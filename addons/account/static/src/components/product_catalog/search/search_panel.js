@@ -14,7 +14,7 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
 
         this.state = useState({
             ...this.state,
-            sections: new Map(),
+            sections: [],
             isAddingSection: '',
             newSectionName: "",
         });
@@ -37,6 +37,10 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         return this.env.searchModel.selectedSection;
     }
 
+    toggle(section) {
+        section.isOpen = !section.isOpen;
+    }
+
     onDragStart(sectionId, ev) {
         ev.dataTransfer.setData('section_id', sectionId);
     }
@@ -51,15 +55,18 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         if (moveSecId !== targetSecId) this.reorderSections(moveSecId, targetSecId);
     }
 
-    enableSectionInput(isAddingSection) {
-        this.state.isAddingSection = isAddingSection;
+    enableSectionInput(type, parentId = null) {
+        debugger;
+        this.state.isAddingSection = parentId
+            ? `subsection_${parentId}`
+            : type;
         setTimeout(() => document.querySelector('.o_section_input')?.focus(), 100);
     }
 
-    onSectionInputKeydown(ev) {
+    onSectionInputKeydown(ev, parentId) {
         const hotkey = getActiveHotkey(ev);
         if (hotkey === 'enter') {
-            this.createSection();
+            this.createSection(parentId);
         } else if (hotkey === 'escape') {
             Object.assign(this.state, {
                 isAddingSection: '',
@@ -72,7 +79,7 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         this.env.searchModel.setSelectedSection(sectionId, filtered);
     }
 
-    async createSection() {
+    async createSection(parentId = null) {
         const sectionName = this.state.newSectionName.trim();
         if (!sectionName) return this.state.isAddingSection = '';
 
@@ -81,8 +88,10 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
             this._getSectionInfoParams({
                 name: sectionName,
                 position: position,
+                parent_id: parentId,
             })
         );
+        debugger;
 
         if (section) {
             const sections = this.state.sections;
@@ -92,11 +101,22 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
                 newLineCount = sections.get(false).line_count;
                 sections.delete(false);
             }
-            sections.set(section.id, {
-                name: this.state.newSectionName,
-                sequence: section.sequence,
-                line_count: newLineCount,
-            });
+            const newNode = {
+                ...section,
+                name: sectionName,
+                children: [],
+                isOpen: true,
+                parentId: parentId,
+                line_count: newLineCount
+            };
+
+            if (parentId) {
+                const parent = this._findSectionById(parentId, this.state.sections);
+                parent?.children.push(newNode);
+                parent.isOpen = true;
+            } else {
+                this.state.sections.push(newNode);
+            }
             this._sortSectionsBySequence(sections);
             this.setSelectedSection(section.id);
         }
@@ -110,12 +130,27 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         if (!this.showSections) return;
         const sections = await rpc('/product/catalog/get_sections', this._getSectionInfoParams());
 
-        const sectionMap = new Map();
-        for (const {id, name, sequence, line_count} of sections) {
-            sectionMap.set(id, {name, sequence, line_count});
+        const map = new Map();
+        const tree = [];
+         for (const sec of sections) {
+            map.set(sec.id, {
+                ...sec,
+                children: [],
+                isOpen: true,
+            });
         }
-        this.state.sections = sectionMap;
-        this.setSelectedSection(sectionMap.size > 0 ? [...sectionMap.keys()][0] : null);
+        for (const sec of map.values()) {
+            if (sec.parent_id) {
+                map.get(sec.parent_id)?.children.push(sec);
+            } else {
+                tree.push(sec);
+            }
+        }
+
+        this.state.sections = tree;
+        if (tree.length) {
+            this.setSelectedSection(tree[0].id);
+        }
     }
 
     async reorderSections(moveId, targetId) {
@@ -155,6 +190,14 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         }
     }
 
+    _findSectionById(id, nodes) {
+        for (const node of nodes) {
+            if (node.id === id) return node;
+            const found = this._findSectionById(id, node.children);
+            if (found) return found;
+        }
+    }
+
     _getSectionInfoParams(extra = {}) {
         const ctx = this.env.model.config.context;
         return {
@@ -166,8 +209,16 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
     }
 
     _sortSectionsBySequence(sections) {
-        this.state.sections = new Map(
-            [...sections].sort((a, b) => a[1].sequence - b[1].sequence)
-        );
+        const sortRecursively = (nodes) => {
+            nodes.sort((a, b) => a.sequence - b.sequence);
+            for (const node of nodes) {
+                if (node.children && node.children.length) {
+                    sortRecursively(node.children);
+                }
+            }
+        };
+
+        sortRecursively(sections);
+        this.state.sections = sections;
     }
 }

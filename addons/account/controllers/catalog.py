@@ -30,7 +30,7 @@ class ProductCatalogAccountController(ProductCatalogController):
 
     @route('/product/catalog/create_section', auth='user', type='jsonrpc')
     def product_catalog_create_section(
-        self, res_model, order_id, child_field, name, position, **kwargs,
+        self, res_model, order_id, child_field, name, position, parent_id=None, **kwargs,
     ):
         """Create a new section on the given order.
 
@@ -45,7 +45,7 @@ class ProductCatalogAccountController(ProductCatalogController):
         """
         order = request.env[res_model].browse(order_id)
         return order.with_company(order.company_id)._create_section(
-            child_field, name, position, **kwargs,
+            child_field, name, position, parent_id, **kwargs,
         )
 
     @route('/product/catalog/resequence_sections', auth='user', type='jsonrpc')

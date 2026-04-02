@@ -6,7 +6,7 @@ from odoo import models
 class ProductCatalogMixin(models.AbstractModel):
     _inherit = 'product.catalog.mixin'
 
-    def _create_section(self, child_field, name, position, **kwargs):
+    def _create_section(self, child_field, name, position, parent_id=None, **kwargs):
         """Create a new section in order.
 
         :param str child_field: Field name of the order's lines (e.g., 'order_line').
@@ -25,17 +25,38 @@ class ProductCatalogMixin(models.AbstractModel):
 
         lines = self[child_field].sorted('sequence')
         line_model = lines._name
-        sequence = 10
-        if lines:
-            sequence = (
-                lines[0].sequence - 1 if position == 'top'
-                else lines[-1].sequence + 1
-            )
+        if parent_id:
+            # creating subsection
+            parent_line = lines.filtered(lambda l: l.id == parent_id)
+
+            next_section = lines.filtered(
+                lambda l: l.display_type == 'line_section'
+                and l.sequence > parent_line.sequence
+            )[:1]
+
+            if next_section:
+                sequence = next_section.sequence - 1
+            else:
+                # No next section → put at end
+                sequence = lines[-1].sequence + 1 if lines else 10
+
+            display_type = 'line_subsection'
+
+        else:
+            # creating section
+            sequence = 10
+            if lines:
+                sequence = (
+                    lines[0].sequence - 1 if position == 'top'
+                    else lines[-1].sequence + 1
+                )
+
+            display_type = 'line_section'
 
         section = self.env[line_model].create({
             parent_field: self.id,
             'name': name,
-            'display_type': 'line_section',
+            'display_type': display_type,
             'sequence': sequence,
             **self._get_default_create_section_values(),
         })
@@ -43,6 +64,7 @@ class ProductCatalogMixin(models.AbstractModel):
         return {
             'id': section.id,
             'sequence': section.sequence,
+            'display_type': display_type,
         }
 
     def _get_new_line_sequence(self, child_field, section_id):
@@ -89,12 +111,14 @@ class ProductCatalogMixin(models.AbstractModel):
         no_section_count = 0
         lines = self[child_field]
         for line in lines.sorted('sequence'):
-            if line.display_type == 'line_section':
+            if line.display_type in ('line_section', 'line_subsection'):
                 sections[line.id] = {
                     'id': line.id,
                     'name': line.name,
                     'sequence': line.sequence,
+                    'parent_id': line.parent_id.id if line.display_type == 'line_subsection' else False,
                     'line_count': 0,
+                    'display_type': line.display_type,
                 }
             elif self._is_line_valid_for_section_line_count(line):
                 sec_id = line.get_parent_section_line().id
@@ -109,6 +133,8 @@ class ProductCatalogMixin(models.AbstractModel):
                 'id': False,
                 'name': self.env._("No Section"),
                 'sequence': lines[0].sequence - 1 if lines else 0,
+                'parent_id': False,
+                'display_type': 'line_section',
                 'line_count': no_section_count,
             }
 

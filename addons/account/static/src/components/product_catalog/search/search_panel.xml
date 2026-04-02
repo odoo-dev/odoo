@@ -9,8 +9,11 @@
         <section position="before">
             <section t-if="this.showSections" class="o_search_panel_sections mt-4 pb-4 border-bottom">
                 <header class="d-flex align-items-center cursor-default gap-2 mb-3 ps-2">
-                    <i class="fa fa-filter text-primary"/>
-                    <b class="text-uppercase">Sections</b>
+                    <b class="text-uppercase mx-2">Sections</b>
+                    <i
+                        class="fa fa-plus-square cursor-pointer"
+                        t-on-click="() => this.enableSectionInput('bottom')"
+                    />
                     <div class="d-flex align-items-center ms-auto">
                         <span class="me-2">Filter</span>
                         <div class="form-check form-switch mb-0">
@@ -27,50 +30,9 @@
                     </div>
                 </header>
                 <ul class="list-group d-block">
-                    <li
-                        draggable="true"
-                        t-foreach="this.state.sections.keys()"
-                        t-as="sectionId"
-                        t-key="sectionId"
-                        t-att-class="'list-group-item px-2 mb-1 border-0 cursor-pointer ' + (
-                            this.selectedSection.sectionId == sectionId ? 'o_selected_section' : ''
-                        )"
-                        t-on-dragstart="(e) => this.onDragStart(sectionId, e)"
-                        t-on-dragover="(e) => this.onDragOver(e)"
-                        t-on-drop="(e) => this.onDrop(sectionId, e)"
-                    >
-                        <div class="d-flex align-items-center">
-                            <t t-set="section" t-value="this.state.sections.get(sectionId)"/>
-                            <span
-                                t-if="sectionId"
-                                class="o_row_handle oi oi-draggable ui-sortable-handle"
-                            />
-                            <i
-                                t-else=""
-                                class="fa fa-pencil"
-                                t-on-click="() => this.enableSectionInput('top')"
-                            />
-                            <input
-                                t-if="sectionId === false and this.state.isAddingSection === 'top'"
-                                class="ms-2 o_section_input"
-                                type="text"
-                                t-custom-model="this.state.newSectionName"
-                                t-on-keydown="this.onSectionInputKeydown"
-                                t-on-blur="this.createSection"
-                            />
-                            <div
-                                t-else=""
-                                class="w-100 ms-2 d-flex align-items-center justify-content-between overflow-hidden"
-                                t-on-click="() => this.setSelectedSection(
-                                    sectionId, this.selectedSection.filtered
-                                )"
-                                t-att-title="section.name"
-                            >
-                                <span class="o_section_name text-truncate" t-out="section.name"/>
-                                <span class="mx-2 text-muted" t-out="section.line_count"/>
-                            </div>
-                        </div>
-                    </li>
+                    <t t-foreach="this.state.sections" t-as="section" t-key="section.id">
+                        <t t-call="account.SectionRow"/>
+                    </t>
                 </ul>
                 <input
                     t-if="this.state.isAddingSection === 'bottom'"
@@ -78,23 +40,65 @@
                     type="text"
                     placeholder="Enter a description"
                     t-custom-model="this.state.newSectionName"
-                    t-on-keydown="this.onSectionInputKeydown"
-                    t-on-blur="this.createSection"
+                    t-on-keydown="(ev) => this.onSectionInputKeydown(ev)"
+                    t-on-blur="() => this.createSection()"
                 />
-                <button
-                    t-else=""
-                    class="btn btn-link"
-                    type="button"
-                    t-on-click="() => this.enableSectionInput('bottom')"
-                >
-                    + Add Section
-                </button>
             </section>
         </section>
 
         <div class="o_search_panel_empty_state me-3" position="attributes">
             <attribute name="class" add="d-none" separator=" "/>
         </div>
+    </t>
+
+    <t t-name="account.SectionRow">
+        <li class="list-group-item px-2 mb-1 border-0">
+
+            <div class="d-flex align-items-center">
+
+                <!-- Expand / collapse -->
+                <i
+                    t-if="section.children.length"
+                    t-att-class="'fa me-1 ' + (section.isOpen ? 'fa-caret-down' : 'fa-caret-right')"
+                    t-on-click="() => this.toggle(section)"
+                />
+
+                <!-- Name -->
+                <div
+                    class="w-100 d-flex align-items-center overflow-hidden"
+                    t-on-click="() => this.setSelectedSection(section.id)"
+                >
+                    <span class="text-truncate" t-out="section.name"/>
+                    <span class="text-muted ms-2" t-out="section.line_count"/>
+                </div>
+
+                <!-- Add subsection -->
+                <i
+                    class="fa fa-plus text-muted me-1"
+                    t-on-click="() => this.enableSectionInput('subsection', section.id)"
+                    t-if="section.display_type === 'line_section'"
+                />
+            </div>
+
+            <!-- Children -->
+            <ul t-if="section.isOpen and section.children.length" class="list-group ms-3">
+                <t t-foreach="section.children" t-as="child" t-key="child.id">
+                    <t t-call="account.SectionRow">
+                        <t t-set="section" t-value="child"/>
+                    </t>
+                </t>
+            </ul>
+
+            <!-- Input for subsection -->
+            <input
+                t-if="this.state.isAddingSection === ('subsection_' + section.id) and section.display_type === 'line_section'"
+                class="o_section_input ms-3 mt-1"
+                type="text"
+                t-custom-model="this.state.newSectionName"
+                t-on-keydown="(ev) => this.onSectionInputKeydown(ev, section.id)"
+                t-on-blur="() => this.createSection(section.id)"
+            />
+        </li>
     </t>
 
     <t t-name="account.ProductCatalogSearchPanel" t-inherit="web.SearchPanel" t-inherit-mode="primary">
