@@ -75,3 +75,19 @@ class AccountMove(models.Model):
                     luhn.validate(invoice.payment_reference)
                 except Exception:
                     raise ValidationError(_("Vendor require OCR Number as payment reference. Payment reference isn't a valid OCR Number."))
+
+    @api.depends('country_code', 'move_type')
+    def _compute_show_delivery_date(self):
+        # EXTENDS 'account'
+        super()._compute_show_delivery_date()
+        for move in self:
+            if move.country_code == 'SE':
+                move.show_delivery_date = move.is_sale_document()
+
+    def _post(self, soft=True):
+        # EXTENDS 'account'
+        super()._post(soft)
+        for move in self:
+            if move.country_code == 'SE' and move.is_sale_document() and not move.delivery_date:
+                move.delivery_date = move.invoice_date or fields.Date.context_today(self)
+        return True
