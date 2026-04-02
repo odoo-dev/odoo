@@ -100,7 +100,6 @@ class ProductTemplate(models.Model):
         string="Publish Date",
         compute='_compute_publish_date',
         store=True,
-        required=True,
         default=fields.Datetime.now,
     )
 
@@ -117,7 +116,6 @@ class ProductTemplate(models.Model):
         compute='_compute_base_unit_count',
         inverse='_set_base_unit_count',
         store=True,
-        required=True,
         default=0,
     )
     base_unit_id = fields.Many2one(

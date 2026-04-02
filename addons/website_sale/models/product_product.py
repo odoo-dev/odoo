@@ -22,7 +22,6 @@ class ProductProduct(models.Model):
         string="Base Unit Count",
         help="Display base unit price on your eCommerce pages. Set to 0 to hide it for this"
              " product.",
-        required=True,
         default=1,
     )
     base_unit_id = fields.Many2one(
