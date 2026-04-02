@@ -77,7 +77,7 @@ export class WebsiteBuilderClientAction extends Component {
         useSubEnv({
             builderRef: useRef("container"),
         });
-        this.state = useState({ isEditing: false, showSidebar: true, key: 1, is404: false });
+        this.state = useState({ isEditing: false, isPreview: false, showSidebar: true, key: 1, is404: false });
         this.websiteContext = useState(this.websiteService.context);
         this.component = useComponent();
 
@@ -209,6 +209,7 @@ export class WebsiteBuilderClientAction extends Component {
             reloadEditor: this.reloadEditor.bind(this),
             snippetsName: this.snippetsTemplate,
             toggleMobile: this.toggleMobile.bind(this),
+            toggleBuilderPreview: this.toggleBuilderPreview.bind(this),
             installSnippetModule: this.installSnippetModule.bind(this),
             overlayRef: this.overlayRef,
             iframeLoaded: iframeLoaded,
@@ -230,6 +231,15 @@ export class WebsiteBuilderClientAction extends Component {
             },
         };
         return { translation: this.translation, builderProps };
+    }
+
+    get builderPreviewToolbarProps() {
+        return {
+            isPreview: this.state.isPreview,
+            onExitPreview: this.exitBuilderPreviewMode.bind(this),
+            onToggleMobileView: this.toggleMobile.bind(this),
+            isMobileView: this.websiteContext.isMobile,
+        };
     }
 
     get systrayProps() {
@@ -422,6 +432,10 @@ export class WebsiteBuilderClientAction extends Component {
         // The clicks on the iframe are listened, so that links with external
         // redirections can be opened in the top window.
         this.websiteContent.el.contentDocument.addEventListener("click", async (ev) => {
+            if (this.state.isPreview) {
+                ev.preventDefault();
+                return;
+            }
             if (this.state.isEditing) {
                 // When in edit mode, prevent the default behaviours of clicks
                 // as to avoid DOM changes not handled by the editor.
@@ -736,6 +750,24 @@ export class WebsiteBuilderClientAction extends Component {
 
     get isMicrosoftEdge() {
         return isBrowserMicrosoftEdge();
+    }
+
+    toggleBuilderPreview() {
+        if (this.state.isPreview) {
+            this.exitBuilderPreviewMode();
+        } else {
+            this.enterBuilderPreviewMode();
+        }
+    }
+
+    enterBuilderPreviewMode() {
+        this.state.isPreview = true;
+        this.state.showSidebar = false;
+    }
+
+    exitBuilderPreviewMode() {
+        this.state.isPreview = false;
+        this.state.showSidebar = true;
     }
 }
 

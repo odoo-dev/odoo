@@ -4,6 +4,9 @@
 <t t-name="website.WebsiteBuilder">
     <Builder t-props="this.builderProps">
         <t t-set-slot="extraActions">
+            <button type="button" t-on-click="() => this.props.builderProps.toggleBuilderPreview()" class="o-hb-btn btn" title="Preview Changes">
+                <i class="fa fa-eye"/>
+            </button>
             <button type="button" t-on-click="this.discard" class="o-hb-btn btn" data-action="cancel" title="Tip: Esc to preview" accesskey="j">Discard</button>
             <button type="button" t-on-click="this.save" class="o-hb-btn btn btn-success px-3" data-action="save" accesskey="s">Save</button>
         </t>

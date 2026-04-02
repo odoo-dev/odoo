@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+<t t-name="website.BuilderPreviewToolbar">
+    <div t-if="props.isPreview" class="o_builder_preview_toolbar d-flex align-items-center gap-2 px-3 py-2">
+        <button t-if="props.onToggleMobileView" class="btn btn-sm"
+            t-att-class="{ 'btn-success': props.isMobileView, 'btn-outline-secondary': !props.isMobileView }"
+            t-on-click="props.onToggleMobileView">
+            <i class="fa fa-mobile"/>
+        </button>
+        <button class="btn btn-primary btn-sm" t-on-click="props.onExitPreview">
+            <i class="fa fa-eye-slash me-1"/>Back to Editor
+        </button>
+    </div>
+</t>
+</templates>
