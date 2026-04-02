@@ -522,6 +522,23 @@ export class PosOrderline extends Base {
         const company = this.company;
         const product = this.get_product();
         const taxes = this.tax_ids || product.taxes_id;
+
+        // Read reactive inputs so OWL tracks them even on a cache hit.
+        const priceUnit = this.price_unit;
+        const discount = this.discount;
+        const fpId = this.order_id.fiscal_position_id?.id || 0;
+        const c = this._allPricesCache;
+        if (
+            c &&
+            c.qty === qty &&
+            c.priceUnit === priceUnit &&
+            c.discount === discount &&
+            c.taxes === taxes &&
+            c.fpId === fpId
+        ) {
+            return c.result;
+        }
+
         const baseLine = accountTaxHelpers.prepare_base_line_for_taxes_computation(
             this,
             this.prepareBaseLineForTaxesComputationExtraValues({
@@ -552,7 +569,7 @@ export class PosOrderline extends Base {
             };
         }
 
-        return {
+        const result = {
             priceWithTax: baseLine.tax_details.total_included_currency,
             priceWithoutTax: baseLine.tax_details.total_excluded_currency,
             priceWithTaxBeforeDiscount: baseLineNoDiscount.tax_details.total_included_currency,
@@ -563,6 +580,8 @@ export class PosOrderline extends Base {
             taxDetails: taxDetails,
             taxesData: baseLine.tax_details.taxes_data,
         };
+        this._allPricesCache = { qty, priceUnit, discount, taxes, fpId, result };
+        return result;
     }
 
     display_discount_policy() {
