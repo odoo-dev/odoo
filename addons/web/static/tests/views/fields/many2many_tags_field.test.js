@@ -2195,7 +2195,7 @@ test("many2many_tags widget enforces limit in desktop form view", async () => {
     expect("article.o_kanban_record:contains('gold')").toHaveCount(1); // New screen with list of tags
 
     // When coming back we should see all tags
-    await click(".modal-header button.oi-arrow-left");
+    await click(".modal-header button[data-icon='west']");
     expect(".o_field_many2many_tags .o_tag").toHaveCount(4);
 });
 

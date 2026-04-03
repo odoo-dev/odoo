@@ -192,7 +192,7 @@ describe("Custom button style", () => {
     test("should convert selected text to a button", async () => {
         const { el } = await setupEditor("<p>[Hello]</p>");
 
-        await contains(".o-we-toolbar .fa-link").click();
+        await contains(".o-we-toolbar [data-icon='link']").click();
         await contains(".o-we-linkpopover input.o_we_href_input_link").edit("http://test.test/", {
             confirm: false,
         });
@@ -218,13 +218,13 @@ describe("Custom button style", () => {
     test("should allow target _blank on custom button", async () => {
         const { el } = await setupEditor("<p>[Hello]</p>", allowTargetBlankOpt);
         await waitFor(".o-we-toolbar");
-        await click(".o-we-toolbar .fa-link");
+        await click(".o-we-toolbar [data-icon='link']");
         await contains(".o-we-linkpopover input.o_we_href_input_link").edit("http://test.test/", {
             confirm: false,
         });
-        await click(".o-we-linkpopover .fa-gear");
+        await click(".o-we-linkpopover [data-icon='settings']");
         await contains(".o_advance_option_panel .target-blank-option").click();
-        await click(".o_advance_option_panel .fa-angle-left");
+        await click(".o_advance_option_panel [data-icon='keyboard_arrow_left']");
         await waitFor(".o-we-linkpopover");
 
         await animationFrame();

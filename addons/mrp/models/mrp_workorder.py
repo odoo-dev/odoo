@@ -233,7 +233,7 @@ class MrpWorkorder(models.Model):
                 'popoverTemplate': 'mrp.workorderPopover',
                 'infos': infos,
                 'color': color_icon,
-                'icon': 'fa-exclamation-triangle' if color_icon in ['text-warning', 'text-danger'] else 'fa-info-circle',
+                'icon': 'warning' if color_icon in ['text-warning', 'text-danger'] else 'info',
                 'replan': color_icon not in [False, 'text-primary']
             })
 

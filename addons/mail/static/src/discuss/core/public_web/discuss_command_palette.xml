@@ -3,18 +3,18 @@
 
     <t t-name="mail.DiscussCommand">
         <div class="o-mail-DiscussCommand o_command_default d-flex align-items-center ps-3 pe-4" t-att-class="{ 'o-uiSmall': this.ui.isSmall }">
-            <i t-if="this.props.channel" class="fa-fw opacity-75 text-muted me-2" t-att-class="this.props.channel.parent_channel_id ? 'fa fa-comments-o' : this.props.channel.discussAppCategory?.icon ?? 'oi oi-user opacity-0'"/>
-            <i t-elif="this.props.persona" class="oi fa-fw oi-user opacity-75 text-muted me-2"/>
+            <i t-if="this.props.channel" class="oi oi-fw opacity-75 text-muted me-2" t-att-class="this.props.channel.discussAppCategory?.icon ? '' : 'opacity-0'" t-att-data-icon="this.props.channel.parent_channel_id ? '' : this.props.channel.discussAppCategory?.icon"/>
+            <i t-elif="this.props.persona" class="oi oi-fw opacity-75 text-muted me-2" data-icon="person"/>
             <DiscussAvatar t-if="this.props.channel or this.props.persona" channel="this.props.channel" persona="this.props.persona" size="this.ui.isSmall ? 32 : 26" className="'me-2'"/>
             <span class="o-mail-DiscussCommand-nameContainer pe-1 text-ellipsis d-flex align-items-center fw-bold" t-att-class="{ 'o-action': this.props.action }">
                 <t t-if="this.props.channel?.parent_channel_id">
                     <span class="text-truncate flex-shrink-0 opacity-75 mw-50 small" t-out="this.props.channel?.parent_channel_id.displayName"/>
-                    <i class="oi oi-chevron-right o-xsmaller mx-1"/>
+                    <i class="oi o-xsmaller mx-1" data-icon="chevron_forward"/>
                 </t>
                 <t t-slot="name" />
             </span>
             <span t-if="this.props.persona and this.props.persona.email" class="text-truncate text-muted smaller opacity-75" t-out="'- ' + this.props.persona.email" t-att-title="this.props.persona.email"/>
-            <i t-if="this.props.action?.icon" class="o-mail-DiscussCommand-actionIcon fa fa-fw opacity-75 o-action" t-attf-class="{{ this.props.action.icon }}"/>
+            <i t-if="this.props.action?.icon" class="o-mail-DiscussCommand-actionIcon oi oi-fw opacity-75 o-action" t-attf-data-icon="{{ this.props.action.icon }}"/>
             <span t-if="this.props.action?.searchValueSuffix" class="o-action fw-bold" t-out="this.props.searchValue"/>
             <span class="flex-grow-1"/>
             <div t-if="this.props.counter > 0">
@@ -26,7 +26,7 @@
     <t t-name="mail.CreateChannelDialog">
         <Dialog size="'sm'" title.translate="New Channel" contentClass="'o-mail-CreateChannelDialog'" bodyClass="'py-0'">
             <div class="d-flex flex-column" t-on-keydown="this.onKeydown">
-                <span class="ms-1 text-uppercase text-muted o-xsmaller opacity-75"><i class="fa fa-hashtag"/> Channel name</span>
+                <span class="ms-1 text-uppercase text-muted o-xsmaller opacity-75"><i class="oi" data-icon="tag"/> Channel name</span>
                 <input type="text" class="form-control" t-att-class="{ 'is-invalid': this.state.isInvalid }" placeholder="Channel name" t-custom-model="this.state.name" tabindex="1"/>
                 <div class="invalid-feedback">Channel must have a name.</div>
                 <div class="form-check mt-2">
@@ -45,7 +45,7 @@
     <Dialog size="'md'" title.translate="Make Chat" contentClass="'o-mail-CreateChatDialog'" bodyClass="'py-0'">
         <div class="d-flex flex-column flex-grow-1 bg-inherit w-100">
             <div class="d-flex align-items-center px-0 mb-1 gap-1">
-                <span class="ms-2 my-1 text-uppercase text-muted o-xsmaller opacity-75"><i class="oi oi-user-plus"/> Invite people</span>
+                <span class="ms-2 my-1 text-uppercase text-muted o-xsmaller opacity-75"><i class="oi" data-icon="person_add"/> Invite people</span>
             </div>
             <ChannelInvitation state="this.invitePeopleState"/>
         </div>

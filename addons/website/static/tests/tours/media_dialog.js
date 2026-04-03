@@ -193,12 +193,12 @@ registerWebsitePreviewTour(
         {
             content: "Select an icon",
             trigger:
-                ".o_select_media_dialog:has(.nav-link.active:contains('Icons')) .tab-content span.fa-heart",
+                ".o_select_media_dialog:has(.nav-link.active:contains('Icons')) .tab-content span[data-icon='favorite']",
             run: "click",
         },
         {
             content: "Checks that the icon doesn't have a shape",
-            trigger: ":iframe .s_text_image .fa-heart:not([data-shape])",
+            trigger: ":iframe .s_text_image [data-icon='favorite']:not([data-shape])",
         },
     ]
 );
@@ -250,7 +250,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "Verify that the icon was inserted",
-            trigger: ":iframe .s_text_block p > span.fa",
+            trigger: ":iframe .s_text_block p > span.oi",
         },
     ]
 );

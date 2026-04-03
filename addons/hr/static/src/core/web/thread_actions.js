@@ -7,7 +7,8 @@ registerThreadAction("open-hr-profile", {
         owner.props.chatWindow?.isOpen &&
         channel.correspondent?.partner_id?.employeeId &&
         !owner.isDiscussSidebarChannelActions,
-    icon: "fa fa-fw fa-id-card",
+    icon: "badge",
+    iconClass: "oi-filled",
     name: _t("Open Profile"),
     onSelected: async ({ channel, store }) =>
         store.env.services.action.doAction({

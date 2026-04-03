@@ -2132,7 +2132,7 @@
       font: bold 16px sans-serif;
     }
   }
-  .fa-small {
+  .oi-small {
     font-size: 14px;
   }
 
@@ -2997,7 +2997,7 @@
       pointer-events: none;
     }
 
-    .fa-stack {
+    .oi-stack {
       /* reset stack size which is doubled by default */
       width: 18px;
       height: 18px;
@@ -3008,7 +3008,7 @@
       left: -1px;
       top: -1px;
 
-      .fa-question-circle {
+      [data-icon="help"] {
         color: var(--os-primary-button-bg);
       }
     }
@@ -3025,7 +3025,7 @@
     }
 
     .o-composer-assistant-container {
-      .fa-times-circle {
+      [data-icon="cancel"] {
         color: var(--os-primary-button-bg);
       }
     }

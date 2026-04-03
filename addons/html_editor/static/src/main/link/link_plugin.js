@@ -183,7 +183,7 @@ export class LinkPlugin extends Plugin {
                 id: "openLinkTools",
                 title: _t("Link"),
                 description: _t("Add a link"),
-                icon: "fa-link",
+                icon: "link",
                 run: ({ link, type } = {}) => this.openLinkTools(link, type),
                 isAvailable: (selection) => {
                     const linkEl = findInSelection(selection, "a");
@@ -196,7 +196,7 @@ export class LinkPlugin extends Plugin {
                 id: "removeLinkFromSelection",
                 title: _t("Remove Link"),
                 description: _t("Remove Link"),
-                icon: "fa-unlink",
+                icon: "link_off",
                 isAvailable: (selection) => {
                     if (!isHtmlContentSupported(selection)) {
                         return false;
@@ -271,7 +271,7 @@ export class LinkPlugin extends Plugin {
             commandId: "openLinkTools",
             commandParams: { type: "primary" },
             description: _t("Add a button"),
-            icon: "fa-square",
+            icon: "square",
         }),
 
         link_popovers: [
@@ -466,7 +466,7 @@ export class LinkPlugin extends Plugin {
         const pasteAsURLCommand = {
             title: _t("Paste as URL"),
             description: _t("Create an URL."),
-            icon: "fa-link",
+            icon: "link",
             run: () => {
                 this.trigger(
                     "on_will_paste_handlers",
@@ -841,7 +841,7 @@ export class LinkPlugin extends Plugin {
         } else if (!selection.isCollapsed) {
             // Open the link tool only if we have an image selected and the selection
             // is fully contained in the image parent link.
-            const imageNode = findInSelection(selection, "img, .fa");
+            const imageNode = findInSelection(selection, "img, .oi");
             const parentElement = imageNode?.parentElement;
             const linkContainingImage = imageNode && closestElement(imageNode, "a");
             if (

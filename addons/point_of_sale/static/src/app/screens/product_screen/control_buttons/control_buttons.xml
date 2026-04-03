@@ -5,7 +5,7 @@
         t-attf-class="control-button btn btn-lg {{btnClasses ? btnClasses : ''}} d-inline-flex flex-md-column justify-content-md-center gap-1 overflow-hidden"
         t-on-click="onClick"
         t-att-disabled="disabled ? 'disabled' : ''">
-            <i t-if="iconClasses" t-attf-class="{{iconClasses}} {{!this.ui.isSmall ? ' fa-2x fa-fw' : ''}} align-self-center opacity-50" role="img" aria-hidden="true"/>
+            <i t-if="iconClasses" t-attf-class="oi {{iconClasses}} {{!this.ui.isSmall ? ' oi-2x oi-fw' : ''}} align-self-center opacity-50" t-att-data-icon="iconName" role="img" aria-hidden="true"/>
             <t t-if="badge" t-out="badge"/>
             <span t-attf-class="d-flex flex-md-column flex-grow-1 flex-md-grow-0 align-items-center align-items-md-stretch min-w-0 {{this.ui.isSmall ? ' lh-sm' : ''}} text-start text-md-center">
                 <span class="px-1" t-esc="btnText"/>
@@ -27,7 +27,7 @@
                 <span t-else="">Preset</span>
             </button>
             <button t-if="!this.ui.isSmall and this.pos.showSaveOrderButton" t-att-disabled="this.pos.getOrder().isEmpty()" t-attf-class="{{ buttonClass }} ms-auto" t-on-click="() => this.pos.clickSaveOrder()">
-                <i class="fa fa-upload" aria-hidden="true"/>
+                <i class="oi" data-icon="upload" aria-hidden="true"/>
             </button>
             <button t-if="!this.ui.isSmall and this.props.onClickMore" class="more-btn btn btn-secondary btn-lg flex-shrink-0 ms-auto lh-lg" t-on-click="this.props.onClickMore">
                 <i class="oi oi-fw oi-ellipsis-v" aria-hidden="true" />
@@ -42,11 +42,12 @@
                 <NoteButton
                     label.translate="Customer Note"
                     class="'btn-secondary '"
-                    icon="'fa fa-sticky-note'"/>
+                    icon="'sticky_note_2'"
+                    icon_class="'oi-filled'"/>
                 <!-- Bill Button -->
                 <t t-if="this.pos.config.iface_printbill"> 
                     <t t-call="point_of_sale.controlButton">
-                        <t t-set="iconClasses" t-value="'fa fa-print'"/>
+                        <t t-set="iconName" t-value="'print'"/>
                         <t t-set="btnText">Bill</t>
                         <t t-set="btnClasses" t-value="'btn-secondary '"/>
                         <t t-set="disabled" t-value="!this.pos.getOrder()?.getOrderlines()?.length"/>
@@ -55,7 +56,7 @@
                 </t>
                 <!-- Pricelist Button -->
                 <t t-if="this.pos.cashier._role != 'minimal'" t-call="point_of_sale.controlButton" name="o_pricelist_button">
-                    <t t-set="iconClasses" t-value="'fa fa-th-list'"/>
+                    <t t-set="iconName" t-value="'view_list'"/>
                     <t t-set="btnText">Pricelist</t>
                     <t t-set="btnClasses" t-value="'o_pricelist_button btn-secondary '"/>
                     <t t-set="onClick" t-value="() => this.clickPricelist()"/>
@@ -67,7 +68,7 @@
                 </t>
                 <!-- Tax Button -->
                 <t t-if="this.pos.config.fiscal_position_ids.length and this.pos.cashier._role != 'minimal'" t-call="point_of_sale.controlButton">
-                    <t t-set="iconClasses" t-value="'fa fa-book'"/>
+                    <t t-set="iconName" t-value="'book'"/>
                     <t t-set="btnText">Tax</t>
                     <t t-set="btnClasses" t-value="'o_fiscal_position_button btn-secondary '"/>
                     <t t-set="onClick" t-value="() => this.clickFiscalPosition()"/>
@@ -79,21 +80,22 @@
                 </t>
                 <!-- Product Info Button -->
                 <t t-if="this.displayProductInfoBtn()" t-call="point_of_sale.controlButton">
-                    <t t-set="iconClasses" t-value="'fa fa-info-circle'"/>
+                    <t t-set="iconName" t-value="'info'"/>
                     <t t-set="btnText">Info</t>
                     <t t-set="btnClasses" t-value="'btn-secondary '"/>
                     <t t-set="onClick" t-value="() => this.pos.onProductInfoClick(this.currentOrder.getSelectedOrderline().product_id.product_tmpl_id, this.currentOrder.getSelectedOrderline().product_id)"/>
                 </t>
                 <!-- Break Combo Button -->
                 <t t-if="this.pos.isSelectedLineCombo" t-call="point_of_sale.controlButton">
-                    <t t-set="iconClasses" t-value="'fa fa-outdent'"/>
+                    <t t-set="iconName" t-value="'format_indent_decrease'"/>
                     <t t-set="btnText">Break Combo</t>
                     <t t-set="btnClasses" t-value="'break-combo-button btn-secondary '"/>
                     <t t-set="onClick" t-value="() => this.breakSelectedCombo()"/>
                 </t>
                 <!-- Cancel Order Button -->
                 <t t-if="this.pos.cashier._role != 'minimal'" t-call="point_of_sale.controlButton">
-                    <t t-set="iconClasses" t-value="'fa fa-trash'"/>
+                    <t t-set="iconName" t-value="'delete'"/>
+                    <t t-set="iconClasses" t-value="'oi-filled'"/>
                     <t t-set="btnText">Cancel Order</t>
                     <t t-set="btnClasses" t-value="'btn-danger '"/>
                     <t t-set="onClick" t-value="() => this.pos.onDeleteOrder(this.pos.getOrder())"/>

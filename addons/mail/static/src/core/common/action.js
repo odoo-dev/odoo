@@ -57,6 +57,7 @@ export const ACTION_TAGS = Object.freeze({
  * @property {boolean|(action: Action) => boolean} [hasBtnBg]
  * @property {string|(action: Action) => string} [hotkey]
  * @property {string|(action: Action) => string} [icon]
+ * @property {string|(action: Action) => string} [iconClass]
  * @property {boolean|(action: Action) => boolean} [inlineName=false]
  * @property {boolean|(action: Action) => boolean} [isActive]
  * @property {string|(action: Action) => string} [name]
@@ -421,7 +422,7 @@ export class Action {
     _icon(action) {}
     /**
      * Icon for the button this action.
-     * - When a string, this is considered an icon as classname (.fa and .oi).
+     * - When a string, this is considered an icon with classname (.oi).
      * - When an object with property `template`, this is an icon rendered in template.
      *   Template params are provided in `params` and passed to template as a `t-set="templateParams"`
      */
@@ -432,6 +433,20 @@ export class Action {
                 ? this.definition.icon.call(this, this.params)
                 : this.definition.icon)
         );
+    }
+
+    /** @param {Action} action @returns {string|Object|undefined} */
+    _iconClass(action) {}
+    /**
+     * Icon classes for the button this action.
+     * - When a string, this is considered as classes for icon
+     * - When an object with property `template`, this is an icon class rendered in template.
+     *   Template params are provided in `params` and passed to template as a `t-set="templateParams"`
+     */
+    get iconClass() {
+        return typeof this.definition.iconClass === "function"
+            ? this.definition.iconClass.call(this, this.params)
+            : this.definition.iconClass;
     }
 
     /** @param {Action} action @returns {string|undefined} */
@@ -601,7 +616,7 @@ export class UseActions extends Reactive {
                     ...data,
                     dropdown: true,
                     dropdownState: new DropdownState(),
-                    icon: data?.icon ?? "oi oi-ellipsis-v",
+                    icon: data?.icon ?? "more_vert",
                     isActive: ({ action }) => action.dropdownState.isOpen,
                     isMoreAction: true,
                     sequence: data.sequence ?? 1000,

@@ -54,7 +54,7 @@ $line-height-truncate: 1.5em;
     .o_wslides_js_slide_like_down {
         user-select: none;
         min-width: 2rem;
-        > i.fa {
+        > i.oi {
             min-width: 1rem;
         }
         &:not(.disabled) {
@@ -88,7 +88,7 @@ $line-height-truncate: 1.5em;
         .list-group-item  {
             @include font-size(1rem);
 
-            input:checked + i.fa-circle {
+            input:checked + i[data-icon="circle"] {
                 color: $primary !important;
             }
         }
@@ -105,7 +105,7 @@ $line-height-truncate: 1.5em;
 
     a.o_wslides_js_quiz_is_correct {
         color: black;
-        input:checked + i.fa-check-circle-o {
+        input:checked + i[data-icon="check_circle"]:not(.oi-filled) {
             color: $success !important;
         }
     }
@@ -188,16 +188,16 @@ $line-height-truncate: 1.5em;
     }
 
     .o_wslides_js_channel_unsubscribe {
-        > .fa-times {
+        > [data-icon="close"] {
             display: none;
         }
 
         &:hover {
-            > .fa-check {
+            > [data-icon="check"] {
                 display: none;
             }
 
-            > .fa-times {
+            > [data-icon="close"] {
                 display: inline-block;
             }
         }
@@ -463,7 +463,7 @@ $line-height-truncate: 1.5em;
 
         .o_wslides_lesson_aside_list_links i {
             padding-right: 10px;
-            &.fa-flag {
+            &[data-icon="flag"] {
                 padding-right: 6px;
             }
         }
@@ -526,10 +526,10 @@ $line-height-truncate: 1.5em;
 }
 
 .o_wslides_fs_sidebar_section {
-    a[aria-expanded="true"] i.fa-caret-left{
+    a[aria-expanded="true"] i[data-icon="arrow_left"]{
         display: none;
     }
-    a[aria-expanded="false"] i.fa-caret-down{
+    a[aria-expanded="false"] i[data-icon="arrow_drop_down"]{
         display: none;
     }
 }

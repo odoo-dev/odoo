@@ -175,25 +175,25 @@ test("Category fold is locally persistent (saved in local storage)", async () =>
     setDiscussSidebarCategoryFoldState("chats", true);
     await start();
     await openDiscuss();
-    await contains(".o-mail-DiscussSidebarCategory:contains('Channels') i.oi-chevron-right");
+    await contains(".o-mail-DiscussSidebarCategory:contains('Channels') i[data-icon='chevron_forward']");
     await click(".o-mail-DiscussSidebarCategory-toggler:contains('Channels')");
-    await contains(".o-mail-DiscussSidebarCategory:contains('Channels') i.oi-chevron-down");
-    await contains(".o-mail-DiscussSidebarCategory:contains('Direct messages') i.oi-chevron-right"); // unchanged
+    await contains(".o-mail-DiscussSidebarCategory:contains('Channels') i[data-icon='keyboard_arrow_down']");
+    await contains(".o-mail-DiscussSidebarCategory:contains('Direct messages') i[data-icon='chevron_forward']"); // unchanged
     expect(isDiscussSidebarCategoryFolded("channels")).toBe(false);
     expect(isDiscussSidebarCategoryFolded("chats")).toBe(true); // unchanged
     await click(".o-mail-DiscussSidebarCategory-toggler:contains('Channels')");
-    await contains(".o-mail-DiscussSidebarCategory:contains('Channels') i.oi-chevron-right");
-    await contains(".o-mail-DiscussSidebarCategory:contains('Direct messages') i.oi-chevron-right"); // unchanged
+    await contains(".o-mail-DiscussSidebarCategory:contains('Channels') i[data-icon='chevron_forward']");
+    await contains(".o-mail-DiscussSidebarCategory:contains('Direct messages') i[data-icon='chevron_forward']"); // unchanged
     expect(isDiscussSidebarCategoryFolded("channels")).toBe(true);
     expect(isDiscussSidebarCategoryFolded("chats")).toBe(true); // unchanged
     await click(".o-mail-DiscussSidebarCategory-toggler:contains('Direct messages')");
-    await contains(".o-mail-DiscussSidebarCategory:contains('Direct messages') i.oi-chevron-down");
-    await contains(".o-mail-DiscussSidebarCategory:contains('Channels') i.oi-chevron-right"); // unchanged
+    await contains(".o-mail-DiscussSidebarCategory:contains('Direct messages') i[data-icon='keyboard_arrow_down']");
+    await contains(".o-mail-DiscussSidebarCategory:contains('Channels') i[data-icon='chevron_forward']"); // unchanged
     expect(isDiscussSidebarCategoryFolded("channels")).toBe(true); // unchanged
     expect(isDiscussSidebarCategoryFolded("chats")).toBe(false);
     await click(".o-mail-DiscussSidebarCategory-toggler:contains('Channels')");
-    await contains(".o-mail-DiscussSidebarCategory:contains('Direct messages') i.oi-chevron-down");
-    await contains(".o-mail-DiscussSidebarCategory:contains('Channels') i.oi-chevron-down");
+    await contains(".o-mail-DiscussSidebarCategory:contains('Direct messages') i[data-icon='keyboard_arrow_down']");
+    await contains(".o-mail-DiscussSidebarCategory:contains('Channels') i[data-icon='keyboard_arrow_down']");
     expect(isDiscussSidebarCategoryFolded("channels")).toBe(false);
     expect(isDiscussSidebarCategoryFolded("chats")).toBe(false);
 });
@@ -207,17 +207,17 @@ test("Category fold is crosstab synced", async () => {
     await openDiscuss(undefined, { target: env1 });
     await openDiscuss(undefined, { target: env2 });
     await contains(
-        `${env1.selector} .o-mail-DiscussSidebarCategory:contains('Channels') i.oi-chevron-right`
+        `${env1.selector} .o-mail-DiscussSidebarCategory:contains('Channels') i[data-icon='chevron_forward']`
     );
     await contains(
-        `${env2.selector} .o-mail-DiscussSidebarCategory:contains('Channels') i.oi-chevron-right`
+        `${env2.selector} .o-mail-DiscussSidebarCategory:contains('Channels') i[data-icon='chevron_forward']`
     );
     await click(`${env2.selector} .o-mail-DiscussSidebarCategory-toggler:contains('Channels')`);
     await contains(
-        `${env1.selector} .o-mail-DiscussSidebarCategory:contains('Channels') i.oi-chevron-down`
+        `${env1.selector} .o-mail-DiscussSidebarCategory:contains('Channels') i[data-icon='keyboard_arrow_down']`
     );
     await contains(
-        `${env2.selector} .o-mail-DiscussSidebarCategory:contains('Channels') i.oi-chevron-down`
+        `${env2.selector} .o-mail-DiscussSidebarCategory:contains('Channels') i[data-icon='keyboard_arrow_down']`
     );
 });
 
@@ -409,7 +409,7 @@ test("channel - counter: should not have a counter if the category is unfolded a
     await start();
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory", {
-        contains: [["i.oi.oi-chevron-down"], ["span:text('Channels')"], [".badge", { count: 0 }]],
+        contains: [["i.oi[data-icon='keyboard_arrow_down']"], ["span:text('Channels')"], [".badge", { count: 0 }]],
     });
 });
 
@@ -446,7 +446,7 @@ test("channel - counter: should not have a counter if the category is unfolded a
     await start();
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory", {
-        contains: [["i.oi.oi-chevron-down"], ["span:text('Channels')"], [".badge", { count: 0 }]],
+        contains: [["i.oi[data-icon='keyboard_arrow_down']"], ["span:text('Channels')"], [".badge", { count: 0 }]],
     });
 });
 
@@ -457,7 +457,7 @@ test("channel - counter: should not have a counter if category is folded and wit
     await start();
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory", {
-        contains: [["i.oi.oi-chevron-right"], ["span:text('Channels')"], [".badge", { count: 0 }]],
+        contains: [["i.oi[data-icon='chevron_forward']"], ["span:text('Channels')"], [".badge", { count: 0 }]],
     });
 });
 
@@ -495,7 +495,7 @@ test("channel - counter: should have correct value of needaction threads if cate
     await start();
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory", {
-        contains: [["i.oi.oi-chevron-right"], ["span:text('Channels')"], [".badge:text('2')"]],
+        contains: [["i.oi[data-icon='chevron_forward']"], ["span:text('Channels')"], [".badge:text('2')"]],
     });
 });
 
@@ -511,7 +511,7 @@ test("chat - counter: should not have a counter if the category is unfolded and 
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory", {
         contains: [
-            ["i.oi.oi-chevron-down"],
+            ["i.oi[data-icon='keyboard_arrow_down']"],
             ["span:text('Direct messages')"],
             [".badge", { count: 0 }],
         ],
@@ -533,7 +533,7 @@ test("chat - counter: should not have a counter if the category is unfolded and 
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory", {
         contains: [
-            ["i.oi.oi-chevron-down"],
+            ["i.oi[data-icon='keyboard_arrow_down']"],
             ["span:text('Direct messages')"],
             [".badge", { count: 0 }],
         ],
@@ -553,7 +553,7 @@ test("chat - counter: should not have a counter if category is folded and withou
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory", {
         contains: [
-            ["i.oi.oi-chevron-right"],
+            ["i.oi[data-icon='chevron_forward']"],
             ["span:text('Direct messages')"],
             [".badge", { count: 0 }],
         ],
@@ -601,7 +601,7 @@ test("chat - counter: should have correct value of unread threads if category is
     await openDiscuss();
     await contains(".o-mail-DiscussSidebarCategory", {
         contains: [
-            ["i.oi.oi-chevron-right"],
+            ["i.oi[data-icon='chevron_forward']"],
             ["span:text('Direct messages')"],
             [".badge:text('2')"],
         ],
@@ -708,7 +708,7 @@ test("sidebar: public channel rendering", async () => {
     });
     await start();
     await openDiscuss();
-    await contains("button:text('channel1')", { contains: [".fa-globe"] });
+    await contains("button:text('channel1')", { contains: ["[data-icon='public']"] });
 });
 
 test("channel - avatar: should have correct avatar", async () => {
@@ -758,7 +758,7 @@ test("channel - states: the active category item should be visible even if the c
     await click("button:text('channel1')");
     await contains(".o-mail-DiscussSidebarChannel-container:text('channel1')");
     await click(".o-mail-DiscussSidebarCategory .btn:text('Channels')");
-    await contains(".o-mail-DiscussSidebarCategory-channel .oi-chevron-right");
+    await contains(".o-mail-DiscussSidebarCategory-channel [data-icon='chevron_forward']");
     await contains("button:text('channel1')");
     await click("button:text('Inbox')");
     await contains("button:text('channel1')", { count: 0 });
@@ -770,15 +770,15 @@ test("chat - states: the active category item should be visible even if the cate
     pyEnv["discuss.channel"].create({ channel_type: "chat" });
     await start();
     await openDiscuss();
-    await contains(".o-mail-DiscussSidebarCategory-chat .oi-chevron-down");
+    await contains(".o-mail-DiscussSidebarCategory-chat [data-icon='keyboard_arrow_down']");
     await contains(".o-mail-DiscussSidebar button:text('Mitchell Admin')");
     await click("button:text('Mitchell Admin')");
     await contains("button.o-active:text('Mitchell Admin')");
     await click(".o-mail-DiscussSidebarCategory-chat .btn:text('Direct messages')");
-    await contains(".o-mail-DiscussSidebarCategory-chat .oi-chevron-right");
+    await contains(".o-mail-DiscussSidebarCategory-chat [data-icon='chevron_forward']");
     await contains(".o-mail-DiscussSidebar button:text('Mitchell Admin')");
     await click("button:text('Inbox')");
-    await contains(".o-mail-DiscussSidebarCategory-chat .oi-chevron-right");
+    await contains(".o-mail-DiscussSidebarCategory-chat [data-icon='chevron_forward']");
     await contains(".o-mail-DiscussSidebar button:text('Mitchell Admin')", { count: 0 });
 });
 
@@ -1070,14 +1070,14 @@ test("sidebar: show loading on initial opening", async () => {
     await start();
     await openDiscuss();
     await contains(
-        ".o-mail-DiscussSidebarCategory:contains('Channels') .fa.fa-circle-o-notch.fa-spin"
+        ".o-mail-DiscussSidebarCategory:contains('Channels') [data-icon='autorenew'].oi-spin"
     );
     await contains(".o-mail-DiscussSidebarChannel-itemName:text('General')", { count: 0 });
     await expect.waitForSteps(["before channels_as_member"]);
     def.resolve();
     await waitStoreFetch("channels_as_member");
     await contains(
-        ".o-mail-DiscussSidebarCategory:contains('Channels') .fa.fa-circle-o-notch.fa-spin",
+        ".o-mail-DiscussSidebarCategory:contains('Channels') [data-icon='autorenew'].oi-spin",
         { count: 0 }
     );
     await contains(".o-mail-DiscussSidebarChannel-itemName:text('General')");
@@ -1256,9 +1256,9 @@ test("add and remove channel from favorites updates sidebar", async () => {
     const generalChannelSelector = ".o-mail-DiscussSidebarChannel:has(:text(General))";
     await start();
     await openDiscuss();
-    await click(`${channelContainerSelector} ${generalChannelSelector} button .oi-ellipsis-h`);
+    await click(`${channelContainerSelector} ${generalChannelSelector} button [data-icon='more_horiz']`);
     await click(".o-dropdown-item:contains('Add to Favorites')");
-    await click(`${favoriteContainerSelector} ${generalChannelSelector} button .oi-ellipsis-h`);
+    await click(`${favoriteContainerSelector} ${generalChannelSelector} button [data-icon='more_horiz']`);
     await click(".o-dropdown-item:contains('Remove from Favorites')");
     await contains(`${channelContainerSelector} ${generalChannelSelector}`);
 });
@@ -1270,15 +1270,15 @@ test("sidebar category toggle is visually disabled when no visible channels", as
     await start();
     await openDiscuss();
     await click(
-        ".o-mail-DiscussSidebarCategory-toggler:enabled:contains('Channels') i.oi-chevron-right"
+        ".o-mail-DiscussSidebarCategory-toggler:enabled:contains('Channels') i[data-icon='chevron_forward']"
     );
     await contains(
-        ".o-mail-DiscussSidebarCategory-toggler:enabled:contains('Channels') i.oi-chevron-down"
+        ".o-mail-DiscussSidebarCategory-toggler:enabled:contains('Channels') i[data-icon='keyboard_arrow_down']"
     );
     await click("[title='Channel Actions']");
     await click(".o-dropdown-item:text('Hide Until New Message')");
     await contains(
-        ".o-mail-DiscussSidebarCategory-toggler:disabled:contains('Channels') i.oi-chevron-right"
+        ".o-mail-DiscussSidebarCategory-toggler:disabled:contains('Channels') i[data-icon='chevron_forward']"
     );
 });
 

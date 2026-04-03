@@ -31,14 +31,14 @@
                                 name="documentation_link"
                                 path="/_downloads/c2c6ce32294dfddffcfefcf2775f7a09/pdfquotebuilderexamples.zip"
                                 label=" Download examples"
-                                icon="fa-arrow-right"
+                                icon="arrow_forward"
                             />
                             <a
                                 href="https://www.youtube.com/watch?v=SIvlo2JFU_U"
                                 target="_blank"
                                 invisible="not quotation_document_ids"
                             >
-                                <i class="fa fa-arrow-right"/> Link to the demo video
+                                <i class="oi" data-icon="arrow_forward"/> Link to the demo video
                             </a>
                             <iframe
                                 title="Quote Builder Demo Video"

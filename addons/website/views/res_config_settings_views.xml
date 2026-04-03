@@ -49,7 +49,7 @@
                                 <field name="website_default_lang_id" options="{'no_open': True, 'no_create': True}" required="website_id"/>
                             </div>
                             <div class="mt8">
-                                <button type="action" name="%(base.action_view_base_language_install)d" string="Install new languages" class="btn-link" icon="oi-arrow-right"/>
+                                <button type="action" name="%(base.action_view_base_language_install)d" string="Install new languages" class="btn-link" icon="east"/>
                             </div>
                         </setting>
                         <setting string="Website Identification" help="Set your website's name and favicon, displayed in the browser tab next to the page title.">
@@ -79,7 +79,7 @@
                             <field name="auth_signup_uninvited" class="o_light_label" widget="radio" options="{'horizontal': true}" required="True"/>
                             <div class="content-group" invisible="auth_signup_uninvited == 'b2b'">
                                 <div class="mt8">
-                                    <button type="object" name="action_open_template_user" string="Default Access Rights" icon="oi-arrow-right" class="btn-link"/>
+                                    <button type="object" name="action_open_template_user" string="Default Access Rights" icon="east" class="btn-link"/>
                                 </div>
                             </div>
                         </setting>
@@ -112,7 +112,7 @@
                                     name="%(website.backend_dashboard)d"
                                     string=" See Analytics Report"
                                     class="btn-link fw-normal border-0"
-                                    icon="oi-arrow-right d-inline me-auto"
+                                    icon="east"
                                 />
                             </div>
                             <div invisible="not has_plausible_shared_key">
@@ -121,7 +121,7 @@
                                     name="documentation_link"
                                     path="/applications/websites/website/reporting/analytics.html#analytics-plausible"
                                     label=" How to create my Plausible Shared Link"
-                                    icon="oi oi-arrow-right"
+                                    icon="east"
                                 />
                             </div>
                         </setting>
@@ -144,7 +144,7 @@
                                     name="documentation_link"
                                     path="/applications/websites/website/reporting/analytics.html#analytics-google-analytics"
                                     label=" How to get my Measurement ID"
-                                    icon="oi oi-arrow-right"
+                                    icon="east"
                                 />
                             </div>
                         </setting>
@@ -178,7 +178,7 @@
                             groups="base.group_no_one"
                         >
                             <div class="mt4">
-                                <button type="object" name="action_open_robots" string="Edit robots.txt" class="btn-link" icon="fa-android" noSaveDialog="true"/>
+                                <button type="object" name="action_open_robots" string="Edit robots.txt" class="btn-link" icon="oi_android" noSaveDialog="true"/>
                             </div>
                         </setting>
                         <setting
@@ -208,7 +208,7 @@
                                     name="documentation_link"
                                     path="/applications/websites/website/configuration/google_search_console.html"
                                     label=" How to?"
-                                    icon="oi oi-arrow-right"
+                                    icon="east"
                                 />
                             </div>
                         </setting>
@@ -231,7 +231,7 @@
                                 <div class="mt4">
                                     <button type="object" name="action_open_blocked_third_party_domains"
                                         string="Add domains to the block list" class="btn-link"
-                                        icon="fa-ban" noSaveDialog="true"/>
+                                        icon="block" noSaveDialog="true"/>
                                 </div>
                             </div>
                         </setting>

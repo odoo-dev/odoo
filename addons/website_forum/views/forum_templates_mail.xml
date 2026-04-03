@@ -8,22 +8,22 @@
             t-att-data-unsubscribe="'unsubscribe' if 'unsubscribe' in request.params else None">
             <div t-if="icons_design and not env.user._is_public()" class="js_follow_icons_container">
                 <button t-attf-class="btn js_unfollow_btn #{btn_classes}">
-                    <i t-attf-class="fa fa-fw fa-minus-circle #{icons_classes}" data-bs-toggle="tooltip" data-bs-placement="top" title="Unfollow"/>
+                    <i t-attf-class="oi oi-fw #{icons_classes}" data-icon="remove_circle" data-bs-toggle="tooltip" data-bs-placement="top" title="Unfollow"/>
                 </button>
                 <button t-attf-class="btn js_follow_btn #{btn_classes} #{follow_btn_classes}">
-                    <i t-attf-class="fa fa-fw fa-plus-circle #{icons_classes}" data-bs-toggle="tooltip" data-bs-placement="top" title="Follow"/>
+                    <i t-attf-class="oi oi-fw #{icons_classes}" data-icon="add_circle" data-bs-toggle="tooltip" data-bs-placement="top" title="Follow"/>
                 </button>
             </div>
             <span t-elif="env.user._is_public() and icons_design" class="js_follow_icons_container">
                 <button t-attf-class="btn js_unfollow_btn #{btn_classes}">
-                    <i t-attf-class="fa fa-fw fa-minus-circle #{icons_classes}" data-bs-toggle="tooltip" data-bs-placement="top" title="Unfollow"/>
+                    <i t-attf-class="oi oi-fw #{icons_classes}" data-icon="remove_circle" data-bs-toggle="tooltip" data-bs-placement="top" title="Unfollow"/>
                 </button>
                 <button t-attf-class="btn follow_btn #{btn_classes}" data-bs-toggle="modal" t-attf-data-bs-target="#o_wmail_follow_modal_#{object.id}">
-                    <i t-attf-class="fa fa-fw fa-plus-circle #{icons_classes}" data-bs-toggle="tooltip" data-bs-placement="top" title="Follow"/>
+                    <i t-attf-class="oi oi-fw #{icons_classes}" data-icon="add_circle" data-bs-toggle="tooltip" data-bs-placement="top" title="Follow"/>
                 </button>
             </span>
             <t t-else="">
-                <button href="#" t-attf-class="btn btn-primary js_unfollow_btn #{btn_classes}"><i class="fa fa-fw fa-check me-1"/>Following</button>
+                <button href="#" t-attf-class="btn btn-primary js_unfollow_btn #{btn_classes}"><i class="oi oi-fw me-1" data-icon="check"/>Following</button>
                 <button href="#" t-attf-class="btn btn-outline-primary js_follow_btn #{btn_classes}">Follow</button>
             </t>
             <div role="dialog" class="modal fade" t-attf-id="o_wmail_follow_modal_#{object.id}" aria-hidden="True">
@@ -41,7 +41,7 @@
                                    placeholder="your email..."
                                    groups="base.group_public"/>
                             <button type="submit" href="#" t-attf-class="btn btn-primary js_follow_btn">Subscribe</button>
-                            <button href="#" t-attf-class="btn btn-secondary js_unfollow_btn"><i class="fa fa-fw fa-check me-1"/>Following</button>
+                            <button href="#" t-attf-class="btn btn-secondary js_unfollow_btn"><i class="oi oi-fw me-1" data-icon="check"/>Following</button>
                         </form>
                     </div>
                 </div>

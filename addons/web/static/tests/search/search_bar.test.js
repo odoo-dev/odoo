@@ -299,7 +299,7 @@ test("search input is focused when being toggled", async () => {
         searchViewId: false,
     });
     expect(".o_searchview input").toHaveCount(0);
-    await contains(`button .fa-search`).click();
+    await contains(`button [data-icon="search"]`).click();
     expect(".o_searchview input").toHaveCount(1);
     expect(queryFirst`.o_searchview input`).toBeFocused();
 });
@@ -1357,29 +1357,29 @@ test("search a property", async () => {
     await animationFrame();
     await runAllTimers();
     expect(`.o-dropdown-item.focus`).toHaveText("Search Properties");
-    expect(".o-dropdown-item.focus:only .fa-caret-down").toHaveCount(1);
+    expect(".o-dropdown-item.focus:only [data-icon='arrow_drop_down']").toHaveCount(1);
     // move on the many2one property
     await keyDown("ArrowRight", { repeat: false });
     await animationFrame();
     await runAllTimers();
     expect(`.o-dropdown-item.focus`).toHaveText("My Partner (Bar 1)");
-    expect(".o-dropdown-item.focus:only .fa-caret-right").toHaveCount(1);
+    expect(".o-dropdown-item.focus:only [data-icon='arrow_right']").toHaveCount(1);
     // move on the many2many property
     await keyDown("ArrowDown");
     await animationFrame();
     expect(`.o-dropdown-item.focus`).toHaveText("My Partners (Bar 1)");
-    expect(".o-dropdown-item.focus:only .fa-caret-right").toHaveCount(1);
+    expect(".o-dropdown-item.focus:only [data-icon='arrow_right']").toHaveCount(1);
     // move on the many2one property again
     await keyDown("ArrowUp");
     await animationFrame();
     expect(`.o-dropdown-item.focus`).toHaveText("My Partner (Bar 1)");
-    expect(".o-dropdown-item.focus:only .fa-caret-right").toHaveCount(1);
+    expect(".o-dropdown-item.focus:only [data-icon='arrow_right']").toHaveCount(1);
     // unfold the many2one
     await keyDown("ArrowRight");
     await animationFrame();
     await runAllTimers();
     expect(`.o-dropdown-item.focus`).toHaveText("My Partner (Bar 1)");
-    expect(".o-dropdown-item.focus:only .fa-caret-down").toHaveCount(1);
+    expect(".o-dropdown-item.focus:only [data-icon='arrow_drop_down']").toHaveCount(1);
     // select the first many2one
     await keyDown("ArrowRight", { repeat: false });
     await animationFrame();
@@ -1390,25 +1390,25 @@ test("search a property", async () => {
     await animationFrame();
     await runAllTimers();
     expect(`.o-dropdown-item.focus`).toHaveText("My Partner (Bar 1)");
-    expect(".o-dropdown-item.focus:only .fa-caret-down").toHaveCount(1);
+    expect(".o-dropdown-item.focus:only [data-icon='arrow_drop_down']").toHaveCount(1);
     // fold the parent
     await keyDown("ArrowLeft");
     await animationFrame();
     await runAllTimers();
     expect(`.o-dropdown-item.focus`).toHaveText("My Partner (Bar 1)");
-    expect(".o-dropdown-item.focus:only .fa-caret-right").toHaveCount(1);
+    expect(".o-dropdown-item.focus:only [data-icon='arrow_right']").toHaveCount(1);
     // go up on the properties field
     await keyDown("ArrowLeft");
     await animationFrame();
     await runAllTimers();
     expect(`.o-dropdown-item.focus`).toHaveText("Search Properties");
-    expect(".o-dropdown-item.focus:only .fa-caret-down").toHaveCount(1);
+    expect(".o-dropdown-item.focus:only [data-icon='arrow_drop_down']").toHaveCount(1);
     // fold the properties field
     await keyDown("ArrowLeft");
     await animationFrame();
     await runAllTimers();
     expect(`.o-dropdown-item.focus`).toHaveText("Search Properties");
-    expect(".o-dropdown-item.focus:only .fa-caret-right").toHaveCount(1);
+    expect(".o-dropdown-item.focus:only [data-icon='arrow_right']").toHaveCount(1);
 });
 
 test("search a property: definition record id in the context", async () => {
@@ -1914,41 +1914,41 @@ test("order by count resets when there is no group left", async () => {
     await selectGroup("bool");
     await selectGroup("bar");
     await toggleMenuItem("Foo");
-    expect(".fa-sort").toHaveCount(1);
-    await contains(".fa-sort", { visible: false }).click();
-    expect(".fa-sort-numeric-desc").toHaveCount(1);
-    await contains(".fa-sort-numeric-desc").click();
-    expect(".fa-sort-numeric-asc").toHaveCount(1);
+    expect("[data-icon='swap_vert']").toHaveCount(1);
+    await contains("[data-icon='swap_vert']", { visible: false }).click();
+    expect("[data-icon='sort']").toHaveCount(1);
+    await contains("[data-icon='sort']").click();
+    expect("[data-icon='sort']").toHaveCount(1);
 
     await toggleSearchBarMenu();
     await toggleMenuItem("Foo");
-    expect(".fa-sort-numeric-asc").toHaveCount(1);
+    expect("[data-icon='sort']").toHaveCount(1);
 
     await toggleMenuItem("Foo");
     await toggleMenuItem("Bool");
-    expect(".fa-sort-numeric-asc").toHaveCount(1);
+    expect("[data-icon='sort']").toHaveCount(1);
     await toggleMenuItem("Bar");
-    expect(".fa-sort-numeric-asc").toHaveCount(0);
+    expect("[data-icon='sort']").toHaveCount(0);
 
     await toggleMenuItem("Bar");
-    expect(".fa-sort-numeric-asc").toHaveCount(0);
-    expect(".fa-sort").toHaveCount(1);
-    await contains(".fa-sort", { visible: false }).click();
-    await contains(".fa-sort-numeric-desc").click();
-    expect(".fa-sort-numeric-asc").toHaveCount(1);
+    expect("[data-icon='sort']").toHaveCount(0);
+    expect("[data-icon='swap_vert']").toHaveCount(1);
+    await contains("[data-icon='swap_vert']", { visible: false }).click();
+    await contains("[data-icon='sort']").click();
+    expect("[data-icon='sort']").toHaveCount(1);
     await toggleSearchBarMenu();
     await toggleMenuItem("Bool");
-    expect(".fa-sort-numeric-asc").toHaveCount(1);
+    expect("[data-icon='sort']").toHaveCount(1);
 
     await contains(".o_facet_remove").click();
-    expect(".fa-sort-numeric-asc").toHaveCount(1);
+    expect("[data-icon='sort']").toHaveCount(1);
     await contains(".o_facet_remove").click();
     expect(".o_searchview_facet").toHaveCount(0);
 
     await toggleSearchBarMenu();
     await toggleMenuItem("Bar");
-    expect(".fa-sort-numeric-asc").toHaveCount(0);
-    expect(".fa-sort").toHaveCount(1);
+    expect("[data-icon='sort']").toHaveCount(0);
+    expect("[data-icon='swap_vert']").toHaveCount(1);
 });
 
 test("subitems have a load more item if there is more records available", async () => {

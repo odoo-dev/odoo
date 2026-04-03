@@ -70,8 +70,8 @@
                 <field name="company_ids" widget="many2many_tags"/>
                 <field name="balance"/>
                 <field name="account_token" optional="hidden"/>
-                <button name="action_buy_credits" type="object" string="Buy Credits" icon="fa-shopping-cart"/>
-                <button name="action_open_iap_account" type="object" string="Set Alerts &amp; Auto-Refill" icon="fa-refresh"/>
+                <button name="action_buy_credits" type="object" string="Buy Credits" icon="shopping_cart"/>
+                <button name="action_open_iap_account" type="object" string="Set Alerts &amp; Auto-Refill" icon="refresh"/>
             </list>
         </field>
     </record>

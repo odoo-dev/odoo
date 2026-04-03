@@ -125,7 +125,7 @@ test("URL with groupBy and orderBy activates ordered groupBy", async () => {
         searchViewId: false,
     });
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(1);
-    expect(`.fa-sort-numeric-desc`).toHaveCount(1); // OrderBy desc icon
+    expect(`[data-icon="sort"]:not(.oi-flip-vertical`).toHaveCount(1); // OrderBy desc icon
     expect(searchBar.env.searchModel.groupBy).toEqual(["partner_id"]);
     expect(searchBar.env.searchModel.orderBy).toEqual([{ asc: false, name: "__count" }]);
 });
@@ -145,7 +145,7 @@ test("URL with filter + groupBy + orderBy activates filters", async () => {
     expect(`.o_searchview .o_searchview_facet`).toHaveCount(2); // One for the shared filter and one for the groupby
     expect(searchBar.env.searchModel.domain).toEqual([["state", "=", "sent"]]);
     expect(searchBar.env.searchModel.groupBy).toEqual(["partner_id"]);
-    expect(`.fa-sort-numeric-asc`).toHaveCount(1); // OrderBy ascending icon
+    expect(`[data-icon="sort"].oi-flip-vertical`).toHaveCount(1); // OrderBy ascending icon
     expect(searchBar.env.searchModel.orderBy).toEqual([{ asc: true, name: "__count" }]);
 
     // Regenerating the url should give the same result as before, without the "?"
@@ -454,7 +454,7 @@ test("hotkey sharing copies complex search to clipboard", async () => {
     await toggleMenuItem("Cool Vendors");
     await toggleMenuItem("Vendor");
 
-    await click(".o_searchview .oi-group"); // Facet click to trigger orderBy
+    await click(".o_searchview [data-icon='stacks']"); // Facet click to trigger orderBy
     await animationFrame();
 
     await press(["alt", "shift", "h"]);

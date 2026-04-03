@@ -54,7 +54,7 @@ registerWebsitePreviewTour(
             run: () => {
                 const isBlockInvisible = document
                     .querySelector("li .o_we_invisible_entry i")
-                    .classList.contains("fa-eye-slash");
+                    .getAttribute('data-icon') == "visibility_off";
                 const isColumnEntryDisplayed = document.querySelector(
                     "li li .o_we_invisible_entry"
                 );
@@ -72,7 +72,7 @@ registerWebsitePreviewTour(
                 const isSubentryDisplayed = document.querySelector("li .o_we_invisible_entry");
                 const isPopupInvisible = document
                     .querySelector(".o_we_invisible_root_parent > i")
-                    .classList.contains("fa-eye-slash");
+                    .getAttribute('data-icon') == "visibility_off";
                 if (!!isSubentryDisplayed || !isPopupInvisible) {
                     console.error("Visibility issue detected with the elements.");
                 }
@@ -95,13 +95,13 @@ registerWebsitePreviewTour(
             run: () => {
                 const isPopupVisible = document
                     .querySelector(".o_we_invisible_root_parent i")
-                    .classList.contains("fa-eye");
+                    .getAttribute('data-icon') == "visibility";
                 const isBannerVisible = document
                     .querySelector("li .o_we_invisible_entry i")
-                    .classList.contains("fa-eye");
+                    .getAttribute('data-icon') == "visibility";
                 const isColumnInvisible = document
                     .querySelector("li li .o_we_invisible_entry i")
-                    .classList.contains("fa-eye-slash");
+                    .getAttribute('data-icon') == "visibility_off";
                 if (!isPopupVisible || !isBannerVisible || !isColumnInvisible) {
                     console.error("Visibility issue detected with the elements.");
                 }
@@ -119,7 +119,7 @@ registerWebsitePreviewTour(
                 const isSubentryDisplayed = document.querySelector("li .o_we_invisible_entry");
                 const isPopupInvisible = document
                     .querySelector(".o_we_invisible_root_parent > i")
-                    .classList.contains("fa-eye-slash");
+                    .getAttribute('data-icon') == "visibility_off";
                 if (!!isSubentryDisplayed || !isPopupInvisible) {
                     console.error("Visibility issue detected with the elements.");
                 }
@@ -137,13 +137,13 @@ registerWebsitePreviewTour(
             run: () => {
                 const isPopupVisible = document
                     .querySelector(".o_we_invisible_root_parent i")
-                    .classList.contains("fa-eye");
+                    .getAttribute('data-icon') == "visibility";
                 const isBannerVisible = document
                     .querySelector("li .o_we_invisible_entry i")
-                    .classList.contains("fa-eye");
+                    .getAttribute('data-icon') == "visibility";
                 const isColumnInvisible = document
                     .querySelector("li li .o_we_invisible_entry i")
-                    .classList.contains("fa-eye-slash");
+                    .getAttribute('data-icon') == "visibility_off";
                 if (!isPopupVisible || !isBannerVisible || !isColumnInvisible) {
                     console.error("Visibility issue detected with the elements.");
                 }

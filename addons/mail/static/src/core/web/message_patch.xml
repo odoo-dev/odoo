@@ -15,7 +15,7 @@
                                 <li class="o-mail-Message-tracking" role="group">
                                     <span class="o-mail-Message-trackingOld text-muted fw-bold" t-out="this.formatTrackingOrNone(trackingValue.fieldInfo, trackingValue.oldValue)"/>
                                     <t t-if="!trackingValue.fieldInfo.isPropertyField">
-                                        <i class="o-mail-Message-trackingSeparator fa fa-long-arrow-right mx-2 text-600"/>
+                                        <i class="o-mail-Message-trackingSeparator oi mx-2 text-600" data-icon="east"/>
                                         <span class="o-mail-Message-trackingNew me-1 fw-bold text-info" t-out="this.formatTrackingOrNone(trackingValue.fieldInfo, trackingValue.newValue)"/>
                                     </t>
                                     <span class="o-mail-Message-trackingField ms-1 fst-italic text-muted">(<t t-out="this.props.messageSearch?.highlight(trackingValue.fieldInfo.changedField) ?? trackingValue.fieldInfo.changedField"/>)</span>

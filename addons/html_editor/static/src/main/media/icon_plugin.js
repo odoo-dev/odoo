@@ -46,7 +46,7 @@ export class IconPlugin extends Plugin {
             {
                 id: "toggleSpinIcon",
                 description: _t("Toggle icon spin"),
-                icon: "fa-play",
+                icon: "play_arrow",
                 run: this.toggleSpinIcon.bind(this),
                 isAvailable: isHtmlContentSupported,
             },
@@ -68,15 +68,15 @@ export class IconPlugin extends Plugin {
                 // FEFF is directly adjacent to it.
                 const isIconRelatedNode = (node) => {
                     if (
-                        node.classList?.contains("fa") ||
-                        node.parentElement?.classList.contains("fa")
+                        node.classList?.contains("oi") ||
+                        node.parentElement?.classList.contains("oi")
                     ) {
                         return true;
                     }
                     if (isZwnbsp(node) && isIconInTargetedNodes) {
                         return (
-                            node.nextElementSibling?.classList?.contains("fa") ||
-                            node.previousElementSibling?.classList?.contains("fa")
+                            node.nextElementSibling?.classList?.contains("oi") ||
+                            node.previousElementSibling?.classList?.contains("oi")
                         );
                     }
                     return false;
@@ -154,12 +154,12 @@ export class IconPlugin extends Plugin {
             return;
         }
         for (const classString of targetedIcon.classList) {
-            if (classString.match(/^fa-[2-5]x$/)) {
+            if (classString.match(/^oi-[2-5]x$/)) {
                 targetedIcon.classList.remove(classString);
             }
         }
         if (size !== "1") {
-            targetedIcon.classList.add(`fa-${size}x`);
+            targetedIcon.classList.add(`oi-${size}x`);
         }
         this.dependencies.history.addStep();
     }
@@ -169,7 +169,7 @@ export class IconPlugin extends Plugin {
         if (!selectedIcon) {
             return;
         }
-        selectedIcon.classList.toggle("fa-spin");
+        selectedIcon.classList.toggle("oi-spin");
         this.dependencies.history.addStep();
     }
 
@@ -180,10 +180,10 @@ export class IconPlugin extends Plugin {
         }
         if (size === "1") {
             return ![...selectedIcon.classList].some((classString) =>
-                classString.match(/^fa-[2-5]x$/)
+                classString.match(/^oi-[2-5]x$/)
             );
         }
-        return selectedIcon.classList.contains(`fa-${size}x`);
+        return selectedIcon.classList.contains(`oi-${size}x`);
     }
 
     hasSpinIcon() {
@@ -191,7 +191,7 @@ export class IconPlugin extends Plugin {
         if (!selectedIcon) {
             return;
         }
-        return selectedIcon.classList.contains("fa-spin");
+        return selectedIcon.classList.contains("oi-spin");
     }
 
     openIconDialog() {

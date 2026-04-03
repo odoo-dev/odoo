@@ -13,6 +13,7 @@ export class DocumentationLink extends Component {
         path: { type: String },
         label: { type: String, optional: true },
         icon: { type: String, optional: true },
+        icon_class: { type: String, optional: true },
         alertLink: { type: Boolean, optional: true },
     };
 
@@ -42,11 +43,12 @@ export class DocumentationLink extends Component {
 export const documentationLink = {
     component: DocumentationLink,
     extractProps: ({ attrs }) => {
-        const { path, label, icon, alert_link } = attrs;
+        const { path, label, icon, icon_class, alert_link } = attrs;
         return {
             path,
             label,
             icon,
+            icon_class,
             alertLink: Boolean(alert_link),
         };
     },

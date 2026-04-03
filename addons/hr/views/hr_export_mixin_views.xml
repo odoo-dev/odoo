@@ -34,7 +34,8 @@
                         <button name="action_open_employees"
                                 type="object"
                                 class="oe_stat_button"
-                                icon="fa-users">
+                                icon="group"
+                                icon_class="oi-filled">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value"><field name="eligible_employee_count"/></span>
                                 <span class="o_stat_text">Eligible Employees</span>

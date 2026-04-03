@@ -9,7 +9,7 @@
                         class="btn p-0"
                         t-on-click.synthetic="this.onClickArrowUp"
                 >
-                    <i class="fa fa-chevron-up"/>
+                    <i class="oi" data-icon="expand_less"/>
                 </button>
             </div>
             <div class="o_hierarchy_node w-100 h-100 d-flex flex-column justify-content-between border"
@@ -45,7 +45,7 @@
                         </span>
                         <span class="text-end" style="grid-column: 3;">
                             <t t-out="this.props.node.childResIds.length"/>
-                            <i class="fa ps-1" t-att-class="this.props.archInfo.icon"/>
+                            <i class="oi ps-1" t-att-data-icon="this.props.archInfo.icon"/>
                         </span>
                     </t>
                     <t t-else="">

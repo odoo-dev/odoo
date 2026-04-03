@@ -89,7 +89,7 @@ registerWebsitePreviewTour(
         },
         {
             content: `Target the "Columns" group`,
-            trigger: `.options-container[data-container-title="Columns"]:has(.options-container-label i.fa-caret-right) button[title="Select only this block"]`,
+            trigger: `.options-container[data-container-title="Columns"]:has(.options-container-label i[data-icon='arrow_right']) button[title="Select only this block"]`,
             run: "click",
         },
         {

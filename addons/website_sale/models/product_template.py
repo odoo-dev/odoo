@@ -918,7 +918,7 @@ class ProductTemplate(models.Model):
             "search_fields": search_fields,
             "fetch_fields": fetch_fields,
             "mapping": mapping,
-            "icon": "fa-shopping-cart",
+            "icon": "shopping_cart",
             "group_name": self.env._("Products"),
             "sequence": 20,
         }

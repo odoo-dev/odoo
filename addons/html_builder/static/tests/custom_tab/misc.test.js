@@ -135,11 +135,11 @@ test("basic multi options containers", async () => {
     });
     await setupHTMLBuilder(`<div class="main"><p class="test-options-target a">b</p></div>`);
     await contains(":iframe .test-options-target").click();
-    expect(".options-container-header i.fa-caret-right").toHaveCount(1);
-    expect(".options-container-header i.fa-caret-down").toHaveCount(1);
+    expect(".options-container-header i[data-icon='arrow_right']").toHaveCount(1);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(1);
     await unfoldAllOptionsGroups();
-    expect(".options-container-header i.fa-caret-right").toHaveCount(0);
-    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
+    expect(".options-container-header i[data-icon='arrow_right']").toHaveCount(0);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(2);
     expect(".options-container").toHaveCount(2);
     expect(queryAllTexts(".options-container:first .we-bg-options-container > div > div")).toEqual([
         "Row 3",
@@ -173,15 +173,15 @@ test("option group stay unfolded when clicking 'Select only this block'", async 
         </div>`
     );
     await contains(":iframe .test-options-child").click();
-    expect(".options-container-header i.fa-caret-right").toHaveCount(2);
-    expect(".options-container-header i.fa-caret-down").toHaveCount(1);
-    await contains(".options-container-header:contains('Parent') i.fa-caret-right").click();
-    expect(".options-container-header i.fa-caret-right").toHaveCount(1);
-    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
+    expect(".options-container-header i[data-icon='arrow_right']").toHaveCount(2);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(1);
+    await contains(".options-container-header:contains('Parent') i[data-icon='arrow_right']").click();
+    expect(".options-container-header i[data-icon='arrow_right']").toHaveCount(1);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(2);
     await contains(
         ".options-container-header:contains('Target') button[title='Select only this block']"
     ).click();
-    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(2);
 });
 
 test("option group stay unfolded when changing an option", async () => {
@@ -205,13 +205,13 @@ test("option group stay unfolded when changing an option", async () => {
         </section>`
     );
     await contains(":iframe .test-options-child").click();
-    expect(".options-container-header i.fa-caret-right").toHaveCount(1);
-    expect(".options-container-header i.fa-caret-down").toHaveCount(1);
-    await contains(".options-container-header:contains('Target') i.fa-caret-right").click();
-    expect(".options-container-header i.fa-caret-right").toHaveCount(0);
-    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
+    expect(".options-container-header i[data-icon='arrow_right']").toHaveCount(1);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(1);
+    await contains(".options-container-header:contains('Target') i[data-icon='arrow_right']").click();
+    expect(".options-container-header i[data-icon='arrow_right']").toHaveCount(0);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(2);
     await contains("button[data-class-action='test-class']").click();
-    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(2);
 });
 
 test("last container with options is unfolded regardless of containers without options", async () => {
@@ -239,8 +239,8 @@ test("last container with options is unfolded regardless of containers without o
         </section>`
     );
     await contains(":iframe .test-options-child").click();
-    expect(".options-container-header i.fa-caret-right").toHaveCount(0);
-    expect(".options-container-header i.fa-caret-down").toHaveCount(1);
+    expect(".options-container-header i[data-icon='arrow_right']").toHaveCount(0);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(1);
 });
 
 test("unfold parent of last container if there is a match in `auto_unfold_container_providers`", async () => {
@@ -275,7 +275,7 @@ test("unfold parent of last container if there is a match in `auto_unfold_contai
         </section>`
     );
     await contains(":iframe .test-options-child").click();
-    expect(".options-container-header i.fa-caret-down").toHaveCount(2);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(2);
 });
 
 test("options restricted to groups excluding current user do not make an empty folded group appear", async () => {
@@ -306,7 +306,7 @@ test("options restricted to groups excluding current user do not make an empty f
     );
     await contains(":iframe .test-options-child").click();
     expect(".options-container-header:contains(Target)").toHaveCount(0);
-    expect(".options-container-header i.fa-caret-down").toHaveCount(1);
+    expect(".options-container-header i[data-icon='arrow_drop_down']").toHaveCount(1);
 });
 
 test("option with groups restriction not available to user", async () => {
@@ -812,7 +812,7 @@ describe("isActiveItem", () => {
         expect(
             "[data-attribute-action='my-attribute2'][data-attribute-action-value='2']"
         ).toBeVisible();
-        await contains(".fa-undo").click();
+        await contains("[data-icon='undo']").click();
         expect(":iframe .test-options-target").toHaveAttribute("my-attribute1", "x");
         expect(
             "[data-attribute-action='my-attribute2'][data-attribute-action-value='1']"
@@ -820,7 +820,7 @@ describe("isActiveItem", () => {
         expect(
             "[data-attribute-action='my-attribute2'][data-attribute-action-value='2']"
         ).not.toHaveCount();
-        await contains(".fa-undo").click();
+        await contains("[data-icon='undo']").click();
         expect(
             "[data-attribute-action='my-attribute2'][data-attribute-action-value='1']"
         ).not.toHaveCount();

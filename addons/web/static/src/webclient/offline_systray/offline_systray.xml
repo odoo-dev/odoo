@@ -20,7 +20,7 @@
                 data-available-offline=""
                 t-on-click="() => this.offlineService.checkConnection()"
                 data-tooltip="Click to check connection and Sync">
-                <i t-attf-class="{{ this.labelIcon }} me-1"/><t t-esc="this.labelText"></t><i t-if="this.offlineService.hasScheduledCalls" class="fa fa-caret-down ms-2"/>
+                <i t-attf-class="{{ this.labelIcon }} me-1"/><t t-esc="this.labelText"></t><i t-if="this.offlineService.hasScheduledCalls" class="oi ms-2" data-icon="arrow_drop_down"/>
             </button>
             <t t-set-slot="content">
                 <div class="o_offline_systray_content px-2">
@@ -56,7 +56,8 @@
                                 </div>
                                 <div>
                                     <button
-                                        class="btn btn-link text-danger fa fa-trash py-0"
+                                        class="btn btn-link text-danger oi oi-filled py-0"
+                                        data-icon="delete"
                                         title="Discard offline changes"
                                         data-available-offline=""
                                         t-on-click.stop="() => this.discard(element.id)"/>

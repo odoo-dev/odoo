@@ -15,8 +15,8 @@
                     <div t-if="this.props.buttons.length" class="o_notification_buttons justify-content-end w-50">
                         <button t-foreach="this.props.buttons" t-as="button" type="button" t-key="button_index" t-attf-class="btn btn-link" t-on-click="button.onClick">
                             <t t-if="button.icon">
-                                <i t-if="button.icon.indexOf('fa-') === 0" role="img" t-att-aria-label="button.name" t-att-title="button.name" t-attf-class="fa fa-fw {{button.icon}} me-1"/>
-                                <img t-else="" t-att-src="button.icon" t-att-alt="button.name"/>
+                                <!-- To check -->
+                                <i role="img" t-att-aria-label="button.name" t-att-title="button.name" class="oi oi-fw me-1" t-att-class="button.icon_class" t-att-data-icon="button.icon"/>
                             </t>
                             <span class="fw-bolder" t-out="button.name"/>
                         </button>

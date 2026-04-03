@@ -9,6 +9,7 @@ export class ThemeFontFamilyOption extends BaseOptionComponent {
     static props = {
         cssVariable: String,
         buttonIcon: String,
+        buttonIconClass: String,
         buttonTitle: String,
     };
     static components = {

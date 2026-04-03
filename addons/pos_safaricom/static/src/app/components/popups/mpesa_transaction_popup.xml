@@ -19,7 +19,7 @@
                     <Input
                         tModel="[this.state, 'searchQuery']"
                         placeholder="this.Search this.by this.name or this.phone..."
-                        icon="{ type: 'fa', value: 'fa-search' }"
+                        icon="{ type: 'icon', value: 'search' }"
                         class="'w-100'"
                     />
                 </div>
@@ -58,7 +58,7 @@
                     </button>
                     <button class="btn btn-secondary" t-on-click="this.cancel">Cancel</button>
                     <button class="btn btn-secondary ms-auto" t-on-click="this.toggleQrCode">
-                        <i class="fa fa-qrcode"/>
+                        <i class="oi" data-icon="qr_code"/>
                     </button>
                 </div>
             </div>

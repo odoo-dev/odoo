@@ -32,7 +32,7 @@ registry.category("web_tour.tours").add("self_combo_selector", {
         Utils.clickBtn("Add to cart"),
         Utils.clickBtn("Checkout"),
         {
-            trigger: ".btn .oi-plus",
+            trigger: ".btn [data-icon='add']",
             run: "click",
         },
         ...CartPage.checkCombo("Office Combo", [

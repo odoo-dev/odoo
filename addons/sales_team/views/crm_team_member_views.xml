@@ -60,7 +60,7 @@
                         <main class="ms-3">
                             <field name="user_id" class="fw-bold fs-5"/>
                             <a type="open" class="nav-link p-0" name="crm_team_id_field">
-                                <i class="fa fa-fw me-1 fa-users text-primary" title="Sales Team"/>
+                                <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="group" title="Sales Team"/>
                                 <field name="crm_team_id"/>
                             </a>
                         </main>
@@ -120,15 +120,15 @@
                     <group name="member_partner_info">
                         <div class="d-flex flex-column flex-grow-1" invisible="not user_id">
                             <div class="o_input_box" groups="base.group_multi_company">
-                                <i class="o_input_box_overlay_start fa fa-fw fa-building" title="Company"/>
+                                <i class="o_input_box_overlay_start oi oi-fw" data-icon="business" title="Company"/>
                                 <field name="company_id"/>
                             </div>
                             <div colspan="2" class="d-flex align-items-baseline" invisible="not user_id">
-                                <i class="fa fa-fw me-1 fa-envelope text-primary" title="Email"/>
+                                <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="mail" title="Email"/>
                                 <field name="email" nolabel="1" placeholder="Email"/>
                             </div>
                             <div colspan="2" class="d-flex align-items-baseline" invisible="not user_id">
-                                <i class="fa fa-fw me-1 fa-phone text-primary" title="Phone"/>
+                                <i class="oi oi-fw oi-filled me-1 text-primary" data-icon="phone" title="Phone"/>
                                 <field name="phone" nolabel="1" placeholder="Phone"/>
                             </div>
                         </div>

@@ -11,25 +11,25 @@
         <div class="s_share">
             <a t-attf-href="https://www.facebook.com/sharer/sharer.php?u=#{website_share_url}" class="btn border bg-white o_wslides_js_social_share"
                 social-key="facebook" aria-label="Share on Facebook" title="Share on Facebook" target="_blank">
-                <i class="fa fa-facebook-square fa-fw"/>
+                <i class="oi oi-fw" data-icon="oi_facebook-square"/>
             </a>
             <a t-attf-href="https://twitter.com/intent/tweet?text=#{record.name}&amp;url=#{website_share_url}" class="btn border bg-white o_wslides_js_social_share"
                 social-key="twitter" aria-label="Share on X" title="Share on X" target="_blank">
-                <i class="fa fa-twitter fa-fw"/>
+                <i class="oi oi-fw" data-icon="oi_x"/>
             </a>
             <a t-attf-href="http://www.linkedin.com/sharing/share-offsite/?url=#{website_share_url}" class="btn border bg-white o_wslides_js_social_share"
                 social-key="linkedin" aria-label="Share on LinkedIn" title="Share on LinkedIn" target="_blank">
-                <i class="fa fa-linkedin fa-fw"/>
+                <i class="oi oi-fw" data-icon="oi_linkedin"/>
             </a>
             <a t-attf-href="https://wa.me/?text=#{website_share_url}" class="btn border bg-white o_wslides_js_social_share"
                 social-key="whatsapp" aria-label="Share on Whatsapp" title="Share on Whatsapp" target="_blank">
-                <i class="fa fa-whatsapp fa-fw"/>
+                <i class="oi oi-fw" data-icon="oi_whatsapp"/>
             </a>
             <a t-attf-href="http://pinterest.com/pin/create/button/?url=#{website_share_url}"
                 social-key="pinterest"
                 class="btn border bg-white o_wslides_js_social_share"
                 aria-label="Share on Pinterest" title="Share on Pinterest">
-                <i class="fa fa-pinterest fa-fw"/>
+                <i class="oi oi-fw" data-icon="oi_pinterest"/>
             </a>
         </div>
     </div>
@@ -47,7 +47,7 @@
                     t-attf-data-slide-id="#{record.id if record._name == 'slide.slide' else False}"
                     t-attf-data-channel-id="#{record.id if record._name == 'slide.channel' else False}"
                     style="border-top-end-radius: 4px;border-bottom-end-radius: 4px;">
-                    <i class="fa fa-envelope"/> Send Email
+                    <i class="oi oi-filled" data-icon="mail"/> Send Email
                 </button>
             </div>
             <div class="alert alert-info d-none" role="alert">
@@ -73,7 +73,7 @@
                 <t t-out="slide.embed_code_external"/>
             </textarea>
             <button t-att-id="'share_embed_clipboard_button_id_%s' % record.id" class="btn btn-sm btn-primary o_embed_clipboard_button float-end mt-1 p-2" >
-                <i class="fa fa-clipboard"/> Copy Embed Code
+                <i class="oi" data-icon="assignment"/> Copy Embed Code
             </button>
         </div>
         <div t-if="slide.slide_category == 'document' and not embed_hide_starting_page" class="input-group mt-5">
@@ -127,7 +127,7 @@
             readonly="readonly" onclick="this.select();"
             t-att-value="website_share_url"/>
         <button t-att-id="'share_link_clipboard_button_id_%s' % record.id" class="btn btn-sm btn-primary o_clipboard_button" >
-            <i class="fa fa-clipboard"/> Copy Link
+            <i class="oi" data-icon="assignment"/> Copy Link
         </button>
     </div>
 </template>
@@ -139,7 +139,7 @@
 
 <!-- Python equivalent of the JS template "website.slides.sidebar.done.button" -->
 <template id="slide_sidebar_done_button" name="Sidebar Done Button">
-    <t t-set="uncompleted_icon" t-value="use_slide_icon and slide.slide_icon_class or 'fa-circle-thin'"/>
+    <t t-set="uncompleted_icon" t-value="use_slide_icon and slide.slide_icon_class or 'radio_button_unchecked'"/>
     <div t-if="is_member"
         class="o_wslides_sidebar_done_button align-self-start"
         t-att-data-id="slide.id"
@@ -149,12 +149,12 @@
         t-att-data-can-self-mark-uncompleted="slide.can_self_mark_uncompleted"
         t-att-data-is-member="is_member">
         <button class="o_wslides_button_complete btn btn-sm" t-if="slide_completed and slide.can_self_mark_uncompleted or not slide_completed and slide.can_self_mark_completed">
-            <i t-if="slide_completed" class="o_wslides_slide_completed fa fa-check-circle fa-fw text-success fa-lg" t-att-data-slide-id="slide.id" title="Mark as not done"/>
-            <i t-else="" t-attf-class="fa #{uncompleted_icon} fa-fw fa-lg" t-att-data-slide-id="slide.id" title="Mark as done"/>
+            <i t-if="slide_completed" class="o_wslides_slide_completed oi oi-fw oi-lg text-success" data-icon="check_circle" t-att-data-slide-id="slide.id" title="Mark as not done"/>
+            <i t-else="" class="oi oi-fw oi-lg" t-attf-data-icon="#{uncompleted_icon}" t-att-data-slide-id="slide.id" title="Mark as done"/>
         </button>
         <button class="o_wslides_button_complete o_wslides_button_uncompleted btn btn-sm border-0" t-else="" disabled="1">
-            <i t-if="slide_completed" class="o_wslides_slide_completed fa fa-check fa-fw text-success fa-lg" t-att-data-slide-id="slide.id" title="Can not be marked as not done"/>
-            <i t-else="" t-attf-class="fa #{uncompleted_icon} fa-fw fa-lg" t-att-data-slide-id="slide.id" title="Can not be marked as done"/>
+            <i t-if="slide_completed" class="o_wslides_slide_completed oi oi-fw oi-lg text-success" data-icon="check" t-att-data-slide-id="slide.id" title="Can not be marked as not done"/>
+            <i t-else="" class="oi oi-fw oi-lg" t-attf-data-icon="#{uncompleted_icon}" t-att-data-slide-id="slide.id" title="Can not be marked as done"/>
         </button>
     </div>
 </template>

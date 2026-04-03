@@ -339,7 +339,7 @@ const createDropdown = function (name) {
         },
         {
             content: "Move the dropdown item into the dropdown",
-            trigger: '.oe_menu_editor li:contains("' + name + " item" + '") .oi-draggable',
+            trigger: '.oe_menu_editor li:contains("' + name + " item" + '") [data-icon="drag_indicator"]',
             run(helpers) {
                 return helpers.drag_and_drop('.oe_menu_editor li:contains("' + name + '")', {
                     position: {
@@ -493,7 +493,7 @@ registerWebsitePreviewTour(
         }),
         {
             content: "Switch to desktop view",
-            trigger: "button:has(> span.fa-mobile)",
+            trigger: "button:has(> span[data-icon='smartphone'])",
             run: "click",
         },
         // Check desktop visibility while editing

@@ -256,7 +256,7 @@ describe("flip shape axis", () => {
             "html_builder/geometric/geo_tetris"
         );
 
-        await contains(`[data-action-id="flipImageShape"]:has(.oi-arrows-h)`).click();
+        await contains(`[data-action-id="flipImageShape"]:has([data-icon="arrow_range"])`).click();
         // ensure the shape action has been applied
         await editor.shared.operation.next(() => {});
 
@@ -280,8 +280,8 @@ describe("flip shape axis", () => {
             "html_builder/geometric/geo_tetris"
         );
 
-        await contains(`[data-action-id="flipImageShape"]:has(.oi-arrows-h)`).click();
-        await contains(`[data-action-id="flipImageShape"]:has(.oi-arrows-h)`).click();
+        await contains(`[data-action-id="flipImageShape"]:has([data-icon="arrow_range"])`).click();
+        await contains(`[data-action-id="flipImageShape"]:has([data-icon="arrow_range"])`).click();
         // ensure the shape action has been applied
         await editor.shared.operation.next(() => {});
 
@@ -305,7 +305,7 @@ describe("flip shape axis", () => {
             "html_builder/geometric/geo_tetris"
         );
 
-        await contains(`[data-action-id="flipImageShape"]:has(.oi-arrows-v)`).click();
+        await contains(`[data-action-id="flipImageShape"]:has([data-icon="height"])`).click();
         // ensure the shape action has been applied
         await editor.shared.operation.next(() => {});
 
@@ -329,8 +329,8 @@ describe("flip shape axis", () => {
             "html_builder/geometric/geo_tetris"
         );
 
-        await contains(`[data-action-id="flipImageShape"]:has(.oi-arrows-h)`).click();
-        await contains(`[data-action-id="flipImageShape"]:has(.oi-arrows-v)`).click();
+        await contains(`[data-action-id="flipImageShape"]:has([data-icon="arrow_range"])`).click();
+        await contains(`[data-action-id="flipImageShape"]:has([data-icon="height"])`).click();
         // ensure the shape action has been applied
         await editor.shared.operation.next(() => {});
 
@@ -356,7 +356,7 @@ describe("rotate shape", () => {
             "html_builder/geometric/geo_tetris"
         );
 
-        await contains(`[data-action-id="rotateImageShape"]:has(.fa-rotate-left)`).click();
+        await contains(`[data-action-id="rotateImageShape"]:has([data-icon="undo"])`).click();
         // ensure the shape action has been applied
         await waitSidebarUpdated();
         expect(`:iframe .test-options-target img`).toHaveAttribute("data-shape-rotate", "270");
@@ -379,8 +379,8 @@ describe("rotate shape", () => {
             "html_builder/geometric/geo_tetris"
         );
 
-        await contains(`[data-action-id="rotateImageShape"]:has(.fa-rotate-left)`).click();
-        await contains(`[data-action-id="rotateImageShape"]:has(.fa-rotate-right)`).click();
+        await contains(`[data-action-id="rotateImageShape"]:has([data-icon="undo"])`).click();
+        await contains(`[data-action-id="rotateImageShape"]:has([data-icon="redo"])`).click();
         // ensure the shape action has been applied
         await editor.shared.operation.next(() => {});
 
@@ -405,7 +405,7 @@ describe("rotate shape", () => {
             "html_builder/geometric/geo_tetris"
         );
 
-        await contains(`[data-action-id="rotateImageShape"]:has(.fa-rotate-right)`).click();
+        await contains(`[data-action-id="rotateImageShape"]:has([data-icon="redo"])`).click();
         // ensure the shape action has been applied
         await editor.shared.operation.next(() => {});
 
@@ -793,8 +793,8 @@ test("Should reset shape transformation with reset button and when switching sha
     expect(imgSelector).not.toHaveAttribute("data-shape-flip");
     expect(imgSelector).not.toHaveAttribute("data-shape-rotate");
 
-    await contains(`[data-action-id="flipImageShape"]:has(.oi-arrows-h)`).click();
-    await contains(`[data-action-id="rotateImageShape"]:has(.fa-rotate-right)`).click();
+    await contains(`[data-action-id="flipImageShape"]:has([data-icon="arrow_range"])`).click();
+    await contains(`[data-action-id="rotateImageShape"]:has([data-icon="redo"])`).click();
     await waitSidebarUpdated();
 
     expect(imgSelector).toHaveAttribute("data-shape-flip", "x");
