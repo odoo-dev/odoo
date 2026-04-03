@@ -51,11 +51,11 @@ def add_guest_to_context(func):
 
 
 class StoreVersionInternal:
-    """Internal state used by the `@store_version` decorator."""
+    """Internal state used by the `@Store.with_versioning` decorator."""
     def __init__(self):
         self.__version = None
         self.__model_name_to_record_id_to_written_fnames = defaultdict(
-            lambda: defaultdict(OrderedSet)
+            lambda: defaultdict(OrderedSet),
         )
 
     def mark_field_as_written(self, model_name, record_ids, fname):
@@ -97,59 +97,18 @@ class StoreVersionInternal:
         return self.__version
 
 
-def store_version(func):
-    """Decorator to manage versioned updates in the store.
-
-    Store data is received from RPC and from the bus, and is applied directly to the
-    store. Without versioning, the order of arrival can cause outdated data to overwrite
-    newer data, leading to incorrect store state.
-
-    On the client side, we should be able to determine whether a field represents a newer
-    version of what is already known. This is directly linked to PostgreSQL snapshots and
-    isolation level, in our case, REPEATABLE READ.
-
-    For fields that were read, what matters is what the snapshot could see at the time.
-    For writes, what matters is whether the snapshot of the version we know could see the
-    write transaction. The combination of xmin, xmax, xip and the current transaction id
-    is enough to deduce it.
-
-    This decorator injects the version helper into the context, allowing written fields to
-    be observed and `Store.as_dict` to inject version metadata into its result.
-    """
-    @wraps(func)
-    def store_version__wrapper(self, *args, **kwargs):
-        if self.env.context.get("store_version_ctx"):
-            return func(self, *args, **kwargs)
-        should_cleanup = False
-        manager = StoreVersionInternal()
-        if isinstance(self, models.BaseModel):
-            self = self.with_context(store_version_ctx=manager)
-        else:
-            # Clean up only if we inserted the manager in the request context;
-            # otherwise, the original decorator will handle it.
-            should_cleanup = True
-            req = request or wsrequest
-            req.update_context(store_version_ctx=manager)
-        response = func(self, *args, **kwargs)
-        if should_cleanup:
-            # Clean context to prevent side effects based on the presence of `store_version_ctx`.
-            req.update_context(store_version_ctx=None)
-        return response
-    return store_version__wrapper
-
-
 def mail_route(*route_args, **route_kwargs):
     """Thin wrapper around `route` that adds guest context and enables versioning.
 
     This decorator is equivalent to applying, in order:
         @route(*route_args, **route_kwargs)
-        @store_version
+        @Store.with_versioning
         @add_guest_to_context
     """
 
     def decorator(func):
         wrapped_func = add_guest_to_context(func)
-        wrapped_func = store_version(wrapped_func)
+        wrapped_func = Store.with_versioning(wrapped_func)
         return route(*route_args, **route_kwargs)(wrapped_func)
 
     return decorator
@@ -222,7 +181,7 @@ class Store:
     name).
 
     The store instance is then transformed to a dictionnary to be sent either by the HTTP
-    or the bus stack. If the store was created in the context of the `@store_version` decorator,
+    or the bus stack. If the store was created in the context of the `@Store.with_versioning` decorator,
     this dictionnary also includes information about the data version, which will be used
     by the client to distinguish stale from new data.
     """
@@ -240,6 +199,47 @@ class Store:
             self._internal_store = Store(bus_channel=bus_channel, bus_subchannel="internal_users")
         self._env_with_version_ctx = None
         self.__try_update_version_ctx_from_env(bus_channel)
+
+    @staticmethod
+    def with_versioning(func):
+        """Decorator to manage versioned updates in the store.
+
+        Store data is received from RPC and from the bus, and is applied directly to the
+        store. Without versioning, the order of arrival can cause outdated data to overwrite
+        newer data, leading to incorrect store state.
+
+        On the client side, we should be able to determine whether a field represents a newer
+        version of what is already known. This is directly linked to PostgreSQL snapshots and
+        isolation level, in our case, REPEATABLE READ.
+
+        For fields that were read, what matters is what the snapshot could see at the time.
+        For writes, what matters is whether the snapshot of the version we know could see the
+        write transaction. The combination of xmin, xmax, xip and the current transaction id
+        is enough to deduce it.
+
+        This decorator injects the version helper into the context, allowing written fields to
+        be observed and `Store.as_dict` to inject version metadata into its result.
+        """
+        @wraps(func)
+        def with_version__wrapper(self, *args, **kwargs):
+            if self.env.context.get("store_version_ctx"):
+                return func(self, *args, **kwargs)
+            should_cleanup = False
+            manager = StoreVersionInternal()
+            if isinstance(self, models.BaseModel):
+                self = self.with_context(store_version_ctx=manager)
+            else:
+                # Clean up only if we inserted the manager in the request context;
+                # otherwise, the original decorator will handle it.
+                should_cleanup = True
+                req = request or wsrequest
+                req.update_context(store_version_ctx=manager)
+            response = func(self, *args, **kwargs)
+            if should_cleanup:
+                # Clean context to prevent side effects based on the presence of `store_version_ctx`.
+                req.update_context(store_version_ctx=None)
+            return response
+        return with_version__wrapper
 
     def __try_update_version_ctx_from_env(self, records):
         is_recordset = isinstance(records, models.Model)
@@ -384,7 +384,8 @@ class Store:
     def as_dict(self):
         """Hook for JSON serialization used by the `json_default` method. Do not call
         directly. Returns a dictionary representing the aggregated result of all store
-        commands, versioned if the store was created within a `@store_version` context.
+        commands, versioned if the store was created within a `@Store.with_versioning`
+        context.
         """
         result = self._build_result()
         if result and self._env_with_version_ctx:
