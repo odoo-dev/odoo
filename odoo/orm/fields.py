@@ -1875,6 +1875,10 @@ class Field[T]:
 
     def __set__(self, records: BaseModel, value) -> None:
         """ set the value of field ``self`` on ``records`` """
+        # access check:
+        # - protected: should be already checked, usually called for computed fields
+        # - new_ids: just check access to model
+        # - other_ids: access is checked in Model.write()
         protected_ids = []
         new_ids = []
         other_ids = []
@@ -1893,6 +1897,7 @@ class Field[T]:
 
         if new_ids:
             # new records: no business logic
+            records.browse().check_access('write')
             new_records = records.__class__(records.env, tuple(new_ids), records._prefetch_ids)
             with records.env.protecting(records.pool.field_computed.get(self, [self]), new_records):
                 if self.relational:
