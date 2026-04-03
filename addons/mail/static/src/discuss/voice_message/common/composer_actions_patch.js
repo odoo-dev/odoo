@@ -8,7 +8,7 @@ registerComposerAction("voice-start", {
         owner.voiceRecorder &&
         !owner.voiceRecorder?.recording &&
         !composer.voiceAttachment,
-    icon: "fa fa-microphone",
+    icon: "mic",
     name: _t("Voice Message"),
     onSelected: ({ owner }) => owner.voiceRecorder.onClick(),
     sequence: 10,
@@ -16,7 +16,8 @@ registerComposerAction("voice-start", {
 registerComposerAction("voice-stop", {
     condition: ({ composer, owner }) =>
         composer.targetThread?.channel && owner.voiceRecorder?.recording,
-    icon: "fa fa-circle text-danger o-mail-VoiceRecorder-dot",
+    icon: "circle",
+    iconClass: "oi-filled text-danger o-mail-VoiceRecorder-dot",
     name: _t("Stop Recording"),
     onSelected: ({ owner }) => owner.voiceRecorder.onClick(),
     sequence: 10,
@@ -29,7 +30,7 @@ registerComposerAction("voice-recording", {
                 <div class="o-mail-VoiceRecorder-elapsed o-active recording ms-2 me-1" t-att-class="{ 'text-danger': this.props.state.limitWarning }" style="font-variant-numeric: tabular-nums;">
                     <span class="d-flex text-truncate" t-out="this.props.state.elapsed"/>
                 </div>
-                <span class="rounded-circle p-1"><i class="fa fa-fw fa-circle text-danger o-mail-VoiceRecorder-dot"/></span>
+                <span class="rounded-circle p-1"><i class="oi oi-fw oi-filled text-danger o-mail-VoiceRecorder-dot" data-icon="circle"/></span>
             </button>
         `;
         get title() {

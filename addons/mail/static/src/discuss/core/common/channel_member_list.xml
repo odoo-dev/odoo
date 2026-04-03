@@ -2,19 +2,27 @@
 <templates xml:space="preserve">
 
     <t t-name="discuss.ChannelMemberList">
-        <ActionPanel close="this.props.close" title.translate="Members" minWidth="200" initialWidth="this.env.inMeetingView ? 400 : 250" icon="'oi oi-users'">
-            <div class="o-discuss-ChannelMemberList-search input-group input-group-sm flex-nowrap">
-                <SearchInput search="this.search" placeholder.translate="Search members"/>
-                <button name="inviteButton" t-on-click="() => this.onClickInviteButton()" class="btn btn-outline-secondary" title="Invite People" aria-label="Invite People"><i class="oi oi-user-plus"/></button>
-            </div>
-            <t t-foreach="this.categories" t-as="category" t-key="category_index">
-                <t t-if="category.filtered.length > 0">
-                    <t t-call="discuss.ChannelMemberList.section">
-                        <t t-set="sectionName" t-value="category.showCount ? `${category.label} - ${category.filtered.length}` : category.label"/>
-                    </t>
-                    <div class="d-flex flex-column bg-inherit gap-1">
-                        <ChannelMember t-foreach="category.filtered" t-as="member" t-key="member.id" member="member"/>
-                    </div>
+        <ActionPanel close="this.props.close" title.translate="Members" minWidth="200" initialWidth="this.env.inMeetingView ? 400 : 250" icon="'person_add'">
+            <button name="inviteButton" t-on-click="() => this.onClickInviteButton()" class="btn btn-sm btn-secondary mt-2 d-flex align-items-center justify-content-center gap-1 rounded-3" title="Invite People"><i class="oi" data-icon="person_add"/><span>Invite People</span></button>
+            <t t-if="this.props.channel.onlineMembers.length > 0">
+                <t t-call="discuss.ChannelMemberList.section">
+                    <t t-set="sectionName" t-value="this.onlineSectionText"/>
+                </t>
+                <div class="d-flex flex-column bg-inherit gap-1">
+                    <ChannelMember t-foreach="this.props.channel.onlineMembers" t-as="member" t-key="member.id" member="member"/>
+                </div>
+            </t>
+            <t name="offlineMembers" t-if="this.props.channel.offlineMembers.length > 0">
+                <t t-call="discuss.ChannelMemberList.section">
+                    <t t-set="sectionName" t-value="this.offlineSectionText"/>
+                </t>
+                <div class="d-flex flex-column bg-inherit gap-1">
+                    <ChannelMember t-foreach="this.props.channel.offlineMembers" t-as="member" t-key="member.id" member="member"/>
+                </div>
+            </t>
+            <t name="unknownStatusMembers" t-if="this.props.channel.unknownStatusMembers.length > 0">
+                <t t-call="discuss.ChannelMemberList.section">
+                    <t t-set="sectionName" t-value="this.unknownStatusSectionText"/>
                 </t>
             </t>
             <span t-if="this.search.searchTerm and !this.search.loading and !this.hasFilteredMembers(this.categories)" class="mx-2 mt-2 text-muted">No members found.</span>

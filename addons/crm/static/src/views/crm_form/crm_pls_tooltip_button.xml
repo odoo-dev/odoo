@@ -45,7 +45,8 @@
                     <span t-if="isSampleData" class="text-primary fw-normal ms-2">(sample data)</span>
                 </h5>
                 <t t-call="crm.PlsTooltipSectionContent">
-                    <t t-set="iconClasses" t-value="'oi oi-arrow-up-right text-success'"/>
+                    <t t-set="iconClasses" t-value="'oi text-success'"/>
+                    <t t-set="iconName" t-value="'north_east'"/>
                     <t t-set="sectionEntries" t-value="this.props.top3Data"/>
                     <t t-set="teamName" t-value="this.props.teamName"/>
                     <t t-set="useDefault" t-value="positiveDefault"/>
@@ -58,7 +59,8 @@
                     <span t-if="isSampleData" class="text-primary fw-normal ms-2">(sample data)</span>
                 </h5>
                 <t t-call="crm.PlsTooltipSectionContent">
-                    <t t-set="iconClasses" t-value="'oi oi-arrow-down-right text-danger'"/>
+                    <t t-set="iconClasses" t-value="'oi text-danger'"/>
+                    <t t-set="iconName" t-value="'south_east'"/>
                     <t t-set="sectionEntries" t-value="this.props.low3Data"/>
                     <t t-set="teamName" t-value="this.props.teamName"/>
                     <t t-set="useDefault" t-value="negativeDefault"/>
@@ -69,7 +71,7 @@
                 <span t-else="">Computed by Odoo AI using your data.</span>
                 <a role="button" class="ms-2 btn-link"
                     href="https://www.odoo.com/documentation/latest/applications/sales/crm/track_leads/lead_scoring.html#predictive-lead-scoring" target="_blank">
-                    <i class="fa fa-info-circle pe-1"/>Learn More
+                    <i class="oi pe-1" data-icon="info"/>Learn More
                 </a>
             </div>
         </div>
@@ -78,7 +80,7 @@
     <t t-name="crm.PlsTooltipSectionContent">
         <div t-foreach="sectionEntries" t-as="group" t-key="group_index"
             t-attf-class="px-2 py-1 {{group.field === 'tag_id' ? 'd-flex align-items-center' : ''}}">
-            <span t-attf-class="{{iconClasses}} o_crm_pls_tooltip_icon me-1"/>
+            <span t-attf-class="{{iconClasses}} o_crm_pls_tooltip_icon me-1" t-attf-data-icon="{{iconName}}"/>
             <t t-if="group.field === 'stage_id'">
                 <span class="fw-bolder"><t t-out="group.value"/></span>
                 <span class="mx-1">stage</span>

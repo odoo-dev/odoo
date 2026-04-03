@@ -5,7 +5,7 @@ import { fonts } from "@html_editor/utils/fonts";
 import { Component } from "@odoo/owl";
 
 export class IconSelector extends Component {
-    static mediaSpecificClasses = ["fa"];
+    static mediaSpecificClasses = ["oi"];
     static mediaSpecificStyles = ["color", "background-color"];
     static mediaExtraClasses = [/^text-\S+$/, /^bg-\S+$/, /^fa-\S+$/];
     static tagNames = ["SPAN", "I"];
