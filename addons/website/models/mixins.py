@@ -6,6 +6,7 @@ import urllib.parse
 from odoo import api, fields, models, _
 from odoo.fields import Domain
 from odoo.addons.website.tools import text_from_html
+from odoo.addons.website.helpers.jsonld_builder import JsonLd
 from odoo.http import request
 from odoo.exceptions import AccessError, UserError
 from odoo.models import Query
@@ -870,3 +871,48 @@ class WebsiteSearchableMixin(models.AbstractModel):
             return False, value, 'html'
 
         return True, value, 'tags'
+
+
+class WebsiteStructuredDataMixin(models.AbstractModel):
+    _name = 'website.structured_data.mixin'
+    _description = 'Website Structured Data Mixin'
+
+    def get_json_ld(self, is_detail_page=False):
+        """Return the JSON-LD structured data for this record.
+        :param is_detail_page: whether the structured data is for a detail page
+        :return: string containing the JSON-LD structured data
+        :rtype: str (JSON-LD)
+        """
+        return JsonLd.render_structured_data(self._build_structured_data(is_detail_page=is_detail_page))
+
+    def _build_structured_data(self, is_detail_page=False):
+        """Return a list of JsonLd builders for this record.
+
+        Default implementation returns the Organization schema of the
+        current website.  Override in sub-models to append page-specific
+        schemas (BlogPosting, Product, BreadcrumbList, ...).
+
+        :param is_detail_page: whether the structured data is for a detail page
+        :return: list of JsonLd builders to be rendered in the page
+        :rtype: list[JsonLd]
+        """
+        website = self.env['website'].get_current_website()
+        return [website.organization_structured_data()]
+
+    def _build_breadcrumb_schema(self, items):
+        """Generic breadcrumb builder.
+
+        :param items: List of ``(name, url)`` tuples.
+        :return: BreadcrumbList schema, or ``None`` when no valid items.
+        :rtype: JsonLd | None
+        """
+        valid_items = [item for item in items if item is not None]
+        if not valid_items:
+            return None
+        list_items = []
+        for position, (name, url) in enumerate(valid_items, start=1):
+            item = JsonLd("ListItem", {"position": position, "name": name, "item": url})
+            list_items.append(item)
+        breadcrumbs = JsonLd("BreadcrumbList")
+        breadcrumbs.add_nested({"itemListElement": list_items})
+        return breadcrumbs
