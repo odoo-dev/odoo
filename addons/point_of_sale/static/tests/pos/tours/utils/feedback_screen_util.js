@@ -371,7 +371,7 @@ export function clickEmailButton() {
     return [
         {
             content: "send email",
-            trigger: ".modal-body .fa-paper-plane",
+            trigger: ".modal-body [data-icon='send']",
             run: "click",
         },
     ];

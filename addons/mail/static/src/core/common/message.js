@@ -404,7 +404,8 @@ export class Message extends Component {
             return {
                 action: () => this.message.setDone(),
                 bgColor: "bg-success",
-                icon: "fa-check-circle",
+                icon: "check_circle",
+                icon_class: "oi-filled",
             };
         }
         if (
@@ -414,7 +415,7 @@ export class Message extends Component {
             return {
                 action: () => this.message.markAsUnread(this.props.thread),
                 bgColor: "bg-secondary",
-                icon: "fa-eye-slash",
+                icon: "visibility_off",
             };
         }
         return undefined;

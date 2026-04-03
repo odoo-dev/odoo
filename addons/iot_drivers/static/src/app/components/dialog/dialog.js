@@ -51,7 +51,7 @@ export class Dialog extends Component {
                 <div class="modal-content">
                     <div class="modal-header gap-1">
                         <t t-out="props.name"/>
-                        <a t-if="props.help" t-att-href="props.help" class="fa fa-question-circle text-decoration-none text-dark" target="_blank"/>
+                        <a t-if="props.help" t-att-href="props.help" class="oi text-decoration-none text-dark" data-icon="help" target="_blank"/>
                     </div>
                     <div class="modal-body position-relative dialog-body">
                         <t t-slot="body" />

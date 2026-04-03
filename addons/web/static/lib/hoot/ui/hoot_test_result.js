@@ -94,7 +94,7 @@ const DOC_URL = `https://www.odoo.com/documentation/18.0/developer/reference/fro
 
 const ERROR_TEMPLATE = /* xml */ `
     <div class="text-rose flex items-center gap-1 px-2 truncate">
-        <i class="fa fa-exclamation" />
+        <i class="oi" data-icon="priority_high" />
         <strong t-esc="event.label" />
         <span class="flex truncate" t-esc="event.message.join(' ')" />
     </div>
@@ -114,7 +114,7 @@ const EVENT_TEMPLATE = /* xml */ `
             <t t-esc="event.number + '.'" />
         </t>
         <t t-else="">
-            <i class="fa" t-att-class="eventIcon" />
+            <i class="oi" t-att-class="eventIconClass" t-att-data-icon="eventIcon" />
         </t>
         <a
             class="hover:text-primary flex gap-1 items-center"
@@ -123,9 +123,9 @@ const EVENT_TEMPLATE = /* xml */ `
             target="_blank"
         >
             <t t-if="event.flags">
-                <i t-if="event.hasFlag('rejects')" class="fa fa-times" />
-                <i t-elif="event.hasFlag('resolves')" class="fa fa-arrow-right" />
-                <i t-if="event.hasFlag('not')" class="fa fa-exclamation" />
+                <i t-if="event.hasFlag('rejects')" class="oi" data-icon="close" />
+                <i t-elif="event.hasFlag('resolves')" class="oi" data-icon="arrow_forward" />
+                <i t-if="event.hasFlag('not')" class="oi" data-icon="priority_high" />
             </t>
             <strong t-esc="event.label" />
         </a>
@@ -269,6 +269,7 @@ export class HootTestResult extends Component {
                         <t t-foreach="this.filteredEvents[index]" t-as="event" t-key="event_index">
                             <t t-set="sType" t-value="this.getTypeName(event.type)" />
                             <t t-set="eventIcon" t-value="this.CASE_EVENT_TYPES[sType].icon" />
+                            <t t-set="eventIconClass" t-value="this.CASE_EVENT_TYPES[sType].icon_class" />
                             <t t-set="eventColor" t-value="
                                 'pass' in event ?
                                     (event.pass ? 'emerald' : 'rose') :

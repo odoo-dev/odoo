@@ -11,8 +11,8 @@
                     <field name="res_id" />
                     <field name="recycle_model_id" string="Recycle Rule" optional="hide" />
                     <field name="name" />
-                    <button icon="fa-check" string="Validate" type="object" name="action_validate" />
-                    <button icon="fa-times" string="Discard" type="object" name="action_discard" invisible="not active" />
+                    <button icon="check" string="Validate" type="object" name="action_validate" />
+                    <button icon="close" string="Discard" type="object" name="action_discard" invisible="not active" />
                 </list>
             </field>
         </record>
@@ -24,7 +24,7 @@
                 <search string="Records">
                     <filter name="active" string="Discarded" domain="[('active', '=', False)]" />
                     <searchpanel>
-                        <field name="recycle_model_id" icon="fa-bars" string="Recycle Rules" />
+                        <field name="recycle_model_id" icon="menu" string="Recycle Rules" />
                     </searchpanel>
                 </search>
             </field>

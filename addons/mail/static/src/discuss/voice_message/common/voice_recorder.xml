@@ -9,7 +9,7 @@
                 'mw-0': !this.state.recording,
                 'text-danger': this.state.limitWarning,
             }" style="font-variant-numeric: tabular-nums;"><span class="d-flex text-truncate" t-out="this.state.elapsed"/></div>
-            <span class="rounded-circle" t-att-class="{ 'p-1': this.state.recording }"><i t-att-class="!this.state.recording ? 'fa fa-fw fa-lg fa-microphone' : 'fa fa-fw fa-circle text-danger o-mail-VoiceRecorder-dot'"/></span>
+            <span class="rounded-circle" t-att-class="{ 'p-1': this.state.recording }"><i class="oi oi-fw" t-att-class="!this.state.recording ? 'oi-lg' : 'text-danger o-mail-VoiceRecorder-dot'" t-att-data-icon="!this.state.recording ? 'mic' : 'circle'"/></span>
         </button>
     </t>
 

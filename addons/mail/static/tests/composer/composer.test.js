@@ -492,7 +492,7 @@ test("Show send button in mobile", async () => {
     await click("button:text('Channels')");
     await click(".o-mail-NotificationItem-name:text('minecraft-wii-u')");
     await contains(".o-mail-Composer button[title='Send']");
-    await contains(".o-mail-Composer button[title='Send'] i.fa-paper-plane-o");
+    await contains(".o-mail-Composer button[title='Send'] i[data-icon='send']");
 });
 
 test("composer textarea content is retained when changing channel then going back", async () => {
@@ -935,7 +935,7 @@ test("composer: add an attachment", async () => {
     await start();
     await openDiscuss(channelId);
     await inputFiles(".o-mail-Composer .o_input_file", [text]);
-    await contains(".o-mail-AttachmentContainer:not(.o-isUploading):contains(text.txt) .fa-check");
+    await contains(".o-mail-AttachmentContainer:not(.o-isUploading):contains(text.txt) [data-icon='check']");
     await contains(".o-mail-Composer-footer .o-mail-AttachmentList");
     await contains(
         ".o-mail-Composer-footer .o-mail-AttachmentList .o-mail-AttachmentContainer:not(.o-isUploading):contains(text.txt)"
@@ -962,7 +962,7 @@ test("composer: add an attachment in reply to message in history", async () => {
     await click("[title='Expand']");
     await click(".o-dropdown-item:contains('Reply')");
     await inputFiles(".o-mail-Composer .o_input_file", [text]);
-    await contains(".o-mail-AttachmentContainer:not(.o-isUploading):contains(text.txt) .fa-check");
+    await contains(".o-mail-AttachmentContainer:not(.o-isUploading):contains(text.txt) [data-icon='check']");
     await contains(".o-mail-Composer-footer .o-mail-AttachmentList");
     await contains(
         ".o-mail-Composer-footer .o-mail-AttachmentList .o-mail-AttachmentContainer:not(.o-isUploading):contains(text.txt)"
@@ -994,7 +994,7 @@ test("remove an attachment from composer does not need any confirmation", async 
     await start();
     await openDiscuss(channelId);
     await inputFiles(".o-mail-Composer .o_input_file", [text]);
-    await contains(".o-mail-AttachmentContainer:not(.o-isUploading):contains(text.txt) .fa-check");
+    await contains(".o-mail-AttachmentContainer:not(.o-isUploading):contains(text.txt) [data-icon='check']");
     await contains(".o-mail-Composer-footer .o-mail-AttachmentList");
     await click(".o-mail-Attachment-unlink");
     await contains(".o-mail-AttachmentList .o-mail-AttachmentContainer", { count: 0 });
@@ -1820,13 +1820,13 @@ test("mentions can be correctly selected with ctrl+A and deleted", async () => {
     await htmlInsertText(editor, "#general");
     await click(".o-mail-NavigableList-item:text('General')");
     await contains(`.o-mail-Composer-html.odoo-editor-editable:text('General')`);
-    await contains(editor.editable.querySelector("i.fa-hashtag"));
+    await contains(editor.editable.querySelector("i[data-icon='tag']"));
     await htmlInsertText(editor, "Hello");
     await contains(".o-mail-Composer-html.odoo-editor-editable:text('General Hello')");
     await focus(editor.editable);
     await press("Control+a");
     await press("Backspace");
-    await contains(editor.editable.querySelector("i.fa-hashtag"), { count: 0 });
+    await contains(editor.editable.querySelector("i[data-icon='tag']"), { count: 0 });
     await contains(editor.editable, { textContent: "" });
 
     //partner in the middle of the message
@@ -1846,7 +1846,7 @@ test("mentions can be correctly selected with ctrl+A and deleted", async () => {
     await htmlInsertText(editor, "Hello #general");
     await click(".o-mail-NavigableList-item:text('General')");
     await contains(`.o-mail-Composer-html.odoo-editor-editable:text('Hello General')`);
-    await contains(editor.editable.querySelector("i.fa-hashtag"));
+    await contains(editor.editable.querySelector("i[data-icon='tag']"));
     await htmlInsertText(editor, "nice to meet you!");
     await contains(
         ".o-mail-Composer-html.odoo-editor-editable:text('Hello General nice to meet you!')"
@@ -1854,7 +1854,7 @@ test("mentions can be correctly selected with ctrl+A and deleted", async () => {
     await focus(editor.editable);
     await press("Control+a");
     await press("Backspace");
-    await contains(editor.editable.querySelector("i.fa-hashtag"), { count: 0 });
+    await contains(editor.editable.querySelector("i[data-icon='tag']"), { count: 0 });
     await contains(editor.editable, { textContent: "" });
 
     //partner at the end of the message
@@ -1870,11 +1870,11 @@ test("mentions can be correctly selected with ctrl+A and deleted", async () => {
     await htmlInsertText(editor, "Hello #general");
     await click(".o-mail-NavigableList-item:text('General')");
     await contains(`.o-mail-Composer-html.odoo-editor-editable:text('Hello General')`);
-    await contains(editor.editable.querySelector("i.fa-hashtag"));
+    await contains(editor.editable.querySelector("i[data-icon='tag']"));
     await focus(editor.editable);
     await press("Control+a");
     await press("Backspace");
-    await contains(editor.editable.querySelector("i.fa-hashtag"), { count: 0 });
+    await contains(editor.editable.querySelector("i[data-icon='tag']"), { count: 0 });
     await contains(editor.editable, { textContent: "" });
 });
 
@@ -1909,13 +1909,13 @@ test("mentions can be correctly cut with ctrl+A and ctrl+X", async () => {
     await htmlInsertText(editor, "#general");
     await click(".o-mail-NavigableList-item:text('General')");
     await contains(".o-mail-Composer-html.odoo-editor-editable:text('General')");
-    await contains(editor.editable.querySelector("i.fa-hashtag"));
+    await contains(editor.editable.querySelector("i[data-icon='tag']"));
     await htmlInsertText(editor, "Hello");
     await contains(".o-mail-Composer-html.odoo-editor-editable:text('General Hello')");
     await focus(editor.editable);
     await press("Control+a");
     cut(editor);
-    await contains(editor.editable.querySelector("i.fa-hashtag"), { count: 0 });
+    await contains(editor.editable.querySelector("i[data-icon='tag']"), { count: 0 });
     await contains(editor.editable, { textContent: "" });
 
     // partner in the middle of the message
@@ -1935,7 +1935,7 @@ test("mentions can be correctly cut with ctrl+A and ctrl+X", async () => {
     await htmlInsertText(editor, "Hello #general");
     await click(".o-mail-NavigableList-item:text('General')");
     await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello General')");
-    await contains(editor.editable.querySelector("i.fa-hashtag"));
+    await contains(editor.editable.querySelector("i[data-icon='tag']"));
     await htmlInsertText(editor, "nice to meet you!");
     await contains(
         ".o-mail-Composer-html.odoo-editor-editable:text('Hello General nice to meet you!')"
@@ -1943,7 +1943,7 @@ test("mentions can be correctly cut with ctrl+A and ctrl+X", async () => {
     await focus(editor.editable);
     await press("Control+a");
     cut(editor);
-    await contains(editor.editable.querySelector("i.fa-hashtag"), { count: 0 });
+    await contains(editor.editable.querySelector("i[data-icon='tag']"), { count: 0 });
     await contains(editor.editable, { textContent: "" });
 
     // partner at the end of the message
@@ -1959,10 +1959,10 @@ test("mentions can be correctly cut with ctrl+A and ctrl+X", async () => {
     await htmlInsertText(editor, "Hello #general");
     await click(".o-mail-NavigableList-item:text('General')");
     await contains(".o-mail-Composer-html.odoo-editor-editable:text('Hello General')");
-    await contains(editor.editable.querySelector("i.fa-hashtag"));
+    await contains(editor.editable.querySelector("i[data-icon='tag']"));
     await focus(editor.editable);
     await press("Control+a");
     cut(editor);
-    await contains(editor.editable.querySelector("i.fa-hashtag"), { count: 0 });
+    await contains(editor.editable.querySelector("i[data-icon='tag']"), { count: 0 });
     await contains(editor.editable, { textContent: "" });
 });

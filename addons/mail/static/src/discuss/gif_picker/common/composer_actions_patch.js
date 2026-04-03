@@ -16,7 +16,7 @@ registerComposerAction("add-gif", {
     isActive: ({ action, owner }) => toRaw(owner.getActivePicker()) === toRaw(action.picker),
     isPicker: true,
     pickerName: _t("GIF"),
-    icon: "oi oi-gif-picker",
+    icon: "gif_box",
     name: _t("Send GIF"),
     onSelected({ owner }, ev) {
         pickerOnClick(owner, this, ev);

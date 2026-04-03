@@ -25,7 +25,7 @@
             'opacity-75': this.props.channel.notEq(this.rtc.channel) and this.compact,
         }">
             <button class="o-mail-DiscussSidebarCallParticipants-expandBtn btn btn-link p-1 my-n1 ms-n1 me-0 align-self-start d-flex rounded-circle" t-if="!this.compact" t-on-click="() => this.state.expanded = !this.state.expanded">
-                <i class="oi o-xxsmaller text-muted text-dark" t-att-class="{'oi-chevron-right': !this.state.expanded, 'oi-chevron-down': this.state.expanded}" t-att-title="this.title"/>
+                <i class="oi o-xxsmaller text-muted text-dark" t-attf-data-icon="{{ this.state.expanded ? 'keyboard_arrow_down' : 'chevron_forward' }}" t-att-title="this.title"/>
             </button>
             <AvatarStack
                 t-if="!this.state.expanded"
@@ -78,8 +78,8 @@
                     <t t-set="session" t-value="session"/>
                 </t>
                 <t t-else="">
-                    <span t-if="session.is_deaf" class="p-1 fa opacity-75" t-att-class="this.CALL_ICON_DEAFEN"/>
-                    <span t-elif="session.is_muted" class="p-1 fa opacity-75" t-att-class="this.CALL_ICON_MUTED"/>
+                    <span t-if="session.is_deaf" class="p-1 oi opacity-75" t-att-data-icon="this.CALL_ICON_DEAFEN"/>
+                    <span t-elif="session.is_muted" class="p-1 oi opacity-75" t-att-data-icon="this.CALL_ICON_MUTED"/>
                     <span t-if="session.is_screen_sharing_on" class="o-live bg-danger o-text-white rounded">LIVE</span>
                 </t>
             </div>
