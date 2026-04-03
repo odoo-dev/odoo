@@ -596,6 +596,7 @@ class MailTemplate(models.Model):
             'partner_to',  # recipients
             'report_template_ids',  # attachments
             'scheduled_date',  # specific
+            'email_from', # dynamic
             # not rendered (static)
             'auto_delete',
             'email_layout_xmlid',
@@ -617,6 +618,13 @@ class MailTemplate(models.Model):
                 )
                 for res_id, field_value in generated_field_values.items():
                     render_results.setdefault(res_id, {})[field] = field_value
+            # render dynamic fields
+            if 'email_from' in render_fields_set:
+                val = template._render_field('email_from', template_res_ids)
+                if user_id := self.env.context.get('email_from_user_id', False):
+                    val = self.env['res.partner'].browse(user_id).email_formatted
+                for res_id in template_res_ids:
+                    render_results.setdefault(res_id, {})['email_from'] = val
 
             # render recipients
             if render_fields_set & {'email_cc', 'email_to', 'partner_to'}:

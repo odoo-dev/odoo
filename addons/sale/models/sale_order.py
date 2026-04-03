@@ -1380,6 +1380,7 @@ class SaleOrder(models.Model):
             "email_notification_allow_footer": True,
             "hide_mail_template_management_options": True,
             "proforma": self.env.context.get("proforma", False),
+            "email_from_user_id": 16
         }
 
         if len(self) > 1:
