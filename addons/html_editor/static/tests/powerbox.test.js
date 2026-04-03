@@ -655,7 +655,7 @@ class NoOpPlugin extends Plugin {
                 title: "No-op",
                 description: "No-op",
                 categoryId: "no_op",
-                icon: "fa-header",
+                icon: "title",
                 commandId: "noOp",
             },
         ],

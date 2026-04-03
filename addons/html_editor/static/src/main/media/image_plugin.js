@@ -56,14 +56,15 @@ export class ImagePlugin extends Plugin {
             {
                 id: "deleteImage",
                 description: _t("Remove (DELETE) image"),
-                icon: "fa-trash text-danger",
+                icon: "delete",
+                icon_class: "oi-filled text-danger",
                 run: this.deleteImage.bind(this),
                 isAvailable: isHtmlContentSupported,
             },
             {
                 id: "previewImage",
                 description: _t("Preview image"),
-                icon: "fa-search-plus",
+                icon: "zoom_in",
                 run: this.previewImage.bind(this),
                 isAvailable: isHtmlContentSupported,
             },
@@ -307,7 +308,7 @@ export class ImagePlugin extends Plugin {
             return {
                 title: _t("Embed Image"),
                 description: _t("Embed the image in the document."),
-                icon: "fa-image",
+                icon: "image",
                 run: () => {
                     this.trigger(
                         "on_will_paste_handlers",
