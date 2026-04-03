@@ -39,7 +39,11 @@
         <field name="name">product.image.view.kanban</field>
         <field name="model">product.image</field>
         <field name="arch" type="xml">
-            <kanban string="Product Images" default_order="has_attribute_value desc, sequence">
+            <kanban
+                js_class="product_kanban_image"
+                string="Product Images"
+                default_order="has_attribute_value desc, sequence"
+            >
                 <!-- We need the hidden video_url to be able to create new `product.image` records with video_url. (see: x2many_media_viewer.js) -->
                 <field name="video_url" invisible="1"/>
                 <field name="sequence" widget="handle"/>

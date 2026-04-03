@@ -154,7 +154,7 @@ class ProductTemplate(models.Model):
         inverse_name="product_tmpl_id",
         copy=True,
     )
-    is_main_image_manually_set = fields.Boolean(default=False)
+    is_main_image_manually_set = fields.Boolean()
 
     compare_list_price = fields.Monetary(
         string="Compare to Price",

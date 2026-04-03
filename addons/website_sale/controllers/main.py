@@ -750,7 +750,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 except Exception:  # noqa: BLE001
                     thumbnail = None
             else:
-                raise ValidationError(_("Invalid video URL provided."))
+                raise ValidationError(self.env._("Invalid video URL provided."))
             media_create_data = [
                 Command.create({
                     "name": video_data.get("name", "Odoo Video"),

@@ -16,7 +16,7 @@ class ProductProduct(models.Model):
     product_template_image_ids = fields.One2many(
         related="product_tmpl_id.product_template_image_ids", readonly=False
     )
-    is_main_image_manually_set = fields.Boolean(default=False)
+    is_main_image_manually_set = fields.Boolean()
 
     website_url = fields.Char(
         string="Website URL",
@@ -56,7 +56,7 @@ class ProductProduct(models.Model):
         return products
 
     def write(self, vals):
-        if "active" in vals and not vals["active"]:
+        if not vals.get("active"):
             # unlink draft lines containing the archived product
             self.env["sale.order.line"].sudo().search([
                 ("state", "=", "draft"),
