@@ -715,6 +715,7 @@ export class Record extends DataPoint {
         this._closeInvalidFieldsNotification();
         this._closeInvalidFieldsNotification = () => {};
         this._restoreActiveFields();
+        this.model.hooks.onRecordDiscarded(this);
     }
 
     _displayInvalidFieldNotification() {
@@ -1211,9 +1212,12 @@ export class Record extends DataPoint {
             if (nextId) {
                 return this.model.load({ resId: nextId });
             }
-            this._changes = markRaw({});
-            this.data = { ...this._values };
-            this.dirty = false;
+            // eslint-disable-next-line no-undef
+            owl.preventWrite(() => {
+                this._changes = markRaw({});
+                this.data = { ...this._values };
+                this.dirty = false;
+            });
             return true;
         }
         if (
