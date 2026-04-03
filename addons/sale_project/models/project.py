@@ -265,19 +265,15 @@ class Project(models.Model):
             return action
 
         if section_name == 'cost_of_goods_sold':
+            move_ids = [res_id] if res_id else self.env.context.get('record_ids', [])
             action = {
                 'name': _('Cost of Goods Sold Items'),
                 'type': 'ir.actions.act_window',
                 'res_model': 'account.move.line',
                 'views': [[False, 'tree'], [False, 'form']],
+                'domain': [('move_id', 'in', move_ids), ('display_type', '=', 'cogs')],
                 'context': {'create': False, 'edit': False},
             }
-            move_ids = [res_id] if res_id else []
-            if domain and not move_ids:
-                for leaf in domain:
-                    if len(leaf) == 3 and leaf[0] == 'id':
-                        move_ids = leaf[2]
-            action['domain'] = [('move_id', 'in', move_ids), ('display_type', '=', 'cogs')]
             return action
 
         return super().action_profitability_items(section_name, domain, res_id)
