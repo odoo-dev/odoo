@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_menu_pos" name="Portal layout : POS menu entries" inherit_id="portal.portal_breadcrumbs" priority="35">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'pos_order'" t-attf-class="breadcrumb-item #{'active ' if not pos_order else ''}">
+                <a t-if="pos_order" t-attf-href="/my/pos_orders?{{ keep_query() }}">POS Orders</a>
+                <t t-else="">POS Orders</t>
+            </li>
+            <li t-if="pos_order" class="breadcrumb-item active">
+                <t t-out="pos_order.pos_reference or pos_order.name"/>
+            </li>
+        </xpath>
+    </template>
+
+    <template id="portal_my_pos_orders" name="My POS Orders">
+        <t t-call="portal.portal_layout" breadcrumbs_searchbar="True">
+            <t t-call="portal.portal_searchbar" title.translate="POS Orders"/>
+            <div t-if="not pos_orders" class="alert alert-warning" role="alert">
+                There are currently no POS orders for your account.
+            </div>
+            <t t-if="pos_orders" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Order</th>
+                        <th class="d-none d-md-table-cell">Receipt</th>
+                        <th class="text-end">Order Date</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="pos_orders" t-as="order">
+                        <tr>
+                            <td>
+                                <a t-att-href="order.get_portal_url()">
+                                    <t t-out="order.name"/>
+                                </a>
+                            </td>
+                            <td class="d-none d-md-table-cell">
+                                <t t-out="order.pos_reference or '-'"/>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="order.date_order" t-options="{'widget': 'date'}"/>&amp;nbsp;
+                                <span class="d-none d-md-inline" t-field="order.date_order" t-options="{'time_only': True}"/>
+                            </td>
+                            <td class="text-center">
+                                <span t-if="order.state == 'cancel'" class="badge rounded-pill text-bg-danger">Cancelled</span>
+                                <span t-elif="order.state == 'done'" class="badge rounded-pill text-bg-success">Posted</span>
+                                <span t-else="" class="badge rounded-pill text-bg-info">Paid</span>
+                            </td>
+                            <td class="text-end">
+                                <span t-field="order.amount_total"/>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_pos_order_page" name="POS Order" inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <div class="row o_portal_invoice_sidebar">
+                <t t-set="title">
+                    <h2 class="mb-0 text-break mx-auto">
+                        <span t-field="pos_order.amount_total"/>
+                    </h2>
+                </t>
+                <t t-set="entries">
+                    <div class="d-flex flex-column gap-4 mt-3">
+                        <div class="d-flex flex-column gap-2">
+                            <a t-if="invoice" class="btn btn-light" t-att-href="invoice.get_portal_url()" role="button">
+                                <i class="fa fa-file-text-o me-1"/>View Invoice
+                            </a>
+                        </div>
+                        <div class="small text-muted">
+                            <div>
+                                <strong>Receipt:</strong>
+                                <span t-out="pos_order.pos_reference or '-'"/>
+                            </div>
+                            <div>
+                                <strong>Order Date:</strong>
+                                <span t-field="pos_order.date_order"/>
+                            </div>
+                            <div>
+                                <strong>Point of Sale:</strong>
+                                <span t-field="pos_order.config_id"/>
+                            </div>
+                            <div>
+                                <strong>Status:</strong>
+                                <t t-if="pos_order.state == 'cancel'">Cancelled</t>
+                                <t t-elif="pos_order.state == 'done'">Posted</t>
+                                <t t-else="">Paid</t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-call="portal.portal_record_sidebar"
+                    classes.f="col-lg-4 col-xxl-3 d-print-none"
+                    title="title"
+                    entries="entries"/>
+
+                <div id="pos_order_content" class="o_portal_content col-12 col-lg-8 col-xxl-9">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap justify-content-between gap-3 mb-3">
+                                <div>
+                                    <h3 class="mb-1">
+                                        <t t-out="pos_order.name"/>
+                                    </h3>
+                                    <p class="text-muted mb-0">
+                                        <t t-out="pos_order.pos_reference or pos_order.name"/>
+                                    </p>
+                                </div>
+                                <div class="text-md-end d-flex align-items-center">
+                                    <a t-att-href="'/pos/receipt/%s' % pos_order.id" class="fa fa-download me-2 cursor-pointer" aria-hidden="true" target="_black"/>
+                                    <div t-if="pos_order.state == 'cancel'" class="badge rounded-pill text-bg-danger">Cancelled</div>
+                                    <div t-elif="pos_order.state == 'done'" class="badge rounded-pill text-bg-success">Posted</div>
+                                    <div t-else="" class="badge rounded-pill text-bg-info">Paid</div>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th class="text-end">Qty</th>
+                                            <th class="text-end">Unit Price</th>
+                                            <th class="text-end">Discount</th>
+                                            <th class="text-end">Subtotal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="pos_order.lines" t-as="line">
+                                            <td>
+                                                <div t-out="line.full_product_name or line.product_id.display_name"/>
+                                                <small t-if="line.customer_note or line.note" class="d-block text-muted">
+                                                    <t t-out="line.customer_note or line.note"/>
+                                                </small>
+                                            </td>
+                                            <td class="text-end">
+                                                <span t-field="line.qty"/>
+                                            </td>
+                                            <td class="text-end">
+                                                <span t-field="line.price_unit" t-options="{'widget': 'monetary', 'display_currency': pos_order.currency_id}"/>
+                                            </td>
+                                            <td class="text-end">
+                                                <span t-out="line.discount"/>%
+                                            </td>
+                                            <td class="text-end">
+                                                <span t-field="line.price_subtotal_incl"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="4" class="text-end"><strong>Taxes</strong></td>
+                                            <td class="text-end">
+                                                <span t-field="pos_order.amount_tax"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4" class="text-end"><strong>Total</strong></td>
+                                            <td class="text-end">
+                                                <strong t-field="pos_order.amount_total"/>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div t-if="pos_order.payment_ids" class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <h4 class="mb-3">Payments</h4>
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Method</th>
+                                            <th>Date</th>
+                                            <th class="text-end">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="pos_order.payment_ids" t-as="payment">
+                                            <td>
+                                                <span t-field="payment.payment_method_id"/>
+                                                <small t-if="payment.is_change" class="d-block text-muted">Change</small>
+                                            </td>
+                                            <td>
+                                                <span t-field="payment.payment_date"/>
+                                            </td>
+                                            <td class="text-end">
+                                                <span t-field="payment.amount"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div t-if="pos_order.general_customer_note" class="card shadow-sm">
+                        <div class="card-body">
+                            <h4 class="mb-2">Customer Note</h4>
+                            <p class="mb-0" t-field="pos_order.general_customer_note"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

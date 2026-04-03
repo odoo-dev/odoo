@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="portal_pos_orders_client" model="portal.entry">
+        <field name="name">Your POS Orders</field>
+        <field name="description">View your POS orders</field>
+        <field name="url">/my/pos_orders</field>
+        <field name="image" type="bytes" file="point_of_sale/static/img/pos.svg"/>
+        <field name="placeholder_count">pos_order_count</field>
+        <field name="category">client_category</field>
+        <field name="sequence" eval="41"/>
+    </record>
+</odoo>

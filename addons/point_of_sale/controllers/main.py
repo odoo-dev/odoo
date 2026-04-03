@@ -1,23 +1,162 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import logging
 import json
+import logging
+from collections import OrderedDict
+from datetime import datetime, timedelta
 
-from odoo import http, _
+from odoo import _, http
+from odoo.addons.account.controllers.portal import PortalAccount
+from odoo.addons.portal.controllers.portal import pager as portal_pager
+from odoo.exceptions import AccessError, MissingError
 from odoo.fields import Domain
 from odoo.http import request
-from odoo.tools import format_amount, file_open
-from odoo.addons.account.controllers.portal import PortalAccount
-from datetime import timedelta, datetime
+from odoo.tools import consteq, file_open, format_amount
 
 _logger = logging.getLogger(__name__)
 
 
 class PosController(PortalAccount):
 
-    @http.route('/pos/receipt/<order_id>', type='http', auth='user', sitemap=False, website=True)
+    def _prepare_home_portal_values(self, counters):
+        values = super()._prepare_home_portal_values(counters)
+        if 'pos_order_count' in counters:
+            values['pos_order_count'] = request.env['pos.order'].sudo().search_count(
+                self._get_pos_order_portal_domain()
+            )
+        return values
+
+    def _get_pos_order_portal_domain(self):
+        partner = request.env.user.partner_id.commercial_partner_id
+        return Domain('partner_id', 'child_of', [partner.id]) & Domain('state', '!=', 'draft')
+
+    def _get_pos_order_searchbar_sortings(self):
+        return {
+            'date': {'label': _('Order Date'), 'order': 'date_order desc, id desc'},
+            'name': {'label': _('Reference'), 'order': 'name desc, id desc'},
+            'total': {'label': _('Total'), 'order': 'amount_total desc, id desc'},
+        }
+
+    def _get_pos_order_searchbar_filters(self):
+        return {
+            'all': {'label': _('All'), 'domain': Domain.TRUE},
+            'invoiced': {'label': _('Invoiced'), 'domain': Domain('account_move', '!=', False)},
+            'uninvoiced': {'label': _('Not Invoiced'), 'domain': Domain('account_move', '=', False)},
+        }
+
+    def _prepare_my_pos_orders_values(
+        self, page=1, date_begin=None, date_end=None, sortby=None, filterby=None
+    ):
+        PosOrder = request.env['pos.order'].sudo()
+        values = self._prepare_portal_layout_values()
+        domain = self._get_pos_order_portal_domain()
+
+        searchbar_sortings = self._get_pos_order_searchbar_sortings()
+        if not sortby:
+            sortby = 'date'
+        order = searchbar_sortings[sortby]['order']
+
+        searchbar_filters = self._get_pos_order_searchbar_filters()
+        if not filterby:
+            filterby = 'all'
+        domain &= searchbar_filters[filterby]['domain']
+
+        if date_begin:
+            domain &= Domain('date_order', '>=', date_begin)
+        if date_end:
+            domain &= Domain('date_order', '<=', date_end)
+
+        pager = portal_pager(
+            url='/my/pos_orders',
+            total=PosOrder.search_count(domain),
+            page=page,
+            step=self._items_per_page,
+            url_args={
+                'date_begin': date_begin,
+                'date_end': date_end,
+                'sortby': sortby,
+                'filterby': filterby,
+            },
+        )
+        pos_orders = PosOrder.search(
+            domain, order=order, limit=self._items_per_page, offset=pager['offset']
+        )
+
+        values.update({
+            'date': date_begin,
+            'page_name': 'pos_order',
+            'default_url': '/my/pos_orders',
+            'pos_orders': pos_orders,
+            'pager': pager,
+            'searchbar_sortings': searchbar_sortings,
+            'sortby': sortby,
+            'searchbar_filters': OrderedDict(searchbar_filters.items()),
+            'filterby': filterby,
+        })
+        return values
+
+    def _get_pos_order_portal_record(self, order_id, access_token=None):
+        pos_order_sudo = request.env['pos.order'].sudo().browse(order_id).exists()
+        if not pos_order_sudo:
+            raise MissingError(_("This document does not exist."))
+
+        pos_order = request.env['pos.order'].browse(order_id)
+        try:
+            pos_order.check_access('read')
+            return pos_order_sudo
+        except AccessError:
+            pass
+
+        commercial_partner = request.env.user.partner_id.commercial_partner_id
+        if (
+            not request.env.user._is_public()
+            and pos_order_sudo.partner_id
+            and pos_order_sudo.partner_id.commercial_partner_id == commercial_partner
+        ):
+            return pos_order_sudo
+
+        if access_token and pos_order_sudo.access_token and consteq(pos_order_sudo.access_token, access_token):
+            return pos_order_sudo
+
+        raise AccessError(_("You are not allowed to access this order."))
+
+    @http.route(['/my/pos_orders', '/my/pos_orders/page/<int:page>'], type='http', auth='user', website=True)
+    def portal_my_pos_orders(self, page=1, date_begin=None, date_end=None, sortby=None, filterby=None, **kw):
+        values = self._prepare_my_pos_orders_values(
+            page=page,
+            date_begin=date_begin,
+            date_end=date_end,
+            sortby=sortby,
+            filterby=filterby,
+        )
+        request.session['my_pos_orders_history'] = values['pos_orders'].ids[:100]
+        return request.render('point_of_sale.portal_my_pos_orders', values)
+
+    @http.route(['/my/pos_orders/<int:order_id>'], type='http', auth='public', website=True)
+    def portal_my_pos_order_detail(self, order_id, access_token=None, **kw):
+        try:
+            pos_order_sudo = self._get_pos_order_portal_record(order_id, access_token=access_token)
+        except (AccessError, MissingError):
+            return request.redirect('/my')
+
+        values = self._get_page_view_values(
+            pos_order_sudo,
+            access_token,
+            {
+                'page_name': 'pos_order',
+                'pos_order': pos_order_sudo,
+                'invoice': pos_order_sudo.account_move,
+                'res_company': pos_order_sudo.company_id,
+            },
+            'my_pos_orders_history',
+            False,
+            **kw,
+        )
+        return request.render('point_of_sale.portal_pos_order_page', values)
+
+    @http.route('/pos/receipt/<order_id>', type='http', auth='public', sitemap=False, website=True)
     def pos_receipt_download(self, order_id=None):
-        pos_order = request.env['pos.order'].browse(int(order_id))
+        pos_order = request.env['pos.order'].sudo().browse(int(order_id))
         if not pos_order.exists():
             return request.not_found()
 

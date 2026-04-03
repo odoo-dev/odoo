@@ -1,0 +1,16 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect x="8" y="8" width="48" height="48" rx="8" fill="#FBDBD0"/>
+
+  <!-- Receipt shape -->
+  <path d="M20 14H44V50L40 47L36 50L32 47L28 50L24 47L20 50V14Z" fill="white" stroke="#374874" stroke-width="2"/>
+
+  <!-- Lines (orders) -->
+  <line x1="26" y1="20" x2="38" y2="20" stroke="#374874" stroke-width="2"/>
+  <line x1="26" y1="26" x2="38" y2="26" stroke="#374874" stroke-width="2"/>
+  <line x1="26" y1="32" x2="38" y2="32" stroke="#374874" stroke-width="2"/>
+
+  <!-- Currency / POS indicator -->
+  <circle cx="32" cy="40" r="5" fill="#FBDBD0" stroke="#374874" stroke-width="2"/>
+  <text x="32" y="43" text-anchor="middle" font-size="10" fill="#374874" font-family="Arial">$</text>
+</svg>

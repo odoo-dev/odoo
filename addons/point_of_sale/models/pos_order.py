@@ -398,6 +398,11 @@ class PosOrder(models.Model):
 
     _unique_uuid = models.Constraint('unique (uuid)', 'An order with this uuid already exists')
 
+    def _compute_access_url(self):
+        super()._compute_access_url()
+        for order in self:
+            order.access_url = f"/my/pos_orders/{order.id}"
+
     def ask_for_ticket_printing(self):
         self.config_id._notify("TICKET_PRINTING_REQUESTED", self.ids)
 
