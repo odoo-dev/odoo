@@ -2117,45 +2117,16 @@ class IrModelAccess(models.Model):
     perm_unlink = fields.Boolean(string='Delete Access')
 
     @api.model
-    def group_names_with_access(self, model_name, access_mode):
-        """ Return the names of visible groups which have been granted
-            ``access_mode`` on the model ``model_name``.
-
-           :rtype: list
-        """
-        assert access_mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
-        lang = self.env.lang or 'en_US'
-        self.env.cr.execute(f"""
-            SELECT COALESCE(c.name->>%s, c.name->>'en_US'), COALESCE(g.name->>%s, g.name->>'en_US')
-              FROM ir_model_access a
-              JOIN ir_model m ON (a.model_id = m.id)
-              JOIN res_groups g ON (a.group_id = g.id)
-         LEFT JOIN res_groups_privilege c ON (c.id = g.privilege_id)
-             WHERE m.model = %s
-               AND a.active = TRUE
-               AND a.perm_{access_mode} = TRUE
-          ORDER BY c.name, g.name NULLS LAST
-        """, [lang, lang, model_name])
-        return [('%s/%s' % x) if x[0] else x[1] for x in self.env.cr.fetchall()]
-
-    @api.model
     @api.ormcache('model_name', 'access_mode', cache='stable')
     def _get_access_groups(self, model_name, access_mode='read'):
-        """ Return the group expression object that represents the users who
-        have ``access_mode`` to the model ``model_name``.
+        """ Return the group ids for each access rule. Used in `ir.ui.view`.
         """
         assert access_mode in ('read', 'write', 'create', 'unlink'), 'Invalid access mode'
         model = self.env['ir.model']._get(model_name)
-        accesses = self.sudo().search([
+        accesses = self.sudo().search_fetch([
             (f'perm_{access_mode}', '=', True), ('model_id', '=', model.id),
-        ])
-
-        group_definitions = self.env['res.groups']._get_group_definitions()
-        if not accesses:
-            return group_definitions.empty
-        if not all(access.group_id for access in accesses):  # there is some global access
-            return group_definitions.universe
-        return group_definitions.from_ids(accesses.group_id.ids)
+        ], ['group_id'])
+        return tuple(access.group_id.id for access in accesses)
 
     # The context parameter is useful when the method translates error messages.
     # But as the method raises an exception in that case,  the key 'lang' might
@@ -2208,7 +2179,19 @@ class IrModelAccess(models.Model):
             'document_model': model,
         }
 
-        groups = "\n".join(f"\t- {g}" for g in self.group_names_with_access(model, mode))
+        lang = self.env.lang or 'en_US'
+        self.env.cr.execute(f"""
+            SELECT COALESCE(COALESCE(c.name->>%s, c.name->>'en_US') || '/', '') || COALESCE(g.name->>%s, g.name->>'en_US')
+              FROM ir_model_access a
+              JOIN ir_model m ON (a.model_id = m.id)
+              JOIN res_groups g ON (a.group_id = g.id)
+         LEFT JOIN res_groups_privilege c ON (c.id = g.privilege_id)
+             WHERE m.model = %s
+               AND a.active = TRUE
+               AND a.perm_{mode} = TRUE
+          ORDER BY c.name, g.name NULLS LAST
+        """, [lang, lang, model])
+        groups = "\n".join(f"\t- {g}" for (g,) in self.env.cr.fetchall())
         if groups:
             group_info = str(ACCESS_ERROR_GROUPS) % {'groups_list': groups}
         else:
