@@ -1,18 +1,17 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-
 import logging
-import requests
-from lxml import etree
-from hashlib import md5
-from urllib import parse
 
 from odoo import api, fields, models
-from odoo.addons.account_peppol.tools.demo_utils import handle_demo
 from odoo.addons.account.models.company import PEPPOL_LIST
+from odoo.addons.account.tools.partner_identifiers import (
+    ISO_IDENTIFIERS_METADATA,
+    format_participant_identifier,
+    get_identifier_metadata,
+)
+from odoo.addons.account_peppol.tools.peppol_iap_connector import PeppolIAPConnector
 
-TIMEOUT = 10
+PEPPOL_CACHE_TTL = 7  # days
+
 _logger = logging.getLogger(__name__)
-
 
 
 class ResPartner(models.Model):
@@ -21,30 +20,48 @@ class ResPartner(models.Model):
     invoice_sending_method = fields.Selection(
         selection_add=[('peppol', 'by Peppol')],
     )
-    peppol_eas = fields.Selection(string="Peppol ID", selection_add=[('odemo', 'Odoo Demo ID')])  # Not a real EAS, used for demonstration.
-    available_peppol_sending_methods = fields.Json(compute='_compute_available_peppol_sending_methods')
-    available_peppol_edi_formats = fields.Json(compute='_compute_available_peppol_edi_formats')
+    peppol_metadata = fields.Json()  # used to cache information fetched from the Peppol Network
+    peppol_metadata_updated_at = fields.Datetime(string="Last sync")
+    peppol_send_to_endpoint = fields.Char(
+        string='Send to',
+        compute='_compute_peppol_info',
+    )
+    peppol_override_send_to_endpoint = fields.Char(
+        string='Specific Peppol Endpoint',
+        help='If set, this endpoint will be used instead of the one found via available information on the partner.',
+    )
     peppol_verification_state = fields.Selection(
         selection=[
             ('not_verified', 'Unchecked'),
-            ('not_valid', 'Partner is not on Peppol'),  # does not exist on Peppol at all
-            ('not_valid_format', 'Partner cannot receive format'),  # registered on Peppol but cannot receive the selected document type
+            ('not_valid', 'Partner is not on Peppol'),
             ('valid', 'Partner is on Peppol'),
         ],
         string='Peppol status',
-        company_dependent=True,
+        compute='_compute_peppol_info',
     )
+    available_peppol_sending_methods = fields.Json(compute='_compute_available_peppol_sending_methods')
+    available_peppol_edi_formats = fields.Json(compute='_compute_available_peppol_edi_formats')
 
-    @api.onchange('invoice_edi_format', 'peppol_endpoint', 'peppol_eas')
+    @api.constrains('peppol_send_to_endpoint')
+    def _check_peppol_send_to_endpoint(self):
+        for partner in self:
+            validation = validate_participant_identifier(partner.peppol_send_to_endpoint)
+            if not validation['valid']:
+                raise UserError(self.env._("Invalid Peppol endpoint"))
+
+    @api.onchange('peppol_send_to_endpoint')
     def _onchange_verify_peppol_status(self):
-        if not self.commercial_partner_id:
-            # avoid issue when commercial_partner_id is on the view
-            self._compute_commercial_partner()
-        self.button_account_peppol_check_partner_endpoint()
+        self._peppol_sync_partner_metadata(force=True)
 
-    # -------------------------------------------------------------------------
-    # COMPUTE METHODS
-    # -------------------------------------------------------------------------
+    @api.depends_context('company')
+    def _compute_display_electronic_invoicing(self):
+        # EXTENDS 'account'
+        super()._compute_display_electronic_invoicing()
+        for partner in self:
+            partner.display_electronic_invoicing = (
+                bool(self.env.company.peppol_can_send)
+                and partner.country_code in PEPPOL_LIST
+            )
 
     @api.depends_context('company')
     @api.depends('company_id')
@@ -63,126 +80,97 @@ class ResPartner(models.Model):
             else:
                 partner.available_peppol_edi_formats = list(dict(self._fields['invoice_edi_format'].selection))
 
-    def _compute_available_peppol_eas(self):
-        # EXTENDS 'account_edi_ubl_cii'
-        super()._compute_available_peppol_eas()
-        eas_codes = set(self[:1].available_peppol_eas)
-        if self.env.company._get_peppol_edi_mode() != 'demo' and 'odemo' in eas_codes:
-            eas_codes.remove('odemo')
-            self.available_peppol_eas = list(eas_codes)
+    @api.depends('peppol_metadata')
+    def _compute_peppol_info(self):
+        for partner in self:
+            send_to_endpoint = None
+            if partner.peppol_metadata_updated_at:
+                if partner.peppol_metadata:
+                    send_to_endpoint = partner.peppol_metadata.get('identifier')
+                    partner.peppol_verification_state = 'valid'
+                else:
+                    partner.peppol_verification_state = 'not_valid'
+            else:
+                partner.peppol_verification_state = 'not_verified'
+            partner.peppol_send_to_endpoint = send_to_endpoint
 
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
 
-    @api.model
-    def _get_participant_info(self, edi_identification):
-        # DEPRECATED: Peppol moved from CNAME to NAPTR DNS records
-        hash_participant = md5(edi_identification.lower().encode()).hexdigest()
-        endpoint_participant = parse.quote_plus(f"iso6523-actorid-upis::{edi_identification}")
-        edi_mode = self.env.company._get_peppol_edi_mode()
-        sml_zone = 'acc.edelivery' if edi_mode == 'test' else 'edelivery'
-        smp_url = f"http://B-{hash_participant}.iso6523-actorid-upis.{sml_zone}.tech.ec.europa.eu/{endpoint_participant}"
-
-        try:
-            response = requests.get(smp_url, timeout=TIMEOUT)
-            response.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            _logger.debug(e)
-            return None
-        return etree.fromstring(response.content)
-
-    @api.model
-    @handle_demo
-    def _check_peppol_participant_exists(self, participant_info, edi_identification):
-        service_href = ''
-        if isinstance(participant_info, dict):
-            participant_identifier = participant_info.get('identifier', '')
-            if services := participant_info.get('services', []):
-                service_href = services[0].get('href', '')
-        else:
-            # DEPRECATED: we now use Odoo peppol API to fetch participant info and get a json response
-            # keeping this branch for compatibility
-            participant_identifier = participant_info.findtext('{*}ParticipantIdentifier') or ''
-            service_metadata = participant_info.find('.//{*}ServiceMetadataReference')
-            if service_metadata is not None:
-                service_href = service_metadata.attrib.get('href', '')
-
-        # all Belgian companies are pre-registered on hermes-belgium, so they will
-        # technically have an existing SMP url but they are not real Peppol participants
-        # NOTE: peppol identifier must be case insensitive
-        return edi_identification.lower() == participant_identifier.lower() and 'hermes-belgium' not in service_href
-
-    @api.model
-    def _peppol_lookup_participant(self, edi_identification):
-        """NAPTR DNS peppol participant lookup through Odoo's Peppol proxy"""
-        if (edi_mode := self.env.company._get_peppol_edi_mode()) == 'demo':
-            return
-
-        origin = self.env['account_edi_proxy_client.user']._get_proxy_urls()['peppol'][edi_mode]
-        query = parse.urlencode({'peppol_identifier': edi_identification.lower()})
-        endpoint = f'{origin}/api/peppol/1/lookup?{query}'
-
-        try:
-            response = requests.get(endpoint, timeout=TIMEOUT)
-        except requests.exceptions.RequestException as e:
-            _logger.debug("failed to query peppol participant %s: %s", edi_identification, e)
-            return
-
-        try:
-            decoded_response = response.json()
-        except ValueError:
-            _logger.error('invalid JSON response %s when querying peppol participant %s', response.status_code, edi_identification)
-            return
-
-        if error := decoded_response.get('error'):
-            if error.get('code') != 'NOT_FOUND':
-                _logger.error('error when querying peppol participant %s: %s', edi_identification, error.get('message', 'unknown error'))
-            return
-
-        if not response.ok:
-            _logger.error('unsuccessful response %s when querying peppol participant %s', response.status_code, edi_identification)
-            return
-
-        return decoded_response.get('result')
-
-    def _check_document_type_support(self, participant_info, ubl_cii_format, process_type='billing'):
-        edi_builder = self._get_edi_builder(ubl_cii_format)
-        expected_customization_id = edi_builder._get_customization_id(process_type=process_type)
-        if isinstance(participant_info, dict):
-            return any(expected_customization_id in (service.get('document_id') or '') for service in participant_info.get('services', []))
-
-        # DEPRECATED: participant_info as XML fetched directly from SMP
-        service_references = participant_info.findall(
-            '{*}ServiceMetadataReferenceCollection/{*}ServiceMetadataReference'
+    def _peppol_get_possible_identifiers(self, enrich=False):
+        self.ensure_one()
+        identifiers = set()
+        for odoo_key, value in self._get_all_identifiers(enrich=enrich).items():
+            if peppol_identifier := format_participant_identifier(odoo_key, value):
+                identifiers.add(peppol_identifier)
+        if self.peppol_override_send_to_endpoint and self.peppol_override_send_to_endpoint not in identifiers:
+            identifiers.add(self.peppol_override_send_to_endpoint)
+        return sorted(
+            list(identifiers),
+            key=lambda endpoint: ISO_IDENTIFIERS_METADATA.get(endpoint.partition(':')[0], {}).get('sequence', 100),
         )
-        for service in service_references:
-            if expected_customization_id in parse.unquote_plus(service.attrib.get('href', '')):
-                return True
-        return False
 
-    def _update_peppol_state_per_company(self, vals=None):
-        partners = self.env['res.partner']
-        if vals is None:
-            partners = self.filtered(lambda p: all([p.peppol_eas, p.peppol_endpoint, p.is_ubl_format, p.country_code in PEPPOL_LIST]))
-        elif {'peppol_eas', 'peppol_endpoint', 'invoice_edi_format'}.intersection(vals.keys()):
-            partners = self.filtered(lambda p: p.country_code in PEPPOL_LIST)
+    def _peppol_should_lookup(self):
+        """ Lookup only when it make sense:
+        The company must use Peppol, and the partner has possible identifiers set.
+        """
+        self.ensure_one()
+        company = self.company_id or self.env.company
+        partner_has_identifiers = bool(self._peppol_get_possible_identifiers())
+        return company.peppol_can_send and partner_has_identifiers
 
-        all_companies = None
-        for partner in partners.sudo():
-            if partner.company_id:
-                partner.button_account_peppol_check_partner_endpoint(company=partner.company_id)
-                continue
+    def _peppol_lookup(self, peppol_identifier):
+        self.ensure_one()
+        company = self.company_id or self.env.company
+        return PeppolIAPConnector(company).lookup(peppol_identifier)
 
-            if all_companies is None:
-                # We only check it for companies that are actually using Peppol.
-                can_send = self.env['account_edi_proxy_client.user']._get_can_send_domain()
-                all_companies = self.env['res.company'].sudo().search([
-                    ('account_peppol_proxy_state', 'in', can_send),
-                ])
+    def _peppol_find_partner_on_network(self):
+        self.ensure_one()
+        participant_info = None
+        for peppol_identifier in self._peppol_get_possible_identifiers():
+            if participant_info := self._peppol_lookup(peppol_identifier):
+                break
+        return participant_info
 
-            for company in all_companies:
-                partner.button_account_peppol_check_partner_endpoint(company=company)
+    def _peppol_sync_partner_metadata(self, force=False):
+        self.ensure_one()
+
+        # re-sync only if it make sense for company and partner
+        if not self._peppol_should_lookup():
+            _logger.debug('event=peppol_sync_partner_skipped reason=should_not_lookup partner_id=%s', self.id)
+            return
+
+        # re-sync only if last sync is old enough
+        is_last_sync_too_old = (
+            not self.peppol_metadata_updated_at
+            or self.peppol_metadata_updated_at <= fields.Datetime.subtract(fields.Datetime.now(), days=PEPPOL_CACHE_TTL)
+        )
+        if not is_last_sync_too_old and not force:
+            _logger.debug('event=peppol_sync_partner_skipped reason=last_sync_not_too_old partner_id=%s', self.id)
+            return
+
+        if self.peppol_verification_state == 'valid':
+            # only refresh the selected endpoint data
+            participant_info = self._peppol_lookup(self.peppol_send_to_endpoint)
+        else:
+            # find a valid endpoint
+            participant_info = self._peppol_find_partner_on_network()
+
+        if participant_info:
+            self.peppol_metadata = {**(self.peppol_metadata or {}), **participant_info}
+
+        self.peppol_metadata_updated_at = fields.Datetime.now()
+        _logger.info('event=peppol_sync_partner_success partner_id=%s', self.id)
+
+    def _peppol_is_service_supported(self, peppol_identifier, process=None, document=None):
+        self.ensure_one()
+        # FIXME not used yet, still need to decide how to represent process and document. Check with ABOO's PR.
+        return (
+            self.peppol_metadata
+            and peppol_identifier == self.peppol_metadata.get('identifier')
+            and any(service.get('document_id') == document for service in self.peppol_metadata.get('services', []))
+        )
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
@@ -192,100 +180,13 @@ class ResPartner(models.Model):
     def create(self, vals_list):
         res = super().create(vals_list)
         if res:
-            res._update_peppol_state_per_company()
+            res.button_peppol_sync()  # will only be sync'ed when it makes sense
         return res
-
-    def _compute_peppol_endpoint(self):
-        # Don't recompute on partners corresponding to registered companies
-        partners_not_to_recompute = self._get_partners_to_skip_peppol_computation()
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in partners_not_to_recompute])
-        super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
-
-    def _compute_peppol_eas(self):
-        # Don't recompute on partners corresponding to registered companies
-        partners_not_to_recompute = self._get_partners_to_skip_peppol_computation()
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in partners_not_to_recompute])
-        super(ResPartner, partners_to_recompute)._compute_peppol_eas()
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
     # -------------------------------------------------------------------------
 
-    def button_account_peppol_check_partner_endpoint(self, company=None):
-        """ A basic check for whether a participant is reachable at the given
-        Peppol participant ID - peppol_eas:peppol_endpoint (ex: '9999:test')
-        The SML (Service Metadata Locator) assigns a DNS name to each peppol participant.
-        This DNS name resolves into the SMP (Service Metadata Publisher) of the participant.
-        The DNS address is of the following form:
-        strip-trailing(base32(sha256(lowercase(ID-VALUE))),"=") + "." + ID-SCHEME + "." + SML-ZONE-NAME
-        The lookup should be done on NAPTR DNS from 2025-11-01
-        (ref:https://peppol.helger.com/public/locale-en_US/menuitem-docs-doc-exchange)
-        """
+    def button_peppol_sync(self, force=True):
         self.ensure_one()
-        if not company:
-            company = self.env.company
-
-        self_partner = self.with_company(company)
-        if not self_partner.peppol_eas or not self_partner.peppol_endpoint:
-            return False
-        old_value = self_partner.peppol_verification_state
-        new_value = self._get_peppol_verification_state(
-            self_partner.peppol_endpoint,
-            self_partner.peppol_eas,
-            self_partner._get_peppol_edi_format(),
-        )
-
-        if (
-                new_value != 'valid'
-                and self_partner.peppol_eas in ('0208', '9925')
-        ):
-            # checks the inverse `eas:endpoint` if the belgian user was not found on Peppol in the first try
-            inverse_eas = '9925' if self_partner.peppol_eas == '0208' else '0208'
-            inverse_endpoint = f'BE{self_partner.peppol_endpoint}' if self_partner.peppol_eas == '0208' else self_partner.peppol_endpoint[2:]
-            if (peppol_state := self._get_peppol_verification_state(inverse_endpoint, inverse_eas, self_partner._get_peppol_edi_format())) == 'valid':
-                self_partner.write({
-                    'peppol_eas': inverse_eas,
-                    'peppol_endpoint': inverse_endpoint,
-                })
-                new_value = peppol_state
-
-        if old_value != new_value:
-            self_partner.peppol_verification_state = new_value
-            if old_value != new_value:
-                self._track_add(
-                    initial_values={self.id: {'peppol_verification_state': old_value}},
-                    end_values={self.id: {'peppol_verification_state': new_value}},
-                )
-        return False
-
-    @api.model
-    @handle_demo
-    def _get_peppol_verification_state(self, peppol_endpoint, peppol_eas, invoice_edi_format, process_type='billing'):
-        if not (peppol_eas and peppol_endpoint) or invoice_edi_format not in self._get_peppol_formats():
-            return 'not_verified'
-
-        edi_identification = f"{peppol_eas}:{peppol_endpoint}".lower()
-        participant_info = self._peppol_lookup_participant(edi_identification)
-        if participant_info is None:
-            return 'not_valid'
-        else:
-            is_participant_on_network = self._check_peppol_participant_exists(participant_info, edi_identification)
-            if is_participant_on_network:
-                is_valid_format = self._check_document_type_support(participant_info, invoice_edi_format, process_type=process_type)
-                if is_valid_format:
-                    return 'valid'
-                else:
-                    return 'not_valid_format'
-            else:
-                return 'not_valid'
-
-    def _get_frontend_writable_fields(self):
-        frontend_writable_fields = super()._get_frontend_writable_fields()
-        frontend_writable_fields.update({'peppol_eas', 'peppol_endpoint'})
-
-        return frontend_writable_fields
-
-    def _get_partners_to_skip_peppol_computation(self):
-        return self.env['res.company'].search([
-            ('account_peppol_proxy_state', 'in', self.env['account_edi_proxy_client.user']._get_can_send_domain()),
-        ]).mapped('partner_id')
+        self._peppol_sync_partner_metadata(force=force)

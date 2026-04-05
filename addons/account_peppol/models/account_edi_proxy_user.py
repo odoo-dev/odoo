@@ -58,10 +58,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                 and not self.active
                 and not self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol')
             ):
-                self.company_id.write({
-                    'account_peppol_proxy_state': 'not_registered',
-                    'account_peppol_migration_key': False,
-                })
+                self.company_id.account_peppol_proxy_state = 'not_registered'
                 # commit the above changes before raising below
                 if not modules.module.current_test:
                     self.env.cr.commit()
@@ -169,14 +166,6 @@ class Account_Edi_Proxy_ClientUser(models.Model):
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
     # -------------------------------------------------------------------------
-
-    def _get_proxy_identification(self, company, proxy_type):
-        if proxy_type == 'peppol':
-            if not company.peppol_eas or not company.peppol_endpoint:
-                raise UserError(
-                    _("Please fill in the EAS code and the Participant ID code."))
-            return f'{company.peppol_eas}:{company.peppol_endpoint}'
-        return super()._get_proxy_identification(company, proxy_type)
 
     def _peppol_import_invoice(self, attachment, peppol_state, uuid, journal=None):
         """Save new documents in an accounting journal, when one is specified on the company.
@@ -432,7 +421,6 @@ class Account_Edi_Proxy_ClientUser(models.Model):
     def _peppol_register_sender_as_receiver(self):
         self.ensure_one()
         company = self.company_id
-
         if company.account_peppol_proxy_state != 'sender':
             # a participant can only try registering as a receiver if they are currently a sender
             peppol_states = dict(self.env['ir.model.fields'].get_field_selection('res.company', 'account_peppol_proxy_state'))[company.account_peppol_proxy_state]  # handles translation correctly
@@ -440,24 +428,13 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                 _('Cannot register a user with a %s application', peppol_states))
 
         edi_identification = self._get_proxy_identification(company, 'peppol')
-        peppol_info = company._get_company_info_on_peppol(edi_identification)
-        is_on_peppol, external_provider, error_msg = peppol_info['is_on_peppol'], peppol_info['external_provider'], peppol_info['error_msg']
-        if is_on_peppol:
-            company.peppol_external_provider = external_provider
-            raise UserError(error_msg)
+        if company.partner_id._peppol_lookup(edi_identification):
+            raise UserError(self.env._("You are already registered on Peppol with this details. Please deregister first."))
 
-        self._call_peppol_proxy(
-            endpoint='/api/peppol/1/register_sender_as_receiver',
-            params={
-                'migration_key': company.sudo().account_peppol_migration_key,
-                'supported_identifiers': list(company._peppol_supported_document_types())
-            },
-        )
+        self._call_peppol_proxy(endpoint='/api/peppol/1/register_sender_as_receiver')
         # once we sent the migration key over, we don't need it
         # but we need the field for future in case the user decided to migrate away from Odoo
-        company.sudo().account_peppol_migration_key = False
         company.account_peppol_proxy_state = 'smp_registration'
-        company.peppol_external_provider = None
 
         self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=fields.Datetime.now() + timedelta(hours=1))
 

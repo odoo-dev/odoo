@@ -1,10 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import contextlib
-import re
 import requests
 from lxml import etree
-from stdnum import get_cc_module, ean
 
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
@@ -17,55 +15,14 @@ except ImportError:
     phonenumbers = None
 
 
-def _cc_checker(country_code, code_type):
-    return lambda endpoint: get_cc_module(country_code, code_type).is_valid(endpoint)
-
-
-def _re_sanitizer(expression):
-    return lambda endpoint: (res.group(0) if (res := re.search(expression, endpoint)) else endpoint)
-
-
-PEPPOL_ENDPOINT_RULES = {
-    '0007': _cc_checker('se', 'orgnr'),
-    '0088': ean.is_valid,
-    '0184': _cc_checker('dk', 'cvr'),
-    '0192': _cc_checker('no', 'orgnr'),
-    '0208': _cc_checker('be', 'vat'),
-}
-
-PEPPOL_ENDPOINT_WARNINGS = {
-    '0151': _cc_checker('au', 'abn'),
-    '0201': lambda endpoint: bool(re.match('[0-9a-zA-Z]{6}$', endpoint)),
-    '0210': _cc_checker('it', 'codicefiscale'),
-    '0211': _cc_checker('it', 'iva'),
-    '9906': _cc_checker('it', 'iva'),
-    '9907': _cc_checker('it', 'codicefiscale'),
-}
-
-PEPPOL_ENDPOINT_SANITIZERS = {
-    '0007': _re_sanitizer(r'\d{10}'),
-    '0184': _re_sanitizer(r'\d{8}'),
-    '0192': _re_sanitizer(r'\d{9}'),
-    '0208': _re_sanitizer(r'\d{10}'),
-}
-TIMEOUT = 10
-
-
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    account_peppol_contact_email = fields.Char(
-        string='Primary contact email',
-        compute='_compute_account_peppol_contact_email', store=True, readonly=False,
-        help='Primary contact email for Peppol connection related communications and notifications.\n'
-             'In particular, this email is used by Odoo to reconnect your Peppol account in case of database change.',
+    account_peppol_edi_user = fields.Many2one(
+        comodel_name='account_edi_proxy_client.user',
+        compute='_compute_account_peppol_edi_user',
     )
-    account_peppol_migration_key = fields.Char(string="Migration Key", groups="base.group_system")
-    account_peppol_phone_number = fields.Char(
-        string='Mobile number',
-        compute='_compute_account_peppol_phone_number', store=True, readonly=False,
-        help='This number is used for identification purposes only.',
-    )
+    peppol_send_from_endpoint = fields.Char(compute='_compute_account_peppol_edi_user')
     account_peppol_proxy_state = fields.Selection(
         selection=[
             ('not_registered', 'Not registered'),
@@ -76,12 +33,17 @@ class ResCompany(models.Model):
         ],
         string='PEPPOL status', required=True, default='not_registered',
     )
-    account_peppol_edi_user = fields.Many2one(
-        comodel_name='account_edi_proxy_client.user',
-        compute='_compute_account_peppol_edi_user',
+    account_peppol_contact_email = fields.Char(
+        string='Primary contact email',
+        compute='_compute_account_peppol_contact_email', store=True, readonly=False,
+        help='Primary contact email for Peppol connection related communications and notifications.\n'
+             'In particular, this email is used by Odoo to reconnect your Peppol account in case of database change.',
     )
-    peppol_eas = fields.Selection(related='partner_id.peppol_eas', readonly=False)
-    peppol_endpoint = fields.Char(related='partner_id.peppol_endpoint', readonly=False)
+    account_peppol_phone_number = fields.Char(
+        string='Mobile number',
+        compute='_compute_account_peppol_phone_number', store=True, readonly=False,
+        help='This number is used for identification purposes only.',
+    )
     peppol_purchase_journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Peppol Purchase Journal',
@@ -135,18 +97,13 @@ class ResCompany(models.Model):
         :param soft: If True, will only set state to unregistered, but keep peppol config intact, so the user can register again
         """
         self.account_peppol_proxy_state = 'not_registered'
-        self.account_peppol_migration_key = False
         if not soft:
-            self.peppol_external_provider = False
-            self.peppol_eas = False
-            self.peppol_endpoint = False
+            self.peppol_send_from_endpoint = False
             self.account_peppol_contact_email = False
             self.account_peppol_phone_number = False
 
             self._compute_account_peppol_contact_email()
             self._compute_account_peppol_phone_number()
-        self.partner_id._compute_peppol_eas()
-        self.partner_id._compute_peppol_endpoint()
 
     @api.model
     def _check_phonenumbers_import(self):
@@ -177,12 +134,6 @@ class ResCompany(models.Model):
         if not phonenumbers.is_valid_number(phone_nbr):
             raise ValidationError(error_message)
 
-    def _check_peppol_endpoint_number(self, warning=False):
-        self.ensure_one()
-        peppol_dict = PEPPOL_ENDPOINT_WARNINGS if warning else PEPPOL_ENDPOINT_RULES
-
-        return True if (endpoint_rule := peppol_dict.get(self.peppol_eas)) is None else endpoint_rule(self.peppol_endpoint)
-
     # -------------------------------------------------------------------------
     # CONSTRAINTS
     # -------------------------------------------------------------------------
@@ -192,14 +143,6 @@ class ResCompany(models.Model):
         for company in self:
             if company.account_peppol_phone_number:
                 company._sanitize_peppol_phone_number()
-
-    @api.constrains('peppol_endpoint')
-    def _check_peppol_endpoint(self):
-        for company in self:
-            if not company.peppol_endpoint:
-                continue
-            if not company._check_peppol_endpoint_number(PEPPOL_ENDPOINT_RULES):
-                raise ValidationError(_("The Peppol endpoint identification number is not correct."))
 
     @api.constrains('peppol_purchase_journal_id')
     def _check_peppol_purchase_journal_id(self):
@@ -214,22 +157,21 @@ class ResCompany(models.Model):
     @api.depends('account_edi_proxy_client_ids')
     def _compute_account_peppol_edi_user(self):
         for company in self:
-            company.account_peppol_edi_user = company.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol')
+            edi_proxy_user = company.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol')[:1]
+            company.account_peppol_edi_user = edi_proxy_user
+            company.peppol_send_from_endpoint = edi_proxy_user.edi_identification
 
-    @api.depends('peppol_eas', 'peppol_endpoint')
+    @api.depends('peppol_send_from_endpoint',)
     def _compute_peppol_parent_company_id(self):
         self.peppol_parent_company_id = False
         for company in self:
             for parent_company in company.parent_ids[::-1][1:]:
                 if (
-                    company.peppol_eas
-                    and company.peppol_endpoint
-                    and company.peppol_eas == parent_company.peppol_eas
-                    and company.peppol_endpoint == parent_company.peppol_endpoint
+                    company.peppol_send_from_endpoint
+                    and company.peppol_send_from_endpoint == parent_company.peppol_send_from_endpoint
                 ) or (
-                    not company.peppol_endpoint
-                    and parent_company.peppol_eas
-                    and parent_company.peppol_endpoint
+                    not company.peppol_send_from_endpoint
+                    and parent_company.peppol_send_from_endpoint
                 ):
                     company.peppol_parent_company_id = parent_company
                     break
@@ -285,14 +227,10 @@ class ResCompany(models.Model):
 
     @api.model
     def _sanitize_peppol_endpoint_in_values(self, values):
-        eas = values.get('peppol_eas')
-        endpoint = values.get('peppol_endpoint')
-        if not eas or not endpoint:
-            return
-        if sanitizer := PEPPOL_ENDPOINT_SANITIZERS.get(eas):
-            new_endpoint = sanitizer(endpoint)
-            if new_endpoint:
-                values['peppol_endpoint'] = new_endpoint
+        if endpoint := values.get('peppol_send_from_endpoint'):
+            validation = validate_participant_identifier(endpoint)
+            if validation['valid']:
+                values['peppol_send_from_endpoint'] = validation['value']
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -308,84 +246,19 @@ class ResCompany(models.Model):
     # PEPPOL PARTICIPANT MANAGEMENT
     # -------------------------------------------------------------------------
 
-    def _peppol_modules_document_types(self):
-        """Override this function to add supported document types as modules are installed.
-
-        :returns: dictionary of the form: {module_name: [(document identifier, document_name)]}
-        """
-        return {
-            'default': {
-                "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::2.1":
-                    "Peppol BIS Billing UBL Invoice V3",
-                "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0::2.1":
-                    "Peppol BIS Billing UBL CreditNote V3",
-                "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0::2.1": "Peppol BIS Self-Billing UBL Invoice V3",
-                "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0::2.1": "Peppol BIS Self-Billing UBL CreditNote V3",
-                "urn:oasis:names:specification:ubl:schema:xsd:Invoice-2::Invoice##urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0::2.1":
-                    "SI-UBL 2.0 Invoice",
-                "urn:oasis:names:specification:ubl:schema:xsd:CreditNote-2::CreditNote##urn:cen.eu:en16931:2017#compliant#urn:fdc:nen.nl:nlcius:v1.0::2.1":
-                    "SI-UBL 2.0 CreditNote",
-            }
-        }
-
-    def _peppol_supported_document_types(self):
-        """Returns a flattened dictionary of all supported document types."""
-        return {
-            identifier: document_name
-            for module, identifiers in self._peppol_modules_document_types().items()
-            for identifier, document_name in identifiers.items()
-        }
+    # TODO list of supported documents for company should be fetch from IAP -> dynamic
 
     def _get_peppol_edi_mode(self, temporary_eas=False):
         self.ensure_one()
         config_param = self.env['ir.config_parameter'].sudo().get_str('account_peppol.edi.mode')
         # by design, we can only have zero or one proxy user per company with type Peppol
-        peppol_user = self.sudo().account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol')
-        demo_if_demo_identifier = 'demo' if (temporary_eas or self.peppol_eas) == 'odemo' else False
+        peppol_user = self.sudo().account_peppol_edi_user
+        demo_if_demo_identifier = 'demo' if temporary_eas == 'odemo' else False
         return demo_if_demo_identifier or peppol_user.edi_mode or config_param or 'prod'
 
     def _get_peppol_webhook_endpoint(self):
         self.ensure_one()
         return urljoin(self.get_base_url(), '/peppol/webhook')
-
-    def _get_company_info_on_peppol(self, edi_identification):
-
-        def _get_peppol_provider(participant_info):
-            if not participant_info:
-                return None
-            services = participant_info.get('services', [])
-            if not services:
-                return None
-
-            service_href = services[0].get('href')
-
-            provider_name = None
-            with contextlib.suppress(requests.exceptions.RequestException, etree.XMLSyntaxError):
-                response = requests.get(service_href, timeout=TIMEOUT)
-                if response.status_code == 200:
-                    access_point_info = etree.fromstring(response.content)
-                    provider_name = access_point_info.findtext('.//{*}ServiceDescription')
-            return provider_name
-
-        self.ensure_one()
-        is_company_on_peppol = False
-        external_provider = None
-        error_msg = ''
-        if (
-            (participant_info := self.partner_id._peppol_lookup_participant(edi_identification)) is not None
-            and (is_company_on_peppol := self.partner_id._check_peppol_participant_exists(participant_info, edi_identification))
-        ):
-            error_msg = _(
-                "A participant with these details has already been registered on the network. "
-                "If you have previously registered to a Peppol service, please deregister."
-            )
-            if (external_provider := _get_peppol_provider(participant_info)) and "Odoo" not in external_provider:
-                error_msg += _("The Peppol service that is used is %s.", external_provider)
-        return {
-            'is_on_peppol': is_company_on_peppol,
-            'external_provider': external_provider,
-            'error_msg': error_msg,
-        }
 
     def _account_peppol_send_welcome_email(self):
         self.ensure_one()

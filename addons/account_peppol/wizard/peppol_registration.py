@@ -10,7 +10,12 @@ from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.urls import urljoin
 
+from odoo.addons.account.tools.partner_identifiers import (
+    ISO_IDENTIFIERS_METADATA,
+    validate_participant_identifier,
+)
 from odoo.addons.account_peppol.tools.demo_utils import handle_demo
+from odoo.addons.account_peppol.tools.partner_identifiers import REGISTRABLE_EAS
 from odoo.addons.account_peppol.tools.peppol_iap_connector import PeppolIAPConnector
 
 _logger = logging.getLogger(__name__)
@@ -62,11 +67,6 @@ class PeppolRegistration(models.TransientModel):
         selection=[('demo', 'Demo'), ('test', 'Test'), ('prod', 'Live')],
         compute='_compute_edi_mode',
     )
-    edi_user_id = fields.Many2one(
-        comodel_name='account_edi_proxy_client.user',
-        string='EDI user',
-        compute='_compute_edi_user_id',
-    )
     account_peppol_proxy_state = fields.Selection(related='company_id.account_peppol_proxy_state')
     peppol_warnings = fields.Json(
         string="Peppol warnings",
@@ -78,16 +78,32 @@ class PeppolRegistration(models.TransientModel):
         required=True,
     )
     phone_number = fields.Char(related='selected_company_id.account_peppol_phone_number', readonly=False)
-    peppol_eas = fields.Selection(related='selected_company_id.peppol_eas', readonly=False, required=True)
-    peppol_endpoint = fields.Char(related='selected_company_id.peppol_endpoint', readonly=False, required=True)
+    peppol_eas = fields.Selection(
+        selection=REGISTRABLE_EAS,
+        default=lambda self: self._default_peppol_endpoint()[0],
+        required=True,
+    )
+    peppol_endpoint = fields.Char(
+        default=lambda self: self._default_peppol_endpoint()[1],
+        required=True,
+    )
+    normalized_identifier = fields.Char(compute='_compute_normalized_identifier')
     smp_registration = fields.Boolean(  # you're registering to SMP when you register as a sender+receiver
         string='Register as a receiver',
-        compute='_compute_smp_registration_external_provider'
+        compute='_compute_smp_registration_metadata'
     )
-    peppol_external_provider = fields.Char(compute='_compute_smp_registration_external_provider')
+    peppol_metadata = fields.Json(compute='_compute_smp_registration_metadata')
+    peppol_external_provider = fields.Char(compute='_compute_smp_registration_metadata')
     peppol_can_connect_data = fields.Json(compute='_compute_peppol_can_connect_data')
     display_itsme_login = fields.Boolean(compute='_compute_peppol_can_connect_data')
     display_no_auth_buttons = fields.Boolean(compute='_compute_peppol_can_connect_data')
+
+    def _default_peppol_endpoint(self):
+        preferred_identifiers = self.env.company.partner_id._peppol_get_possible_identifiers(enrich=True)
+        assert preferred_identifiers  # should always be true because of international formats such as the GLN
+        preferred_identifier = preferred_identifiers[0]
+        eas, _sep, endpoint = preferred_identifier.partition(':')
+        return eas, endpoint
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
@@ -153,20 +169,14 @@ class PeppolRegistration(models.TransientModel):
             else:
                 wizard.selected_company_id = wizard.company_id
 
-    @api.depends('selected_company_id.account_edi_proxy_client_ids')
-    def _compute_edi_user_id(self):
-        for wizard in self:
-            wizard.edi_user_id = wizard.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol')[:1]
-
-    @api.depends('selected_company_id', 'peppol_eas', 'peppol_endpoint', 'smp_registration', 'peppol_external_provider', 'use_parent_connection')
+    @api.depends('selected_company_id', 'normalized_identifier', 'use_parent_connection')
     def _compute_peppol_warnings(self):
         for wizard in self:
             peppol_warnings = {}
-            if all((
-                wizard.peppol_eas,
-                wizard.peppol_endpoint,
-                not wizard.selected_company_id._check_peppol_endpoint_number(warning=True),
-            )):
+            if (
+                wizard.normalized_identifier
+                and not validate_participant_identifier(wizard.normalized_identifier)['valid']
+            ):
                 peppol_warnings['company_peppol_endpoint_warning'] = {
                     'level': 'warning',
                     'message': _("The endpoint number might not be correct. "
@@ -174,14 +184,23 @@ class PeppolRegistration(models.TransientModel):
                 }
             if all((
                 not wizard.use_parent_connection,
-                wizard.peppol_eas,
-                wizard.peppol_endpoint,
+                wizard.normalized_identifier,
                 not wizard.smp_registration,
             )):
-                peppol_warnings['company_already_on_smp'] = {
+                if 'odoo.com' in wizard.peppol_metadata.get('smp_base_url'):
+                    warning_msg = self.env._(
+                        "You are already registered on Odoo Access Point for receiving invoices.\n"
+                        "You will receive an email to possibly transfer the reception point to this company."
+                    )
+                else:
+                    warning_msg = self.env._(
+                        "Your company is already registered on an Access Point%s for receiving invoices.\n"
+                        "We will register you on Odoo as a sender only.",
+                        f" ({wizard.peppol_external_provider})" if wizard.peppol_external_provider else "",
+                    )
+                peppol_warnings['company_already_on_sml'] = {
                     'level': 'info',
-                    'message': _("Your company is already registered on an Access Point (%s) for receiving invoices. "
-                                 "We will register you on Odoo as a sender only.", wizard.peppol_external_provider)
+                    'message': warning_msg,
                 }
             if wizard.peppol_eas == '9925':
                 peppol_warnings['be_9925_warning'] = {
@@ -191,25 +210,31 @@ class PeppolRegistration(models.TransientModel):
                 }
             wizard.peppol_warnings = peppol_warnings or False
 
-    @api.depends('selected_company_id', 'edi_user_id', 'peppol_eas')
+    @api.depends('peppol_eas', 'peppol_endpoint')
+    def _compute_normalized_identifier(self):
+        for wizard in self:
+            if wizard.peppol_eas and wizard.peppol_endpoint:
+                validation = validate_participant_identifier(f'{wizard.peppol_eas}:{wizard.peppol_endpoint}')
+                wizard.normalized_identifier = validation['value'].lower()
+            else:
+                wizard.normalized_identifier = False
+
+    @api.depends('selected_company_id', 'peppol_eas')
     def _compute_edi_mode(self):
         for wizard in self:
-            wizard.edi_mode = wizard.company_id._get_peppol_edi_mode(temporary_eas=wizard.peppol_eas)
+            wizard.edi_mode = wizard.selected_company_id._get_peppol_edi_mode(temporary_eas=wizard.peppol_eas)
 
-    @api.depends('selected_company_id', 'peppol_eas', 'peppol_endpoint')
-    def _compute_smp_registration_external_provider(self):
+    @api.depends('selected_company_id', 'normalized_identifier')
+    def _compute_smp_registration_metadata(self):
         for wizard in self:
-            is_company_on_peppol = True
-            external_provider = None
-            if wizard.peppol_eas and wizard.peppol_endpoint:
-                edi_identification = f'{wizard.peppol_eas}:{wizard.peppol_endpoint}'
-                peppol_info = wizard.company_id._get_company_info_on_peppol(edi_identification)
-                is_company_on_peppol = peppol_info['is_on_peppol']
-                external_provider = peppol_info['external_provider']
-            wizard.smp_registration = not is_company_on_peppol  # Register on smp if not on Peppol
-            wizard.peppol_external_provider = external_provider
+            participant_info = None
+            if wizard.normalized_identifier:
+                participant_info = self.company_id.partner_id._peppol_lookup(wizard.normalized_identifier)
+            wizard.smp_registration = not participant_info  # Register on smp if not on Peppol
+            wizard.peppol_metadata = participant_info
+            wizard.peppol_external_provider = participant_info.get('services', [{}])[0].get('provider_name') if participant_info else None
 
-    @api.depends('peppol_eas', 'peppol_endpoint')
+    @api.depends('normalized_identifier')
     def _compute_peppol_can_connect_data(self):
         for wizard in self:
             connect_vals = wizard._can_connect()
@@ -226,8 +251,7 @@ class PeppolRegistration(models.TransientModel):
         return (
             not self.use_parent_connection
             and self.company_id != self.parent_company_id
-            and self.peppol_eas == self.parent_company_id.peppol_eas
-            and self.peppol_endpoint == self.parent_company_id.peppol_endpoint
+            and self.normalized_identifier == self.parent_company_id.peppol_send_from_endpoint
         )
 
     def _ensure_mandatory_fields(self):
@@ -329,7 +353,7 @@ class PeppolRegistration(models.TransientModel):
     def _can_connect(self):
         self.ensure_one()
         db_uuid = self.env['ir.config_parameter'].sudo().get_str('database.uuid')
-        peppol_identifier = f'{self.peppol_eas}:{self.peppol_endpoint}'.lower()
+        peppol_identifier = self.normalized_identifier
         connect_token = self._generate_connect_token(peppol_identifier, self.company_id)
         callback_url = urljoin(self.get_base_url(), '/peppol/authentication/callback')
         return PeppolIAPConnector(self.company_id).can_connect(
@@ -406,15 +430,14 @@ class PeppolRegistration(models.TransientModel):
         old_proxy_users = self.env['account_edi_proxy_client.user'].search([
             ('company_id', '=', self.company_id.id),
             ('proxy_type', '=', 'peppol'),
-            ('edi_identification', '=', f'{self.peppol_eas}:{self.peppol_endpoint}')
+            ('edi_identification', '=', self.normalized_identifier)
         ])
         old_proxy_users.active = False
         _logger.debug("De-registering existing Peppol proxy user for company %s", self.company_id.display_name)
 
         if self.use_parent_connection:
             self.company_id.write({
-                'peppol_eas': self.peppol_eas,
-                'peppol_endpoint': self.peppol_endpoint,
+                'peppol_external_provider': self.peppol_external_provider,
                 'account_peppol_contact_email': self.contact_email,
                 'account_peppol_phone_number': self.phone_number,
             })
@@ -427,9 +450,8 @@ class PeppolRegistration(models.TransientModel):
             }
 
         # No auth required
-        peppol_identifier = f'{self.peppol_eas}:{self.peppol_endpoint}'.lower()
         db_uuid = self.env['ir.config_parameter'].sudo().get_str('database.uuid')
-        self._create_connection(peppol_identifier, db_uuid, self.company_id)
+        self._create_connection(self.normalized_identifier, db_uuid, self.company_id)
         notifications = {
             'sender': {
                 'message': _('You can now send electronic invoices via Peppol.'),

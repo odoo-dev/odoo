@@ -4,7 +4,7 @@
         <field name="name">res.partner.form.account.peppol</field>
             <field name="model">res.partner</field>
             <field name="priority">20</field>
-            <field name="inherit_id" ref="account_edi_ubl_cii.view_partner_property_form"/>
+            <field name="inherit_id" ref="account.view_partner_property_form"/>
             <field name="arch" type="xml">
             <data>
                 <xpath expr="//field[@name='invoice_sending_method']" position="before">
@@ -19,31 +19,20 @@
                     <attribute name="widget">filterable_selection</attribute>
                     <attribute name="options">{'whitelist_fname': 'available_peppol_edi_formats'}</attribute>
                 </xpath>
-                <xpath expr="//field[@name='peppol_eas']" position="before">
-                    <field name="bank_account_count" invisible="1"/>
-                    <div class="alert alert-warning"
-                         colspan="2"
-                         role="alert"
-                         invisible="peppol_verification_state != 'valid' or country_code">
-                         To generate complete electronic invoices, also set a country for this partner.
+                <xpath expr="//group[@id='electronic_invoicing']" position="inside">
+                    <label for="peppol_verification_state"/>
+                    <div class="row">
+                        <field name="peppol_verification_state" readonly="1"/>
+                        <span invisible="peppol_verification_state == 'not_verified'">
+                            with <field name="peppol_send_to_endpoint" readonly="1"/>
+                        </span>
+                        <button name="button_peppol_sync"
+                                type="object"
+                                string="Verify"
+                                help="Verify partner's Peppol endpoint"
+                                class="btn-link mb-1 px-0" icon="fa-refresh"/>
                     </div>
-                </xpath>
-                <xpath expr="//div[@id='peppol_address']" position="after">
-                    <field name="is_peppol_edi_format" invisible="1"/>
-                    <field name="peppol_verification_state" invisible="1" force_save="1"/>
-                    <label for="peppol_verification_state" invisible="not peppol_endpoint"/>
-                    <div class="row" invisible="not peppol_endpoint">
-                        <div class="col-6">
-                            <field name="peppol_verification_state" readonly="1"/>
-                        </div>
-                        <div class="col-6 pt-0">
-                            <button name="button_account_peppol_check_partner_endpoint"
-                                    class="btn btn-secondary"
-                                    type="object"
-                                    string="Verify"
-                                    help="Verify partner's Peppol endpoint"/>
-                        </div>
-                    </div>
+                    <field name="peppol_send_to_endpoint" groups="base.group_no_one"/>
                 </xpath>
             </data>
         </field>
@@ -57,7 +46,7 @@
         <field name="state">code</field>
         <field name="code">
             for record in records:
-                record.button_account_peppol_check_partner_endpoint()
+                record.button_peppol_sync()
         </field>
     </record>
 </odoo>
