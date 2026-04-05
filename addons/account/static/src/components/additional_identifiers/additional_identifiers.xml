@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="account.AdditionalIdentifiersButton">
+        <div class="ms-2 d-inline-block">
+             <Dropdown t-if="identifiersInDropdown.length > 0">
+                <button class="btn btn-link p-0" type="button">
+                    <i class="fa fa-plus me-1"/>
+                </button>
+                <t t-set-slot="content">
+                    <DropdownItem t-foreach="identifiersInDropdown" t-as="identifier" t-key="identifier.identifierType" onSelected="() => this.onAdd(identifier.identifierType)">
+                        <t t-out="identifier.label"/>
+                    </DropdownItem>
+                </t>
+            </Dropdown>
+        </div>
+    </t>
+
+    <t t-name="account.AdditionalIdentifiersList">
+        <div class="o_inner_group grid mt-2 w-100" t-if="sortedIdentifiers.length > 0">
+            <t t-foreach="sortedIdentifiers" t-as="identifierPair" t-key="identifierPair[0]">
+                <t t-set="identifierType" t-value="identifierPair[0]"/>
+                <t t-set="identifierValue" t-value="identifierPair[1]"/>
+                <t t-set="meta" t-value="state.metadata[identifierType]"/>
+                
+                <label t-att-for="identifierType" class="o_form_label mt-1" style="font-weight: 500;">
+                    <t t-out="meta and meta.label ? meta.label : identifierType"/>
+                </label>
+                <div class="d-flex align-items-center mb-1">
+                    <input type="text"
+                           t-att-id="identifierType"
+                           class="o_input w-50"
+                           t-att-value="identifierValue"
+                           t-att-placeholder="meta ? meta.placeholder : ''"
+                           t-on-change="(ev) => this.onUpdateValue(identifierType, ev)"/>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

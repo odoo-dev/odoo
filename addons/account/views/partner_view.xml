@@ -159,12 +159,19 @@
                     </button>
                 </div>
 
-                <field name="vat" position="before">
-                    <field name="partner_vat_placeholder" invisible="1"/> <!-- Needed for the placeholder widget -->
+                <field name="vat" position="replace">
+                    <field name="partner_vat_placeholder" invisible="1"/>
+                    <field name="country_code" invisible="1"/>
+                    <label for="vat"/>
+                    <div class="o_row d-flex">
+                        <field name="vat" options="{'placeholder_field': 'partner_vat_placeholder'}" nolabel="1"/>
+                        <!-- <div name="vat_vies_container"/> FIXME -->
+
+                        <field name="additional_identifiers" widget="additional_identifiers_button" nolabel="1"/>
+                    </div>
+                    <field name="additional_identifiers" widget="additional_identifiers_list" colspan="2" nolabel="1"/>
                 </field>
-                <field name="vat" position="attributes">
-                    <attribute name="options">{'placeholder_field': 'partner_vat_placeholder'}</attribute>
-                </field>
+
 
                 <xpath expr=".//page[@name='sales_purchases']//group[@name='misc']" position="inside">
                     <field name="global_location_number" invisible="type != 'delivery'"/>

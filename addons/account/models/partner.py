@@ -11,30 +11,11 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import SQL, unique
 from odoo.addons.account.models.account_move import BYPASS_LOCK_CHECK
+from odoo.addons.account.tools.partner_identifiers import get_additional_identifiers_metadata_of_country
 from odoo.addons.base_vat.models.res_partner import _ref_vat
 
 _logger = logging.getLogger(__name__)
 
-
-_ref_company_registry = {
-    'jp': '7000012050002',
-    'dk': '58403288',
-    # Using the same placeholder value for France and all its overseas territories/collectivities
-    'fr': '33417522101010',
-    'pf': '33417522101010',
-    'mf': '33417522101010',
-    'mq': '33417522101010',
-    'nc': '33417522101010',
-    're': '33417522101010',
-    'gf': '33417522101010',
-    'gp': '33417522101010',
-    'tf': '33417522101010',
-    'bl': '33417522101010',
-    'pm': '33417522101010',
-    'yt': '33417522101010',
-    'wf': '33417522101010',
-    'fi': '8763054-9',
-}
 
 
 class AccountFiscalPosition(models.Model):
@@ -353,6 +334,7 @@ class ResPartner(models.Model):
     duplicate_bank_partner_ids = fields.Many2many('res.partner', compute='_compute_duplicate_bank_partner_ids')
 
     global_location_number = fields.Char(string="GLN", help="Global Location Number")
+    additional_identifiers = fields.Json(string="Additional Identifiers")
 
     @api.depends('company_id', 'country_code')
     @api.depends_context('allowed_company_ids')
@@ -771,6 +753,8 @@ class ResPartner(models.Model):
         )
 
     def write(self, vals):
+        vals = self._clean_additional_identifiers(vals)
+
         if 'parent_id' in vals:
             partner2move_lines = self.sudo().env['account.move.line'].search([('partner_id', 'in', self.ids)]).grouped('partner_id')
             parent_vat = self.env['res.partner'].browse(vals['parent_id']).vat
@@ -792,6 +776,9 @@ class ResPartner(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            self._clean_additional_identifiers(vals)
+
         search_partner_mode = self.env.context.get('res_partner_search_mode')
         is_customer = search_partner_mode == 'customer'
         is_supplier = search_partner_mode == 'supplier'
@@ -888,6 +875,16 @@ class ResPartner(models.Model):
         """ Hook for determining VAT validity with more complex VAT requirements. (like VIES)"""
         self.ensure_one()
         return bool(self.vat)
+
+    @api.model
+    def get_available_additional_identifiers_metadata(self, country_code, seq_min=0, seq_max=199):
+        return get_additional_identifiers_metadata_of_country(country_code, seq_min=seq_min, seq_max=seq_max)
+
+    def _clean_additional_identifiers(self, vals):
+        # We never save empty or unselected identifiers strings back to the dictionary
+        if 'additional_identifiers' in vals and isinstance(vals['additional_identifiers'], dict):
+            vals['additional_identifiers'] = {k: v for k, v in vals['additional_identifiers'].items() if v}
+        return vals
 
     # TODO accounting/JCO, seems strange that this address validation logic is only there for pos, and
     # not for standard address management on portal/ecommerce
@@ -1056,12 +1053,14 @@ class ResPartner(models.Model):
 
     @api.depends('country_id')
     def _compute_company_registry_placeholder(self):
-        """ Provides a dynamic placeholder on the company registry field for countries that may need it.
-        Add your country and the value you want in the _ref_company_registry map.
-        """
+        """ Provides a dynamic placeholder on the company registry field for countries that may need it. """
         for partner in self:
-            country_code = partner.country_id.code or ''
-            partner.company_registry_placeholder = _ref_company_registry.get(country_code.lower(), '')
+            partner.company_registry_placeholder = ''
+            if partner.country_id:
+                # FIXME use a helper to retrieve label of identifier
+                identifiers = partner.get_available_additional_identifiers_metadata(partner.country_id.code)
+                if identifiers:
+                    partner.company_registry_placeholder = next(iter(identifiers.values())).get('placeholder', '')
 
     def _compute_account_move_count(self):
         # retrieve all children partners and prefetch 'parent_id' on them
