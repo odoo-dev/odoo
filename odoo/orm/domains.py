@@ -1985,7 +1985,7 @@ def _optimize_m2o_bypass_comodel_id_lookup(condition, model):
 @field_type_optimization(['one2many', 'many2many'], level=OptimizationLevel.FULL)
 def _optimize_x2m_in_operator(condition, model):
     """For x2m fields, we always will generate a query so we can express it as
-    the "any!" operator directly.
+    the "any" operator directly.
     """
     if condition.operator not in ('in', 'not in'):
         return condition
@@ -1997,11 +1997,11 @@ def _optimize_x2m_in_operator(condition, model):
     domain_comodel = DomainCondition(active_name, 'in', [True, False]) if active_name else Domain.TRUE
     if False in ids:
         # x2m in {False, ...} => x2m not any! (Domain.TRUE) or x2m in {...}
-        domain |= DomainCondition(field_expr, 'not any!', domain_comodel)
+        domain |= DomainCondition(field_expr, 'not any', domain_comodel)
         ids = ids - {False}
     if ids:
         # x2m in ids => x2m any! (id in ids)
-        domain |= DomainCondition(field_expr, 'any!', domain_comodel & DomainCondition('id', 'in', ids))
+        domain |= DomainCondition(field_expr, 'any', domain_comodel & DomainCondition('id', 'in', ids))
     return domain if condition.operator == 'in' else ~domain
 
 
