@@ -16,7 +16,7 @@ class TestItEdiReverseCharge(TestItEdi):
         super().setUpClass()
 
         # Company -----------
-        cls.company.partner_id.l10n_it_pa_index = "0803HR0"
+        cls.company.partner_id.additional_identifiers = {**(cls.company.partner_id.additional_identifiers or {}), 'IT_IPA': '0803HR0'}
 
         # Partner -----------
         cls.french_partner = cls.env['res.partner'].create({

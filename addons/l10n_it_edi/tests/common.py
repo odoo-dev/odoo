@@ -45,12 +45,11 @@ class TestItEdi(AccountTestInvoicingCommon):
             street="1234 Test Street",
             zip="12345",
             city="Prova",
-            l10n_it_codice_fiscale='01234560157',
             l10n_it_tax_system="RF01",
         )
         cls.company = cls.company_data_2['company']
         cls.company.partner_id.write({
-            'l10n_it_pa_index': "0803HR0"
+            'additional_identifiers': {'IT_CF': '01234560157', 'IT_IPA': '0803HR0'},
         })
 
         cls.test_bank = cls.env['res.partner.bank'].create({
@@ -65,7 +64,7 @@ class TestItEdi(AccountTestInvoicingCommon):
         cls.italian_partner_a = cls.env['res.partner'].create({
             'name': 'Alessi',
             'vat': 'IT00465840031',
-            'l10n_it_codice_fiscale': '93026890017',
+            'additional_identifiers': {'IT_CF': '93026890017'},
             'country_id': cls.env.ref('base.it').id,
             'street': 'Via Privata Alessi 6',
             'zip': '28887',
@@ -77,8 +76,7 @@ class TestItEdi(AccountTestInvoicingCommon):
         cls.italian_partner_b = cls.env['res.partner'].create({
             'name': 'pa partner',
             'vat': 'IT06655971007',
-            'l10n_it_codice_fiscale': '06655971007',
-            'l10n_it_pa_index': '123456',
+            'additional_identifiers': {'IT_CF': '06655971007', 'IT_IPA': '123456'},
             'country_id': cls.env.ref('base.it').id,
             'street': 'Via Test PA',
             'zip': '32121',
@@ -88,7 +86,7 @@ class TestItEdi(AccountTestInvoicingCommon):
 
         cls.italian_partner_no_address_codice = cls.env['res.partner'].create({
             'name': 'Alessi',
-            'l10n_it_codice_fiscale': '00465840031',
+            'additional_identifiers': {'IT_CF': '00465840031'},
         })
 
         cls.italian_partner_no_address_VAT = cls.env['res.partner'].create({

@@ -15,8 +15,7 @@ class TestItEdiExport(TestItEdi):
         cls.italian_partner_b = cls.env['res.partner'].create({
             'name': 'pa partner',
             'vat': 'IT06655971007',
-            'l10n_it_codice_fiscale': '06655971007',
-            'l10n_it_pa_index': '123456',
+            'additional_identifiers': {'IT_CF': '06655971007', 'IT_IPA': '123456'},
             'country_id': cls.env.ref('base.it').id,
             'street': 'Via Test PA',
             'zip': '32121',
@@ -25,7 +24,7 @@ class TestItEdiExport(TestItEdi):
 
         cls.italian_partner_no_address_codice = cls.env['res.partner'].create({
             'name': 'Alessi',
-            'l10n_it_codice_fiscale': '00465840031',
+            'additional_identifiers': {'IT_CF': '00465840031'},
         })
 
         cls.italian_partner_no_address_VAT = cls.env['res.partner'].create({
@@ -41,7 +40,7 @@ class TestItEdiExport(TestItEdi):
 
     def test_vat_not_equals_codice(self):
         self.company.partner_id.vat = '01698911003'
-        self.company.l10n_it_codice_fiscale = '07149930583'
+        self.company.partner_id.additional_identifiers = {**(self.company.partner_id.additional_identifiers or {}), 'IT_CF': '07149930583'}
 
         invoice = self.env['account.move'].with_company(self.company).create({
             'move_type': 'out_invoice',
@@ -195,7 +194,7 @@ class TestItEdiExport(TestItEdi):
         self._assert_export_invoice(invoice, 'invoice_below_400_codice_simplified.xml')
 
     def test_invoice_total_400_VAT_simplified(self):
-        self.company.l10n_it_codice_fiscale = '07149930583'
+        self.company.partner_id.additional_identifiers = {**(self.company.partner_id.additional_identifiers or {}), 'IT_CF': '07149930583'}
         invoice = self.env['account.move'].with_company(self.company).create({
             'move_type': 'out_invoice',
             'invoice_date': '2022-03-24',
@@ -524,8 +523,7 @@ class TestItEdiExport(TestItEdi):
     def test_export_XML_lowercase_fields_and_payment_method(self):
         partner = self.env['res.partner'].create({
             'name': 'Alessi',
-            'l10n_it_codice_fiscale': 'Mrtmtt91d08f205j',
-            'l10n_it_pa_index': 'N8mimm9',
+            'additional_identifiers': {'IT_CF': 'Mrtmtt91d08f205j', 'IT_IPA': 'N8mimm9'},
         })
 
         invoice = self.env['account.move'].with_company(self.company).create({

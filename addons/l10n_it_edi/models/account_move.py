@@ -108,7 +108,7 @@ class AccountMove(models.Model):
     # Technical field for showing the above fields or not
     l10n_it_partner_pa = fields.Boolean(compute='_compute_l10n_it_partner_pa')
     l10n_it_partner_is_public_administration = fields.Boolean(compute='_compute_l10n_it_partner_is_public_administration',
-        help='Only partners that have a 6-chars long l10n_it_pa_index actually belong to the Public Administration'
+        help='Only partners that have a 6-chars long IT_IPA (additional_identifiers) actually belong to the Public Administration'
     )
 
     l10n_it_payment_method = fields.Selection(
@@ -182,13 +182,16 @@ class AccountMove(models.Model):
 
             move.l10n_it_document_type = document_type.get(move._l10n_it_edi_get_document_type())
 
-    @api.depends('commercial_partner_id.l10n_it_pa_index', 'company_id')
+    @api.depends('commercial_partner_id.additional_identifiers', 'company_id')
     def _compute_l10n_it_partner_pa(self):
         for move in self:
             partner = move.commercial_partner_id
-            move.l10n_it_partner_pa = partner and (partner._l10n_it_edi_is_public_administration() or len(partner.l10n_it_pa_index or '') == 7)
+            move.l10n_it_partner_pa = partner and (
+                partner._l10n_it_edi_is_public_administration()
+                or len((partner.additional_identifiers or {}).get('IT_IPA') or '') == 7
+            )
 
-    @api.depends('commercial_partner_id.l10n_it_pa_index', 'company_id')
+    @api.depends('commercial_partner_id.additional_identifiers', 'company_id')
     def _compute_l10n_it_partner_is_public_administration(self):
         for move in self:
             partner = move.commercial_partner_id
@@ -996,7 +999,7 @@ class AccountMove(models.Model):
             and not self.l10n_it_edi_is_self_invoice
             and list(buyer._l10n_it_edi_export_check(checks).keys()) == ['l10n_it_edi_partner_address_missing']
             and (not buyer.country_id or buyer.country_id.code == 'IT')
-            and (buyer.l10n_it_codice_fiscale or (buyer.vat and (buyer.vat[:2].upper() == 'IT' or buyer.vat[:2].isdecimal())))
+            and ((buyer.additional_identifiers or {}).get('IT_CF') or (buyer.vat and (buyer.vat[:2].upper() == 'IT' or buyer.vat[:2].isdecimal())))
             and (self.company_id.l10n_it_tax_system == 'RF19' or self.amount_total <= 400)
         )
 
@@ -1181,12 +1184,8 @@ class AccountMove(models.Model):
                     ('l10n_it_edi_transaction', '!=', False),
                     *Domain.OR(
                         [[('l10n_it_edi_state', 'in', WAITING_STATES)],
-                        Domain.AND(
-                            [
-                                [('l10n_it_edi_state', '=', 'forwarded')],
-                                [('commercial_partner_id.l10n_it_pa_index', '=ilike', '_' * 6)],
-                            ]
-                        )]
+                        [('l10n_it_edi_state', '=', 'forwarded'),
+                         ('commercial_partner_id', 'in', self._l10n_it_edi_get_pa_partner_ids())]]
                     )
                 ])
                 if moves_to_check:
@@ -1315,14 +1314,46 @@ class AccountMove(models.Model):
 
         return filename, decrypted_content
 
+    @api.model
+    def _l10n_it_edi_get_pa_partner_ids(self):
+        """ Return IDs of partners whose IT_IPA code has exactly 6 characters (Public Administration). """
+        return self.env['res.partner'].search([
+            ('additional_identifiers', '!=', False),
+        ]).filtered(
+            lambda p: len((p.additional_identifiers or {}).get('IT_IPA') or '') == 6
+        ).ids
+
     def _l10n_it_edi_search_partner(self, company, vat, codice_fiscale, email, destination_code=None):
         base_domain = self.env['res.partner']._check_company_domain(company)
-        for domain in [vat and destination_code
-                           and [('vat', 'ilike', vat), ('l10n_it_pa_index', 'ilike', destination_code)],
-                       vat and [('vat', 'ilike', vat)],
-                       codice_fiscale and [('l10n_it_codice_fiscale', 'in', ('IT' + codice_fiscale, codice_fiscale))],
-                       email and ['|', ('email', '=', email), ('l10n_it_pec_email', '=', email)]]:
-            if domain and (partner := self.env['res.partner'].search(domain + base_domain, limit=1)):
+        # VAT + destination_code: match by vat, then filter by pa_index
+        if vat and destination_code:
+            partners = self.env['res.partner'].search([('vat', 'ilike', vat)] + base_domain)
+            partner = partners.filtered(
+                lambda p: destination_code and destination_code.casefold() in ((p.additional_identifiers or {}).get('IT_IPA') or '').casefold()
+            )[:1]
+            if partner:
+                return partner
+        # VAT only
+        if vat and (partner := self.env['res.partner'].search([('vat', 'ilike', vat)] + base_domain, limit=1)):
+            return partner
+        # Codice Fiscale
+        if codice_fiscale:
+            partner = self.env['res.partner'].search(
+                [('additional_identifiers', '!=', False)] + base_domain
+            ).filtered(
+                lambda p: (p.additional_identifiers or {}).get('IT_CF', '').casefold()
+                          in (codice_fiscale.casefold(), ('IT' + codice_fiscale).casefold())
+            )[:1]
+            if partner:
+                return partner
+        # Email or PEC email
+        if email:
+            partner = self.env['res.partner'].search(
+                ['|', ('email', '=', email), ('additional_identifiers', '!=', False)] + base_domain
+            ).filtered(
+                lambda p: p.email == email or (p.additional_identifiers or {}).get('IT_PEC') == email
+            )[:1]
+            if partner:
                 return partner
         return self.env['res.partner']
 
@@ -1480,7 +1511,7 @@ class AccountMove(models.Model):
                 if vat and vat .casefold() in (company.vat or '').casefold():
                     break
                 codice_fiscale = get_text(tree, company_info['codice_fiscale_xpath'])
-                if codice_fiscale and codice_fiscale.casefold() in (company.l10n_it_codice_fiscale or '').casefold():
+                if codice_fiscale and codice_fiscale.casefold() in ((company.partner_id.additional_identifiers or {}).get('IT_CF') or '').casefold():
                     break
             else:
                 invoice.message_post(body=_("Your company's VAT number and Fiscal Code haven't been found in the buyer and/or seller sections inside the document."))
@@ -1920,7 +1951,7 @@ class AccountMove(models.Model):
             if moves := pa_moves.filtered(lambda move: move.l10n_it_origin_document_date and move.l10n_it_origin_document_date > fields.Date.today()):
                 message = _("The Origin Document Date cannot be in the future.")
                 errors['l10n_it_edi_move_future_origin_document_date'] = build_error(message=message, records=moves)
-        if pa_moves := self.filtered(lambda move: len(move.commercial_partner_id.l10n_it_pa_index or '') == 7):
+        if pa_moves := self.filtered(lambda move: len((move.commercial_partner_id.additional_identifiers or {}).get('IT_IPA') or '') == 7):
             if moves := pa_moves.filtered(lambda move: not move.l10n_it_origin_document_type and (move.l10n_it_cig or move.l10n_it_cup)):
                 message = _("CIG/CUP fields of partner(s) are present, please fill out Origin Document Type field in the Electronic Invoicing tab.")
                 errors['move_missing_origin_document_field'] = build_error(message=message, records=moves)
@@ -2099,7 +2130,7 @@ class AccountMove(models.Model):
                 response = move._l10n_it_edi_upload([{
                     'filename': filename,
                     'xml': content,
-                    'destination_code': move.commercial_partner_id.l10n_it_pa_index,
+                    'destination_code': (move.commercial_partner_id.additional_identifiers or {}).get('IT_IPA'),
                 }])[filename]
 
                 if 'error' in response:

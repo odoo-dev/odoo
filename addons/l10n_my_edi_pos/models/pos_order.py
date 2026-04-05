@@ -74,10 +74,7 @@ class PosOrder(models.Model):
                 # We can skip this check when refunding a consolidated invoice, since the customer in the XML is fixed.
                 if not refunding_consolidated_invoice:
                     partner = order.partner_id
-                    if (
-                        not partner.l10n_my_identification_type
-                        or not partner.l10n_my_identification_number
-                    ):
+                    if not all(partner._l10n_my_get_identification()):
                         raise UserError(order.env._("You must set the identification information on the commercial partner."))
                     if not partner._l10n_my_edi_get_tin_for_myinvois():
                         raise UserError(order.env._("You must set a TIN number on the commercial partner."))

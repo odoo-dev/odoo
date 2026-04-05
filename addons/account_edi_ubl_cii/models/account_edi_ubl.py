@@ -899,9 +899,9 @@ class AccountEdiUBL(models.AbstractModel):
             },
         }
 
-        if delivery_partner.global_location_number:
+        if gln := (delivery_partner.additional_identifiers or {}).get('GLN'):
             node['cac:DeliveryLocation']['cbc:ID']['schemeID'] = '0088'
-            node['cac:DeliveryLocation']['cbc:ID']['_text'] = delivery_partner.global_location_number
+            node['cac:DeliveryLocation']['cbc:ID']['_text'] = gln
 
         party_node = node['cac:DeliveryParty'] = {}
 

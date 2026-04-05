@@ -59,7 +59,7 @@
                 <Telefono t-if="sender.phone" t-out="format_phone(sender.phone)"/>
                 <Email t-if="sender.email" t-out="format_alphanumeric(sender.email, 256)"/>
             </ContattiTrasmittente>
-            <PECDestinatario t-if="not is_self_invoice and buyer.l10n_it_pec_email" t-out="format_alphanumeric(buyer.l10n_it_pec_email, 256)"/>
+            <PECDestinatario t-if="not is_self_invoice and (buyer.additional_identifiers or {}).get('IT_PEC')" t-out="format_alphanumeric((buyer.additional_identifiers or {}).get('IT_PEC'), 256)"/>
         </DatiTrasmissione>
         <CedentePrestatore>
             <DatiAnagrafici>

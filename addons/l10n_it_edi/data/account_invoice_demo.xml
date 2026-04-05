@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data noupdate="1">
-        <!-- add VAT, codice fiscal and tax system for main company -->
+        <!-- add VAT and tax system for main company -->
         <record id="base.demo_company_it" model="res.company">
             <field name="vat">IT01654010345</field>
             <field name="street">Test Street</field>
             <field name="city">Prova</field>
             <field name="zip">12345</field>
-            <field name="l10n_it_codice_fiscale">01654010345</field>
             <field name="l10n_it_tax_system">RF01</field>
             <field name="zip">12345</field>
         </record>
 
         <record id="base.partner_demo_company_it" model="res.partner">
-            <field name="l10n_it_pa_index">0803HR0</field>
+            <field name="additional_identifiers" eval="{'IT_CF': '01654010345', 'IT_IPA': '0803HR0'}"/>
         </record>
 
         <record id="partner_demo_it" model="res.partner">
@@ -43,8 +42,7 @@
             <field name="city">Milano</field>
             <field name="zip">20100</field>
             <field name="vat">IT06289781004</field>
-            <field name="l10n_it_codice_fiscale">06289781004</field>
-            <field name="l10n_it_pa_index">N8MIMM9</field>
+            <field name="additional_identifiers" eval="{'IT_CF': '06289781004', 'IT_IPA': 'N8MIMM9'}"/>
         </record>
 
         <record id="demo_l10n_it_edi_partner_pa" model="res.partner">
@@ -54,8 +52,7 @@
             <field name="city">Milano</field>
             <field name="zip">20124</field>
             <field name="vat">IT11513540960</field>
-            <field name="l10n_it_codice_fiscale">11513540960</field>
-            <field name="l10n_it_pa_index">SOOTJS</field>
+            <field name="additional_identifiers" eval="{'IT_CF': '11513540960', 'IT_IPA': 'SOOTJS'}"/>
         </record>
 
         <record id="demo_l10n_it_edi_key" model="certificate.key">

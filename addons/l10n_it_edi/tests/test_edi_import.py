@@ -223,7 +223,7 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
     def test_import_invoice_with_multiple_same_vat(self):
         (self.italian_partner_a | self.italian_partner_b).update({
             'vat': "IT06655971007",
-            'l10n_it_codice_fiscale': '06655971007',
+            'additional_identifiers': {'IT_CF': '06655971007'},
         })
         self._assert_import_invoice('IT01234567892_FPR01.xml', [{
             'partner_id': self.italian_partner_b.id,

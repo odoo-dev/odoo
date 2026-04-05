@@ -15,7 +15,7 @@ class TestUi(HttpCaseWithUserPortal, TestItEdi):
 
         self.start_tour("/my", 'portal_compute_codice_fiscale', login="portal_user")
         self.assertEqual(
-            it_user_portal.l10n_it_codice_fiscale,
+            (it_user_portal.additional_identifiers or {}).get('IT_CF'),
             '12345670017',
             "The user should have the Codice Fiscale filled according to the VAT",
         )

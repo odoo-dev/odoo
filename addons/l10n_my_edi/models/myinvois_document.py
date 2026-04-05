@@ -1377,7 +1377,7 @@ class MyInvoisDocument(models.Model):
             Domain('vat', '=', 'EI00000000010')
             | Domain('l10n_my_edi_malaysian_tin', '=', 'EI00000000010')
             | (
-                Domain('l10n_my_identification_number', '=', False)
+                Domain('additional_identifiers', '=', False)
                 & Domain('vat', '=', False)
                 & Domain('l10n_my_edi_malaysian_tin', '=', False)
             )

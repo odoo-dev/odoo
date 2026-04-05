@@ -2,6 +2,16 @@
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
+# Maps additional_identifiers code → MyInvois scheme ID
+MY_IDENTIFIER_SCHEME = {
+    'MY_MYID': 'NRIC',
+    'MY_BRN': 'BRN',
+    'MY_PASSPORT': 'PASSPORT',
+    'MY_ARMY': 'ARMY',
+}
+# Reverse mapping: MyInvois scheme ID → additional_identifiers code
+MY_SCHEME_TO_CODE = {v: k for k, v in MY_IDENTIFIER_SCHEME.items()}
+
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
@@ -27,19 +37,6 @@ class ResPartner(models.Model):
         compute='_compute_l10n_my_edi_display_tin_warning',
     )
 
-    l10n_my_identification_type = fields.Selection(
-        string="ID Type",
-        selection=[
-            ('NRIC', 'MyKad/MyTentera/MyPR/MyKAS'),
-            ('BRN', 'Business Registration Number'),
-            ('PASSPORT', 'Passport'),
-            ('ARMY', 'Army'),
-        ],
-        default="BRN",
-        help="The identification type and number used by the MyTax/MyInvois system to identify the user.\nNote: For MyPR and MyKAS to use NRIC scheme",
-    )
-    l10n_my_identification_number = fields.Char(string="ID Number")
-    l10n_my_identification_number_placeholder = fields.Char(compute="_compute_l10n_my_identification_number_placeholder")
     l10n_my_edi_industrial_classification = fields.Many2one(
         comodel_name='l10n_my_edi.industry_classification',
         string="Ind. Classification",
@@ -57,12 +54,12 @@ class ResPartner(models.Model):
     # Compute, inverse, search methods
     # --------------------------------
 
-    @api.depends('l10n_my_identification_type', 'l10n_my_identification_number', 'vat', 'l10n_my_edi_malaysian_tin')
+    @api.depends('additional_identifiers', 'vat', 'l10n_my_edi_malaysian_tin')
     def _compute_l10n_my_tin_validation_state(self):
         """ The three @depends are used for the validation. If they change, we will invalidate it and expect the user to revalidate. """
         self.l10n_my_tin_validation_state = False
 
-    @api.depends_context('company', 'l10n_my_identification_number')
+    @api.depends_context('company', 'additional_identifiers')
     def _compute_l10n_my_edi_display_tin_warning(self):
         """ We want to display the tin warning for companies registered to use MyInvois. """
         # We need to sudo here, as all users having access to partners may not have the rights to access the proxy users.
@@ -70,24 +67,7 @@ class ResPartner(models.Model):
         is_edi_used = proxy_user and proxy_user.proxy_type == 'l10n_my_edi'
         for partner in self:
             # Users with no business number can't be validated using the api
-            partner.l10n_my_edi_display_tin_warning = is_edi_used and partner.l10n_my_identification_number
-
-    @api.depends('l10n_my_identification_type')
-    def _compute_l10n_my_identification_number_placeholder(self):
-        """ Computes a dynamic placeholder that depends on the selected type to help the user inputs their data.
-        The placeholders have been taken from the MyInvois doc.
-        """
-        for partner in self:
-            placeholder = 'N/A'
-            if partner.l10n_my_identification_type == 'NRIC':
-                placeholder = '830503114923'
-            elif partner.l10n_my_identification_type == 'BRN':
-                placeholder = '202201234565'
-            elif partner.l10n_my_identification_type == 'PASSPORT':
-                placeholder = 'A00000000'
-            elif partner.l10n_my_identification_type == 'ARMY':
-                placeholder = '830805134983'
-            partner.l10n_my_identification_number_placeholder = placeholder
+            partner.l10n_my_edi_display_tin_warning = is_edi_used and bool(partner._l10n_my_get_identification()[1])
 
     def _compute_l10n_my_edi_industrial_classification(self):
         default_classification = self.env.ref('l10n_my_edi.class_00000', raise_if_not_found=False)
@@ -100,7 +80,8 @@ class ResPartner(models.Model):
     def action_validate_tin(self):
         """ Calling this action will reach our EDI proxy in order to validate the TIN against the provided identification information. """
         self.ensure_one()
-        if not self._l10n_my_edi_get_tin_for_myinvois() or not self.l10n_my_identification_type or not self.l10n_my_identification_number:
+        id_type, id_val = self._l10n_my_get_identification()
+        if not self._l10n_my_edi_get_tin_for_myinvois() or not id_type or not id_val:
             raise UserError(self.env._('In order to validate the TIN, you must provide the Identification type and number.'))
 
         # Sudo to allow a user without access to the proxy user to validate the ID if needed.
@@ -111,8 +92,8 @@ class ResPartner(models.Model):
         response = proxy_user._l10n_my_edi_contact_proxy('api/l10n_my_edi/1/validate_tin', params={
             'identification_values': {
                 'tin': self._l10n_my_edi_get_tin_for_myinvois(),
-                'id_type': self.l10n_my_identification_type,
-                'id_val': self.l10n_my_identification_number,
+                'id_type': id_type,
+                'id_val': id_val,
             },
         })
 
@@ -135,12 +116,21 @@ class ResPartner(models.Model):
         # Using the Tax ID field also causes issue when base_vat is enabled, which block setting foreign VAT numbers.
         return self.l10n_my_edi_malaysian_tin or self.vat
 
+    def _l10n_my_get_identification(self):
+        """ Return (scheme_id, value) for the first MY identifier found in additional_identifiers, or (None, None). """
+        self.ensure_one()
+        for code, scheme in MY_IDENTIFIER_SCHEME.items():
+            value = (self.additional_identifiers or {}).get(code)
+            if value:
+                return scheme, value
+        return None, None
+
     @api.model
     def _commercial_fields(self):
-        return super()._commercial_fields() + ['l10n_my_identification_type', 'l10n_my_identification_number', 'l10n_my_edi_industrial_classification', 'l10n_my_edi_malaysian_tin']
+        return super()._commercial_fields() + ['additional_identifiers', 'l10n_my_edi_industrial_classification', 'l10n_my_edi_malaysian_tin']
 
     def _get_frontend_writable_fields(self):
         frontend_writable_fields = super()._get_frontend_writable_fields()
-        frontend_writable_fields.update({'l10n_my_identification_type', 'l10n_my_identification_number', 'l10n_my_edi_industrial_classification'})
+        frontend_writable_fields.update({'additional_identifiers', 'l10n_my_edi_industrial_classification'})
 
         return frontend_writable_fields

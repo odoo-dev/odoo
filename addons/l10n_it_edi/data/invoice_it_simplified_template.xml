@@ -28,7 +28,7 @@
                         <ProgressivoInvio t-out="format_alphanumeric(record.name.replace('/',''), -10)"/>
                         <FormatoTrasmissione t-out="formato_trasmissione"/>
                         <CodiceDestinatario t-if="buyer_info['pa_index']" t-out="buyer_info['pa_index']"/>
-                        <PECDestinatario t-if="buyer.l10n_it_pec_email" t-out="buyer.l10n_it_pec_email"/>
+                        <PECDestinatario t-if="(buyer.additional_identifiers or {}).get('IT_PEC')" t-out="(buyer.additional_identifiers or {}).get('IT_PEC')"/>
                     </DatiTrasmissione>
                     <CedentePrestatore>
                         <IdFiscaleIVA>

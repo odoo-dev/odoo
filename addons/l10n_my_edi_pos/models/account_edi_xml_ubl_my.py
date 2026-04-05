@@ -264,11 +264,12 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                 'schemeID': 'TIN',
             }
         }]
-        if partner.l10n_my_identification_type and partner.l10n_my_identification_number:
+        id_type, id_val = partner._l10n_my_get_identification()
+        if id_type and id_val:
             party_identifications.append({
                 'cbc:ID': {
-                    '_text': partner.l10n_my_identification_number,
-                    'schemeID': partner.l10n_my_identification_type,
+                    '_text': id_val,
+                    'schemeID': id_type,
                 }
             })
         if partner.sst_registration_number:

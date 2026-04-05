@@ -30,11 +30,14 @@ class SaleOrder(models.Model):
     # Technical field for showing the above fields or not
     l10n_it_partner_pa = fields.Boolean(compute='_compute_l10n_it_partner_pa')
 
-    @api.depends('partner_id.commercial_partner_id.l10n_it_pa_index', 'company_id')
+    @api.depends('partner_id.commercial_partner_id.additional_identifiers', 'company_id')
     def _compute_l10n_it_partner_pa(self):
         for order in self:
             partner = order.partner_id.commercial_partner_id
-            order.l10n_it_partner_pa = partner and (partner._l10n_it_edi_is_public_administration() or len(partner.l10n_it_pa_index or '') == 7)
+            order.l10n_it_partner_pa = partner and (
+                partner._l10n_it_edi_is_public_administration()
+                or len((partner.additional_identifiers or {}).get('IT_IPA') or '') == 7
+            )
 
     def _prepare_invoice(self):
         res = super()._prepare_invoice()

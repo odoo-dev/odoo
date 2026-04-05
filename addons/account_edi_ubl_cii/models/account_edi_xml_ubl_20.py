@@ -315,7 +315,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             },
         }
 
-        if gln := partner_shipping.global_location_number:
+        if gln := (partner_shipping.additional_identifiers or {}).get('GLN'):
             document_node['cac:Delivery']['cac:DeliveryLocation'].update({
                 'cbc:ID': {'schemeID': '0088', '_text': gln},
             })

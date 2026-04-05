@@ -6,6 +6,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
 from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EAS_MAPPING
 from odoo.addons.account.models.company import PEPPOL_DEFAULT_COUNTRIES
+from odoo.addons.account.tools.partner_identifiers import ADDITIONAL_IDENTIFIERS_METADATA
 
 
 PEPPOL_ENDPOINT_INVALIDCHARS_RE = re.compile(r'[^a-zA-Z\d\-._~]')
@@ -223,7 +224,7 @@ class ResPartner(models.Model):
     def _peppol_eas_endpoint_depends(self):
         # field dependencies of methods _compute_peppol_endpoint() and _compute_peppol_eas()
         # because we need to extend depends in l10n modules
-        return ['country_code', 'vat', 'company_registry']
+        return ['country_code', 'vat', 'company_registry', 'additional_identifiers']
 
     @api.depends_context('company')
     @api.depends('invoice_edi_format')
@@ -239,7 +240,14 @@ class ResPartner(models.Model):
 
     def _get_peppol_endpoint_value(self, country_code, field, eas):
         self.ensure_one()
-        value = field in self._fields and self[field]
+        if field == 'additional_identifiers':
+            identifier_key = next(
+                (k for k, v in ADDITIONAL_IDENTIFIERS_METADATA.items() if v.get('eas') == eas),
+                None,
+            )
+            value = identifier_key and (self.additional_identifiers or {}).get(identifier_key)
+        else:
+            value = field in self._fields and self[field]
 
         if (
             country_code == 'BE'

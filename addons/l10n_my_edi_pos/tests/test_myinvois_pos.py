@@ -49,8 +49,6 @@ class TestMyInvoisPoS(TestPoSCommon, HttpCase):
             'name': 'MY Test Company',
             'vat': 'C2584563200',
             'l10n_my_edi_mode': 'test',
-            'l10n_my_identification_type': 'BRN',
-            'l10n_my_identification_number': '202001234567',
             'country_id': cls.env.ref('base.my').id,
             'state_id': cls.env.ref('base.state_my_kul').id,
             'zip': '50300',
@@ -60,12 +58,12 @@ class TestMyInvoisPoS(TestPoSCommon, HttpCase):
             'phone': '+60123456789',
             'email': 'info@company.myexample.com',
         })
+        cls.env.company.partner_id.additional_identifiers = {'MY_BRN': '202001234567'}
         cls.env.company.partner_id.l10n_my_edi_industrial_classification = cls.env['l10n_my_edi.industry_classification'].search([('code', '=', '01111')])
         cls.invoicing_customer = cls.customer
         cls.invoicing_customer.write({
             'vat': 'C2584563201',
-            'l10n_my_identification_type': 'BRN',
-            'l10n_my_identification_number': '202001234568',
+            'additional_identifiers': {'MY_BRN': '202001234568'},
             'country_id': cls.env.ref('base.my').id,
             'state_id': cls.env.ref('base.state_my_jhr').id,
             'street': 'that other street, 3',

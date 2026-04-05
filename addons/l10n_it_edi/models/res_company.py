@@ -28,8 +28,6 @@ TAX_SYSTEM = [
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
-    l10n_it_codice_fiscale = fields.Char(string="Codice Fiscale", size=16, related='partner_id.l10n_it_codice_fiscale',
-        store=True, readonly=False, help="Fiscal code of your company")
     l10n_it_tax_system = fields.Selection(selection=TAX_SYSTEM, string="Tax System",
         help="Please select the Tax system to which you are subjected.")
     l10n_it_edi_proxy_user_id = fields.Many2one(
@@ -127,15 +125,15 @@ class ResCompany(models.Model):
             if not record.l10n_it_tax_representative_partner_id.country_id:
                 raise ValidationError(_("Your tax representative partner must have a country."))
 
-    @api.depends("account_edi_proxy_client_ids", "l10n_it_codice_fiscale")
+    @api.depends("account_edi_proxy_client_ids", "partner_id.additional_identifiers")
     def _compute_l10n_it_edi_proxy_user_id(self):
         for company in self:
             edi_company = company._l10n_it_get_edi_company()
             company.l10n_it_edi_proxy_user_id = edi_company.account_edi_proxy_client_ids.filtered(lambda x: x.proxy_type == 'l10n_it_edi')
 
             # If we can't find any proxy user, create a new demo proxy user for this italian company.
-            # They must have the Codice Fiscale field filled for the registration process to work.
-            if not company.l10n_it_edi_proxy_user_id and company.l10n_it_codice_fiscale:
+            # They must have the Codice Fiscale filled for the registration process to work.
+            if not company.l10n_it_edi_proxy_user_id and (company.partner_id.additional_identifiers or {}).get('IT_CF'):
                 company.l10n_it_edi_proxy_user_id = self.env['account_edi_proxy_client.user']._register_proxy_user(
                     company=company,
                     proxy_type='l10n_it_edi',
@@ -157,7 +155,7 @@ class ResCompany(models.Model):
     def _l10n_it_edi_export_check(self):
         checks = {
             'company_vat_codice_fiscale_missing': {
-                'fields': [('vat', 'l10n_it_codice_fiscale')],
+                'fields': [('vat',)],
                 'message': _("Company/ies should have a VAT number or Codice Fiscale."),
             },
             'company_address_missing': {
@@ -172,7 +170,14 @@ class ResCompany(models.Model):
         errors = {}
         for key, check in checks.items():
             for fields_tuple in check.pop('fields'):
-                if invalid_records := self.filtered(lambda record: not any(record[field] for field in fields_tuple)):
+                fields_tuple_local = fields_tuple  # avoid closure capture
+                invalid_records = self.filtered(lambda record: not any(record[f] for f in fields_tuple_local))
+                if key == 'company_vat_codice_fiscale_missing':
+                    # Also passes when the company has a Codice Fiscale in additional_identifiers
+                    invalid_records = invalid_records.filtered(
+                        lambda record: not (record.partner_id.additional_identifiers or {}).get('IT_CF')
+                    )
+                if invalid_records:
                     errors[f"l10n_it_edi_{key}"] = {
                         'message': check['message'],
                         'action_text': _("View Company/ies"),
@@ -196,7 +201,7 @@ class ResCompany(models.Model):
         self.ensure_one()
         if (
             self.root_id.id != self.id
-            and self.l10n_it_codice_fiscale == self.root_id.l10n_it_codice_fiscale
+            and (self.partner_id.additional_identifiers or {}).get('IT_CF') == (self.root_id.partner_id.additional_identifiers or {}).get('IT_CF')
             and self.vat == self.root_id.vat
         ):
             return self.root_id

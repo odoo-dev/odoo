@@ -85,7 +85,7 @@ class TestItAccountMoveSend(TestItEdi, TestAccountMoveSendCommon):
 
     def test_invoice_with_cig_or_cup_or_both(self):
             
-            self.italian_partner_a.write({'l10n_it_pa_index': '1234567'})
+            self.italian_partner_a.write({'additional_identifiers': {**(self.italian_partner_a.additional_identifiers or {}), 'IT_IPA': '1234567'}})
 
             invoice_valid = self._create_invoice_it()
             invoice_cig_only = self._create_invoice_it()
@@ -135,9 +135,9 @@ class TestItAccountMoveSend(TestItEdi, TestAccountMoveSendCommon):
             'street': '1234 Test Street',
             'zip': '12345',
             'city': 'Prova',
-            'l10n_it_codice_fiscale': '12345670017',
             'l10n_it_tax_system': 'RF01'
         })
+        second_company.partner_id.additional_identifiers = {**(second_company.partner_id.additional_identifiers or {}), 'IT_CF': '12345670017'}
 
         second_proxy = self.env['account_edi_proxy_client.user'].create({
             'proxy_type': 'l10n_it_edi',
@@ -291,7 +291,7 @@ class TestItAccountMoveSend(TestItEdi, TestAccountMoveSendCommon):
         self.proxy_user.edi_mode = 'demo'
         ref = self.env['account.chart.template'].with_company(self.proxy_user.company_id).ref
         self.partner_a.write({
-            "l10n_it_codice_fiscale": "PERTLELPALQZRTSN",
+            'additional_identifiers': {'IT_CF': 'PERTLELPALQZRTSN'},
             'country_id': self.env.ref('base.it').id,
             'street': 'Test street',
             'city': 'Test town',

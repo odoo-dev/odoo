@@ -60,10 +60,10 @@ class TestResPartner(TransactionCase):
 
         for i, code in enumerate(invalid_codes):
             with self.assertRaises(UserError):
-                partners += self.env['res.partner'].create({'name': f'partner_{i}', 'l10n_it_codice_fiscale': code})
+                partners += self.env['res.partner'].create({'name': f'partner_{i}', 'additional_identifiers': {'IT_CF': code}})
 
         for i, code in enumerate(valid_codes):
-            partners += self.env['res.partner'].create({'name': f'partner_{i}', 'l10n_it_codice_fiscale': code})
+            partners += self.env['res.partner'].create({'name': f'partner_{i}', 'additional_identifiers': {'IT_CF': code}})
 
         self.assertEqual(len(partners), len(valid_codes))
 
@@ -75,27 +75,35 @@ class TestResPartner(TransactionCase):
         partner_form = Form(vat_partner)
 
         partner_form.vat = 'IT12345676017'
-        self.assertEqual(partner_form.l10n_it_codice_fiscale, '12345676017', "We give the Parnter a VAT, l10n_it_codice_fiscale is given accordingly")
+        self.assertEqual((partner_form.additional_identifiers or {}).get('IT_CF'), '12345676017', "We give the Partner a VAT, IT_CF is given accordingly")
 
         partner_form.country_id = self.env.ref('base.ir')
-        self.assertFalse(partner_form.l10n_it_codice_fiscale, "Partner is given Iran as country, l10n_it_codice_fiscale is removed")
+        self.assertFalse((partner_form.additional_identifiers or {}).get('IT_CF'), "Partner is given Iran as country, IT_CF is removed")
 
         partner_form.country_id = self.env.ref('base.it')
-        self.assertEqual(partner_form.l10n_it_codice_fiscale, '12345676017', "The partner was given the wrong country, we correct it to Italy")
+        self.assertEqual((partner_form.additional_identifiers or {}).get('IT_CF'), '12345676017', "The partner was given the wrong country, we correct it to Italy")
 
         partner_form.vat = 'IT12345670017'
-        self.assertEqual(partner_form.l10n_it_codice_fiscale, '12345670017', "There was a typo in the VAT, changing it should change l10n_it_codice_fiscale as well")
+        self.assertEqual((partner_form.additional_identifiers or {}).get('IT_CF'), '12345670017', "There was a typo in the VAT, changing it should change IT_CF as well")
 
     def _test_normalized_data(self, testdata):
         prefix = "normalized_"
         partner = self.env['res.partner'].create({'name': 'partner'})
         for testentry in testdata:
             with self.subTest(testentry=testentry):
-                partner.write({
-                    k: (v if isinstance(v, str | int | float) else v.id)
-                    for k, v in testentry.items()
-                    if not k.startswith(prefix)
-                })
+                write_vals = {}
+                for k, v in testentry.items():
+                    if k.startswith(prefix):
+                        continue
+                    if k in ('IT_CF', 'IT_IPA'):
+                        write_vals.setdefault('additional_identifiers', {})
+                        if v:
+                            write_vals['additional_identifiers'][k] = v
+                    elif isinstance(v, str | int | float | bool) or v is False:
+                        write_vals[k] = v
+                    else:
+                        write_vals[k] = v.id
+                partner.write(write_vals)
                 l10n_it_edi_values = partner._l10n_it_edi_get_values()
                 for field, expected in [
                     (k[len(prefix):], v)
@@ -109,13 +117,13 @@ class TestResPartner(TransactionCase):
             {
                 'country_id': self.italy,
                 'zip': '20100',
-                'l10n_it_pa_index': '1234567',
+                'IT_IPA': '1234567',
                 'normalized_pa_index': '1234567',
                 'normalized_zip': '20100',
             },
             {
                 'country_id': self.france,
-                'l10n_it_pa_index': '1234567',
+                'IT_IPA': '1234567',
                 'zip': '33344',
                 'normalized_pa_index': 'XXXXXXX',
                 'normalized_zip': '00000',
@@ -127,42 +135,42 @@ class TestResPartner(TransactionCase):
             {
                 'country_id': self.usa,
                 'vat': '911-92-3333',
-                'l10n_it_codice_fiscale': False,
+                'IT_CF': False,
                 'normalized_country_code': 'US',
                 'normalized_vat': '911-92-3333',
             },
             {
                 'country_id': self.france,
                 'vat': 'FR 13542107651',
-                'l10n_it_codice_fiscale': False,
+                'IT_CF': False,
                 'normalized_country_code': 'FR',
                 'normalized_vat': '13542107651',
             },
             {
                 'country_id': self.usa,
                 'vat': False,
-                'l10n_it_codice_fiscale': False,
+                'IT_CF': False,
                 'normalized_country_code': 'US',
                 'normalized_vat': 'OO99999999999',
             },
             {
                 'country_id': self.france,
                 'vat': False,
-                'l10n_it_codice_fiscale': False,
+                'IT_CF': False,
                 'normalized_country_code': 'FR',
                 'normalized_vat': '0000000',
             },
             {
                 'country_id': self.italy,
                 'vat': False,
-                'l10n_it_codice_fiscale': False,
+                'IT_CF': False,
                 'normalized_country_code': 'IT',
                 'normalized_vat': False,
             },
             {
                 'country_id': self.italy,
                 'vat': 'IT06289781004',
-                'l10n_it_codice_fiscale': 'IT06289781004',
+                'IT_CF': 'IT06289781004',
                 'normalized_country_code': 'IT',
                 'normalized_codice_fiscale': '06289781004',
                 'normalized_vat': '06289781004',
@@ -170,7 +178,7 @@ class TestResPartner(TransactionCase):
             {
                 'country_id': False,
                 'vat': False,
-                'l10n_it_codice_fiscale': 'MRTMTT91D08F205J',
+                'IT_CF': 'MRTMTT91D08F205J',
                 'normalized_codice_fiscale': 'MRTMTT91D08F205J',
                 'normalized_country_code': 'IT',
                 'normalized_vat': False,
@@ -178,15 +186,13 @@ class TestResPartner(TransactionCase):
         ])
 
     def test_create_company(self):
-        """Test that when creating a company from an individual, l10n_it values are propagated"""
+        """Test that when creating a company from an individual, IT identifiers are propagated"""
         individual_partner = self.env['res.partner'].create({
             'parent_name': 'Mario Bros. Plumbing',
             'name': 'Mario',
-            'l10n_it_codice_fiscale': '12345670546',
-            'l10n_it_pa_index': '1231231',
+            'additional_identifiers': {'IT_CF': '12345670546', 'IT_IPA': '1231231'},
         })
         self.assertRecordValues(individual_partner.parent_id, [{
             'name': 'Mario Bros. Plumbing',
-            'l10n_it_codice_fiscale': '12345670546',
-            'l10n_it_pa_index': '1231231',
+            'additional_identifiers': {'IT_CF': '12345670546', 'IT_IPA': '1231231'},
         }])

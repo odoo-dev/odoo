@@ -10,30 +10,11 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     invoice_edi_format = fields.Selection(selection_add=[('it_edi_xml', 'Italy (Factura PA)')])
-    l10n_it_pec_email = fields.Char(string="PEC e-mail")
-    l10n_it_codice_fiscale = fields.Char(string="Codice Fiscale", size=16)
-    l10n_it_pa_index = fields.Char(
-        string="Destination Code (SDI)",
-        size=7,
-        help="Must contain the 6-character (or 7) code, present in the PA Index "
-             "in the information relative to the electronic invoicing service, "
-             "associated with the office which, within the addressee administration, deals "
-             "with receiving (and processing) the invoice.",
-    )
-
-    _l10n_it_codice_fiscale = models.Constraint(
-        "CHECK(l10n_it_codice_fiscale IS NULL OR l10n_it_codice_fiscale = '' OR LENGTH(l10n_it_codice_fiscale) >= 11)",
-        'Codice fiscale must have between 11 and 16 characters.',
-    )
-    _l10n_it_pa_index = models.Constraint(
-        "CHECK(l10n_it_pa_index IS NULL OR l10n_it_pa_index = '' OR LENGTH(l10n_it_pa_index) >= 6)",
-        'Destination Code (SDI) must have between 6 and 7 characters.',
-    )
 
     def _l10n_it_edi_is_public_administration(self):
         """ Returns True if the destination of the FatturaPA belongs to the Public Administration. """
         self.ensure_one()
-        return self.country_id.code == 'IT' and len(self.l10n_it_pa_index or '') == 6
+        return self.country_id.code == 'IT' and len((self.additional_identifiers or {}).get('IT_IPA') or '') == 6
 
     def _l10n_it_edi_get_values(self):
         """ Generates all partner values needed by l10n_it_edi XML export.
@@ -54,7 +35,7 @@ class ResPartner(models.Model):
             If there's a codice fiscale, the country is 'IT'.
 
             PA Index:
-            If the partner is in Italy, then the l10n_it_pa_index is used, and '0000000' if missing.
+            If the partner is in Italy, then the IT_IPA identifier is used, and '0000000' if missing.
             If the partner is not in Italy, the default 'XXXXXXX' is used.
 
             Codice Fiscale:
@@ -66,6 +47,9 @@ class ResPartner(models.Model):
         """
         if not self or len(self) > 1:
             return {}
+
+        codice_fiscale = (self.additional_identifiers or {}).get('IT_CF')
+        pa_index_raw = (self.additional_identifiers or {}).get('IT_IPA')
 
         europe = self.env.ref('base.europe', raise_if_not_found=False)
         in_eu = not europe or not self.country_id or self.country_id in europe.country_ids
@@ -91,7 +75,7 @@ class ResPartner(models.Model):
                 normalized_vat = normalized_vat if normalized_vat[:2].isdecimal() else normalized_vat[2:]
 
         # If it has a codice fiscale (and no country), it's an Italian partner
-        if not normalized_country and self.l10n_it_codice_fiscale:
+        if not normalized_country and codice_fiscale:
             normalized_country = 'IT'
         elif not has_vat and self.country_id and self.country_id.code != 'IT':
             if in_eu:
@@ -100,7 +84,7 @@ class ResPartner(models.Model):
                 normalized_vat = 'OO99999999999'
 
         if normalized_country == 'IT':
-            pa_index = (self.l10n_it_pa_index or '0000000').upper()
+            pa_index = (pa_index_raw or '0000000').upper()
             zipcode = self.zip
             state_code = self.state_id and self.state_id.code
         else:
@@ -124,20 +108,20 @@ class ResPartner(models.Model):
             'last_name': ' '.join(self.name.split()[1:]),
         }
 
-    def _l10n_it_edi_normalized_codice_fiscale(self, l10n_it_codice_fiscale=None):
+    def _l10n_it_edi_normalized_codice_fiscale(self, codice_fiscale=None):
         """ Normalize the Italian Tax Code for export.
             If the Tax Code is equal to the Italian VAT, it may mistakenly have the country prefix,
             so we try and remove it if we can
         """
-        if l10n_it_codice_fiscale is None:
+        if codice_fiscale is None:
             self.ensure_one()
-            l10n_it_codice_fiscale = self.l10n_it_codice_fiscale
-        if l10n_it_codice_fiscale:
-            if codicefiscale._code_re.match(l10n_it_codice_fiscale):
+            codice_fiscale = (self.additional_identifiers or {}).get('IT_CF')
+        if codice_fiscale:
+            if codicefiscale._code_re.match(codice_fiscale):
                 # Personal codice
-                return codicefiscale.compact(l10n_it_codice_fiscale)
+                return codicefiscale.compact(codice_fiscale)
             # Company codice
-            return iva.compact(l10n_it_codice_fiscale)
+            return iva.compact(codice_fiscale)
 
     @api.onchange('vat', 'country_id')
     def _l10n_it_onchange_vat(self):
@@ -146,73 +130,86 @@ class ResPartner(models.Model):
             if self.country_code
             else self.vat.startswith("IT")
         ):
-            self.l10n_it_codice_fiscale = self._l10n_it_edi_normalized_codice_fiscale(self.vat)
+            normalized = self._l10n_it_edi_normalized_codice_fiscale(self.vat)
+            existing = dict(self.additional_identifiers or {})
+            if normalized:
+                existing['IT_CF'] = normalized
+            else:
+                existing.pop('IT_CF', None)
+            self.additional_identifiers = existing or False
         else:
-            self.l10n_it_codice_fiscale = False
+            existing = dict(self.additional_identifiers or {})
+            existing.pop('IT_CF', None)
+            self.additional_identifiers = existing or False
 
-    @api.constrains('l10n_it_codice_fiscale')
+    @api.constrains('additional_identifiers')
     def validate_codice_fiscale(self):
         for record in self:
-            if record.l10n_it_codice_fiscale and (not codicefiscale.is_valid(record.l10n_it_codice_fiscale) and not iva.is_valid(record.l10n_it_codice_fiscale)):
-                raise UserError(_("Invalid Codice Fiscale '%s': should be like 'MRTMTT91D08F205J' for physical person and '12345670546' for businesses.", record.l10n_it_codice_fiscale))
+            codice_fiscale = (record.additional_identifiers or {}).get('IT_CF')
+            if codice_fiscale and (not codicefiscale.is_valid(codice_fiscale) and not iva.is_valid(codice_fiscale)):
+                raise UserError(_("Invalid Codice Fiscale '%s': should be like 'MRTMTT91D08F205J' for physical person and '12345670546' for businesses.", codice_fiscale))
 
     def _l10n_it_edi_export_check(self, checks=None):
         checks = checks or ['partner_vat_codice_fiscale_missing', 'partner_address_missing']
-        fields_to_check = {
-            'partner_vat_missing': {
-                'fields': [('vat',)],
-                'message': _("Partner(s) should have a VAT number."),
-            },
-            'partner_vat_codice_fiscale_missing': {
-                'fields': [('vat', 'l10n_it_codice_fiscale')],
-                'message': _("Partner(s) should have a VAT number or Codice Fiscale."),
-            },
-            'partner_country_missing': {
-                'fields': [('country_id',)],
-                'message': _("Partner(s) should have a Country when used for simplified invoices."),
-            },
-            'partner_address_missing': {
-                'fields': [('street', 'street2'), ('zip',), ('city',), ('country_id',)],
-                'message': _("Partner(s) should have a complete address, verify their Street, City, Zipcode and Country."),
-            },
-        }
-        selected_checks = {k: v for k, v in fields_to_check.items() if k in checks}
         single_views = [(False, 'form')]
         list_view = (self.env.ref('l10n_it_edi.res_partner_tree_l10n_it', raise_if_not_found=False))
         multi_views = [(list_view.id if list_view else False, 'list'), (False, 'form')]
         errors = {}
-        for key, check in selected_checks.items():
-            for fields_tuple in check['fields']:
-                if invalid_records := self.filtered(lambda record: not any(record[field] for field in fields_tuple)):
-                    views = single_views if len(invalid_records) == 1 else multi_views
-                    errors[f"l10n_it_edi_{key}"] = {
-                        'message': check['message'],
-                        'action_text': _("View Partner(s)"),
-                        'action': invalid_records._get_records_action(name=_("Check Partner(s)"), views=views),
-                    }
+
+        def _add_error(key, message, invalid_records):
+            if invalid_records:
+                views = single_views if len(invalid_records) == 1 else multi_views
+                errors[f"l10n_it_edi_{key}"] = {
+                    'message': message,
+                    'action_text': _("View Partner(s)"),
+                    'action': invalid_records._get_records_action(name=_("Check Partner(s)"), views=views),
+                }
+
+        if 'partner_vat_missing' in checks:
+            _add_error('partner_vat_missing',
+                       _("Partner(s) should have a VAT number."),
+                       self.filtered(lambda r: not r.vat))
+
+        if 'partner_vat_codice_fiscale_missing' in checks:
+            _add_error('partner_vat_codice_fiscale_missing',
+                       _("Partner(s) should have a VAT number or Codice Fiscale."),
+                       self.filtered(lambda r: not r.vat and not (r.additional_identifiers or {}).get('IT_CF')))
+
+        if 'partner_country_missing' in checks:
+            _add_error('partner_country_missing',
+                       _("Partner(s) should have a Country when used for simplified invoices."),
+                       self.filtered(lambda r: not r.country_id))
+
+        if 'partner_address_missing' in checks:
+            _add_error('partner_address_missing',
+                       _("Partner(s) should have a complete address, verify their Street, City, Zipcode and Country."),
+                       self.filtered(lambda r: not (r.street or r.street2) or not r.zip or not r.city or not r.country_id))
+
         return errors
 
     def _compute_is_company(self):
         l10n_it_partners = self.filtered(lambda p: p.vat and p.country_code == 'IT')
         for partner in l10n_it_partners:
             partner.is_company = False
-            if partner.l10n_it_codice_fiscale and len(partner.l10n_it_codice_fiscale) == 11:
+            codice_fiscale = (partner.additional_identifiers or {}).get('IT_CF')
+            if codice_fiscale and len(codice_fiscale) == 11:
                 partner.is_company = True
 
         super(ResPartner, self - l10n_it_partners)._compute_is_company()
 
     def _deduce_country_code(self):
-        if self.l10n_it_codice_fiscale:
+        if (self.additional_identifiers or {}).get('IT_CF'):
             return 'IT'
         return super()._deduce_country_code()
 
     def _peppol_eas_endpoint_depends(self):
         # extends account_edi_ubl_cii
-        return super()._peppol_eas_endpoint_depends() + ['l10n_it_codice_fiscale']
+        # additional_identifiers is already included in the base depends
+        return super()._peppol_eas_endpoint_depends()
 
     def _get_frontend_writable_fields(self):
         frontend_writable_fields = super()._get_frontend_writable_fields()
-        frontend_writable_fields.update({'l10n_it_codice_fiscale', 'l10n_it_pa_index'})
+        frontend_writable_fields.update({'additional_identifiers'})
 
         return frontend_writable_fields
 
@@ -227,6 +224,6 @@ class ResPartner(models.Model):
     def _create_parent_from_name(self, parent_name, additional_values=None):
         parent_company = super()._create_parent_from_name(parent_name=parent_name, additional_values=additional_values)
         if parent_company:
-            it_values = self._convert_fields_to_values(('l10n_it_codice_fiscale', 'l10n_it_pa_index'))
+            it_values = self._convert_fields_to_values(('additional_identifiers',))
             parent_company.update(it_values)
         return parent_company

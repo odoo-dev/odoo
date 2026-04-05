@@ -556,7 +556,7 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
         self._assert_invoice_ubl_file(invoice, 'test_invoice_sent_to_luxembourg_dig')
 
     def test_invoice_sent_to_partner_with_gln(self):
-        self.partner_be.global_location_number = "222222222222"
+        self.partner_be.additional_identifiers = {'GLN': '222222222222'}
 
         tax_21 = self.percent_tax(21.0)
         product = self._create_product(

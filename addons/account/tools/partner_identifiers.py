@@ -69,6 +69,12 @@ IDENTIFIERS_METADATA = {
         'eas': '0208',
         'countries': ['BE'],
     },
+    'BE_CN': {
+        'sequence': 120,
+        'label': _lt("Belgian National Number"),
+        'placeholder': '84022612345',
+        'countries': ['BE'],
+    },
     'BE_UBL': {
         'sequence': 200,
         'label': _lt("UBL.BE party identifier"),
@@ -434,6 +440,24 @@ IDENTIFIERS_METADATA = {
         'label': _lt("Malaysia NRIC"),
         'placeholder': '123456-12-1234',
         'eas': '0230',
+        'countries': ['MY'],
+    },
+    'MY_BRN': {
+        'sequence': 110,
+        'label': _lt("Malaysia Business Registration Number"),
+        'placeholder': '202101234567',
+        'countries': ['MY'],
+    },
+    'MY_PASSPORT': {
+        'sequence': 120,
+        'label': _lt("Malaysia Passport"),
+        'placeholder': 'A12345678',
+        'countries': ['MY'],
+    },
+    'MY_ARMY': {
+        'sequence': 130,
+        'label': _lt("Malaysia Army ID"),
+        'placeholder': '880101235137',
         'countries': ['MY'],
     },
     'NG_TIN': {

@@ -332,8 +332,6 @@ class ResPartner(models.Model):
     fiscal_country_group_codes = fields.Json(compute='_compute_fiscal_country_group_codes')
     partner_vat_placeholder = fields.Char(compute='_compute_partner_vat_placeholder')
     duplicate_bank_partner_ids = fields.Many2many('res.partner', compute='_compute_duplicate_bank_partner_ids')
-
-    global_location_number = fields.Char(string="GLN", help="Global Location Number")
     additional_identifiers = fields.Json(string="Additional Identifiers")
 
     @api.depends('company_id', 'country_code')
