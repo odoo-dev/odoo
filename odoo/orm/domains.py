@@ -1978,13 +1978,15 @@ def _optimize_x2m_in_operator(condition, model):
     ids = condition.value
     # rewrite condition (field_expr, 'in', ids), then negate in the case 'not in'
     domain = Domain.FALSE
+    active_name = model.env[condition._field(model).comodel_name]._active_name
+    domain_comodel = DomainCondition(active_name, 'in', [True, False]) if active_name else Domain.TRUE
     if False in ids:
         # x2m in {False, ...} => x2m not any! (Domain.TRUE) or x2m in {...}
-        domain |= DomainCondition(field_expr, 'not any!', Domain.TRUE)
+        domain |= DomainCondition(field_expr, 'not any!', domain_comodel)
         ids = ids - {False}
     if ids:
         # x2m in ids => x2m any! (id in ids)
-        domain |= DomainCondition(field_expr, 'any!', DomainCondition('id', 'in', ids))
+        domain |= DomainCondition(field_expr, 'any!', domain_comodel & DomainCondition('id', 'in', ids))
     return domain if condition.operator == 'in' else ~domain
 
 
