@@ -1450,6 +1450,10 @@ class TransactionCase(BaseCase):
             self.addCleanup(_reset, callback, deque(callback._funcs), deepcopy(callback.data))
 
         self.addCleanup(self.savepoint.rollback)
+        # ok... a commit can update the cache of the registry, that would be the
+        # self.savepoint ormcache layer, but we want to make tests independent,
+        # so add another layer that is dropped after each test
+        self.addCleanup(self.cr.savepoint().close)
 
     @contextmanager
     def enter_registry_test_mode(self):
