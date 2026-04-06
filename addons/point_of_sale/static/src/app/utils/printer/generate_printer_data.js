@@ -36,9 +36,9 @@ export class GeneratePrinterData {
 
     get commonExtraData() {
         return {
-            company_state_name: this.company.state_id?.name || "",
-            company_country_name: this.company.country_id?.name || "",
-            vat_label: this.company.country_id.vat_label || "Tax ID",
+            company_state_name: this.company?.state_id?.name || "",
+            company_country_name: this.company?.country_id?.name || "",
+            vat_label: this.company?.country_id?.vat_label || "Tax ID",
         };
     }
 
@@ -360,17 +360,19 @@ export class GeneratePrinterData {
             return [];
         }
 
-        const receipts = [];
         const changes = orderChange.filter(Boolean);
+        return this.getReceiptData(order, changes, reprint, categoryIdsSet);
+    }
+    getReceiptData(order, changes, reprint, categoryIdsSet = []) {
+        const receipts = [];
         for (const change of changes) {
             const data = this.generatePreparationReceipts(change, categoryIdsSet);
-
             for (const changeData of data) {
                 receipts.push({
                     changes: changeData,
                     order: order.raw,
                     config: this.config.raw,
-                    company: this.company.raw,
+                    // company: this.company.raw,
                     partner: order.partner_id ? order.partner_id.raw : false,
                     preset: order.preset_id ? order.preset_id.raw : false,
                     extra_data: {
@@ -378,7 +380,7 @@ export class GeneratePrinterData {
                         reprint: Boolean(reprint),
                         time: DateTime.now().toFormat("HH:mm"),
                         internal_note: getStrNotes(change.internal_note) || false,
-                        general_customer_note: orderChange.general_customer_note || false,
+                        general_customer_note: changes.general_customer_note || false,
                         employee_name: order.employee_id?.name || order.user_id?.name || false,
                         preset_time: order.presetDateTime || false,
                     },
@@ -388,7 +390,6 @@ export class GeneratePrinterData {
                 });
             }
         }
-
         return receipts;
     }
 }

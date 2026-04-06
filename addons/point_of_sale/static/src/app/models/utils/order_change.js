@@ -31,6 +31,9 @@ export const getStrNotes = (note) => {
 };
 
 export const filterChangeByCategories = (categoryIdsSet, currentOrderChange, models) => {
+    if (!categoryIdsSet || categoryIdsSet.length === 0) {
+        return currentOrderChange;
+    }
     const matchesCategories = (change) => {
         const product = models["product.product"].get(change["product_id"]);
         const categoryIds = product.parentPosCategIds;

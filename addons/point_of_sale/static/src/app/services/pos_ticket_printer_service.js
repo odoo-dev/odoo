@@ -229,38 +229,12 @@ export class PosTicketPrinterService {
     async printOrderChanges({ order, opts = {}, printers = this.config.preparation_printer_ids }) {
         let isPrinted = false;
         const unsuccessfulPrints = [];
-        const retryPrinters = new Set();
-
         for (const printer of printers) {
-            const template = "point_of_sale.pos_order_change_receipt";
             const generator = this.getGenerator({ models: this.data.models, order });
             const categoryIds = new Set(printer.product_categories_ids.map((c) => c.id));
             const changes = generator.generatePreparationData(categoryIds, opts);
-
-            for (const ticket of changes) {
-                if (ticket.extra_data.reprint && !opts.explicitReprint) {
-                    continue;
-                }
-
-                if (!printer?._instance) {
-                    unsuccessfulPrints.push(printer.name + " is not connected");
-                    break;
-                }
-
-                const iframe = await this.generateIframe(template, ticket);
-                const image = await this.generateImage(iframe);
-                const result = await this.print({ printer, image });
-                if (result.successful) {
-                    isPrinted = true;
-                }
-
-                if (!result.successful) {
-                    retryPrinters.add(printer);
-                    unsuccessfulPrints.push(printer.name + ": " + result.message.body);
-                } else if (result.warningCode) {
-                    this.displayPrinterWarning(result, printer.name);
-                }
-            }
+            unsuccessfulPrints,
+                (isPrinted = await this.printOrderChangesTickets(changes, opts, printer));
         }
 
         if (unsuccessfulPrints.length) {
@@ -273,7 +247,38 @@ export class PosTicketPrinterService {
 
         return isPrinted;
     }
+    async printOrderChangesTickets(changes, opts, printer) {
+        let isPrinted = false;
+        const unsuccessfulPrints = [];
+        const template = "point_of_sale.pos_order_change_receipt";
+        const retryPrinters = new Set();
 
+        for (const ticket of changes) {
+            if (ticket.extra_data.reprint && !opts.explicitReprint) {
+                continue;
+            }
+
+            if (!printer?._instance) {
+                unsuccessfulPrints.push(printer.name + " is not connected");
+                break;
+            }
+
+            const iframe = await this.generateIframe(template, ticket);
+            const image = await this.generateImage(iframe);
+            const result = await this.print({ printer, image });
+            if (result.successful) {
+                isPrinted = true;
+            }
+
+            if (!result.successful) {
+                retryPrinters.add(printer);
+                unsuccessfulPrints.push(printer.name + ": " + result.message.body);
+            } else if (result.warningCode) {
+                this.displayPrinterWarning(result, printer.name);
+            }
+        }
+        return unsuccessfulPrints, isPrinted;
+    }
     /**
      * Helpers for printer initialization, warnings messages and
      * data generation.
