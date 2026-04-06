@@ -1407,8 +1407,13 @@ class StockPicking(models.Model):
 
         # Run the pre-validation wizards. Processing a pre-validation wizard should work on the
         # moves and/or the context and never call `_action_done`.
+        ctx = {}
         if not self.env.context.get('button_validate_picking_ids'):
-            self = self.with_context(button_validate_picking_ids=self.ids)
+            ctx['button_validate_picking_ids'] = self.ids
+        if not self.env.context.get('active_ids'):
+            ctx['active_ids'] = self.ids
+        if ctx:
+            self = self.with_context(**ctx)
         res = self._pre_action_done_hook()
         if res is not True:
             return res
