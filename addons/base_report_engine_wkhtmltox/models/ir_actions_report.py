@@ -1,30 +1,28 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import functools
 import logging
-from itertools import islice
-
-import lxml.html
 import os
+import re
 import subprocess
 import tempfile
-import unittest
-import re
 import typing
-import functools
-
-from contextlib import closing, ExitStack
-from lxml import etree
-from markupsafe import Markup
+import unittest
+from contextlib import ExitStack, closing
+from itertools import islice
 from urllib.parse import urlparse
 
-from odoo.tools import find_in_path, config, split_every
+import lxml.html
+from lxml import etree
+from markupsafe import Markup
 
-from odoo import api, models, fields, modules, tools, _
+from odoo import _, api, fields, models, modules
 from odoo.exceptions import UserError
 from odoo.http import request
 from odoo.http.session import session_store, update_session_token
-from odoo.tools import parse_version
+from odoo.tools import config, find_in_path, parse_version, split_every
 
 _logger = logging.getLogger(__name__)
+
 
 def _split_table(tree, max_rows):
     """
@@ -46,6 +44,7 @@ def _split_table(tree, max_rows):
             prev.addnext(sibling)
             prev = sibling
 
+
 class WkhtmlInfo(typing.NamedTuple):
     state: typing.Literal['install', 'ok']
     dpi_zoom_ratio: bool
@@ -54,6 +53,7 @@ class WkhtmlInfo(typing.NamedTuple):
     is_patched_qt: bool
     wkhtmltoimage_bin: str
     wkhtmltoimage_version: tuple[str, ...] | None
+
 
 def _run_wkhtmltopdf(args):
     """
@@ -81,7 +81,9 @@ def _wkhtml() -> WkhtmlInfo:
     try:
         bin_path = find_in_path('wkhtmltopdf')
         process = subprocess.Popen(
-            [bin_path, '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            [bin_path, '--version'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
     except OSError:
         _logger.info('You need Wkhtmltopdf to print a pdf version of the reports.')
@@ -114,7 +116,9 @@ def _wkhtml() -> WkhtmlInfo:
     try:
         image_bin_path = find_in_path('wkhtmltoimage')
         process = subprocess.Popen(
-            [image_bin_path, '--version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            [image_bin_path, '--version'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
     except OSError:
         _logger.info('You need Wkhtmltoimage to generate images from html.')
@@ -146,7 +150,7 @@ class IrActionsReport(models.Model):
     report_type = fields.Selection(
         selection_add=[('qweb-pdf-wkhtmltopdf', 'PDF (Wkhtmltopdf)')],
         default='qweb-pdf',
-        ondelete={'qweb-pdf-wkhtmltopdf': 'set qweb-pdf'}
+        ondelete={'qweb-pdf-wkhtmltopdf': 'set qweb-pdf'},
     )
 
     @api.model
@@ -272,11 +276,12 @@ class IrActionsReport(models.Model):
 
     @api.model
     def _build_wkhtmltopdf_args(
-            self,
-            paperformat_id,
-            landscape,
-            specific_paperformat_args=None,
-            set_viewport_size=False):
+        self,
+        paperformat_id,
+        landscape,
+        specific_paperformat_args=None,
+        set_viewport_size=False,
+    ):
         '''Build arguments understandable by wkhtmltopdf bin.
 
         :param paperformat_id: A report.paperformat record.
@@ -290,7 +295,7 @@ class IrActionsReport(models.Model):
 
         command_args = ['--disable-local-file-access']
         if set_viewport_size:
-            command_args.extend(['--viewport-size', landscape and '1024x1280' or '1280x1024'])
+            command_args.extend(['--viewport-size', '1024x1280' if landscape else '1280x1024'])
 
         # Less verbose error messages
         command_args.extend(['--quiet'])
@@ -400,17 +405,17 @@ class IrActionsReport(models.Model):
                         output_images.append(output_file.read())
         return output_images
 
-
     @api.model
     def _run_wkhtmltopdf(
-            self,
-            bodies,
-            report_ref=False,
-            header=None,
-            footer=None,
-            landscape=False,
-            specific_paperformat_args=None,
-            set_viewport_size=False):
+        self,
+        bodies,
+        report_ref=False,
+        header=None,
+        footer=None,
+        landscape=False,
+        specific_paperformat_args=None,
+        set_viewport_size=False,
+    ):
         '''Execute wkhtmltopdf as a subprocess in order to convert html given in input into a pdf
         document.
 
@@ -515,7 +520,8 @@ class IrActionsReport(models.Model):
                     if body_idx:
                         if not _wkhtml().is_patched_qt:
                             if modules.module.current_test:
-                                raise unittest.SkipTest("Unable to convert multiple documents via wkhtmltopdf using unpatched QT")
+                                e = "Unable to convert multiple documents via wkhtmltopdf using unpatched QT"
+                                raise unittest.SkipTest(e)
                             raise UserError(_("Tried to convert multiple documents in wkhtmltopdf using unpatched QT"))
 
                     _logger.warning("wkhtmltopdf: %s", err)
@@ -537,28 +543,28 @@ class IrActionsReport(models.Model):
 
         return pdf_content
 
-    def _run_pdf_engine_without_processing(self,
-            engine_name,
-            bodies,
-            report_ref=False,
-            header=None,
-            footer=None,
-            landscape=False,
-            specific_paperformat_args=None,
-            set_viewport_size=False):
+    def _run_pdf_engine_without_processing(
+        self,
+        engine_name,
+        bodies,
+        report_ref=False,
+        header=None,
+        footer=None,
+        landscape=False,
+        specific_paperformat_args=None,
+        set_viewport_size=False,
+    ):
         if engine_name == 'wkhtmltopdf':
-            content = self._run_wkhtmltopdf(
+            return self._run_wkhtmltopdf(
                 bodies,
                 report_ref=report_ref,
                 header=header,
                 footer=footer,
                 landscape=landscape,
                 specific_paperformat_args=specific_paperformat_args,
-                set_viewport_size=set_viewport_size
+                set_viewport_size=set_viewport_size,
             )
-            return content
-        else:
-            return super()._run_pdf_engine_without_processing(engine_name, bodies, report_ref, header, footer, landscape)
+        return super()._run_pdf_engine_without_processing(engine_name, bodies, report_ref, header, footer, landscape)
 
     def _run_pdf_engine(self, engine_name, html, report_ref=False, landscape=False, **kwargs):
         if engine_name == 'wkhtmltopdf':

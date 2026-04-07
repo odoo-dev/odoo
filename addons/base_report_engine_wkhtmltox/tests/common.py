@@ -1,11 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from contextlib import contextmanager, ExitStack
+from contextlib import ExitStack, contextmanager
 from unittest.mock import patch
 
-from odoo.addons.base.tests.common import BaseCommon
-from odoo.tests.common import HttpCase, release_test_lock, TransactionCase, TEST_CURSOR_COOKIE_NAME
-from odoo.addons.base_report_engine_wkhtmltox.models import ir_actions_report
+from odoo.tests.common import (
+    TEST_CURSOR_COOKIE_NAME,
+    HttpCase,
+    release_test_lock,
+)
 
+from odoo.addons.base.tests.common import BaseCommon
+from odoo.addons.base_report_engine_wkhtmltox.models import ir_actions_report
 
 # Tests can monkeypatch this in this module to emulate another backend key.
 WKHTML_TEST_ENGINE = 'wkhtmltopdf'

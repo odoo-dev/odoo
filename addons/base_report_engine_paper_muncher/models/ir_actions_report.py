@@ -2,15 +2,16 @@
 
 import logging
 from collections.abc import Sequence
-import typing
 
-from odoo import api, models, fields, _
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-from odoo.addons.base_report_engine_paper_muncher.engine.paper_muncher import run_paper_muncher
-from odoo.addons.base_report_engine_paper_muncher.engine import status
+
+from odoo.addons.base_report_engine_paper_muncher.engine.paper_muncher import (
+    get_paper_muncher_binary,
+    run_paper_muncher,
+)
 
 _logger = logging.getLogger(__name__)
-
 
 
 class IrActionsReport(models.Model):
@@ -20,7 +21,7 @@ class IrActionsReport(models.Model):
     report_type = fields.Selection(
         selection_add=[('qweb-pdf-paper-muncher', 'PDF (Paper Muncher)')],
         default='qweb-pdf',
-        ondelete={'qweb-pdf-paper-muncher': 'set qweb-pdf'}
+        ondelete={'qweb-pdf-paper-muncher': 'set qweb-pdf'},
     )
 
     @api.model
@@ -29,28 +30,35 @@ class IrActionsReport(models.Model):
             if self.report_type.startswith('qweb-pdf-paper-muncher'):
                 engine_name = 'paper-muncher'
         if engine_name == 'paper-muncher':
-            return status
+            try:
+                get_paper_muncher_binary()
+            except RuntimeError:
+                return 'install'
+            else:
+                return 'ok'
         return super().get_pdf_engine_state(engine_name)
 
     @api.model
     def _run_paper_muncher(
         self,
         bodies: Sequence[str],
-        report_ref: typing.Union[str, bool] = False,
-        header = None,
-        footer = None,
+        report_ref: str | bool = False,
+        header=None,
+        footer=None,
         landscape: bool = False,
-        specific_paperformat_args = None,
-        set_viewport_size = False,
+        specific_paperformat_args=None,
+        set_viewport_size=False,
         scale: int = 72,
     ) -> bytes:
-        '''Execute paper-muncher as a subprocess in order to convert html given in input into a pdf
-        document. 
+        """
+        Execute paper-muncher as a subprocess in order to convert html
+        given in input into a pdf document.
+
         :param Sequence[str] bodies: The html bodies to convert to pdf.
         :param report_ref: report reference that is needed to get report paperformat.
         :param landscape: Force the pdf to be rendered under a landscape format.
         :return: Content of the pdf as bytes
-        '''
+        """
 
         paperformat_id = self._get_report(report_ref).get_paperformat() if report_ref else self.get_paperformat()
 
@@ -63,31 +71,28 @@ class IrActionsReport(models.Model):
                 landscape=landscape,
                 specific_paperformat_args=specific_paperformat_args,
                 set_viewport_size=set_viewport_size,
-                scale=scale
+                scale=scale,
             )
-        except Exception as e:  # noqa: BLE001
-            _logger.error(
-                "Error while running paper-muncher",
-                exc_info=e,
-            )
+        except Exception:  # noqa: BLE001
+            _logger.exception("Error while running paper-muncher")
             raise UserError(_('The PDF generation failed. Please contact an administrator.'))
 
         return output
 
     def _run_pdf_engine_without_processing(
-            self,
-            engine_name: str,
-            bodies: Sequence[str],
-            report_ref: typing.Union[str, bool] = False,
-            header = None,
-            footer = None,
-            landscape: bool = False,
-            specific_paperformat_args = None,
-            set_viewport_size = False,
-            scale: int = 72,
+        self,
+        engine_name: str,
+        bodies: Sequence[str],
+        report_ref: str | bool = False,
+        header=None,
+        footer=None,
+        landscape: bool = False,
+        specific_paperformat_args=None,
+        set_viewport_size=False,
+        scale: int = 72,
     ) -> bytes:
         if engine_name == 'paper-muncher':
-            content = self._run_paper_muncher(
+            return self._run_paper_muncher(
                 bodies,
                 report_ref=report_ref,
                 header=header,
@@ -95,25 +100,30 @@ class IrActionsReport(models.Model):
                 landscape=landscape,
                 specific_paperformat_args=specific_paperformat_args,
                 set_viewport_size=set_viewport_size,
-                scale=scale
+                scale=scale,
             )
-            return content
-        else:
-            return super()._run_pdf_engine_without_processing(engine_name, bodies, report_ref, header, footer, landscape, specific_paperformat_args, set_viewport_size)
+        return super()._run_pdf_engine_without_processing(
+            engine_name, bodies, report_ref, header, footer, landscape,
+            specific_paperformat_args, set_viewport_size)
 
-
-    def _run_pdf_engine(self, engine_name: str, html: str, report_ref: typing.Union[str, bool] = False,
-                        landscape: bool = False, **kwargs) -> tuple[bytes, list[int]]:
+    def _run_pdf_engine(
+        self,
+        engine_name: str,
+        html: str,
+        report_ref: str | bool = False,
+        landscape: bool = False,
+        **kwargs,
+    ) -> tuple[bytes, list[int]]:
         if engine_name == 'paper-muncher':
-            report_sudo = self._get_report(report_ref)
-            bodies, html_ids, header, footer, specific_paperformat_args = report_sudo \
-                .with_context(debug=False)._prepare_wkhtmltopdf_html(html, report_model=report_sudo.model)
-            content =  self._run_paper_muncher(bodies,
-                   report_ref=report_ref,
-                   header=header,
-                   footer=footer,
-                   landscape=landscape,
-                   specific_paperformat_args=specific_paperformat_args,
-                   scale=kwargs.get('dpi-resolution',72))
+            report_sudo = self._get_report(report_ref).with_context(debug=False)
+            bodies, html_ids, header, footer, specific_paperformat_args = (
+                report_sudo._prepare_wkhtmltopdf_html(html, report_model=report_sudo.model))
+            content = self._run_paper_muncher(bodies,
+               report_ref=report_ref,
+               header=header,
+               footer=footer,
+               landscape=landscape,
+               specific_paperformat_args=specific_paperformat_args,
+               scale=kwargs.get('dpi-resolution', 72))
             return content, html_ids
         return super()._run_pdf_engine(engine_name, html, report_ref, landscape, **kwargs)

@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, fields
+from odoo import fields, models
 
 
 class ResCompany(models.Model):
@@ -9,5 +9,5 @@ class ResCompany(models.Model):
     report_rendering_engine = fields.Selection(
         selection_add=[('wkhtmltopdf', 'WKHTML to PDF/Image')],
         ondelete={'wkhtmltopdf': 'set default'},
-        default='wkhtmltopdf'
+        default='wkhtmltopdf',
     )

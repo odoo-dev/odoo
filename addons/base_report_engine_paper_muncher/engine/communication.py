@@ -1,20 +1,22 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import datetime as dt
 import logging
 import os
-import selectors
-import threading
 import re
+import selectors
+import subprocess as sp
+import threading
 import time
-from collections.abc import Generator
+from collections.abc import Buffer, Generator
 from contextlib import contextmanager
-from datetime import datetime, timezone
 from email.utils import format_datetime
-from typing import BinaryIO, Optional, IO
+from functools import partial
+from io import DEFAULT_BUFFER_SIZE
+from typing import IO, BinaryIO
 from wsgiref.types import WSGIEnvironment
-from lxml import etree, html
-import subprocess
 
+from lxml import etree, html
 from werkzeug.test import create_environ, run_wsgi_app
 
 import odoo
@@ -26,42 +28,37 @@ _logger = logging.getLogger(__name__)
 SERVER_SOFTWARE = f'{odoo.release.product_name}/{odoo.release.version}'
 DEFAULT_READ_TIMEOUT = 15  # seconds
 DEFAULT_WRITE_TIMEOUT = 15  # seconds
-DEFAULT_SERVE_TIMEOUT = 15 * 60  # seconds
-DEFAULT_CHUNK_SIZE = 8192  # bytes
-LOG_PAPER_MUNCHER = False
+DEFAULT_SERVE_TIMEOUT = 15 * 60  # 15 minutes
+DEFAULT_CHUNK_SIZE = 8192  # 8kiB
 HTML_BODY_PATTERN = re.compile(
     r'(?s)(.*?)(<body[^>]*>)(.*?)(</body>)(.*)', re.IGNORECASE)
+
 
 def remaining_time(deadline: float) -> float:
     """Return remaining seconds until a monotonic deadline.
 
-    Args:
-        deadline: Absolute timestamp from :func:`time.monotonic`.
-
-    Raises:
-        TimeoutError: If the deadline has been reached.
+    :param deadline: Absolute timestamp from :func:`time.monotonic`.
+    :raises TimeoutError: When the deadline has been reached.
     """
     remaining = deadline - time.monotonic()
     if remaining <= 0:
-        raise TimeoutError("Timeout exceeded")
+        raise TimeoutError
     return remaining
 
+
 def read_all_with_timeout(
-        file_object: IO[bytes],
-        timeout: int = DEFAULT_READ_TIMEOUT,
-        chunk_size: int = DEFAULT_CHUNK_SIZE,
+    file_object: IO[bytes],
+    timeout: int = DEFAULT_READ_TIMEOUT,
+    chunk_size: int = DEFAULT_CHUNK_SIZE,
 ) -> bytes:
     """Read from a binary stream until EOF with a global timeout.
 
     The timeout applies to the whole operation (single deadline), not per chunk.
 
-    Args:
-        file_object: Binary stream (must implement :meth:`fileno`).
-        timeout: Maximum number of seconds.
-        chunk_size: Maximum bytes per read.
-
-    Raises:
-        TimeoutError: If the deadline is reached before EOF.
+    :param file_object: Binary stream (must implement :meth:`fileno`).
+    :param timeout: Maximum number of seconds.
+    :param chunk_size: Maximum bytes per read.
+    :raises: When the deadline is reached before EOF.
     """
     fd = file_object.fileno()
     data = bytearray()
@@ -75,30 +72,28 @@ def read_all_with_timeout(
                 break
             data.extend(chunk)
         else:
-            raise TimeoutError("Timeout while reading data")
-    _logger.debug(
-        "Elapsed time reading: %.3f seconds",
-        time.monotonic() - (deadline - timeout)
-    )
+            e = "Timeout while reading data"
+            raise TimeoutError(e)
+    _logger.debug("elapsed time reading: %.3fs", time.monotonic() - (deadline - timeout))
     return bytes(data)
 
+
 def write_with_timeout(
-        file_object: BinaryIO,
-        data: bytes,
-        timeout: int = DEFAULT_WRITE_TIMEOUT
+    file_object: BinaryIO,
+    data: Buffer,
+    timeout: int = DEFAULT_WRITE_TIMEOUT,
 ) -> None:
     """Write all bytes to a binary stream with a global timeout.
 
-    Args:
-        file_object: Binary stream (must implement :meth:`fileno`).
-        data: Bytes to write.
-        timeout: Maximum number of seconds.
+    :param file_object: Binary stream (must implement :meth:`fileno`).
+    :param data: Bytes to write.
+    :param timeout: Maximum number of seconds.
 
-    Raises:
-        TimeoutError: If the deadline is reached before completion.
-        RuntimeError: If 0 bytes are written while data remains.
+    :raises TimeoutError: When the deadline is reached before completion.
+    :raises RuntimeError: When 0 bytes are written while data remains.
     """
     fd = file_object.fileno()
+    memview = memoryview(data)
     total_written = 0
     deadline = time.monotonic() + timeout
 
@@ -108,27 +103,29 @@ def write_with_timeout(
         while total_written < len(data):
             events = selector.select(timeout=remaining_time(deadline))
             if not events:
-                raise TimeoutError("Timeout exceeded while writing to subprocess")
+                e = "Timeout exceeded while writing to subprocess"
+                raise TimeoutError(e)
 
-            written = os.write(fd, data[total_written:])
+            written = os.write(fd, memview[total_written:])
             if written == 0:
-                raise RuntimeError("Write returned zero bytes")
+                e = "Write returned zero bytes"
+                raise RuntimeError(e)
             total_written += written
-    _logger.debug(
-        "Elapsed time writing: %.3f seconds",
-        time.monotonic() - (deadline - timeout)
-    )
+
+    _logger.debug("elapsed time writing: %.3fs", time.monotonic() - (deadline - timeout))
+
 
 @contextmanager
 def preserve_thread_data():
     """Preserve and restore a subset of Odoo thread-local attributes."""
     current_thread = threading.current_thread()
     attrs_to_preserve = [
-        'query_count',
-        'query_time',
-        'perf_t0',
         'cursor_mode',
         'dbname',
+        'perf_t0',
+        'query_count',
+        'query_time',
+        'rpc_model_method',
         'uid',
     ]
 
@@ -157,7 +154,7 @@ def generate_environ(path: str) -> WSGIEnvironment:
     current_environ = request.httprequest.environ
     # By security, we forge a request with public user environment.
     # For protected documents, Odoo should provide a URL with an access token.
-    environ = create_environ(
+    return create_environ(
         method='GET',
         path=url,
         query_string=query_string,
@@ -165,46 +162,40 @@ def generate_environ(path: str) -> WSGIEnvironment:
             'Host': current_environ['HTTP_HOST'],
             'User-Agent': SERVER_SOFTWARE,
             'remote_addr': current_environ['REMOTE_ADDR'],
-        }
+        },
     )
-    return environ
 
-def generate_odoo_http_response(
-        request_path: str
-) -> Generator[bytes, None, None]:
+
+def generate_odoo_http_response(request_path: str) -> Generator[bytes, None, None]:
     """Yield a raw HTTP response (headers then body) for an internal Odoo GET.
 
     If the response provides ``X-Sendfile``, the file is streamed from disk.
     """
     with preserve_thread_data():
         response_iterable, http_status, http_response_headers = run_wsgi_app(
-            root, generate_environ(request_path)
+            root, generate_environ(request_path),
         )
 
-    if "X-Sendfile" in http_response_headers:
-        with open(http_response_headers["X-Sendfile"], 'rb') as file:
-            http_response_status_line_and_headers = (
+    if path := http_response_headers.get("X-Sendfile"):
+        with open(path, 'rb') as file:
+            yield (
                 f"HTTP/1.1 {http_status}\r\n"
-                f"Date: {format_datetime(datetime.now(timezone.utc), usegmt=True)}\r\n"
+                f"Date: {format_datetime(dt.datetime.now(dt.UTC), usegmt=True)}\r\n"
                 f"Server: {SERVER_SOFTWARE}\r\n"
-                f"Content-Length: {os.path.getsize(http_response_headers['X-Sendfile'])}\r\n"
+                f"Content-Length: {os.path.getsize(path)}\r\n"
                 f"Content-Type: {http_response_headers['Content-Type']}\r\n"
                 "\r\n"
             ).encode()
-            yield http_response_status_line_and_headers
-            yield from file
+            yield from iter(partial(file.read, DEFAULT_BUFFER_SIZE), b'')
     else:
-        now = datetime.now(timezone.utc)
-        http_response_status_line_and_headers = (
+        yield (
             f"HTTP/1.1 {http_status}\r\n"
-            f"Date: {format_datetime(now, usegmt=True)}\r\n"
+            f"Date: {format_datetime(dt.datetime.now(dt.UTC), usegmt=True)}\r\n"
             f"Server: {SERVER_SOFTWARE}\r\n"
             f"Content-Length: {http_response_headers['Content-Length']}\r\n"
             f"Content-Type: {http_response_headers['Content-Type']}\r\n"
             "\r\n"
         ).encode()
-
-        yield http_response_status_line_and_headers
         yield from response_iterable
 
 
@@ -262,19 +253,12 @@ def make_multi_docs_html(bodies, header='', footer=''):
         open_body, body, close_body = partition_on_body(body)
         header_fragment = headers[i] if is_same_length_h else (headers[0] if headers else '')
         footer_fragment = footers[i] if is_same_length_f else (footers[0] if footers else '')
-        documents.append("".join((
-            open_body,
-            header_fragment,
-            body,
-            footer_fragment,
-            close_body,
-            "\n",
-        )))
+        documents.append(f'{open_body}{header_fragment}{body}{footer_fragment}{close_body}\n')
 
     return documents
 
 
-def consume_headers(buffer: bytearray) -> tuple[Optional[str], Optional[dict[str, str]]]:
+def consume_headers(buffer: bytearray) -> tuple[str | None, dict[str, str] | None]:
     """Parse and remove an HTTP-like header block from a byte buffer.
 
     Returns ``(None, None)`` if the full header block has not been received yet.
@@ -290,13 +274,13 @@ def consume_headers(buffer: bytearray) -> tuple[Optional[str], Optional[dict[str
 
     headers_data = buffer[:headers_end]
     lines = headers_data.split(b'\n')
-    
+
     # Strip \r and decode as text
     decoded_lines = [line.strip(b'\r').decode('utf-8', errors='replace') for line in lines]
-    
+
     request_line = decoded_lines[0] if decoded_lines else ""
     headers = {}
-    
+
     for line in decoded_lines[1:]:
         if not line:
             continue
@@ -306,7 +290,7 @@ def consume_headers(buffer: bytearray) -> tuple[Optional[str], Optional[dict[str
 
     # Remove the headers and the separator from the buffer
     del buffer[:headers_end + sep_len]
-    
+
     return request_line, headers
 
 
@@ -322,7 +306,6 @@ def _serve_requests(process, documents, timeout: int = DEFAULT_SERVE_TIMEOUT):
 
     # Line buffers for partial reads
     stdout_buffer = bytearray()
-    stderr_buffer = bytearray()
 
     request_number = 0
     deadline = time.monotonic() + timeout
@@ -338,35 +321,23 @@ def _serve_requests(process, documents, timeout: int = DEFAULT_SERVE_TIMEOUT):
 
             for key, mask in events:
                 if key.data == 'stderr':
-                    # DRAIN STDERR: Read logs so the worker doesn't block
-                    # Using a large read to clear the buffer quickly
-
-
                     log_data = os.read(process.stderr.fileno(), 65536)
                     if not log_data:
                         selector.unregister(process.stderr)
-                    else:
-                        if not LOG_PAPER_MUNCHER:
-                            continue
-
-                        stderr_buffer.extend(log_data)
-                        while b'\n' in stderr_buffer:
-                            line_end = stderr_buffer.find(b'\n') + 1
-                            line = stderr_buffer[:line_end].decode('utf-8', errors='replace').rstrip('\r\n')
-                            del stderr_buffer[:line_end]
-                            if line:
-                                _logger.warning("Worker Log: %s", line)
+                        continue
+                    _logger.warning("paper-muncher (pid %s) wrote on stderr:\n%s",
+                        process.pid, log_data.decode('utf-8', errors='replace'))
 
                 elif key.data == 'stdout':
                     # PROCESS REQUESTS: Read chunk from stdout
                     chunk = os.read(process.stdout.fileno(), DEFAULT_CHUNK_SIZE)
-                    if not chunk: # EOF
+                    if not chunk:  # EOF
                         return
 
                     stdout_buffer.extend(chunk)
 
                     while True:
-                        request_line, headers = consume_headers(stdout_buffer)
+                        request_line, _headers = consume_headers(stdout_buffer)
                         if request_line is None:
                             break
 
@@ -379,61 +350,41 @@ def _serve_requests(process, documents, timeout: int = DEFAULT_SERVE_TIMEOUT):
                             all_docs_served = len(documents_served) >= len(documents)
                             if all_docs_served:
                                 return _finalize_and_read(process, stdout_buffer)
-                            raise RuntimeError("Paper Muncher returned before we sent everything")
+                            e = "Paper Muncher returned before we sent everything"
+                            raise RuntimeError(e)
     except TimeoutError as timeout_error:
-        try:
-            process.kill()
-        except Exception:
-            pass
-        try:
-            process.wait()
-        except Exception:
-            pass
-        raise TimeoutError(
-            "Paper Muncher exceeded the maximum serve timeout "
-            f"({timeout}s) after serving {len(documents_served)}/{len(documents)} document(s)."
-        ) from timeout_error
-
-
+        _try_kill_proc(process)
+        e = f"Paper Muncher exceeded the maximum serve timeout ({timeout}s) after serving {len(documents_served)}/{len(documents)} document(s)."
+        raise TimeoutError(e) from timeout_error
     finally:
         selector.close()
 
 
 def _finalize_and_read(process, current_buffer):
     """Send the final response, then read stdout/stderr and validate the PDF."""
-    now = datetime.now(timezone.utc)
     final_response = (
-                         b"HTTP/1.1 200 OK\r\n"
-                         b"Date: %(date)s\r\n"
-                         b"Server: %(server)s\r\n"
-                         b"\r\n"
-                     ) % {
-                         b'date': format_datetime(now, usegmt=True).encode(),
-                         b'server': SERVER_SOFTWARE.encode(),
-                     }
+        b"HTTP/1.1 200 OK\r\n"
+        b"Date: %(date)s\r\n"
+        b"Server: %(server)s\r\n"
+        b"\r\n"
+    ) % {
+        b'date': format_datetime(dt.datetime.now(dt.UTC), usegmt=True).encode(),
+        b'server': SERVER_SOFTWARE.encode(),
+    }
 
-    try:
-        _safe_write(process, final_response)
-        process.stdin.flush()
-        process.stdin.close()
-    except TimeoutError:
-        raise
+    _safe_write(process, final_response)
+    process.stdin.flush()
+    process.stdin.close()
 
     if process.poll() is not None:
-        raise RuntimeError("Paper Muncher crashed before returning PDF")
+        e = "Paper Muncher crashed before returning PDF"
+        raise RuntimeError(e)
 
     try:
         rendered_content = bytes(current_buffer + read_all_with_timeout(process.stdout))
         stderr_output = read_all_with_timeout(process.stderr)
     except (EOFError, TimeoutError):
-        try:
-            process.kill()
-        except Exception:
-            pass
-        try:
-            process.wait()
-        except Exception:
-            pass
+        _try_kill_proc(process)
         raise
 
     if stderr_output:
@@ -444,15 +395,8 @@ def _finalize_and_read(process, current_buffer):
 
     try:
         process.wait(timeout=5)
-    except subprocess.TimeoutExpired:
-        try:
-            process.kill()
-        except Exception:
-            pass
-        try:
-            process.wait()
-        except Exception:
-            pass
+    except sp.TimeoutExpired:
+        _try_kill_proc(process)
         _logger.warning(
             "Paper Muncher did not terminate in time, forcefully killed it"
         )
@@ -461,7 +405,8 @@ def _finalize_and_read(process, current_buffer):
         _logger.warning("Paper Muncher exited with code %d", process.returncode)
 
     if not rendered_content.startswith(b'%PDF-'):
-        raise RuntimeError("Paper Muncher did not return valid PDF content")
+        e = "Paper Muncher did not return valid PDF content"
+        raise RuntimeError(e)
 
     return rendered_content
 
@@ -478,27 +423,26 @@ def _handle_single_request(process, request_line, documents, documents_served, r
         raise ValueError(
             f"Unexpected HTTP method: {method} in line: {request_line}")
 
-
     _logger.info("Request #%d: path=%r (documents_count=%d)", request_number, path, len(documents))
 
-    is_document = path.endswith(('.html','.xhtml','.xml')) or path == "."
+    is_document = path.endswith(('.html', '.xhtml', '.xml')) or path == "."
     if is_document:
         index = int(path.split('.')[0]) if path != "." else 0
         _logger.info("Request #%d: Document request for index=%d", request_number, index)
         content = documents[index]
-        now = datetime.now(timezone.utc)
+        now = dt.datetime.now(dt.UTC)
         response_headers = (
-                               b"HTTP/1.1 200 OK\r\n"
-                               b"Content-Length: %(length)d\r\n"
-                               b"Content-Type: text/html\r\n"
-                               b"Date: %(date)s\r\n"
-                               b"Server: %(server)s\r\n"
-                               b"\r\n"
-                           ) % {
-                               b'length': len(content.encode()),
-                               b'date': format_datetime(now, usegmt=True).encode(),
-                               b'server': SERVER_SOFTWARE.encode(),
-                           }
+            b"HTTP/1.1 200 OK\r\n"
+            b"Date: %(date)s\r\n"
+            b"Content-Length: %(length)d\r\n"
+            b"Content-Type: text/html\r\n"
+            b"Server: %(server)s\r\n"
+            b"\r\n"
+        ) % {
+            b'length': len(content.encode()),
+            b'date': format_datetime(now, usegmt=True).encode(),
+            b'server': SERVER_SOFTWARE.encode(),
+        }
         _safe_write(process, response_headers)
         _safe_write(process, content.encode())
         process.stdin.flush()
@@ -518,12 +462,17 @@ def _safe_write(process, data: bytes) -> None:
     try:
         write_with_timeout(process.stdin, data)
     except TimeoutError:
-        try:
-            process.kill()
-        except Exception:
-            pass
-        try:
-            process.wait()
-        except Exception:
-            pass
+        _try_kill_proc(process)
         raise
+
+
+def _try_kill_proc(process) -> None:
+    """Try killing the process, ignore errors."""
+    try:
+        process.kill()
+    except (OSError, sp.SubprocessError):
+        _logger.debug("failed to kill PID %s", process.pid, exc_info=True)
+    try:
+        process.wait()
+    except (OSError, sp.SubprocessError):
+        _logger.debug("PID %s did not terminate", process.pid, exc_info=True)

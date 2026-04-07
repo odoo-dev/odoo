@@ -1,9 +1,13 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from lxml import etree
+
 from odoo.tests.common import TransactionCase
 from odoo.tools import file_open
-from odoo.addons.base_report_engine_wkhtmltox.models.ir_actions_report import _split_table
-from lxml import etree
+
+from odoo.addons.base_report_engine_wkhtmltox.models.ir_actions_report import (
+    _split_table,
+)
 
 
 def cleanup_string(s):

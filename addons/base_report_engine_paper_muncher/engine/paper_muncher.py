@@ -1,36 +1,29 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
-
-import subprocess
 import os
+import os.path
+import subprocess
 from collections.abc import Mapping, Sequence
-from typing import Optional
-from lxml import etree, html
+from functools import cache
 
-import odoo
+from odoo.tools.misc import find_in_path
 
-try:
-    import magic
-except ImportError:
-    magic = None
-
-from .communication import (partition_on_body, make_multi_docs_html, _serve_requests)
-from .utils import get_paper_muncher_binary
+from .communication import _serve_requests, make_multi_docs_html, partition_on_body
 
 _logger = logging.getLogger(__name__)
+FALLBACK_BIN_PATH = '/opt/paper-muncher/bin/paper-muncher'
 
-SERVER_SOFTWARE = f'{odoo.release.product_name}/{odoo.release.version}'
 
 def run_paper_muncher(
-        paperformat,
-        bodies: Sequence[str],
-        header: str = '',
-        footer: str = '',
-        landscape: bool = False,
-        specific_paperformat_args: Optional[Mapping] = None,
-        set_viewport_size: Optional[str] = None,
-        scale = 72,
+    paperformat,
+    bodies: Sequence[str],
+    header: str = '',
+    footer: str = '',
+    landscape: bool = False,
+    specific_paperformat_args: Mapping | None = None,
+    set_viewport_size: str | None = None,
+    scale=72,
 ) -> bytes:
     """Render a PDF from HTML content using Paper Muncher subprocess.
 
@@ -46,11 +39,8 @@ def run_paper_muncher(
     :param scale:
     :raises RuntimeError: If Paper Muncher fails during any phase.
     """
-
-
     if not isinstance(bodies, (list, tuple)):
         bodies = list(bodies)
-
 
     if len(bodies) > 1:
         documents = make_multi_docs_html(bodies, header, footer)
@@ -58,7 +48,7 @@ def run_paper_muncher(
         header = partition_on_body(header)[1]
         footer = partition_on_body(footer)[1]
         open_body, body, close_body = partition_on_body(bodies[0])
-        documents = ["".join((open_body, header, body, footer, close_body, "\n"))]
+        documents = [f'{open_body}{header}{body}{footer}{close_body}\n']
 
     FEATURE_FLAGS = True
 
@@ -68,7 +58,7 @@ def run_paper_muncher(
         extra_args += ['--orientation', 'landscape']
 
     if FEATURE_FLAGS:
-        extra_args += ['--feature', '*=on'] # activate all experimental/optional features
+        extra_args += ['--feature', '*=on']  # activate all experimental/optional features
         # extra_args += ['--debug', 'http-client=on'] # logs paper-munchers requests
         extra_args += ['--margins', 'none']
 
@@ -79,19 +69,13 @@ def run_paper_muncher(
             extra_args += ['--width', f'{paperformat.page_width}mm']
             extra_args += ['--height', f'{paperformat.page_height}mm']
 
-    if not (binary := get_paper_muncher_binary()):
-        raise RuntimeError(
-            "Paper Muncher binary not found or not usable. "
-            "Ensure it is installed and available in the system PATH."
-        )
-
-    return run_process(binary, extra_args, documents)
+    return run_process(which_paper_muncher(), extra_args, documents)
 
 
 def run_process(
-        binary,
-        extra_args,
-        documents,
+    binary,
+    extra_args,
+    documents,
 ):
     env = os.environ.copy()
     # Disable ANSI color codes in subprocess logs to prevent parsing errors.
@@ -100,10 +84,45 @@ def run_process(
     names = [f"pipe:{i}.html" for i in range(len(documents))]
 
     with subprocess.Popen(
-            [binary, *names, '-o', "pipe:"] + extra_args,
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            env=env,
+        [binary, *names, '-o', "pipe:"] + extra_args,
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=env,
     ) as process:
         return _serve_requests(process, documents)
+
+
+@cache
+def which_paper_muncher() -> os.PathLike:
+    f""" Look for the paper-muncher binary in PATH or at {FALLBACK_BIN_PATH}. """
+    try:
+        binary = find_in_path('paper-muncher')
+    except OSError as exc:
+        if not os.path.isfile(FALLBACK_BIN_PATH):
+            e = "paper-muncher binary not found in PATH"
+            raise RuntimeError(e) from exc
+        binary = FALLBACK_BIN_PATH
+
+    try:
+        subprocess.run(
+            [binary, '--version'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError) as exc:
+        e = f"bad paper-muncher found at {binary}"
+        raise RuntimeError(e) from exc
+
+    return binary
+
+
+try:
+    _bin_path = which_paper_muncher()
+except RuntimeError:
+    _logger.error("Error finding the paper-muncher binary.",
+        exc_info=_logger.isEnabledFor(logging.DEBUG))
+else:
+    _logger.info("Found paper-muncher binary at %s", _bin_path)
+    del _bin_path
