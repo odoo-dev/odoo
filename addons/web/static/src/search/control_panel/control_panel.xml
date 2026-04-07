@@ -76,7 +76,7 @@
                 </div>
 
                 <div class="o_control_panel_navigation d-flex flex-wrap flex-md-nowrap justify-content-end gap-1 gap-xl-3 order-1 order-lg-2 flex-grow-1">
-                    <t t-set="isFilledIconViews" t-value="['view_list', 'contact_mail', 'calendar_today', 'location_on']"/>
+                    <t t-set="isFilledIconViews" t-value="['contact_mail', 'calendar_today', 'location_on']"/>
                     <t t-if="this.state.embeddedInfos.embeddedActions?.length and this.env.isSmall">
                         <t t-call="web.embeddedActionsDropdown" />
                     </t>

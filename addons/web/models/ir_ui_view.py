@@ -21,7 +21,7 @@ class IrUiView(models.Model):
 
     def _get_view_info(self):
         return {
-            'list': {'icon': 'view_list'},
+            'list': {'icon': 'reorder'},
             'form': {'icon': 'contact_mail', 'multi_record': False},
             'graph': {'icon': 'area_chart'},
             'pivot': {'icon': 'oi_view-pivot'},
