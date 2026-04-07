@@ -64,48 +64,6 @@ class TestOrmCache(TransactionCase):
         self.assertEqual(counter.tx_miss, tx_miss + 1)
         self.assertIn(key, cache)
 
-    def test_invalidation(self):
-        transaction = self.env.transaction
-        reg_caches = transaction._registry_caches__.copy()
-
-        def root(data):
-            while hasattr(data, 'parent'):
-                data = data.parent
-            return data
-
-        def cache_invalidated():
-            # cache is invalidated if the layer is detached from the registry
-            # cache that the transaction started with
-            return {
-                name for name, data in transaction.ormcaches__.items()
-                if root(data) is not reg_caches[name][1] and '.' not in name
-            }
-        self.assertEqual(cache_invalidated(), set())
-        self.env.transaction.invalidate_ormcache()
-        self.env.transaction.invalidate_ormcache('templates')
-        self.assertEqual(cache_invalidated(), {'default', 'templates'})
-        self.env.transaction.reset()
-        self.assertEqual(cache_invalidated(), set())
-        self.env.transaction.invalidate_ormcache('assets')
-        self.assertEqual(cache_invalidated(), {'assets'})
-        self.env.transaction.reset()
-        self.assertEqual(cache_invalidated(), set())
-
-    def test_invalidation_in_savepoints(self):
-        cr = self.env.cr
-        transaction = self.env.transaction
-        transaction.invalidate_ormcache()
-        # XXX
-        # set value
-        with cr.savepoint() as sp:
-            # XXX set value
-            transaction.invalidate_ormcache()
-            sp.rollback()
-            # XXX set value
-            transaction.invalidate_ormcache()
-        # set value
-        transaction.invalidate_ormcache()
-
     def test_signaling_gc(self):
         cr = self.env.cr
         cr.execute('SELECT last_value FROM orm_signaling_registry_id_seq')
@@ -191,6 +149,34 @@ class TestOrmCacheSignaling(BaseCase):
             if root(data) is not self.transaction._registry_caches__[name][1]
             and '.' not in name
         }
+
+    def test_invalidation(self):
+        transaction = self.transaction
+        self.assertEqual(self.cache_invalidated, set())
+        transaction.invalidate_ormcache()
+        transaction.invalidate_ormcache('templates')
+        self.assertEqual(self.cache_invalidated, {'default', 'templates'})
+        transaction.reset()
+        self.assertEqual(self.cache_invalidated, set())
+        transaction.invalidate_ormcache('assets')
+        self.assertEqual(self.cache_invalidated, {'assets'})
+        transaction.reset()
+        self.assertEqual(self.cache_invalidated, set())
+
+    def test_invalidation_in_savepoints(self):
+        cr = self.cr
+        transaction = self.transaction
+        transaction.invalidate_ormcache()
+        # XXX
+        # set value
+        with cr.savepoint() as sp:
+            # XXX set value
+            transaction.invalidate_ormcache()
+            sp.rollback()
+            # XXX set value
+            transaction.invalidate_ormcache()
+        # set value
+        transaction.invalidate_ormcache()
 
     def test_signaling_01_single(self):
         transaction = self.transaction
