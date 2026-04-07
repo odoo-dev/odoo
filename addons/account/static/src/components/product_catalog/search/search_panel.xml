@@ -6,12 +6,18 @@
         t-inherit="web.SearchPanelContent"
         t-inherit-mode="primary"
     >
+        <div t-custom-ref="root" position="attributes">
+            <attribute name="class" add="o_product_catalog_search_panel" separator=" "/>
+        </div>
+
+        <xpath expr="//header/i" position="replace"/>
+
         <section position="before">
             <section t-if="this.showSections" class="o_search_panel_sections mt-4 pb-4 border-bottom">
-                <header class="d-flex align-items-center cursor-default gap-2 mb-3 ps-2">
+                <header class="d-flex align-items-center cursor-default mb-3 ps-2">
                     <b class="text-uppercase mx-2">Sections</b>
                     <i
-                        class="fa fa-plus-square cursor-pointer"
+                        class="fa fa-fw fa-plus-square cursor-pointer"
                         t-on-click="() => this.enableSectionInput('bottom')"
                     />
                     <div class="d-flex align-items-center ms-auto">
@@ -54,7 +60,9 @@
     <t t-name="account.SectionRow">
         <li class="list-group-item px-2 mb-1 border-0">
 
-            <div class="d-flex align-items-center">
+            <div t-att-class="'d-flex align-items-center cursor-pointer o_section_row ' + (
+                            this.selectedSection.sectionId == section.id ? 'o_selected_section' : ''
+                        )">
 
                 <!-- Expand / collapse -->
                 <i
@@ -62,14 +70,30 @@
                     t-att-class="'fa me-1 ' + (section.isOpen ? 'fa-caret-down' : 'fa-caret-right')"
                     t-on-click="() => this.toggle(section)"
                 />
+                <i
+                    t-if="section.id === false"
+                    class="fa fa-pencil"
+                    t-on-click="() => this.enableSectionInput('top')"
+                />
+                <input
+                    t-if="section.id === false and this.state.isAddingSection === 'top'"
+                    class="ms-2 o_section_input"
+                    type="text"
+                    t-custom-model="this.state.newSectionName"
+                    t-on-keydown="(ev) => this.onSectionInputKeydown(ev)"
+                    t-on-blur="() => this.createSection()"
+                />
 
                 <!-- Name -->
                 <div
+                    t-else=""
                     class="w-100 d-flex align-items-center overflow-hidden"
                     t-on-click="() => this.setSelectedSection(section.id)"
+                    t-att-title="section.name"
                 >
                     <span class="text-truncate" t-out="section.name"/>
                     <span class="text-muted ms-2" t-out="section.line_count"/>
+                    <span t-if="section.display_type === 'line_section'" class="text-muted ms-2" t-out="this.getFormattedSubTotal(section)"/>
                 </div>
 
                 <!-- Add subsection -->

@@ -2644,7 +2644,7 @@ class SaleOrder(models.Model):
             if (
                 line.display_type
                 or line.product_id.id not in product_ids
-                or line.get_parent_section_line().id != section_id
+                or not line.is_in_section(section_id)
             ):
                 continue
             grouped_lines[line.product_id] |= line
@@ -2668,9 +2668,7 @@ class SaleOrder(models.Model):
         """
         request.update_context(catalog_skip_tracking=True)
         sol = self.order_line.filtered(
-            lambda line: (
-                line.product_id.id == product.id and line.get_parent_section_line().id == section_id
-            )
+            lambda line: line.product_id.id == product.id and line.is_in_section(section_id)
         )
         if sol:
             if quantity != 0:

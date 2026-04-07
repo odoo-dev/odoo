@@ -119,12 +119,20 @@ class ProductCatalogMixin(models.AbstractModel):
                     'parent_id': line.parent_id.id if line.display_type == 'line_subsection' else False,
                     'line_count': 0,
                     'display_type': line.display_type,
+                    'subtotal': line._get_section_totals('price_subtotal') if line.display_type == 'line_section' else False,
+                    'currency_id': self.currency_id.id,
                 }
             elif self._is_line_valid_for_section_line_count(line):
-                sec_id = line.get_parent_section_line().id
-                if sec_id and sec_id in sections:
-                    sections[sec_id]['line_count'] += 1
-                else:
+                section = line.get_parent_section_line()
+                subsection = line.get_parent_subsection_line()
+
+                if subsection and subsection.id in sections:
+                    sections[subsection.id]['line_count'] += 1
+
+                if section and section.id in sections:
+                    sections[section.id]['line_count'] += 1
+
+                if not (section or subsection):
                     no_section_count += 1
 
         if no_section_count > 0 or not sections:
@@ -134,7 +142,6 @@ class ProductCatalogMixin(models.AbstractModel):
                 'name': self.env._("No Section"),
                 'sequence': lines[0].sequence - 1 if lines else 0,
                 'parent_id': False,
-                'display_type': 'line_section',
                 'line_count': no_section_count,
             }
 

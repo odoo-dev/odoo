@@ -1,8 +1,9 @@
-import { useState } from "@web/owl2/utils";
 import { onWillStart } from '@odoo/owl';
+import { formatCurrency } from '@web/core/currency';
 import { getActiveHotkey } from '@web/core/hotkeys/hotkey_service';
 import { rpc } from '@web/core/network/rpc';
 import { useBus } from '@web/core/utils/hooks';
+import { useState } from "@web/owl2/utils";
 import { SearchPanel } from '@web/search/search_panel/search_panel';
 
 
@@ -37,6 +38,10 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         return this.env.searchModel.selectedSection;
     }
 
+    getFormattedSubTotal(section) {
+        return formatCurrency(section.subtotal, section.currency_id);
+    }
+
     toggle(section) {
         section.isOpen = !section.isOpen;
     }
@@ -56,7 +61,6 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
     }
 
     enableSectionInput(type, parentId = null) {
-        debugger;
         this.state.isAddingSection = parentId
             ? `subsection_${parentId}`
             : type;
@@ -91,15 +95,17 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
                 parent_id: parentId,
             })
         );
-        debugger;
 
         if (section) {
-            const sections = this.state.sections;
             let newLineCount = 0;
 
             if (position === 'top') {
-                newLineCount = sections.get(false).line_count;
-                sections.delete(false);
+                const noSection = this.state.sections.find(sec => sec.id === false);
+
+                if (noSection) {
+                    newLineCount = noSection.line_count;
+                    this.state.sections = this.state.sections.filter(sec => sec.id !== false);
+                }
             }
             const newNode = {
                 ...section,
@@ -117,7 +123,7 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
             } else {
                 this.state.sections.push(newNode);
             }
-            this._sortSectionsBySequence(sections);
+            this._sortSectionsBySequence(this.state.sections);
             this.setSelectedSection(section.id);
         }
         Object.assign(this.state, {
@@ -177,16 +183,15 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         this._sortSectionsBySequence(sections);
     }
 
-    updateSectionLineCount({detail: {sectionId, lineCountChange}}) {
-        const sections = this.state.sections;
-        const section = sections.get(sectionId);
+    updateSectionLineCount({ detail: { sectionId, lineCountChange } }) {
+        const section = this._findSectionById(sectionId, this.state.sections);
         if (!section) return;
 
-        section.line_count = Math.max(0, section.line_count + lineCountChange);
+        section.line_count = Math.max(0, (section.line_count || 0) + lineCountChange);
 
-        if (section.line_count === 0 && sectionId === false && sections.size > 1) {
-            sections.delete(sectionId);
-            this.setSelectedSection(sections.size > 0 ? [...sections.keys()][0] : null);
+        if (section.line_count === 0 && sectionId === false && this.state.sections.length > 1) {
+            this.state.sections = this.state.sections.filter(sec => sec.id !== sectionId);
+            this.setSelectedSection(this.state.sections.length ? this.state.sections[0].id : null);
         }
     }
 
