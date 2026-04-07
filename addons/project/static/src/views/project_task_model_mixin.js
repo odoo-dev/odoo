@@ -1,10 +1,12 @@
 import { browser } from "@web/core/browser/browser";
+import { router } from "@web/core/browser/router";
 import { Domain } from "@web/core/domain";
 
 export const ProjectTaskModelMixin = (T) => class ProjectTaskModelMixin extends T {
     _processSearchDomain(domain) {
         const { my_tasks, subtask_action, activity_action } = this.env.searchModel.globalContext;
-        const showSubtasks = my_tasks || subtask_action || activity_action || JSON.parse(browser.localStorage.getItem("showSubtasks"));
+        const showSubtasksKey = router.current.action === "project_sharing" ? "portalShowSubTasks" : "showSubtasks";
+        const showSubtasks = (my_tasks || subtask_action || activity_action || JSON.parse(browser.localStorage.getItem(showSubtasksKey))) ?? true;
         if (!showSubtasks) {
             domain = Domain.and([
                 domain,

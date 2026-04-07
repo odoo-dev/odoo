@@ -1,4 +1,5 @@
 import { browser } from "@web/core/browser/browser";
+import { router } from "@web/core/browser/router";
 import { _t } from "@web/core/l10n/translation";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 
@@ -7,7 +8,7 @@ export class ProjectTaskControlPanel extends ControlPanel {
 
     setup() {
         super.setup();
-        this.showSubtasksKey = "showSubtasks";
+        this.showSubtasksKey = router.current.action === "project_sharing" ? "portalShowSubTasks" : "showSubtasks";
         this.state.showSubtasks = JSON.parse(browser.localStorage.getItem(this.showSubtasksKey) || "false");
     }
 
