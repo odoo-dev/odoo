@@ -100,11 +100,7 @@ class TestUi(TestPosHrHttpCommon):
         # open a session, the /pos/ui controller will redirect to it
         self.main_pos_config.with_user(self.pos_admin).open_ui()
 
-        self.start_tour(
-            "/pos/ui/%d" % self.main_pos_config.id,
-            "CashierStayLogged",
-            login="pos_admin",
-        )
+        self.start_pos_tour('CashierStayLogged')
 
     def test_cashier_can_see_product_info(self):
         # open a session, the /pos/ui controller will redirect to it
@@ -171,11 +167,7 @@ class TestUi(TestPosHrHttpCommon):
         self.product_a.available_in_pos = True
         self.main_pos_config.with_user(self.pos_admin).open_ui()
 
-        self.start_tour(
-            "/pos/ui?config_id=%d" % self.main_pos_config.id,
-            "test_cashier_changed_in_receipt",
-            login="pos_admin",
-        )
+        self.start_pos_tour('test_cashier_changed_in_receipt')
         order = self.main_pos_config.current_session_id.order_ids[0]
         self.assertEqual(order.cashier, "Test Employee 3")
         self.assertEqual(order.employee_id.display_name, "Test Employee 3")
@@ -216,7 +208,7 @@ class TestUi(TestPosHrHttpCommon):
             'payment_method_id': self.bank_payment_method.id
         })
         order_payment.with_context(**payment_context).check()
-        self.start_pos_tour("test_minimal_employee_refund", login="pos_admin")
+        self.start_pos_tour("test_minimal_employee_refund")
 
     def test_cost_and_margin_visibility(self):
         self.product_a.available_in_pos = True
@@ -225,11 +217,7 @@ class TestUi(TestPosHrHttpCommon):
         })
         self.main_pos_config.with_user(self.pos_admin).open_ui()
 
-        self.start_tour(
-            "/pos/ui?config_id=%d" % self.main_pos_config.id,
-            "test_cost_and_margin_visibility",
-            login="pos_admin",
-        )
+        self.start_pos_tour('test_cost_and_margin_visibility')
 
     @users('pos_admin')
     def test_create_pos_config_without_hr_right(self):
@@ -276,8 +264,4 @@ class TestUi(TestPosHrHttpCommon):
         self.main_pos_config.module_pos_hr = False
         self.main_pos_config.with_user(self.pos_admin).open_ui()
 
-        self.start_tour(
-            "/pos/ui?config_id=%d" % self.main_pos_config.id,
-            "test_scan_employee_barcode_with_pos_hr_disabled",
-            login="pos_admin"
-        )
+        self.start_pos_tour('test_scan_employee_barcode_with_pos_hr_disabled')

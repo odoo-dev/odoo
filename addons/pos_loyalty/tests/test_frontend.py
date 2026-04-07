@@ -2536,17 +2536,13 @@ class TestUi(TestPointOfSaleHttpCommon):
             'pos_config_ids': [Command.link(self.main_pos_config.id)],
         })
         self.main_pos_config.with_user(self.pos_admin).open_ui()
-        self.start_tour(
-            "/pos/ui/%d" % self.main_pos_config.id,
+        self.start_pos_tour(
             "PosRewardProductScan",
-            login="pos_admin",
         )
         # check the same flow with gs1 nomenclature
         self.env.company.nomenclature_id = self.env.ref('barcodes_gs1_nomenclature.default_gs1_nomenclature')
-        self.start_tour(
-            "/pos/ui/%d" % self.main_pos_config.id,
+        self.start_pos_tour(
             "PosRewardProductScanGS1",
-            login="pos_admin",
         )
 
     def test_coupon_pricelist(self):

@@ -44,7 +44,7 @@ class TestSelfOrderOnlinePayment(TestUi):
         # No need to check preparation printer in this test.
         self.env["pos.printer"].search([]).unlink()
         self.pos_config.with_user(self.pos_admin).open_ui()
-        self.start_pos_tour('OnlinePaymentWithMultiTables', login="pos_admin")
+        self.start_pos_tour('OnlinePaymentWithMultiTables')
 
     def test_02_online_payment_with_multi_website_company(self):
         if not self.env["ir.module.module"].search([("name", "=", "website"), ("state", "=", "installed")]):

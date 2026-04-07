@@ -832,7 +832,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         })
         sale_order.action_confirm()
         self.main_pos_config.with_user(self.pos_admin).open_ui()
-        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosOrdersListDifferentCurrency', login="pos_admin")
+        self.start_pos_tour('PosOrdersListDifferentCurrency')
 
     def test_downpayment_amount_to_invoice(self):
         product_a = self.env['product.product'].create({

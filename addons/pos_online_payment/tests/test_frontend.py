@@ -331,7 +331,7 @@ class TestUi(TestPointOfSaleHttpCommon, OnlinePaymentCommon):
     def test_selected_customer_after_adding_payment_sync(self):
         """ Test that the selected customer is kept after adding an online payment."""
         self.pos_config.with_user(self.pos_admin).open_ui()
-        self.start_pos_tour('test_selected_customer_after_adding_payment_sync', login="pos_admin")
+        self.start_pos_tour('test_selected_customer_after_adding_payment_sync')
         order = self.pos_config.current_session_id.order_ids.sorted(lambda o: o.id, reverse=True)[0]
         self.assertEqual(order.partner_id.name, "A simple PoS man!", "The selected customer was not kept after adding an online payment.")
         self.assertEqual(order.state, "draft", "The order should still be in draft state.")

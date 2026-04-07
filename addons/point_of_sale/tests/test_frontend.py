@@ -2069,7 +2069,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             },
         ])
         self.main_pos_config.with_user(self.pos_admin).open_ui()
-        self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'PosCategoriesOrder', login="pos_admin")
+        self.start_pos_tour('PosCategoriesOrder')
 
     def test_product_with_dynamic_attributes(self):
         dynamic_attribute = self.env['product.attribute'].create({
@@ -2097,7 +2097,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             'value_ids': [Command.set([value_1.id, value_2.id])],
         })
         self.main_pos_config.with_user(self.pos_admin).open_ui()
-        self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'PosProductWithDynamicAttributes', login="pos_admin")
+        self.start_pos_tour('PosProductWithDynamicAttributes')
 
     def test_autofill_cash_count(self):
         """Make sure that when the decimal separator is a comma, the shown orderline price is correct.
@@ -4132,7 +4132,7 @@ class TestUi(TestPointOfSaleHttpCommon):
             }
         )
         self.main_pos_config.with_user(self.pos_admin).open_ui()
-        self.start_pos_tour('test_combo_price_unchanged_with_lot_tracked_product', login="pos_admin")
+        self.start_pos_tour('test_combo_price_unchanged_with_lot_tracked_product')
 
 
 # This class just runs the same tests as above but with mobile emulation

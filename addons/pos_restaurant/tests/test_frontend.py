@@ -256,14 +256,14 @@ class TestFrontend(TestFrontendCommon):
     def test_02_others(self):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('SplitBillScreenTour')
-        self.start_pos_tour('FloorScreenTour', login="pos_admin")
-        self.start_pos_tour('TableMergeUnmergeTour', login="pos_admin")
+        self.start_pos_tour('FloorScreenTour')
+        self.start_pos_tour('TableMergeUnmergeTour')
 
     def test_02_others_bis(self):
         # disable kitchen printer to avoid printing errors
         self.pos_config.use_order_printer = False
         self.pos_config.with_user(self.pos_admin).open_ui()
-        self.start_pos_tour('ControlButtonsTour', login="pos_admin")
+        self.start_pos_tour('ControlButtonsTour')
 
     def test_04_ticket_screen(self):
         self.pos_config.use_order_printer = False
@@ -593,7 +593,7 @@ class TestFrontend(TestFrontendCommon):
         })
         self.pos_config.use_order_printer = False
         self.pos_config.with_user(self.pos_user).open_ui()
-        self.start_pos_tour('test_tax_in_merge_table_order_line_tour', login="pos_admin")
+        self.start_pos_tour('test_tax_in_merge_table_order_line_tour')
         line_1 = self.env['pos.order.line'].search([('full_product_name', '=', 'product_1')])
         line_2 = self.env['pos.order.line'].search([('full_product_name', '=', 'product_2')])
         self.assertEqual(line_1.tax_ids, self.tax_sale_a)
@@ -775,7 +775,7 @@ class TestFrontend(TestFrontendCommon):
         })
         self.pos_config.write({'payment_method_ids': [(4, self.customer_account_payment_method.id)]})
         self.pos_config.with_user(self.pos_admin).open_ui()
-        self.start_pos_tour('test_no_kitchen_confirmation_for_deposit_money', login="pos_admin")
+        self.start_pos_tour('test_no_kitchen_confirmation_for_deposit_money')
 
     def test_open_default_register_screen_config(self):
         """
