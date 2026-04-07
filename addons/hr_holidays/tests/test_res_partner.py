@@ -86,3 +86,40 @@ class TestPartner(TransactionCase):
             "Return date is the return date of the main user of the partner, "
             "even if the user has no access to the company",
         )
+
+    @freeze_time("2024-06-04")
+    def test_store_add_res_partner_multicompany_employee(self):
+        other_company = self.env["res.company"].create({"name": "Other Company"})
+        other_user = self.env["res.users"].create({
+            "name": "other",
+            "login": "other",
+            "email": "other@example.com",
+            "company_id": other_company.id,
+            "company_ids": [Command.set([other_company.id])],
+            "group_ids": [Command.link(self.env.ref("base.group_user").id)],
+            "notification_type": "inbox",
+            "partner_id": self.partner.id,
+        })
+        other_employee = self.env["hr.employee"].create({
+            "user_id": other_user.id,
+            "company_id": other_company.id,
+        })
+        other_leave = self.env["hr.leave"].create({
+            "request_date_from": "2024-06-03",
+            "request_date_to": "2024-06-06",
+            "employee_id": other_employee.id,
+            "work_entry_type_id": self.work_entry_type.id,
+        })
+        other_leave.write({"state": "validate"})
+        store = Store().add(self.partner, "_store_partner_fields")
+        other_employee_info = next(
+            employee
+            for employee in store._build_result()["hr.employee"]
+            if employee["id"] == other_employee.id
+        )
+        self.assertEqual(
+            other_employee_info["leave_date_to"],
+            "2024-06-07",
+            "Partner store should serialize leave dates from partner employee_ids "
+            "even when the employee belongs to another company",
+        )
