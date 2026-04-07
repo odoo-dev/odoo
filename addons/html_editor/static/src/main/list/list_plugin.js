@@ -421,25 +421,17 @@ export class ListPlugin extends Plugin {
      * Converts a list element and its nested elements to the given list mode.
      *
      * @see switchListMode
-     * @param {HTMLUListElement|HTMLOListElement|HTMLLIElement} node - HTML element
-     * representing a list or list item.
+     * @param {HTMLElement} node - HTML element
      * @param {string} newMode - Target list mode
-     * @param {Object} options
-     * @returns {HTMLUListElement|HTMLOListElement|HTMLLIElement} node - Modified
-     * list element after conversion.
+     * @returns {HTMLElement} node - Modified
+     * Node after conversion.
      */
     convertList(node, newMode) {
-        if (!["UL", "OL", "LI"].includes(node.tagName)) {
-            return;
+        const listsToConvert = node.querySelectorAll("ul, ol");
+        for (const list of listsToConvert) {
+            this.switchListMode(list, newMode);
         }
-        const listMode = this.getListMode(node);
-        if (listMode && newMode !== listMode) {
-            node = this.switchListMode(node, newMode);
-        }
-        for (const child of node.children) {
-            this.convertList(child, newMode);
-        }
-        return node;
+        return isListElement(node) ? this.switchListMode(node, newMode) : node;
     }
 
     /**
@@ -466,7 +458,7 @@ export class ListPlugin extends Plugin {
      */
     switchListMode(list, newMode) {
         if (this.getListMode(list) === newMode) {
-            return;
+            return list;
         }
         const newTag = newMode === "CL" ? "UL" : newMode;
         const newList = this.dependencies.dom.setTagName(list, newTag);
@@ -843,18 +835,12 @@ export class ListPlugin extends Plugin {
         if (isListItemElement(container) && isParagraphRelatedElement(nodeToInsert)) {
             nodeToInsert = this.dependencies.dom.setTagName(nodeToInsert, "LI");
         }
-        const listEl = container && closestElement(container, listElementSelector);
+        const listEl = closestElement(container, listElementSelector);
         if (!listEl) {
             return nodeToInsert;
         }
-        const mode = container && this.getListMode(listEl);
-        if (isListItemElement(nodeToInsert) && nodeToInsert.querySelector("ol, ul")) {
-            return this.convertList(nodeToInsert, mode);
-        }
-        if (isListElement(nodeToInsert)) {
-            return this.convertList(nodeToInsert, this.getListMode(nodeToInsert));
-        }
-        return nodeToInsert;
+        const mode = this.getListMode(listEl);
+        return this.convertList(nodeToInsert, mode);
     }
 
     handleTab() {
