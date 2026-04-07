@@ -65,3 +65,50 @@ class TestAdditionalIdentifiers(AccountTestInvoicingCommon):
         keys_to_check = ['GLN', 'NO_EN']
         found_keys = [k for k in metadata if k in keys_to_check]
         self.assertEqual(len(found_keys), len(keys_to_check))
+
+    def test_vat_deduces_additional_identifiers(self):
+        """Setting a Belgian VAT should automatically deduce BE_EN (enterprise number)."""
+        partner = self.env['res.partner'].create({
+            'name': 'BE Partner',
+            'country_id': self.env.ref('base.be').id,
+        })
+        partner.vat = 'BE0477472701'
+        self.assertEqual(
+            (partner.additional_identifiers or {}).get('BE_EN'),
+            '0477472701',
+            "BE_EN should be deduced from BE VAT by stripping the country prefix",
+        )
+
+    def test_vat_deduces_dk_cvr(self):
+        """Setting a Danish VAT should automatically deduce DK_CVR."""
+        partner = self.env['res.partner'].create({
+            'name': 'DK Partner',
+            'country_id': self.env.ref('base.dk').id,
+        })
+        partner.vat = 'DK12345674'
+        self.assertEqual(
+            (partner.additional_identifiers or {}).get('DK_CVR'),
+            '12345674',
+        )
+
+    def test_vat_deduces_at_en(self):
+        """Setting an Austrian VAT should automatically deduce AT_EN."""
+        partner = self.env['res.partner'].create({
+            'name': 'AT Partner',
+            'country_id': self.env.ref('base.at').id,
+        })
+        partner.vat = 'ATU12345675'
+        self.assertEqual(
+            (partner.additional_identifiers or {}).get('AT_EN'),
+            'U12345675',
+        )
+
+    def test_unknown_key_dropped(self):
+        """Unknown identifier keys should be silently dropped on save."""
+        partner = self.env['res.partner'].create({
+            'name': 'Test Unknown Key',
+            'country_id': self.env.ref('base.be').id,
+            'additional_identifiers': {'UNKNOWN_KEY': '12345', 'BE_EN': '0477472701'},
+        })
+        self.assertNotIn('UNKNOWN_KEY', partner.additional_identifiers or {})
+        self.assertIn('BE_EN', partner.additional_identifiers or {})

@@ -231,10 +231,6 @@
                                 <field name="invoice_sending_method"
                                        groups="base.group_no_one"
                                        placeholder="e-Invoicing &amp; Email"/>
-                                <field name="invoice_edi_format"
-                                       placeholder="XML format"
-                                       groups="base.group_no_one"
-                                       invisible="not display_invoice_edi_format"/>
                                 <field name="invoice_template_pdf_report_id"
                                        invisible="not display_invoice_template_pdf_report_id"
                                        options="{'no_create': True, 'no_edit': True}"/>

@@ -1,26 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="res_partner_tree_l10n_it" model="ir.ui.view">
-        <field name="name">res.partner.list.l10n.it</field>
-        <field name="mode">primary</field>
-        <field name="model">res.partner</field>
-        <field name="inherit_id" ref="base.view_partner_tree"/>
-        <field name="arch" type="xml">
-        </field>
-    </record>
-
-    <record id="res_partner_form_l10n_it" model="ir.ui.view">
-        <field name="name">res.partner.form.l10n.it</field>
-        <field name="model">res.partner</field>
-        <field name="priority">20</field>
-        <field name="inherit_id" ref="account.view_partner_property_form"/>
-        <field name="arch" type="xml">
-        <data>
-        </data>
-        </field>
-    </record>
-
     <record id="res_company_form_l10n_it" model="ir.ui.view">
         <field name="name">res.company.form.l10n.it</field>
         <field name="model">res.company</field>

@@ -180,7 +180,8 @@ class ResPartner(models.Model):
     def create(self, vals_list):
         res = super().create(vals_list)
         if res:
-            res.button_peppol_sync()  # will only be sync'ed when it makes sense
+            for partner in res:
+                partner.button_peppol_sync()  # will only be sync'ed when it makes sense
         return res
 
     # -------------------------------------------------------------------------

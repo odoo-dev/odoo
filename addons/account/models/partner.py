@@ -664,6 +664,7 @@ class ResPartner(models.Model):
 
     def _inverse_vat(self):
         self._check_vat()
+        self._deduce_additional_identifiers_from_vat()
 
     @api.onchange('vat', 'country_id')
     def _onchange_vat(self):
@@ -925,6 +926,20 @@ class ResPartner(models.Model):
             for identifier_type, value in identifiers.items():
                 enriched_identifiers.update(get_deduced_identifiers(identifier_type, value))
         return {**identifiers, **enriched_identifiers}
+
+    def _deduce_additional_identifiers_from_vat(self):
+        """When VAT changes, compute deduced identifiers (e.g. BE_VAT → BE_EN)."""
+        for partner in self:
+            if not partner.vat or not partner.country_code:
+                continue
+            vat_key = get_tin_metadata_of_country(partner.country_code).get('key')
+            if not vat_key:
+                continue
+            deduced = get_deduced_identifiers(vat_key, partner.vat)
+            if deduced:
+                existing = dict(partner.additional_identifiers or {})
+                existing.update(deduced)
+                partner.additional_identifiers = existing
 
     def _clean_additional_identifiers(self, vals):
         if 'additional_identifiers' not in vals or not isinstance(vals['additional_identifiers'], dict):
