@@ -75,8 +75,12 @@ patch(PosStore.prototype, {
     async preSyncAllOrders(orders) {
         if (this.config.module_pos_restaurant) {
             for (const order of orders) {
-                // Avoid to block others devices on register screen when no table and name is set.
-                if (!order.table_id && !order.floating_order_name) {
+                if (order.table_id) {
+                    // Always update floating_order_name with the full formatted name
+                    // so that KDS displays the combined table numbers (e.g. "T 2 & 1 - 1026").
+                    order.floating_order_name = order.getName();
+                } else if (!order.floating_order_name) {
+                    // Avoid to block others devices on register screen when no table and name is set.
                     order.floating_order_name = order.floatingOrderName || order.pos_reference;
                 }
             }
@@ -233,6 +237,7 @@ patch(PosStore.prototype, {
         }
 
         if (typeof destOrder.id === "number") {
+            await this.sendOrderInPreparation(destOrder, { byPassPrint: true });
             await this.syncAllOrders({ orders: [destOrder] });
         }
         await this.deleteOrders([sourceOrder], [], typeof sourceOrder.id === "number");
@@ -367,6 +372,12 @@ patch(PosStore.prototype, {
             }
 
             await this.syncAllOrders({ orders: [order, newOrder] });
+            if (typeof order.id === "number") {
+                await this.sendOrderInPreparation(order, { byPassPrint: true });
+            }
+            if (typeof newOrder.id === "number") {
+                await this.sendOrderInPreparation(newOrder, { byPassPrint: true });
+            }
             return newOrder;
         }
 
@@ -829,6 +840,7 @@ patch(PosStore.prototype, {
 
         if (destinationTable) {
             if (!this.prepareOrderTransfer(sourceOrder, destinationTable)) {
+                await this.sendOrderInPreparation(sourceOrder, { byPassPrint: true });
                 await this.syncAllOrders({ orders: [sourceOrder] });
                 return;
             }
