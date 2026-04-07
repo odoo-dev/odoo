@@ -76,7 +76,6 @@
                 </div>
 
                 <div class="o_control_panel_navigation d-flex flex-wrap flex-md-nowrap justify-content-end gap-1 gap-xl-3 order-1 order-lg-2 flex-grow-1">
-                    <t t-set="isFilledIconViews" t-value="['contact_mail', 'calendar_today', 'location_on']"/>
                     <t t-if="this.state.embeddedInfos.embeddedActions?.length and this.env.isSmall">
                         <t t-call="web.embeddedActionsDropdown" />
                     </t>
@@ -94,7 +93,7 @@
                             <Dropdown menuClass="{o_cp_switch_buttons: true, o_custom_bottom_sheet: true }">
                                 <button class="btn btn-secondary" data-available-offline="">
                                     <t t-set="activeView" t-value="this.env.config.viewSwitcherEntries.find((view) => view.active)"/>
-                                    <i class="oi oi-fw" t-att-class="{ 'oi-filled': isFilledIconViews.includes(activeView.icon) }" t-att-data-icon="activeView.icon"/>
+                                    <i class="oi oi-fw" t-att-data-icon="activeView.icon"/>
                                 </button>
                                 <t t-set-slot="content">
                                     <t t-foreach="this.env.config.viewSwitcherEntries" t-as="view" t-key="view.type">
@@ -103,7 +102,7 @@
                                             attrs="{ 'data-available-offline': this.isViewAvailable(view)}"
                                             onSelected="() => this.switchView(view.type)"
                                             class="{ 'selected': view.active }">
-                                                <i class="oi oi-fw" t-att-class="{ 'oi-filled': isFilledIconViews.includes(view.icon) }" t-att-data-icon="view.icon"/>
+                                                <i class="oi oi-fw" t-att-data-icon="view.icon"/>
                                                 <span class="ms-1" t-out="view.name"/>
                                         </DropdownItem>
                                     </t>
@@ -120,7 +119,7 @@
                                     t-custom-click="(ev, isMiddleClick) => this.switchView(view.type, isMiddleClick)"
                                     t-att-aria-label="view.name + ' View'"
                                 >
-                                    <i class="oi" t-att-class="{ 'oi-filled': isFilledIconViews.includes(view.icon) }" t-att-data-icon="view.icon"/>
+                                    <i class="oi" t-att-data-icon="view.icon"/>
                                 </button>
                             </t>
                         </nav>
