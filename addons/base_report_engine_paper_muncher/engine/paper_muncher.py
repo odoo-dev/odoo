@@ -97,25 +97,25 @@ def run_process(
 def which_paper_muncher() -> os.PathLike:
     f""" Look for the paper-muncher binary in PATH or at {FALLBACK_BIN_PATH}. """
     try:
-        binary = find_in_path('paper-muncher')
+        bin_path = find_in_path('paper-muncher')
     except OSError as exc:
         if not os.path.isfile(FALLBACK_BIN_PATH):
             e = "paper-muncher binary not found in PATH"
             raise RuntimeError(e) from exc
-        binary = FALLBACK_BIN_PATH
+        bin_path = FALLBACK_BIN_PATH
 
     try:
         subprocess.run(
-            [binary, '--version'],
+            [bin_path, '--version'],
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
             check=True,
         )
     except (OSError, subprocess.CalledProcessError) as exc:
-        e = f"bad paper-muncher found at {binary}"
+        e = f"bad paper-muncher found at {bin_path}"
         raise RuntimeError(e) from exc
 
-    return binary
+    return bin_path
 
 
 try:

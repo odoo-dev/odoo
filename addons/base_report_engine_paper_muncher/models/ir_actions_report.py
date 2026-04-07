@@ -118,12 +118,14 @@ class IrActionsReport(models.Model):
             report_sudo = self._get_report(report_ref).with_context(debug=False)
             bodies, html_ids, header, footer, specific_paperformat_args = (
                 report_sudo._prepare_wkhtmltopdf_html(html, report_model=report_sudo.model))
-            content = self._run_paper_muncher(bodies,
-               report_ref=report_ref,
-               header=header,
-               footer=footer,
-               landscape=landscape,
-               specific_paperformat_args=specific_paperformat_args,
-               scale=kwargs.get('dpi-resolution', 72))
+            content = self._run_paper_muncher(
+                bodies,
+                report_ref=report_ref,
+                header=header,
+                footer=footer,
+                landscape=landscape,
+                specific_paperformat_args=specific_paperformat_args,
+                scale=kwargs.get('dpi-resolution', 72),
+            )
             return content, html_ids
         return super()._run_pdf_engine(engine_name, html, report_ref, landscape, **kwargs)
