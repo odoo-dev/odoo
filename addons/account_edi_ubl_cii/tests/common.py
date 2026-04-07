@@ -52,11 +52,9 @@ class TestUblCiiCommon(AccountTestInvoicingCommon):
             'street': "bd de la Foire",
             'zip': "L-1528",
             'city': "Luxembourg",
-            'vat': None,
+            'vat': 'LU00005000041',
             'company_registry': None,
             'country_id': cls.env.ref('base.lu').id,
-            'peppol_eas': '9938',
-            'peppol_endpoint': '00005000041',
             **kwargs,
         })
 
@@ -71,8 +69,7 @@ class TestUblCiiCommon(AccountTestInvoicingCommon):
             'vat': 'NL000099998B57',
             'company_registry': None,
             'country_id': cls.env.ref('base.nl').id,
-            'peppol_eas': '0106',
-            'peppol_endpoint': '77777677',
+            'additional_identifiers': {'NL_KVK': '77777677'},
             **kwargs,
         })
 

@@ -239,6 +239,14 @@
                                        invisible="not display_invoice_template_pdf_report_id"
                                        options="{'no_create': True, 'no_edit': True}"/>
                             </group>
+                            <group id="electronic_invoicing"
+                                   string="Electronic invoicing"
+                                   groups="account.group_account_invoice,account.group_account_readonly"
+                                   invisible="not display_electronic_invoicing">
+                                <field name="invoice_edi_format"
+                                       placeholder="XML format"
+                                       groups="base.group_no_one"/>
+                            </group>
                             <group string="Credit Limits"
                                    name="credit_limits"
                                    groups="account.group_account_invoice,account.group_account_readonly"

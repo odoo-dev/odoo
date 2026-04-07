@@ -24,7 +24,7 @@ class AccountMove(models.Model):
 
     def action_send_and_print(self):
         for move in self:
-            move.commercial_partner_id.button_account_peppol_check_partner_endpoint(company=move.company_id)
+            move.commercial_partner_id._peppol_sync_partner_metadata()
         return super().action_send_and_print()
 
     def action_cancel_peppol_documents(self):

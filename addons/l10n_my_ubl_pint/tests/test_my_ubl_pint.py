@@ -25,8 +25,7 @@ class TestMyUBLPint(AccountTestInvoicingCommon):
             'street': 'that one street, 5',
             'city': 'Main city',
             'phone': '+60123456789',
-            'peppol_eas': '0230',
-            'peppol_endpoint': 'C2584563200',
+            'additional_identifiers': {**(cls.company_data['company'].partner_id.additional_identifiers or {}), 'MY_EN': 'C2584563200'},
         })
         cls.partner_a.write({
             'vat': 'C2584563201',
@@ -35,8 +34,7 @@ class TestMyUBLPint(AccountTestInvoicingCommon):
             'street': 'that other street, 3',
             'city': 'Main city',
             'phone': '+60123456786',
-            'peppol_eas': '0230',
-            'peppol_endpoint': 'C2584563201',
+            'additional_identifiers': {**(cls.partner_a.additional_identifiers or {}), 'MY_EN': 'C2584563201'},
         })
 
         cls.fakenow = datetime(2024, 7, 15, 10, 00, 00)

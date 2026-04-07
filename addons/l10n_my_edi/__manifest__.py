@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Malaysia - E-invoicing',
+    'version': '1.1',
     'countries': ['my'],
     'category': 'Accounting/Localizations/EDI',
     'icon': '/account/static/description/l10n.png',

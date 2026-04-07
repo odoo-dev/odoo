@@ -314,7 +314,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
         self.ensure_one()
         self.company_id.peppol_purchase_journal_id._notify_einvoices_received(moves)
         for partner in moves.partner_id.filtered(lambda partner: partner.peppol_verification_state in ('not_verified', False)):
-            partner.button_account_peppol_check_partner_endpoint()
+            partner._peppol_sync_partner_metadata()
 
     def _peppol_get_message_status(self):
         # Context added to not break stable policy: useful to tweak on databases processing large invoices

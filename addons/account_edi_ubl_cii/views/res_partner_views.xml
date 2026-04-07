@@ -6,13 +6,6 @@
         <field name="arch" type="xml">
             <xpath expr="//group[@id='invoice_send_settings']" position="inside">
                 <div id="peppol_address" class="row" invisible="1"/> <!-- TODO remove in master -->
-                <field name="available_peppol_eas" invisible="1"/>
-                <field name="peppol_eas"
-                       nolabel="1"
-                       widget="filterable_selection"
-                       options="{'whitelist_fname': 'available_peppol_eas'}"
-                       class="o_field_peppol_eas_selection"/>
-                <field name="peppol_endpoint"/>
             </xpath>
         </field>
     </record>

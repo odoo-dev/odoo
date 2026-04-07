@@ -27,10 +27,9 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
 
         cls.env.company.write({
             'country_id': cls.env.ref('base.be').id,
-            'peppol_eas': '0208',
-            'peppol_endpoint': '0477472701',
             'account_peppol_proxy_state': 'receiver',
         })
+        cls.env.company.partner_id.additional_identifiers = {'BE_EN': '0477472701'}
 
         edi_identification = cls.env['account_edi_proxy_client.user']._get_proxy_identification(cls.env.company, 'peppol')
         cls.private_key = cls.env['certificate.key'].create({
@@ -50,21 +49,18 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
             'name': 'Wintermute',
             'city': 'Charleroi',
             'country_id': cls.env.ref('base.be').id,
-            'peppol_eas': '0208',
-            'peppol_endpoint': '3141592654',
+            'additional_identifiers': {'BE_EN': '3141592654'},
         }, {
             'name': 'Molly',
             'city': 'Namur',
             'email': 'Namur@company.com',
             'country_id': cls.env.ref('base.be').id,
-            'peppol_eas': '0208',
-            'peppol_endpoint': '2718281828',
+            'additional_identifiers': {'BE_EN': '2718281828'},
         }, {
             'name': 'SupplierOfficialName Ltd',
             'vat': 'GB123456782',
             'country_id': cls.env.ref('base.uk').id,
-            'peppol_eas': '0088',
-            'peppol_endpoint': '9482348239847239874',
+            'additional_identifiers': {'EAN_GLN': '9482348239847239874'},
         }])
 
         cls.env['res.partner.bank'].create({
@@ -187,7 +183,7 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
         """If there's already account_edi_ubl_cii_configure_partner, the warning should not appear."""
         move = self.create_move(self.invalid_partner)
         move.action_post()
-        self.invalid_partner.peppol_endpoint = False
+        self.invalid_partner.additional_identifiers = {}
         with (
             mock_lookup_not_found('0208:3141592654'),
             mock_lookup_not_found('9925:be3141592654'),
@@ -340,89 +336,60 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
             'city': 'Namur',
             'country_id': self.env.ref('base.be').id,
         })
-        self.assertRecordValues(
-            new_partner, [{
-                'peppol_verification_state': 'not_verified',
-                'peppol_eas': '0208',
-                'peppol_endpoint': False,
-            }])
+        self.assertEqual(new_partner.peppol_verification_state, 'not_verified')
 
-        new_partner.peppol_endpoint = '0477472701'
+        new_partner.additional_identifiers = {'BE_EN': '0477472701'}
         with mock_lookup_success('0208:0477472701'):
-            new_partner.button_account_peppol_check_partner_endpoint()
-        self.assertRecordValues(
-            new_partner, [{
-                'peppol_verification_state': 'valid',
-                'peppol_eas': '0208',
-                'peppol_endpoint': '0477472701',
-            }])
+            new_partner._peppol_sync_partner_metadata()
+        self.assertEqual(new_partner.peppol_verification_state, 'valid')
 
-        new_partner.peppol_endpoint = '3141592654'
+        new_partner.additional_identifiers = {'BE_EN': '3141592654'}
         with (
             mock_lookup_not_found('0208:3141592654'),
             mock_lookup_not_found('9925:be3141592654'),
         ):
-            new_partner.button_account_peppol_check_partner_endpoint()
-        self.assertRecordValues(
-            new_partner, [{
-                'peppol_verification_state': 'not_valid',
-                'peppol_eas': '0208',
-                'peppol_endpoint': '3141592654',
-            }])
+            new_partner._peppol_sync_partner_metadata()
+        self.assertEqual(new_partner.peppol_verification_state, 'not_valid')
 
         # the participant exists on the network but cannot receive XRechnung
         new_partner.write({
             'invoice_edi_format': 'xrechnung',
-            'peppol_endpoint': '0477472701',
+            'additional_identifiers': {'BE_EN': '0477472701'},
         })
         with (
             mock_lookup_success('0208:0477472701'),
             mock_lookup_not_found('9925:be0477472701'),
         ):
-            new_partner.button_account_peppol_check_partner_endpoint()
-            self.assertRecordValues(
-                new_partner, [{
-                    'peppol_verification_state': 'not_valid_format',
-                    'peppol_eas': '0208',
-                    'peppol_endpoint': '0477472701',
-                }])
+            new_partner._peppol_sync_partner_metadata()
+            self.assertEqual(new_partner.peppol_verification_state, 'not_valid_format')
 
     def test_peppol_send_multi_async(self):
         company_2 = self.setup_other_company()['company']
         company_2.write({
-            'peppol_eas': '0230',
-            'peppol_endpoint': 'C2584563200',
             'country_id': self.env.ref('base.be').id,
         })
+        company_2.partner_id.additional_identifiers = {'MY_BRN': 'C2584563200'}
         with mock_lookup_success('0208:0477472701'):
             new_partner = self.env['res.partner'].create({
                 'name': 'Deanna Troi',
                 'city': 'Namur',
                 'country_id': self.env.ref('base.be').id,
-                'peppol_endpoint': '0477472701',
+                'additional_identifiers': {'BE_EN': '0477472701'},
                 'invoice_edi_format': 'ubl_bis3',
             })
 
         # partner is valid for company 1
-        self.assertRecordValues(new_partner, [{
-            'peppol_verification_state': 'valid',
-            'peppol_eas': '0208',
-            'peppol_endpoint': '0477472701',
-            'invoice_edi_format': 'ubl_bis3',
-        }])
+        self.assertEqual(new_partner.peppol_verification_state, 'valid')
+        self.assertEqual(new_partner.invoice_edi_format, 'ubl_bis3')
+
         # but not valid for company 2
         new_partner.with_company(company_2).invoice_edi_format = 'nlcius'
         with (
             mock_lookup_success('0208:0477472701'),
             mock_lookup_not_found('9925:be0477472701'),
         ):
-            new_partner.button_account_peppol_check_partner_endpoint(company=company_2)
-        self.assertRecordValues(new_partner.with_company(company_2), [{
-            'peppol_verification_state': 'not_valid_format',
-            'peppol_eas': '0208',
-            'peppol_endpoint': '0477472701',
-            'invoice_edi_format': 'nlcius',
-        }])
+            new_partner._peppol_sync_partner_metadata()
+        self.assertEqual(new_partner.peppol_verification_state, 'not_valid_format')
         move_1 = self.create_move(new_partner)
         move_2 = self.create_move(new_partner)
         move_3 = self.create_move(new_partner, company_2)
@@ -456,11 +423,7 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
             'country_id': self.env.ref('base.be').id,
             'company_registry': '0477472701',
         })
-        self.assertRecordValues(peppol_partner, [{
-            'peppol_verification_state': 'not_verified',
-            'peppol_eas': '0208',
-            'peppol_endpoint': '0477472701',
-        }])
+        self.assertEqual(peppol_partner.peppol_verification_state, 'not_verified')
         not_peppol_partner = self.env['res.partner'].create({
             'name': 'Not Peppol partner',
             'country_id': self.env.ref('base.us').id,
@@ -572,22 +535,20 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
                 'name': 'BE Spoiled Kid',
                 'country_id': self.env.ref('base.be').id,
                 'parent_id': self.env.company.id,
-                'peppol_eas': '0208',
-                'peppol_endpoint': '0477472701',
+                'additional_identifiers': {'BE_EN': '0477472701'},
                 'account_peppol_proxy_state': 'receiver',
             },
             {
                 'name': 'BE Independent Kid',
                 'country_id': self.env.ref('base.be').id,
                 'parent_id': self.env.company.id,
-                'peppol_eas': '0208',
-                'peppol_endpoint': '0477471111',
+                'additional_identifiers': {'BE_EN': '0477471111'},
                 'account_peppol_proxy_state': 'receiver',
             },
         ])
         self.cr.precommit.run()  # load the COA
         with mock_lookup_success('0208:2718281828'):
-            self.valid_partner.button_account_peppol_check_partner_endpoint()
+            self.valid_partner._peppol_sync_partner_metadata()
         self.env['account_edi_proxy_client.user'].create([
             {
                 'company_id': branch_spoiled.id,
@@ -627,18 +588,6 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
         with mock_send_document():
             wizard.action_send_and_print()
         self.assertEqual(independent_move.peppol_move_state, 'processing')
-
-    def test_compute_available_peppol_eas_multi_partner(self):
-        """Check _compute_available_peppol_eas works with multiple partners"""
-
-        # Create multiple partners
-        partners = self.env['res.partner'].create([
-            {'name': 'Partner A'},
-            {'name': 'Partner B'},
-        ])
-        partners._compute_available_peppol_eas()
-        for partner in partners:
-            self.assertFalse('odemo' in partner.available_peppol_eas)
 
     def test_send_self_billed_invoice_via_peppol(self):
         """Test sending a self-billed invoice (vendor bill) via Peppol.

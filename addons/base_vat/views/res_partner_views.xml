@@ -9,7 +9,6 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='vat']" position="after">
                     <field name="perform_vies_validation" invisible="1"/>
-                    <label for="vat"/>
                     <div name="vat_vies_container"/>
                 </xpath>
                 <xpath expr="//div[@name='vat_vies_container']" position="inside">
@@ -18,9 +17,6 @@
                         <label for="vies_valid" invisible="not perform_vies_validation"/>
                         <field name="vies_valid" invisible="not perform_vies_validation" class="oe_inline"/>
                     </span>
-                </xpath>
-                <xpath expr="//field[@name='vat']" position="attributes">
-                    <attribute name="class" add="oe_inline" separator=" "/>
                 </xpath>
             </field>
         </record>

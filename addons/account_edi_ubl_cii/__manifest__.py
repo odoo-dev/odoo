@@ -1,5 +1,6 @@
 {
     'name': "Import/Export electronic invoices with UBL/CII",
+    'version': '1.1',
     'category': 'Accounting/Accounting',
     'description': """
 Electronic invoicing module

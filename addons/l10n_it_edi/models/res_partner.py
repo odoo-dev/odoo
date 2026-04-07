@@ -142,13 +142,6 @@ class ResPartner(models.Model):
             existing.pop('IT_CF', None)
             self.additional_identifiers = existing or False
 
-    @api.constrains('additional_identifiers')
-    def validate_codice_fiscale(self):
-        for record in self:
-            codice_fiscale = (record.additional_identifiers or {}).get('IT_CF')
-            if codice_fiscale and (not codicefiscale.is_valid(codice_fiscale) and not iva.is_valid(codice_fiscale)):
-                raise UserError(_("Invalid Codice Fiscale '%s': should be like 'MRTMTT91D08F205J' for physical person and '12345670546' for businesses.", codice_fiscale))
-
     def _l10n_it_edi_export_check(self, checks=None):
         checks = checks or ['partner_vat_codice_fiscale_missing', 'partner_address_missing']
         single_views = [(False, 'form')]
@@ -201,11 +194,6 @@ class ResPartner(models.Model):
         if (self.additional_identifiers or {}).get('IT_CF'):
             return 'IT'
         return super()._deduce_country_code()
-
-    def _peppol_eas_endpoint_depends(self):
-        # extends account_edi_ubl_cii
-        # additional_identifiers is already included in the base depends
-        return super()._peppol_eas_endpoint_depends()
 
     def _get_frontend_writable_fields(self):
         frontend_writable_fields = super()._get_frontend_writable_fields()

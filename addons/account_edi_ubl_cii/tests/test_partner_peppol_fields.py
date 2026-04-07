@@ -1,86 +1,51 @@
 # -*- coding: utf-8 -*-
 
-from contextlib import contextmanager
-from unittest.mock import patch
-
 from odoo.tests import tagged
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EAS_MAPPING
 
 
 @tagged('post_install', '-at_install')
 class TestAccountUblCii(AccountTestInvoicingCommon):
 
-    @contextmanager
-    def check_peppol_vals(self, partner, expected, reset=True):
-        if reset:
-            partner.write({
-                'country_id': False,
-                'peppol_eas': False,
-                'peppol_endpoint': False,
-            })
-        yield
-        partner.country_id = self.env.ref('base.ba')
-        self.assertEqual((partner.peppol_eas, partner.peppol_endpoint), expected)
-
-    def _build_error_peppol_endpoint(self, eas, endpoint):
-        """ Mock _build_error_peppol_endpoint"""
-        if eas == "0184" and endpoint != "12345674":
-            return f"(0184, {endpoint}) is not a valid peppol couple."
-
-    @patch(
-        'odoo.addons.account_edi_ubl_cii.models.res_partner.ResPartner._build_error_peppol_endpoint',
-        _build_error_peppol_endpoint,
-    )
-    @patch.dict(EAS_MAPPING, {'BA': {'0184': 'company_registry', '0198': 'vat'}})
-    def test_peppol_eas_endpoint(self):
-        partner = self.company_data['company'].partner_id
-
-        partner.company_registry = "12345674"
-        partner.vat = "BA12345674"
-
-        # Base case -> (0184, company_registry)
-        with self.check_peppol_vals(partner, expected=("0184", partner.company_registry)):
-            pass
-
-        # No company_registry -> (0198, vat)
-        with self.check_peppol_vals(partner, expected=("0198", partner.vat)):
-            partner.company_registry = False
-
-        # Invalid company_registry -> (0198, vat)
-        with self.check_peppol_vals(partner, expected=("0198", partner.vat)):
-            partner.company_registry = "turlututu"
-
-        # No company_registry nor vat -> (0184, False)
-        with self.check_peppol_vals(partner, expected=("0184", False)):
-            partner.write({
-                'company_registry': False,
-                'vat': False,
-            })
-
-        # Create a partner, fill the peppol fields, then set the country
-        partner_1 = self.env['res.partner'].create({
-            'name': "A new partner",
-            'peppol_eas': '0184',
-            'peppol_endpoint': '12345674'
+    def test_get_eas_endpoint(self):
+        bis3 = self.env['account.edi.xml.ubl_bis3']
+        partner = self.env['res.partner'].create({
+            'name': 'BE partner',
+            'country_id': self.env.ref('base.be').id,
+            'additional_identifiers': {'BE_EN': '0477472701'},
         })
-        with self.check_peppol_vals(partner_1, expected=("0184", '12345674'), reset=False):
-            pass
+        # EN identifier takes priority
+        self.assertEqual(bis3._get_eas_endpoint(partner), ('0208', '0477472701'))
 
-        # Create a partner, set the country, then fill the peppol fields
-        partner_2 = self.env['res.partner'].create({
-            'name': "A new partner",
-            'country_id': self.env.ref('base.ba').id,
+        # With VAT but no EN → falls back to VAT
+        partner_vat = self.env['res.partner'].create({
+            'name': 'BE partner VAT only',
+            'country_id': self.env.ref('base.be').id,
+            'vat': 'BE0477472701',
         })
-        with self.check_peppol_vals(partner_2, expected=("0184", '12345674'), reset=False):
-            partner_2.peppol_eas = '0184'
-            partner_2.peppol_endpoint = '12345674'
+        self.assertEqual(bis3._get_eas_endpoint(partner_vat), ('9925', 'BE0477472701'))
 
-        # Change the country, the EAS changes but we do not overwrite the existing endpoint
-        partner_2.country_id = self.env.ref('base.be')
-        self.assertEqual((partner_2.peppol_eas, partner_2.peppol_endpoint), ('0208', '12345674'))
+        # No identifiers at all → (None, None)
+        partner_empty = self.env['res.partner'].create({
+            'name': 'Empty partner',
+            'country_id': self.env.ref('base.be').id,
+        })
+        self.assertEqual(bis3._get_eas_endpoint(partner_empty), (None, None))
+
+    def test_get_eas_endpoint_country_filter(self):
+        """Identifiers are filtered by the partner's country."""
+        bis3 = self.env['account.edi.xml.ubl_bis3']
+        # A DK partner with a DK enterprise number
+        partner = self.env['res.partner'].create({
+            'name': 'DK partner',
+            'country_id': self.env.ref('base.dk').id,
+            'additional_identifiers': {'DK_EN': '12345674'},
+        })
+        self.assertEqual(bis3._get_eas_endpoint(partner), ('0184', '12345674'))
 
     def test_partner_ubl_cii_formats(self):
+        from unittest.mock import patch
+
         def _get_ubl_cii_formats_info(self):
             return {
                 'ubl_no_country': {'on_peppol': True},
@@ -109,13 +74,3 @@ class TestAccountUblCii(AccountTestInvoicingCommon):
             self.assertEqual(partner_au._get_suggested_ubl_cii_edi_format(), 'cii')  # AU matches 2 formats but 'cii' has a lower sequence
             self.assertEqual(partner_nz._get_suggested_ubl_cii_edi_format(), 'peppol')
             self.assertFalse(partner_be._get_suggested_ubl_cii_edi_format())
-
-    def test_peppol_endpoint_sanitized_be_company_registry(self):
-        partner = self.env['res.partner'].create({
-            'name': "BE partner dots",
-            'country_id': self.env.ref('base.be').id,
-            'company_registry': '0123.456.789',
-            'vat': False
-        })
-        self.assertEqual(partner.peppol_eas, '0208')
-        self.assertEqual(partner.peppol_endpoint, '0123456789')

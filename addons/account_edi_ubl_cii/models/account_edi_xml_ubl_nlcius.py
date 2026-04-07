@@ -81,11 +81,11 @@ class AccountEdiXmlUbl_Nl(models.AbstractModel):
         nodes = vals['party_node']['cac:PartyIdentification']
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
-
-        if commercial_partner.peppol_endpoint:
+        eas, endpoint = self._get_eas_endpoint(commercial_partner)
+        if endpoint:
             nodes.append({
                 'cbc:ID': {
-                    '_text': commercial_partner.peppol_endpoint,
+                    '_text': endpoint,
                     'schemeID': None,
                 },
             })
@@ -96,16 +96,15 @@ class AccountEdiXmlUbl_Nl(models.AbstractModel):
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
 
-        if (
-            commercial_partner.country_code == 'NL'
-            and commercial_partner.peppol_endpoint
-        ):
-            vals['party_node']['cac:PartyIdentification'] = [{
-                'cbc:ID': {
-                    '_text': commercial_partner.peppol_endpoint,
-                    'schemeID': commercial_partner.peppol_eas if commercial_partner.peppol_eas in ('0106', '0190') else None,
-                },
-            }]
+        if commercial_partner.country_code == 'NL':
+            eas, endpoint = self._get_eas_endpoint(commercial_partner)
+            if endpoint:
+                vals['party_node']['cac:PartyIdentification'] = [{
+                    'cbc:ID': {
+                        '_text': endpoint,
+                        'schemeID': eas if eas in ('0106', '0190') else None,
+                    },
+                }]
 
     def _ubl_add_customization_id_node(self, vals):
         # EXTENDS account.edi.xml.ubl_bis3

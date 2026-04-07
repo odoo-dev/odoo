@@ -12,11 +12,13 @@ from odoo.addons.account_edi_ubl_cii.models.account_edi_common import (
     EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES,
 )
 from odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20 import UBL_NAMESPACES
+from odoo.addons.account.tools.partner_identifiers import get_identifier_metadata
 
 from stdnum.no import mva
 from stdnum.be import vat as be_vat
 
 CHORUS_PRO_PEPPOL_ID = "0009:11000201100044"
+TIN_CATEGORIES = ('VAT', 'TIN', 'GST')
 
 
 class AccountEdiXmlUbl_Bis3(models.AbstractModel):
@@ -41,9 +43,37 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
     * Documentation for Peppol Order transaction 3.5: https://docs.peppol.eu/poacc/upgrade-3/syntax/Order/tree/
     """
 
+    def _get_eas_endpoint(self, partner):
+        """ Returns (eas, value) for the partner's best identifier.
+        Tries EN-category identifiers first (enterprise number), then VAT/TIN/GST.
+        Only considers identifiers matching the partner's country that have an iso6523 code.
+        """
+        country_code = partner._deduce_country_code()
+        identifiers = partner._get_all_identifiers()
+        # First pass: look for EN-category (enterprise number) identifier for this country
+        for key, value in identifiers.items():
+            meta = get_identifier_metadata(key)
+            if (
+                meta.get('iso6523')
+                and meta.get('category') == 'EN'
+                and (not meta.get('countries') or country_code in meta['countries'])
+            ):
+                return (meta['iso6523'], value)
+        # Second pass: look for VAT/TIN/GST identifier for this country
+        for key, value in identifiers.items():
+            meta = get_identifier_metadata(key)
+            if (
+                meta.get('iso6523')
+                and meta.get('category') in TIN_CATEGORIES
+                and (not meta.get('countries') or country_code in meta['countries'])
+            ):
+                return (meta['iso6523'], value)
+        return (None, None)
+
     @api.model
     def _is_customer_behind_chorus_pro(self, customer):
-        return customer.peppol_eas and customer.peppol_endpoint and f"{customer.peppol_eas}:{customer.peppol_endpoint}" == CHORUS_PRO_PEPPOL_ID
+        eas, endpoint = self._get_eas_endpoint(customer.commercial_partner_id)
+        return eas and endpoint and f"{eas}:{endpoint}" == CHORUS_PRO_PEPPOL_ID
 
     # -------------------------------------------------------------------------
     # EXPORT
@@ -214,8 +244,9 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
 
         # For B2G transactions in Germany: set the buyer_reference to the Leitweg-ID (code 0204)
         customer = vals['customer']
-        if customer.peppol_eas == "0204":
-            vals['document_node']['cbc:BuyerReference']['_text'] = customer.peppol_endpoint
+        eas, endpoint = self._get_eas_endpoint(customer.commercial_partner_id)
+        if eas == "0204" and endpoint:
+            vals['document_node']['cbc:BuyerReference']['_text'] = endpoint
         elif customer_ref := customer.commercial_partner_id.ref:
             vals['document_node']['cbc:BuyerReference']['_text'] = customer_ref
 
@@ -641,9 +672,10 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
         super()._ubl_add_party_endpoint_id_node(vals)
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
-        if commercial_partner.peppol_endpoint and commercial_partner.peppol_eas:
-            vals['party_node']['cbc:EndpointID']['_text'] = commercial_partner.peppol_endpoint
-            vals['party_node']['cbc:EndpointID']['schemeID'] = commercial_partner.peppol_eas
+        eas, endpoint = self._get_eas_endpoint(commercial_partner)
+        if eas and endpoint:
+            vals['party_node']['cbc:EndpointID']['_text'] = endpoint
+            vals['party_node']['cbc:EndpointID']['schemeID'] = eas
 
     def _ubl_add_party_identification_nodes(self, vals):
         # EXTENDS account.edi.ubl
@@ -691,14 +723,15 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
                     'cbc:ID': {'_text': tax_scheme_id},
                 },
             })
-        elif commercial_partner.peppol_endpoint and commercial_partner.peppol_eas:
-            # TaxScheme based on partner's EAS/Endpoint.
-            nodes.append({
-                'cbc:CompanyID': {'_text': commercial_partner.peppol_endpoint},
-                'cac:TaxScheme': {
-                    'cbc:ID': {'_text': commercial_partner.peppol_eas},
-                },
-            })
+        else:
+            eas, endpoint = self._get_eas_endpoint(commercial_partner)
+            if eas and endpoint:
+                nodes.append({
+                    'cbc:CompanyID': {'_text': endpoint},
+                    'cac:TaxScheme': {
+                        'cbc:ID': {'_text': eas},
+                    },
+                })
 
     def _ubl_add_party_legal_entity_nodes(self, vals):
         # EXTENDS account.edi.ubl
@@ -706,56 +739,14 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
         nodes = vals['party_node']['cac:PartyLegalEntity']
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
+        eas, endpoint = self._get_eas_endpoint(commercial_partner)
 
-        if commercial_partner.peppol_eas in ('0106', '0190'):
-            nl_id = commercial_partner.peppol_endpoint
-        else:
-            nl_id = commercial_partner.company_registry
-
-        if commercial_partner.country_code == 'NL' and nl_id:
-            # For NL, VAT can be used as a Peppol endpoint, but KVK/OIN has to be used as PartyLegalEntity/CompanyID
-            # To implement a workaround on stable, company_registry field is used without recording whether
-            # the number is a KVK or OIN, and the length of the number (8 = KVK, 20 = OIN) is used to determine the type
+        if eas and endpoint:
             nodes.append({
                 'cbc:RegistrationName': {'_text': commercial_partner.name},
                 'cbc:CompanyID': {
-                    '_text': nl_id,
-                    'schemeID': '0190' if len(nl_id) == 20 else '0106',
-                },
-            })
-        elif commercial_partner.country_code == 'LU' and commercial_partner.company_registry:
-            nodes.append({
-                'cbc:RegistrationName': {'_text': commercial_partner.name},
-                'cbc:CompanyID': {
-                    '_text': commercial_partner.company_registry,
-                    'schemeID': None,
-                },
-            })
-        elif commercial_partner.country_code == 'SE' and commercial_partner.company_registry:
-            nodes.append({
-                'cbc:RegistrationName': {'_text': commercial_partner.name},
-                'cbc:CompanyID': {
-                    '_text': ''.join(char for char in commercial_partner.company_registry if char.isdigit()),
-                },
-            })
-        elif commercial_partner.country_code == 'BE' and commercial_partner.company_registry:
-            nodes.append({
-                'cbc:RegistrationName': {'_text': commercial_partner.name},
-                'cbc:CompanyID': {
-                    '_text': be_vat.compact(commercial_partner.company_registry),
-                    'schemeID': '0208',
-                },
-            })
-        elif (
-            commercial_partner.country_code == 'DK'
-            and commercial_partner.peppol_eas == '0184'
-            and commercial_partner.peppol_endpoint
-        ):
-            nodes.append({
-                'cbc:RegistrationName': {'_text': commercial_partner.name},
-                'cbc:CompanyID': {
-                    '_text': commercial_partner.peppol_endpoint,
-                    'schemeID': '0184',
+                    '_text': endpoint,
+                    'schemeID': eas,
                 },
             })
         elif commercial_partner.vat and commercial_partner.vat != '/':
@@ -763,14 +754,6 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
                 'cbc:RegistrationName': {'_text': commercial_partner.name},
                 'cbc:CompanyID': {
                     '_text': commercial_partner.vat,
-                    'schemeID': None,
-                },
-            })
-        elif commercial_partner.peppol_endpoint:
-            nodes.append({
-                'cbc:RegistrationName': {'_text': commercial_partner.name},
-                'cbc:CompanyID': {
-                    '_text': commercial_partner.peppol_endpoint,
                     'schemeID': None,
                 },
             })
@@ -1141,12 +1124,9 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
                 # [NL-R-003] For suppliers in the Netherlands, the legal entity identifier MUST be either a
                 # KVK or OIN number (schemeID 0106 or 0190)
                 'nl_r_003': _(
-                    "%s should have a KVK or OIN number set in Company ID field or as Peppol e-address (EAS code 0106 or 0190).",
+                    "%s should have a KVK or OIN number set as additional identifier (EAS code 0106 or 0190).",
                     vals['supplier'].display_name
-                ) if (
-                    not vals['supplier'].peppol_eas in ('0106', '0190') and
-                    (not vals['supplier'].company_registry or len(vals['supplier'].company_registry) not in (8, 9))
-                ) else '',
+                ) if self._get_eas_endpoint(vals['supplier'])[0] not in ('0106', '0190') else '',
 
                 # [NL-R-007] For suppliers in the Netherlands, the supplier MUST provide a means of payment
                 # (cac:PaymentMeans) if the payment is from customer to supplier
@@ -1165,12 +1145,9 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
                     # [NL-R-005] For suppliers in the Netherlands, if the customer is in the Netherlands,
                     # the customer's legal entity identifier MUST be either a KVK or OIN number (schemeID 0106 or 0190)
                     'nl_r_005': _(
-                        "%s should have a KVK or OIN number set in Company ID field or as Peppol e-address (EAS code 0106 or 0190).",
+                        "%s should have a KVK or OIN number set as additional identifier (EAS code 0106 or 0190).",
                         vals['customer'].display_name
-                    ) if (
-                        not vals['customer'].commercial_partner_id.peppol_eas in ('0106', '0190') and
-                        (not vals['customer'].commercial_partner_id.company_registry or len(vals['customer'].commercial_partner_id.company_registry) not in (8, 9))
-                    ) else '',
+                    ) if self._get_eas_endpoint(vals['customer'].commercial_partner_id)[0] not in ('0106', '0190') else '',
                 })
 
         if vals['supplier'].country_id.code == 'NO':
@@ -1204,17 +1181,17 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
 
     def _import_retrieve_partner_vals(self, tree, role):
         # EXTENDS account.edi.xml.ubl_20
+        from odoo.addons.account.tools.partner_identifiers import ISO_IDENTIFIERS_METADATA
         partner_vals = super()._import_retrieve_partner_vals(tree, role)
         endpoint_node = tree.find(f'.//cac:{role}Party/cac:Party/cbc:EndpointID', UBL_NAMESPACES)
         if endpoint_node is not None:
-            peppol_eas = endpoint_node.attrib.get('schemeID')
-            peppol_endpoint = endpoint_node.text
-            if peppol_eas and peppol_endpoint:
-                # include the EAS and endpoint in the search domain when retrieving the partner
-                partner_vals.update({
-                    'peppol_eas': peppol_eas,
-                    'peppol_endpoint': peppol_endpoint,
-                })
+            eas = endpoint_node.attrib.get('schemeID')
+            endpoint = endpoint_node.text
+            if eas and endpoint:
+                # Map the EAS code to an identifier key and store in additional_identifiers
+                iso_meta = ISO_IDENTIFIERS_METADATA.get(eas)
+                if iso_meta:
+                    partner_vals.setdefault('additional_identifiers', {})[iso_meta['key']] = endpoint
         return partner_vals
 
     # -------------------------------------------------------------------------

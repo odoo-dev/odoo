@@ -7,12 +7,14 @@
             <field name="inherit_id" ref="account_peppol.res_partner_form_account_peppol"/>
             <field name="arch" type="xml">
             <data>
-                <xpath expr="//div/field[@name='peppol_verification_state']/.." position="replace">
+                <xpath expr="//div[@id='peppol_verification_state_container']" position="after">
+                    <!-- 1. The first container uses 'move' to wrap the existing row/field -->
                     <div class="col-6" title="Supports Invoice Responses" invisible="not peppol_response_support">
-                        <field name="peppol_verification_state" readonly="1"/>
+                        <xpath expr="//field[@name='peppol_verification_state']/.." position="move"/>
                     </div>
+                    <!-- 2. The second container must declare the field again as it's a new instance -->
                     <div class="col-6" title="Does not support Invoice Responses" invisible="peppol_response_support">
-                        <field name="peppol_verification_state" readonly="1"/>
+                        <xpath expr="//field[@name='peppol_verification_state']/.." position="move"/>
                     </div>
                 </xpath>
             </data>

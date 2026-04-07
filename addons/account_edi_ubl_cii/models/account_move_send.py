@@ -37,18 +37,19 @@ class AccountMoveSend(models.AbstractModel):
 
         peppol_formats = set(self.env['res.partner']._get_peppol_formats())
         if peppol_format_moves := moves.filtered(lambda m: moves_data[m]['invoice_edi_format'] in peppol_formats):
+            bis3 = self.env['account.edi.xml.ubl_bis3']
             not_configured_company_partners = peppol_format_moves.company_id.partner_id.filtered(
-                lambda partner: not (partner.peppol_eas and partner.peppol_endpoint)
+                lambda partner: not all(bis3._get_eas_endpoint(partner))
             )
             if not_configured_company_partners:
                 alerts['account_edi_ubl_cii_configure_company'] = {
-                    'message': _("Please fill in your company's VAT or Peppol Address to generate a complete XML file."),
+                    'message': _("Please fill in your company's VAT or identifiers to generate a complete XML file."),
                     'level': 'info',
                     'action_text': _("Configure"),
                     'action': not_configured_company_partners._get_records_action(),
                 }
             not_configured_partners = peppol_format_moves.partner_id.commercial_partner_id.filtered(
-                lambda partner: not (partner.peppol_eas and partner.peppol_endpoint)
+                lambda partner: not all(bis3._get_eas_endpoint(partner))
             )
             if not_configured_partners:
                 alerts['account_edi_ubl_cii_configure_partner'] = {
@@ -189,14 +190,17 @@ class AccountMoveSend(models.AbstractModel):
         writer.clone_reader_document_root(reader)
 
         attachment_name = 'factur-x.xml'
-        if invoice.commercial_partner_id.country_code == 'DE' and invoice.commercial_partner_id.peppol_eas != '0204':
-            attachment_name = 'zugferd-invoice.xml'
+        if invoice.commercial_partner_id.country_code == 'DE':
+            eas, _endpoint = self.env['account.edi.xml.ubl_bis3']._get_eas_endpoint(invoice.commercial_partner_id)
+            if eas != '0204':
+                attachment_name = 'zugferd-invoice.xml'
 
         writer.add_attachment(attachment_name, xml_facturx, subtype='text/xml')
 
         # PDF-A.
+        eas, _endpoint = self.env['account.edi.xml.ubl_bis3']._get_eas_endpoint(invoice.commercial_partner_id)
         if ((invoice_data.get('ubl_cii_xml_options', {}).get('ubl_cii_format') in ('facturx', 'zugferd')
-                or (invoice.commercial_partner_id.country_code in ('FR', 'DE') and invoice.commercial_partner_id.peppol_eas != '0204'))
+                or (invoice.commercial_partner_id.country_code in ('FR', 'DE') and eas != '0204'))
                 and invoice.country_code in ('FR', 'DE')
                 and not writer.is_pdfa
             ):

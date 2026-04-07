@@ -797,36 +797,28 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
             test_file='test_invoice_customer_party_identifiers_partner_nl_vat_kvk_eas',
         )
 
-        # VAT is set plus an OIN number as EAS/Endpoint.
-        # PartyIdentification is not there.
+        # VAT is set plus an OIN number in additional_identifiers.
         # PartyTaxScheme is filled using VAT.
-        # PartyLegalEntity is filled using the EAS/Endpoint.
-        self.partner_nl.peppol_eas = '0190'
-        self.partner_nl.peppol_endpoint = '00000001822477348000'
+        # PartyLegalEntity is filled using the OIN identifier.
+        self.partner_nl.additional_identifiers = {'NL_OIN': '00000001822477348000'}
         self._assert_invoice_partner_party_identifiers(
             partner=self.partner_nl,
             test_file='test_invoice_customer_party_identifiers_partner_nl_vat_oin_eas',
         )
 
-        # VAT in EAS/Endpoint, KVK number in company registry.
-        # PartyIdentification is not there.
+        # VAT + KVK number in additional_identifiers.
         # PartyTaxScheme is filled using VAT.
-        # PartyLegalEntity is filled using the EAS/Endpoint.
-        self.partner_nl.company_registry = '77777677'
-        self.partner_nl.peppol_eas = '9944'
-        self.partner_nl.peppol_endpoint = 'NL000099998B57'
+        # PartyLegalEntity is filled using the KVK identifier.
+        self.partner_nl.additional_identifiers = {'NL_KVK': '77777677'}
         self._assert_invoice_partner_party_identifiers(
             partner=self.partner_nl,
             test_file='test_invoice_customer_party_identifiers_partner_nl_vat_eas_kvk_company_registry',
         )
 
-        # VAT in EAS/Endpoint, OIN number in company registry.
-        # PartyIdentification is not there.
+        # VAT + OIN number in additional_identifiers.
         # PartyTaxScheme is filled using VAT.
-        # PartyLegalEntity is filled using the EAS/Endpoint.
-        self.partner_nl.company_registry = '00000001822477348000'
-        self.partner_nl.peppol_eas = '9944'
-        self.partner_nl.peppol_endpoint = 'NL000099998B57'
+        # PartyLegalEntity is filled using the OIN identifier.
+        self.partner_nl.additional_identifiers = {'NL_OIN': '00000001822477348000'}
         self._assert_invoice_partner_party_identifiers(
             partner=self.partner_nl,
             test_file='test_invoice_customer_party_identifiers_partner_nl_vat_eas_oin_company_registry',

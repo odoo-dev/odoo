@@ -20,19 +20,20 @@
                     <attribute name="options">{'whitelist_fname': 'available_peppol_edi_formats'}</attribute>
                 </xpath>
                 <xpath expr="//group[@id='electronic_invoicing']" position="inside">
-                    <label for="peppol_verification_state"/>
-                    <div class="row">
-                        <field name="peppol_verification_state" readonly="1"/>
-                        <span invisible="peppol_verification_state == 'not_verified'">
-                            with <field name="peppol_send_to_endpoint" readonly="1"/>
-                        </span>
-                        <button name="button_peppol_sync"
+                    <div id="peppol_verification_state_container">
+                        <label for="peppol_verification_state"/>
+                        <div class="d-flex align-items-baseline flex-wrap gap-1">
+                            <field name="peppol_verification_state" readonly="1" class="oe_inline"/>
+                            <span invisible="peppol_verification_state != 'valid'" class="text-muted">
+                                (<field name="peppol_send_to_endpoint" readonly="1" class="oe_inline"/>)
+                            </span>
+                            <button name="button_peppol_sync"
                                 type="object"
                                 string="Verify"
                                 help="Verify partner's Peppol endpoint"
-                                class="btn-link mb-1 px-0" icon="fa-refresh"/>
+                                class="btn-link p-0" icon="fa-refresh"/>
+                        </div>
                     </div>
-                    <field name="peppol_send_to_endpoint" groups="base.group_no_one"/>
                 </xpath>
             </data>
         </field>

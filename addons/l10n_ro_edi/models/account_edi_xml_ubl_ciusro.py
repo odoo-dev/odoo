@@ -188,12 +188,13 @@ class AccountEdiXmlUbl_Ro(models.AbstractModel):
 
     def _import_retrieve_partner_vals(self, tree, role):
         # EXTENDS account.edi.xml.ubl_bis3
+        from odoo.addons.account.tools.partner_identifiers import sanitize_endpoint
         partner_vals = super()._import_retrieve_partner_vals(tree, role)
-        if 'peppol_endpoint' in partner_vals:
-            # ANAF allows for endpoints to be an address mail, since we don't want to create a new
-            # user with an address mail as a Peppol endpoint, we simply remove it in that case.
-            error = self.env['res.partner']._build_error_peppol_endpoint(False, partner_vals['peppol_endpoint'])
-            if error:
-                partner_vals['peppol_endpoint'] = False
-                partner_vals['peppol_eas'] = False
+        # ANAF allows for endpoints to be an email address. If the imported identifier
+        # value doesn't sanitize cleanly, drop it to avoid creating invalid identifiers.
+        if identifiers := partner_vals.get('additional_identifiers'):
+            partner_vals['additional_identifiers'] = {
+                k: v for k, v in identifiers.items()
+                if sanitize_endpoint(v) == v
+            } or None
         return partner_vals

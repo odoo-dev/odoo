@@ -4,7 +4,7 @@
     'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations.html',
     'icon': '/account/static/description/l10n.png',
     'countries': ['no'],
-    'version': '2.1',
+    'version': '2.2',
     'author': 'Rolv Råen',
     'category': 'Accounting/Localizations/Account Charts',
     'description': """This is the module to manage the accounting chart for Norway in Odoo.

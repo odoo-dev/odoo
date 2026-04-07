@@ -11,7 +11,15 @@ from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import SQL, unique
 from odoo.addons.account.models.account_move import BYPASS_LOCK_CHECK
-from odoo.addons.account.tools.partner_identifiers import get_additional_identifiers_metadata_of_country
+from odoo.addons.account.tools.partner_identifiers import (
+    get_deduced_identifiers,
+    get_identifier_metadata,
+    get_additional_identifiers_metadata_of_country,
+    get_tin_metadata_of_country,
+    get_tin_placeholder_of_country,
+    validate_identifier,
+    validation_error_message,
+)
 from odoo.addons.base_vat.models.res_partner import _ref_vat
 
 _logger = logging.getLogger(__name__)
@@ -332,7 +340,6 @@ class ResPartner(models.Model):
     fiscal_country_group_codes = fields.Json(compute='_compute_fiscal_country_group_codes')
     partner_vat_placeholder = fields.Char(compute='_compute_partner_vat_placeholder')
     duplicate_bank_partner_ids = fields.Many2many('res.partner', compute='_compute_duplicate_bank_partner_ids')
-    additional_identifiers = fields.Json(string="Additional Identifiers")
 
     @api.depends('company_id', 'country_code')
     @api.depends_context('allowed_company_ids')
@@ -570,6 +577,8 @@ class ResPartner(models.Model):
     trust = fields.Selection([('good', 'Good Debtor'), ('normal', 'Normal Debtor'), ('bad', 'Bad Debtor')], string='Degree of trust you have in this debtor', company_dependent=True)
     ignore_abnormal_invoice_date = fields.Boolean(company_dependent=True)
     ignore_abnormal_invoice_amount = fields.Boolean(company_dependent=True)
+    vat = fields.Char(inverse='_inverse_vat', store=True)
+    additional_identifiers = fields.Json(string="Additional Identifiers", copy=False)
     invoice_sending_method = fields.Selection(
         string="Invoice sending",
         selection=[
@@ -578,6 +587,7 @@ class ResPartner(models.Model):
         ],
         company_dependent=True,
     )
+    display_electronic_invoicing = fields.Boolean(compute='_compute_display_electronic_invoicing')
     invoice_edi_format = fields.Selection(
         string="eInvoice format",
         selection=[],  # to extend
@@ -651,6 +661,17 @@ class ResPartner(models.Model):
                 if partner.id in self_ids:
                     partner.supplier_invoice_count += count
                 partner = partner.parent_id
+
+    def _inverse_vat(self):
+        self._check_vat()
+
+    @api.onchange('vat', 'country_id')
+    def _onchange_vat(self):
+        self._check_vat(validation=False)
+
+    @api.depends('country_code')
+    def _compute_display_electronic_invoicing(self):
+        self.display_electronic_invoicing = bool(self._fields['invoice_edi_format'].selection)
 
     @api.depends_context('company')
     @api.depends('country_code')
@@ -878,11 +899,55 @@ class ResPartner(models.Model):
     def get_available_additional_identifiers_metadata(self, country_code, seq_min=0, seq_max=199):
         return get_additional_identifiers_metadata_of_country(country_code, seq_min=seq_min, seq_max=seq_max)
 
+    def _set_identifier(self, identifier_type, value):
+        self.ensure_one()
+        identifiers = self.additional_identifiers or {}
+        validation = validate_identifier(identifier_type, value)
+        if not validation['valid']:
+            raise ValidationError(validation_error_message(self.env, identifier_type, validation['example']))
+        normalized_value = validation['value']
+        identifiers[identifier_type] = normalized_value  # set the normalized value
+        deduced_identifiers = get_deduced_identifiers(identifier_type, normalized_value)
+        self.additional_identifiers = {**identifiers, **deduced_identifiers}  # json needs to be fully reassigned each time
+
+    def _get_all_identifiers(self, enrich=False):
+        """ Returns a dict with identifier_key: identifier_value, containing
+        both additional identifiers and the VAT.
+        """
+        self.ensure_one()
+        partner = self.commercial_partner_id
+        identifiers = partner.additional_identifiers or {}
+        if partner.vat and partner.country_code:
+            key = get_tin_metadata_of_country(partner.country_code)['key']
+            identifiers = {key: partner.vat, **identifiers}
+        enriched_identifiers = {}
+        if enrich:
+            for identifier_type, value in identifiers.items():
+                enriched_identifiers.update(get_deduced_identifiers(identifier_type, value))
+        return {**identifiers, **enriched_identifiers}
+
     def _clean_additional_identifiers(self, vals):
-        # We never save empty or unselected identifiers strings back to the dictionary
-        if 'additional_identifiers' in vals and isinstance(vals['additional_identifiers'], dict):
-            vals['additional_identifiers'] = {k: v for k, v in vals['additional_identifiers'].items() if v}
+        if 'additional_identifiers' not in vals or not isinstance(vals['additional_identifiers'], dict):
+            return vals
+        cleaned = {}
+        for key, value in vals['additional_identifiers'].items():
+            if not value or not get_identifier_metadata(key):
+                continue
+            result = validate_identifier(key, value)
+            cleaned[key] = result['value'] if result['valid'] else value
+        # Compute deduced identifiers (e.g. BE_VAT → BE_EN)
+        for key, value in list(cleaned.items()):
+            cleaned.update(get_deduced_identifiers(key, value))
+        vals['additional_identifiers'] = cleaned or False
         return vals
+
+    @api.constrains('additional_identifiers')
+    def _check_additional_identifiers(self):
+        for partner in self:
+            for key, value in (partner.additional_identifiers or {}).items():
+                result = validate_identifier(key, value)
+                if not result['valid']:
+                    raise ValidationError(validation_error_message(self.env, key, result['example']))
 
     # TODO accounting/JCO, seems strange that this address validation logic is only there for pos, and
     # not for standard address management on portal/ecommerce

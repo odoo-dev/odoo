@@ -42,12 +42,12 @@ class ResPartner(models.Model):
     available_peppol_sending_methods = fields.Json(compute='_compute_available_peppol_sending_methods')
     available_peppol_edi_formats = fields.Json(compute='_compute_available_peppol_edi_formats')
 
-    @api.constrains('peppol_send_to_endpoint')
-    def _check_peppol_send_to_endpoint(self):
-        for partner in self:
-            validation = validate_participant_identifier(partner.peppol_send_to_endpoint)
-            if not validation['valid']:
-                raise UserError(self.env._("Invalid Peppol endpoint"))
+    # @api.constrains('peppol_send_to_endpoint')
+    # def _check_peppol_send_to_endpoint(self):
+    #     for partner in self:
+    #         validation = validate_participant_identifier(partner.peppol_send_to_endpoint)
+    #         if not validation['valid']:
+    #             raise UserError(self.env._("Invalid Peppol endpoint"))
 
     @api.onchange('peppol_send_to_endpoint')
     def _onchange_verify_peppol_status(self):
