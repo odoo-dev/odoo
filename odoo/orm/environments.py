@@ -739,7 +739,8 @@ class Transaction:
         """
         assert not self._registry_caches__, "Cannot check in the middle of a transaction"
         registry = self.registry
-        self._registry_caches__ = registry.registry_caches__.copy()
+        with registry.registry_cache_lock:
+            self._registry_caches__ = registry.registry_caches__.copy()
         for name, (seq, data) in self._registry_caches__.items():
             self.ormcaches__[name] = CacheLayer(data)
         if not registry.ready:
@@ -936,10 +937,15 @@ class Transaction:
             push_caches[name] = (seq + 1, data)
         registry._signal_changes(cr, names)
 
-        yield
-
-        # propagate the cache to the registry
-        registry.registry_caches__.update(push_caches)
+        # Propagate the cache to the registry after the commit.
+        # We lock the registry so that another transaction cannot start checking
+        # signaling between the commit and the push of the caches.
+        if push_caches:
+            with registry.registry_cache_lock:
+                yield
+                registry.registry_caches__.update(push_caches)
+        else:
+            yield
         for layer in self.ormcaches__.values():
             layer.update_parent()
 
