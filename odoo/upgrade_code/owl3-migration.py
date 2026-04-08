@@ -1307,7 +1307,7 @@ def upgrade(file_manager) -> str:
     """Main upgrade_code entry point."""
     collector = MigrationCollector(file_manager)
 
-    collector.run_sub("Migrating useEffect", upgrade_useeffect)
+    # collector.run_sub("Migrating useEffect", upgrade_useeffect)
     collector.run_sub("Migrating onWillRender", upgrade_onwillrender)
     collector.run_sub("Migrating onRendered", upgrade_onrendered)
     collector.run_sub("Migrating useComponent", upgrade_usecomponent)
