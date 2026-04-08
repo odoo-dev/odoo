@@ -10,6 +10,7 @@ import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/n
 import { parseFloat } from "@web/views/fields/parsers";
 import { OrderDisplay } from "@point_of_sale/app/components/order_display/order_display";
 import { ChoseComboPopup } from "@point_of_sale/app/components/popups/chose_combo_popup/chose_combo_popup";
+import { getSortedBestPotentialCombos } from "@point_of_sale/app/models/utils/combo_suggestion";
 
 export class OrderSummary extends Component {
     static template = "point_of_sale.OrderSummary";
@@ -382,42 +383,18 @@ export class OrderSummary extends Component {
         return this.state.potentialCombos.length > 0;
     }
     getSortedBestPotentialCombos() {
-        const bestCombos = {
-            applicable: [],
-            upsell: [],
-        };
-        this.pos.getApplicableProductCombo("combinations").forEach((applicable) => {
-            applicable.comboPrice = applicable.productTmpl.getPrice(
-                this.currentOrder.pricelist_id,
-                applicable.combinationsQty
-            );
-            applicable.numberOfUpsell = Object.values(applicable.combinations[0]).reduce(
-                (acc, combo) => {
-                    if (combo.upsell) {
-                        return acc + 1;
-                    }
-                    return acc;
-                },
-                0
-            );
-            if (applicable.numberOfUpsell > 0) {
-                bestCombos.upsell.push(applicable);
-            } else {
-                bestCombos.applicable.push(applicable);
-            }
+        return getSortedBestPotentialCombos({
+            order: this.currentOrder,
+            models: this.pos.data.models,
+            productCombos: this.pos.productCombos,
+            currency: this.pos.currency,
+            company: this.pos.company,
+            config: this.pos.config,
         });
-        bestCombos.applicable.sort((a, b) => b.comboPrice - a.comboPrice);
-        bestCombos.upsell.sort((a, b) => {
-            if (a.numberOfUpsell === b.numberOfUpsell) {
-                return b.comboPrice - a.comboPrice;
-            }
-            return a.numberOfUpsell - b.numberOfUpsell;
-        });
-        return bestCombos;
     }
     get bestComboName() {
         let name = `
-            ${this.state.potentialCombos[0].quantity} ${this.state.potentialCombos[0].productTmpl.display_name}`;
+            ${this.state.potentialCombos[0].quantity} ${this.state.potentialCombos[0].product.display_name}`;
         if (this.state.potentialCombos.length > 1) {
             name += " + Others";
         }
@@ -439,12 +416,8 @@ export class OrderSummary extends Component {
             comboToApply = bestPotentialCombos.upsell[0];
         }
         if (comboToApply) {
-            // Apply combo
-            comboToApply = this.pos.getApplicableProductCombo("full", comboToApply.productTmpl);
-            await this.pos.createComboFromLines(
-                comboToApply[0].productTmpl,
-                comboToApply[0].combinations
-            );
+            // Apply the exact suggestion selected by the user.
+            await this.pos.createComboFromLines(comboToApply.product, comboToApply.combinations);
             // If more combo applicable left, keep popup opened
             await this.applyBestCombo(true);
         }

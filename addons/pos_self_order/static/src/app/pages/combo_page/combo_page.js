@@ -426,7 +426,7 @@ export class ComboPage extends Component {
             {},
             this.getComboSelection()
         );
-
+        this.selfOrder.applyPendingComboConversion();
         this.goBack();
     }
 
@@ -440,7 +440,10 @@ export class ComboPage extends Component {
     }
 
     goBack() {
-        this.router.navigate("product_list");
+        if (this.selfOrder.pendingComboConversion) {
+            this.selfOrder.pendingComboConversion = null;
+        }
+        this.router.navigate(history.state.redirctPage || "product_list");
     }
 
     scrollUpToRequired() {

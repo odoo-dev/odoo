@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self_order.ChooseComboPopup">
+        <Dialog size="'md'" contentClass="this.contentClass" bodyClass="'d-flex flex-column gap-2 chose-combo-popup'">
+            <t t-set-slot="header">
+                <span class="fw-bold text-center w-100 fs-4">
+                    Do you want to make a combo instead ?
+                </span>
+            </t>
+            <div class="flex-fill d-flex flex-column gap-2 overflow-y-auto combo-list">
+                <t t-foreach="this.allCombos" t-as="combo" t-key="combo_index">
+                    <t t-set="price_diff" t-value="combo.totalSplitedComboLinePrice - combo.totalComboPrice"/>
+                    <div class="combo-item" t-if="price_diff > 0" t-att-class="{'border-top pt-3': combo_index > 0}">
+                        <div class="combo-row d-flex align-items-start gap-3">
+                            <img class="combo-img rounded flex-shrink-0 " style="width:80px;height:80px;object-fit:cover;"
+                                 t-att-src="'/web/image/product.product/' + combo.product.id + '/image_128'"/>
+
+                            <div class="combo-details flex-grow-1 text-truncate">
+                                <div class="combo-title d-flex align-items-center gap-2">
+                                    <span class="combo-name fs-5 fw-medium text-truncate d-inline-block mh-100">
+                                        <t t-out="combo.product.display_name"/>
+                                    </span>
+
+                                    <span class="combo-price fs-5 fw-semibold text-nowrap">
+                                        <t t-out="this.selfOrder.formatMonetary(combo.totalComboPrice)"/>
+                                    </span>
+                                </div>
+
+                                <ul class="mb-0 ps-3 combo-lines small text-muted mt-1">
+                                    <li t-foreach="combo.lines" t-as="line" t-key="line_index" t-att-class="{'text-info': line.upsell}">
+                                        - <t t-if="!line.upsell"><span t-out="line.quantity"/> x </t>
+                                        <span t-out="line.name"/>
+                                        <t t-if="line.upsell">
+                                            (up to <span t-out="line.quantity"/> more)
+                                        </t>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div class="combo-actions d-flex flex-column align-items-center .min-vw-100">
+                                <button class="apply-combo-btn btn btn-primary px-3 py-2 rounded"
+                                        t-on-click="() => this.confirm(combo)">
+                                    <t t-if="combo.upsell">Choose</t>
+                                    <t t-else="">Apply</t>
+                                </button>
+
+                                <span class="combo-save small text-success mt-1 text-nowrap">
+                                    Save <t t-out="this.selfOrder.formatMonetary(price_diff)"/>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+            <t t-set-slot="footer">
+                <div class="d-flex pt-0 justify-content-center w-100">
+                    <button type="button" class="btn btn-secondary"
+                            t-on-click="this.props.close">
+                        No Thanks
+                    </button>
+                </div>
+            </t>
+        </Dialog>
+    </t>
+</templates>

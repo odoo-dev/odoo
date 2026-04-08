@@ -1,11 +1,11 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { Component } from "@odoo/owl";
-import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
+import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { getAllComboChoices } from "@point_of_sale/app/models/utils/combo_suggestion";
 
-export class ChoseComboPopup extends Component {
-    static template = "point_of_sale.ChoseComboPopup";
+export class ChooseComboPopup extends Component {
+    static template = "pos_self_order.ChooseComboPopup";
     static components = { Dialog };
     static props = {
         potentialCombos: Object,
@@ -14,13 +14,12 @@ export class ChoseComboPopup extends Component {
     };
 
     setup() {
-        super.setup();
-        this.pos = usePos();
+        this.selfOrder = useSelfOrder();
         this.ui = useService("ui");
     }
 
     get allCombos() {
-        return getAllComboChoices(this.pos.models, this.props.potentialCombos);
+        return getAllComboChoices(this.selfOrder.models, this.props.potentialCombos);
     }
 
     get contentClass() {

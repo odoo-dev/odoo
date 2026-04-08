@@ -68,6 +68,21 @@
                             </div>
                         </t>
                     </div>
+                    <button
+                        t-if="this.showComboBtn"
+                        type="button"
+                        class="combo-suggestion-apply mt-2 d-flex justify-content-center px-3 px-kiosk-p-4 py-3 rounded-4 w-100 btn btn-primary text-white"
+                        t-on-click="this.applyBestComboSuggestion"
+                    >
+                        <span class="fw-bold fs-5 text-center">
+                            <t t-if="this.hasMultipleComboSuggestions">
+                                Multiple Combo Suggestions Available
+                            </t>
+                            <t t-else="">
+                                Choose combo instead and save <t t-out="this.selfOrder.formatMonetary(Math.abs(this.comboSuggestionDelta))"/>
+                            </t>
+                        </span>
+                    </button>
                 </div>
                 <div class="container o_self_container" t-if="!this.selfOrder.kioskMode">
                     <hr/>
