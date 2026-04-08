@@ -1081,6 +1081,10 @@ class AccountMove(models.Model):
         self.ensure_one()
         return self.invoice_date or fields.Date.context_today(self)
 
+    def _get_rate_defining_field_name(self):
+        self.ensure_one()
+        return 'invoice_date'
+
     def _get_expected_currency_rate_at(self, date):
         self.ensure_one()
         return self.env['res.currency']._get_conversion_rate(
@@ -2977,7 +2981,7 @@ class AccountMove(models.Model):
         moves_values_before = {
             move: {
                 field: get_value(move, field)
-                for field in ('currency_id', 'partner_id', 'move_type', 'invoice_currency_rate', 'invoice_date')
+                for field in ('currency_id', 'partner_id', 'move_type', 'invoice_currency_rate', move._get_rate_defining_field_name())
             }
             for move in container['records']
             if move.state == 'draft'
@@ -3026,7 +3030,7 @@ class AccountMove(models.Model):
             elif any(line not in base_lines for line, values in move_base_lines_values_before.items() if values['tax_ids']):
                 # Removed a base line affecting the taxes.
                 round_from_tax_lines = any_field_has_changed(move_tax_lines_values_before, tax_lines)
-            elif field_has_changed(moves_values_before, move, 'invoice_currency_rate') and not field_has_changed(moves_values_before, move, 'invoice_date'):
+            elif field_has_changed(moves_values_before, move, 'invoice_currency_rate') and not field_has_changed(moves_values_before, move, move._get_rate_defining_field_name()):
                 # Changing the rate should preserve the tax amounts in foreign currency but reapply the currency rate.
                 round_from_tax_lines = 'reapply_currency_rate'
             elif changed_lines := list(get_changed_lines(move_base_lines_values_before, base_lines)):

@@ -129,11 +129,22 @@ class AccountMove(models.Model):
     def _compute_expected_currency_rate(self):
         super()._compute_expected_currency_rate()
 
+    @api.depends('delivery_date')
+    def _compute_invoice_currency_rate(self):
+        hu_moves = self.filtered(lambda m: m.country_code == 'HU')
+        super(AccountMove, hu_moves)._compute_invoice_currency_rate()
+
     def _get_invoice_currency_rate_date(self):
         self.ensure_one()
         if self.country_code == 'HU' and self.delivery_date:
             return self.delivery_date
         return super()._get_invoice_currency_rate_date()
+
+    def _get_rate_defining_field_name(self):
+        self.ensure_one()
+        if self.country_code == 'HU' and self.delivery_date:
+            return 'delivery_date'
+        return super()._get_rate_defining_field_name()
 
     @api.depends('l10n_hu_edi_messages')
     def _compute_message_html(self):
