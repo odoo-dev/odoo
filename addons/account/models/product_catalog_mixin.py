@@ -176,46 +176,103 @@ class ProductCatalogMixin(models.AbstractModel):
             and line.product_uom_qty > 0
         )
 
-    def _resequence_sections(self, sections, child_field, **kwargs):
-        """Resequence the order content based on the new sequence order.
+    def _resequence_sections(self, child_field, id, parent_id, before_id=None, **kwargs):
+        lines = getattr(self, child_field).sorted("sequence")
+        section = lines.browse(id)
 
-        :param list sections: A list of dictionaries containing move and target sections.
-        :param str child_field: Field name of the order's lines (e.g., 'order_line').
-        :param dict kwargs: Additional values given for inherited models.
-        :return: A dictonary containing the new sequences of all the sections of order.
-        :rtype: dict
-        """
-        lines = self[child_field].sorted('sequence')
-        move_section, target_section = sections
+        if not section:
+            return True
 
-        move_block = lines.filtered(
-            lambda line: line.id == move_section['id']
-            or line.parent_id.id == move_section['id'],
+        # 1. GET SUBTREE (CONTIGUOUS BLOCK)
+        def _get_subtree(node, ordered_lines):
+            result = self.env[node._name].browse()
+            collecting = False
+            parent_stack = {node.id}
+
+            for line in ordered_lines:
+                if line.id == node.id:
+                    collecting = True
+                    result |= line
+                    continue
+
+                if not collecting:
+                    continue
+
+                if line.parent_id.id in parent_stack:
+                    result |= line
+                    parent_stack.add(line.id)
+                else:
+                    break
+
+            return result
+
+        subtree = _get_subtree(section, lines)
+
+        # 2. PREVENT CYCLIC MOVE
+        if parent_id and parent_id in subtree.ids:
+            return True
+
+        # 3. REMOVE SUBTREE FROM LIST
+        remaining = lines - subtree
+
+        # 4. UPDATE PARENT
+        section.parent_id = parent_id or False
+
+        # 5. COMPUTE INSERT INDEX
+        insert_index = None
+
+        # CASE 1: use before_id (highest priority)
+        if before_id:
+            for i, line in enumerate(remaining):
+                if line.id == before_id:
+                    insert_index = i
+                    break
+
+        # CASE 2: insert inside parent (as last child)
+        elif parent_id:
+            parent = lines.browse(parent_id)
+            parent_subtree = _get_subtree(parent, lines)
+            last_line = parent_subtree[-1]
+
+            for i, line in enumerate(remaining):
+                if line.id == last_line.id:
+                    insert_index = i + 1
+                    break
+
+        # CASE 3: fallback
+        if insert_index is None:
+            insert_index = len(remaining)
+
+        # 6. NORMALIZE ROOT INSERTION
+        if not parent_id:
+            if insert_index < len(remaining):
+                next_line = remaining[insert_index]
+
+                if next_line.parent_id:
+                    ancestor = next_line
+                    while ancestor.parent_id:
+                        ancestor = ancestor.parent_id
+
+                    for i, line in enumerate(remaining):
+                        if line.id == ancestor.id:
+                            insert_index = i
+                            break
+
+        # 7. BUILD FINAL ORDER
+        new_list = (
+            remaining[:insert_index]
+            | subtree
+            | remaining[insert_index:]
         )
 
-        target_block = lines.filtered(
-            lambda line: line.id == target_section['id']
-            or line.parent_id.id == target_section['id'],
-        )
+        # 8. RESEQUENCE FULL ORDER
+        for seq, line in enumerate(new_list, start=1):
+            line.sequence = seq
 
-        remaining_lines = lines - move_block
-        insert_after = move_section['sequence'] < target_section['sequence']
-        insert_index = len(remaining_lines)
-        for idx, line in enumerate(remaining_lines):
-            if line.id == (target_block[-1].id if insert_after else target_section['id']):
-                insert_index = idx + 1 if insert_after else idx
-                break
+        # 9. NORMALIZE DISPLAY TYPE
+        if not parent_id:
+            section.display_type = 'line_section'
+        else:
+            section.display_type = 'line_subsection'
 
-        reordered_lines = (
-            remaining_lines[:insert_index] +
-            move_block +
-            remaining_lines[insert_index:]
-        )
-
-        sections = {}
-        for sequence, line in enumerate(reordered_lines, start=1):
-            line.sequence = sequence
-            if line.display_type == 'line_section':
-                sections[line.id] = sequence
-
-        return sections
+        return True

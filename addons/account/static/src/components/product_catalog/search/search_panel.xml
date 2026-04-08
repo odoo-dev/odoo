@@ -35,7 +35,7 @@
                         </div>
                     </div>
                 </header>
-                <ul class="list-group d-block">
+                <ul class="list-group d-block" t-ref="mainTree">
                     <t t-foreach="this.state.sections" t-as="section" t-key="section.id">
                         <t t-call="account.SectionRow"/>
                     </t>
@@ -58,7 +58,7 @@
     </t>
 
     <t t-name="account.SectionRow">
-        <li class="list-group-item px-2 mb-1 border-0">
+        <li class="list-group-item px-2 mb-1 border-0 o_section" t-att-data-id="section.id" t-att-data-display-type="section.display_type">
 
             <div t-att-class="'d-flex align-items-center cursor-pointer o_section_row ' + (
                             this.selectedSection.sectionId == section.id ? 'o_selected_section' : ''

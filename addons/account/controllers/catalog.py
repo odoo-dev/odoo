@@ -50,7 +50,7 @@ class ProductCatalogAccountController(ProductCatalogController):
 
     @route('/product/catalog/resequence_sections', auth='user', type='jsonrpc')
     def product_catalog_resequence_sections(
-        self, res_model, order_id, sections, child_field, **kwargs,
+        self, res_model, order_id, child_field, id, parent_id, before_id=None, **kwargs,
     ):
         """Reorder the sections of a given order.
 
@@ -63,5 +63,5 @@ class ProductCatalogAccountController(ProductCatalogController):
         """
         order = request.env[res_model].browse(order_id)
         return order.with_company(order.company_id)._resequence_sections(
-            sections, child_field, **kwargs,
+            child_field, id, parent_id, before_id, **kwargs,
         )

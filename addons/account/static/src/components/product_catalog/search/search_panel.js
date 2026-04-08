@@ -3,7 +3,8 @@ import { formatCurrency } from '@web/core/currency';
 import { getActiveHotkey } from '@web/core/hotkeys/hotkey_service';
 import { rpc } from '@web/core/network/rpc';
 import { useBus } from '@web/core/utils/hooks';
-import { useState } from "@web/owl2/utils";
+import { useNestedSortable } from "@web/core/utils/nested_sortable";
+import { useState, useRef } from "@web/owl2/utils";
 import { SearchPanel } from '@web/search/search_panel/search_panel';
 
 
@@ -18,11 +19,122 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
             sections: [],
             isAddingSection: '',
             newSectionName: "",
+            dragging: false,
         });
 
         useBus(this.env.searchModel, 'section-line-count-change', this.updateSectionLineCount);
 
         onWillStart(async () => await this.loadSections());
+
+        this.mainTree = useRef("mainTree");
+
+         useNestedSortable({
+            ref: this.mainTree,
+            elements: "li.o_section",
+            nest: true,
+            listTagName: "ul",
+            useElementSize: true,
+            maxLevels: 2,
+            preventDrag: (el) => {
+                const id = el.dataset.id;
+                return !id;
+            },
+            isAllowed: (ctx) => {
+                const placeholder = ctx.placeHolder;
+
+                const parent = placeholder.parentElement?.closest("li.o_section");
+                const next = placeholder.nextElementSibling;
+
+                if (parent && !parent.dataset.id) {
+                    return false;
+                }
+
+                if (next && !next.dataset.id) {
+                    return false;
+                }
+
+                return true;
+            },
+
+            onDragStart: () => {
+                this.state.dragging = true;
+            },
+
+            onDragEnd: () => {
+                this.state.dragging = false;
+            },
+
+            onDrop: (params) => this._handleDrop(params),
+
+        });
+    }
+
+     _handleDrop({ element, parent, next }) {
+        const movedId = parseInt(element.dataset.id);
+        if (!movedId) return;
+        const newParentId = parent
+            ? parseInt(parent.dataset.id)
+            : false;
+
+        const nextId = next
+            ? parseInt(next.dataset.id)
+            : null;
+
+        this._moveNode(movedId, newParentId, nextId);
+    }
+
+    _moveNode(movedId, newParentId, nextId) {
+        // 1. Remove node from old location
+        const node = this._extractNode(movedId, this.state.sections);
+        if (!node) return;
+
+        // 2. Update parent
+        node.parent_id = newParentId;
+
+        // 3. Get target list
+        const targetList = newParentId
+            ? this._findSectionById(newParentId, this.state.sections).children
+            : this.state.sections;
+
+        // 4. Compute insert index (based on NEXT)
+        let insertIndex = targetList.length;
+
+        if (nextId !== null) {
+            const idx = targetList.findIndex(n => n.id === nextId);
+            if (idx !== -1) {
+                insertIndex = idx;
+            }
+        }
+
+        // 5. Insert node
+        targetList.splice(insertIndex, 0, node);
+
+        // 6. Resequence ONLY siblings
+        this._resequence(targetList);
+
+        // 7. Trigger OWL re-render
+        this.state.sections = [...this.state.sections];
+
+        this._syncMove(movedId, newParentId, nextId);
+    }
+
+    _extractNode(id, nodes) {
+        for (let i = 0; i < nodes.length; i++) {
+            const node = nodes[i];
+
+            if (node.id === id) {
+                return nodes.splice(i, 1)[0];
+            }
+
+            const found = this._extractNode(id, node.children);
+            if (found) return found;
+        }
+    }
+
+    _resequence(nodes) {
+        for (let i = 0; i < nodes.length; i++) {
+            nodes[i].sequence = i + 1;
+        }
     }
 
     updateActiveValues() {
@@ -44,20 +156,6 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
 
     toggle(section) {
         section.isOpen = !section.isOpen;
-    }
-
-    onDragStart(sectionId, ev) {
-        ev.dataTransfer.setData('section_id', sectionId);
-    }
-
-    onDragOver(ev) {
-        ev.preventDefault();
-    }
-
-    onDrop(targetSecId, ev) {
-        ev.preventDefault();
-        const moveSecId = parseInt(ev.dataTransfer.getData('section_id'));
-        if (moveSecId !== targetSecId) this.reorderSections(moveSecId, targetSecId);
     }
 
     enableSectionInput(type, parentId = null) {
@@ -159,28 +257,15 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         }
     }
 
-    async reorderSections(moveId, targetId) {
-        const sections = this.state.sections;
-        const moveSection = sections.get(moveId);
-        const targetSection = sections.get(targetId);
-
-        if (!moveSection || !targetSection) return;
-
-        const updatedSequences = await rpc('/product/catalog/resequence_sections',
+    async _syncMove(id, parent_id, before_id) {
+        await rpc(
+            "/product/catalog/resequence_sections",
             this._getSectionInfoParams({
-                sections: [
-                    { id: moveId, sequence: moveSection.sequence },
-                    { id: targetId, sequence: targetSection.sequence },
-                ],
+                id,
+                parent_id,
+                before_id,
             })
         );
-        for (const [id, sequence] of Object.entries(updatedSequences)) {
-            const section = sections.get(parseInt(id));
-            section && (section.sequence = sequence);
-        }
-        const noSection = sections.get(false);
-        noSection && (noSection.sequence = 0); // Reset the sequence of the "No Section"
-        this._sortSectionsBySequence(sections);
     }
 
     updateSectionLineCount({ detail: { sectionId, lineCountChange } }) {
