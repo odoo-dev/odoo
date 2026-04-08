@@ -7,6 +7,7 @@ import typing
 import warnings
 from datetime import datetime
 from hashlib import md5
+from importlib.metadata import version
 from logging import getLogger
 from zlib import compress, decompress, decompressobj
 
@@ -50,8 +51,8 @@ else:
         raise ImportError("pypdf implementation not found") from errors[0]
     del errors
 
-PdfReaderBase, PdfWriter, filters, generic, errors, create_string_object =\
-    pypdf.PdfReader, pypdf.PdfWriter, pypdf.filters, pypdf.generic, pypdf.errors, pypdf.create_string_object
+PdfReaderBase, PdfWriter, PageObject, filters, generic, errors, create_string_object =\
+    pypdf.PdfReader, pypdf.PdfWriter, pypdf.PageObject, pypdf.filters, pypdf.generic, pypdf.errors, pypdf.create_string_object
 # because they got re-exported
 ArrayObject, BooleanObject, ByteStringObject, DecodedStreamObject, DictionaryObject, IndirectObject, NameObject, NumberObject =\
     generic.ArrayObject, generic.BooleanObject, generic.ByteStringObject, generic.DecodedStreamObject, generic.DictionaryObject, generic.IndirectObject, generic.NameObject, generic.NumberObject
@@ -78,6 +79,26 @@ pypdf.filters.decompress = lambda data: decompressobj().decompress(data)
 class PdfReader(PdfReaderBase):
     def __init__(self, stream, strict=True, *args, **kwargs):
         super().__init__(stream, strict)
+
+
+# monkey patch to discard the following deprecation warning while we still support PyPDF2:
+#
+# Calling `PageObject.replace_contents()` for pages not assigned to a writer is
+# deprecated and will be removed in pypdf 7.0.0. Attach the page to the writer
+# first or use `PdfWriter(clone_from=...)` directly. The existing approach has
+# proved being unreliable.
+#
+# https://github.com/py-pdf/pypdf/commit/08e951dea814420003d46d2f40a484b065e3ad76
+# https://github.com/py-pdf/pypdf/blob/6.6.0/pypdf/_page.py#L1004
+if parse_version("6.6.0") <= parse_version(version('pypdf')):
+    _orig_replace_contents = PageObject.replace_contents
+
+    def replace_contents(self, *args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", category=DeprecationWarning)
+            return _orig_replace_contents(self, *args, **kwargs)
+
+    PageObject.replace_contents = replace_contents
 
 
 # Ensure that PdfFileReader and PdfFileWriter are available in case it's still used somewhere

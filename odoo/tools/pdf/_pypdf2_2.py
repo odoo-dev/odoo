@@ -1,10 +1,11 @@
 import warnings
 
-from PyPDF2 import errors, filters, generic, PdfReader, PdfWriter as _Writer
+from PyPDF2 import errors, filters, generic, PdfReader, PdfWriter as _Writer, PageObject
 from PyPDF2.generic import create_string_object
 from PyPDF2 import __version__  # noqa: F401
 
 __all__ = [
+    "PageObject",
     "PdfReader",
     "PdfWriter",
     "create_string_object",
