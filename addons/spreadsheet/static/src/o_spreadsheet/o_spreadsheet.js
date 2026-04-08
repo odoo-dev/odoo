@@ -7874,7 +7874,7 @@ let CommandResult = /* @__PURE__ */ function(CommandResult) {
 	CommandResult["SheetLocked"] = "SheetLocked";
 	CommandResult["InvalidZoomLevel"] = "InvalidZoomLevel";
 	CommandResult["NamedRangeNameAlreadyExists"] = "NamedRangeNameAlreadyExists";
-	CommandResult["NamedRangeNameWithInvalidCharacter"] = "NamedRangeNameWithInvalidCharacter";
+	CommandResult["NamedRangeInvalidName"] = "NamedRangeInvalidName";
 	CommandResult["NamedRangeNameLooksLikeCellReference"] = "NamedRangeNameLooksLikeCellReference";
 	CommandResult["NamedRangeNotFound"] = "NamedRangeNotFound";
 	return CommandResult;
@@ -36881,7 +36881,7 @@ function interactiveUpdateNamedRange(env, payload) {
 function handleResult(env, result) {
 	if (!result.isSuccessful) {
 		if (result.isCancelledBecause(CommandResult.NamedRangeNameAlreadyExists)) env.raiseError(_t("A named range with this name already exists."));
-		else if (result.isCancelledBecause(CommandResult.NamedRangeNameWithInvalidCharacter)) env.raiseError(_t("The named range name contains invalid characters. Valid characters are letters, numbers, underscores, and periods."));
+		else if (result.isCancelledBecause(CommandResult.NamedRangeInvalidName)) env.raiseError(_t("The named range name is invalid. Valid names can contain letters, digits, underscores, and periods. The name cannot be only a number, TRUE, or FALSE."));
 		else if (result.isCancelledBecause(CommandResult.NamedRangeNameLooksLikeCellReference)) env.raiseError(_t("A named range name cannot resemble a cell reference."));
 		else if (result.isCancelledBecause(CommandResult.NamedRangeNotFound)) env.raiseError(_t("The named range to update was not found."));
 	}
@@ -52191,7 +52191,7 @@ var NamedRangesPlugin = class extends CorePlugin {
 	}
 	checkValidNewNamedRangeName(name) {
 		if (this.getNamedRange(name)) return CommandResult.NamedRangeNameAlreadyExists;
-		if (!validNamedRangeNameRegex.test(name) || isNumber(name, DEFAULT_LOCALE)) return CommandResult.NamedRangeNameWithInvalidCharacter;
+		if (!validNamedRangeNameRegex.test(name) || isNumber(name, DEFAULT_LOCALE) || ["TRUE", "FALSE"].includes(name.toUpperCase())) return CommandResult.NamedRangeInvalidName;
 		if (rangeReference.test(name)) return CommandResult.NamedRangeNameLooksLikeCellReference;
 		return CommandResult.Success;
 	}
