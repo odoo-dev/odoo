@@ -33,6 +33,40 @@ export const RELATIVE_PERIODS = {
     year_to_date: _t("Year to Date"),
 };
 
+export const DATE_FILTER_TYPES = [
+    "today",
+    "yesterday",
+    "last_7_days",
+    "last_30_days",
+    "last_90_days",
+    "month_to_date",
+    "last_month",
+    "month",
+    "quarter",
+    "year_to_date",
+    "last_12_months",
+    "year",
+    undefined,
+    "range",
+];
+
+export function getDateFilterTypeLabel(type) {
+    switch (type) {
+        case "month":
+            return _t("Month");
+        case "quarter":
+            return _t("Quarter");
+        case "year":
+            return _t("Year");
+        case "range":
+            return _t("Custom Range");
+        case undefined:
+            return _t("All time");
+        default:
+            return RELATIVE_PERIODS[type] || type;
+    }
+}
+
 /**
  * Compute the display name of a date filter value.
  */
@@ -84,6 +118,7 @@ export function dateFilterValueToString(value) {
  * @returns {boolean}
  */
 export function checkFilterDefaultValueIsValid(filter, defaultValue) {
+    // ADRM TODO: add check for allowed values
     if (defaultValue === undefined) {
         return true;
     }

@@ -24,7 +24,7 @@
                     </div>
                 </t>
             </DropdownItem>
-            <div class="dropdown-divider" t-if="option.separator"/>
+            <div class="dropdown-divider" t-if="option.separator and !option_last"/>
         </t>
     </t>
 </templates>

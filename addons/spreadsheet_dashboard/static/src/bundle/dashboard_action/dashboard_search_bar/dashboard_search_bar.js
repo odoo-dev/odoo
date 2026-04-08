@@ -53,6 +53,10 @@ export class DashboardSearchBar extends Component {
         return this.props.model.getters.getGlobalFilterValue(this.firstDateFilter.id);
     }
 
+    get allowedDateFilterTypes() {
+        return this.firstDateFilter ? this.firstDateFilter.allowedDateFilterTypes : [];
+    }
+
     async computeState() {
         const filters = this.props.model.getters.getGlobalFilters();
         const firstDateFilterIndex = filters.findIndex((filter) => filter.type === "date");

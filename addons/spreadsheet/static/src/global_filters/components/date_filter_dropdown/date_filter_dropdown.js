@@ -4,87 +4,86 @@ import {
     getDateRange,
     getNextDateFilterValue,
     getPreviousDateFilterValue,
-    RELATIVE_PERIODS,
+    getDateFilterTypeLabel,
 } from "@spreadsheet/global_filters/helpers";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { _t } from "@web/core/l10n/translation";
 const { DateTime } = luxon;
 
 const DATE_OPTIONS = [
     {
         id: "today",
         type: "relative",
-        label: RELATIVE_PERIODS["today"],
+        label: getDateFilterTypeLabel("today"),
     },
     {
         id: "yesterday",
         type: "relative",
-        label: RELATIVE_PERIODS["yesterday"],
+        label: getDateFilterTypeLabel("yesterday"),
         separator: true,
     },
     {
         id: "last_7_days",
         type: "relative",
-        label: RELATIVE_PERIODS["last_7_days"],
+        label: getDateFilterTypeLabel("last_7_days"),
     },
     {
         id: "last_30_days",
         type: "relative",
-        label: RELATIVE_PERIODS["last_30_days"],
+        label: getDateFilterTypeLabel("last_30_days"),
     },
     {
         id: "last_90_days",
         type: "relative",
-        label: RELATIVE_PERIODS["last_90_days"],
+        label: getDateFilterTypeLabel("last_90_days"),
         separator: true,
     },
     {
         id: "month_to_date",
         type: "relative",
-        label: RELATIVE_PERIODS["month_to_date"],
+        label: getDateFilterTypeLabel("month_to_date"),
     },
     {
         id: "last_month",
         type: "relative",
-        label: RELATIVE_PERIODS["last_month"],
+        label: getDateFilterTypeLabel("last_month"),
     },
     {
         id: "month",
         type: "month",
-        label: _t("Month"),
+        label: getDateFilterTypeLabel("month"),
     },
     {
         id: "quarter",
         type: "quarter",
-        label: _t("Quarter"),
+        label: getDateFilterTypeLabel("quarter"),
         separator: true,
     },
     {
         id: "year_to_date",
         type: "relative",
-        label: RELATIVE_PERIODS["year_to_date"],
+        label: getDateFilterTypeLabel("year_to_date"),
     },
     {
         id: "last_12_months",
         type: "relative",
-        label: RELATIVE_PERIODS["last_12_months"],
+        label: getDateFilterTypeLabel("last_12_months"),
     },
     {
         id: "year",
         type: "year",
-        label: _t("Year"),
+        label: getDateFilterTypeLabel("year"),
         separator: true,
     },
     {
         id: undefined,
         type: undefined,
-        label: _t("All time"),
+        label: getDateFilterTypeLabel(undefined),
     },
     {
         id: "range",
         type: "range",
-        label: _t("Custom Range"),
+        label: getDateFilterTypeLabel("range"),
     },
 ];
 
@@ -98,6 +97,7 @@ export class DateFilterDropdown extends Component {
     static components = { DropdownItem, DateTimeInput };
     static props = {
         value: { type: Object, optional: true },
+        allowedFilterTypes: { type: Array, optional: true },
         update: Function,
     };
 
@@ -165,7 +165,11 @@ export class DateFilterDropdown extends Component {
     }
 
     get dateOptions() {
-        return DATE_OPTIONS;
+        const options = DATE_OPTIONS;
+        if (this.props.allowedFilterTypes) {
+            return options.filter((option) => this.props.allowedFilterTypes.includes(option.id));
+        }
+        return options;
     }
 
     isMonthQuarterYear(value) {

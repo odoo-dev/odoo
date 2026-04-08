@@ -64,6 +64,10 @@ export class FilterValue extends Component {
         return this.props.globalFilterValue;
     }
 
+    get allowedDateFilterTypes() {
+        return this.filter.allowedDateFilterTypes;
+    }
+
     get textAllowedValues() {
         return this.getters.getTextFilterOptions(this.filter.id);
     }

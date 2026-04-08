@@ -7,6 +7,7 @@
                 <DateFilterDropdown
                     value="props.value"
                     update.bind="props.update"
+                    allowedFilterTypes="props.allowedFilterTypes"
                 />
             </t>
         </Dropdown>

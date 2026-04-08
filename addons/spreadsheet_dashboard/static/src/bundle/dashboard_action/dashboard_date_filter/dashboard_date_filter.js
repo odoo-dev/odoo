@@ -18,6 +18,7 @@ export class DashboardDateFilter extends Component {
     static components = { Dropdown, DateFilterDropdown };
     static props = {
         value: { type: Object, optional: true },
+        allowedFilterTypes: { type: Array, optional: true },
         update: Function,
     };
 
