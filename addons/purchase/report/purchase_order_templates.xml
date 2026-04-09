@@ -114,7 +114,7 @@
                                 <td colspan="99" id="subtotal">
                                     <strong class="mr16">Subtotal</strong>
                                     <span
-                                        t-out="current_subtotal"
+                                        t-out="current_section._get_section_totals('price_subtotal')"
                                         t-options='{"widget": "monetary", "display_currency": o.currency_id}'
                                     />
                                 </td>
