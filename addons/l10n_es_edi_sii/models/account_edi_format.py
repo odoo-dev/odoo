@@ -209,9 +209,11 @@ class AccountEdiFormat(models.Model):
         for invoice in invoices:
             com_partner = invoice.commercial_partner_id
             is_simplified = invoice.l10n_es_is_simplified
+            is_navarra = invoice.company_id.l10n_es_sii_tax_agency == 'navarra'
+            periodo_key = 'PeriodoImpositivo' if is_navarra else 'PeridoLiquidacion'
 
             info = {
-                'PeriodoLiquidacion': {
+                periodo_key: {
                     'Ejercicio': str(invoice.date.year),
                     'Periodo': str(invoice.date.month).zfill(2),
                 },
@@ -408,6 +410,25 @@ class AccountEdiFormat(models.Model):
                 'url': 'https://egoitza.gipuzkoa.eus/ogasuna/sii/ficheros/v1.1/SuministroFactRecibidas.wsdl',
                 'test_url': 'https://sii-prep.egoitza.gipuzkoa.eus/JBS/HACI/SSII-FACT/ws/fr/SiiFactFRV1SOAP',
             }
+    
+    def _l10n_es_edi_web_service_navarra_vals(self, invoices):
+         if invoices[0].is_sale_document():
+            return {
+                'url': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/ssii/fact/ws/SuministroFactEmitidas.wsdl',
+                'address': 'https://siihacienda.navarra.es/SII_PRODUCCION.proxy/SiiMensajesXsdHandlet.ashx',
+                'test_url': 'https://siihacienda.navarra.es/SII_PRUEBAS.proxy/SiiMensajesXsdHandlet.ashx',
+                # Add this to identify that is Navarra in the next step
+                'custom_navarra': True,
+            }
+        else:
+            # Lo mismo para facturas recibidas...
+            # The same for received invoices
+            return {
+                'url': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/ssii/fact/ws/SuministroFactRecibidas.wsdl',
+                'address': 'https://siihacienda.navarra.es/SII_PRODUCCION.proxy/SiiMensajesXsdHandlet.ashx',
+                'test_url': 'https://siihacienda.navarra.es/SII_PRUEBAS.proxy/SiiMensajesXsdHandlet.ashx',
+                'custom_navarra': True,
+            }
 
     def _l10n_es_edi_call_web_service_sign(self, invoices, info_list):
         return self._l10n_es_edi_call_web_service_sign_common(invoices, info_list)
@@ -443,6 +464,15 @@ class AccountEdiFormat(models.Model):
         session.mount('https://', CertificateAdapter(ciphers=EUSKADI_CIPHERS))
 
         client = zeep.Client(connection_vals['url'], operation_timeout=60, timeout=60, session=session)
+
+        if connection_vals.get('custom_navarra'):
+            # We Inject the namespaces directly in the header dictionary
+            # This makes Odoo serializer to include them in the Envelope
+            header['_attributes'] = {
+                'xmlns:sum': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/ssii/fact/ws/SuministroLR.xsd',
+                'xmlns:sum1': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/ssii/fact/ws/SuministroInformacion.xsd',
+            }
+
 
         if invoices[0].is_sale_document():
             service_name = 'SuministroFactEmitidas'
