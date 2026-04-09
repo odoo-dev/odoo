@@ -32,24 +32,43 @@ class ProductImage(models.Model):
     can_image_1024_be_zoomed = fields.Boolean(
         string="Can Image 1024 be zoomed", compute="_compute_can_image_1024_be_zoomed", store=True
     )
-    attribute_value_ids = fields.Many2many("product.template.attribute.value")
 
+    attribute_value_ids = fields.Many2many("product.template.attribute.value")
     has_attribute_value = fields.Boolean(compute="_compute_has_attribute_value", store=True)
 
     is_primary_or_secondary = fields.Selection(
         [("primary", "Primary"), ("secondary", "Secondary")],
         default=False,
-        compute="_compute_primary_secondary",
+        compute="_compute_is_primary_or_secondary",
     )
 
     # === COMPUTE METHODS ===#
 
-    def _compute_primary_secondary(self):
+    @api.depends("image_1920", "image_1024")
+    def _compute_can_image_1024_be_zoomed(self):
+        for image in self:
+            image.can_image_1024_be_zoomed = image.image_1920 and is_image_size_above(
+                image.image_1920, image.image_1024
+            )
+
+    @api.depends("video_url")
+    def _compute_embed_code(self):
+        for image in self:
+            image.embed_code = (image.video_url and get_video_embed_code(image.video_url)) or False
+
+    @api.depends("attribute_value_ids")
+    def _compute_has_attribute_value(self):
+        for image in self:
+            image.has_attribute_value = bool(image.attribute_value_ids)
+
+    def _compute_is_primary_or_secondary(self):
         for template in self.mapped("product_tmpl_id"):
             tmpl_content = template.image_1920.content
             primary = secondary = None
 
-            for img in template.product_template_image_ids.sorted("sequence"):
+            for img in template.product_template_image_ids.sorted(
+                key=lambda img: (img.has_attribute_value, img.sequence)
+            ):
                 content = img.image_1920.content
 
                 if not primary and content == tmpl_content:
@@ -63,23 +82,6 @@ class ProductImage(models.Model):
                     continue
 
                 img.is_primary_or_secondary = False
-
-    @api.depends("attribute_value_ids")
-    def _compute_has_attribute_value(self):
-        for image in self:
-            image.has_attribute_value = bool(image.attribute_value_ids)
-
-    @api.depends("image_1920", "image_1024")
-    def _compute_can_image_1024_be_zoomed(self):
-        for image in self:
-            image.can_image_1024_be_zoomed = image.image_1920 and is_image_size_above(
-                image.image_1920, image.image_1024
-            )
-
-    @api.depends("video_url")
-    def _compute_embed_code(self):
-        for image in self:
-            image.embed_code = (image.video_url and get_video_embed_code(image.video_url)) or False
 
     # === ONCHANGE METHODS ===#
 

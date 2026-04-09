@@ -7,9 +7,7 @@
             state="this.dropdownState"
             beforeOpen.bind="this.beforeOpen"
         >
-            <button
-                t-attf-class="btn btn-outline-secondary border-top-0 rounded-0 w-100 #{this.props.record.context.default_product_variant_ids &amp;&amp; !this.props.record.data.product_variant_ids.resIds.includes(this.props.record.context.default_product_variant_ids?.[0]) ? 'opacity-50' : ''}"
-            >
+            <button t-attf-class="btn btn-outline-secondary border-top-0 rounded-0 w-100">
                 <div class="d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-2">
                         <span>Apply to attributes</span>

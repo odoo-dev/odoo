@@ -214,7 +214,7 @@ class ProductProduct(models.Model):
         self.ensure_one()
         return self.product_template_image_ids.filtered(
             lambda img: self in img.product_variant_ids
-        ).sorted(key=lambda img: (not bool(img.attribute_value_ids), img.sequence))
+        ).sorted(key=lambda img: (not img.has_attribute_value, img.sequence))
 
     def _is_in_wishlist(self):
         if not self:

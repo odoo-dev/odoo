@@ -39,28 +39,24 @@
         <field name="name">product.image.view.kanban</field>
         <field name="model">product.image</field>
         <field name="arch" type="xml">
-            <kanban
-                js_class="product_kanban_image"
-                string="Product Images"
-                default_order="has_attribute_value desc, sequence"
-            >
+            <kanban string="Product Images" default_order="has_attribute_value desc, sequence, id">
                 <!-- We need the hidden video_url to be able to create new `product.image` records with video_url. (see: x2many_media_viewer.js) -->
                 <field name="video_url" invisible="1"/>
                 <field name="sequence" widget="handle"/>
-                <field name="has_attribute_value"/>
-                <field name="product_tmpl_id"/>
-                <field name="product_variant_ids"/>
-                <field name="is_primary_or_secondary"/>
-                <field name="name"/>
+                <field name="has_attribute_value"/> <!-- We need this for sorting -->
+                <field name="is_primary_or_secondary"/> <!-- We need this for displaying primary or secondary badge ( see: product_image.js ) -->
+                <field name="name"/> <!-- We need name to be able to create new `product.image` records. (see: x2many_media_viewer.js) -->
+                <field name="product_tmpl_id"/> <!-- We need this as we are accessing it in `product_image.js` -->
+                <field name="product_variant_ids"/> <!-- We need this for filtering to mute non applicable images -->
                 <templates>
                     <t t-name="card" class="p-0 border-0">
+                        <t t-set="currentVariant" t-value="context.default_product_variant_ids?.[0]"/>
+                        <t t-set="variants" t-value="record.product_variant_ids.raw_value or []"/>
                         <t
-                            t-set="notApplicable"
-                            t-value="context.default_product_variant_ids
-                                &amp;&amp; record.product_variant_ids.raw_value.length > 0
-                                &amp;&amp; !record.product_variant_ids.raw_value.includes(context.default_product_variant_ids?.[0])"
+                            t-set="isApplicable"
+                            t-value="!currentVariant or variants.includes(currentVariant)"
                         />
-                        <div t-attf-class="card flex-row border rounded-0 #{notApplicable ? 'opacity-50' : ''}">
+                        <div t-attf-class="card flex-row border rounded-0 #{!isApplicable ? 'opacity-50' : ''}">
                             <div class="o_website_sale_image_list_card_image ratio ratio-1x1">
                                 <field name="image_1920" widget="x2_many_image"/>
                             </div>
@@ -87,7 +83,9 @@
                             </t>
                             <span t-attf-class="badge #{size_status} o_product_image_size" t-att-title="message"></span>
                         </div>
-                        <field name="attribute_value_ids" widget="variant_image_assignment"/>
+                        <div t-att-class="!isApplicable ? 'opacity-50' : ''">
+                            <field name="attribute_value_ids" widget="variant_image_assignment"/>
+                        </div>
                     </t>
                 </templates>
             </kanban>
