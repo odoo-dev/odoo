@@ -20,6 +20,7 @@ export class CartPage extends Component {
 
     setup() {
         this.selfOrder = useSelfOrder();
+        this.alreadyOrdered = Object.keys(this.selfOrder.currentOrder.changes).length == 0;
         this.dialog = useService("dialog");
         this.router = useService("router");
         this.state = useState({
@@ -45,13 +46,15 @@ export class CartPage extends Component {
     get lines() {
         const selfOrder = this.selfOrder;
         const order = selfOrder.currentOrder;
-        const lines =
-            (selfOrder.config.self_ordering_pay_after === "meal" &&
-            Object.keys(order.changes).length > 0
-                ? order.unsentLines
-                : this.selfOrder.currentOrder.lines) || [];
+        const changed = Object.keys(order.changes).length > 0;
 
-        return lines.filter((line) => !line.combo_parent_id);
+        if (selfOrder.config.self_ordering_pay_after === "meal" && changed) {
+            if (this.alreadyOrdered) {
+                return this.selfOrder.currentOrder.lines.filter((line) => !line.combo_parent_id);
+            }
+            return order.unsentLines.filter((line) => !line.combo_parent_id);
+        }
+        return this.selfOrder.currentOrder.lines.filter((line) => !line.combo_parent_id);
     }
 
     get totalPriceAndTax() {
@@ -87,6 +90,9 @@ export class CartPage extends Component {
     getLineChangeQty(line) {
         const currentQty = line.qty;
         const lastChange = this.selfOrder.currentOrder.uiState.lineChanges[line.uuid];
+        if (typeof line.id === "number") {
+            return this.alreadyOrdered ? currentQty : currentQty - (lastChange?.qty || 0);
+        }
         return !lastChange ? currentQty : currentQty - lastChange.qty;
     }
 
@@ -305,30 +311,7 @@ export class CartPage extends Component {
         }
     }
 
-    canChangeQuantity(line) {
-        const order = this.selfOrder.currentOrder;
-        const lastChange = order.uiState.lineChanges[line.uuid];
-        if (!lastChange) {
-            return true;
-        }
-        return lastChange.qty < line.qty;
-    }
-
-    canDeleteLine(line) {
-        const lastChange = this.selfOrder.currentOrder.uiState.lineChanges[line.uuid];
-        return !lastChange ? true : lastChange.qty !== line.qty;
-    }
-
     removeLine(line, event) {
-        if (!this.canDeleteLine(line)) {
-            return;
-        }
-        const lastChange = this.selfOrder.currentOrder.uiState.lineChanges[line.uuid];
-        if (lastChange) {
-            line.qty = lastChange.qty;
-            return;
-        }
-
         const doRemoveLine = () => {
             this.selfOrder.removeLine(line);
             if (this.lines.length === 0) {
@@ -349,10 +332,6 @@ export class CartPage extends Component {
     }
 
     changeQuantity(line, increase) {
-        if (!increase && !this.canChangeQuantity(line)) {
-            return;
-        }
-
         // Update combo first
         for (const cline of line.combo_line_ids) {
             this.changeQuantity(cline, increase);

@@ -16,12 +16,15 @@ patch(PosOrder.prototype, {
     get unsentLines() {
         return this.lines.filter(
             (l) =>
-                !Object.keys(this.uiState.lineChanges).includes(l.uuid) ||
-                this.uiState.lineChanges[l.uuid].qty !== l.qty
+                !this.uiState.lineChanges[l.uuid] ||
+                this.uiState.lineChanges[l.uuid].qty !== l.qty ||
+                Object.keys(this.uiState.lineChanges).some(
+                    (uuid) => !this.lines.find((line) => line.uuid === uuid)
+                )
         );
     },
     get changes() {
-        return this.lines.reduce((acc, line) => {
+        const changes = this.lines.reduce((acc, line) => {
             const diff = line.changes;
             if (
                 diff.qty ||
@@ -33,6 +36,16 @@ patch(PosOrder.prototype, {
             }
             return acc;
         }, {});
+
+        // 🔥 Add removed lines
+        const currentUUIDs = new Set(this.lines.map((l) => l.uuid));
+        for (const uuid in this.uiState.lineChanges) {
+            if (!currentUUIDs.has(uuid)) {
+                changes[uuid] = -this.uiState.lineChanges[uuid].qty;
+            }
+        }
+
+        return changes;
     },
     get isTakeaway() {
         return this.preset_id?.service_at !== "table" && this.config.use_presets;
