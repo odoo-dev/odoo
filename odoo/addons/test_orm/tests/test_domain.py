@@ -459,6 +459,14 @@ class TestDomainOptimize(TransactionCase):
             # fields must be validated
             domain.optimize(model)
 
+    def test_condition_properties_missing_name(self):
+        # this test is the same as the one above,
+        # but checks whether the property name is present or not
+        model = self.env['test_orm.message']
+        domain = Domain("attributes", "!=", False)
+        with self.assertRaises(ValueError):
+            domain.validate(model.sudo())
+
     def test_condition_optimize_search(self):
         model = self.env['test_orm.bar']
         foo = model.foo.create({"name": "ok"})
