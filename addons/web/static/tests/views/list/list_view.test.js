@@ -20566,7 +20566,7 @@ test(`column tag: stacks multiple fields in a single cell`, async () => {
     // Should have 2 columns: foo and the stacked column
     expect(`thead th:not(.o_list_record_selector)`).toHaveCount(2);
     // The stacked cell uses the first field's label as header
-    expect(`thead th:not(.o_list_record_selector):eq(1)`).toHaveText("Int Field");
+    expect(`thead th:not(.o_list_record_selector):eq(1)`).toHaveText("Int field");
     // Each row has 2 data cells
     expect(`tbody tr:eq(0) td:not(.o_list_record_selector)`).toHaveCount(2);
     // Both sub-fields appear in the second cell
