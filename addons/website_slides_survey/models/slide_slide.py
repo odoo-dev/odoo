@@ -23,9 +23,7 @@ class SlideSlidePartner(models.Model):
     def _compute_field_value(self, field):
         super()._compute_field_value(field)
         if field.name == 'survey_scoring_success':
-            self.filtered('survey_scoring_success').write({
-                'completed': True
-            })
+            self.filtered('survey_scoring_success').completed = True
 
     def _recompute_completion(self):
         super()._recompute_completion()

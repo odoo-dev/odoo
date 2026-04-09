@@ -154,10 +154,7 @@ class MrpWorkorder(models.Model):
             if not workorder.uom_id or workorder.state not in ('blocked', 'ready'):
                 continue
             has_qty_ready = workorder.uom_id.compare(workorder.qty_ready, 0) > 0
-            if has_qty_ready:
-                workorder.write({'state': 'ready'})
-            else:
-                workorder.write({'state': 'blocked'})
+            workorder.state = 'ready' if has_qty_ready else 'blocked'
 
     def set_state(self, state):
         ids_to_update = []

@@ -18,7 +18,7 @@ class CalendarRecurrence(models.Model):
         # be already synced through the calendar.event.write()
         for recurrence in self:
             if recurrence.rrule != recurrence._rrule_serialize():
-                recurrence.write({'rrule': recurrence._rrule_serialize()})
+                recurrence.rrule = recurrence._rrule_serialize()
 
     def _inverse_rrule(self):
         # Note: 'need_sync_m' is set to False to avoid syncing the updated recurrence with
