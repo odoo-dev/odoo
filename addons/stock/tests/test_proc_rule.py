@@ -660,7 +660,6 @@ class TestProcRule(TransactionCase):
             'product_id': self.product.id,
             'product_min_qty': 5,
             'product_max_qty': 5,
-            'qty_to_order': 5,
             'trigger': 'auto',
         })
         self.assertEqual(orderpoint.qty_to_order, 5)
