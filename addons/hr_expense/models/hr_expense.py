@@ -14,12 +14,6 @@ from datetime import timedelta
 
 _logger = logging.getLogger(__name__)
 
-EXPENSE_APPROVAL_STATE = [
-    ('submitted', 'Submitted'),
-    ('approved', 'Approved'),
-    ('refused', 'Refused'),
-]
-
 
 class HrExpense(models.Model):
     """
@@ -121,26 +115,21 @@ class HrExpense(models.Model):
     )
     state = fields.Selection(
         selection=[
-            # Pre-Approval states
             ('draft', 'Draft'),
-            # Approval states
             ('submitted', 'Submitted'),
             ('approved', 'Approved'),
             ('posted', 'Posted'),
-            # Payment states
             ('in_payment', 'In Payment'),
             ('paid', 'Paid'),
-            # refused state is always last
             ('refused', 'Refused'),
         ],
         string="Status",
-        compute='_compute_state', store=True, readonly=True,
+        readonly=True,
         index=True,
         copy=False,
         default='draft',
         tracking=True,
     )
-    approval_state = fields.Selection(selection=EXPENSE_APPROVAL_STATE, copy=False, readonly=True)
     approval_date = fields.Datetime(string="Approval Date", readonly=True)
     duplicate_expense_ids = fields.Many2many(comodel_name='hr.expense', compute='_compute_duplicate_expense_ids')  # Used to trigger warnings
     same_receipt_expense_ids = fields.Many2many(comodel_name='hr.expense', compute='_compute_same_receipt_expense_ids')  # Used to trigger warnings
@@ -258,8 +247,9 @@ class HrExpense(models.Model):
         string="Account",
         compute='_compute_account_id', precompute=True, store=True, readonly=False,
         check_company=True,
-        domain="[('account_type', 'not in', ('asset_receivable', 'liability_payable', 'asset_cash', 'liability_credit_card'))]",
-        help="An expense account is expected",
+        domain="[('account_type', 'not in', ('asset_receivable', 'asset_cash', 'liability_credit_card'))]",
+        help="An expense account is expected for employee paid expenses and company paid expenses without a matched bill.\n"
+             "For company paid expenses with a matched bill, the account needs to be the payable account of the bill.",
     )
     tax_ids = fields.Many2many(
         comodel_name='account.tax',
@@ -463,42 +453,6 @@ class HrExpense(models.Model):
         for expense in self:
             expense.product_uom_id = expense.product_id.uom_id
 
-    @api.depends('amount_residual', 'account_move_id.state', 'account_move_id.payment_state', 'approval_state')
-    def _compute_state(self):
-        """
-        Compute the states of the expense as such (priority is given to the last matching state of the list):
-            - draft: By default
-            - submitted: When the approval_state is 'submitted'
-            - approved: When the approval_state is 'approved'
-            - refused: When the approval_state is 'refused'
-            - paid: When it is a company paid expense or the move state is neither 'draft' nor 'posted'
-            - in_payment (or paid): When the move state is 'posted' and it's 'payment_state' is 'in_payment' or 'paid'
-                                    or ('partial' and there is a residual amount)
-            - posted: When the linked move state is 'draft', or if it is 'posted' and it's 'payment_state' is 'not_paid'
-        """
-        for expense in self:
-            move = expense.account_move_id
-            if move.state == 'cancel':
-                expense.state = 'paid'
-                continue
-            if move:
-                if expense.payment_mode == 'company_account':
-                    # Shortcut to paid, as it's already paid, but we may not have the bank statement yet
-                    expense.state = 'paid'
-                elif move.state == 'draft':
-                    expense.state = 'posted'
-                elif move.payment_state == 'not_paid':
-                    expense.state = 'posted'
-                elif (
-                        move.payment_state == 'in_payment'
-                        or (move.payment_state == 'partial' and not expense.company_currency_id.is_zero(expense.amount_residual))
-                ):
-                    expense.state = self.env['account.move']._get_invoice_in_payment_state()
-                else:  # Partial, reversed or in_payment
-                    expense.state = 'paid'
-                continue
-            expense.state = expense.approval_state or 'draft'
-
     @api.depends('employee_id', 'employee_id.department_id')
     def _compute_from_employee_id(self):
         for expense in self:
@@ -689,16 +643,24 @@ class HrExpense(models.Model):
                     ('journal_id.active', '=', True),
                 ])
 
-    @api.depends('product_id', 'company_id')
+    @api.onchange('payment_mode')
+    def _onchange_payment_mode(self):
+        # TODO HUPO: check if I shouldn't check if still in draft or submitted
+        for expense in self:
+            if expense.payment_mode == 'own_account':
+                expense.account_move_id = False
+            else:
+                expense.account_move_id = expense.account_move_id
+
+    @api.depends('product_id', 'company_id', 'account_move_id')
     def _compute_account_id(self):
         for _expense in self:
             expense = _expense.with_company(_expense.company_id)
-            if not expense.product_id:
-                expense.account_id = _expense.company_id.expense_account_id
-                continue
-            account = expense.product_id.product_tmpl_id._get_product_accounts()['expense']
-            if account:
-                expense.account_id = account
+            account = expense.product_id and expense.product_id.product_tmpl_id._get_product_accounts()['expense']
+            if expense.account_move_id:
+                expense.account_id = expense.account_move_id.line_ids.filtered(lambda line: line.account_type == 'liability_payable').account_id
+            else:
+                expense.account_id = account or expense.company_id.expense_account_id
 
     @api.depends('company_id')
     def _compute_employee_id(self):
@@ -836,9 +798,9 @@ class HrExpense(models.Model):
 
         res = super().write(vals)
 
-        if vals.get('state') == 'approved' or vals.get('approval_state') == 'approved':
+        if vals.get('state') == 'approved':
             self._check_can_approve()
-        elif vals.get('state') == 'refused' or vals.get('approval_state') == 'refused':
+        elif vals.get('state') == 'refused':
             self._check_can_refuse()
 
         if 'currency_id' in vals:
@@ -1184,7 +1146,7 @@ class HrExpense(models.Model):
             if not expense.manager_id:
                 expense.sudo().manager_id = expense._get_default_responsible_for_approval()
         expenses_autovalidated = self.filtered(lambda expense: expense._can_be_autovalidated())
-        (self - expenses_autovalidated).approval_state = 'submitted'
+        (self - expenses_autovalidated).state = 'submitted'
         if expenses_autovalidated:  # Note, this will and should bypass the duplicate check. May be changed later
             expenses_autovalidated._do_approve(check=False)
         self.sudo().update_activities_and_mails()
@@ -1232,12 +1194,45 @@ class HrExpense(models.Model):
             raise UserError(_("You can't post simultaneously employee-paid expenses belonging to different companies"))
 
         if company_expenses:
-            company_expenses._create_company_paid_moves()
+            with_matched_bill = company_expenses.filtered(lambda expense: expense.selectable_matching_bill)
+            without_matched_bill = company_expenses - with_matched_bill
+
+            without_matched_bill._create_company_paid_moves()
+            with_matched_bill._link_existing_bill()
+
             # Post the company-paid expense through the payment, to post both at the same time
             company_expenses.account_move_id.origin_payment_id.action_post()
 
         if employee_expenses:
-            return employee_expenses.with_context(company_paid_move_ids=company_expenses.account_move_id.ids)._post_wizard()
+            return employee_expenses.with_context(
+                company_paid_move_ids=company_expenses.account_move_id.ids)._post_wizard()
+
+    def _link_existing_bill(self):
+        for expense in self:
+            payment_vals = {
+                'date': expense.date,
+                'memo': expense.name,
+                'journal_id': expense.journal_id.id,
+                'amount': expense.total_amount_currency,
+                'payment_type': 'outbound',
+                'partner_type': 'supplier',
+                'partner_id': expense.vendor_id.id,
+                'currency_id': expense.currency_id.id,
+                'payment_method_line_id': expense.payment_method_line_id.id,
+                'company_id': expense.company_id.id,
+            }
+
+            payment = self.env['account.payment'].create(payment_vals)
+            payment.move_id = expense.selectable_matching_bill.id
+
+            matched_bill = payment.move_id
+            # matched_bill.expense_ids |= expense
+            matched_bill.update({
+                'origin_payment_id': payment.id,
+                # We need to put the journal_id because editing origin_payment_id triggers a re-computation chain
+                # that voids the company_currency_id of the lines
+                'journal_id': matched_bill.journal_id.id,
+            })
 
     def action_pay(self):
         """ Register payment shortcut on the expense form view """
@@ -1465,14 +1460,19 @@ class HrExpense(models.Model):
         expenses_to_approve = self.filtered(lambda s: s.state in {'submitted', 'draft'})
         for expense in expenses_to_approve:
             expense.write({
-                'approval_state': 'approved',
+                'state': 'approved',
                 'manager_id': self.env.user.id,
                 'approval_date': fields.Datetime().now(),
             })
         self.update_activities_and_mails()
 
     def _do_reset_approval(self):
-        self.sudo().write({'approval_state': False, 'approval_date': False, 'last_notification_date': False, 'account_move_id': False})
+        self.sudo().write({
+            'state': 'draft',
+            'approval_date': False,
+            'last_notification_date': False,
+            'account_move_id': False
+        })
         self.update_activities_and_mails()
 
     def _do_refuse(self, reason):
@@ -1484,7 +1484,7 @@ class HrExpense(models.Model):
         if draft_moves_sudo:
             draft_moves_sudo.unlink()  # Else we have lingering moves
 
-        self.approval_state = 'refused'
+        self.state = 'refused'
         subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
         for expense in self:
             expense.message_post_with_source(
@@ -1509,7 +1509,7 @@ class HrExpense(models.Model):
             'company_id': self.company_id.id,
             'analytic_distribution': self.analytic_distribution,
             'employee_id': self.employee_id.id,
-            'approval_state': self.approval_state,
+            'state': self.state,
             'approval_date': self.approval_date,
             'manager_id': self.manager_id.id,
             'expense_id': self.id,

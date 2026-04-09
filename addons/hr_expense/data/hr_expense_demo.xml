@@ -50,7 +50,7 @@
             <field eval="289.0" name="total_amount_currency"/>
             <field name="date" eval="time.strftime('%Y')+'-04-03'"/>
             <field name="payment_mode">company_account</field>
-            <field name="approval_state">submitted</field>
+            <field name="state">submitted</field>
         </record>
 
         <record id="laptop_expense" model="hr.expense">
@@ -68,7 +68,7 @@
             <field name="product_id" ref="expense_product_mileage"/>
             <field name="product_uom_id" ref="uom.product_uom_km"/>
             <field eval="108.84" name="quantity"/>
-            <field name="approval_state">submitted</field>
+            <field name="state">submitted</field>
         </record>
 
         <record id="breakfast_admin_expense" model="hr.expense">
@@ -86,7 +86,7 @@
             <field eval="700.0" name="total_amount_currency"/>
             <field name="product_uom_id" ref="uom.product_uom_unit"/>
             <field name="date" eval="time.strftime('%Y-%m')+'-12'"/>
-            <field name="approval_state">submitted</field>
+            <field name="state">submitted</field>
             <field name="payment_mode">company_account</field>
         </record>
 
@@ -98,7 +98,7 @@
             <field eval="2000.0" name="total_amount_currency"/>
             <field name="product_uom_id" ref="uom.product_uom_unit"/>
             <field name="date" eval="time.strftime('%Y-%m')+'-17'"/>
-            <field name="approval_state">submitted</field>
+            <field name="state">submitted</field>
         </record>
 
         <record id="lunch_customer_bill_expense" model="hr.expense">
@@ -137,7 +137,7 @@
             <field name="product_id" ref="product_product_no_cost"/>
             <field name="date" eval="time.strftime('%Y')+'-01-15'"/>
             <field eval="152.8" name="total_amount_currency"/>
-            <field name="approval_state">approved</field>
+            <field name="state">approved</field>
         </record>
 
         <!-- ++++++++++++++ Expense for Keith Byrd ++++++++++++++-->
@@ -166,7 +166,7 @@
             <field name="product_id" ref="product_product_no_cost"/>
             <field name="date" eval="time.strftime('%Y-%m')+'-05'"/>
             <field eval="25" name="total_amount_currency"/>
-            <field name="approval_state">approved</field>
+            <field name="state">approved</field>
         </record>
 
         <!-- ++++++++++++++ Expense sheet for Ronnie Hart ++++++++++++++-->
@@ -187,7 +187,7 @@
             <field name="product_id" ref="product_product_no_cost"/>
             <field name="date" eval="time.strftime('%Y')+'-06-02'"/>
             <field eval="28.99" name="total_amount_currency"/>
-            <field name="approval_state">refused</field>
+            <field name="state">refused</field>
         </record>
 
         <!-- ++++++++++++++ Expense for Randall Lewis ++++++++++++++-->

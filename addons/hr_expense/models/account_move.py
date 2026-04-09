@@ -1,4 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from os import WCONTINUED
+
 from odoo import Command, models, fields, api, _
 from odoo.exceptions import ValidationError
 from odoo.tools.misc import frozendict
@@ -108,3 +110,31 @@ class AccountMove(models.Model):
         res = super().button_cancel()
         self.filtered('expense_ids').write({'expense_ids': [Command.clear()]})
         return res
+
+    def write(self, vals):
+        for move in self:
+            expense_ids = move.expense_ids
+            if not expense_ids:
+                continue
+
+            state = vals.get('state', move.state)
+            payment_state = vals.get('payment_state', move.payment_state)
+
+            if state == 'cancel':
+                expense_ids.write({'state': 'paid'})
+                continue
+
+            for expense in expense_ids:
+                if expense.payment_mode == 'company_account':
+                    expense.state = 'paid'
+                elif state == 'draft':
+                    expense.state = 'posted'
+                elif payment_state == 'not_paid':
+                    expense.state = 'posted'
+                elif payment_state == 'in_payment' or (payment_state == 'partial' and not expense.company_currency_id.is_zero(expense.amount_residual)):
+                    expense.state = self.env['account.move']._get_invoice_in_payment_state()
+                else:
+                    expense.state = 'paid'
+
+        return super().write(vals)
+
