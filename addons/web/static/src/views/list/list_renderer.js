@@ -524,6 +524,7 @@ export class ListRenderer extends Component {
     }
 
     focusCell(column, forward = true) {
+        return;
         const index = column
             ? this.columns.findIndex((col) => col.id === column.id && col.name === column.name)
             : -1;
@@ -537,26 +538,26 @@ export class ListRenderer extends Component {
             ];
         }
         for (const column of columns) {
-            if (column.type === "column_group") {
-                // Focus the first non-readonly sub-field in the group
-                const editableSubColumn = column.fields.find(
-                    (f) => !this.isCellReadonly(f, this.editedRecord)
-                );
-                if (editableSubColumn) {
-                    const cell = this.tableRef.el.querySelector(
-                        `.o_selected_row td[name='${column.fields[0].name}']`
-                    );
-                    if (cell) {
-                        const toFocus = getElementToFocus(cell);
-                        if (cell !== toFocus) {
-                            this.focus(toFocus);
-                            this.lastEditedCell = { column, record: this.editedRecord };
-                            break;
-                        }
-                    }
-                }
-                continue;
-            }
+            // if (column.type === "column_group") {
+            //     // Focus the first non-readonly sub-field in the group
+            //     const editableSubColumn = column.fields.find(
+            //         (f) => !this.isCellReadonly(f, this.editedRecord)
+            //     );
+            //     if (editableSubColumn) {
+            //         const cell = this.tableRef.el.querySelector(
+            //             `.o_selected_row td[name='${column.fields[0].name}']`
+            //         );
+            //         if (cell) {
+            //             const toFocus = getElementToFocus(cell);
+            //             if (cell !== toFocus) {
+            //                 this.focus(toFocus);
+            //                 this.lastEditedCell = { column, record: this.editedRecord };
+            //                 break;
+            //             }
+            //         }
+            //     }
+            //     continue;
+            // }
             if (column.type !== "field") {
                 continue;
             }
