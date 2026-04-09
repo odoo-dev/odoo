@@ -118,7 +118,7 @@ export const hotkeyService = {
         addListeners(browser);
 
         function addListeners(target) {
-            target.addEventListener("keydown", onKeydown);
+            target.addEventListener("keydown", onKeydown, true);
             target.addEventListener("keyup", removeHotkeyOverlays);
             target.addEventListener("blur", removeHotkeyOverlays);
             target.addEventListener("click", removeHotkeyOverlays);
