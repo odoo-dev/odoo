@@ -8,7 +8,7 @@ export class Many2ManyTagsColorDotProductImageField extends Many2ManyTagsColorDo
     get tagsListProps() {
         return {
             ...super.tagsListProps,
-            visibleItemsLimit: 11,
+            tagLimit: 11,
         };
     }
 }

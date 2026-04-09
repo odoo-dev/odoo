@@ -201,7 +201,7 @@
                                 add-label="Add Media"
                                 nolabel="1"
                                 colspan="2"
-                                widget="x2_many_media_viewer"
+                                widget="product_image_x2_many_media_viewer"
                                 options="{'convert_to_webp': True}"
                             />
                         </group>
