@@ -5,6 +5,7 @@ import { browser } from "../browser/browser";
 import { registry } from "../registry";
 import { strftimeToLuxonFormat } from "./dates";
 import { localization } from "./localization";
+import { fetchTranslations } from "./fetch_translation";
 import { rpcBus } from "../network/rpc";
 import {
     translatedTerms,
@@ -12,7 +13,6 @@ import {
     translationLoaded,
     translationResolvers,
 } from "./translation";
-import { objectToUrlEncodedString } from "../utils/urls";
 import { IndexedDB } from "../utils/indexed_db";
 
 const { Settings } = luxon;
@@ -47,16 +47,8 @@ export const localizationService = {
             }
         });
 
-        const fetchTranslations = async (hash) => {
-            let queryString = objectToUrlEncodedString({ hash, lang });
-            queryString = queryString.length > 0 ? `?${queryString}` : queryString;
-            const response = await browser.fetch(`${translationURL}${queryString}`, {
-                cache: "no-store",
-            });
-            if (!response.ok) {
-                throw new Error("Error while fetching translations");
-            }
-            const result = await response.json();
+        const loadTranslations = async (hash) => {
+            const result = await fetchTranslations(lang, hash);
             if (result.hash !== hash) {
                 localizationDB.write(translationURL, JSON.stringify({ lang }), result);
                 updateTranslations(result);
@@ -97,7 +89,7 @@ export const localizationService = {
             JSON.stringify({ lang })
         );
 
-        const translationProm = fetchTranslations(storedTranslations?.hash);
+        const translationProm = loadTranslations(storedTranslations?.hash);
         if (storedTranslations) {
             updateTranslations(storedTranslations);
         } else {
