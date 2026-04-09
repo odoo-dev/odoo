@@ -24,7 +24,7 @@ from opcode import opmap, opname
 from types import CodeType
 
 import werkzeug
-from psycopg2 import OperationalError
+from psycopg2 import IntegrityError, OperationalError
 
 import odoo.exceptions
 
@@ -350,6 +350,7 @@ _BUBBLEUP_EXCEPTIONS = (
     odoo.exceptions.UserError,
     odoo.exceptions.RedirectWarning,
     werkzeug.exceptions.HTTPException,
+    IntegrityError,
     OperationalError,  # let auto-replay of serialized transactions work its magic
     ZeroDivisionError,
 )
