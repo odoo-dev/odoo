@@ -20548,6 +20548,92 @@ test(`widget column visibility with column_invisible attribute`, async () => {
     expect(`.o_data_row .test_widget`).toHaveCount(0);
 });
 
+test(`column tag: stacks multiple fields in a single cell`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <column>
+                    <field name="int_field"/>
+                    <field name="bar"/>
+                </column>
+            </list>
+        `,
+    });
+
+    // Should have 2 columns: foo and the stacked column
+    expect(`thead th:not(.o_list_record_selector)`).toHaveCount(2);
+    // The stacked cell uses the first field's label as header
+    expect(`thead th:not(.o_list_record_selector):eq(1)`).toHaveText("Int Field");
+    // Each row has 2 data cells
+    expect(`tbody tr:eq(0) td:not(.o_list_record_selector)`).toHaveCount(2);
+    // Both sub-fields appear in the second cell
+    expect(
+        `tbody tr:eq(0) td:not(.o_list_record_selector):eq(1) .o_column_group_field`
+    ).toHaveCount(2);
+});
+
+test(`column tag: uses string attribute as header label`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <column string="Details">
+                    <field name="int_field"/>
+                    <field name="bar"/>
+                </column>
+            </list>
+        `,
+    });
+
+    expect(`thead th:not(.o_list_record_selector):eq(1)`).toHaveText("Details");
+});
+
+test(`column tag: column_invisible hides the entire stacked column`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <column column_invisible="1">
+                    <field name="int_field"/>
+                    <field name="bar"/>
+                </column>
+            </list>
+        `,
+    });
+
+    expect(`thead th:not(.o_list_record_selector)`).toHaveCount(1);
+    expect(`tbody tr:eq(0) td:not(.o_list_record_selector)`).toHaveCount(1);
+});
+
+test(`column tag: sub-field invisible hides only that sub-field`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <column>
+                    <field name="int_field"/>
+                    <field name="bar" invisible="1"/>
+                </column>
+            </list>
+        `,
+    });
+
+    expect(`thead th:not(.o_list_record_selector)`).toHaveCount(2);
+    // Only one sub-field is visible in each cell (bar is invisible)
+    expect(
+        `tbody tr:eq(0) td:not(.o_list_record_selector):eq(1) .o_column_group_field`
+    ).toHaveCount(1);
+});
+
 test(`x2many list: create control supports hotkey`, async () => {
     Foo._records[0].o2m = [1];
 

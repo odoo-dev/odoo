@@ -42,6 +42,16 @@
                                           t-on-dblclick="this.columnWidths.resetWidths"/>
                                 </t>
                             </th>
+                            <th t-elif="column.type === 'column_group'"
+                                class="align-middle cursor-default"
+                                t-on-keydown="(ev) => this.onCellKeydown(ev)"
+                                tabindex="-1">
+                                <t t-if="column.hasLabel">
+                                    <div class="d-flex align-items-center">
+                                        <span class="d-block min-w-0 text-truncate flex-grow-1 flex-shrink-1" t-out="column.label"/>
+                                    </div>
+                                </t>
+                            </th>
                             <th t-else="" t-on-keydown="(ev) => this.onCellKeydown(ev)" t-att-class="{'o_list_button w-print-0 p-print-0': column.type === 'button_group'}"/>
                         </t>
                         <th t-if="this.hasOpenFormViewColumn" t-on-keydown="(ev) => this.onCellKeydown(ev)" class="o_list_open_form_view w-print-0 p-print-0"/>
@@ -309,6 +319,28 @@
                         <t t-if="!isInvisible">
                             <t t-if="this.canUseFormatter(column, record)" t-out="this.getFormattedValue(column, record)"/>
                             <Field t-else="" name="column.name" record="record" type="column.widget" class="this.getFieldClass(column)" fieldInfo="column" t-props="this.getFieldProps(record, column)"/>
+                        </t>
+                    </td>
+                </t>
+                <t t-if="column.type === 'column_group'">
+                    <td t-on-keydown="(ev) => this.onCellKeydown(ev, group, record)"
+                        class="o_data_cell cursor-pointer"
+                        t-att-class="this.getCellClass(column, record)"
+                        t-att-name="column.fields[0].name"
+                        t-custom-click="(ev, isMiddleClick) => this.onCellClicked(record, column, ev, isMiddleClick)"
+                        tabindex="-1">
+                        <t t-foreach="column.fields" t-as="subColumn" t-key="subColumn.id">
+                            <t t-set="subIsInvisible" t-value="this.evalInvisible(subColumn.invisible, record) or !(subColumn.name in record.data)"/>
+                            <div t-if="!subIsInvisible" class="o_column_group_field">
+                                <t t-if="this.canUseFormatter(subColumn, record)" t-out="this.getFormattedValue(subColumn, record)"/>
+                                <Field t-else=""
+                                    name="subColumn.name"
+                                    record="record"
+                                    type="subColumn.widget"
+                                    class="this.getFieldClass(subColumn)"
+                                    fieldInfo="subColumn"
+                                    t-props="this.getFieldProps(record, subColumn)"/>
+                            </div>
                         </t>
                     </td>
                 </t>

@@ -146,6 +146,44 @@ export class ListArchParser {
                     id: `column_${nextId++}`,
                     type: "widget",
                 });
+            } else if (node.tagName === "column") {
+                const columnFields = [];
+                for (const child of node.children) {
+                    if (child.tagName === "field") {
+                        const fieldInfo = this.parseFieldNode(child, models, modelName);
+                        if (!(fieldInfo.name in fieldNextIds)) {
+                            fieldNextIds[fieldInfo.name] = 0;
+                        }
+                        const fieldId = `${fieldInfo.name}_${fieldNextIds[fieldInfo.name]++}`;
+                        fieldNodes[fieldId] = fieldInfo;
+                        child.setAttribute("field_id", fieldId);
+                        const label = fieldInfo.field.label;
+                        columnFields.push({
+                            ...fieldInfo,
+                            id: `column_${nextId++}`,
+                            className: child.getAttribute("class"),
+                            optional: false,
+                            type: "field",
+                            fieldType: fieldInfo.type,
+                            hasLabel: false,
+                            label:
+                                (fieldInfo.widget && label && label.toString()) || fieldInfo.string,
+                        });
+                    }
+                }
+                if (columnFields.length) {
+                    const labelAttr = node.getAttribute("string");
+                    columns.push({
+                        id: `column_${nextId++}`,
+                        type: "column_group",
+                        label: labelAttr !== null ? labelAttr : columnFields[0].label,
+                        hasLabel: true,
+                        optional: false,
+                        column_invisible: node.getAttribute("column_invisible"),
+                        fields: columnFields,
+                    });
+                }
+                return false;
             } else if (node.tagName === "groupby" && node.getAttribute("name")) {
                 const fieldName = node.getAttribute("name");
                 const coModelName = fields[fieldName].relation;

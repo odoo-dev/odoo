@@ -537,6 +537,26 @@ export class ListRenderer extends Component {
             ];
         }
         for (const column of columns) {
+            if (column.type === "column_group") {
+                // Focus the first non-readonly sub-field in the group
+                const editableSubColumn = column.fields.find(
+                    (f) => !this.isCellReadonly(f, this.editedRecord)
+                );
+                if (editableSubColumn) {
+                    const cell = this.tableRef.el.querySelector(
+                        `.o_selected_row td[name='${column.fields[0].name}']`
+                    );
+                    if (cell) {
+                        const toFocus = getElementToFocus(cell);
+                        if (cell !== toFocus) {
+                            this.focus(toFocus);
+                            this.lastEditedCell = { column, record: this.editedRecord };
+                            break;
+                        }
+                    }
+                }
+                continue;
+            }
             if (column.type !== "field") {
                 continue;
             }
@@ -973,6 +993,8 @@ export class ListRenderer extends Component {
             const classNames = ["o_data_cell"];
             if (column.type === "button_group") {
                 classNames.push("o_list_button");
+            } else if (column.type === "column_group") {
+                classNames.push("o_field_cell");
             } else if (column.type === "field") {
                 classNames.push("o_field_cell");
                 if (column.attrs && column.attrs.class && this.canUseFormatter(column, record)) {
