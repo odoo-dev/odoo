@@ -43,23 +43,17 @@ class StockWarehouse(models.Model):
     sam_loc_id = fields.Many2one('stock.location', 'Stock after Manufacturing Location', check_company=True)
 
     def _compute_manufacture_to_resupply(self):
+        manufacture_route = self._find_or_create_global_route('mrp.route_warehouse0_manufacture', _('Manufacture'))
+        manufacture_warehouse_ids = set(manufacture_route.warehouse_ids.ids)
         for warehouse in self:
-            manufacture_route = warehouse.manufacture_pull_id.route_id
-            warehouse.manufacture_to_resupply = warehouse.id in manufacture_route.warehouse_ids.ids
+            warehouse.manufacture_to_resupply = warehouse.id in manufacture_warehouse_ids
 
     def _inverse_manufacture_to_resupply(self):
-        for warehouse in self:
-            manufacture_route = warehouse.manufacture_pull_id.route_id
-            if not manufacture_route:
-                manufacture_route = self.env['stock.rule'].search([
-                    ('action', '=', 'manufacture'), ('warehouse_id', '=', warehouse.id)]).route_id
-            if not manufacture_route:
-                continue
-            manufacture_route = manufacture_route.sudo()
-            if warehouse.manufacture_to_resupply:
-                manufacture_route.warehouse_ids = [Command.link(warehouse.id)]
-            else:
-                manufacture_route.warehouse_ids = [Command.unlink(warehouse.id)]
+        manufacture_route = self._find_or_create_global_route('mrp.route_warehouse0_manufacture', _('Manufacture'))
+        manufacture_route.sudo().warehouse_ids = [
+            Command.link(warehouse.id) if warehouse.manufacture_to_resupply else Command.unlink(warehouse.id)
+            for warehouse in self
+        ]
 
     def _create_or_update_route(self):
         manufacture_route = self._find_or_create_global_route('mrp.route_warehouse0_manufacture', _('Manufacture'))
