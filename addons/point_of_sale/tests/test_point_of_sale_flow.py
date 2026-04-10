@@ -2539,3 +2539,41 @@ class TestPointOfSaleFlow(CommonPosTest):
                 },
             ],
         )
+
+    def test_write_behavior_based_on_field_changes(self):
+        """Ensure write is only triggered for modified fields and skipped otherwise."""
+        ResConfigSettings = self.env['res.config.settings']
+        PosConfig = self.env['pos.config'].__class__
+        pos_config = self.pos_config_usd
+        pos_config.tip_product_id = pos_config._get_default_tip_product()
+
+        # Case 1: No change → no write
+        with patch.object(PosConfig, 'write', wraps=pos_config.write) as mocked_write:
+            ResConfigSettings.create([{
+                'pos_config_id': pos_config.id,
+                'pos_iface_print_auto': pos_config.iface_print_auto,
+            }])
+            self.assertFalse(mocked_write.called, "Write should not be triggered for unchanged values.")
+
+        # Case 2: Field changed → write triggered with only changed field
+        with patch.object(PosConfig, 'write', wraps=pos_config.write) as mocked_write:
+            new_value_iface_print_auto = not pos_config.iface_print_auto
+            ResConfigSettings.create([{
+                'pos_config_id': pos_config.id,
+                'pos_iface_print_auto': new_value_iface_print_auto,
+            }])
+
+            args, _kwargs = mocked_write.call_args
+            self.assertTrue(mocked_write.called, "Write should be triggered for changed values.")
+            self.assertEqual(
+                args[0],
+                {'iface_print_auto': new_value_iface_print_auto},
+                "Only modified fields should be written."
+            )
+
+        # Case 3: No relevant fields → no write
+        with patch.object(PosConfig, 'write', wraps=pos_config.write) as mocked_write:
+            ResConfigSettings.create([{
+                'pos_config_id': pos_config.id
+            }])
+            self.assertFalse(mocked_write.called, "Write should not be triggered when there are no values to update.")

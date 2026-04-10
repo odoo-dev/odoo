@@ -704,8 +704,8 @@ class PosConfig(models.Model):
         if 'iface_tipproduct' in vals and not vals['iface_tipproduct']:
             vals['tip_product_id'] = False
             vals['set_tip_after_payment'] = False
-        else:
-            if 'tip_product_id' not in vals and (default_tip := self._get_default_tip_product()):
+        elif 'tip_product_id' not in vals and (default_tip := self._get_default_tip_product()):
+            if any(config.tip_product_id != default_tip for config in self):
                 vals['tip_product_id'] = default_tip.id
 
         self._check_header_footer(vals)
@@ -716,7 +716,6 @@ class PosConfig(models.Model):
         bypass_payment_method_ids_forbidden_change = self.env.context.get('bypass_payment_method_ids_forbidden_change', False)
 
         self._preprocess_x2many_vals_from_settings_view(vals)
-        vals = self._keep_new_vals(vals)
         opened_session = self.mapped('session_ids').filtered(lambda s: s.state != 'closed')
         if opened_session:
             forbidden_fields = []
@@ -803,23 +802,6 @@ class PosConfig(models.Model):
                 unlink_commands = [Command.unlink(_id) for _id in linked_ids]
 
                 vals[x2many_field] = unlink_commands + vals[x2many_field]
-
-    def _keep_new_vals(self, vals):
-        """ Keep values in vals that are different than
-        self's values.
-        """
-        from_settings_view = self.env.context.get('from_settings_view')
-        if not from_settings_view:
-            return vals
-        new_vals = {}
-        for field, val in vals.items():
-            config_field = self._fields.get(field)
-            if config_field:
-                cache_value = config_field.convert_to_cache(val, self)
-                record_value = config_field.convert_to_record(cache_value, self)
-                if record_value != self[field]:
-                    new_vals[field] = val
-        return new_vals
 
     def _get_forbidden_change_fields(self):
         return ['module_pos_restaurant', 'payment_method_ids']

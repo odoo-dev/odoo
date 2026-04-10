@@ -170,6 +170,7 @@ class ResConfigSettings(models.TransientModel):
         for vals in vals_list:
             pos_config_id = vals.get('pos_config_id')
             if pos_config_id:
+                pos_config_record = self.env['pos.config'].browse(pos_config_id).exists()
                 pos_fields_vals = {}
 
                 if vals.get('pos_cash_rounding'):
@@ -196,10 +197,16 @@ class ResConfigSettings(models.TransientModel):
                             _logger.warning("The value of '%s' is not properly saved to the pos_config_id field because the destination"
                                 " field '%s' is not a valid field in the pos.config model.", field.name, pos_config_field_name)
                         else:
-                            pos_fields_vals[pos_config_field_name] = val
+                            # Keep values in vals that are different than record's values.
+                            config_field = pos_config_record._fields.get(pos_config_field_name)
+                            cache_value = config_field.convert_to_cache(val, self)
+                            record_value = config_field.convert_to_record(cache_value, self)
+                            if record_value != pos_config_record[pos_config_field_name]:
+                                pos_fields_vals[pos_config_field_name] = val
                             del vals[field.name]
 
-                pos_config_id_to_fields_vals_map[pos_config_id] = pos_fields_vals
+                if pos_fields_vals:
+                    pos_config_id_to_fields_vals_map[pos_config_id] = pos_fields_vals
 
         # STEP: Call super on the modified vals_list.
         # NOTE: When creating `res.config.settings` records, it doesn't write on *unmodified* related fields.
