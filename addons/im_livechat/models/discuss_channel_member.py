@@ -34,6 +34,7 @@ class DiscussChannelMember(models.Model):
     )
 
     @api.model_create_multi
+    @Store.with_store_context
     def create(self, vals_list):
         members = super().create(vals_list)
         guest = self.env["mail.guest"]._get_guest_from_context()
@@ -52,10 +53,9 @@ class DiscussChannelMember(models.Model):
                 member.sudo().livechat_member_type = "visitor"
                 continue
             member.sudo().livechat_member_type = "agent"
-        stores = Store.Stores()
         for history in members.livechat_member_history_ids:
             # sudo - visitor can access the channel member history of an accessible channel
-            stores[history.channel_id].add(
+            Store.to(history.channel_id).add(
                 history.channel_id,
                 lambda res, history=history: res.many(
                     "livechat_channel_member_history_ids",
@@ -65,7 +65,6 @@ class DiscussChannelMember(models.Model):
                     sudo=True,
                 ),
             )
-        stores.bus_send()
         return members
 
     @api.depends("livechat_member_history_ids.livechat_member_type")
@@ -147,6 +146,7 @@ class DiscussChannelMember(models.Model):
         )
 
     @api.autovacuum
+    @Store.with_store_context
     def _gc_unpin_livechat_sessions(self):
         """ Unpin read livechat sessions with no activity for at least one day to
             clean the operator's interface """
@@ -157,10 +157,8 @@ class DiscussChannelMember(models.Model):
         ])
         sessions_to_be_unpinned = members.filtered(lambda m: m.message_unread_counter == 0)
         sessions_to_be_unpinned.channel_id.livechat_end_dt = fields.Datetime.now()
-        stores = Store.Stores()
-        for member, store in sessions_to_be_unpinned._get_member_store_list(stores):
+        for member, store in sessions_to_be_unpinned._get_member_store_list():
             store.add(member.channel_id, {"close_chat_window": True})
-        stores.bus_send()
         sessions_to_be_unpinned.unpin_dt = fields.Datetime.now()
 
     def _store_member_fields(self, res: Store.FieldList):

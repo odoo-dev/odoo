@@ -24,11 +24,10 @@ class MailboxController(WebclientController):
             messages_su.bookmarked_partner_ids = [Command.unlink(request.env.user.partner_id.id)]
             bookmark_messages |= messages_su
         if bookmark_messages:
-            bus_store = Store(bus_channel=request.env.user)
+            bus_store = Store.to(request.env.user)
             for cur_store in [store, bus_store]:
                 cur_store.add(bookmark_messages, ["is_bookmarked"])
                 cur_store.add_global_values(request.env.user._store_bookmark_box_global_fields)
-            bus_store.bus_send()
         message_fetch_domain = None
         if name == "/mail/inbox/messages":
             message_fetch_domain = Domain("needaction", "=", True)

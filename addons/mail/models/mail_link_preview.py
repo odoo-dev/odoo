@@ -35,6 +35,7 @@ class MailLinkPreview(models.Model):
     _unique_source_url = models.UniqueIndex("(source_url)")
 
     @api.model
+    @Store.with_store_context
     def _create_from_message_and_notify(self, message, request_url=None):
         urls = []
         if not tools.is_html_empty(message.body):
@@ -97,7 +98,7 @@ class MailLinkPreview(models.Model):
             ]
         )
         (message.sudo().message_link_preview_ids - message_link_previews_ok)._unlink_and_notify()
-        Store(bus_channel=message).add(message, "_store_message_link_previews_fields").bus_send()
+        Store.to(message).add(message, "_store_message_link_previews_fields")
 
     @api.model
     def _is_link_preview_enabled(self):

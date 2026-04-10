@@ -3,11 +3,13 @@
 import base64
 import math
 import os
+import traceback
 from collections import UserList, defaultdict
 from contextlib import suppress
 from datetime import date, datetime
 from functools import partial, wraps
 from itertools import product
+from logging import getLogger
 from typing import Generic, TypeVar
 
 from markupsafe import Markup
@@ -16,11 +18,12 @@ import odoo
 from odoo import models
 from odoo.exceptions import MissingError
 from odoo.http import request, route
-from odoo.tools import OrderedSet, groupby
+from odoo.tools import frozendict, OrderedSet, groupby
 
 from odoo.addons.bus.websocket import wsrequest
 
 T = TypeVar("T")
+_logger = getLogger(__name__)
 
 
 def add_guest_to_context(func):
@@ -51,7 +54,25 @@ def add_guest_to_context(func):
 
 
 class StoreVersionInternal:
-    """Internal state used by the `@Store.with_versioning` decorator."""
+    """Decorator to manage versioned updates in the store.
+
+    Store data is received from RPC and from the bus, and is applied directly to the
+    store. Without versioning, the order of arrival can cause outdated data to overwrite
+    newer data, leading to incorrect store state.
+
+    On the client side, we should be able to determine whether a field represents a newer
+    version of what is already known. This is directly linked to PostgreSQL snapshots and
+    isolation level, in our case, REPEATABLE READ.
+
+    For fields that were read, what matters is what the snapshot could see at the time.
+    For writes, what matters is whether the snapshot of the version we know could see the
+    write transaction. The combination of xmin, xmax, xip and the current transaction id
+    is enough to deduce it.
+
+    This decorator injects the version helper into the context, allowing written fields to
+    be observed and `Store.as_dict` to inject version metadata into its result.
+    """
+
     def __init__(self):
         self.__version = None
         self.__model_name_to_record_id_to_written_fnames = defaultdict(
@@ -102,13 +123,13 @@ def mail_route(*route_args, **route_kwargs):
 
     This decorator is equivalent to applying, in order:
         @route(*route_args, **route_kwargs)
-        @Store.with_versioning
+        @Store.with_store_context
         @add_guest_to_context
     """
 
     def decorator(func):
         wrapped_func = add_guest_to_context(func)
-        wrapped_func = Store.with_versioning(wrapped_func)
+        wrapped_func = Store.with_store_context(wrapped_func)
         return route(*route_args, **route_kwargs)(wrapped_func)
 
     return decorator
@@ -173,7 +194,93 @@ def store_enqueue(func):
     return store_enqueue__wrapper
 
 
-class Store:
+class StoreFactory:
+    @staticmethod
+    def with_store_context(func):
+        """Decorator to give this method access to versioned stores. Inside the method,
+        one can safely call `Store.current()` or `Store.to()` to get a store instance.
+        Updates are grouped, versioned, and optionally sent on the bus at the end of the
+        transaction.
+        """
+
+        @wraps(func)
+        def with_version__wrapper(self, *args, **kwargs):
+            if self.env.context.get("store_version_ctx"):
+                return func(self, *args, **kwargs)
+            should_cleanup = False
+            manager = StoreVersionInternal()
+            if isinstance(self, models.BaseModel):
+                self = self.with_context(
+                    store_version_ctx=manager,
+                    store_factory__stores=Store.Stores(),
+                )
+            else:
+                # Clean up only if we inserted the manager in the request context;
+                # otherwise, the original decorator will handle it.
+                should_cleanup = True
+                req = request or wsrequest
+                req.update_context(store_version_ctx=manager, store_factory__stores=Store.Stores())
+            response = func(self, *args, **kwargs)
+            if should_cleanup:
+                # Clean context to prevent side effects based on the presence of `store_version_ctx`.
+                req.update_context(store_version_ctx=None, store_factory__stores=None)
+            return response
+
+        return with_version__wrapper
+
+    @staticmethod
+    def __ensure_stores(env_owner):
+        stores = env_owner.env.context.get("store_factory__stores") if env_owner else None
+        assert isinstance(stores, Store.Stores), (
+            "Store.to/Store.current can only be used within the @Store.with_store_context context."
+        )
+        return stores
+
+    # @staticmethod
+    # def __plan_store_bus_send(store, notification_type, payload=None):
+    #     env = store.target.channel.env
+    #     if "store_factory__pending_send_stores" not in env.cr.precommit.data:
+    #         env.cr.precommit.data["store_factory__pending_send_stores"] = set()
+
+    #         @env.cr.precommit.add
+    #         def execute_store_bus_send():
+    #             for store, notification_type, payload in env.cr.precommit.data["store_factory__pending_send_stores"]:
+    #                 store.bus_send(notification_type, payload=payload)
+
+    #     frozen_payload = frozendict(payload) if payload else None
+    #     env.cr.precommit.data["store_factory__pending_send_stores"].add((store, notification_type, frozen_payload))
+
+    @classmethod
+    def to(
+        cls,
+        bus_channel,
+        /,
+        *,
+        bus_subchannel=None,
+        auto_bus_send=True,
+        notification_type="mail.record/insert",
+        payload=None,
+    ) -> "Store":
+        """Return a versioned Store instance for a specific recipient. Data is automatically sent
+        to that channel via the bus at the end of the transaction.
+        """
+        try:
+            store = cls.__ensure_stores(bus_channel)[bus_channel, bus_subchannel]
+        except AssertionError as err:
+            _logger.warning(err)
+            traceback.print_stack(limit=5)
+            store = Store(bus_channel=bus_channel, bus_subchannel=bus_subchannel)
+        if auto_bus_send:
+            store.bus_send(notification_type=notification_type, payload=payload)
+        return store
+
+    @classmethod
+    def current(cls, env_owner):
+        """Return the single, versioned, Store instance linked to the current execution context."""
+        return cls.__ensure_stores(env_owner)[None, None]
+
+
+class Store(StoreFactory):
     """Helper to build a dict of data for sending to web client.
     It supports merging of data from multiple sources, either through list extend or dict update.
     The keys of data are the name of models as defined in mail JS code, and the values are any
@@ -181,12 +288,13 @@ class Store:
     name).
 
     The store instance is then transformed to a dictionnary to be sent either by the HTTP
-    or the bus stack. If the store was created in the context of the `@Store.with_versioning` decorator,
+    or the bus stack. If the store was created in the context of the `@Store.with_store_context` decorator,
     this dictionnary also includes information about the data version, which will be used
     by the client to distinguish stale from new data.
     """
 
     def __init__(self, bus_channel=None, bus_subchannel=None):
+        super().__init__()
         self.add_depth = 0
         self.already_done = set()
         self.data = {}
@@ -199,47 +307,6 @@ class Store:
             self._internal_store = Store(bus_channel=bus_channel, bus_subchannel="internal_users")
         self._env_with_version_ctx = None
         self.__try_update_version_ctx_from_env(bus_channel)
-
-    @staticmethod
-    def with_versioning(func):
-        """Decorator to manage versioned updates in the store.
-
-        Store data is received from RPC and from the bus, and is applied directly to the
-        store. Without versioning, the order of arrival can cause outdated data to overwrite
-        newer data, leading to incorrect store state.
-
-        On the client side, we should be able to determine whether a field represents a newer
-        version of what is already known. This is directly linked to PostgreSQL snapshots and
-        isolation level, in our case, REPEATABLE READ.
-
-        For fields that were read, what matters is what the snapshot could see at the time.
-        For writes, what matters is whether the snapshot of the version we know could see the
-        write transaction. The combination of xmin, xmax, xip and the current transaction id
-        is enough to deduce it.
-
-        This decorator injects the version helper into the context, allowing written fields to
-        be observed and `Store.as_dict` to inject version metadata into its result.
-        """
-        @wraps(func)
-        def with_version__wrapper(self, *args, **kwargs):
-            if self.env.context.get("store_version_ctx"):
-                return func(self, *args, **kwargs)
-            should_cleanup = False
-            manager = StoreVersionInternal()
-            if isinstance(self, models.BaseModel):
-                self = self.with_context(store_version_ctx=manager)
-            else:
-                # Clean up only if we inserted the manager in the request context;
-                # otherwise, the original decorator will handle it.
-                should_cleanup = True
-                req = request or wsrequest
-                req.update_context(store_version_ctx=manager)
-            response = func(self, *args, **kwargs)
-            if should_cleanup:
-                # Clean context to prevent side effects based on the presence of `store_version_ctx`.
-                req.update_context(store_version_ctx=None)
-            return response
-        return with_version__wrapper
 
     def __try_update_version_ctx_from_env(self, records):
         is_recordset = isinstance(records, models.Model)
@@ -384,7 +451,7 @@ class Store:
     def as_dict(self):
         """Hook for JSON serialization used by the `json_default` method. Do not call
         directly. Returns a dictionary representing the aggregated result of all store
-        commands, versioned if the store was created within a `@Store.with_versioning`
+        commands, versioned if the store was created within a `@Store.with_store_context`
         context.
         """
         result = self._build_result()
@@ -413,11 +480,12 @@ class Store:
                 res[model_name] = [dict(sorted(record.items())) for record in records.values()]
         return res
 
-    def bus_send(self, notification_type="mail.record/insert", /):
+    def bus_send(self, notification_type="mail.record/insert", /, *, payload=None):
         assert self.target.channel is not None, (
             "Missing `bus_channel`. Pass it to the `Store` constructor to use `bus_send`."
         )
-        self.target.channel._bus_send(notification_type, self, subchannel=self.target.subchannel)
+        to_send = self if payload is None else {**payload, "store_data": self}
+        self.target.channel._bus_send(notification_type, to_send, subchannel=self.target.subchannel)
         if self._internal_store:
             self._internal_store.bus_send()
 
@@ -980,7 +1048,7 @@ class Store:
         to a specific (bus_channel, sub_channel), and there can be multiple bus_channel for one
         record depending on the result of _bus_channels()."""
 
-        def __init__(self, stores, records, bus_target):
+        def __init__(self, records, bus_target):
             """bus_target is expected in the following format:
             - single bus_subchannel (which can be None), where bus_channel is implied as being the
               record on which it is called.
@@ -994,7 +1062,7 @@ class Store:
             for record in records:
                 target = record[field_name] if field_name else record
                 self._field_lists_by_record[record] = [
-                    Store.FieldList(stores[bus_channel, bus_subchannel], record)
+                    Store.FieldList(Store.to(bus_channel, bus_subchannel=bus_subchannel), record)
                     for bus_channel in target._bus_channels()
                 ]
 

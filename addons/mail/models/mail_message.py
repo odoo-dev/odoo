@@ -899,6 +899,7 @@ class MailMessage(models.Model):
     # ------------------------------------------------------
 
     @api.model
+    @Store.with_store_context
     def mark_all_as_read(self, domain=None):
         # not really efficient method: it does one db request for the
         # search, and one for each message in the result set is_read to True in the
@@ -1073,10 +1074,10 @@ class MailMessage(models.Model):
         # send the reaction group to bus for logged in users
         self._bus_send_reaction_group(content)
 
+    @Store.with_store_context
     def _bus_send_reaction_group(self, content):
-        store = Store(bus_channel=self)
+        store = Store.to(self)
         store.add(self, "_store_reaction_group_fields", fields_params={"content": content})
-        store.bus_send()
 
     def _store_reaction_group_fields(self, res: Store.FieldList, *, content):
         group_domain = [("message_id", "in", self.ids), ("content", "=", content)]
@@ -1374,6 +1375,7 @@ class MailMessage(models.Model):
             as_thread=True,
         )
 
+    @Store.with_store_context
     def _notify_message_notification_update(self):
         """Send bus notifications to update status of notifications in the web
         client. Purpose is to send the updated status per author."""
@@ -1400,10 +1402,8 @@ class MailMessage(models.Model):
                 messages_per_partner[message.author_id] |= message
         for partner, messages in messages_per_partner.items():
             if user := partner.main_user_id:
-                store = Store(bus_channel=user)
                 user_messages = messages.with_user(user)._filtered_access('read')
-                store.add(user_messages, "_store_notification_fields")
-                store.bus_send()
+                Store.to(user).add(user_messages, "_store_notification_fields")
 
     def _bus_channels(self):
         return self.env.user._bus_channels()

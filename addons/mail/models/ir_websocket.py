@@ -34,7 +34,7 @@ class IrWebsocket(models.AbstractModel):
     def _subscribe(self, og_data):
         super()._subscribe(og_data)
 
-    @Store.with_versioning
+    @Store.with_store_context
     @add_guest_to_context
     def _update_mail_presence(self, inactivity_period):
         user, guest = self.env["res.users"]._get_current_persona()
@@ -105,7 +105,7 @@ class IrWebsocket(models.AbstractModel):
         data["missed_presences"] = self.env["mail.presence"].sudo().search(presence_domain)
         return data
 
-    @Store.with_versioning
+    @Store.with_store_context
     def _after_subscribe_data(self, data):
         user, guest = self.env["res.users"]._get_current_persona()
         if user or guest:

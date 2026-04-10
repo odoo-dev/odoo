@@ -414,6 +414,7 @@ class DiscussChannel(models.Model):
         return ["channel_role", "partner_id", "guest_id", "unpin_dt", "last_interest_dt"]
 
     @api.model_create_multi
+    @Store.with_store_context
     def create(self, vals_list):
         for vals in vals_list:
             # find partners to add from partner_ids
@@ -472,7 +473,7 @@ class DiscussChannel(models.Model):
         channels = channels.with_context(mail_create_bypass_create_check=None)
         channels._subscribe_users_automatically()
         if not self.env.context.get("install_mode") and not self.env.user._is_public():
-            Store(bus_channel=self.env.user).add(channels, "_store_channel_fields").bus_send()
+            Store.to(self.env.user).add(channels, "_store_channel_fields")
         return channels
 
     def action_reset_invitation_uuid(self):
@@ -578,8 +579,7 @@ class DiscussChannel(models.Model):
         ]
         # sudo: discuss.channel.member - adding member of other users based on channel auto-subscribe
         new_members = self.env["discuss.channel.member"].sudo().create(to_create)
-        stores = Store.Stores()
-        for member, store in new_members._get_member_store_list(stores):
+        for member, store in new_members._get_member_store_list():
             store.add(member.channel_id, "_store_channel_fields").add(
                 member,
                 lambda res: (
@@ -587,7 +587,6 @@ class DiscussChannel(models.Model):
                     res.attr("unpin_dt"),
                 ),
             )
-        stores.bus_send()
 
     def _subscribe_users_automatically_get_members(self):
         """ Return new members per channel ID """
@@ -603,6 +602,7 @@ class DiscussChannel(models.Model):
         else:
             self.self_member_id.unpin_dt = fields.Datetime.now()
 
+    @Store.with_store_context
     def _action_unfollow(self, partner=None, guest=None, post_leave_message=True):
         self.ensure_one()
         if partner is None:
@@ -617,8 +617,7 @@ class DiscussChannel(models.Model):
             ]
         )
         for bus_channel in ((member or partner or guest)._bus_channels()):
-            custom_store = Store(bus_channel=bus_channel)
-            custom_store.add(self, {"close_chat_window": True, "isLocallyPinned": False}).bus_send()
+            Store.to(bus_channel).add(self, {"close_chat_window": True, "isLocallyPinned": False})
         if not member:
             return
         if self.channel_type != "channel" and post_leave_message:
@@ -647,6 +646,7 @@ class DiscussChannel(models.Model):
             post_joined_message=post_joined_message,
         )
 
+    @Store.with_store_context
     def _add_members(
         self,
         *,
@@ -660,7 +660,6 @@ class DiscussChannel(models.Model):
     ):
         """Adds the given users, partners and guests as member of self channels.
         Prefer giving users rather than partners when possible."""
-        stores = Store.Stores()
         inviting_partner = inviting_partner or self.env["res.partner"]
         partners = partners or self.env["res.partner"]
         if users:
@@ -689,8 +688,7 @@ class DiscussChannel(models.Model):
             else:
                 new_members = self.env["discuss.channel.member"].create(members_to_create)
             all_new_members += new_members
-            joined_stores = Store.Stores()
-            for member, joined_store in new_members._get_member_store_list(joined_stores):
+            for member, joined_store in new_members._get_member_store_list():
                 joined_store.add(member.channel_id, "_store_channel_fields")
                 joined_store.add(member, ["unpin_dt"])
                 payload = {
@@ -710,15 +708,12 @@ class DiscussChannel(models.Model):
                         subtype_xmlid="mail.mt_comment",
                     )
             if new_members:
-                stores[channel].add(channel, ["member_count"])
-                stores[channel].add(new_members, "_store_member_fields")
+                Store.to(channel).add(channel, ["member_count"]).add(new_members, "_store_member_fields")
             if existing_members and (bus_channel := current_user or current_guest):
                 # If the current user invited these members but they are already present, notify the current user about their existence as well.
                 # In particular this fixes issues where the current user is not aware of its own member in the following case:
                 # create channel from form view, and then join from discuss without refreshing the page.
-                stores[bus_channel].add(channel, ["member_count"])
-                stores[bus_channel].add(existing_members, "_store_member_fields")
-        stores.bus_send()
+                Store.to(bus_channel).add(channel, ["member_count"]).add(existing_members, "_store_member_fields")
         if invite_to_rtc_call:
             for channel in self:
                 # sudo: discuss.channel.rtc.session - reading rtc sessions of current user
@@ -818,6 +813,7 @@ class DiscussChannel(models.Model):
         self.ensure_one()
         return f"call_{self.id}"
 
+    @Store.with_store_context
     def _rtc_cancel_invitations(self, member_ids=None):
         """ Cancels the invitations of the RTC call from all invited members,
             if member_ids is provided, only the invitations of the specified members are canceled.
@@ -834,7 +830,7 @@ class DiscussChannel(models.Model):
         members = self.env['discuss.channel.member'].search(channel_member_domain)
         members.rtc_inviting_session_id = False
         if members:
-            Store(bus_channel=self).add(
+            Store.to(self).add(
                 self,
                 lambda res: res.many(
                     "invited_member_ids",
@@ -842,7 +838,7 @@ class DiscussChannel(models.Model):
                     mode="DELETE",
                     value=members,
                 ),
-            ).bus_send()
+            )
             devices, private_key, public_key = self._web_push_get_partners_parameters(members.partner_id.ids)
             if devices:
                 self._web_push_send_notification(devices, private_key, public_key, payload={
@@ -982,15 +978,14 @@ class DiscussChannel(models.Model):
     def _notify_thread(self, message, msg_vals=False, **kwargs):
         # link message to channel
         rdata = super()._notify_thread(message, msg_vals=msg_vals, **kwargs)
-        store = Store(bus_channel=self).add(message, "_store_message_fields")
-        if message.channel_id.parent_channel_id:
-            store.add(message.channel_id, ["message_count"])
-        payload = {"data": store, "id": self.id}
+        payload = {"id": self.id}
         if temporary_id := self.env.context.get("temporary_id"):
             payload["temporary_id"] = temporary_id
         if kwargs.get("silent"):
             payload["silent"] = True
-        self._bus_send("discuss.channel/new_message", payload)
+        store = Store.to(self, notification_type="discuss.channel/new_message", payload=payload)
+        if message.channel_id.parent_channel_id:
+            store.add(message.channel_id, ["message_count"])
         return rdata
 
     def _notify_by_web_push_prepare_payload(self, message, msg_vals=False, force_record_name=False):
@@ -1158,16 +1153,16 @@ class DiscussChannel(models.Model):
     # BROADCAST
     # ------------------------------------------------------------
 
-    # Anonymous method
+    @Store.with_store_context
     def _broadcast(self, users):
         """ Broadcast the current channel header to the given users
             :param users : the users to notify
         """
         for user in users:
-            Store(bus_channel=user).add(
+            Store.to(user.with_context(self.env.context)).add(
                 self.with_user(user).with_context(allowed_company_ids=[]),
                 "_store_channel_fields",
-            ).bus_send()
+            )
 
     # ------------------------------------------------------------
     # INSTANT MESSAGING API
@@ -1351,6 +1346,7 @@ class DiscussChannel(models.Model):
     # User methods
 
     @api.model
+    @Store.with_store_context
     def _get_or_create_chat(self, partners_to):
         """ Get the canonical private channel between some partners, create it if needed.
             To reuse an old channel (conversation), this one must be private, and contains

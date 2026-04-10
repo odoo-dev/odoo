@@ -84,6 +84,7 @@ class MailGuest(models.Model):
         timezone = request.cookies.get('tz')
         return timezone if timezone in all_timezones else False
 
+    @Store.with_store_context
     def _update_name(self, name):
         self.ensure_one()
         name = name.strip()
@@ -93,8 +94,8 @@ class MailGuest(models.Model):
             raise UserError(_("Guest's name is too long."))
         self.name = name
         for channel in self.channel_ids:
-            Store(bus_channel=channel).add(self, "_store_avatar_fields").bus_send()
-        Store(bus_channel=self).add(self, "_store_avatar_fields").bus_send()
+            Store.to(channel).add(self, "_store_avatar_fields")
+        Store.to(self).add(self, "_store_avatar_fields")
 
     def _update_timezone(self, timezone):
         query = """

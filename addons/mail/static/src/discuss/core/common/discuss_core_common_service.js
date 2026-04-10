@@ -26,7 +26,7 @@ export class DiscussCoreCommon {
             // Insert should always be done before any async operation. Indeed,
             // awaiting before the insertion could lead to overwritting newer
             // state coming from more recent `mail.record/insert` notifications.
-            this.store.insert(payload.data);
+            this.store.insert(payload.store_data);
             this._handleNotificationNewMessage(payload, metadata);
         });
         this.busService.subscribe("discuss.channel/transient_message", (payload) => {

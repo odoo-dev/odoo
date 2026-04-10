@@ -2978,6 +2978,7 @@ class MailThread(models.AbstractModel):
                        for record in self]
         return self.sudo()._message_create(values_list)
 
+    @Store.with_store_context
     def set_message_pin(self, message_id, pinned):
         """(Un)pin a message on the thread.
         The message must belong to the thread on which it is called.
@@ -3003,7 +3004,7 @@ class MailThread(models.AbstractModel):
             "UPDATE mail_message SET pinned_at=%(pinned_at)s WHERE id=%(id)s",
             {"pinned_at": fields.Datetime.now() if pinned else None, "id": message.id},
         )
-        Store(bus_channel=message).add(message, ["pinned_at"]).bus_send()
+        Store.to(message).add(message, ["pinned_at"])
         return True
 
     # ------------------------------------------------------------
@@ -5017,6 +5018,7 @@ class MailThread(models.AbstractModel):
         msg_not_comment.sudo().write(msg_vals)
         return True
 
+    @Store.with_store_context
     def _message_update_content(self, message, /, *, body, attachment_ids=None, partner_ids=None,
                                 strict=True, **kwargs):
         """ Update message content. Currently does not support attachments
@@ -5099,7 +5101,7 @@ class MailThread(models.AbstractModel):
             self.env["mail.message.translation"].sudo().search(
                 [("message_id", "=", message.id)],
             ).unlink()
-        Store(bus_channel=message).add(
+        Store.to(message).add(
             message,
             lambda res: (
                 res.many("attachment_ids", "_store_attachment_fields", sort="id"),
@@ -5116,7 +5118,7 @@ class MailThread(models.AbstractModel):
                 self._store_message_update_extra_fields(res),
                 res.attr("translationValue", False, predicate=lambda m: m.body is not None),
             ),
-        ).bus_send()
+        )
 
     def _clean_empty_message(self, message):
         message.message_link_preview_ids._unlink_and_notify()
