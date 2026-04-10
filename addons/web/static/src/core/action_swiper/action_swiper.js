@@ -106,6 +106,7 @@ export class ActionSwiper extends Component {
         this.isSwipeEnabled = false;
         this.targetContainer.el.classList.add("o_actionswiper_transition_enabled");
         if (this.isSwipeStarted) {
+            console.log("onswipe END")
             ev.stopPropagation();
             ev.preventDefault();
             if (
@@ -143,11 +144,7 @@ export class ActionSwiper extends Component {
                 onLeftSwipe ? -this.containerWidth : 0,
                 onRightSwipe ? this.containerWidth : 0
             );
-            ev.stopPropagation();
             if (this.isSwipeStarted) {
-                // Prevent the browser to navigate back/forward when using swipe
-                // gestures while still allowing to scroll vertically.
-                ev.preventDefault();
                 this.applyStyle(this.swipedDistance);
             } else {
                 // If there are scrollable elements under touch pressure,
@@ -159,9 +156,15 @@ export class ActionSwiper extends Component {
                     return this._reset();
                 }
                 if (Math.abs(this.swipedDistance) > this.constructor.swipeEffectiveThreshold) {
+                    console.log("swiper STARTED")
                     this.isSwipeStarted = true;
                 }
             }
+            // Prevent the browser to navigate back/forward when using swipe
+            // gestures while still allowing to scroll vertically.
+            //ev.stopPropagation();
+            ev.preventDefault();
+                console.log("move stop + defaultprevented", this.scrollables)
         }
     }
     /**

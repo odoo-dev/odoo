@@ -1,0 +1,53 @@
+[1mdiff --git a/addons/web/static/src/core/action_swiper/action_swiper.js b/addons/web/static/src/core/action_swiper/action_swiper.js[m
+[1mindex 3179393f9326..409b05bceace 100644[m
+[1m--- a/addons/web/static/src/core/action_swiper/action_swiper.js[m
+[1m+++ b/addons/web/static/src/core/action_swiper/action_swiper.js[m
+[36m@@ -106,6 +106,7 @@[m [mexport class ActionSwiper extends Component {[m
+         this.isSwipeEnabled = false;[m
+         this.targetContainer.el.classList.add("o_actionswiper_transition_enabled");[m
+         if (this.isSwipeStarted) {[m
+[32m+[m[32m            console.log("onswipe END")[m
+             ev.stopPropagation();[m
+             ev.preventDefault();[m
+             if ([m
+[36m@@ -143,11 +144,7 @@[m [mexport class ActionSwiper extends Component {[m
+                 onLeftSwipe ? -this.containerWidth : 0,[m
+                 onRightSwipe ? this.containerWidth : 0[m
+             );[m
+[31m-            ev.stopPropagation();[m
+             if (this.isSwipeStarted) {[m
+[31m-                // Prevent the browser to navigate back/forward when using swipe[m
+[31m-                // gestures while still allowing to scroll vertically.[m
+[31m-                ev.preventDefault();[m
+                 this.applyStyle(this.swipedDistance);[m
+             } else {[m
+                 // If there are scrollable elements under touch pressure,[m
+[36m@@ -159,9 +156,15 @@[m [mexport class ActionSwiper extends Component {[m
+                     return this._reset();[m
+                 }[m
+                 if (Math.abs(this.swipedDistance) > this.constructor.swipeEffectiveThreshold) {[m
+[32m+[m[32m                    console.log("swiper STARTED")[m
+                     this.isSwipeStarted = true;[m
+                 }[m
+             }[m
+[32m+[m[32m            // Prevent the browser to navigate back/forward when using swipe[m
+[32m+[m[32m            // gestures while still allowing to scroll vertically.[m
+[32m+[m[32m            //ev.stopPropagation();[m
+[32m+[m[32m            ev.preventDefault();[m
+[32m+[m[32m                console.log("move stop + defaultprevented", this.scrollables)[m
+         }[m
+     }[m
+     /**[m
+[1mdiff --git a/addons/web/static/src/core/browser/feature_detection.js b/addons/web/static/src/core/browser/feature_detection.js[m
+[1mindex 59f784620036..849c446f5e26 100644[m
+[1m--- a/addons/web/static/src/core/browser/feature_detection.js[m
+[1m+++ b/addons/web/static/src/core/browser/feature_detection.js[m
+[36m@@ -71,7 +71,7 @@[m [mexport function isDisplayStandalone() {[m
+ }[m
+ [m
+ export function hasTouch() {[m
+[31m-    return browser.ontouchstart !== undefined || browser.matchMedia("(pointer:coarse)").matches;[m
+[32m+[m[32m    return true//browser.ontouchstart !== undefined || browser.matchMedia("(pointer:coarse)").matches;[m
+ }[m
+ [m
+ export function maxTouchPoints() {[m
