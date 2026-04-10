@@ -54,14 +54,13 @@ export class Navbar extends Component {
 
     async openLnaPopup() {
         let localPrinterIp;
-        if (isPrivateIp(this.pos.config.epson_printer_ip)) {
-            localPrinterIp = this.pos.config.epson_printer_ip;
-        }
-        if (!localPrinterIp) {
-            for (const printer of this.pos.config.printer_ids) {
-                if (isPrivateIp(printer.epson_printer_ip)) {
-                    localPrinterIp = printer.epson_printer_ip;
-                }
+        for (const printer of [
+            ...this.pos.config.receipt_printer_ids,
+            ...this.pos.config.preparation_printer_ids,
+        ]) {
+            if (isPrivateIp(printer.epson_printer_ip)) {
+                localPrinterIp = printer.epson_printer_ip;
+                break;
             }
         }
         if (localPrinterIp) {
