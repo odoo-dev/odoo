@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
-    <!-- ===================== -->
-    <!-- LIST VIEW -->
-    <!-- ===================== -->
     <record id="view_printers_tree" model="ir.ui.view">
         <field name="name">printers.list</field>
         <field name="model">printers.printer</field>
@@ -34,33 +30,24 @@
                         <field name="ip"/>
                     </group>
                     <group>
-                        <field name="report_ids" widget="many2many_tags"/>      
+                        <field name="report_ids" widget="many2many_tags"/>
                     </group>
                 </sheet>
             </form>
         </field>
     </record>
 
-    <!-- ===================== -->
-    <!-- ACTION -->
-    <!-- ===================== -->
     <record id="action_printers_view" model="ir.actions.act_window">
         <field name="name">Printers</field>
         <field name="res_model">printers.printer</field>
         <field name="view_mode">list,form</field>
     </record>
 
-
-    <!-- ===================== -->
-    <!-- MENU -->
-    <!-- ===================== -->
-
-    <menuitem id="menu_devices"
-              name="Devices"
-                parent="base.menu_custom"/>
-    <menuitem id="menu_printers"
-              name="Printers"
-                parent="printers.menu_devices"
-              action="action_printers_view"/>
-
+    <menuitem 
+        id="menu_printers"
+        name="Printers"
+        parent="base.reporting_menuitem"
+        sequence="4"
+        action="action_printers_view"
+    />
 </odoo>

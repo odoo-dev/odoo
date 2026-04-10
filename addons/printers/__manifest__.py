@@ -5,6 +5,7 @@
     'summary': 'A printer service',
     'data': [
         'security/ir.model.access.csv',
+        'security/printers_security.xml',
         'views/printers.xml',
         'views/ir_actions_report.xml',
         'wizard/select_printer_views.xml',

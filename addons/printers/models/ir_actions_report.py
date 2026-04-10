@@ -1,7 +1,6 @@
 import base64
 
 from odoo import _, fields, models
-from odoo.exceptions import UserError
 
 
 class IrActionsReport(models.Model):
@@ -13,25 +12,21 @@ class IrActionsReport(models.Model):
         'report_id',
         'printer_id',
         string='Printers',
-        domain="[('printer_type', '=', 'office_printer')]",
     )
 
-    def get_pdf_bytes(self, printerId, res_ids, data=None):
-        """
-        Generate PDF and return it as base64 to frontend.
-        Frontend will handle sending to proxy.
-        """
+    def generate_print_data(self, printer_ids, res_ids, data=None):
         self.ensure_one()
-        # ovveride to add printer info in the data sent to frontend
-        # return [{
-        #     "data": base64.b64encode(pdf_bytes).decode("utf-8"),
-        #     "printer": {
-        #         "id": printerId,
-        #         "name": printer.name,
-        #         "ip": printer.ip,
-        #         "printer_type": printer.printer_type,
-        #     },
-        # }]
+        printers = self.env['printers.printer'].browse(printer_ids)
+        content_bytes, _ = self._render(self.report_name, res_ids, data=data)
+        return [{
+            "payload": base64.b64encode(content_bytes).decode("utf-8"),
+            "printer": {
+                "id": printer.id,
+                "name": printer.name,
+                "ip": printer.ip,
+                "printer_type": printer.printer_type,
+            },
+        } for printer in printers]
 
     def _get_readable_fields(self):
         return super()._get_readable_fields() | {"printer_ids"}
@@ -44,11 +39,16 @@ class IrActionsReport(models.Model):
         result['printer_ids'] = self.printer_ids.ids
         return result
 
-    def get_action_wizard_printers(self, printerId=None):
+    def get_action_wizard_printers(self, printer_ids=None):
         self.ensure_one()
+        if printer_ids:
+            printer_ids = [
+                p for p in printer_ids
+                if p in self.printer_ids.ids
+            ]
         wizard = self.env['select.printer.wizard'].create([{
             'display_printer_ids': self.printer_ids.ids,
-            'printer_id': printerId if printerId else (self.printer_ids.ids[0] if self.printer_ids else False),
+            'printer_ids': printer_ids if printer_ids else self.printer_ids.ids,
         }])
         return {
             'name': _("Select Printers for %s", self.name),

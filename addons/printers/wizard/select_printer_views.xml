@@ -7,7 +7,7 @@
             <form js_class="select_printer_wizard" string="Sales Details">
                 <field name="display_printer_ids" invisible="1"/>
                 <group>
-                    <field name="printer_id" domain="[('id', 'in', display_printer_ids)]" string="Printers"/>
+                    <field name="printer_ids" widget="many2many_tags" domain="[('id', 'in', display_printer_ids)]" string="Printers"/>
                 </group>
                 <group>
                     <field name="do_not_ask_again"/>

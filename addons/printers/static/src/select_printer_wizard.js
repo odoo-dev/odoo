@@ -15,7 +15,7 @@ export class SelectPrinterFormController extends FormController {
 
         onWillUnmount(() => {
             // If the user closes the popup without selecting a printer we still send a message back
-            this.env.bus.trigger("printer-selected-proxy", {
+            this.env.bus.trigger("report-printer-selected", {
                 reportId: this.props.context.report_id,
                 deviceSettings: null,
             });
@@ -25,17 +25,17 @@ export class SelectPrinterFormController extends FormController {
 
     async onClickViewButtonProxy(params) {
         const deviceSettings = {
-            selectedDevices: this.model.root.evalContextWithVirtualIds.printer_id,
+            selectedDevices: this.model.root.evalContextWithVirtualIds.printer_ids,
             skipDialog: this.model.root.evalContextWithVirtualIds.do_not_ask_again,
         };
         if (deviceSettings.selectedDevices) {
-            this.env.bus.trigger("printer-selected-proxy", {
+            this.env.bus.trigger("report-printer-selected", {
                 reportId: this.props.context.report_id,
                 deviceSettings,
             });
             this.onClickViewButton(params);
         } else {
-            this.notification.add(_t("Select at printer"), {
+            this.notification.add(_t("Please select a printer"), {
                 title: _t("No printer selected"),
                 type: "danger",
             });
