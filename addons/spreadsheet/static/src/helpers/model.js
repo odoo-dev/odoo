@@ -274,6 +274,7 @@ function isLoaded(model) {
  * @returns {string}
  */
 function odooChartToImage(model, figure, chartId) {
+    return "data:image/png;base64,";
     const runtime = model.getters.getChartRuntime(chartId);
     // wrap the canvas in a div with a fixed size because chart.js would
     // fill the whole page otherwise
