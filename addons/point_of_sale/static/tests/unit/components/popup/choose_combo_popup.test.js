@@ -1,12 +1,12 @@
 import { test, expect, describe } from "@odoo/hoot";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
-import { ChoseComboPopup } from "@point_of_sale/app/components/popups/chose_combo_popup/chose_combo_popup";
+import { ChooseComboPopup } from "@point_of_sale/app/components/popups/choose_combo_popup/choose_combo_popup";
 import { setupPosEnv } from "@point_of_sale/../tests/unit/utils";
 import { definePosModels } from "@point_of_sale/../tests/unit/data/generate_model_definitions";
 
 definePosModels();
 
-describe("chose_combo_popup.js", () => {
+describe("choose_combo_popup.js", () => {
     test("allCombos", async () => {
         const store = await setupPosEnv();
 
@@ -35,7 +35,7 @@ describe("chose_combo_popup.js", () => {
         };
 
         const checkAllCombos = async (comboProduct, potentialCombos) => {
-            const choseComboPopup = await mountWithCleanup(ChoseComboPopup, {
+            const chooseComboPopup = await mountWithCleanup(ChooseComboPopup, {
                 props: {
                     potentialCombos: potentialCombos,
                     close: () => {},
@@ -81,7 +81,7 @@ describe("chose_combo_popup.js", () => {
             if (potentialCombos.upsell.length > 0) {
                 expectedAllCombos[0].upsell = true;
             }
-            expect(choseComboPopup.allCombos).toEqual(expectedAllCombos);
+            expect(chooseComboPopup.allCombos).toEqual(expectedAllCombos);
         };
 
         // Two combo choice, one is upsell, the other is not

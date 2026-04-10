@@ -11,7 +11,7 @@
                         <div class="company-field text-bg-muted" t-out="this.props.partner.parent_name or ''" />
                     </div>
                     <Dropdown t-if="this.pos.cashier._role !== 'minimal'">
-                        <button class="btn btn-ligth fa fa-bars" />
+                        <button class="btn btn-light fa fa-bars" />
                         <t t-set-slot="content">
                             <DropdownItem onSelected="() => this.props.onClickEdit(this.props.partner)">
                                 Edit Details
@@ -22,7 +22,7 @@
                         </t>
                     </Dropdown>
                 </div>
-                <div class="partner-line-adress p-1" t-if="this.props.partner.address" t-out="this.props.partner.address" />
+                <div class="partner-line-address p-1" t-if="this.props.partner.address" t-out="this.props.partner.address" />
                 <div class="partner-line-email p-1">
                     <div class="mb-1" t-if="this.props.partner.phone">
                         <i class="fa fa-fw fa-phone me-2" /><t t-out="this.props.partner.phone" />
@@ -47,7 +47,7 @@
                     <div class="company-field text-bg-muted" t-out="this.props.partner.parent_name or ''" />
                 </td>
                 <td class="text-break w-25">
-                    <div class="partner-line-adress" t-if="this.props.partner.address" t-out="this.props.partner.address" />
+                    <div class="partner-line-address" t-if="this.props.partner.address" t-out="this.props.partner.address" />
                 </td>
                 <td class="partner-line-email w-100">
                     <div t-if="this.props.partner.phone">

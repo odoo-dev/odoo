@@ -5,7 +5,7 @@ import * as PartnerList from "@point_of_sale/../tests/pos/tours/utils/partner_li
 import * as TextInputPopup from "@point_of_sale/../tests/generic_helpers/text_input_popup_util";
 import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
-import * as ChoseComboPopup from "@point_of_sale/../tests/pos/tours/utils/chose_combo_popup_util";
+import * as ChooseComboPopup from "@point_of_sale/../tests/pos/tours/utils/choose_combo_popup_util";
 import { LONG_PRESS_DURATION } from "@point_of_sale/utils";
 import * as PaymentScreen from "@point_of_sale/../tests/pos/tours/utils/payment_screen_util";
 import * as FeedbackScreen from "@point_of_sale/../tests/pos/tours/utils/feedback_screen_util";
@@ -1098,14 +1098,14 @@ export function clickApplyCombo(
         },
     ];
     if (isOptionShown) {
-        steps.push(ChoseComboPopup.isShown());
+        steps.push(ChooseComboPopup.isShown());
         for (const option of optionsShown) {
-            steps.push(ChoseComboPopup.isOptionShown(option));
+            steps.push(ChooseComboPopup.isOptionShown(option));
         }
-        steps.push(ChoseComboPopup.apply(optionToChoose));
+        steps.push(ChooseComboPopup.apply(optionToChoose));
     }
     if (dialogStillPresent) {
-        steps.push(ChoseComboPopup.isShown());
+        steps.push(ChooseComboPopup.isShown());
         steps.push(Dialog.cancel());
     }
     return inLeftSide(steps.flat());

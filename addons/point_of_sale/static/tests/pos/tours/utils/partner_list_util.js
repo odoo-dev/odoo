@@ -89,7 +89,7 @@ export function checkContactValues(name, address = "", phone = "", email = "") {
         },
         {
             content: `Check address "${address}" for partner "${name}"`,
-            trigger: `.partner-list .partner-info:contains("${name}") .partner-line-adress:contains("${address}")`,
+            trigger: `.partner-list .partner-info:contains("${name}") .partner-line-address:contains("${address}")`,
         },
     ];
 

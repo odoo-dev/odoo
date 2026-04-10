@@ -259,7 +259,7 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
 
     def test_image_variants_displayed(self):
         """
-        Tests that the user can correctly chose variants in the product_configurator_popup
+        Tests that the user can correctly choose variants in the product_configurator_popup
         if the variant was set as Image
         """
         image_attribute = self.env['product.attribute'].create({

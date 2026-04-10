@@ -24,7 +24,7 @@ class ProductTemplate(models.Model):
     to_weight = fields.Boolean(
         string='To Weigh',
         help="Enable this option if the product should be sold by weight. "
-            "When enabled and scale is not avalable, the 'Price' button will update the quantity instead of the unit price. "
+            "When enabled and scale is not available, the 'Price' button will update the quantity instead of the unit price. "
             "This applies to both normal POS usage and when integrated with a hardware scale."
     )
     pos_categ_ids = fields.Many2many(

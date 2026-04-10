@@ -112,7 +112,7 @@ patch(PosOrder.prototype, {
         }
     },
     get courses() {
-        // Sort courses first by thier sequences, then by their index.
+        // Sort courses first by their sequences, then by their index.
         // Course that have sequence are backend created ones.
         return this.course_ids.toSorted((a, b) => {
             const aHasSeq = a.course_id?.sequence !== undefined;

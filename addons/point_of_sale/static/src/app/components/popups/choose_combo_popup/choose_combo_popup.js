@@ -3,8 +3,8 @@ import { Component } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
 
-export class ChoseComboPopup extends Component {
-    static template = "point_of_sale.ChoseComboPopup";
+export class ChooseComboPopup extends Component {
+    static template = "point_of_sale.ChooseComboPopup";
     static components = { Dialog };
     static props = {
         potentialCombos: Object,

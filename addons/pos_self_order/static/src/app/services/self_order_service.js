@@ -277,7 +277,7 @@ export class SelfOrder extends Reactive {
             const localUsage = orderUsageUTCtoLocalUtil(presetAvailabilities.usage_utc);
             preset.computeAvailabilities(localUsage);
         } catch {
-            console.info("Offline mode, cannot update the slot avaibility");
+            console.info("Offline mode, cannot update the slot availability");
         }
     }
 

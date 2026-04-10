@@ -9,7 +9,7 @@ import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
 import { parseFloat } from "@web/views/fields/parsers";
 import { OrderDisplay } from "@point_of_sale/app/components/order_display/order_display";
-import { ChoseComboPopup } from "@point_of_sale/app/components/popups/chose_combo_popup/chose_combo_popup";
+import { ChooseComboPopup } from "@point_of_sale/app/components/popups/choose_combo_popup/choose_combo_popup";
 
 export class OrderSummary extends Component {
     static template = "point_of_sale.OrderSummary";
@@ -444,7 +444,7 @@ export class OrderSummary extends Component {
             bestPotentialCombos.upsell.length + bestPotentialCombos.applicable.length >
             (keepOpen ? 0 : 1)
         ) {
-            comboToApply = await makeAwaitable(this.dialog, ChoseComboPopup, {
+            comboToApply = await makeAwaitable(this.dialog, ChooseComboPopup, {
                 potentialCombos: bestPotentialCombos,
             });
         } else if (bestPotentialCombos.applicable.length == 1) {
