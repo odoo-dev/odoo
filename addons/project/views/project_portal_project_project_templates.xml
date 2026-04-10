@@ -41,7 +41,7 @@
     <template id="portal_my_projects" name="My Projects">
         <t t-call="portal.portal_layout" breadcrumbs_searchbar="True">
 
-            <t t-call="portal.portal_searchbar" title.translate="Projects"/>
+            <t t-call="portal.portal_searchbar" title.translate="Projects" breadcrumbs_searchbar="True"/>
             <t t-if="not projects">
                 <div class="alert alert-warning" role="alert">
                     There are no projects.
@@ -70,9 +70,9 @@
         </t>
         <t t-call="portal.portal_layout"
             title="project.name"
-            o_portal_fullwidth_alert="o_portal_fullwidth_alert">
+            o_portal_fullwidth_alert="o_portal_fullwidth_alert" breadcrumbs_searchbar="True">
 
-            <t t-call="portal.portal_searchbar" title.translate="Tasks"/>
+            <t t-call="portal.portal_searchbar" title.translate="Tasks" breadcrumbs_searchbar="True"/>
             <t t-if="not grouped_tasks">
                 <div class="alert alert-warning" role="alert">
                     There are no tasks.
