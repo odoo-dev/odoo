@@ -79,21 +79,17 @@ class StockWarehouse(models.Model):
     buy_pull_id = fields.Many2one('stock.rule', 'Buy rule', copy=False)
 
     def _compute_buy_to_resupply(self):
+        buy_route = self._find_or_create_global_route('purchase_stock.route_warehouse0_buy', _('Buy'))
+        buy_warehouse_ids = set(buy_route.warehouse_ids.ids)
         for warehouse in self:
-            buy_route = warehouse.buy_pull_id.route_id
-            warehouse.buy_to_resupply = warehouse.id in buy_route.warehouse_ids.ids
+            warehouse.buy_to_resupply = warehouse.id in buy_warehouse_ids
 
     def _inverse_buy_to_resupply(self):
-        for warehouse in self:
-            buy_route = warehouse.buy_pull_id.route_id
-            if not buy_route:
-                buy_route = self.env['stock.rule'].search([
-                    ('action', '=', 'buy'), ('warehouse_id', '=', warehouse.id)]).route_id
-            buy_route = buy_route.sudo()
-            if warehouse.buy_to_resupply:
-                buy_route.warehouse_ids = [Command.link(warehouse.id)]
-            else:
-                buy_route.warehouse_ids = [Command.unlink(warehouse.id)]
+        buy_route = self._find_or_create_global_route('purchase_stock.route_warehouse0_buy', _('Buy'))
+        buy_route.sudo().warehouse_ids = [
+            Command.link(warehouse.id) if warehouse.buy_to_resupply else Command.unlink(warehouse.id)
+            for warehouse in self
+        ]
 
     def _create_or_update_route(self):
         purchase_route = self._find_or_create_global_route('purchase_stock.route_warehouse0_buy', _('Buy'))
