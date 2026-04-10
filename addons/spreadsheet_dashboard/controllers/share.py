@@ -51,7 +51,15 @@ class DashboardShareRoute(http.Controller):
             raise request.not_found()
 
         share._check_dashboard_access(token)
-        stream = request.env["ir.binary"]._get_stream_from(
-            share, "spreadsheet_binary_data"
-        )
-        return stream.get_response()
+        dashboard = share.dashboard_id
+        body = dashboard.with_user(share.create_uid)._evaluate()
+        headers = [
+            ('Content-Length', len(body)),
+            ('Content-Type', 'application/json; charset=utf-8'),
+            ('Cache-Control', 'no-store'),
+        ]
+        return request.make_response(body, headers)
+        # stream = request.env["ir.binary"]._get_stream_from(
+        #     share, "spreadsheet_binary_data"
+        # )
+        # return stream.get_response()

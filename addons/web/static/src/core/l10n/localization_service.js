@@ -48,7 +48,7 @@ export const localizationService = {
         });
 
         const loadTranslations = async (hash) => {
-            const result = await fetchTranslations(lang, hash);
+            const result = await fetchTranslations(translationURL, lang, hash);
             if (result.hash !== hash) {
                 localizationDB.write(translationURL, JSON.stringify({ lang }), result);
                 updateTranslations(result);
