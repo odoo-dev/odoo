@@ -121,7 +121,6 @@ NO_ACCESS = '.'
 BAD_FIELDS = {
     'stock.warehouse.manufacture_to_resupply',  # need fix from stock (demo of mrp)
     'stock.warehouse.orderpoint.qty_to_order',  # need fix from stock (install + test_replenishment_order_to_max)
-    'stock.warehouse.buy_to_resupply',  # need fix from stock (install + test_04_mto_multiple_po)
 }
 
 
