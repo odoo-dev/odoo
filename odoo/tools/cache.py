@@ -144,7 +144,7 @@ class ormcache:
             return self.method(*args, **kwargs)
 
 
-def log_ormcache_stats(sig=None, frame=None):    # noqa: ARG001 (arguments are there for signals)
+def log_ormcache_stats(sig=None, frame=None, *, run_in_thread=True):    # noqa: ARG001 (arguments are there for signals)
     # collect and log data in a separate thread to avoid blocking the main thread
     # and avoid using logging module directly in the signal handler
     # https://docs.python.org/3/library/logging.html#thread-safety
@@ -275,14 +275,22 @@ def log_ormcache_stats(sig=None, frame=None):    # noqa: ARG001 (arguments are t
             with _logger_lock:
                 _logger_state = 'wait'
 
-    show_size = False
     if sig == signal.SIGUSR1:
-        threading.Thread(target=_log_ormcache_stats,
-                         name="odoo.signal.log_ormcache_stats").start()
+        show_size = False
     elif sig == signal.SIGUSR2:
         show_size = True
-        threading.Thread(target=_log_ormcache_stats,
-                         name="odoo.signal.log_ormcache_stats_with_size").start()
+    elif run_in_thread:
+        return  # not a known signal
+    else:
+        # by default in sync mode show the size
+        show_size = True
+    if run_in_thread:
+        threading.Thread(
+            target=_log_ormcache_stats,
+            name="odoo.signal.log_ormcache_stats" + ("_with_size" if show_size else ""),
+        ).start()
+    else:
+        _log_ormcache_stats()
 
 
 def get_cache_key_counter(bound_method: Callable, *args, **kwargs) -> tuple[LRU, tuple, ormcache_counter]:
