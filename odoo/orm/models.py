@@ -3869,9 +3869,9 @@ class BaseModel(metaclass=MetaModel):
                         ))
                     raise
 
-        fields = [field.name for fields in determine_inverses.values() for field in fields if not field.store and field.compute]
-        real_recs.invalidate_recordset(fields)
-        real_recs.modified(fields)
+            fields = [field.name for fields in determine_inverses.values() for field in fields if not field.store and field.compute]
+            real_recs.invalidate_recordset(fields)
+            real_recs.modified(fields)
 
         # invalidate the cache
         if real_recs and (cache_name := self._clear_cache_name) and (
@@ -4116,10 +4116,10 @@ class BaseModel(metaclass=MetaModel):
                 inv_relational_fnames = [field.name for field in fields if field.type in ('one2many', 'many2many') and not field.store]
                 inv_records.invalidate_recordset(fnames=inv_relational_fnames)
 
-        for field, rec_ids in to_recompute.items():
-            rec = self.browse(rec_ids)
-            rec.invalidate_recordset([field.name])
-            rec.modified([field.name])
+            for field, rec_ids in to_recompute.items():
+                rec = self.browse(rec_ids)
+                rec.invalidate_recordset([field.name])
+                rec.modified([field.name])
 
         # invalidate the cache
         if cache_name := self._clear_cache_name:
