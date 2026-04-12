@@ -635,6 +635,12 @@ class BaseCase(case.TestCase):
             for patcher in _patch._active_patches:
                 _logger.warning("A patcher (targeting %s.%s) was remaining active at the end of %s, disabling it...", patcher.target, patcher.attribute, cls.__name__)
                 patcher.stop()
+            # release odoo objects
+            for to_clear in [
+                name for name, value in vars(cls).items()
+                if value is not None and type(value).__module__.startswith('odoo.')
+            ]:
+                setattr(cls, to_clear, None)
         cls.addClassCleanup(check_remaining_patchers)
         super().setUpClass()
         if 'standard' in cls.test_tags or 'click_all' in cls.test_tags:
