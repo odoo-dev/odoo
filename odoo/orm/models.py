@@ -4084,7 +4084,7 @@ class BaseModel(metaclass=MetaModel):
 
         # protect fields being written against recomputation
         protected_data = [(data['protected'], data['record']) for data in data_list]
-        protected_fields = {field for data in data_list for field in data['protected']}
+        to_recompute = {}
         with self.env.protecting(protected_data):
             # fill cached_only fields
             for data in data_list:
@@ -4110,13 +4110,16 @@ class BaseModel(metaclass=MetaModel):
                 next(iter(fields)).determine_inverse(inv_records)
                 for field in fields:
                     if not field.store and field.compute:
-                        if field in protected_fields:
-                            self.env._protected[field].difference_update(inv_records._ids)
-                        inv_records.invalidate_recordset(fnames=[field.name])
+                        to_recompute[field] = inv_rec_ids
                 # Values of non-stored fields were cached before running inverse methods. In case of x2many create
                 # commands, the cache may therefore hold NewId records. We must now invalidate those values.
                 inv_relational_fnames = [field.name for field in fields if field.type in ('one2many', 'many2many') and not field.store]
                 inv_records.invalidate_recordset(fnames=inv_relational_fnames)
+
+        for field, rec_ids in to_recompute.items():
+            rec = self.browse(rec_ids)
+            rec.invalidate_recordset([field.name])
+            rec.modified([field.name])
 
         # invalidate the cache
         if cache_name := self._clear_cache_name:
