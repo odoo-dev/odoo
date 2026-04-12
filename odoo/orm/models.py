@@ -3858,15 +3858,6 @@ class BaseModel(metaclass=MetaModel):
                 # inverse records that are not being computed
                 try:
                     fields[0].determine_inverse(real_recs)
-                    for field in fields:
-                        if not field.store and field.compute:
-                            if field in protected:
-                                # remove the protected after inverse to
-                                # 1. avoid endless recursion when inverse
-                                # 2. allow these non-stored fields to be recomputed after inverse
-                                env._protected[field].difference_update(real_recs._ids)
-                            # invalidate the field in case the inverse will cause compute to be a different value
-                            real_recs.invalidate_recordset(fnames=[field.name])
                 except AccessError as e:
                     if fields[0].inherited:
                         description = self.env['ir.model']._get(self._name).name
@@ -3878,15 +3869,19 @@ class BaseModel(metaclass=MetaModel):
                         ))
                     raise
 
-            # invalidate the cache
-            if real_recs and (cache_name := self._clear_cache_name) and (
-                self._clear_cache_on_fields is None
-                or not vals.keys().isdisjoint(self._clear_cache_on_fields)
-            ):
-                self.env.registry.clear_cache(cache_name)
+        fields = [field.name for fields in determine_inverses.values() for field in fields if not field.store and field.compute]
+        real_recs.invalidate_recordset(fields)
+        real_recs.modified(fields)
 
-            # validate inversed fields
-            real_recs._validate_fields(inverse_fields)
+        # invalidate the cache
+        if real_recs and (cache_name := self._clear_cache_name) and (
+            self._clear_cache_on_fields is None
+            or not vals.keys().isdisjoint(self._clear_cache_on_fields)
+        ):
+            self.env.registry.clear_cache(cache_name)
+
+        # validate inversed fields
+        real_recs._validate_fields(inverse_fields)
 
         if self._check_company_auto:
             self._check_company(list(vals))
