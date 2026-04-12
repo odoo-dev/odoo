@@ -625,6 +625,10 @@ class BaseCase(case.TestCase):
                 _logger.warning('A child process was found, terminating it: %s', child)
                 child.terminate()
             psutil.wait_procs(children, timeout=10)  # mainly to avoid a zombie process that would be logged again at the end.
+            # stats for the used memory after a run
+            memory_size = current_process.memory_info().vms
+            from .result import stats_logger  # noqa: PLC0415
+            stats_logger.info("Memory usage after %s.%s: %d", cls.test_module, cls.__name__, memory_size)
         cls.addClassCleanup(check_remaining_processes)
 
         def check_remaining_patchers():
