@@ -36,7 +36,11 @@ export class NavBar extends Component {
         this.pwa = useService("pwa");
         this.root = useRef("root");
         this.appSubMenus = useRef("appSubMenus");
-        const debouncedAdapt = debounce(this.adapt.bind(this), 250);
+        const debouncedAdapt = debounce(() => {
+            // Force re-render to update env.isSmall in template
+            this.render();
+            this.adapt.bind(this);
+        }, 250);
         onWillDestroy(() => debouncedAdapt.cancel());
         useExternalListener(window, "resize", debouncedAdapt);
 
