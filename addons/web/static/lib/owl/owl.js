@@ -171,6 +171,9 @@
             if (attrs[0] === "class") {
                 setClass.call(this, attrs[1]);
             }
+            else if (attrs[0] === "style") {
+                setStyle.call(this, attrs[1]);
+            }
             else {
                 setAttribute.call(this, attrs[0], attrs[1]);
             }
@@ -179,6 +182,9 @@
             for (let k in attrs) {
                 if (k === "class") {
                     setClass.call(this, attrs[k]);
+                }
+                else if (k === "style") {
+                    setStyle.call(this, attrs[k]);
                 }
                 else {
                     setAttribute.call(this, k, attrs[k]);
@@ -197,6 +203,9 @@
                 if (name === "class") {
                     updateClass.call(this, val, oldAttrs[1]);
                 }
+                else if (name === "style") {
+                    updateStyle.call(this, val, oldAttrs[1]);
+                }
                 else {
                     setAttribute.call(this, name, val);
                 }
@@ -212,6 +221,9 @@
                     if (k === "class") {
                         updateClass.call(this, "", oldAttrs[k]);
                     }
+                    else if (k === "style") {
+                        updateStyle.call(this, "", oldAttrs[k]);
+                    }
                     else {
                         removeAttribute.call(this, k);
                     }
@@ -222,6 +234,9 @@
                 if (val !== oldAttrs[k]) {
                     if (k === "class") {
                         updateClass.call(this, val, oldAttrs[k]);
+                    }
+                    else if (k === "style") {
+                        updateStyle.call(this, val, oldAttrs[k]);
                     }
                     else {
                         setAttribute.call(this, k, val);
@@ -270,29 +285,105 @@
                 return { [expr]: true };
         }
     }
+    // ---------------------------------------------------------------------------
+    // Style
+    // ---------------------------------------------------------------------------
+    const CSS_PROP_CACHE = {};
+    function toKebabCase(prop) {
+        if (prop in CSS_PROP_CACHE) {
+            return CSS_PROP_CACHE[prop];
+        }
+        const result = prop.replace(/[A-Z]/g, (m) => "-" + m.toLowerCase());
+        CSS_PROP_CACHE[prop] = result;
+        return result;
+    }
+    function toStyleObj(expr) {
+        const result = {};
+        switch (typeof expr) {
+            case "string": {
+                const str = trim.call(expr);
+                if (!str) {
+                    return {};
+                }
+                const parts = str.split(";");
+                for (let part of parts) {
+                    part = trim.call(part);
+                    if (!part) {
+                        continue;
+                    }
+                    const colonIdx = part.indexOf(":");
+                    if (colonIdx === -1) {
+                        continue;
+                    }
+                    const prop = trim.call(part.slice(0, colonIdx));
+                    const value = trim.call(part.slice(colonIdx + 1));
+                    if (prop && value && value !== "undefined") {
+                        result[prop] = value;
+                    }
+                }
+                return result;
+            }
+            case "object":
+                for (let prop in expr) {
+                    const value = expr[prop];
+                    if (value || value === 0) {
+                        result[toKebabCase(prop)] = String(value);
+                    }
+                }
+                return result;
+            default:
+                return {};
+        }
+    }
+    // ---------------------------------------------------------------------------
+    // Class
+    // ---------------------------------------------------------------------------
     function setClass(val) {
         val = val === "" ? {} : toClassObj(val);
-        // add classes
-        const cl = this.classList;
-        for (let c in val) {
-            tokenListAdd.call(cl, c);
+        for (let k in val) {
+            tokenListAdd.call(this.classList, k);
         }
     }
     function updateClass(val, oldVal) {
         oldVal = oldVal === "" ? {} : toClassObj(oldVal);
         val = val === "" ? {} : toClassObj(val);
-        const cl = this.classList;
-        // remove classes
-        for (let c in oldVal) {
-            if (!(c in val)) {
-                tokenListRemove.call(cl, c);
+        for (let k in oldVal) {
+            if (!(k in val)) {
+                tokenListRemove.call(this.classList, k);
             }
         }
-        // add classes
-        for (let c in val) {
-            if (!(c in oldVal)) {
-                tokenListAdd.call(cl, c);
+        for (let k in val) {
+            if (val[k] !== oldVal[k]) {
+                tokenListAdd.call(this.classList, k);
             }
+        }
+    }
+    // ---------------------------------------------------------------------------
+    // Style setters
+    // ---------------------------------------------------------------------------
+    function setStyle(val) {
+        val = val === "" ? {} : toStyleObj(val);
+        const style = this.style;
+        for (let prop in val) {
+            style.setProperty(prop, val[prop]);
+        }
+    }
+    function updateStyle(val, oldVal) {
+        oldVal = oldVal === "" ? {} : toStyleObj(oldVal);
+        val = val === "" ? {} : toStyleObj(val);
+        const style = this.style;
+        for (let prop in oldVal) {
+            if (!(prop in val)) {
+                style.removeProperty(prop);
+            }
+        }
+        for (let prop in val) {
+            if (val[prop] !== oldVal[prop]) {
+                style.setProperty(prop, val[prop]);
+            }
+        }
+        if (!style.cssText) {
+            removeAttribute.call(this, "style");
         }
     }
 
@@ -308,7 +399,7 @@
         return function batchedCall(...args) {
             if (!scheduled) {
                 scheduled = true;
-                Promise.resolve().then(() => {
+                queueMicrotask(() => {
                     scheduled = false;
                     callback(...args);
                 });
@@ -1046,6 +1137,10 @@
                         setter = setClass;
                         updater = updateClass;
                     }
+                    else if (info.name === "style") {
+                        setter = setStyle;
+                        updater = updateStyle;
+                    }
                     else {
                         setter = createAttrUpdater(info.name);
                         updater = setter;
@@ -1776,9 +1871,8 @@
     })(ComputationState || (ComputationState = {}));
     const atomSymbol = Symbol("Atom");
     let observers = [];
-    let immediateObservers = [];
     let currentComputation;
-    function createComputation(compute, isDerived, state = ComputationState.STALE, immediate = false) {
+    function createComputation(compute, isDerived, state = ComputationState.STALE) {
         return {
             state,
             value: undefined,
@@ -1786,7 +1880,6 @@
             sources: new Set(),
             observers: new Set(),
             isDerived,
-            immediate,
         };
     }
     function onReadAtom(atom) {
@@ -1796,37 +1889,17 @@
         currentComputation.sources.add(atom);
         atom.observers.add(currentComputation);
     }
-    let canWrite = true;
-    exports.preventWrite = function preventWrite(cb) {
-        const w = canWrite;
-        canWrite = false;
-        cb();
-        canWrite = w;
-    }
     function onWriteAtom(atom) {
-        if (!canWrite) {
-            return;
-        }
         for (const ctx of atom.observers) {
             if (ctx.state === ComputationState.EXECUTED) {
                 if (ctx.isDerived) {
                     markDownstream(ctx);
-                }
-                else if (ctx.immediate) {
-                    immediateObservers.push(ctx);
                 }
                 else {
                     observers.push(ctx);
                 }
             }
             ctx.state = ComputationState.STALE;
-        }
-        if (immediateObservers.length) {
-            const toRun = immediateObservers;
-            immediateObservers = [];
-            for (const ctx of toRun) {
-                updateComputation(ctx);
-            }
         }
         batchProcessEffects();
     }
@@ -1930,51 +2003,11 @@
     // Maps fibers to thrown errors
     const fibersInError = new WeakMap();
     const nodeErrorHandlers = new WeakMap();
-    function destroyApp(app, error) {
-        try {
-            app.destroy();
-        }
-        catch (e) {
-            // mute all errors here because we are in a corrupted state anyway
-        }
-        const e = Object.assign(new OwlError(`[Owl] Unhandled error. Destroying the root component`), {
-            cause: error,
-        });
-        return e;
-    }
-    function _handleError(node, error) {
-        if (!node) {
-            return false;
-        }
-        const fiber = node.fiber;
-        if (fiber) {
-            fibersInError.set(fiber, error);
-        }
-        const errorHandlers = nodeErrorHandlers.get(node);
-        if (errorHandlers) {
-            let handled = false;
-            // execute in the opposite order
-            const finalize = () => destroyApp(node.app, error);
-            for (let i = errorHandlers.length - 1; i >= 0; i--) {
-                try {
-                    errorHandlers[i](error, finalize);
-                    handled = true;
-                    break;
-                }
-                catch (e) {
-                    error = e;
-                }
-            }
-            if (handled) {
-                return true;
-            }
-        }
-        return _handleError(node.parent, error);
-    }
     function handleError(params) {
         let { error } = params;
-        const node = "node" in params ? params.node : params.fiber.node;
+        let node = "node" in params ? params.node : params.fiber.node;
         const fiber = "fiber" in params ? params.fiber : node.fiber;
+        const app = node.app;
         if (fiber) {
             // resets the fibers on components if possible. This is important so that
             // new renderings can be properly included in the initial one, if any.
@@ -1986,10 +2019,43 @@
             } while (current);
             fibersInError.set(fiber.root, error);
         }
-        const handled = _handleError(node, error);
-        if (!handled) {
-            throw destroyApp(node.app, error);
+        const finalize = () => {
+            try {
+                app.destroy();
+            }
+            catch (e) {
+                // mute all errors here because we are in a corrupted state anyway
+            }
+            return Object.assign(new OwlError(`[Owl] Unhandled error. Destroying the root component`), {
+                cause: error,
+            });
+        };
+        // Walk up the component tree looking for error handlers
+        while (node) {
+            const nodeFiber = node.fiber;
+            if (nodeFiber) {
+                fibersInError.set(nodeFiber, error);
+            }
+            const errorHandlers = nodeErrorHandlers.get(node);
+            if (errorHandlers) {
+                // execute in the opposite order
+                for (let i = errorHandlers.length - 1; i >= 0; i--) {
+                    try {
+                        errorHandlers[i](error, finalize);
+                        return; // handled
+                    }
+                    catch (e) {
+                        error = e;
+                    }
+                }
+            }
+            node = node.parent;
         }
+        // No handler found — create the OwlError, then let the app handle it.
+        // app._handleError is called after error creation, so it doesn't appear
+        // in the error's .stack property.
+        const owlError = finalize();
+        app._handleError(owlError);
     }
 
     function makeChildFiber(node, parent) {
@@ -2110,13 +2176,9 @@
                 current = current.parent;
             }
             // there are no current rendering from above => we can render
-            this._render();
-        }
-        _render() {
             const node = this.node;
             const root = this.root;
             if (root) {
-                // todo: should use updateComputation somewhere else.
                 const c = getCurrentComputation();
                 removeSources(node.signalComputation);
                 setComputation(node.signalComputation);
@@ -2125,10 +2187,14 @@
                     this.bdom = node.renderFn();
                 }
                 catch (e) {
-                    node.app.handleError({ node, error: e });
+                    handleError({ node, error: e });
                 }
                 setComputation(c);
-                root.setCounter(root.counter - 1);
+                const newCounter = root.counter - 1;
+                root.counter = newCounter;
+                if (newCounter === 0) {
+                    this.node.app.scheduler.flush();
+                }
             }
         }
     }
@@ -2195,7 +2261,7 @@
                     fiber.node.willUnmount = [];
                 }
                 this.locked = false;
-                node.app.handleError({ fiber: current || this, error: e });
+                handleError({ fiber: current || this, error: e });
             }
         }
         setCounter(newValue) {
@@ -2251,13 +2317,12 @@
                 }
             }
             catch (e) {
-                this.node.app.handleError({ fiber: current, error: e });
+                handleError({ fiber: current, error: e });
             }
         }
     }
 
     class ComponentNode {
-        el;
         app;
         fiber = null;
         component;
@@ -2305,16 +2370,6 @@
             setComputation(previousComputation);
             contextStack.length = 0; // clear context stack
         }
-        mountComponent(target, options) {
-            const fiber = new MountFiber(this, target, options);
-            this.app.scheduler.addFiber(fiber);
-            let prev = getCurrentComputation();
-            this.initiateRender(fiber);
-            // only useful if the component is a root, and a willstart function just
-            // crashed synchonously. In that case, it is possible that the previous
-            // computation has not been properly restored
-            setComputation(prev);
-        }
         async initiateRender(fiber) {
             this.fiber = fiber;
             if (this.mounted.length) {
@@ -2329,7 +2384,8 @@
                 await Promise.all(promises);
             }
             catch (e) {
-                this.app.handleError({ node: this, error: e });
+                setComputation(prev);
+                handleError({ node: this, error: e });
                 return;
             }
             if (this.status === 0 /* STATUS.NEW */ && this.fiber === fiber) {
@@ -2419,7 +2475,7 @@
                     }
                 }
                 catch (e) {
-                    this.app.handleError({ error: e, node: this });
+                    handleError({ error: e, node: this });
                 }
             }
             for (const computation of this.computations) {
@@ -3118,7 +3174,21 @@
             if (node) {
                 if (arePropsDifferent(node.props, props) || parentFiber.deep || node.forceNextRender) {
                     node.forceNextRender = false;
-                    updateAndRender.call(node, props, parentFiber);
+                    if (node.willUpdateProps.length) {
+                        updateAndRender.call(node, props, parentFiber);
+                    }
+                    else {
+                        // Synchronous fast path — no willUpdateProps hooks
+                        const fiber = makeChildFiber(node, parentFiber);
+                        node.fiber = fiber;
+                        node.props = props;
+                        const parentRoot = parentFiber.root;
+                        if (node.willPatch.length)
+                            parentRoot.willPatch.push(fiber);
+                        if (node.patched.length)
+                            parentRoot.patched.push(fiber);
+                        fiber.render();
+                    }
                 }
             }
             else {
@@ -3138,7 +3208,17 @@
                 }
                 node = new ComponentNode(C, props, app, ctx, key);
                 children[key] = node;
-                initiateRender.call(node, new Fiber(node, parentFiber));
+                const fiber = new Fiber(node, parentFiber);
+                if (node.willStart.length) {
+                    initiateRender.call(node, fiber);
+                }
+                else {
+                    node.fiber = fiber;
+                    if (node.mounted.length) {
+                        fiber.root.mounted.push(fiber);
+                    }
+                    fiber.render();
+                }
             }
             parentFiber.childrenMap[key] = node;
             return node;
@@ -3729,6 +3809,7 @@
         tSetVars = new Map();
         code = [];
         hasRoot = false;
+        deferReturn = false;
         needsScopeProtection = false;
         on;
         constructor(name, on) {
@@ -3809,6 +3890,14 @@
             this.dev = options.dev || false;
             this.ast = ast;
             this.templateName = options.name;
+            if (options.name) {
+                if (options.name.startsWith("__")) {
+                    this.target.name = options.name;
+                }
+                else {
+                    this.target.name = `template_${options.name.replace(/[^a-zA-Z0-9_$]/g, "_")}`;
+                }
+            }
             if (options.hasGlobalValues) {
                 this.helpers.add("__globals__");
             }
@@ -3918,7 +4007,7 @@
             if (ctx.tKeyExpr) {
                 blockExpr = `toggler(${ctx.tKeyExpr}, ${blockExpr})`;
             }
-            if (block.isRoot) {
+            if (block.isRoot && !this.target.deferReturn) {
                 if (this.target.on) {
                     blockExpr = this.wrapWithEventCatcher(blockExpr, this.target.on);
                 }
@@ -4135,11 +4224,22 @@
             // t-model
             let tModelSelectedExpr;
             if (ast.model) {
-                const { hasDynamicChildren, expr, eventType, shouldNumberize, shouldTrim, targetAttr, specialInitTargetAttr, } = ast.model;
-                const expression = compileExpr(expr);
-                const exprId = generateId("expr");
-                this.helpers.add("modelExpr");
-                this.define(exprId, `modelExpr(${expression})`);
+                const { hasDynamicChildren, expr, eventType, shouldNumberize, shouldTrim, targetAttr, specialInitTargetAttr, isProxy, } = ast.model;
+                let readExpr;
+                let writeExpr;
+                if (isProxy) {
+                    const expression = compileExpr(expr);
+                    readExpr = expression;
+                    writeExpr = (value) => `${expression} = ${value}`;
+                }
+                else {
+                    const exprId = generateId("expr");
+                    const expression = compileExpr(expr);
+                    this.helpers.add("modelExpr");
+                    this.define(exprId, `modelExpr(${expression})`);
+                    readExpr = `${exprId}()`;
+                    writeExpr = (value) => `${exprId}.set(${value})`;
+                }
                 let idx;
                 if (specialInitTargetAttr) {
                     let targetExpr = targetAttr in attrs && `'${attrs[targetAttr]}'`;
@@ -4150,23 +4250,23 @@
                             targetExpr = compileExpr(dynamicTgExpr);
                         }
                     }
-                    idx = block.insertData(`${exprId}() === ${targetExpr}`, "prop");
+                    idx = block.insertData(`${readExpr} === ${targetExpr}`, "prop");
                     attrs[`block-property-${idx}`] = specialInitTargetAttr;
                 }
                 else if (hasDynamicChildren) {
                     const bValueId = generateId("bValue");
                     tModelSelectedExpr = `${bValueId}`;
-                    this.define(tModelSelectedExpr, `${exprId}()`);
+                    this.define(tModelSelectedExpr, readExpr);
                 }
                 else {
-                    idx = block.insertData(`${exprId}()`, "prop");
+                    idx = block.insertData(readExpr, "prop");
                     attrs[`block-property-${idx}`] = targetAttr;
                 }
                 this.helpers.add("toNumber");
                 let valueCode = `ev.target.${targetAttr}`;
                 valueCode = shouldTrim ? `${valueCode}.trim()` : valueCode;
                 valueCode = shouldNumberize ? `toNumber(${valueCode})` : valueCode;
-                const handler = `[(ctx, ev) => { ${exprId}.set(${valueCode}); }, ctx]`;
+                const handler = `[(ctx, ev) => { ${writeExpr(valueCode)}; }, ctx]`;
                 idx = block.insertData(handler, "hdlr");
                 attrs[`block-handler-${idx}`] = eventType;
             }
@@ -4394,9 +4494,19 @@
                 const n = ast.content.filter((c) => !c.hasNoRepresentation).length;
                 let result = null;
                 if (n <= 1) {
+                    // Check if there are non-DOM directives (like t-set) after the DOM child.
+                    // If so, defer the return so those directives are compiled before it.
+                    const shouldDefer = !this.target.hasRoot && ast.content[ast.content.length - 1].hasNoRepresentation;
+                    if (shouldDefer) {
+                        this.target.deferReturn = true;
+                    }
                     for (let child of ast.content) {
                         const blockName = this.compileAST(child, ctx);
                         result = result || blockName;
+                    }
+                    if (shouldDefer) {
+                        this.target.deferReturn = false;
+                        this.addLine(`return ${result};`);
                     }
                     return result;
                 }
@@ -4459,11 +4569,11 @@
             if (ast.context) {
                 const dynCtxVar = generateId("ctx");
                 this.addLine(`const ${dynCtxVar} = ${compileExpr(ast.context)};`);
-                if (ast.attrs) {
-                    ctxExpr = `Object.assign({}, ${dynCtxVar}${attrs.length ? ", " + ctxString : ""})`;
-                } else {
-                    const thisCtx = `{this: ${dynCtxVar}, __owl__: this.__owl__}`;
-                    ctxExpr = `Object.assign({}, ${dynCtxVar}, ${thisCtx}${attrs.length ? ", " + ctxString : ""})`;
+                if (attrs.length) {
+                    ctxExpr = `Object.assign({this: ${dynCtxVar}}, ${ctxString})`;
+                }
+                else {
+                    ctxExpr = `{this: ${dynCtxVar}}`;
                 }
             }
             else {
@@ -4972,6 +5082,7 @@
                 const hasTrimMod = attr.includes(".trim");
                 const hasLazyMod = hasTrimMod || attr.includes(".lazy");
                 const hasNumberMod = attr.includes(".number");
+                const hasProxyMod = attr.includes(".proxy");
                 const eventType = isRadioInput ? "click" : isSelect || hasLazyMod ? "change" : "input";
                 model = {
                     expr: value,
@@ -4981,6 +5092,7 @@
                     hasDynamicChildren: false,
                     shouldTrim: hasTrimMod,
                     shouldNumberize: hasNumberMod,
+                    isProxy: hasProxyMod,
                 };
                 if (isSelect) {
                     // don't pollute the original ctx
@@ -5589,10 +5701,12 @@
     }
 
     // do not modify manually. This file is generated by the release script.
-    const version = "3.0.0-alpha";
+    const version = "3.0.0-alpha.26";
 
     function effect(fn) {
         const computation = createComputation(() => {
+            // In case the cleanup read an atom.
+            // todo: test it
             setComputation(undefined);
             unsubscribeEffect(computation);
             setComputation(computation);
@@ -5600,23 +5714,10 @@
         }, false);
         getCurrentComputation()?.observers.add(computation);
         updateComputation(computation);
+        // Remove sources and unsubscribe
         return function cleanupEffect() {
-            const previousComputation = getCurrentComputation();
-            setComputation(undefined);
-            unsubscribeEffect(computation);
-            setComputation(previousComputation);
-        };
-    }
-    function immediateEffect(fn) {
-        const computation = createComputation(() => {
-            setComputation(undefined);
-            unsubscribeEffect(computation);
-            setComputation(computation);
-            return fn();
-        }, false, ComputationState.STALE, true);
-        getCurrentComputation()?.observers.add(computation);
-        updateComputation(computation);
-        return function cleanupImmediateEffect() {
+            // In case the cleanup read an atom.
+            // todo: test it
             const previousComputation = getCurrentComputation();
             setComputation(undefined);
             unsubscribeEffect(computation);
@@ -5760,6 +5861,7 @@
         processing = false;
         constructor() {
             this.requestAnimationFrame = Scheduler.requestAnimationFrame;
+            this.processTasks = this.processTasks.bind(this);
         }
         addFiber(fiber) {
             this.tasks.add(fiber.root);
@@ -5767,7 +5869,7 @@
         scheduleDestroy(node) {
             this.cancelledNodes.add(node);
             if (this.frame === 0) {
-                this.frame = this.requestAnimationFrame(() => this.processTasks());
+                this.frame = this.requestAnimationFrame(this.processTasks);
             }
         }
         /**
@@ -5785,7 +5887,7 @@
                 }
             }
             if (this.frame === 0) {
-                this.frame = this.requestAnimationFrame(() => this.processTasks());
+                this.frame = this.requestAnimationFrame(this.processTasks);
             }
         }
         processTasks() {
@@ -5798,8 +5900,33 @@
                 node._destroy();
             }
             this.cancelledNodes.clear();
-            for (let task of this.tasks) {
-                this.processFiber(task);
+            for (let fiber of this.tasks) {
+                if (fiber.root !== fiber) {
+                    this.tasks.delete(fiber);
+                    continue;
+                }
+                const hasError = fibersInError.has(fiber);
+                if (hasError && fiber.counter !== 0) {
+                    this.tasks.delete(fiber);
+                    continue;
+                }
+                if (fiber.node.status === 3 /* STATUS.DESTROYED */) {
+                    this.tasks.delete(fiber);
+                    continue;
+                }
+                if (fiber.counter === 0) {
+                    if (!hasError) {
+                        fiber.complete();
+                    }
+                    // at this point, the fiber should have been applied to the DOM, so we can
+                    // remove it from the task list. If it is not the case, it means that there
+                    // was an error and an error handler triggered a new rendering that recycled
+                    // the fiber, so in that case, we actually want to keep the fiber around,
+                    // otherwise it will just be ignored.
+                    if (fiber.appliedToDom) {
+                        this.tasks.delete(fiber);
+                    }
+                }
             }
             for (let task of this.tasks) {
                 if (task.node.status === 3 /* STATUS.DESTROYED */) {
@@ -5807,34 +5934,6 @@
                 }
             }
             this.processing = false;
-        }
-        processFiber(fiber) {
-            if (fiber.root !== fiber) {
-                this.tasks.delete(fiber);
-                return;
-            }
-            const hasError = fibersInError.has(fiber);
-            if (hasError && fiber.counter !== 0) {
-                this.tasks.delete(fiber);
-                return;
-            }
-            if (fiber.node.status === 3 /* STATUS.DESTROYED */) {
-                this.tasks.delete(fiber);
-                return;
-            }
-            if (fiber.counter === 0) {
-                if (!hasError) {
-                    fiber.complete();
-                }
-                // at this point, the fiber should have been applied to the DOM, so we can
-                // remove it from the task list. If it is not the case, it means that there
-                // was an error and an error handler triggered a new rendering that recycled
-                // the fiber, so in that case, we actually want to keep the fiber around,
-                // otherwise it will just be ignored.
-                if (fiber.appliedToDom) {
-                    this.tasks.delete(fiber);
-                }
-            }
         }
     }
 
@@ -5896,36 +5995,47 @@
                         return promise;
                     }
                     App.validateTarget(target);
-                    this.mountNode(node, target, resolve, reject, options);
+                    // Set up error handler and onMounted callback
+                    let handlers = nodeErrorHandlers.get(node);
+                    if (!handlers) {
+                        handlers = [];
+                        nodeErrorHandlers.set(node, handlers);
+                    }
+                    handlers.unshift((e, finalize) => {
+                        const finalError = finalize();
+                        reject(finalError);
+                    });
+                    node.mounted.push(() => {
+                        resolve(node.component);
+                        handlers.shift();
+                    });
+                    const fiber = new MountFiber(node, target, options);
+                    this.scheduler.addFiber(fiber);
+                    if (node.willStart.length) {
+                        node.initiateRender(fiber);
+                    }
+                    else {
+                        node.fiber = fiber;
+                        if (node.mounted.length) {
+                            fiber.root.mounted.push(fiber);
+                        }
+                        try {
+                            fiber.render();
+                        }
+                        catch (e) {
+                            reject(e);
+                        }
+                    }
                     return promise;
                 },
                 destroy: () => {
                     this.roots.delete(root);
-                    node?.destroy();
+                    node.destroy();
                     this.scheduler.processTasks();
                 },
             };
             this.roots.add(root);
             return root;
-        }
-        mountNode(node, target, resolve, reject, options) {
-            // Manually add the last resort error handler on the node
-            let handlers = nodeErrorHandlers.get(node);
-            if (!handlers) {
-                handlers = [];
-                nodeErrorHandlers.set(node, handlers);
-            }
-            handlers.unshift((e, finalize) => {
-                const finalError = finalize();
-                reject(finalError);
-            });
-            // manually set a onMounted callback.
-            // that way, we are independant from the current node.
-            node.mounted.push(() => {
-                resolve(node.component);
-                handlers.shift();
-            });
-            node.mountComponent(target, options);
         }
         destroy() {
             for (let root of this.roots) {
@@ -5935,8 +6045,8 @@
             this.scheduler.processTasks();
             apps.delete(this);
         }
-        handleError(...args) {
-            return handleError(...args);
+        _handleError(error) {
+            throw error;
         }
     }
     async function mount(C, target, config = {}) {
@@ -5994,14 +6104,20 @@
     //  hooks
     // -----------------------------------------------------------------------------
     function decorate(node, f, hookName) {
-        const result = f.bind(node.component);
         if (node.app.dev) {
-            const suffix = f.name ? ` <${f.name}>` : "";
-            Reflect.defineProperty(result, "name", {
-                value: hookName + suffix,
-            });
+            const component = node.component;
+            const componentName = component ? component.constructor.name : "Component";
+            const name = `${componentName}.${hookName}`;
+            // Create a named wrapper so the name appears in stack traces.
+            // V8 uses computed property keys as inferred function names.
+            const wrapper = {
+                [name](...args) {
+                    return f.call(component, ...args);
+                },
+            };
+            return wrapper[name];
         }
-        return result;
+        return f.bind(node.component);
     }
     function onWillStart(fn) {
         const { node } = getContext("component");
@@ -6259,22 +6375,30 @@
         }
     }
 
-    const anyType = function validateAny() { };
-    const booleanType = function validateBoolean(context) {
-        if (typeof context.value !== "boolean") {
-            context.addIssue({ message: "value is not a boolean" });
-        }
-    };
-    const numberType = function validateNumber(context) {
-        if (typeof context.value !== "number") {
-            context.addIssue({ message: "value is not a number" });
-        }
-    };
-    const stringType = function validateString(context) {
-        if (typeof context.value !== "string") {
-            context.addIssue({ message: "value is not a string" });
-        }
-    };
+    function anyType() {
+        return function validateAny() { };
+    }
+    function booleanType() {
+        return function validateBoolean(context) {
+            if (typeof context.value !== "boolean") {
+                context.addIssue({ message: "value is not a boolean" });
+            }
+        };
+    }
+    function numberType() {
+        return function validateNumber(context) {
+            if (typeof context.value !== "number") {
+                context.addIssue({ message: "value is not a number" });
+            }
+        };
+    }
+    function stringType() {
+        return function validateString(context) {
+            if (typeof context.value !== "string") {
+                context.addIssue({ message: "value is not a string" });
+            }
+        };
+    }
     function arrayType(elementType) {
         return function validateArray(context) {
             if (!Array.isArray(context.value)) {
@@ -6465,6 +6589,9 @@
             }
         };
     }
+    function componentType() {
+        return constructorType(Component);
+    }
     function ref(type) {
         return union([literalType(null), instanceType(type)]);
     }
@@ -6473,6 +6600,7 @@
         any: anyType,
         array: arrayType,
         boolean: booleanType,
+        component: componentType,
         constructor: constructorType,
         customValidator: customValidator,
         function: functionType,
@@ -6711,7 +6839,6 @@
     exports.config = config;
     exports.effect = effect;
     exports.htmlEscape = htmlEscape;
-    exports.immediateEffect = immediateEffect;
     exports.markRaw = markRaw;
     exports.markup = markup;
     exports.mount = mount;
@@ -6742,8 +6869,8 @@
     exports.xml = xml;
 
 
-    __info__.date = '2026-03-30T13:10:09.927Z';
-    __info__.hash = 'e3cb598';
+    __info__.date = '2026-04-13T12:54:32.651Z';
+    __info__.hash = '4d1d0e1';
     __info__.url = 'https://github.com/odoo/owl';
 
 
