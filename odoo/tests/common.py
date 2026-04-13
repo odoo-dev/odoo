@@ -639,7 +639,7 @@ class BaseCase(case.TestCase):
                 _logger.warning("A patcher (targeting %s.%s) was remaining active at the end of %s, disabling it...", patcher.target, patcher.attribute, cls.__name__)
                 patcher.stop()
             # release odoo objects
-            for to_clear in [
+            for to_clear in () and [
                 name for name, value in vars(cls).items()
                 if value is not None and type(value).__module__.startswith('odoo.')
             ]:
