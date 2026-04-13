@@ -177,7 +177,8 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
         model_cls = registry[name]
         _check_model_extension(model_cls, model_def)
     else:
-        model_cls = type(name, (model_def,), {
+        inner_cls = type(name, (models.TopModel, model_def), {'_register': False})
+        model_cls = type(name, (inner_cls,), {
             'pool': registry,                       # this makes it a model class
             '_name': name,
             '_register': False,
