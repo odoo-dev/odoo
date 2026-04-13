@@ -186,16 +186,15 @@ class StockWarehouseOrderpoint(models.Model):
         # add quantities coming from draft MOs
         productions_group = self.env['mrp.production']._read_group(
             [
-                ('bom_id', 'in', bom_manufacture.ids),
                 ('state', '=', 'draft'),
-                ('orderpoint_id', 'in', orderpoints_without_kit.ids),
                 ('id', 'not in', self.env.context.get('ignore_mo_ids', [])),
             ],
-            ['orderpoint_id', 'uom_id'],
+            ['product_id', 'location_dest_id', 'uom_id'],
             ['product_qty:sum'])
-        for orderpoint, uom, product_qty_sum in productions_group:
-            res[orderpoint.id] += uom._compute_quantity(
-                product_qty_sum, orderpoint.uom_id, round=False)
+        for product, location, uom, product_qty_sum in productions_group:
+            for orderpoint in orderpoints_without_kit.filtered(lambda op: op.product_id.id == product.id and op.location_id.id == location.id):
+                res[orderpoint.id] += uom._compute_quantity(
+                    product_qty_sum, orderpoint.uom_id, round=False)
 
         # add quantities coming from confirmed MO to be started but not finished
         # by the end of the stock forecast
