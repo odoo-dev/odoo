@@ -5,6 +5,9 @@ helpers and classes to write tests.
 """
 from __future__ import annotations
 
+from collections import Counter
+xx = {'c': Counter()}
+
 import base64
 import binascii
 import concurrent.futures
@@ -641,6 +644,14 @@ class BaseCase(case.TestCase):
                 if value is not None and type(value).__module__.startswith('odoo.')
             ]:
                 setattr(cls, to_clear, None)
+            import gc
+            gc.collect(2)
+            counter = Counter(type(obj).__name__ for obj in gc.get_objects())
+            if old_count := xx.get('c'):
+                out = counter - old_count
+                _logger.info("counter %s", sorted((-v, k) for k, v in out.items() if v > 200)[:30])
+            xx['c'] = counter
+
         cls.addClassCleanup(check_remaining_patchers)
         super().setUpClass()
         if 'standard' in cls.test_tags or 'click_all' in cls.test_tags:
