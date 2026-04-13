@@ -718,6 +718,10 @@ class _SafeTransformer(ast.NodeTransformer):
 encoder_ctx = contextvars.ContextVar('encoder_ctx')
 
 
+def empty_encoder(x):
+    return ''
+
+
 class _SafeChecker:
     """
     Callable object that checks whether a value is considered "safe".
@@ -783,7 +787,7 @@ class _SafeChecker:
             encoder = encoder_ctx.get()
         except LookupError:
             # markers, default, encoder, indent, key_separator, item_separator, sort_keys, skipkeys, allow_nan
-            encoder = c_make_encoder({}, self._default, lambda x: '', None, '', '', False, False, False)
+            encoder = c_make_encoder({}, self._default, empty_encoder, None, '', '', False, False, False)
             encoder_ctx.set(encoder)
         encoder.markers.clear()
         return encoder
