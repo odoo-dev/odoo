@@ -229,7 +229,7 @@ class StockLot(models.Model):
             ('lot_id', 'in', self.ids),
             ('state', '=', 'done'),
             ('move_id.sale_line_id.order_id', '!=', False),
-            ('move_id.picking_id.location_dest_id.usage', 'in', ('customer', 'transit')),
+            ('move_id.location_usage', 'in', ('customer', 'transit')),
         ])
         for ml in move_lines:
             so = ml.move_id.sale_line_id.order_id

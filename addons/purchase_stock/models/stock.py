@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, Command
 from odoo.osv.expression import AND
 
 
@@ -257,14 +257,34 @@ class StockLot(models.Model):
 
     @api.depends('name')
     def _compute_purchase_order_ids(self):
-        purchase_orders = defaultdict(lambda: self.env['purchase.order'])
-        for move_line in self.env['stock.move.line'].search([('lot_id', 'in', self.ids), ('state', '=', 'done')]):
-            move = move_line.move_id
-            if move.picking_id.location_id.usage in ('supplier', 'transit') and move.purchase_line_id.order_id:
-                purchase_orders[move_line.lot_id.id] |= move.purchase_line_id.order_id
+        # purchase_orders = defaultdict(lambda: self.env['purchase.order'])
+        # for move_line in self.env['stock.move.line'].search([('lot_id', 'in', self.ids), ('state', '=', 'done')]):
+        #     move = move_line.move_id
+        #     if move.location_usage in ('supplier', 'transit') and move.purchase_line_id.order_id:
+        #         purchase_orders[move_line.lot_id.id] |= move.purchase_line_id.order_id
+        # for lot in self:
+        #     lot.purchase_order_ids = purchase_orders[lot.id]
+        #     lot.purchase_order_count = len(lot.purchase_order_ids)
+
+        purchase_orders = defaultdict(set)
+
+        move_lines = self.env['stock.move.line'].search([
+            ('lot_id', 'in', self.ids),
+            ('state', '=', 'done'),
+            ('move_id.purchase_line_id.order_id', '!=', False),
+            ('move_id.location_usage', 'in', ('customer', 'transit')),
+        ])
+
+        for ml in move_lines:
+            po = ml.move_id.purchase_line_id.order_id
+            if po.with_user(self.env.user).has_access('read'):
+                purchase_orders[ml.lot_id.id].add(po.id)
+
         for lot in self:
-            lot.purchase_order_ids = purchase_orders[lot.id]
-            lot.purchase_order_count = len(lot.purchase_order_ids)
+            so_ids = purchase_orders.get(lot.id, set())
+            lot.purchase_order_ids = [Command.set(list(so_ids))]
+            lot.purchase_order_count = len(so_ids)
+
 
     def action_view_po(self):
         self.ensure_one()
