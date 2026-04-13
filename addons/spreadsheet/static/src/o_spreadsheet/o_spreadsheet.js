@@ -64432,7 +64432,6 @@ var SheetViewPlugin = class extends UIPlugin {
 			case "FREEZE_ROWS":
 			case "UNFREEZE_COLUMNS_ROWS":
 				this.sheetsWithDirtyViewports.add(cmd.sheetId);
-				this.viewports.setPaneDivision(cmd.sheetId, this.getters.getPaneDivisions(cmd.sheetId));
 				break;
 			case "REMOVE_TABLE":
 			case "UPDATE_TABLE":
@@ -64473,6 +64472,7 @@ var SheetViewPlugin = class extends UIPlugin {
 	}
 	finalize() {
 		for (const sheetId of this.sheetsWithDirtyViewports) {
+			this.viewports.setPaneDivision(sheetId, this.getters.getPaneDivisions(sheetId));
 			this.viewports.resetViewports(sheetId);
 			if (this.shouldAdjustViewports) {
 				const position = this.getters.getSheetPosition(sheetId);
