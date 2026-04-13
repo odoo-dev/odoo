@@ -79,6 +79,7 @@ import { StylePlugin } from "./core/style_plugin";
 import { ContentEditablePlugin } from "./core/content_editable_plugin";
 import { SelectionPlaceholderPlugin } from "./main/selection_placeholder_plugin";
 import { ResizePlugin } from "./main/resize_plugin";
+import { LegacyIconMigrationPlugin } from "./main/legacy_icon_migration_plugin";
 
 export const CORE_PLUGINS = [
     BaseContainerPlugin,
@@ -151,6 +152,7 @@ export const MAIN_PLUGINS = [
     PlaceholderPlugin,
     SelectionPlaceholderPlugin,
     ResizePlugin,
+    LegacyIconMigrationPlugin,
 ];
 
 export const COLLABORATION_PLUGINS = [
