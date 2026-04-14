@@ -346,7 +346,7 @@ class MailMail(models.Model):
             self.env['ir.config_parameter'].sudo().get_param('mail.disable_personal_mail_servers', False)
         ):
             return mail_servers.filtered(lambda server: not server.owner_user_id)
-        return mail_servers.filtered(lambda server: server.owner_user_id in [self.env['res.users'], self.mail_message_id.create_uid])
+        return mail_servers.filtered(lambda server: not server.owner_user_id or server.owner_user_id == self.mail_message_id.create_uid)
 
     def _prepare_outgoing_body(self):
         """Return a specific ir_email body. The main purpose of this method

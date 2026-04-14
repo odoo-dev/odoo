@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from unittest.mock import patch
 
 from odoo.addons.mail.tests.common import MailCommon
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tests import tagged, users
 from odoo.tools import config, mute_logger, split_every
 
@@ -766,3 +766,25 @@ class TestPersonalServer(MailCommon):
             message = self._build_email(mail_from=self.user_2.email)
             IrMailServer_user2.send_email(message, mail_server_id=self.mail_server_1.id)
         self.assertFalse(self.emails)
+
+    @mute_logger('odoo.models.unlink')
+    def test_personal_server_cron_non_personal_server_allowed(self):
+        """A non-personal server can be assigned to a mail created by any user, including superuser.
+        A personal server is rejected when the creator is not its owner.
+        """
+        non_personal = self.mail_server_default  # from_filter=False, no owner_user_id
+        mail = self.env['mail.mail'].sudo().create({
+            'email_to': 'target@example.com',
+            'email_from': 'from@test.mycompany.com',
+            'mail_server_id': non_personal.id,
+            'state': 'outgoing',
+        })
+        self.assertEqual(mail.mail_server_id, non_personal)
+
+        with self.assertRaises(ValidationError):
+            self.env['mail.mail'].sudo().create({
+                'email_to': 'target@example.com',
+                'email_from': self.user_1.email,
+                'mail_server_id': self.mail_server_1.id,
+                'state': 'outgoing',
+            })
