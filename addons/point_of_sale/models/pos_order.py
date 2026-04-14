@@ -58,6 +58,10 @@ class PosOrder(models.Model):
     def _load_pos_data_domain(self, data):
         return [('state', '=', 'draft'), ('config_id', '=', data['pos.config'][0]['id'])]
 
+    def _unrelevant_records(self):
+        config_id = self.env.context.get('config_id')
+        return self.filtered(lambda record: record.config_id.id != config_id or record.state != 'draft').ids
+
     @api.model
     def _process_order(self, order, existing_order):
         """Create or update an pos.order from a given dictionary.
