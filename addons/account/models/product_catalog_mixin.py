@@ -119,7 +119,7 @@ class ProductCatalogMixin(models.AbstractModel):
                     'parent_id': line.parent_id.id if line.display_type == 'line_subsection' else False,
                     'line_count': 0,
                     'display_type': line.display_type,
-                    'subtotal': line._get_section_totals('price_subtotal') if line.display_type == 'line_section' else False,
+                    'subtotal': line._get_section_totals('price_subtotal'),
                     'currency_id': self.currency_id.id,
                 }
             elif self._is_line_valid_for_section_line_count(line):
@@ -274,5 +274,87 @@ class ProductCatalogMixin(models.AbstractModel):
             section.display_type = 'line_section'
         else:
             section.display_type = 'line_subsection'
+
+        return True
+
+    def _duplicate_section(self, child_field, section_id, parent_id=None, **kwargs):
+        """Duplicate the given section with all its children."""
+        lines = self[child_field]
+
+        if parent_id:
+            section_lines = lines.filtered(
+                lambda l: l.id == section_id or l.parent_id.id == section_id
+            )
+        else:
+            section_lines = lines.filtered(
+                lambda l: l.id == section_id
+                or l.get_parent_section_line().id == section_id
+            )
+
+        section_lines = section_lines.sorted("sequence")
+
+        # --- Anchor = last line of block ---
+        anchor = section_lines[-1]
+
+        # --- Stable ordering (sequence, id) ---
+        ordered_lines = lines.sorted(lambda l: (l.sequence, l.id))
+
+        # --- Find anchor index ---
+        anchor_index = ordered_lines.ids.index(anchor.id)
+
+        # --- Lines AFTER anchor (including same sequence ones) ---
+        to_shift = ordered_lines[anchor_index + 1:]
+
+        shift_by = len(section_lines) + 1
+
+        # --- Shift sequences (make space) ---
+        for line in to_shift:
+            line.sequence += shift_by
+
+        # --- Insert duplicated block ---
+        base_sequence = anchor.sequence + 1
+
+        commands = []
+        for i, line in enumerate(section_lines):
+            vals = line.copy_data()[0]
+            vals["sequence"] = base_sequence + i
+            commands.append((0, 0, vals))
+
+        existing_ids = set(lines.ids)
+
+        self.write({child_field: commands})
+
+        new_section = self[child_field].filtered(lambda l: l.id not in existing_ids).sorted("sequence")[0]
+
+        # return sequences of all sections to update the view and new section id for selection
+        return {
+            "sections": {
+                line.id: line.sequence
+                for line in lines
+                if line.display_type in ("line_section", "line_subsection")
+            },
+            "id": new_section.id,
+        }
+
+    def _delete_section(self, child_field, section_id, **kwargs):
+        lines = self[child_field]
+        section = lines.browse(section_id)
+
+        if not section:
+            return True
+
+        # --- Find all lines to delete (section + children) ---
+        if section.display_type == 'line_section':
+            to_delete = lines.filtered(
+                lambda l: l.id == section_id
+                or l.get_parent_section_line().id == section_id
+            )
+        else:
+            to_delete = lines.filtered(
+                lambda l: l.id == section_id
+                or l.parent_id.id == section_id
+            )
+
+        to_delete.unlink()
 
         return True

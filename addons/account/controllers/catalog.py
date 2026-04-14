@@ -65,3 +65,23 @@ class ProductCatalogAccountController(ProductCatalogController):
         return order.with_company(order.company_id)._resequence_sections(
             child_field, id, parent_id, before_id, **kwargs,
         )
+
+    @route('/product/catalog/delete_section', auth='user', type='jsonrpc')
+    def product_catalog_delete_section(self, res_model, order_id, child_field, section_id, **kwargs):
+        """Delete the given section.
+
+        :param int section_id: The section id.
+        """
+        order = request.env[res_model].browse(order_id)
+        return order.with_company(order.company_id)._delete_section(child_field, section_id, **kwargs)
+
+    @route('/product/catalog/duplicate_section', auth='user', type='jsonrpc')
+    def product_catalog_duplicate_section(self, res_model, order_id, child_field, section_id, parent_id=None, **kwargs):
+        """Duplicate the given section.
+
+        :param int section_id: The section id.
+        :return: A dictionary with duplicated section's 'id' and 'sequence'.
+        :rtype: dict
+        """
+        order = request.env[res_model].browse(order_id)
+        return order.with_company(order.company_id)._duplicate_section(child_field, section_id, parent_id, **kwargs)

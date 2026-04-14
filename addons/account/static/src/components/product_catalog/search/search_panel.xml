@@ -37,7 +37,10 @@
                 </header>
                 <ul class="list-group d-block" t-ref="mainTree">
                     <t t-foreach="this.state.sections" t-as="section" t-key="section.id">
-                        <t t-call="account.SectionRow"/>
+                        <SectionRow
+                            section="section"
+                            state="this.state"
+                        />
                     </t>
                 </ul>
                 <input
@@ -57,14 +60,13 @@
         </div>
     </t>
 
-    <t t-name="account.SectionRow">
-        <li class="list-group-item px-2 mb-1 border-0 o_section" t-att-data-id="section.id" t-att-data-display-type="section.display_type">
+    <!-- <t t-name="account.SectionRow">
+        <li class="list-group-item px-2 mb-1 border-0 o_section" t-att-data-id="section.id">
 
-            <div t-att-class="'d-flex align-items-center cursor-pointer o_section_row ' + (
+            <div t-att-class="'d-flex align-items-center gap-1 px-2 py-1 cursor-pointer o_section_row ' + (
                             this.selectedSection.sectionId == section.id ? 'o_selected_section' : ''
                         )">
 
-                <!-- Expand / collapse -->
                 <i
                     t-if="section.children.length"
                     t-att-class="'fa me-1 ' + (section.isOpen ? 'fa-caret-down' : 'fa-caret-right')"
@@ -84,28 +86,31 @@
                     t-on-blur="() => this.createSection()"
                 />
 
-                <!-- Name -->
                 <div
                     t-else=""
-                    class="w-100 d-flex align-items-center overflow-hidden"
+                    class="flex-grow-1 d-flex align-items-center gap-2 overflow-hidden"
                     t-on-click="() => this.setSelectedSection(section.id)"
                     t-att-title="section.name"
                 >
                     <span class="text-truncate" t-out="section.name"/>
                     <span class="text-muted ms-2" t-out="section.line_count"/>
-                    <span t-if="section.display_type === 'line_section'" class="text-muted ms-2" t-out="this.getFormattedSubTotal(section)"/>
+                    <span class="text-muted ms-2" t-out="this.getFormattedSubTotal(section)"/>
                 </div>
-
-                <!-- Add subsection -->
-                <i
-                    class="fa fa-plus text-muted me-1"
-                    t-on-click="() => this.enableSectionInput('subsection', section.id)"
-                    t-if="section.display_type === 'line_section'"
-                />
+                <div class="d-flex align-items-center ms-2 gap-2">
+                    <SectionsDropdown
+                        t-if="section.id"
+                        section="section"
+                        context="this.sectionContext"
+                    />
+                    <i
+                        class="fa fa-plus text-muted"
+                        t-on-click="() => this.enableSectionInput('subsection', section.id)"
+                        t-if="section.display_type === 'line_section'"
+                    />
+                </div>
             </div>
 
-            <!-- Children -->
-            <ul t-if="section.isOpen and section.children.length" class="list-group ms-3">
+            <ul t-if="section.isOpen and section.children.length" class="list-group border-0 ps-3">
                 <t t-foreach="section.children" t-as="child" t-key="child.id">
                     <t t-call="account.SectionRow">
                         <t t-set="section" t-value="child"/>
@@ -113,7 +118,6 @@
                 </t>
             </ul>
 
-            <!-- Input for subsection -->
             <input
                 t-if="this.state.isAddingSection === ('subsection_' + section.id) and section.display_type === 'line_section'"
                 class="o_section_input ms-3 mt-1"
@@ -123,7 +127,7 @@
                 t-on-blur="() => this.createSection(section.id)"
             />
         </li>
-    </t>
+    </t> -->
 
     <t t-name="account.ProductCatalogSearchPanel" t-inherit="web.SearchPanel" t-inherit-mode="primary">
         <t t-call="web.SearchPanel.Regular" position="attributes">

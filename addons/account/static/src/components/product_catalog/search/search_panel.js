@@ -1,15 +1,17 @@
 import { onWillStart } from '@odoo/owl';
-import { formatCurrency } from '@web/core/currency';
 import { getActiveHotkey } from '@web/core/hotkeys/hotkey_service';
 import { rpc } from '@web/core/network/rpc';
 import { useBus } from '@web/core/utils/hooks';
 import { useNestedSortable } from "@web/core/utils/nested_sortable";
-import { useState, useRef } from "@web/owl2/utils";
+import { useState, useRef, useSubEnv } from "@web/owl2/utils";
 import { SearchPanel } from '@web/search/search_panel/search_panel';
-
+import { SectionRow } from './section_row';
 
 export class AccountProductCatalogSearchPanel extends SearchPanel {
     static template = 'account.ProductCatalogSearchPanel';
+    static components = {
+        SectionRow,
+    };
 
     setup() {
         super.setup();
@@ -21,6 +23,17 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
             newSectionName: "",
             dragging: false,
         });
+
+        useSubEnv({
+            setSelectedSection: this.setSelectedSection.bind(this),
+            enableSectionInput: this.enableSectionInput.bind(this),
+            createSection: this.createSection.bind(this),
+            loadSections: this.loadSections.bind(this),
+            onSectionInputKeydown: this.onSectionInputKeydown.bind(this),
+            _findSectionById: this._findSectionById.bind(this),
+            _getSectionInfoParams: this._getSectionInfoParams.bind(this),
+            _sortSectionsBySequence : this._sortSectionsBySequence.bind(this),
+        })
 
         useBus(this.env.searchModel, 'section-line-count-change', this.updateSectionLineCount);
 
@@ -150,14 +163,6 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         return this.env.searchModel.selectedSection;
     }
 
-    getFormattedSubTotal(section) {
-        return formatCurrency(section.subtotal, section.currency_id);
-    }
-
-    toggle(section) {
-        section.isOpen = !section.isOpen;
-    }
-
     enableSectionInput(type, parentId = null) {
         this.state.isAddingSection = parentId
             ? `subsection_${parentId}`
@@ -210,13 +215,13 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
                 name: sectionName,
                 children: [],
                 isOpen: true,
-                parentId: parentId,
+                parent_id: parentId,
                 line_count: newLineCount
             };
 
             if (parentId) {
                 const parent = this._findSectionById(parentId, this.state.sections);
-                parent?.children.push(newNode);
+                parent.children.push(newNode);
                 parent.isOpen = true;
             } else {
                 this.state.sections.push(newNode);
@@ -240,7 +245,7 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
             map.set(sec.id, {
                 ...sec,
                 children: [],
-                isOpen: true,
+                isOpen: false,
             });
         }
         for (const sec of map.values()) {
