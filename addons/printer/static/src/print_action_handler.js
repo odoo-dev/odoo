@@ -106,6 +106,7 @@ export async function printJobs(printer, jobs) {
 const printerTypeRegistry = registry.category("printer.type.handlers");
 printerTypeRegistry.add("epos", (printer, _duplex, jobs) => printJobs(printer, jobs));
 printerTypeRegistry.add("zpl", (printer, _duplex, jobs) => printJobs(printer, jobs));
+printerTypeRegistry.add("pdf", (printer, _duplex, jobs) => printJobs(printer, jobs));
 
 async function printActionHandler(action, options) {
     const scope = useScope();
