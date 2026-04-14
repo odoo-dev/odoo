@@ -743,3 +743,11 @@ class TestPersonalServer(MailCommon):
         self.assertEqual(self.mail_server_1.owner_limit_count, 3)
         mails = self.env["mail.mail"].search([('mail_message_id', 'in', (mail.mail_message_id.id, other_mail.mail_message_id.id))])
         self.assertEqual(set(mails.mapped('state')), {'sent'})
+
+    @mute_logger('odoo.models.unlink')
+    def test_personal_server_copy_owner_not_copied(self):
+        """Copying a personal mail server produces a server with no owner."""
+        self.assertTrue(self.mail_server_1.owner_user_id)
+
+        server_copy = self.mail_server_1.copy()
+        self.assertFalse(server_copy.owner_user_id)

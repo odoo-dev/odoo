@@ -17,7 +17,7 @@ class IrMail_Server(models.Model):
         string='Mail template using this mail server',
         readonly=True)
 
-    owner_user_id = fields.Many2one('res.users', 'Owner')
+    owner_user_id = fields.Many2one('res.users', 'Owner', copy=False)
 
     # Store the current time, and the number of emails we sent
     # Each minute, the time and the count will be reset
