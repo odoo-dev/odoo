@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from odoo import _, api, fields, models
 
-from odoo.addons.account.models.company import PEPPOL_LIST
+from odoo.addons.account.models.company import PEPPOL_DEFAULT_COUNTRIES, PEPPOL_LIST
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
 
 _logger = logging.getLogger(__name__)
@@ -80,6 +80,7 @@ class AccountMoveSend(models.AbstractModel):
         elif (
             (peppol_not_selected_partners := filter_peppol_state(not_peppol_moves, ['valid']))
             and any_moves_not_sent_peppol
+            and peppol_partner(moves).country_id.code in PEPPOL_DEFAULT_COUNTRIES
             and len(peppol_not_selected_partners) == 1  # Check for not peppol partners that are on the network
         ):
             alerts['account_peppol_partner_want_peppol'] = {
@@ -137,6 +138,7 @@ class AccountMoveSend(models.AbstractModel):
                 self._is_applicable_to_company(method, move.company_id),
                 self.env['res.partner']._get_peppol_verification_state(partner.peppol_endpoint, partner.peppol_eas, invoice_edi_format) == 'valid',
                 move.company_id.account_peppol_proxy_state != 'rejected',
+                partner.country_id.code in PEPPOL_DEFAULT_COUNTRIES,
                 move._need_ubl_cii_xml(invoice_edi_format)
                 or move.ubl_cii_xml_id and move.peppol_move_state not in ('processing', 'done'),
             ])
