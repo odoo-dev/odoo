@@ -210,7 +210,7 @@ class AccountEdiFormat(models.Model):
             com_partner = invoice.commercial_partner_id
             is_simplified = invoice.l10n_es_is_simplified
             is_navarra = invoice.company_id.l10n_es_sii_tax_agency == 'navarra'
-            periodo_key = 'PeriodoImpositivo' if is_navarra else 'PeridoLiquidacion'
+            periodo_key = 'PeriodoLiquidacion' if is_navarra else 'PeriodoImpositivo'
 
             info = {
                 periodo_key: {
@@ -412,7 +412,7 @@ class AccountEdiFormat(models.Model):
             }
     
     def _l10n_es_edi_web_service_navarra_vals(self, invoices):
-         if invoices[0].is_sale_document():
+        if invoices[0].is_sale_document():
             return {
                 'url': 'https://www2.agenciatributaria.gob.es/static_files/common/internet/dep/aplicaciones/es/aeat/ssii/fact/ws/SuministroFactEmitidas.wsdl',
                 'address': 'https://siihacienda.navarra.es/SII_PRODUCCION.proxy/SiiMensajesXsdHandlet.ashx',
