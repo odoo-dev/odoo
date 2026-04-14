@@ -70,6 +70,7 @@ export class ActionSwiper extends Component {
         this.isSwipeEnabled = false;
         this.scrollables = undefined;
         this.startX = undefined;
+        this.startY = undefined;
         this.swipedDistance = 0;
         this.isSwipeStarted = false;
         const _onTouchMove = (ev) => this._onTouchMoveSwipe(ev);
@@ -127,6 +128,13 @@ export class ActionSwiper extends Component {
      */
     _onTouchMoveSwipe(ev) {
         if (this.isSwipeEnabled) {
+            // Prevent the browser to navigate back/forward when using swipe
+            // gestures while still allowing to scroll vertically.
+            const verticalDistance = Math.abs(ev.touches[0].clientY - this.startY);
+            if (this.isSwipeStarted || verticalDistance < this.constructor.swipeEffectiveThreshold) {
+                ev.preventDefault();
+                ev.stopPropagation();
+            }
             browser.clearTimeout(this.enabledTimeoutId);
             const { onLeftSwipe, onRightSwipe } = this.localizedProps;
             this.swipedDistance = clamp(
@@ -134,11 +142,7 @@ export class ActionSwiper extends Component {
                 onLeftSwipe ? -this.containerWidth : 0,
                 onRightSwipe ? this.containerWidth : 0
             );
-            ev.stopPropagation();
             if (this.isSwipeStarted) {
-                // Prevent the browser to navigate back/forward when using swipe
-                // gestures while still allowing to scroll vertically.
-                ev.preventDefault();
                 this.applyStyle(this.swipedDistance);
             } else {
                 // If there are scrollable elements under touch pressure,
@@ -179,6 +183,7 @@ export class ActionSwiper extends Component {
         this.isSwipeEnabled = true;
         this.targetContainer.el.classList.remove("o_actionswiper_transition_enabled");
         this.startX = ev.touches[0].clientX;
+        this.startY = ev.touches[0].clientY;
         if (this.props.enabledDuration) {
             this.enabledTimeoutId = browser.setTimeout(() => this._reset(), this.props.enabledDuration);
         }
@@ -190,6 +195,7 @@ export class ActionSwiper extends Component {
     _reset() {
         this.scrollables = undefined;
         this.startX = undefined;
+        this.startY = undefined;
         this.swipedDistance = 0;
         this.isSwipeEnabled = false;
         this.isSwipeStarted = false;
