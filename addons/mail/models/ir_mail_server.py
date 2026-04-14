@@ -90,7 +90,7 @@ class IrMail_Server(models.Model):
     def _check_forced_mail_server(self, mail_server, allow_archived, smtp_from):
         super()._check_forced_mail_server(mail_server, allow_archived, smtp_from)
 
-        if mail_server.owner_user_id:
+        if mail_server.owner_user_id and not self.env.is_admin():
             if email_normalize(smtp_from) != mail_server.from_filter:
                 raise UserError(_('The server "%s" cannot be forced as it belongs to a user.', mail_server.display_name))
             if not mail_server.active:

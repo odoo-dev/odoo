@@ -478,11 +478,11 @@ class TestPersonalServer(MailCommon):
             from_filter='cli@example.com',
         )
 
-        with self.mock_smtplib_connection(), self.assertRaises(UserError):
-            # We can't even force it
+        # Admin can force a personal OMS even when smtp_from does not match from_filter
+        with self.mock_smtplib_connection():
             message = self._build_email(mail_from='test@test.mycompany.com')
             IrMailServer.send_email(message, mail_server_id=self.mail_server_user.id)
-        self.assertFalse(self.emails)
+        self.assertTrue(self.emails)
 
     @mute_logger('odoo.models.unlink')
     def test_personal_mail_server_limit(self):
@@ -751,3 +751,18 @@ class TestPersonalServer(MailCommon):
 
         server_copy = self.mail_server_1.copy()
         self.assertFalse(server_copy.owner_user_id)
+
+    @mute_logger('odoo.models.unlink', 'odoo.addons.base.models.ir_mail_server')
+    def test_personal_server_admin_forced_check(self):
+        """Admin can force-send through any personal server regardless of the sender address; regular users cannot."""
+        # smtp_from intentionally does not match mail_server_1.from_filter
+        with self.mock_smtplib_connection():
+            message = self._build_email(mail_from='random@test.mycompany.com')
+            self.env['ir.mail_server'].send_email(message, mail_server_id=self.mail_server_1.id)
+        self.assertTrue(self.emails)
+
+        IrMailServer_user2 = self.env['ir.mail_server'].with_user(self.user_2)
+        with self.mock_smtplib_connection(), self.assertRaises(UserError):
+            message = self._build_email(mail_from=self.user_2.email)
+            IrMailServer_user2.send_email(message, mail_server_id=self.mail_server_1.id)
+        self.assertFalse(self.emails)
