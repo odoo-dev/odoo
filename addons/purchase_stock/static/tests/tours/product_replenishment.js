@@ -61,3 +61,56 @@ registry.category("web_tour.tours").add("test_product_replenishment", {
         },
     ],
 });
+
+registry.category("web_tour.tours").add("test_replenishment_supplier_multicompany_access", {
+    steps: () => [
+        {
+            content: 'Remove "To Reorder" filter',
+            trigger: '.o_searchview_facet:contains("To Reorder") .o_facet_remove',
+            run: "click",
+        },
+        {
+            content: "Open optional columns",
+            trigger: ".o_optional_columns_dropdown_toggle",
+            run: "click",
+        },
+        {
+            content: "Show Vendor column",
+            trigger: '.o-dropdown-item input[name="supplier_id"]',
+            run: async ({ anchor }) => {
+                if (!anchor.checked) {
+                    anchor.click();
+                }
+            },
+        },
+        {
+            content: "Close optional columns",
+            trigger: ".o_optional_columns_dropdown_toggle",
+            run: "click",
+        },
+        {
+            content: "Select the target row",
+            trigger: '.o_data_row:has(.o_data_cell[name="product_id"]:contains("Product A")) .o_data_cell[name="supplier_id"]',
+            run: "click",
+        },
+        {
+            content: "Edit the vendor field",
+            trigger: '.o_selected_row .o_list_many2one[name="supplier_id"] input',
+            run: "edit Partner A",
+        },
+        {
+            content: "Select the valid vendor",
+            trigger: '.ui-menu-item-wrapper:contains("Partner A")',
+            run: "click",
+        },
+        {
+            content: "Save the edited row",
+            trigger: 'button:contains("Save")',
+            run: "click",
+        },
+        {
+            content: "Make sure that no access error dialog is shown",
+            trigger: '.o_web_client:not(:has(.o_error_dialog))',
+        },
+    ],
+});
