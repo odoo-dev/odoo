@@ -8,6 +8,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, tools
+from odoo.tools.mail import email_normalize, email_domain_extract, email_domain_normalize
 
 
 class MailMail(models.Model):
@@ -100,6 +101,40 @@ class MailMail(models.Model):
                 'X-Auto-Response-Suppress': 'OOF',  # avoid out-of-office replies from MS Exchange
             })
         return email_list
+
+    def _filter_mail_mail_servers(self, mail_servers):
+        """For mass mailing without a dedicated server, apply strict from_filter
+        matching and exclude personal servers, without falling back to an arbitrary
+        first server that does not match the sender domain.
+        """
+        result = super()._filter_mail_mail_servers(mail_servers)
+        if not self.mailing_id or self.mail_server_id:
+            return result
+
+        normalized_from = email_normalize(self.email_from or '')
+        from_domain = email_domain_extract(normalized_from) if normalized_from else None
+
+        def _matches(server_filter, target, normalize_fn):
+            return server_filter and any(
+                normalize_fn(part.strip()) == target
+                for part in server_filter.split(',') if part.strip()
+            )
+
+        if normalized_from:
+            full_match = result.filtered(
+                lambda s: _matches(s.from_filter, normalized_from, email_normalize)
+            )
+            if full_match:
+                return full_match
+
+        if from_domain:
+            domain_match = result.filtered(
+                lambda s: _matches(s.from_filter, from_domain, email_domain_normalize)
+            )
+            if domain_match:
+                return domain_match
+
+        return result.filtered(lambda s: not s.from_filter)
 
     def _postprocess_sent_message(self, success_pids, success_emails, failure_reason=False, failure_type=None):
         if failure_type:  # we consider that a recipient error is a failure with mass mailing and show them as failed

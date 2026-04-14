@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 from odoo.tools.misc import format_date
 
 
@@ -14,6 +15,17 @@ class IrMail_Server(models.Model):
         string='Active mailing using this mail server',
         readonly=True,
         domain=[('state', '!=', 'done'), ('active', '=', True)])
+
+    @api.constrains('owner_user_id')
+    def _check_owner_no_active_mailings(self):
+        """Prevent setting an owner on a server that is used in active mass mailings."""
+        for server in self:
+            if server.owner_user_id and server.active_mailing_ids:
+                raise ValidationError(_(
+                    'The mail server "%s" cannot be set as personal because it is used in active mass mailings: %s.',
+                    server.display_name,
+                    ', '.join(server.active_mailing_ids.mapped('display_name')),
+                ))
 
     def _active_usages_compute(self):
         def format_usage(mailing_id):

@@ -173,6 +173,7 @@ class MailingMailing(models.Model):
     mail_server_id = fields.Many2one('ir.mail_server', string='Mail Server',
         index='btree_not_null',
         default=_get_default_mail_server_id,
+        domain=[('owner_user_id', '=', False)],
         help="Use a specific mail server in priority. Otherwise Odoo relies on the first outgoing mail server available (based on their sequencing) as it does for normal mails.")
     contact_list_ids = fields.Many2many('mailing.list', 'mail_mass_mailing_list_rel', string='Mailing Lists')
     use_exclusion_list = fields.Boolean(
@@ -253,6 +254,16 @@ class MailingMailing(models.Model):
                 raise ValidationError(
                     _("The saved filter targets different recipients and is incompatible with this mailing.")
                 )
+
+    @api.constrains('mail_server_id')
+    def _check_mail_server_not_personal(self):
+        """Prevent mass mailings from using a personal OMS (one with an owner)."""
+        for mailing in self:
+            if mailing.mail_server_id and mailing.mail_server_id.owner_user_id:
+                raise ValidationError(_(
+                    'The mail server "%s" is a personal server and cannot be used for mass mailing.',
+                    mailing.mail_server_id.display_name,
+                ))
 
     @api.depends('campaign_id.ab_testing_winner_mailing_id')
     def _compute_ab_testing_is_winner_mailing(self):

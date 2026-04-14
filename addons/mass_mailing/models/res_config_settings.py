@@ -17,6 +17,7 @@ class ResConfigSettings(models.TransientModel):
         help='Use a specific mail server in priority. Otherwise Odoo relies on the first outgoing mail server available (based on their sequencing) as it does for normal mails.')
     mass_mailing_mail_server_id = fields.Many2one(
         'ir.mail_server', string='Mail Server',
+        domain=[('owner_user_id', '=', False)],
         config_parameter='mass_mailing.mail_server_id')
     show_blacklist_buttons = fields.Boolean(
         string="Blacklist Option when Unsubscribing",

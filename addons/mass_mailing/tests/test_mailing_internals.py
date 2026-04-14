@@ -506,6 +506,105 @@ class TestMassMailValues(MassMailCommon):
         mail_thread_attachments = mailing._get_mail_thread_data_attachments()
         self.assertSetEqual(set(mail_thread_attachments.ids), {png_duplicate_of_svg_attachment.id, original_png_attachment.id})
 
+    def test_mailing_personal_oms_constraint(self):
+        """Personal mail servers cannot be used as the dedicated server for a mass mailing."""
+        personal_server = self.env['ir.mail_server'].sudo().create({
+            'name': 'Personal OMS',
+            'from_filter': self.user_marketing.email,
+            'smtp_host': 'smtp.personal.example.com',
+            'owner_user_id': self.user_marketing.id,
+        })
+
+        with self.assertRaises(ValidationError):
+            self.env['mailing.mailing'].create({
+                'name': 'Test mailing',
+                'subject': 'Test',
+                'mailing_model_id': self.env['ir.model']._get('res.partner').id,
+                'mail_server_id': personal_server.id,
+            })
+
+        mailing = self.env['mailing.mailing'].create({
+            'name': 'Test mailing no server',
+            'subject': 'Test',
+            'mailing_model_id': self.env['ir.model']._get('res.partner').id,
+        })
+        self.assertFalse(mailing.mail_server_id)
+
+        with self.assertRaises(ValidationError):
+            mailing.mail_server_id = personal_server
+
+    def test_mailing_personal_oms_owner_blocked_by_active_mailing(self):
+        """A mail server cannot be claimed by a specific user while an active mailing campaign uses it."""
+        shared_server = self.env['ir.mail_server'].sudo().create({
+            'name': 'Shared OMS',
+            'from_filter': self.alias_domain,
+            'smtp_host': 'smtp.shared.example.com',
+        })
+        active_mailing = self.env['mailing.mailing'].sudo().create({
+            'name': 'Active campaign',
+            'subject': 'Active',
+            'mailing_model_id': self.env['ir.model']._get('res.partner').id,
+            'mail_server_id': shared_server.id,
+            'state': 'in_queue',
+        })
+
+        with self.assertRaises(ValidationError):
+            shared_server.owner_user_id = self.user_marketing.id
+
+        # active_mailing_ids excludes done mailings, so the constraint no longer fires
+        active_mailing.sudo().state = 'done'
+        shared_server.owner_user_id = self.user_marketing.id
+        self.assertEqual(shared_server.owner_user_id, self.user_marketing)
+
+    def test_mailing_personal_oms_server_fallback_rules(self):
+        """Without a dedicated server, mass mailing selects the best matching server in order:
+        exact sender address, sender domain, then any catch-all server. Personal servers
+        are never considered, even when their domain would otherwise match.
+        """
+        personal_server = self.env['ir.mail_server'].sudo().create({
+            'name': 'Personal OMS',
+            'from_filter': self.mail_server_domain.from_filter,  # same domain, to confirm exclusion
+            'smtp_host': 'smtp.personal.example.com',
+            'owner_user_id': self.user_marketing.id,
+        })
+        all_servers = self.env['ir.mail_server'].sudo().search([], order='sequence, id')
+
+        mailing = self.env['mailing.mailing'].sudo().create({
+            'name': 'Fallback test',
+            'subject': 'Fallback',
+            'mailing_model_id': self.env['ir.model']._get('res.partner').id,
+        })
+
+        def _make_mail(email_from):
+            return self.env['mail.mail'].sudo().create({
+                'email_to': 'to@example.com',
+                'email_from': email_from,
+                'mailing_id': mailing.id,
+                'state': 'outgoing',
+            })
+
+        # Step 1: exact email match. mail_server_user has from_filter='specific_user@test.mycompany.com'
+        mail = _make_mail(self.mail_server_user.from_filter)
+        allowed = mail._filter_mail_mail_servers(all_servers)
+        self.assertEqual(allowed, self.mail_server_user)
+        self.assertNotIn(personal_server, allowed)
+
+        # Step 2: domain match. Send from a different address on the same domain.
+        # mail_server_domain (from_filter='test.mycompany.com') matches; mail_server_user
+        # does not because email_domain_normalize returns False for email-format filters.
+        mail = _make_mail('other@test.mycompany.com')
+        allowed = mail._filter_mail_mail_servers(all_servers)
+        self.assertIn(self.mail_server_domain, allowed)
+        self.assertNotIn(self.mail_server_user, allowed)
+        self.assertNotIn(personal_server, allowed)
+
+        # Step 3: no match at all. Only catch-all servers (no from_filter) are returned.
+        mail = _make_mail('nobody@unrelated-domain.com')
+        allowed = mail._filter_mail_mail_servers(all_servers)
+        self.assertIn(self.mail_server_default, allowed)
+        self.assertNotIn(self.mail_server_domain, allowed)
+        self.assertNotIn(personal_server, allowed)
+
     @users('user_marketing')
     @mute_logger('odoo.addons.mail.models.mail_mail')
     def test_process_mailing_queue_without_html_body(self):
