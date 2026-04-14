@@ -913,6 +913,8 @@ class Transaction:
         if env is not None and not env.cr._closing:
             self._registry_caches__.clear()
             self._check_signaling(env.cr)
+        else:
+            _logger_signaling.debug("reset() closing transaction, skip signaling")
 
     @contextmanager
     def committing(self):
