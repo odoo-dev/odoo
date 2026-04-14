@@ -889,9 +889,15 @@ class Transaction:
         may have changed!
         """
         # get the registry and rebuild the stack of states
-        self._reset_registry_change()
-        self.registry = Registry(self.registry.db_name)
-        self._registry_sequence = self.registry.registry_sequence
+        new_registry = Registry(self.registry.db_name)
+        if self.registry is new_registry:
+            self._reset_registry_change()
+            # the registry sequence can change during testing, copy it anyways
+            self._registry_sequence = self.registry.registry_sequence
+        else:
+            self.registry = new_registry
+            self._registry_invalidated = 0
+            self._registry_sequence = self.registry.registry_sequence
         self._state_stack__ = [
             TransactionState(
                 default_env=state.default_env,
@@ -905,7 +911,10 @@ class Transaction:
         # recheck signaling for the ormcache
         env = self.default_env or next(iter(self.envs), None)
         if env is not None and not env.cr._closing:
+            self._registry_caches__.clear()
             self._check_signaling(env.cr)
+        else:
+            _logger_signaling.debug("reset() closing transaction, skip signaling")
 
     @contextmanager
     def committing(self):
@@ -949,23 +958,10 @@ class Transaction:
         for layer in self.ormcaches__.values():
             layer.update_parent()
 
-        # We can skip registry reuilding here... TODO why?
+        # skip resetting the registry because the transaction should
+        # re-setup the registry correctly
         self._registry_invalidated = 0
-        if cr.postcommit:
-            # We have postcommit hooks, which can use the current cursor,
-            # so reset the transaction before running hooks; generally, the
-            # hook uses a new cursor. Since it uses a new cursor, rollback our
-            # cursor after the postcommit hook has been done to see changes.
-            # To reproduce, install l10n_be,l10n_us_1099 with demo data.
-            self.reset()
-        elif cr._closing:
-            # we are closing the cursor, just a quick clean-up
-            self.clear()
-        else:
-            # if not closing, reset the cursor entirely
-            # skip resetting the registry because the transaction should
-            # re-setup the registry correctly
-            self.reset()
+        self.reset()
 
     @contextmanager
     def rollbacking(self):
