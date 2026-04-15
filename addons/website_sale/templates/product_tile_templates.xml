@@ -104,7 +104,7 @@
         <!-- Fetch Images Data -->
         <t
             t-set="secondary_image_holder"
-            t-value="product.product_template_image_ids.filtered(lambda i: i.is_primary_or_secondary == 'secondary')[:1]"
+            t-value="product.product_template_image_ids.filtered(lambda i: i.image_type == 'secondary')[:1]"
         />
 
         <a

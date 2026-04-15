@@ -1485,7 +1485,7 @@ class ProductTemplate(models.Model):
 
         return bool(self.valid_product_template_attribute_line_ids)
 
-    def get_attribute_values_for_image_assignment(self):
+    def get_attribute_value_mapping(self):
         return [
             {
                 "id": line.attribute_id.id,
