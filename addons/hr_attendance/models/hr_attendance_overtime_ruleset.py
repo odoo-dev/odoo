@@ -30,6 +30,18 @@ class HrAttendanceOvertimeRuleset(models.Model):
             "    e.g.: combined rate for 150% & 120% = 100% (baseline) + (150-100)% + (120-100)% = 170%\n"
         ),
     )
+    max_positive_hours = fields.Float(
+        string="Maximum Positive Hours",
+        default=0.0,
+        help="Maximum number of hours per month that will be counted as positive hours. "
+             "Hours above this limit will not be counted. Set to 0 for unlimited.",
+    )
+    max_negative_hours = fields.Float(
+        string="Maximum Negative Hours",
+        default=0.0,
+        help="Maximum negative hours (undertime) per month allowed without salary deduction. "
+             "Employee keeps full salary if negative hours are within this limit. Set to 0 for unlimited.",
+    )
     rules_count = fields.Integer(compute='_compute_rules_count')
     active = fields.Boolean(default=True, readonly=False)
     version_ids = fields.One2many('hr.version', 'ruleset_id')

@@ -130,8 +130,10 @@
                     <group>
                         <group>
                             <field name="rate_combination_mode"/>
+                            <field name="max_positive_hours" widget="float_time"/>
                         </group>
                         <group>
+                            <field name="max_negative_hours" widget="float_time"/>
                             <field name="country_id" options="{'no_create': True, 'no_open': True}" groups="base.group_multi_company"/>
                         </group>
                     </group>
@@ -166,6 +168,8 @@
                 <field name="name"/>
                 <field name="country_id" groups="base.group_multi_company" optional="hide"/>
                 <field name="rate_combination_mode" string="Rate Mode"/>
+                <field name="max_positive_hours" widget="float_time"/>
+                <field name="max_negative_hours" widget="float_time"/>
                 <field name="rules_count"/>
             </list>
         </field>
