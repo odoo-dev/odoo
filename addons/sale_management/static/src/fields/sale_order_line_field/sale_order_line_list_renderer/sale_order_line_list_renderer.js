@@ -1,9 +1,7 @@
 import { getSectionRecords } from "@account/components/section_and_note_fields_backend/section_and_note_fields_backend";
 import { onWillStart, onWillUpdateProps, useState } from "@odoo/owl";
-import {
-    SaleOrderLineListRenderer,
-    SaleOrderLineOne2Many,
-} from "@sale/js/sale_order_line_field/sale_order_line_field";
+import { SaleOrderLineOne2Many } from "@sale/js/sale_order_line_field/sale_order_line_field";
+import { SaleOrderLineListRenderer } from "@sale/js/sale_order_line_field/sale_order_line_list_renderer/sale_order_line_list_renderer";
 import { makeContext } from "@web/core/context";
 import { _t } from "@web/core/l10n/translation";
 import { x2ManyCommands } from "@web/core/orm_service";

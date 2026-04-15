@@ -835,7 +835,7 @@
                             <kanban class="o_kanban_mobile">
                                 <field name="display_type"/>
                                 <field name="currency_id"/>
-                                <control>
+                                <!-- <control>
                                     <create name="add_product_control" string="Add product"/>
                                     <create name="add_section_control" string="Add section" context="{'default_display_type': 'line_section'}"/>
                                     <create name="add_note_control" string="Add note" context="{'default_display_type': 'line_note'}"/>
@@ -845,7 +845,7 @@
                                         type="object"
                                         class="btn-secondary"
                                         context="{'order_id': parent.id}"/>
-                                </control>
+                                </control> -->
                                 <templates>
                                     <t t-name="card" class="row g-0 ps-0 pe-0">
                                         <t t-if="!record.display_type.raw_value">
@@ -896,7 +896,8 @@
                                 </templates>
                             </kanban>
                         </field>
-                        <div class="float-end d-flex d-print-none gap-1 mb-2"
+                        <!-- Hidden in mobile view since it's handled in JS -->
+                        <div class="float-end d-none d-md-flex d-print-none gap-1 mb-2"
                              name="so_button_below_order_lines">
                             <button
                                 string="Discount"

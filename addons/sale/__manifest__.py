@@ -67,7 +67,7 @@ This module contains all the common features of Sales Management and eCommerce.
             "sale/static/src/js/product_template_attribute_line/*",
             "sale/static/src/js/quantity_availability/*",
             "sale/static/src/js/quantity_buttons/*",
-            "sale/static/src/js/sale_order_line_field/*",
+            "sale/static/src/js/sale_order_line_field/**/*",
             "sale/static/src/js/sale_progressbar_field.js",
             "sale/static/src/js/tours/sale.js",
             "sale/static/src/js/upload_rfq_cog_menu/*",
