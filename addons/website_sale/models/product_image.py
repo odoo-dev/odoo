@@ -36,10 +36,10 @@ class ProductImage(models.Model):
     attribute_value_ids = fields.Many2many("product.template.attribute.value")
     has_attribute_value = fields.Boolean(compute="_compute_has_attribute_value", store=True)
 
-    is_primary_or_secondary = fields.Selection(
+    image_type = fields.Selection(
         [("primary", "Primary"), ("secondary", "Secondary")],
         default=False,
-        compute="_compute_is_primary_or_secondary",
+        compute="_compute_image_type",
     )
 
     # === COMPUTE METHODS ===#
@@ -61,7 +61,7 @@ class ProductImage(models.Model):
         for image in self:
             image.has_attribute_value = bool(image.attribute_value_ids)
 
-    def _compute_is_primary_or_secondary(self):
+    def _compute_image_type(self):
         for template in self.mapped("product_tmpl_id"):
             tmpl_content = template.image_1920.content
             primary = secondary = None
@@ -73,15 +73,15 @@ class ProductImage(models.Model):
 
                 if not primary and content == tmpl_content:
                     primary = img
-                    img.is_primary_or_secondary = "primary"
+                    img.image_type = "primary"
                     continue
 
                 if not secondary and not img.attribute_value_ids and content != tmpl_content:
                     secondary = img
-                    img.is_primary_or_secondary = "secondary"
+                    img.image_type = "secondary"
                     continue
 
-                img.is_primary_or_secondary = False
+                img.image_type = False
 
     # === ONCHANGE METHODS ===#
 
