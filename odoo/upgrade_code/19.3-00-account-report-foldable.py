@@ -178,4 +178,6 @@ def upgrade(file_manager: FileManager):
 
     if inconsistencies:
         summary = "Foldable inconsistencies found:\n" + "\n".join(inconsistencies)
+        with open('/tmp/foldable_inconsistencies.txt', 'w') as f:
+            f.write(summary)
         file_manager.add_to_summary(summary)

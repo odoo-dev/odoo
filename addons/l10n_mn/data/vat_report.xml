@@ -518,7 +518,7 @@
                     <record id="vat_report_line51" model="account.report.line">
                         <field name="name">Revenue from similar transaction services such as factoring and forfeiting (51)</field>
                         <field name="code">VAT_LINE51</field>
-                        <field name="foldable" eval="True"/>
+                        <field name="foldability">foldable</field>
                         <field name="expression_ids">
                             <record id="vat_report_line51_tag" model="account.report.expression">
                                 <field name="label">balance</field>
