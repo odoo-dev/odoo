@@ -31,6 +31,7 @@ from lxml.html import (
 from werkzeug import urls
 
 from odoo.tools import misc
+from odoo.tools.parse_version import parse_version
 
 __all__ = [
     "email_domain_extract",
@@ -90,6 +91,9 @@ SANITIZE_TAGS = {
                   'noscript', 'object', 'script', 'style', 'title'],
     'remove_tags': ['html', 'body'],
 }
+RE_STARTS_WITH_TAG = r'^\s*<[\w!-]+'
+RE_STARTS_WITH_TAG_STR = re.compile(RE_STARTS_WITH_TAG)
+RE_STARTS_WITH_TAG_BYTES = re.compile(RE_STARTS_WITH_TAG.encode('ascii'))
 
 
 class _Cleaner(clean.Cleaner):
@@ -377,6 +381,13 @@ def html_normalize(src, filter_callback=None, output_method="html"):
     # On the specific case of Outlook desktop it adds unnecessary '<o:.*></o:.*>' tags which are parsed
     # in '<p></p>' which may alter the appearance (eg. spacing) of the mail body
     src = re.sub(r'</?o:.*?>', '', src)
+
+    if tuple(map(str, etree.LIBXML_VERSION)) >= parse_version("2.14.0"):
+        if isinstance(src, bytes) and not RE_STARTS_WITH_TAG_BYTES.match(src):
+            src = b'<p>%s</p>' % src
+        elif not RE_STARTS_WITH_TAG_STR.match(src):
+            src = '<p>%s</p>' % src
+        # src = re.sub(r'(\w+)"(?==|\s|>)', r'\1', src)
 
     try:
         doc, single_body_element = fromstring(src)

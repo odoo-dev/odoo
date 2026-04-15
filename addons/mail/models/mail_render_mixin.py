@@ -8,6 +8,7 @@ import re
 import traceback
 
 from lxml import html
+from lxml.etree import LIBXML_VERSION
 from functools import reduce
 from markupsafe import Markup, escape
 
@@ -16,6 +17,7 @@ from odoo.addons.base.models.ir_qweb import QWebError
 from odoo.exceptions import UserError, AccessError
 from odoo.tools import urls
 from odoo.tools.mail import is_html_empty, prepend_html_content, html_normalize
+from odoo.tools.parse_version import parse_version
 from odoo.tools.rendering_tools import convert_inline_template_to_qweb, parse_inline_template, render_inline_template, template_env_globals
 
 _logger = logging.getLogger(__name__)
@@ -373,6 +375,9 @@ class MailRenderMixin(models.AbstractModel):
         results = dict.fromkeys(res_ids, u"")
         if not template_src or not res_ids:
             return results
+
+        if tuple(map(str, LIBXML_VERSION)) >= parse_version("2.14.0"):
+            template_src = re.sub(r'<([\w!-]+)/[^\s>]+', r'<\1', template_src)  # legacy behavior
 
         if not self._has_unsafe_expression_template_qweb(template_src, model):
             # do not call the qweb engine
