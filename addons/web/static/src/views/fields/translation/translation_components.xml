@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="web.translate.TranslateXml">
+    <div class="o-translate-full-xml position-relative d-flex flex-column overflow-auto" t-on-input="this.onInput" t-ref="this.rootRef" t-on-scroll="this.onScroll">
+        <div class="d-flex gap-1 align-items-center fs-3 o-translate-lang-buttons" t-ref="this.langButtonsRef">
+            <span>Translate into</span>
+            <t t-foreach="Object.entries(this.model.languages())" t-as="lang" t-key="lang[0]">
+                <button t-on-click="() => this.model.changeLang(lang[0])"
+                    class="btn btn-secondary" t-attf-class="{{lang[0] === this.model.currentLang() ? 'active' : ''}}"
+                    t-out="lang[1].name" />
+            </t>
+        </div>
+        <!-- Force display in LTR for the XML -->
+        <div class="o-node-list"
+            dir="ltr"
+            data-lang=""
+            t-attf-style="--to-translate-dir: {{ this.model.getLang(this.model.baseLang()).direction }}; --translated-dir: {{ this.model.getLang(this.model.currentLang()).direction }};">
+            <t t-call="{{ this.childrenLoopTemplate }}" node="this.currentValue().firstElementChild" />
+        </div>
+    </div>
+</t>
+
+<t t-name="web.translate.TranslateText.input">
+    <t t-if="this.inputTag === 'textarea'">
+        <textarea class="o_input o_field_text" t-att-id="lang" t-att-value="this.model.getValue(lang)" t-on-change="this.onChange" t-att-dir="direction"/>
+    </t>
+    <t t-else="">
+        <input class="o_input o_field_char" t-att-id="lang" t-att-value="this.model.getValue(lang)" t-on-change="this.onChange" t-att-dir="direction"/>
+    </t>
+</t>
+
+<t t-name="web.translate.TranslateText">
+    <div class="row m-3">
+        <div class="grid col-12">
+            <div class="g-col-4 d-flex flex-row align-items-baseline">
+                <label t-att-for="this.model.userLang" t-out="this.model.getLang(this.model.userLang).name" />
+                <t t-set="menuItems" t-value="this.model.getLangMenuItems(this.model.userLang)" />
+                <Dropdown items="menuItems">
+                    <button class="btn btn-light py-0" ><i class="oi oi-ellipsis-v" /></button>
+                </Dropdown>
+            </div>
+            <div class="g-col-8 translation">
+                <t t-call="web.translate.TranslateText.input" lang="this.model.userLang" />
+            </div>
+            <t t-foreach="Object.values(this.model.languages())" t-as="lang" t-key="lang.code" t-if="lang.code !== this.model.userLang">
+                <div class="g-col-4 d-flex flex-row align-items-baseline">
+                    <label t-att-for="lang.code">
+                        <i t-if="this.model.langStatus(lang.code) === 'reset'" class="fa fa-warning me-1" data-tooltip="Will be deleted in favor of the default language"/>
+                        <t t-out="lang.name" />
+                    </label>
+                    <t t-set="menuItems" t-value="this.model.getLangMenuItems(lang.code)" />
+                    <Dropdown t-if="menuItems.length" items="menuItems">
+                        <button class="btn btn-light py-0" ><i class="oi oi-ellipsis-v" /></button>
+                    </Dropdown>
+                </div>
+                <div class="g-col-8 translation">
+                    <t t-call="web.translate.TranslateText.input" lang="lang.code" direction="lang.direction"/>
+                </div>
+            </t>
+        </div>
+    </div>
+</t>
+
+<t t-name="web.translate.TranslateHTML">
+    <div class="p-3 grid w-100" style="gap: 10px 40px;">
+        <Record t-props="this.fakeRecordProps()" t-slot-scope="slot">
+            <div class="g-col-6 fs-3 d-flex flex-row">
+                <span t-out="this.model.getLang(this.model.userLang).name" />
+                <t t-set="menuItems" t-value="this.model.getLangMenuItems(this.model.userLang)" />
+                <div t-if="menuItems.length" class="align-self-baseline">
+                    <Dropdown t-if="menuItems.length" items="menuItems">
+                        <button class="btn btn-light py-0" ><i class="oi oi-ellipsis-v" /></button>
+                    </Dropdown>
+                </div>
+            </div>
+
+            <div class="g-col-6 d-flex gap-1 align-items-center fs-3 o-translate-lang-buttons" t-custom-ref="langButtons">
+                <div class="d-flex flex-row gap-1 flex-wrap">
+                    <span class="flex-shrink-0">Translate into</span>
+                    <t t-foreach="Object.values(this.model.languages())" t-as="lang" t-key="lang.code" t-if="lang.code !== this.model.userLang">
+                        <button t-on-click="() => this.model.changeLang(lang.code)" class="btn btn-secondary"
+                            t-attf-class="{{lang.code === this.model.currentLang() ? 'active' : ''}}"
+                        >
+                            <i t-if="this.model.langStatus(lang.code) === 'reset'" class="fa fa-warning me-1" data-tooltip="Will be deleted in favor of the default language"/>
+                            <span t-out="lang.name" />
+                        </button>
+                    </t>
+                </div>
+                <t t-set="menuItems" t-value="this.model.getLangMenuItems(this.model.currentLang())" />
+                <div t-if="menuItems.length" class="align-self-baseline">
+                    <Dropdown t-if="menuItems.length" items="menuItems">
+                        <button class="btn btn-light py-0" ><i class="oi oi-ellipsis-v" /></button>
+                    </Dropdown>
+                </div>
+            </div>
+
+            <div class="g-col-6">
+                <div name="body_html" class="o_field_widget oe-bordered-editor o_field_html translation">
+                    <t t-component="this.fieldComponentClass()" name="this.model.userLang" record="slot.record" t-key="this.model.userLang" t-props="this.fieldComponentProps()" id="this.model.userLang"/>
+                </div>
+            </div>
+
+            <div class="g-col-6">
+                <div name="body_html" class="o_field_widget oe-bordered-editor o_field_html translation">
+                    <t t-component="this.fieldComponentClass()" name="this.model.currentLang()" record="slot.record" t-key="this.model.currentLang()" t-props="this.fieldComponentProps()" id="this.model.currentLang()" />
+                </div>
+            </div>
+        </Record>
+    </div>
+</t>
+
+<t t-name="web.translate.TranslationDialog">
+    <Dialog size="this.dialogSize()" title="this.dialogTitle()" contentClass="'o_translation_dialog'" bodyClass="'d-flex p-0'">
+        <t t-if="this.model.translateMode() === 'xml'" >
+            <TranslateXml/>
+        </t>
+        <t t-elif="this.model.translateMode() === 'text'" >
+            <TranslateText/>
+        </t>
+        <t t-elif="this.model.translateMode() === 'html'">
+            <TranslateHTML getFakeRecordInfos="this.props.getFakeRecordInfos" fieldComponentClass="this.props.fieldComponentClass" fieldComponentProps="this.props.fieldComponentProps" />
+        </t>
+        <t t-set-slot="footer">
+            <div class="d-flex w-100 gap-1">
+                <button class="btn btn-primary" t-att-disabled="!this.model.canSave()" t-on-click="() => this.model.save()">Save</button>
+                <button class="btn btn-secondary" t-on-click="() => this.props.close()">Discard</button>
+            </div>
+        </t>
+    </Dialog>
+</t>
+
+</templates>
