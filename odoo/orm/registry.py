@@ -411,6 +411,8 @@ class Registry(Mapping[str, type["BaseModel"]]):
         from . import models  # noqa: PLC0415
 
         # clear cache to ensure consistency, but do not signal it
+        if self.ready:
+            _logger.warning("load: clear caches", stack_info=True)
         for _seq, cache in self.registry_caches__.values():
             cache.clear()
 
@@ -440,29 +442,26 @@ class Registry(Mapping[str, type["BaseModel"]]):
         from .environments import Environment  # noqa: PLC0415
         env = Environment(cr, SUPERUSER_ID, {})
         env.invalidate_all()
-        if self.ready:
-            env.transaction.will_change_registry()
+        transaction = env.transaction
 
         # Uninstall registry hooks. Because of the condition, this only happens
         # on a fully loaded registry, and not on a registry being loaded.
         if self.ready:
+            transaction.will_change_registry()
             for model in env.values():
                 model._unregister_hook()
-
-        # clear cache to ensure consistency, but do not signal it
-        for _seq, cache in self.registry_caches__.values():
-            cache.clear()
-        # XXX is the code above enough, should we signal?
-        from odoo.orm.environments import CacheLayer
-        for name in ('default', 'stable'):
-            layer = cr.transaction.ormcaches__[name]
-            while layer is not None:
-                if isinstance(layer, CacheLayer):
-                    layer.data.clear()
+            # clear cache to ensure consistency, we are in self.ready, so it
+            # will signal the change anyways because the registry changes
+            transaction.invalidate_ormcache('stable')
+        else:
+            # loading the registry, or running at_install tests
+            # clear cache to ensure consistency, but do not signal it
+            _logger.debug("setup_models: invalidating cache without signaling")
+            transaction.invalidate_ormcache('stable')
+            for name, layer in transaction.ormcaches__.items():
+                while hasattr(layer, 'parent'):
                     layer = layer.parent
-                else:
-                    layer.clear()
-                    layer = None
+                transaction._registry_caches__[name] = (transaction._registry_caches__[name][0], layer)
 
         reset_cached_properties(self)
         self._field_trigger_trees.clear()
