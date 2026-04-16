@@ -56,7 +56,7 @@
             }
         }
 
-        li, button {
+        li, button:not(.btn-primary) {
             @include o-hover-text-color(rgba($o-burger-base-color, .8), $o-burger-base-color);
         }
     }
