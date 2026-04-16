@@ -932,6 +932,28 @@ class AccountTax(models.Model):
                 sorted_taxes |= tax
         return sorted_taxes, group_per_tax
 
+    def _is_price_included(self, document_tax_mode=None, special_mode=False):
+        """ Get the price_include value of the tax, taking into account the document_tax_mode.
+
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+
+        :param document_tax_mode:   The tax mode of the document.
+        :return:                    True if the tax is price included, False otherwise.
+        """
+        self.ensure_one()
+        if self.has_negative_factor:
+            return False
+        if self.price_include_override:
+            return self.price_include_override == 'tax_included'
+        if document_tax_mode:
+            return document_tax_mode == 'tax_included'
+        if special_mode == 'total_included':
+            return True
+        if special_mode == 'total_excluded':
+            return False
+        return self.price_include
+
     def _batch_for_taxes_computation(self, special_mode=False, filter_tax_function=None, document_tax_mode=None):
         """ Group the current taxes all together like price-included percent taxes or division taxes.
 
@@ -940,6 +962,7 @@ class AccountTax(models.Model):
 
         :param special_mode:        The special mode of the taxes computation: False, 'total_excluded' or 'total_included'.
         :param filter_tax_function: Optional function to filter out some taxes from the computation.
+        :param document_tax_mode:   The tax mode of the document.
         :return: A dictionary containing:
             * batch_per_tax: A mapping of each tax to its batch.
             * group_per_tax: A mapping of each tax retrieved from a group of taxes.
@@ -965,7 +988,7 @@ class AccountTax(models.Model):
             if batch:
                 same_batch = (
                     tax.amount_type == batch[0].amount_type
-                    and (special_mode or tax._price_include_after_document_tax_mode(document_tax_mode) == batch[0]._price_include_after_document_tax_mode(document_tax_mode))
+                    and (special_mode or tax._is_price_included(document_tax_mode) == batch[0]._is_price_included(document_tax_mode))
                     and tax.include_base_amount == batch[0].include_base_amount
                     and (
                         (tax.include_base_amount and not is_base_affected)
@@ -985,7 +1008,7 @@ class AccountTax(models.Model):
                 results['batch_per_tax'][batch_tax.id] = batch
         return results
 
-    def _propagate_extra_taxes_base(self, tax, taxes_data, special_mode=False, document_tax_mode=False):
+    def _propagate_extra_taxes_base(self, tax, taxes_data, special_mode=False):
         """ In some cases, depending the computation order of taxes, the special_mode or the configuration
         of taxes (price included, affect base of subsequent taxes, etc), some taxes need to affect the base and
         the tax amount of the others. That's the purpose of this method: adding which tax need to be added as
@@ -1016,7 +1039,7 @@ class AccountTax(models.Model):
                 taxes_data[other_tax.id]['extra_base_for_tax'] += sign * tax_amount
             taxes_data[other_tax.id]['extra_base_for_base'] += sign * tax_amount
 
-        if tax._price_include_after_document_tax_mode(document_tax_mode):
+        if taxes_data[tax.id]['original_price_include']:
 
             # Suppose:
             # 1.
@@ -1059,7 +1082,7 @@ class AccountTax(models.Model):
                         if other_tax.is_base_affected:
                             add_extra_base(other_tax, 1)
 
-        elif not tax._price_include_after_document_tax_mode(document_tax_mode):
+        else:
 
             # Case of a tax affecting the base of the subsequent ones, no price included taxes.
             if special_mode in (False, 'total_excluded'):
@@ -1180,6 +1203,7 @@ class AccountTax(models.Model):
                             Note: You can only expect accurate symmetrical taxes computation with not rounded price_unit
                             as input and 'round_globally' computation. Otherwise, it's not guaranteed.
         :param filter_tax_function: Optional function to filter out some taxes from the computation.
+        :param document_tax_mode:   The tax mode of the document.
         :return: A dict containing:
             'evaluation_context':       The evaluation_context parameter.
             'taxes_data':               A list of dictionaries, one per tax containing:
@@ -1195,7 +1219,7 @@ class AccountTax(models.Model):
                 taxes_data[tax.id]['tax_amount'] = float_round(taxes_data[tax.id]['tax_amount'], precision_rounding=precision_rounding)
             if tax.has_negative_factor:
                 reverse_charge_taxes_data[tax.id]['tax_amount'] = -taxes_data[tax.id]['tax_amount']
-            sorted_taxes._propagate_extra_taxes_base(tax, taxes_data, special_mode=special_mode, document_tax_mode=document_tax_mode)
+            sorted_taxes._propagate_extra_taxes_base(tax, taxes_data, special_mode=special_mode)
 
         def eval_tax_amount(tax_amount_function, tax):
             is_already_computed = 'tax_amount' in taxes_data[tax.id]
@@ -1211,20 +1235,11 @@ class AccountTax(models.Model):
                 add_tax_amount_to_results(tax, tax_amount)
 
         def prepare_tax_extra_data(tax, **kwargs):
-            if tax.has_negative_factor:
-                price_include = False
-            elif document_tax_mode and not tax.price_include_override:
-                price_include = document_tax_mode == 'tax_included'
-            elif special_mode == 'total_included':
-                price_include = True
-            elif special_mode == 'total_excluded':
-                price_include = False
-            else:
-                price_include = tax.price_include
             return {
                 **kwargs,
                 'tax': tax,
-                'price_include': price_include,
+                'price_include': tax._is_price_included(document_tax_mode, special_mode),
+                'original_price_include': tax._is_price_included(document_tax_mode),
                 'document_tax_mode': document_tax_mode,
                 'extra_base_for_tax': 0.0,
                 'extra_base_for_base': 0.0,
@@ -1240,7 +1255,6 @@ class AccountTax(models.Model):
                 tax,
                 group=batching_results['group_per_tax'].get(tax.id),
                 batch=batching_results['batch_per_tax'][tax.id],
-                document_tax_mode=document_tax_mode,
             )
             if tax.has_negative_factor:
                 reverse_charge_taxes_data[tax.id] = {
@@ -1351,18 +1365,6 @@ class AccountTax(models.Model):
             ],
         }
 
-    def _price_include_after_document_tax_mode(self, document_tax_mode):
-        """ Makes sure that if there is a document tax mode, it changes the behavior of taxes set to default.
-
-        [!] Mirror of the same method in account_tax.js.
-        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-
-        :return:    New price_included value for taxes when document tax mode is applicable.
-        """
-        self.ensure_one()
-        is_included = document_tax_mode == 'tax_included'
-        return is_included if (not self.price_include_override and document_tax_mode) else self.price_include
-
     # -------------------------------------------------------------------------
     # MAPPING PRICE_UNIT
     # -------------------------------------------------------------------------
@@ -1384,14 +1386,15 @@ class AccountTax(models.Model):
         [!] Mirror of the same method in account_tax.js.
         PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
 
-        :param price_unit:      The original price_unit.
-        :param product:         The product.
-        :param original_taxes:  A recordset of taxes from where you come from.
-        :param new_taxes:       A recordset of the taxes you are mapping the price unit to.
-        :param product_uom:     The product uom.
-        :return:                The price_unit after mapping of taxes.
+        :param price_unit:          The original price_unit.
+        :param product:             The product.
+        :param original_taxes:      A recordset of taxes from where you come from.
+        :param new_taxes:           A recordset of the taxes you are mapping the price unit to.
+        :param product_uom:         The product uom.
+        :param document_tax_mode:   The tax mode of the document.
+        :return:                    The price_unit after mapping of taxes.
         """
-        if original_taxes == new_taxes or any(not tax._price_include_after_document_tax_mode(document_tax_mode) for tax in original_taxes):
+        if original_taxes == new_taxes or any(not tax._is_price_included(document_tax_mode) for tax in original_taxes):
             return price_unit
 
         # Find the price unit without tax.
@@ -1415,7 +1418,7 @@ class AccountTax(models.Model):
             special_mode='total_excluded',
             document_tax_mode=document_tax_mode,
         )
-        delta = sum(x['tax_amount'] for x in taxes_computation['taxes_data'] if x['tax']._price_include_after_document_tax_mode(document_tax_mode))
+        delta = sum(x['tax_amount'] for x in taxes_computation['taxes_data'] if x['tax']._is_price_included(document_tax_mode))
         return price_unit + delta
 
     # -------------------------------------------------------------------------
@@ -2892,15 +2895,18 @@ class AccountTax(models.Model):
 
             # Get all involved taxes in the tax group.
             involved_taxes = self.env['account.tax']
-            for _base_line, taxes_data in values['base_line_x_taxes_data']:
+            price_included_values = set()
+            for base_line, taxes_data in values['base_line_x_taxes_data']:
                 for tax_data in taxes_data:
-                    involved_taxes |= tax_data['tax']
+                    tax = tax_data['tax']
+                    involved_taxes |= tax
+                    price_included_values.add(tax._is_price_included(base_line['document_tax_mode']))
 
             # Compute the display base amounts.
             if set(involved_taxes.mapped('amount_type')) == {'fixed'}:
                 display_base_amount = False
                 display_base_amount_currency = False
-            elif set(involved_taxes.mapped('amount_type')) == {'division'} and all(tax._price_include_after_document_tax_mode(base_lines[0]['document_tax_mode']) for tax in involved_taxes):
+            elif set(involved_taxes.mapped('amount_type')) == {'division'} and price_included_values == {True}:
                 display_base_amount = 0.0
                 display_base_amount_currency = 0.0
                 for base_line, _taxes_data in values['base_line_x_taxes_data']:
@@ -3586,6 +3592,7 @@ class AccountTax(models.Model):
                                     being the way the base lines will be aggregated all together.
                                     By default, the base lines will be aggregated by taxes.
         :param aggregate_function:  An optional function taking the 2 base lines as parameter to be aggregated together.
+        :param document_tax_mode:   The tax mode of the document.
         :return:                    A new list of base lines having total amounts exactly matching the expected 'amount'/'amount_type'.
         """
         if not base_lines:
@@ -4098,7 +4105,7 @@ class AccountTax(models.Model):
                     + sum(
                         sub_tax_data['raw_tax_amount_currency']
                         for sub_tax_data in second_tax_details['taxes_data']
-                        if sub_tax_data['tax']._price_include_after_document_tax_mode(base_lines[0]['document_tax_mode'])
+                        if sub_tax_data['tax']._is_price_included(base_line['document_tax_mode'])
                     )
                 ) / (base_line['quantity'] or 1.0),
                 tax_details=second_tax_details,
@@ -4965,7 +4972,7 @@ class AccountTax(models.Model):
                     'analytic': tax.analytic,
                     'use_in_tax_closing': rep_line.use_in_tax_closing,
                     'is_reverse_charge': tax_data['is_reverse_charge'],
-                    'price_include': tax._price_include_after_document_tax_mode(base_line['document_tax_mode']),
+                    'price_include': tax._is_price_included(base_line['document_tax_mode']),
                     'tax_exigibility': tax.tax_exigibility,
                     'tax_repartition_line_id': rep_line.id,
                     'group': tax_data['group'],
@@ -5007,7 +5014,7 @@ class AccountTax(models.Model):
         # FIXME get currency in param?
         prod_taxes = prod_taxes._origin
         line_taxes = line_taxes._origin
-        incl_tax = prod_taxes.filtered(lambda tax: tax not in line_taxes and tax._price_include_after_document_tax_mode(document_tax_mode))
+        incl_tax = prod_taxes.filtered(lambda tax: tax not in line_taxes and tax._is_price_included(document_tax_mode))
         if incl_tax:
             return incl_tax.compute_all(price)['total_excluded']
         return price
