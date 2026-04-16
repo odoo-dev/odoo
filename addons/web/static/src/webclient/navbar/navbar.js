@@ -39,7 +39,7 @@ export class NavBar extends Component {
         const debouncedAdapt = debounce(() => {
             // Force re-render to update env.isSmall in template
             this.render();
-            this.adapt.bind(this);
+            this.adapt();
         }, 250);
         onWillDestroy(() => debouncedAdapt.cancel());
         useExternalListener(window, "resize", debouncedAdapt);
