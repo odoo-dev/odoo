@@ -3380,7 +3380,6 @@ class AccountMove(models.Model):
         moves_values_before = {
             move: {
                 field: get_value(move, field)
-                # for field in ('currency_id', 'partner_id', 'move_type', 'invoice_currency_rate', 'invoice_date')
                 for field in ('currency_id', 'partner_id', 'move_type', 'invoice_currency_rate', 'invoice_date', 'document_tax_mode')
             }
             for move in container['records']
