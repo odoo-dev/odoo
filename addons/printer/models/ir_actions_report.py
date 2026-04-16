@@ -67,6 +67,17 @@ class IrActionsReport(models.Model):
                     ),
                 }
             ]
+
+        if report.report_type == "qweb-pdf" and len(report.printer_ids.filtered(lambda p: p.type == "pdf").exists()):
+            return [
+                {
+                    "type": "pdf",
+                    "report": base64.b64encode(
+                        self._render(report_name, docids, data=data)[0],
+                    ),
+                },
+            ]
+
         return []
 
     def _read_format(self, *args, **kwargs):

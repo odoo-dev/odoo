@@ -13,6 +13,7 @@
                         <group>
                             <field name="ip_address" required="1"/>
                             <field name="report_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="printer_type"/>
                             <field name="type"/>
                         </group>
                     </group>
@@ -42,6 +43,7 @@
                 <field name="name"/>
                 <field name="ip_address" required="1"/>
                 <field name="report_ids" widget="many2many_tags"/>
+                <field name="printer_type"/>
                 <field name="type"/>
             </list>
         </field>

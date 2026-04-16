@@ -11,19 +11,17 @@ class ReportPrintersLocalStorage extends Component {
         this.orm = useService("orm");
         this.printersCache = useService("report_printers_cache");
         this.state = useState({
-            reports: this.printersCache.cache
-                ? Object.keys(this.printersCache.cache)
-                : []
+            reports: this.printersCache.cache ? Object.keys(this.printersCache.cache) : [],
         });
         onWillStart(async () => {
-            this.state.reportList = await this.orm.searchRead("ir.actions.report", [
+            this.state.reports = await this.orm.searchRead("ir.actions.report", [
                 ["id", "in", this.state.reports],
             ]);
         });
     }
     removeFromCache(event, id) {
         this.printersCache.unCacheReport(id);
-        this.state.reportList = this.state.reports.filter((report) => report.id !== id);
+        this.state.reports = this.state.reports.filter((report) => report.id !== id);
     }
 }
 

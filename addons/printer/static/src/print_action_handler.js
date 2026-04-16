@@ -13,7 +13,8 @@ const base64Decode = (base64) => {
 const baseRequestParams = (report) => ({
     method: "POST",
     body: report,
-    signal: AbortSignal.timeout(15000),
+    targetAddressSpace: "loopback",
+    signal: AbortSignal.timeout(30000),
 });
 
 /**
@@ -61,6 +62,32 @@ async function ePosPrint(ip, report) {
     }
 }
 
+async function sendToPdfProxy(ip, binary) {
+    try {
+        const response = await fetch(`http://${ip}/print/pdf`, {
+            ...baseRequestParams(binary),
+            headers: { "Content-Type": "application/octet-stream" },
+        });
+        return { result: response.ok };
+    } catch (error) {
+        console.error(error);
+        return {
+            result: false,
+        };
+    }
+}
+
+function getPrintMethod(type) {
+    switch (type) {
+        case "epos":
+            return ePosPrint;
+        case "pdf":
+            return sendToPdfProxy;
+        default:
+            return zplPrint;
+    }
+}
+
 export async function printJobs(printer, jobs, { notification }) {
     jobs = [...jobs]; // copy to allow using the same array for multiple printers
     // print jobs one by one and retry if the printers is waiting for the user to eject the paper
@@ -70,7 +97,7 @@ export async function printJobs(printer, jobs, { notification }) {
             jobs.pop();
             continue;
         }
-        const print = job.type === "epos" ? ePosPrint : zplPrint;
+        const print = getPrintMethod(job.type);
         const res = await print(printer.ip_address, base64Decode(job.report));
 
         if (res.result) {
@@ -108,7 +135,6 @@ async function printActionHandler(action, options, { services }) {
         // If the user does not select any printer, fall back to normal printing
         return false;
     }
-
     for (const printer of printerSettings.selectedPrinters) {
         await printJobs(printer, jobs, services);
     }
