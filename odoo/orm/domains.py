@@ -929,16 +929,18 @@ class DomainCondition(Domain):
             field, _ = self.__get_field(model)
         return field
 
-    def __get_field(self, model: BaseModel) -> tuple[Field, str]:
+    def __get_field(self, model: BaseModel) -> tuple[Field, str | None]:
         """Get the field or raise an exception"""
         field_name, property_name = parse_field_expr(self.field_expr)
         try:
             field = model._fields[field_name]
         except KeyError:
             self._raise("Invalid field %s.%s", model._name, field_name)
+        if field.type == 'properties' and not property_name:
+            self._raise("Missing property name for %s.%s", model._name, field_name)
         # cache field value, with this hack to bypass immutability
         object.__setattr__(self, '_field_instance', field)
-        return field, property_name or ''
+        return field, property_name
 
     def _optimize_step(self, model: BaseModel, level: OptimizationLevel) -> Domain:
         """Optimization step.

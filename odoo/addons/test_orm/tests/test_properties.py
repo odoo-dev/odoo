@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from odoo.addons.base.tests.test_expression import TransactionExpressionCase
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.fields import Command
+from odoo.fields import Command, Domain
 from odoo.tests import tagged, TransactionCase, users
 from odoo.tools import mute_logger
 
@@ -958,6 +958,12 @@ class PropertiesCase(TestPropertiesMixin):
             sql_definition[0],
             msg='The domain should remain in database until we write on the properties definition',
         )
+
+    def test_properties_field_domain_missing_property_name(self):
+        model = self.env['test_orm.schema']
+        domain = Domain("properties", "!=", False)
+        with self.assertRaises(ValueError):
+            domain.validate(model.sudo())
 
     def test_properties_field_integer_float_boolean(self):
         self.discussion_1.attributes_definition = [
