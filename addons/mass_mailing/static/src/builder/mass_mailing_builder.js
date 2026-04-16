@@ -32,6 +32,7 @@ export class MassMailingBuilder extends Component {
     };
 
     get builderProps() {
+        console.log(this.props.builderProps);
         const builderProps = Object.assign({}, this.props.builderProps);
         const pluginsToRemove = [
             "BuilderFontPlugin", // Makes call to Google API (can't be used for emails)

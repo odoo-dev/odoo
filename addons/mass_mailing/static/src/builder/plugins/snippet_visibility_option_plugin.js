@@ -27,23 +27,25 @@ export class SnippetVisibilityPlugin extends Plugin {
         system_attributes: "data-filter-domain",
     };
     setup() {
-        this.mailingModelId = this.config.record.data.mailing_model_id.id;
+        // this.mailingModelId = this.config.record.data.mailing_model_id.id;
         effect(
             (record) => {
                 if (this.isDestroyed) {
                     return;
                 }
-                if (record.data.mailing_model_id.id !== this.mailingModelId) {
-                    this.mailingModelId = record.data.mailing_model_id.id;
-                    this.resetFilterDomains();
-                }
+                console.log("SnippetVisibility Effect");
+                // if (record.data.mailing_model_id.id !== this.mailingModelId) {
+                //     this.mailingModelId = record.data.mailing_model_id.id;
+                //     this.resetFilterDomains();
+                // }
             },
             [this.config.record]
         );
     }
 
     getModel() {
-        return this.config.record.data.mailing_model_real;
+        console.log("getModel");
+        // return this.config.record.data.mailing_model_real;
     }
 
     resetFilterDomains() {

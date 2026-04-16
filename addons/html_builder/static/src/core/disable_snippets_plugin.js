@@ -168,6 +168,7 @@ export class DisableSnippetsPlugin extends Plugin {
                 dropAreasBySelector.push({ selector, exclude, dropAreaEls });
             }
         });
+        console.log("get drop areas", dropAreasBySelector);
         return dropAreasBySelector;
     }
 }

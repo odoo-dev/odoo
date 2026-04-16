@@ -68,6 +68,7 @@ export class ThemeModel extends Reactive {
             }
             // Wrap the Theme `html` with a technical layout.
             themeOptions.html = renderToMarkup("mass_mailing.ThemeLayout", themeOptions);
+            console.log("computeThemeTemplate");
             if (["basic", "empty"].includes(themeOptions.name)) {
                 this.simpleThemes.set(themeOptions.name, themeOptions);
             } else {
