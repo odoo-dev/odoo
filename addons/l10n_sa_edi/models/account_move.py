@@ -366,6 +366,41 @@ class AccountMoveLine(models.Model):
         self.ensure_one()
         return not self._get_downpayment_lines() and self.price_subtotal < 0
 
+    def _l10n_sa_is_top_up_line(self):
+        if not 'loyalty.program' in self.pool.models:
+            return False
+
+        ewallet_products = self.env['loyalty.program'].search([('program_type', '=', 'ewallet')]).filtered(lambda rec: rec.company_id.country_code in {'SA', False}).trigger_product_ids
+        return all(line.product_id in ewallet_products for line in self)
+
+    def _l10n_sa_is_reward_line(self):
+        discount_lines = self._get_discount_lines()
+        # If line has tax or no discount and downpayment lines or sale/loyalty is not activated we return false
+        if self.tax_ids or not (discount_lines or self.is_downpayment) or not hasattr(self, 'sale_line_ids') or not hasattr(self.env['sale.order.line'], 'is_reward_line'):
+            return False
+
+        # If all related sale order lines are reward lines then it's a reward line
+        if all(sol.is_reward_line for sol in self.sale_line_ids):
+            return True
+
+        # Discount and downpayment lines relating to a reward line should have no taxes
+        # since there is no direct link between the downpayment/discount line and the reward line we're assuming
+        # that if there are no product lines with no taxes and atleast one reward line then it's relating to a reward line.
+        lines = discount_lines
+        if self.is_downpayment:
+            lines |= self
+        related_orders = lines.sale_line_ids.order_id
+        reward_lines = related_orders.order_line.filtered('is_reward_line')
+        product_lines = (related_orders.order_line - reward_lines).filtered(lambda rec: not rec.display_type and not rec.is_downpayment and not rec._is_discount_line())
+        return reward_lines and all(line.tax_ids for line in product_lines)
+
+    def _check_edi_line_tax_required(self):
+        res = super()._check_edi_line_tax_required()
+        if self.company_id.account_fiscal_country_id.code != 'SA':
+            return res
+
+        return res and not self._l10n_sa_is_reward_line() and not self._l10n_sa_is_top_up_line()
+
     @api.depends('price_subtotal', 'price_total')
     def _compute_tax_amount(self):
         super()._compute_tax_amount()
