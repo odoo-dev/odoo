@@ -126,7 +126,7 @@ class SaleOrderLine(models.Model):
     product_uom_qty = fields.Float(
         string="Quantity",
         compute='_compute_product_uom_qty',
-        digits='Product Unit of Measure', default=1.0,
+        min_display_digits='Product Unit of Measure', default=1.0,
         store=True, readonly=False, required=True, precompute=True)
     product_uom = fields.Many2one(
         comodel_name='uom.uom',

@@ -60,12 +60,12 @@ class TestUblImportBis3InvoiceBE(TestUblBis3Common, TestUblCiiBECommon):
             invoice.invoice_line_ids,
             [
                 {
-                    'quantity': 0.93,
+                    'quantity': 0.9333333333333333,
                     'price_unit': 101.35,
                     'tax_ids': tax_21.ids,
                 },
                 {
-                    'quantity': 0.28,
+                    'quantity': 0.2833333333333333,
                     'price_unit': 101.35,
                     'tax_ids': tax_21.ids,
                 },
