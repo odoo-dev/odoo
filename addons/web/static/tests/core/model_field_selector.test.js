@@ -812,6 +812,59 @@ test("support properties", async () => {
     expect(".o_model_field_selector_warning").toHaveCount(0);
 });
 
+test("relational property sub-fields do not show follow relation icon", async () => {
+    addProperties();
+    Product._records[0].definitions.push({
+        name: "xphone_prop_m2o",
+        string: "M2O Prop",
+        type: "many2one",
+        comodel: "partner",
+    });
+
+    class Parent extends Component {
+        static components = { ModelFieldSelector };
+        static template = xml`
+            <ModelFieldSelector
+                readonly="false"
+                resModel="'partner'"
+                path="path"
+                isDebugMode="true"
+                update="(path, fieldInfo) => this.onUpdate(path)"
+            />
+        `;
+        static props = ["*"];
+        setup() {
+            this.path = "foo";
+        }
+        onUpdate(path) {
+            this.path = path;
+            expect.step(path);
+            this.render();
+        }
+    }
+
+    await mountWithCleanup(Parent);
+    await openModelFieldSelectorPopover();
+
+    // Navigate into properties
+    await contains(
+        '.o_model_field_selector_popover_item[data-name="properties"] .o_model_field_selector_popover_item_name'
+    ).click();
+    expect(getTitle()).toBe("Properties");
+
+    // The m2o property sub-field should be listed but without a drill arrow
+    expect('.o_model_field_selector_popover_item[data-name="xphone_prop_m2o"]').toHaveCount(1);
+    expect(
+        '.o_model_field_selector_popover_item[data-name="xphone_prop_m2o"] .o_model_field_selector_popover_relation_icon'
+    ).toHaveCount(0);
+
+    // Clicking it should select it directly, not drill into it
+    await contains(
+        '.o_model_field_selector_popover_item[data-name="xphone_prop_m2o"] .o_model_field_selector_popover_item_name'
+    ).click();
+    expect.verifySteps(["properties.xphone_prop_m2o"]);
+});
+
 test("search on field string and name in debug mode", async () => {
     Partner._fields.ucit = fields.Char({
         type: "char",

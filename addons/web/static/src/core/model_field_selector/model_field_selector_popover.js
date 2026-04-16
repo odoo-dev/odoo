@@ -170,7 +170,7 @@ export class ModelFieldSelectorPopover extends Component {
         if (fieldDef.type === "properties") {
             return true;
         }
-        if (!this.props.followRelations) {
+        if (!this.props.followRelations || fieldDef.is_property) {
             return false;
         }
         return fieldDef.relation;
