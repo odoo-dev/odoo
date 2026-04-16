@@ -375,15 +375,28 @@ class MailMessage(models.Model):
             message.partner_ids = message.partner_to_ids | message.partner_cc_ids
 
     def _inverse_partner_ids(self):
+        to_removes = []
+        to_adds = []
         for message in self:
             current = message.partner_to_ids | message.partner_cc_ids
-            to_remove = current - message.partner_ids
-            to_add = message.partner_ids - current
-            if to_add:
-                message.partner_to_ids |= to_add
-            if to_remove:
-                message.partner_to_ids -= to_remove
-                message.partner_cc_ids -= to_remove
+            to_removes.append(current - message.partner_ids)
+            to_adds.append(message.partner_ids - current)
+
+        if len(set(to_removes)) == 1 and len(set(to_adds)) == 1:
+            print(self)
+            if to_adds[0]:
+                self.partner_to_ids |= to_adds[0]
+            if to_removes[0]:
+                self.partner_to_ids -= to_removes[0]
+                self.partner_cc_ids -= to_removes[0]
+        else:
+            print("crap")
+            for message, to_remove, to_add in zip(self, to_removes, to_adds):
+                if to_add:
+                    message.partner_to_ids |= to_add
+                if to_remove:
+                    message.partner_to_ids -= to_remove
+                    message.partner_cc_ids -= to_remove
 
     @api.model
     def _search_partner_ids(self, operator, value):
@@ -770,19 +783,19 @@ class MailMessage(models.Model):
             if 'reply_to' not in values:
                 values['reply_to'] = self._get_reply_to(values)
             # Ensure partner_to_ids is present so access depending on partner_ids can be evaluated correctly.
-            if "partner_to_ids" not in values and values.get("partner_ids"):
-                empty = self.browse()
-                # Ignore create command (NewId) as they cannot impact access at create time. They are handled later
-                # in _inverse_partner_ids.
-                existing_partner_ids = [
-                    pid for pid in self._fields["partner_ids"].convert_to_cache(values["partner_ids"], empty)
-                    if not isinstance(pid, NewId)]
-                existing_partner_cc_ids = {
-                    pid
-                    for pid in (self._fields["partner_cc_ids"].convert_to_cache(
-                        values.get("partner_cc_ids", []), empty) if "partner_cc_ids" in values else ())
-                    if not isinstance(pid, NewId)}
-                values["partner_to_ids"] = [pid for pid in existing_partner_ids if pid not in existing_partner_cc_ids]
+            # if "partner_to_ids" not in values and values.get("partner_ids"):
+            #     empty = self.browse()
+            #     # Ignore create command (NewId) as they cannot impact access at create time. They are handled later
+            #     # in _inverse_partner_ids.
+            #     existing_partner_ids = [
+            #         pid for pid in self._fields["partner_ids"].convert_to_cache(values["partner_ids"], empty)
+            #         if not isinstance(pid, NewId)]
+            #     existing_partner_cc_ids = {
+            #         pid
+            #         for pid in (self._fields["partner_cc_ids"].convert_to_cache(
+            #             values.get("partner_cc_ids", []), empty) if "partner_cc_ids" in values else ())
+            #         if not isinstance(pid, NewId)}
+            #     values["partner_to_ids"] = [pid for pid in existing_partner_ids if pid not in existing_partner_cc_ids]
 
             if not values.get('attachment_ids', True):
                 # pop empty values

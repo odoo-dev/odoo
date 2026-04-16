@@ -260,7 +260,7 @@ class TestMailTemplateLanguages(TestMailTemplateCommon):
     def test_template_send_email_batch(self):
         """ Test 'send_email' on template in batch """
         self.env.invalidate_all()
-        with self.with_user(self.user_employee.login), self.assertQueryCount(123):
+        with self.with_user(self.user_employee.login), self.assertQueryCount(1):
             template = self.test_template.with_env(self.env)
             mails_sudo = template.send_mail_batch(self.test_records_batch.ids)
 

@@ -3937,7 +3937,7 @@ class BaseModel(metaclass=MetaModel):
             assignments = []
             for fname in fnames:
                 field = self._fields[fname]
-                assert field.store and field.column_type
+                assert field.store and field.column_type, fname
                 column = SQL.identifier(fname)
                 # the type cast is necessary for some values, like NULLs
                 expr = SQL('"__tmp".%s::%s', column, SQL(field.column_type[1]))
