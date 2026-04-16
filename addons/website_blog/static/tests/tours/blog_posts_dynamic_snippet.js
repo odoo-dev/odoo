@@ -1,9 +1,10 @@
+import { registry } from "@web/core/registry";
 import {
     changeOptionInPopover,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
     goBackToBlocks,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 const dynamicSnippet = {
@@ -17,13 +18,9 @@ const blogPostsSnippet = {
     groupName: "Blogs",
 };
 
-registerWebsitePreviewTour(
-    "blog_posts_dynamic_snippet_options",
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("blog_posts_dynamic_snippet_options", {
+    steps: () => [
+        ...waitForEditMode(),
         ...insertSnippet(blogPostsSnippet),
         ...clickOnSnippet({ ...blogPostsSnippet, id: "s_blog_posts" }),
         {
@@ -51,5 +48,5 @@ registerWebsitePreviewTour(
             content: "Check That the `Template` option is visible",
             trigger: `.options-container [data-label="Template"]`,
         },
-    ]
-);
+    ],
+});

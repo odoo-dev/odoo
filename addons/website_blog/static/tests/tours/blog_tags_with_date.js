@@ -1,15 +1,11 @@
-import { registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
 /**
  * Makes sure that blog tags should not be removed on the addition of date filter
  * and on the removal of date filter.
  */
-registerWebsitePreviewTour(
-    "blog_tags_with_date",
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-    },
-    () => [
+registry.category("web_tour.tours").add("blog_tags_with_date", {
+    steps: () => [
         {
             content: "Check that the sidebar is present",
             trigger: ":iframe #o_wblog_sidebar",
@@ -21,27 +17,30 @@ registerWebsitePreviewTour(
         },
         {
             content: "Check 'adventure' tag has been added",
-            trigger: ":iframe #o_wblog_posts_loop span:contains('adventure')",
+            trigger: ":iframe #o_wblog_posts_loop span.o_filter_tag:contains('adventure')",
         },
         {
             content: "Click on 'discovery' tag",
-            trigger: ":iframe #o_wblog_sidebar a:contains('discovery')",
+            trigger:
+                ":iframe:has(#o_wblog_posts_loop span.o_filter_tag:contains('adventure')) #o_wblog_sidebar a:contains('discovery')",
             run: "click",
         },
         {
             content: "Check 'discovery' tag has been added",
-            trigger: ":iframe #o_wblog_posts_loop span:contains('discovery')",
+            trigger:
+                ":iframe #o_wblog_posts_loop:has(.o_filter_tag:contains('adventure')):has(.o_filter_tag:contains('discovery'))",
+            pause: true,
         },
         {
             content: "Select first month",
             trigger: ":iframe select[name=archive]",
-            run: function (helpers) {
+            async run({ selectByIndex }) {
                 const options = Array.from(this.anchor?.options ?? []);
                 const firstMonthIndex = options.findIndex((option) => option.closest("optgroup"));
                 if (firstMonthIndex === -1) {
                     throw new Error("Expected an option inside an optgroup in the archive select.");
                 }
-                return helpers.selectByIndex(firstMonthIndex, this.anchor);
+                await selectByIndex(firstMonthIndex, this.anchor);
             },
         },
         {
@@ -69,5 +68,5 @@ registerWebsitePreviewTour(
             trigger:
                 ":iframe #o_wblog_posts_loop:has(span:contains('adventure'), span:contains('discovery'))",
         },
-    ]
-);
+    ],
+});
