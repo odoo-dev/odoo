@@ -1,15 +1,15 @@
 import { click, contains, openDiscuss, start, startServer } from "@mail/../tests/mail_test_helpers";
 import { withGuest } from "@mail/../tests/mock_server/mail_mock_server";
-import { advanceTime, describe, test } from "@odoo/hoot";
+import { advanceTime, describe, expect, test } from "@odoo/hoot";
 import { mockDate, tick } from "@odoo/hoot-mock";
-import { Command, serverState } from "@web/../tests/web_test_helpers";
+import { Command, getService, onRpc, serverState } from "@web/../tests/web_test_helpers";
 
+import { waitFor, waitForNone } from "@odoo/hoot-dom";
+import { browser } from "@web/core/browser/browser";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { rpc } from "@web/core/network/rpc";
 import { url } from "@web/core/utils/urls";
 import { defineLivechatModels } from "./livechat_test_helpers";
-import { browser } from "@web/core/browser/browser";
-import { waitFor, waitForNone } from "@odoo/hoot-dom";
 
 describe.current.tags("desktop");
 defineLivechatModels();
@@ -508,7 +508,21 @@ test("show looking for help duration in the sidebar", async () => {
     await waitFor(
         ".o-mail-DiscussSidebarChannel-container:has(:text(Visitor #1)) .o-livechat-LookingForHelp-timer:text(2d)"
     );
+    getService("bus_service").subscribe("discuss.channel/joined", () =>
+        expect.step("channel_joined")
+    );
+    onRpc("/mail/data", async (req) => {
+        const { params } = await req.json();
+        if (
+            params.fetch_params?.some(
+                (param) => param[0] === "discuss.channel" && param[1].includes(channelId)
+            )
+        ) {
+            expect.step("/mail/data - discuss.channel");
+        }
+    });
     await click("button[name='join-channel']");
+    await expect.waitForSteps(["channel_joined", "/mail/data - discuss.channel"]);
     await contains(".o-livechat-LivechatStatusSelection .active:text('In Progress')");
     await waitForNone(
         ".o-mail-DiscussSidebarChannel-container:has(:text(Visitor #1)) .o-livechat-LookingForHelp-timer"
