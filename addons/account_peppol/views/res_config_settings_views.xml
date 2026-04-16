@@ -11,7 +11,7 @@
                         <field name="account_peppol_proxy_state" invisible="1"/>
                         <field name="peppol_use_parent_company" invisible="1"/>
                         <div class="o_setting_right_pane border-0">
-                            <div class="mb-2">
+                            <div class="mb-2" invisible="peppol_use_parent_company">
                                 <span class="o_form_label">
                                     Peppol Details
                                 </span>
@@ -50,7 +50,7 @@
                                        required="account_peppol_proxy_state == 'not_verified'"/>
                             </div>
                             <div class="row"
-                                 invisible="account_peppol_proxy_state in ('rejected', 'canceled', 'sent_verification')">
+                                 invisible="account_peppol_proxy_state in ('rejected', 'canceled', 'sent_verification') or peppol_use_parent_company">
                                 <label string="Primary contact email"
                                        for="account_peppol_contact_email"
                                        class="col-lg-3 o_light_label"/>
@@ -123,7 +123,7 @@
                                            nolabel="1"
                                            readonly="1"/>
                                 </div>
-                                <div invisible="account_peppol_proxy_state not in ('active', 'sender')">
+                                <div invisible="account_peppol_proxy_state not in ('active', 'sender') or peppol_use_parent_company">
                                     Your Peppol identification is:
                                     <field name="account_peppol_edi_identification"
                                            nolabel="1"/>
