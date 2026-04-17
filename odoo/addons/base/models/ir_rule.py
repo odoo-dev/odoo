@@ -147,7 +147,10 @@ class IrRule(models.Model):
             except ValueError:
                 domains[rule] = domain
             else:
-                domains[rule] = Domain(domain).optimize(env[rule.model_name])
+                domain = Domain(domain)
+                if (model := env.get(rule.model_name)) is not None:
+                    domain = domain.optimize(model)
+                domains[rule] = domain
 
         return frozendict({
             model_name: tuple(
