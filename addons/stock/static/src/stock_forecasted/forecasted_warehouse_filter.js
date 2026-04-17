@@ -10,11 +10,6 @@ export class ForecastedWarehouseFilter extends Component {
     setup() {
         this.context = this.props.action.context;
         this.warehouses = this.props.warehouses;
-        onWillStart(this.onWillStart)
-    }
-
-    async onWillStart() {
-        this.displayWarehouseFilter = (this.warehouses.length > 1);
     }
 
     _onSelected(id){

@@ -72,9 +72,8 @@ export class StockForecasted extends Component {
     }
 
     async _getResModel(){
-        const variant_id = this.variantId;
         const active_model = this.context.active_model || this.context.params?.active_model;
-        this.resModel = variant_id ? "product.product" : active_model;
+        this.resModel = this.variantId ? "product.product" : active_model;
         //Following is used as a fallback when the forecast is not called by an action but through browser's history
         if (!this.resModel) {
             let resModel = this.props.action.res_model;
@@ -98,21 +97,27 @@ export class StockForecasted extends Component {
     }
 
     async _loadWarehouses() {
-        const warehouses = await this.orm.searchRead('stock.warehouse', [], ['id', 'name', 'code']);
-        this.warehouses = warehouses.length > 1
-            ? [{ id: 0, name: _t("All Warehouses") }, ...warehouses]
-            : warehouses;
+        const warehouses = await this.orm.searchRead("stock.warehouse", [], ["id", "name", "code"]);
+        this.warehouses =
+            warehouses.length > 1
+                ? [{ id: 0, name: _t("All Warehouses") }, ...warehouses]
+                : warehouses;
 
-        // If no warehouse ID is set in the context, set a default.
+        // If no warehouse is selected by the user, set a default.
         if (this.warehouseId === undefined) {
             this.updateWarehouse(this.warehouses[0].id);
         }
     }
 
     async _loadVariants() {
-        const variants = await this.orm.searchRead('product.product', [['product_tmpl_id', '=', this.productId]], ['id', 'display_name']);
-        this.variants = [{ id: 0, display_name: _t("All Variants") }, ...variants]
-        // If no variant Id is set in the context, set a default.
+        const variants = await this.orm.searchRead(
+            "product.product",
+            [["product_tmpl_id", "=", this.productId]],
+            ["id", "display_name"]
+        );
+        this.variants = [{ id: 0, display_name: _t("All Variants") }, ...variants];
+
+        // If no variant is selected by the user, set a default.
         if (this.variantId === undefined) {
             this.updateVariant(this.variants[0].id);
         }
@@ -148,7 +153,9 @@ export class StockForecasted extends Component {
 
     get selectedWarehouseIds() {
         if (this.warehouseId === 0) {
-            return this.warehouses.filter((warehouse) => warehouse.id > 0).map((warehouse) => warehouse.id);
+            return this.warehouses
+                .filter((warehouse) => warehouse.id > 0)
+                .map((warehouse) => warehouse.id);
         }
         return [this.warehouseId];
     }
@@ -161,7 +168,8 @@ export class StockForecasted extends Component {
         if (this.resModel === "product.template") {
             domain.push(["product_tmpl_id", "=", this.productId]);
         } else if (this.resModel === "product.product") {
-            const productId = this.context.active_model === 'product.template' ? this.variantId : this.productId;
+            const productId =
+                this.context.active_model === "product.template" ? this.variantId : this.productId;
             domain.push(["product_id", "=", productId]);
         }
         return domain;
@@ -169,7 +177,7 @@ export class StockForecasted extends Component {
 
     get graphInfo() {
         return {
-            noContentHelp: markup(`<span class="text-muted">${_t("Try to add some incoming or outgoing transfers.")}</span>`),
+            noContentHelp: markup(`<span class="text-muted">${_t("No History Yet")}</span>`),
         };
     }
 

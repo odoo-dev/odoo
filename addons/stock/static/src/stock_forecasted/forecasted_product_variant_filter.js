@@ -17,11 +17,13 @@ export class ForecastedProductVariantFilter extends Component {
     }
 
     get activeVariant() {
-        return this.context.variant_id ? this.variants.find((v) => v.id == this.context.variant_id) : this.variants[0];
+        return this.context.variant_id
+            ? this.variants.find((v) => v.id == this.context.variant_id)
+            : this.variants[0];
     }
 
     get variantItems() {
-        return this.variants.map(variant => ({
+        return this.variants.map((variant) => ({
             id: variant.id,
             label: variant.display_name,
             onSelected: () => this._onSelected(variant.id),
