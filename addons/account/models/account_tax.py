@@ -2895,18 +2895,18 @@ class AccountTax(models.Model):
 
             # Get all involved taxes in the tax group.
             involved_taxes = self.env['account.tax']
-            price_included_values = set()
+            involved_price_include = set()
             for base_line, taxes_data in values['base_line_x_taxes_data']:
                 for tax_data in taxes_data:
                     tax = tax_data['tax']
                     involved_taxes |= tax
-                    price_included_values.add(tax._is_price_included(base_line['document_tax_mode']))
+                    involved_price_include.add(tax._is_price_included(base_line['document_tax_mode']))
 
             # Compute the display base amounts.
             if set(involved_taxes.mapped('amount_type')) == {'fixed'}:
                 display_base_amount = False
                 display_base_amount_currency = False
-            elif set(involved_taxes.mapped('amount_type')) == {'division'} and price_included_values == {True}:
+            elif set(involved_taxes.mapped('amount_type')) == {'division'} and involved_price_include == {True}:
                 display_base_amount = 0.0
                 display_base_amount_currency = 0.0
                 for base_line, _taxes_data in values['base_line_x_taxes_data']:
