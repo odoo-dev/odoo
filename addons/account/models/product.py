@@ -222,6 +222,245 @@ class ProductProduct(models.Model):
     def _get_product_accounts(self):
         return self.product_tmpl_id._get_product_accounts()
 
+    def _get_default_product_values(self, document_type):
+        """ Get the default product values for a document type.
+
+        :param document_type:   The type of the document.
+        :return:                A dictionary of default product values.
+        """
+        self.ensure_one()
+        company = self.company_id or self.env.company
+
+        # Uom.
+        uom = self.uom_id
+
+        # Taxes.
+        if document_type == 'sale':
+            taxes = self.taxes_id._filter_taxes_by_company(company)
+        elif document_type == 'purchase':
+            taxes = self.supplier_taxes_id._filter_taxes_by_company(company)
+        else:
+            taxes = self.env['account.tax']
+
+        # Currency.
+        currency = company.currency_id
+
+        # Price.
+        if document_type == 'sale':
+            price = self.with_company(company).lst_price
+        elif document_type == 'purchase':
+            price = self.with_company(company).standard_price
+        else:
+            price = 0.0
+
+        return {
+            'product': self,
+            'price': price,
+            'uom': uom,
+            'taxes': taxes,
+            'currency': currency,
+            'document_tax_mode': None,
+        }
+
+    @api.model
+    def _adapt_product_values_to_currency(self, product_values, currency, conversion_date):
+        """ Adapt the product values to the given currency at a specific date.
+
+        :param product_values:  The product values created by '_get_default_product_values'.
+        :param currency:        The currency to adapt to.
+        :param conversion_date: The date to use for the currency conversion.
+        :return:                A dictionary of adapted product values.
+        """
+        product_currency = product_values['currency']
+
+        if product_currency != currency:
+            price = product_currency._convert(
+                product_values['price'],
+                currency,
+                product_values['company'],
+                conversion_date,
+                round=False,
+            )
+        else:
+            price = product_values['price']
+
+        return {
+            **product_values,
+            'price': price,
+            'currency': currency,
+        }
+
+    @api.model
+    def _adapt_product_values_to_document_tax_mode(self, product_values, document_tax_mode):
+        """ Adapt the product values to the tax mode forced for the document.
+
+        :param product_values:      The product values created by '_get_default_product_values'.
+        :param document_tax_mode:   The tax mode forced for the document.
+        :return:                A dictionary of adapted product values.
+        """
+        if document_tax_mode is None:
+            return product_values
+
+        results = product_values['taxes']._get_tax_details(
+            price_unit=product_values['price'],
+            quantity=1.0,
+            rounding_method='round_globally',
+            product=product_values['product'],
+            product_uom=product_values['uom'],
+        )
+        if document_tax_mode == 'tax_included':
+            price = results['total_included']
+        else:
+            price = results['total_excluded']
+
+        return {
+            **product_values,
+            'price': price,
+            'document_tax_mode': document_tax_mode,
+        }
+
+    @api.model
+    def _adapt_product_values_to_uom(self, product_values, uom):
+        """ Adapt the product values to the given uom.
+
+        :param product_values:  The product values created by '_get_default_product_values'.
+        :param uom:             The uom to adapt to.
+        :return:                A dictionary of adapted product values.
+        """
+        product = product_values['product']
+        product_uom = product_values['uom']
+
+        # Apply unit of measure.
+        if product_uom and product_uom != uom:
+            price = product_uom._compute_price(product_values['price'], uom)
+        else:
+            price = product_values['price']
+
+        return {
+            **product_values,
+            'uom': uom,
+            'price': price,
+        }
+
+    @api.model
+    def _adapt_product_values_to_fiscal_position(self, product_values, fiscal_position):
+        """ Adapt the product values to the fiscal position.
+
+        :param product_values:  The product values created by '_get_default_product_values'.
+        :param fiscal_position: The fiscal position to adapt to.
+        :return:                A dictionary of adapted product values.
+        """
+        product = product_values['product']
+        price = product_values['price']
+        taxes = product_values['taxes']
+
+        if taxes and fiscal_position:
+            taxes_after_fp = fiscal_position.map_tax(taxes)
+            if taxes != taxes_after_fp:
+                price = taxes._adapt_price_unit_to_another_taxes(
+                    price_unit=price,
+                    product=product,
+                    original_taxes=taxes,
+                    new_taxes=taxes_after_fp,
+                    document_tax_mode=product_values['document_tax_mode'],
+                )
+                taxes = taxes_after_fp
+
+        return {
+            **product_values,
+            'price': price,
+            'taxes': taxes,
+        }
+
+    @api.model
+    def _adapt_price_unit_json_to_new_values(self, new_values, price_unit_json):
+        def to_json(results):
+            return {
+                'price_unit': results['price'],
+                'product_uom_id': results['uom'].id,
+                'product_id': results['product'].id,
+                'document_tax_mode': results['document_tax_mode'],
+            }
+
+        # The values we kept from the previous call.
+        if price_unit_json:
+            old_values = {
+                'product': self.env['product.product'].browse(price_unit_json['product_id']),
+                'uom': self.env['uom.uom'].browse(price_unit_json['product_uom_id']),
+                'price': price_unit_json['price_unit'],
+                'document_tax_mode': price_unit_json['document_tax_mode'],
+            }
+        else:
+            old_values = None
+
+        # The default product values if we have to recompute from it.
+        if product := new_values['product']:
+            product_values = product._get_default_product_values(new_values['document_type'])
+            product_values = self._adapt_product_values_to_currency(product_values, new_values['currency'], new_values['conversion_date'])
+            product_values = self._adapt_product_values_to_document_tax_mode(product_values, new_values['document_tax_mode'])
+            product_values = self._adapt_product_values_to_uom(product_values, new_values['uom'])
+            product_values = self._adapt_product_values_to_fiscal_position(product_values, new_values['fiscal_position'])
+        else:
+            product_values = None
+
+        if (
+            product_values
+            and (not old_values or old_values['product'] == product_values['product'])
+        ):
+            # Recompute from the product.
+            return to_json({
+                'product': product_values['product'],
+                'uom': product_values['uom'],
+                'price': product_values['price'],
+                'document_tax_mode': product_values['document_tax_mode'],
+            })
+
+        # Without previous values, keep the values as they are.
+        if not old_values:
+            return to_json({
+                'product': new_values['product'],
+                'uom': new_values['uom'],
+                'price': new_values['price'],
+                'document_tax_mode': new_values['document_tax_mode'],
+            })
+
+        results = {
+            'product': new_values['product'],
+            'price': new_values['price'],
+            'currency': new_values['currency'],
+            'taxes': new_values['taxes'],
+
+            'document_tax_mode': old_values['document_tax_mode'],
+            'uom': old_values['uom'],
+        }
+
+        # Deduce if the current price_unit is an user input or not.
+        if (
+            product_values
+            and all(product_values[key] == new_values[key] for key in ('uom', 'document_tax_mode'))
+        ):
+            is_user_input = not new_values['currency'].compare_amounts(product_values['price'], new_values['price'])
+        else:
+            is_user_input = True
+
+        # Adapt the document tax mode.
+        if new_values['document_tax_mode'] != results['document_tax_mode']:
+            if is_user_input:
+                new_values['price'] = self._adapt_product_values_to_document_tax_mode(results, new_values['document_tax_mode'])
+            else:
+                new_values['price'] = product_values['price']
+            results['document_tax_mode'] = new_values['document_tax_mode']
+
+        # Adapt the UOM.
+        if old_values['uom'] != new_values['uom']:
+            if is_user_input:
+                new_values['price'] = self._adapt_product_values_to_uom(results, new_values['uom'])
+            else:
+                new_values['price'] = product_values['price']
+            results['uom'] = new_values['uom']
+
+        return to_json(results)
+
     def _get_tax_included_unit_price(self, company, currency, document_date, document_type,
         is_refund_document=False, product_uom=None, product_currency=None,
         product_price_unit=None, product_taxes=None, fiscal_position=None, document_tax_mode=None,
@@ -230,51 +469,60 @@ class ProductProduct(models.Model):
             This is needed to compute the same unit price in different models (sale order, account move, etc.) with same parameters.
         """
         self.ensure_one()
-        company.ensure_one()
 
-        product = self
+        product_values = self._get_default_product_values(document_type)
+        product_values = self._adapt_product_values_to_currency(product_values, currency, document_date)
+        product_values = self._adapt_product_values_to_document_tax_mode(product_values, document_tax_mode)
+        product_values = self._adapt_product_values_to_uom(product_values, product_uom)
+        product_values = self._adapt_product_values_to_fiscal_position(product_values, fiscal_position)
 
-        assert document_type
+        # company.ensure_one()
 
-        if product_uom is None:
-            product_uom = product.uom_id
-        if not product_currency:
-            if document_type == 'sale':
-                product_currency = product.currency_id
-            elif document_type == 'purchase':
-                product_currency = company.currency_id
-        if product_price_unit is None:
-            if document_type == 'sale':
-                product_price_unit = product.with_company(company).lst_price
-            elif document_type == 'purchase':
-                product_price_unit = product.with_company(company).standard_price
-            else:
-                return 0.0
-        if product_taxes is None:
-            if document_type == 'sale':
-                product_taxes = product.taxes_id
-            elif document_type == 'purchase':
-                product_taxes = product.supplier_taxes_id
-        if product_taxes:
-            product_taxes = product_taxes._filter_taxes_by_company(company)
-        # Apply unit of measure.
-        if product_uom and product.uom_id != product_uom:
-            product_price_unit = product.uom_id._compute_price(product_price_unit, product_uom)
+        # product = self
 
-        # Apply fiscal position.
-        if product_taxes and fiscal_position:
-            product_price_unit = self._get_tax_included_unit_price_from_price(
-                product_price_unit,
-                product_taxes,
-                fiscal_position=fiscal_position,
-                document_tax_mode=document_tax_mode,
-            )
+        # assert document_type
 
-        # Apply currency rate.
-        if currency != product_currency:
-            product_price_unit = product_currency._convert(product_price_unit, currency, company, document_date, round=False)
+        # product_values = self._get_default_product_values(document_type)
+        # if product_uom is not None:
+        #     product_values = self._adapt_product_values_to_uom(product_values, product_uom)
 
-        return product_price_unit
+        # if product_uom is None:
+        #     product_uom = product.uom_id
+        # if not product_currency:
+        #     if document_type == 'sale':
+        #         product_currency = product.currency_id
+        #     elif document_type == 'purchase':
+        #         product_currency = company.currency_id
+        # if product_price_unit is None:
+        #     if document_type == 'sale':
+        #         product_price_unit = product.with_company(company).lst_price
+        #     elif document_type == 'purchase':
+        #         product_price_unit = product.with_company(company).standard_price
+        #     else:
+        #         return 0.0
+        # if product_taxes is None:
+        #     if document_type == 'sale':
+        #         product_taxes = product.taxes_id.filtered(lambda x: x.company_id == company)
+        #     elif document_type == 'purchase':
+        #         product_taxes = product.supplier_taxes_id.filtered(lambda x: x.company_id == company)
+        # # Apply unit of measure.
+        # if product_uom and product.uom_id != product_uom:
+        #     product_price_unit = product.uom_id._compute_price(product_price_unit, product_uom)
+
+        # # Apply fiscal position.
+        # if product_taxes and fiscal_position:
+        #     product_price_unit = self._get_tax_included_unit_price_from_price(
+        #         product_price_unit,
+        #         product_taxes,
+        #         fiscal_position=fiscal_position,
+        #         document_tax_mode=document_tax_mode,
+        #     )
+
+        # # Apply currency rate.
+        # if currency != product_currency:
+        #     product_price_unit = product_currency._convert(product_price_unit, currency, company, document_date, round=False)
+
+        return product_values['price']
 
     def _get_tax_included_unit_price_from_price(
         self, product_price_unit, product_taxes,
