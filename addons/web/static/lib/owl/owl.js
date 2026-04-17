@@ -6259,237 +6259,247 @@
         }
     }
 
-    const anyType = function validateAny() { };
-    const booleanType = function validateBoolean(context) {
-        if (typeof context.value !== "boolean") {
-            context.addIssue({ message: "value is not a boolean" });
-        }
+  function anyType() {
+    return function validateAny() {
     };
-    const numberType = function validateNumber(context) {
-        if (typeof context.value !== "number") {
-            context.addIssue({ message: "value is not a number" });
-        }
+  }
+  function booleanType() {
+    return function validateBoolean(context) {
+      if (typeof context.value !== "boolean") {
+        context.addIssue({ message: "value is not a boolean" });
+      }
     };
-    const stringType = function validateString(context) {
-        if (typeof context.value !== "string") {
-            context.addIssue({ message: "value is not a string" });
-        }
+  }
+  function numberType() {
+    return function validateNumber(context) {
+      if (typeof context.value !== "number") {
+        context.addIssue({ message: "value is not a number" });
+      }
     };
-    function arrayType(elementType) {
-        return function validateArray(context) {
-            if (!Array.isArray(context.value)) {
-                context.addIssue({ message: "value is not an array" });
-                return;
-            }
-            if (!elementType) {
-                return;
-            }
-            for (let index = 0; index < context.value.length; index++) {
-                context.withKey(index).validate(elementType);
-            }
-        };
-    }
-    function constructorType(constructor) {
-        return function validateConstructor(context) {
-            if (!(typeof context.value === "function") ||
-                !(context.value === constructor || context.value.prototype instanceof constructor)) {
-                context.addIssue({ message: `value is not '${constructor.name}' or an extension` });
-            }
-        };
-    }
-    function customValidator(type, validator, errorMessage = "value does not match custom validation") {
-        return function validateCustom(context) {
-            context.validate(type);
-            if (!context.isValid) {
-                return;
-            }
-            if (!validator(context.value)) {
-                context.addIssue({ message: errorMessage });
-            }
-        };
-    }
-    function functionType(parameters = [], result = undefined) {
-        return function validateFunction(context) {
-            if (typeof context.value !== "function") {
-                context.addIssue({ message: "value is not a function" });
-            }
-        };
-    }
-    function instanceType(constructor) {
-        return function validateInstanceType(context) {
-            if (!(context.value instanceof constructor)) {
-                context.addIssue({ message: `value is not an instance of '${constructor.name}'` });
-            }
-        };
-    }
-    function intersection(types) {
-        return function validateIntersection(context) {
-            for (const type of types) {
-                context.validate(type);
-            }
-        };
-    }
-    function literalType(literal) {
-        return function validateLiteral(context) {
-            if (context.value !== literal) {
-                context.addIssue({
-                    message: `value is not equal to ${typeof literal === "string" ? `'${literal}'` : literal}`,
-                });
-            }
-        };
-    }
-    function literalSelection(literals) {
-        return union(literals.map(literalType));
-    }
-    function validateObject(context, schema, isStrict) {
-        if (typeof context.value !== "object" || Array.isArray(context.value) || context.value === null) {
-            context.addIssue({ message: "value is not an object" });
-            return;
-        }
-        if (!schema) {
-            return;
-        }
-        const isShape = !Array.isArray(schema);
-        let shape = schema;
-        if (Array.isArray(schema)) {
-            shape = {};
-            for (const key of schema) {
-                shape[key] = null;
-            }
-        }
-        const missingKeys = [];
-        for (const key in shape) {
-            const property = key.endsWith("?") ? key.slice(0, -1) : key;
-            if (context.value[property] === undefined) {
-                if (!key.endsWith("?")) {
-                    missingKeys.push(property);
-                }
-                continue;
-            }
-            if (isShape) {
-                context.withKey(property).validate(shape[key]);
-            }
-        }
-        if (missingKeys.length) {
-            context.addIssue({
-                message: "object value has missing keys",
-                missingKeys,
-            });
-        }
-        if (isStrict) {
-            const unknownKeys = [];
-            for (const key in context.value) {
-                if (!(key in shape) && !(`${key}?` in shape)) {
-                    unknownKeys.push(key);
-                }
-            }
-            if (unknownKeys.length) {
-                context.addIssue({
-                    message: "object value has unknown keys",
-                    unknownKeys,
-                });
-            }
-        }
-    }
-    function objectType(schema = {}) {
-        return function validateLooseObject(context) {
-            validateObject(context, schema, false);
-        };
-    }
-    function strictObjectType(schema) {
-        return function validateStrictObject(context) {
-            validateObject(context, schema, true);
-        };
-    }
-    function promiseType(type) {
-        return function validatePromise(context) {
-            if (!(context.value instanceof Promise)) {
-                context.addIssue({ message: "value is not a promise" });
-            }
-        };
-    }
-    function recordType(valueType) {
-        return function validateRecord(context) {
-            if (typeof context.value !== "object" ||
-                Array.isArray(context.value) ||
-                context.value === null) {
-                context.addIssue({ message: "value is not an object" });
-                return;
-            }
-            if (!valueType) {
-                return;
-            }
-            for (const key in context.value) {
-                context.withKey(key).validate(valueType);
-            }
-        };
-    }
-    function tuple(types) {
-        return function validateTuple(context) {
-            if (!Array.isArray(context.value)) {
-                context.addIssue({ message: "value is not an array" });
-                return;
-            }
-            if (context.value.length !== types.length) {
-                context.addIssue({ message: "tuple value does not have the correct length" });
-                return;
-            }
-            for (let index = 0; index < types.length; index++) {
-                context.withKey(index).validate(types[index]);
-            }
-        };
-    }
-    function union(types) {
-        return function validateUnion(context) {
-            let firstIssueIndex = 0;
-            const subIssues = [];
-            for (const type of types) {
-                const subContext = context.withIssues(subIssues);
-                subContext.validate(type);
-                if (subIssues.length === firstIssueIndex || subContext.issueDepth > 0) {
-                    context.mergeIssues(subIssues.slice(firstIssueIndex));
-                    return;
-                }
-                firstIssueIndex = subIssues.length;
-            }
-            context.addIssue({
-                message: "value does not match union type",
-                subIssues,
-            });
-        };
-    }
-    function reactiveValueType(type) {
-        return function validateReactiveValue(context) {
-            if (typeof context.value !== "function" || !context.value[atomSymbol]) {
-                context.addIssue({ message: "value is not a reactive value" });
-            }
-        };
-    }
-    function ref(type) {
-        return union([literalType(null), instanceType(type)]);
-    }
-    const types = {
-        and: intersection,
-        any: anyType,
-        array: arrayType,
-        boolean: booleanType,
-        constructor: constructorType,
-        customValidator: customValidator,
-        function: functionType,
-        instanceOf: instanceType,
-        literal: literalType,
-        number: numberType,
-        object: objectType,
-        or: union,
-        promise: promiseType,
-        record: recordType,
-        ref,
-        selection: literalSelection,
-        signal: reactiveValueType,
-        strictObject: strictObjectType,
-        string: stringType,
-        tuple: tuple,
+  }
+  function stringType() {
+    return function validateString(context) {
+      if (typeof context.value !== "string") {
+        context.addIssue({ message: "value is not a string" });
+      }
     };
+  }
+  function arrayType(elementType) {
+    return function validateArray(context) {
+      if (!Array.isArray(context.value)) {
+        context.addIssue({ message: "value is not an array" });
+        return;
+      }
+      if (!elementType) {
+        return;
+      }
+      for (let index = 0; index < context.value.length; index++) {
+        context.withKey(index).validate(elementType);
+      }
+    };
+  }
+  function constructorType(constructor) {
+    return function validateConstructor(context) {
+      if (!(typeof context.value === "function") || !(context.value === constructor || context.value.prototype instanceof constructor)) {
+        context.addIssue({ message: `value is not '${constructor.name}' or an extension` });
+      }
+    };
+  }
+  function customValidator(type, validator, errorMessage = "value does not match custom validation") {
+    return function validateCustom(context) {
+      context.validate(type);
+      if (!context.isValid) {
+        return;
+      }
+      if (!validator(context.value)) {
+        context.addIssue({ message: errorMessage });
+      }
+    };
+  }
+  function functionType(parameters = [], result = void 0) {
+    return function validateFunction(context) {
+      if (typeof context.value !== "function") {
+        context.addIssue({ message: "value is not a function" });
+      }
+    };
+  }
+  function instanceType(constructor) {
+    return function validateInstanceType(context) {
+      if (!(context.value instanceof constructor)) {
+        context.addIssue({ message: `value is not an instance of '${constructor.name}'` });
+      }
+    };
+  }
+  function intersection(types2) {
+    return function validateIntersection(context) {
+      for (const type of types2) {
+        context.validate(type);
+      }
+    };
+  }
+  function literalType(literal) {
+    return function validateLiteral(context) {
+      if (context.value !== literal) {
+        context.addIssue({
+          message: `value is not equal to ${typeof literal === "string" ? `'${literal}'` : literal}`
+        });
+      }
+    };
+  }
+  function literalSelection(literals) {
+    return union(literals.map(literalType));
+  }
+  function validateObject(context, schema, isStrict) {
+    if (typeof context.value !== "object" || Array.isArray(context.value) || context.value === null) {
+      context.addIssue({ message: "value is not an object" });
+      return;
+    }
+    if (!schema) {
+      return;
+    }
+    const isShape = !Array.isArray(schema);
+    let shape = schema;
+    if (Array.isArray(schema)) {
+      shape = {};
+      for (const key of schema) {
+        shape[key] = null;
+      }
+    }
+    const missingKeys = [];
+    for (const key in shape) {
+      const property = key.endsWith("?") ? key.slice(0, -1) : key;
+      if (context.value[property] === void 0) {
+        if (!key.endsWith("?")) {
+          missingKeys.push(property);
+        }
+        continue;
+      }
+      if (isShape) {
+        context.withKey(property).validate(shape[key]);
+      }
+    }
+    if (missingKeys.length) {
+      context.addIssue({
+        message: "object value has missing keys",
+        missingKeys
+      });
+    }
+    if (isStrict) {
+      const unknownKeys = [];
+      for (const key in context.value) {
+        if (!(key in shape) && !(`${key}?` in shape)) {
+          unknownKeys.push(key);
+        }
+      }
+      if (unknownKeys.length) {
+        context.addIssue({
+          message: "object value has unknown keys",
+          unknownKeys
+        });
+      }
+    }
+  }
+  function objectType(schema = {}) {
+    return function validateLooseObject(context) {
+      validateObject(context, schema, false);
+    };
+  }
+  function strictObjectType(schema) {
+    return function validateStrictObject(context) {
+      validateObject(context, schema, true);
+    };
+  }
+  function promiseType(type) {
+    return function validatePromise(context) {
+      if (!(context.value instanceof Promise)) {
+        context.addIssue({ message: "value is not a promise" });
+      }
+    };
+  }
+  function recordType(valueType) {
+    return function validateRecord(context) {
+      if (typeof context.value !== "object" || Array.isArray(context.value) || context.value === null) {
+        context.addIssue({ message: "value is not an object" });
+        return;
+      }
+      if (!valueType) {
+        return;
+      }
+      for (const key in context.value) {
+        context.withKey(key).validate(valueType);
+      }
+    };
+  }
+  function tuple(types2) {
+    return function validateTuple(context) {
+      if (!Array.isArray(context.value)) {
+        context.addIssue({ message: "value is not an array" });
+        return;
+      }
+      if (context.value.length !== types2.length) {
+        context.addIssue({ message: "tuple value does not have the correct length" });
+        return;
+      }
+      for (let index = 0; index < types2.length; index++) {
+        context.withKey(index).validate(types2[index]);
+      }
+    };
+  }
+  function union(types2) {
+    return function validateUnion(context) {
+      let firstIssueIndex = 0;
+      const subIssues = [];
+      for (const type of types2) {
+        const subContext = context.withIssues(subIssues);
+        subContext.validate(type);
+        if (subIssues.length === firstIssueIndex || subContext.issueDepth > 0) {
+          context.mergeIssues(subIssues.slice(firstIssueIndex));
+          return;
+        }
+        firstIssueIndex = subIssues.length;
+      }
+      context.addIssue({
+        message: "value does not match union type",
+        subIssues
+      });
+    };
+  }
+  function reactiveValueType(type) {
+    return function validateReactiveValue(context) {
+      if (typeof context.value !== "function" || !context.value[atomSymbol]) {
+        context.addIssue({ message: "value is not a reactive value" });
+      }
+    };
+  }
+  function componentType() {
+    return constructorType(Component);
+  }
+  function ref(type) {
+    return union([literalType(null), instanceType(type)]);
+  }
+  var types = {
+    and: intersection,
+    any: anyType,
+    array: arrayType,
+    boolean: booleanType,
+    component: componentType,
+    constructor: constructorType,
+    customValidator,
+    function: functionType,
+    instanceOf: instanceType,
+    literal: literalType,
+    number: numberType,
+    object: objectType,
+    or: union,
+    promise: promiseType,
+    record: recordType,
+    ref,
+    selection: literalSelection,
+    signal: reactiveValueType,
+    strictObject: strictObjectType,
+    string: stringType,
+    tuple
+  };
 
     function validateObjectWithDefaults(schema, defaultValues) {
         const keys = Array.isArray(schema) ? schema : Object.keys(schema);
