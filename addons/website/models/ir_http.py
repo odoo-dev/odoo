@@ -14,6 +14,7 @@ from odoo import SUPERUSER_ID
 from odoo.exceptions import AccessError
 from odoo.fields import Domain
 from odoo.http import request
+from odoo.http.session import STORED_SESSION_BYTES
 from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.tools.safe_eval import safe_eval
 from odoo.addons.http_routing.models import ir_http
@@ -434,6 +435,15 @@ class IrHttp(models.AbstractModel):
         # is not restricted by the website module.
         return result
 
+    def _get_visitor_identifier(self):
+        if not request:
+            raise ValueError("Visitors can only be created through the frontend.")
+
+        if not request.env.user._is_public():
+            return request.env.user.partner_id.id
+
+        return request.session.sid[:STORED_SESSION_BYTES]
+
     def _get_visitor_from_request(self, force_create=False, force_track_values=None):
         """ Return the visitor as sudo from the request.
 
@@ -450,12 +460,12 @@ class IrHttp(models.AbstractModel):
         if not (request and request.env and request.env.uid):
             return None
 
-        access_token = self.env['website.visitor']._get_access_token()
+        visitor_identifier = self._get_visitor_identifier()
 
         if force_create:
             force_track_values = force_track_values or {}
             visitor_id, _ = self.env['website.visitor']._upsert_visitor(
-                token_or_partner_id=access_token,
+                identifier=visitor_identifier,
                 website_id=request.website.id,
                 lang_id=request.lang.id,
                 country_code=request.geoip.country_code,  # GEOIP might return a country code unknown to odoo
@@ -464,7 +474,7 @@ class IrHttp(models.AbstractModel):
             )
             return self.env['website.visitor'].sudo().browse(visitor_id)
 
-        visitor = self.env['website.visitor'].sudo().search_fetch([('access_token', '=', access_token)])
+        visitor = self.env['website.visitor'].sudo().search_fetch([('access_token', '=', visitor_identifier)])
 
         if not force_create and not self.env.cr.readonly and visitor and not visitor.timezone:
             tz = self.env['website.visitor']._get_visitor_timezone()

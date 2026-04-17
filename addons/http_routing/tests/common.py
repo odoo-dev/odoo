@@ -16,6 +16,7 @@ def MockRequest(
     env, *, path='/mockrequest', routing=True, multilang=True,
     context=frozendict(), cookies=frozendict(), country_code=None, city_name=None,
     website=None, remote_addr=HOST, environ_base=None, url_root=None, referrer=None,
+    session_sid=None,
 ):
     """Mock of the ``http.request``.
 
@@ -58,6 +59,7 @@ def MockRequest(
             odoo.http.session.get_default_session(),
             context={'lang': ''},
             force_website_id=website and website.id,
+            sid=session_sid or '',
         ),
         geoip=odoo.http.geoip.GeoIP('127.0.0.1'),
         db=env.registry.db_name,

@@ -11,12 +11,13 @@ class WebsiteSaleVisitorTests(WebsiteSaleCommon):
     def setUp(self):
         super().setUp()
         self.WebsiteController = Website()
+        self.session_sid = 'thisidentifierneedstocontainmorethan32char'
 
     def test_create_visitor_on_tracked_product(self):
         existing_visitors = self.env["website.visitor"].search([])
         existing_tracks = self.env["website.track"].search([])
 
-        with self.mock_request(referrer=self.product.website_url):
+        with self.mock_request(referrer=self.product.website_url, session_sid=self.session_sid):
             cookies = self.WebsiteController.track(res_model='product.product', res_id=self.product.id)
 
         new_visitors = self.env["website.visitor"].search([("id", "not in", existing_visitors.ids)])
@@ -28,7 +29,7 @@ class WebsiteSaleVisitorTests(WebsiteSaleCommon):
             len(new_tracks), 1, "A track should be created after visiting a tracked product"
         )
 
-        with self.mock_request(cookies=cookies, referrer=self.product.website_url):
+        with self.mock_request(cookies=cookies, referrer=self.product.website_url, session_sid=self.session_sid):
             self.WebsiteController.track(res_model='product.product', res_id=self.product.id)
 
         new_visitors = self.env["website.visitor"].search([("id", "not in", existing_visitors.ids)])
@@ -44,7 +45,7 @@ class WebsiteSaleVisitorTests(WebsiteSaleCommon):
             "list_price": 320.0,
         })
 
-        with self.mock_request(cookies=cookies, referrer=product.website_url):
+        with self.mock_request(cookies=cookies, referrer=product.website_url, session_sid=self.session_sid):
             self.WebsiteController.track(res_model='product.product', res_id=product.id)
 
         new_visitors = self.env["website.visitor"].search([("id", "not in", existing_visitors.ids)])
@@ -107,9 +108,9 @@ class WebsiteSaleVisitorTests(WebsiteSaleCommon):
         self.assertFalse(res)
 
         # AFTER VISITING THE PRODUCT
-        with self.mock_request(referrer=product.website_url):
+        with self.mock_request(referrer=product.website_url, session_sid=self.session_sid):
             cookies = self.WebsiteController.track(res_model='product.product', res_id=product.id)
-        with self.mock_request(cookies=cookies):
+        with self.mock_request(cookies=cookies, session_sid=self.session_sid):
             res = snippet_filter._prepare_values(limit=16, search_domain=[])
         res_products = [res_product["_record"] for res_product in res]
         self.assertIn(product, res_products)
@@ -117,6 +118,6 @@ class WebsiteSaleVisitorTests(WebsiteSaleCommon):
         # AFTER CHANGING PRODUCT COMPANY
         product.product_tmpl_id.company_id = new_company
         product.product_tmpl_id.flush_recordset(["company_id"])
-        with self.mock_request(cookies=cookies):
+        with self.mock_request(cookies=cookies, session_sid=self.session_sid):
             res = snippet_filter._prepare_values(limit=16, search_domain=[])
         self.assertFalse(res)

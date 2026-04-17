@@ -1,6 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import hashlib
 from datetime import datetime, timedelta
 
 from odoo import api, fields, models
@@ -30,25 +29,8 @@ class WebsiteVisitor(models.Model):
     _description = 'Website Visitor'
     _order = 'id DESC'
 
-    def _get_access_token(self):
-        """ Either the user's partner.id or a hash. """
-        if not request:
-            raise ValueError("Visitors can only be created through the frontend.")
-
-        if not request.env.user._is_public():
-            return request.env.user.partner_id.id
-
-        msg = repr((
-            request.httprequest.remote_addr,
-            request.httprequest.environ.get('HTTP_USER_AGENT'),
-            request.session.sid,
-        )).encode('utf-8')
-        # Keep same length (32) as before, it will ease the migration without
-        # any real downside
-        return hashlib.sha1(msg).hexdigest()[:32]
-
     name = fields.Char('Name', related='partner_id.name')
-    access_token = fields.Char(required=True, default=_get_access_token, copy=False)
+    access_token = fields.Char(required=True, default=lambda self: self.env['ir.http']._get_visitor_identifier(), copy=False)
     website_id = fields.Many2one('website', "Website", readonly=True)
     partner_id = fields.Many2one('res.partner', string="Contact", help="Partner of the last logged in user.", compute='_compute_partner_id', store=True, index='btree_not_null')
     partner_image = fields.Binary(related='partner_id.image_1920')
@@ -97,7 +79,7 @@ class WebsiteVisitor(models.Model):
             # If the access_token is not a 32 length hexa string, it means that
             # the visitor is linked to a logged in user, in which case its
             # partner_id is used instead as the token.
-            partner_id = len(visitor.access_token) != 32 and int(visitor.access_token)
+            partner_id = len(visitor.access_token) < 32 and int(visitor.access_token)
             visitor.partner_id = self.env['res.partner'].browse(partner_id)
 
     @api.depends('partner_id.email_normalized', 'partner_id.phone')
@@ -190,13 +172,13 @@ class WebsiteVisitor(models.Model):
             'context': compose_ctx,
         }
 
-    def _upsert_visitor(self, token_or_partner_id, website_id, lang_id=None, country_code=None, timezone=None, url=None, **kwargs):
+    def _upsert_visitor(self, identifier, website_id, lang_id=None, country_code=None, timezone=None, url=None, **kwargs):
         """ Based on the given `access_token`, either create or return the
         related visitor if exists, through a single raw SQL UPSERT Query.
 
         It will also create a tracking record if requested, in the same query.
 
-        :param token_or_partner_id: token (or partner id) to be used to identify the visitor
+        :param identifier: session identifier (or partner id) used to identify the visitor
         :param website_id: every visit is typically for a particular website
         :param lang_id: visitors language id
         :param country_code: visitors country code
@@ -208,17 +190,17 @@ class WebsiteVisitor(models.Model):
             `inserted` or `updated).
         """
         create_values = {
-            'access_token': token_or_partner_id,
+            'access_token': identifier,
             'lang_id': lang_id,
             'country_code': country_code,
             'website_id': website_id,
             'timezone': timezone,
             'write_uid': self.env.uid,
             'create_uid': self.env.uid,
-            # If the access_token is not a 32 length hexa string, it means that the
+            # If the access_token is shorter than 32 length hexa string, it means that the
             # visitor is linked to a logged in user, in which case its partner_id is
             # used instead as the token.
-            'partner_id': None if len(str(token_or_partner_id)) == 32 else token_or_partner_id,
+            'partner_id': None if len(str(identifier)) > 31 else identifier,
         }
         query = SQL("""
             INSERT INTO website_visitor (
