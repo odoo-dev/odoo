@@ -506,7 +506,7 @@ class MailMail(models.Model):
                 record_owned_attachments.sudo().generate_access_token()
                 attachments_links = self.env['ir.qweb']._render('mail.mail_attachment_links',
                                                                 {'attachments': record_owned_attachments})
-                body = tools.mail.prepend_html_content(str(body), str(attachments_links))
+                body = tools.mail.prepend_html_content(body, attachments_links)
                 attachments -= record_owned_attachments
         # attachments sorted by increasing ID to match front-end and upload ordering
         attachments.sudo().fetch(['name', 'raw', 'mimetype'])
