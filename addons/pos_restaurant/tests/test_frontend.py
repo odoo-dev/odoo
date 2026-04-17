@@ -914,9 +914,9 @@ class TestFrontend(TestFrontendCommon):
     def test_delete_line_release_table(self):
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_delete_line_release_table')
-        order = self.pos_config.current_session_id.order_ids[1]
         # opening a table at end of tour created a draft order
         last_order = self.pos_config.current_session_id.order_ids[0]
+        order = self.pos_config.current_session_id.order_ids[1]
         self.assertEqual(order.state, "cancel")
         self.assertEqual(len(last_order.lines), 0)
 
