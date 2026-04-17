@@ -38,6 +38,12 @@ def thermal_printer_format(data) -> bytes:
     return (epos_template % (target_height, base64_image)).encode()
 
 
+mapping = {
+    "qweb-text": ("zpl", lambda r: "zpl" in r.name.lower()),
+    "qweb-pdf": ("pdf", lambda r: True),
+}
+
+
 class IrActionsReport(models.Model):
     _inherit = "ir.actions.report"
 
@@ -54,29 +60,16 @@ class IrActionsReport(models.Model):
         Odoo's default behavior.
         """
         report = self._get_report(report_name)
-        if (
-            report.report_type == "qweb-text"
-            and "zpl" in report.name.lower()
-            and len(report.printer_ids.filtered(lambda p: p.type == "zpl").exists())
-        ):
-            return [
-                {
-                    "type": "zpl",
-                    "report": base64.b64encode(
-                        self._render(report_name, docids, data=data)[0]
-                    ),
-                }
-            ]
 
-        if report.report_type == "qweb-pdf" and len(report.printer_ids.filtered(lambda p: p.type == "pdf").exists()):
-            return [
-                {
-                    "type": "pdf",
+        if report.report_type in mapping:
+            printer_type, extra_check = mapping[report.report_type]
+            if extra_check(report) and report.printer_ids.filtered(lambda p: p.type == printer_type):
+                return [{
+                    "type": printer_type,
                     "report": base64.b64encode(
                         self._render(report_name, docids, data=data)[0],
                     ),
-                },
-            ]
+                }]
 
         return []
 

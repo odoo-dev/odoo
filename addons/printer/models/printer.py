@@ -31,28 +31,3 @@ class Printer(models.Model):
         ],
         default="zpl", required=True, string="Type",
     )
-
-    def _get_allowed_types(self):
-        self.ensure_one()
-
-        if self.printer_type == 'label_printer':
-            return ['zpl', 'epos']
-
-        if self.printer_type == 'receipt_printer':
-            return ['epos']
-
-        if self.printer_type == 'office_printer':
-            return ['pdf']
-
-        return []
-
-    @api.constrains('printer_type', 'type')
-    def _check_type_validity(self):
-        for rec in self:
-            allowed = rec._get_allowed_types()
-            if rec.type not in allowed:
-                raise ValidationError(
-                    f"Invalid configuration:\n\n"
-                    f"Printer Type: {rec.printer_type}\n"
-                    f"Allowed Types: {', '.join(allowed)}\n",
-                )

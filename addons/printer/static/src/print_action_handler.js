@@ -1,145 +1,160 @@
+/** @odoo-module **/
+
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 
-const base64Decode = (base64) => {
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-        bytes[i] = binary.charCodeAt(i);
+export class PrinterService {
+    constructor(services) {
+        this.services = services;
     }
-    return new TextDecoder("utf-8").decode(bytes);
-};
 
-const baseRequestParams = (report) => ({
-    method: "POST",
-    body: report,
-    targetAddressSpace: "loopback",
-    signal: AbortSignal.timeout(30000),
-});
-
-/**
- * Zebra printers host a web server that accepts print jobs
- * This server has not been updated to handle CORS preflight requests,
- * so we have to use "no-cors" mode and can't check the response status.
- */
-async function zplPrint(ip, report) {
-    const params = {
-        ...baseRequestParams(report),
-        headers: {
-            "Content-Length": report.length,
-            "Content-Type": "text/plain; charset=utf-8",
-        },
-        mode: "no-cors",
-    };
-
-    try {
-        await fetch(`http://${ip}/pstprnt`, params);
-        return { result: true };
-    } catch {
-        return { result: false };
+    base64Decode(base64) {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return new TextDecoder("utf-8").decode(bytes);
     }
-}
 
-async function ePosPrint(ip, report) {
-    try {
-        const res = await fetch(
-            `http://${ip}/cgi-bin/epos/service.cgi?devid=local_printer`,
-            baseRequestParams(report)
-        );
-        const body = await res.text();
-        const parser = new DOMParser();
-        const parsedBody = parser.parseFromString(body, "application/xml");
-        const response = parsedBody.querySelector("response");
+    baseRequestParams(report, params = {}) {
         return {
-            result: response.getAttribute("success") === "true",
-            errorCode: response.getAttribute("code"),
-        };
-    } catch {
-        return {
-            result: false,
-            errorCode: "",
+            params,
+            method: "POST",
+            body: this.base64Decode(report),
+            targetAddressSpace: "loopback",
+            signal: AbortSignal.timeout(30000),
         };
     }
-}
 
-async function sendToPdfProxy(ip, binary) {
-    try {
-        const response = await fetch(`http://${ip}/print/pdf`, {
-            ...baseRequestParams(binary),
-            headers: { "Content-Type": "application/octet-stream" },
-        });
-        return { result: response.ok };
-    } catch (error) {
-        console.error(error);
-        return {
-            result: false,
+    async zplPrint({ ip_address }, duplex, { report }) {
+        const params = {
+            ...this.baseRequestParams(report),
+            headers: {
+                "Content-Length": report.length,
+                "Content-Type": "text/plain; charset=utf-8",
+            },
+            mode: "no-cors",
         };
+
+        try {
+            await fetch(`http://${ip_address}/pstprnt`, params);
+            return { result: true };
+        } catch {
+            return { result: false };
+        }
     }
-}
 
-function getPrintMethod(type) {
-    switch (type) {
-        case "epos":
-            return ePosPrint;
-        case "pdf":
-            return sendToPdfProxy;
-        default:
-            return zplPrint;
+    async ePosPrint({ ip_address }, duplex, { report }) {
+        try {
+            const res = await fetch(
+                `http://${ip_address}/cgi-bin/epos/service.cgi?devid=local_printer`,
+                this.baseRequestParams(report)
+            );
+            const body = await res.text();
+            const parser = new DOMParser();
+            const parsedBody = parser.parseFromString(body, "application/xml");
+            const response = parsedBody.querySelector("response");
+            return {
+                result: response.getAttribute("success") === "true",
+                errorCode: response.getAttribute("code"),
+            };
+        } catch {
+            return { result: false, errorCode: "" };
+        }
     }
-}
 
-export async function printJobs(printer, jobs, { notification }) {
-    jobs = [...jobs]; // copy to allow using the same array for multiple printers
-    // print jobs one by one and retry if the printers is waiting for the user to eject the paper
-    while (jobs.length > 0) {
-        const job = jobs.at(-1);
-        if (job.type !== printer.type) {
-            jobs.pop();
-            continue;
+    async sendToPdfProxy({ ip_address }, duplex, { report }) {
+        try {
+            const response = await fetch(`http://${ip_address}/print/pdf`, {
+                ...this.baseRequestParams(report, { duplex }),
+                headers: { "Content-Type": "application/octet-stream" },
+            });
+            return { result: response.ok };
+        } catch (error) {
+            console.error(error);
+            return { result: false };
         }
-        const print = getPrintMethod(job.type);
-        const res = await print(printer.ip_address, base64Decode(job.report));
+    }
 
-        if (res.result) {
-            jobs.pop();
-            continue;
-        }
+    getPrintMethod(type) {
+        const map = {
+            epos: this.ePosPrint.bind(this),
+            pdf: this.sendToPdfProxy.bind(this),
+            zpl: this.zplPrint.bind(this),
+        };
+        return map[type];
+    }
 
-        if (res.errorCode === "ERROR_WAIT_EJECT") {
-            await new Promise((r) => setTimeout(r, 1000));
-            continue;
-        }
+    async printJobs(printers, duplex, jobs) {
+        const { notification } = this.services;
+        let anySuccess = false;
 
-        notification.add(
-            _t(
-                "Error occurred while printing the document. Please check the printer and try again: %s",
-                res.errorCode
-            ),
-            {
-                type: "danger",
+        for (const job of jobs) {
+            let jobPrinted = false;
+
+            for (const printer of printers) {
+                if (printer.type !== job.type) {
+                    continue;
+                }
+
+                const print = this.getPrintMethod(job.type);
+                const res = await print(printer, duplex, job, this.services);
+
+                if (res.result) {
+                    anySuccess = true;
+                    jobPrinted = true;
+                    break;
+                }
+
+                if (res.errorCode === "ERROR_WAIT_EJECT") {
+                    await new Promise((r) => setTimeout(r, 1000));
+                    continue;
+                }
             }
-        );
-        jobs.pop();
+
+            if (!jobPrinted) {
+                notification.add(
+                    _t("Failed to print one document. Falling back to default printing."),
+                    { type: "warning" }
+                );
+                return false;
+            }
+        }
+
+        return anySuccess;
+    }
+
+    async handle(action, options) {
+        const printersCache = this.services.report_printers_cache;
+        const { report_id, jobs } = action.context;
+
+        if (!jobs?.length) {
+            return false;
+        }
+
+        const printerSettings = await printersCache.getPrinterSettingsForReport(report_id);
+
+        const printers = printerSettings?.selectedPrinters;
+
+        if (!printers?.length) {
+            return false;
+        }
+
+        const success = await this.printJobs(printers, printerSettings.duplex, jobs);
+
+        if (!success) {
+            return false;
+        }
+
+        options.onClose?.();
+        return true;
     }
 }
 
-async function printActionHandler(action, options, { services }) {
-    const printersCache = services.report_printers_cache;
-    const { report_id, jobs } = action.context;
-    if (!jobs?.length) {
-        return false;
-    }
-
-    const printerSettings = await printersCache.getPrinterSettingsForReport(report_id);
-    if (!printerSettings?.selectedPrinters) {
-        // If the user does not select any printer, fall back to normal printing
-        return false;
-    }
-    for (const printer of printerSettings.selectedPrinters) {
-        await printJobs(printer, jobs, services);
-    }
-    options.onClose?.();
-    return true;
+function printActionHandler(action, options, { services }) {
+    const service = new PrinterService(services);
+    return service.handle(action, options);
 }
 
 registry.category("ir.actions.report handlers").add("print_action_handler", printActionHandler);
