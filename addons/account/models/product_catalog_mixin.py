@@ -112,7 +112,7 @@ class ProductCatalogMixin(models.AbstractModel):
         lines = self[child_field]
         for line in lines.sorted('sequence'):
             if line.display_type in ('line_section', 'line_subsection'):
-                sections[line.id] = {
+                values = {
                     'id': line.id,
                     'name': line.name,
                     'sequence': line.sequence,
@@ -122,6 +122,13 @@ class ProductCatalogMixin(models.AbstractModel):
                     'subtotal': line._get_section_totals('price_subtotal'),
                     'currency_id': self.currency_id.id,
                 }
+                if hasattr(line, 'collapse_prices'):
+                    values['collapse_prices'] = line.collapse_prices
+                if hasattr(line, 'collapse_composition'):
+                    values['collapse_composition'] = line.collapse_composition
+                if hasattr(line, 'is_optional'):
+                    values['is_optional'] = line.is_optional
+                sections[line.id] = values
             elif self._is_line_valid_for_section_line_count(line):
                 section = line.get_parent_section_line()
                 subsection = line.get_parent_subsection_line()
@@ -177,7 +184,7 @@ class ProductCatalogMixin(models.AbstractModel):
         )
 
     def _resequence_sections(self, child_field, id, parent_id, before_id=None, **kwargs):
-        lines = getattr(self, child_field).sorted("sequence")
+        lines = self[child_field].sorted("sequence")
         section = lines.browse(id)
 
         if not section:
@@ -356,5 +363,20 @@ class ProductCatalogMixin(models.AbstractModel):
             )
 
         to_delete.unlink()
+
+        return True
+
+    def _toggle_field_of_section(self, child_field, section_id, field_name, **kwargs):
+        lines = self[child_field]
+        section = lines.browse(section_id)
+
+        if not section.exists():
+            return True
+
+        # ensure field exists on model
+        if field_name not in section._fields:
+            return True
+
+        section[field_name] = not section[field_name]
 
         return True

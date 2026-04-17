@@ -40,14 +40,29 @@
                 >
                     <span class="text-truncate" t-out="this.props.section.name"/>
                     <span class="text-muted ms-2" t-out="this.props.section.line_count"/>
-                    <span class="text-muted ms-2"
-                        t-out="this.getFormattedSubTotal(this.props.section)"/>
                 </div>
 
                 <!-- Actions -->
                 <div class="d-flex align-items-center ms-2 gap-2">
+                    <span
+                        class="text-muted"
+                        t-out="this.getFormattedSubTotal(this.props.section)"
+                    />
 
-                    <SectionsDropdown t-if="this.props.section.id" t-props="this.props"/>
+                    <i
+                        t-if="this.props.section.collapse_prices"
+                        class="fa fa-eye-slash text-muted"
+                    />
+                    <i
+                        t-elif="this.props.section.collapse_composition"
+                        class="fa fa-compress text-muted"
+                    />
+                    <i
+                        t-elif="this.props.section.is_optional"
+                        class="fa fa-fw fa-dot-circle-o text-muted"
+                    />
+
+                    <SectionDropdown t-if="this.props.section.id" t-props="this.props"/>
 
                     <!-- Add subsection -->
                     <i

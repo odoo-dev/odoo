@@ -5,7 +5,7 @@ import { useBus } from '@web/core/utils/hooks';
 import { useNestedSortable } from "@web/core/utils/nested_sortable";
 import { useState, useRef, useSubEnv } from "@web/owl2/utils";
 import { SearchPanel } from '@web/search/search_panel/search_panel';
-import { SectionRow } from './section_row';
+import { SectionRow } from './section_row/section_row';
 
 export class AccountProductCatalogSearchPanel extends SearchPanel {
     static template = 'account.ProductCatalogSearchPanel';
