@@ -1366,7 +1366,7 @@
                                         <field name="collapse_prices" column_invisible="True"/>
                                         <field name="collapse_composition" column_invisible="True"/>
                                         <field name="document_tax_mode" column_invisible="True"/>
-                                        <field name="price_unit_last_computed_vals" column_invisible="True"/>
+                                        <field name="price_unit_json" column_invisible="True"/>
                                     </list>
                                     <kanban class="o_kanban_mobile">
                                         <!-- Displayed fields -->

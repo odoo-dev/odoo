@@ -409,13 +409,11 @@ class AccountMoveLine(models.Model):
         compute="_compute_price_unit", store=True, readonly=False, precompute=True,
         min_display_digits='Product Price',
     )
-    price_unit_last_computed_vals = fields.Json(
-        help="Technical field storing last computed values for price_unit computation",
+    # Technical field storing last computed values for price_unit computation.
+    price_unit_json = fields.Json(
         compute='_compute_price_unit',
-        readonly=False,
         store=True,
         precompute=True,
-        default={},
     )
     price_subtotal = fields.Monetary(
         string='Subtotal',
@@ -1129,17 +1127,8 @@ class AccountMoveLine(models.Model):
     @api.depends('product_id', 'product_uom_id', 'document_tax_mode')
     def _compute_price_unit(self):
         for line in self:
-            if not line.product_id or line.display_type in ('line_section', 'line_subsection', 'line_note') or line.is_imported:
-                continue
-
-            # No recomputation needed when price_unit has been manually changed, unless the uom or product changes
-            if line.price_unit and (
-                line.price_unit != (line.price_unit_last_computed_vals or {}).get('price_unit')
-            ) and (
-                line.product_uom_id.id == (line.price_unit_last_computed_vals or {}).get('product_uom_id')
-            ) and (
-                line.product_id.id == (line.price_unit_last_computed_vals or {}).get('product_id')
-            ):
+            if line.display_type in ('line_section', 'line_subsection', 'line_note') or line.is_imported:
+                line.price_unit_json = False
                 continue
 
             if line.move_id.is_sale_document(include_receipts=True):
@@ -1149,25 +1138,21 @@ class AccountMoveLine(models.Model):
             else:
                 document_type = 'other'
 
-            # The product taxes follow the tax mode set on the company
-            product_tax_mode = line.company_id.account_price_include
-            price_from_product = line.product_id._get_tax_included_unit_price(
-                line.move_id.company_id,
-                line.move_id.currency_id,
-                line.move_id.date,
-                document_type,
-                fiscal_position=line.move_id.fiscal_position_id,
-                product_uom=line.product_uom_id,
-            )
-            price_from_product_opposite_tax_mode = line.product_id._get_opposite_tax_mode_price(line, price_from_product)
-            line.price_unit = price_from_product if (line.document_tax_mode == product_tax_mode) else price_from_product_opposite_tax_mode
-
-            line.price_unit_last_computed_vals = {
-                'price_unit': line.price_unit,
-                'product_id': line.product_id.id,
-                'product_uom_id': line.product_uom_id.id,
+            new_values = {
+                'product': line.product_id,
+                'uom': line.product_uom_id,
+                'price': line.price_unit,
+                'taxes': line.tax_ids,
                 'document_tax_mode': line.document_tax_mode,
+                'document_type': document_type,
+
+                'currency': line.move_id.currency_id,
+                'conversion_date': line.move_id.date,
+                'fiscal_position': line.move_id.fiscal_position_id,
             }
+
+            line.price_unit_json = line.product_id._adapt_price_unit_json_to_new_values(new_values, line.price_unit_json)
+            line.price_unit = line.price_unit_json['price_unit']
 
     @api.depends('product_id', 'product_uom_id')
     def _compute_tax_ids(self):
