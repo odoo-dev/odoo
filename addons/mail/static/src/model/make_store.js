@@ -85,6 +85,15 @@ export function makeStore(env, { localRegistry } = {}) {
                                 return res;
                             }
                             if (Model._.fieldsCompute.get(name) && !Model._.fieldsEager.get(name)) {
+                                if (
+                                    [
+                                        "allMessages",
+                                        "newestPersistentAllMessages",
+                                        "newestPersistentOfAllMessage",
+                                    ].includes(name)
+                                ) {
+                                    console.log("computeInNeed of " + name);
+                                }
                                 record._.fieldsComputeInNeed.set(name, true);
                                 if (record._.fieldsComputeOnNeed.get(name)) {
                                     record._.compute(record, name, { fromInNeed: true });

@@ -1876,6 +1876,9 @@
         const sources = computation.sources;
         for (const source of sources) {
             const observers = source.observers;
+            if (computation === window.aku_computation) {
+                debugger;
+            }
             observers.delete(computation);
             // todo: if source has no effect observer anymore, remove its sources too
             // todo: test it
@@ -1883,6 +1886,9 @@
         sources.clear();
     }
     function disposeComputation(computation) {
+        if (computation === window.aku_computation) {
+            debugger;
+        }
         for (const source of computation.sources) {
             source.observers.delete(computation);
             // Recursively dispose derived computations that lost all observers
@@ -2610,6 +2616,12 @@
      * @param callback the function to call when the key changes
      */
     function onReadTargetKey(target, key, atom) {
+        if (window.aku6) {
+            if (`${target.localId ?? target._?.name ?? target.toString()}` === "mail.message,1") {
+                debugger;
+            }
+            console.log(`onReadTargetKey of ${target.localId ?? target._?.name ?? target.toString()}`, key)
+        }
         onReadAtom(atom ?? getTargetKeyAtom(target, key));
     }
     /**
@@ -2622,6 +2634,9 @@
      *   or deleted)
      */
     function onWriteTargetKey(target, key, atom) {
+        if (window.aku100) {
+            debugger;
+        }
         if (!atom) {
             const keyToAtomItem = targetToKeysToAtomItem.get(target);
             if (!keyToAtomItem) {
@@ -5608,6 +5623,9 @@
         };
     }
     function immediateEffect(fn) {
+        if (window.aku_xx) {
+            debugger;
+        }
         const computation = createComputation(() => {
             setComputation(undefined);
             unsubscribeEffect(computation);
@@ -5632,6 +5650,9 @@
             childEffect.state = ComputationState.EXECUTED;
             removeSources(childEffect);
             unsubscribeEffect(childEffect);
+        }
+        if (effect.observers.has(window.aku_computation)) {
+            debugger;
         }
         effect.observers.clear();
     }

@@ -30,6 +30,7 @@ export class MessagingMenu extends Component {
 
     setup() {
         super.setup();
+        window.aku3 = this;
         this.isIosPwa = isIOS() && isDisplayStandalone();
         this.discussSystray = useDiscussSystray();
         this.store = useService("mail.store");
@@ -141,6 +142,13 @@ export class MessagingMenu extends Component {
         }
         ev.preventDefault();
         ev.stopPropagation();
+    }
+
+    getThreadMessage(thread) {
+        return thread.channel?.isChatChannel ||
+            (thread.channel?.channel_type === "channel" && thread.needactionMessages.length === 0)
+            ? thread.newestPersistentOfAllMessage
+            : thread.needactionMessages.at(-1);
     }
 
     get notificationItems() {

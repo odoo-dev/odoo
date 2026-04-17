@@ -307,6 +307,16 @@ export class StoreInternal extends RecordInternal {
      * @param {any} value
      */
     updateRelation(record, fieldName, value) {
+        if (
+            ["allMessages", "newestPersistentAllMessages", "newestPersistentOfAllMessage"].includes(
+                fieldName
+            )
+        ) {
+            // if (window.aku2 && fieldName === "allMessages") {
+            //     debugger;
+            // }
+            console.log("updating of " + fieldName);
+        }
         /** @type {RecordList<Record>} */
         const recordList = record[fieldName];
         if (isMany(record.Model, fieldName)) {

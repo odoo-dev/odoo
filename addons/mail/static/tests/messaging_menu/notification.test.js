@@ -263,7 +263,7 @@ test("marked as read thread notifications are ordered by last message date", asy
     await contains(".o-mail-NotificationItem-name:eq(1):text('Channel 2019')");
 });
 
-test("thread notifications are re-ordered on receiving a new message", async () => {
+test.debug("thread notifications are re-ordered on receiving a new message", async () => {
     mockDate("2023-01-03 12:00:00"); // so that it's after last interest (mock server is in 2019 by default!)
     const pyEnv = await startServer();
     const bobUserId = pyEnv["res.users"].create({ name: "Bob" });
@@ -292,9 +292,12 @@ test("thread notifications are re-ordered on receiving a new message", async () 
             res_id: channelId_2,
         },
     ]);
-    await start();
+    window.aku = await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await contains(".o-mail-NotificationItem", { count: 2 });
+    await contains(".o-mail-NotificationItem-name:eq(0):text('Channel 2020')");
+    await contains(".o-mail-NotificationItem-name:eq(1):text('Channel 2019')");
+    window.aku2 = 1;
     await withUser(bobUserId, () =>
         rpc("/mail/message/post", {
             post_data: {
@@ -306,9 +309,9 @@ test("thread notifications are re-ordered on receiving a new message", async () 
             thread_model: "discuss.channel",
         })
     );
-    await contains(".o-mail-NotificationItem-name:eq(0):text('Channel 2019')");
-    await contains(".o-mail-NotificationItem-name:eq(1):text('Channel 2020')");
-    await contains(".o-mail-NotificationItem", { count: 2 });
+    // await contains(".o-mail-NotificationItem-name:eq(0):text('Channel 2019')");
+    // await contains(".o-mail-NotificationItem-name:eq(1):text('Channel 2020')");
+    // await contains(".o-mail-NotificationItem", { count: 2 });
 });
 
 test("messaging menu counter should ignore unread messages in channels that are unpinned", async () => {

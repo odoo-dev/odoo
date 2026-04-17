@@ -31,6 +31,13 @@ function isEager(reclist) {
 
 /** @param {RecordList} reclist */
 function setComputeInNeed(reclist) {
+    if (
+        ["allMessages", "newestPersistentAllMessages", "newestPersistentOfAllMessage"].includes(
+            reclist._.name
+        )
+    ) {
+        console.log("computeInNeed of " + reclist._.name);
+    }
     reclist._.owner._.fieldsComputeInNeed.set(reclist._.name, true);
 }
 
@@ -392,6 +399,10 @@ export class RecordList extends Array {
                     recordList,
                     val,
                     function recordListPushInsert(record) {
+                        if (window.aku2 && recordList._.name === "allMessages") {
+                            window.aku100 = 1;
+                            debugger;
+                        }
                         recordList._proxy.data.push(record.localId);
                         recordList._.syncLength(recordList);
                         record._.uses.add(recordList);
@@ -475,6 +486,9 @@ export class RecordList extends Array {
      * @param {...R} [newRecordsProxy]
      */
     splice(start, deleteCount, ...newRecordsProxy) {
+        // if (newRecordsProxy.some((r) => r.localId === "mail.message,3") && window.aku2) {
+        //     debugger;
+        // }
         const recordList = toRaw(this)._raw;
         const recordListFullProxy = this;
         const store = recordList._store;

@@ -148,6 +148,15 @@ export class RecordInternal {
                          * true through the proxy getters.
                          */
                         this.fieldsComputeInNeed.delete(fieldName);
+                        if (
+                            [
+                                "allMessages",
+                                "newestPersistentAllMessages",
+                                "newestPersistentOfAllMessage",
+                            ].includes(fieldName)
+                        ) {
+                            console.log("remove of computeInNeed of " + fieldName);
+                        }
                     }
                 });
                 // reset flags triggered by registering onChange
@@ -209,8 +218,26 @@ export class RecordInternal {
             store._.ADD_QUEUE("compute", record, fieldName);
         } else {
             if (Model._.fieldsEager.get(fieldName) || this.fieldsComputeInNeed.get(fieldName)) {
+                if (
+                    [
+                        "allMessages",
+                        "newestPersistentAllMessages",
+                        "newestPersistentOfAllMessage",
+                    ].includes(fieldName)
+                ) {
+                    console.log("compute of " + fieldName);
+                }
                 this.compute(record, fieldName);
             } else {
+                if (
+                    [
+                        "allMessages",
+                        "newestPersistentAllMessages",
+                        "newestPersistentOfAllMessage",
+                    ].includes(fieldName)
+                ) {
+                    console.log("computeOnNeed of " + fieldName);
+                }
                 this.fieldsComputeOnNeed.set(fieldName, true);
             }
         }
@@ -249,19 +276,49 @@ export class RecordInternal {
             return;
         }
         this.fieldsComputeStop.get(fieldName)?.();
+        if (fieldName === "newestPersistentOfAllMessage") {
+            console.log("STOPPED");
+        }
         let triggered = false;
+        if (fieldName === "newestPersistentOfAllMessage") {
+            console.log("NEWWW");
+            window.aku_xx = 1;
+            debugger;
+        }
         const stopFn = immediateEffect(() => {
+            window.aku_xx = 0;
+            if (fieldName === "newestPersistentOfAllMessage") {
+                console.log("1");
+            }
             if (triggered) {
+                if (fieldName === "newestPersistentOfAllMessage") {
+                    console.log("2");
+                }
                 return untrack(() => this.requestCompute(record, fieldName));
+            }
+            if (fieldName === "newestPersistentOfAllMessage") {
+                console.log("3");
             }
             const store = record._rawStore;
             this.fieldsComputing.set(fieldName, true);
             this.fieldsComputeOnNeed.delete(fieldName);
             let computedValue;
+            if (
+                [
+                    "allMessages",
+                    "newestPersistentAllMessages",
+                    "newestPersistentOfAllMessage",
+                ].includes(fieldName)
+            ) {
+                console.log("computing of " + fieldName);
+            }
             try {
                 computedValue = Model._.fieldsCompute.get(fieldName).call(record._proxy);
             } catch (err) {
                 store.handleError(err);
+            }
+            if (fieldName === "newestPersistentOfAllMessage") {
+                console.log("4");
             }
             untrack(() =>
                 store._.updateFields(record, {
@@ -272,6 +329,15 @@ export class RecordInternal {
         });
         this.fieldsComputeStop.set(fieldName, stopFn);
         if (fromInNeed) {
+            if (
+                [
+                    "allMessages",
+                    "newestPersistentAllMessages",
+                    "newestPersistentOfAllMessage",
+                ].includes(fieldName)
+            ) {
+                console.log("computeInNeed 2 of " + fieldName);
+            }
             this.fieldsComputeInNeed.set(fieldName, true);
         }
         triggered = true;

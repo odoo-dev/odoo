@@ -34,7 +34,7 @@
                 <t t-set="itemIndex" t-value="itemIndex + 1"/>
             </t>
             <t t-foreach="this.threads" name="threads" t-as="thread" t-key="thread.localId">
-                <t t-set="message" t-value="thread.channel?.isChatChannel or (thread.channel?.channel_type === 'channel' and thread.needactionMessages.length === 0) ? thread.newestPersistentOfAllMessage : thread.needactionMessages.at(-1)"/>
+                <t t-set="message" t-value="this.getThreadMessage(thread)"/>
                 <NotificationItem
                     isActive="this.state.activeIndex === itemIndex"
                     counter="thread.channel?.importantCounter ?? thread.needactionCounter"

@@ -1,11 +1,12 @@
 import { AND, fields, Record } from "@mail/model/export";
 import { generateEmojisOnHtml } from "@mail/utils/common/format";
-import { compareDatetime } from "@mail/utils/common/misc";
+import { compareDatetime, onChange } from "@mail/utils/common/misc";
 
 import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
 import { Deferred } from "@web/core/utils/concurrency";
+import { toRaw } from "@odoo/owl";
 
 /**
  * @typedef SuggestedRecipient
@@ -29,6 +30,28 @@ import { Deferred } from "@web/core/utils/concurrency";
 export class Thread extends Record {
     static id = AND("model", "id");
     static _name = "mail.thread";
+    static new() {
+        const res = super.new(...arguments);
+        // onChange(res, "allMessages", () => {
+        //     if (window.aku2) {
+        //         debugger;
+        //     }
+        //     console.log("allMessages has changed!", res.allMessages.data.toString());
+        // });
+        // onChange(res, "newestPersistentAllMessages", () => {
+        //     console.log(
+        //         "newestPersistentAllMessages has changed!",
+        //         res.newestPersistentAllMessages.data.toString()
+        //     );
+        // });
+        // onChange(res, "newestPersistentOfAllMessage", () => {
+        //     console.log(
+        //         "newestPersistentOfAllMessage has changed!",
+        //         toRaw(res)._raw.newestPersistentOfAllMessage.data.toString()
+        //     );
+        // });
+        return res;
+    }
     /**
      * @param {string} localId
      * @returns {string}
@@ -361,19 +384,53 @@ export class Thread extends Record {
         return this.messages.findLast((msg) => Number.isInteger(msg.id));
     }
 
-    newestPersistentAllMessages = fields.Many("mail.message", {
-        compute() {
-            const allPersistentMessages = this.allMessages.filter((message) =>
-                Number.isInteger(message.id)
-            );
-            allPersistentMessages.sort((m1, m2) => m2.id - m1.id);
-            return allPersistentMessages;
-        },
-    });
+    // newestPersistentAllMessages = fields.Many("mail.message", {
+    //     compute() {
+    //         // if (this.localId.includes("AND 1")) {
+    //         //     window.aku6 = 1;
+    //         // }
+    //         // void this.allMessages.length;
+    //         // const res = undefined;
+    //         // for (const msg of this.allMessages) {
+    //         //     if (!Number.isInteger(msg.id)) {
+    //         //         continue;
+    //         //     }
+    //         //     if (res && msg.id < res.id) {
+    //         //         res = msg;
+    //         //     }
+    //         // }
+    //         // return res;
+    //         const allPersistentMessages = this.allMessages.filter((message) =>
+    //             Number.isInteger(message.id)
+    //         );
+    //         allPersistentMessages.sort((m1, m2) => m2.id - m1.id);
+    //         window.aku6 = 0;
+    //         return allPersistentMessages;
+    //     },
+    // });
 
     newestPersistentOfAllMessage = fields.One("mail.message", {
         compute() {
-            return this.newestPersistentAllMessages[0];
+            if (this.localId.includes("AND 1")) {
+                window.aku6 = 1;
+            }
+            let res = undefined;
+            for (const msg of this.allMessages) {
+                if (!Number.isInteger(msg.id)) {
+                    continue;
+                }
+                if (res && msg.id > res.id) {
+                    res = msg;
+                } else {
+                    res = msg;
+                }
+            }
+            if (window.aku2) {
+                debugger;
+            }
+            window.aku6 = 0;
+            return res;
+            // return this.newestPersistentAllMessages[0];
         },
     });
 
