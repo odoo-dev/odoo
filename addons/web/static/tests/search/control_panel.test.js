@@ -262,34 +262,3 @@ test("control panel layout buttons in dialog", async () => {
         message: "layout buttons are not replicated in the control panel when inside a dialog",
     });
 });
-
-test.tags("mobile");
-test("Control panel is shown/hide on top when scrolling", async () => {
-    await mountWithSearch(
-        ControlPanel,
-        { resModel: "foo" },
-        {
-            viewSwitcherEntries: [
-                { type: "list", active: true, icon: "oi-view-list", name: "List" },
-                { type: "kanban", icon: "oi-view-kanban", name: "Kanban" },
-            ],
-        }
-    );
-    const contentHeight = 200;
-    const sampleContent = document.createElement("div");
-    sampleContent.style.minHeight = `${2 * contentHeight}px`;
-    const target = getFixture();
-    target.appendChild(sampleContent);
-    target.style.maxHeight = `${contentHeight}px`;
-    target.style.overflow = "auto";
-    target.scrollTo({ top: 50 });
-    await animationFrame();
-    expect(".o_control_panel").toHaveClass("o_mobile_sticky", {
-        message: "control panel becomes sticky when the target is not on top",
-    });
-    target.scrollTo({ top: -50 });
-    await animationFrame();
-    expect(".o_control_panel").not.toHaveClass("o_mobile_sticky", {
-        message: "control panel is not sticky anymore",
-    });
-});

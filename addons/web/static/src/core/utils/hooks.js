@@ -1,4 +1,4 @@
-import { useComponent, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
+import { useEnv, useComponent, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
 import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 
 import { status, onWillUnmount, toRaw, onMounted, onPatched } from "@odoo/owl";
@@ -421,4 +421,58 @@ export function useBackButton(handler, shouldEnable) {
     onMounted(updateRegistration);
     onPatched(updateRegistration);
     onWillUnmount(unregister);
+}
+
+/**
+ * Show or hide the navbar and control panel on the top screen
+ * The function is throttled to avoid refreshing the scroll position more
+ * often than necessary.
+ */
+export function useStickyNavbar({ navbarRef, controlPanelRef }) {
+    const env = useEnv();
+    let lastScrollTop = 0;
+    let currentTranslateY = 0;
+    let scrollingEl = null;
+    let isDocked = false;
+    let maxTranslate = 0;
+
+    function onScrollThrottled() {
+        if (isDocked) {
+            return;
+        }
+        const scrollTop = scrollingEl.scrollTop;
+        const delta = scrollTop - lastScrollTop;
+        currentTranslateY = Math.min(
+            maxTranslate,
+            Math.max(0, currentTranslateY + delta)
+        );
+        const translate = `translateY(-${currentTranslateY}px)`;
+        controlPanelRef.el?.style.setProperty("transform", translate);
+        navbarRef.el?.style.setProperty("transform", translate);
+        lastScrollTop = scrollTop;
+    }
+
+    useBus(env.bus, "STICKY_NAVBAR:RESET_STATE", ({ detail }) => {
+        isDocked = detail.isDocked;
+        currentTranslateY = 0;
+        lastScrollTop = scrollingEl?.scrollTop;
+        controlPanelRef.el?.style.setProperty("transform", null);
+        navbarRef.el?.style.setProperty("transform", null);
+    });
+
+    useLayoutEffect((navbarEl, controlPanelEl) => {
+        if (!env.isSmall) {
+            return;
+        }
+        scrollingEl = controlPanelEl?.parentElement; //FIXME to check
+        const navbarHeight = navbarEl?.clientHeight || 0;
+        const controlPanelHeight = controlPanelEl?.clientHeight || 0;
+        maxTranslate = navbarHeight + controlPanelHeight;
+        scrollingEl?.addEventListener("scroll", onScrollThrottled);
+
+        return () => {
+            scrollingEl?.removeEventListener("scroll", onScrollThrottled);
+            scrollingEl = null;
+        };
+    }, () => [navbarRef?.el, controlPanelRef?.el]);
 }

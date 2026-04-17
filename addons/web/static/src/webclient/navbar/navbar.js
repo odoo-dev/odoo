@@ -3,7 +3,7 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { DropdownGroup } from "@web/core/dropdown/dropdown_group";
 import { Transition } from "@web/core/transition";
-import { useService } from "@web/core/utils/hooks";
+import { useService, useForwardRefToParent } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { debounce } from "@web/core/utils/timing";
 import { ErrorHandler } from "@web/core/utils/components";
@@ -32,7 +32,9 @@ export class NavBar extends Component {
         ErrorHandler,
         Transition,
     };
-    static props = {};
+    static props = {
+        navbar: { type: Function, optional: true },
+    };
 
     setup() {
         this.currentAppSectionsExtra = [];
@@ -40,7 +42,7 @@ export class NavBar extends Component {
         this.menuService = useService("menu");
         this.offlineService = useService("offline");
         this.pwa = useService("pwa");
-        this.root = useRef("root");
+        this.root = useRef("navbar");
         this.appSubMenus = useRef("appSubMenus");
         const debouncedAdapt = debounce(this.adapt.bind(this), 250);
         onWillDestroy(() => debouncedAdapt.cancel());
@@ -77,6 +79,7 @@ export class NavBar extends Component {
             isAppMenuSidebarOpened: false,
         });
         this.ui = useState(useService("ui"));
+        useForwardRefToParent("navbar");
     }
 
     handleItemError(error, item) {
