@@ -37,20 +37,6 @@ export const accountTaxHelpers = {
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      */
-    price_include_after_document_tax_mode(taxes, document_tax_mode) {
-        const isIncluded = document_tax_mode === 'tax_included';
-
-        if (!taxes.price_include_override && document_tax_mode) {
-            return isIncluded;
-        } else {
-            return taxes.price_include;
-        }
-    },
-
-    /**
-     * [!] Mirror of the same method in account_tax.py.
-     * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-     */
     flatten_taxes_and_sort_them(taxes) {
         function sort_key(taxes) {
             return taxes.toSorted((t1, t2) => t1.sequence - t2.sequence || t1.id - t2.id);
@@ -76,6 +62,29 @@ export const accountTaxHelpers = {
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      */
+    is_price_included(tax, { document_tax_mode = null, special_mode = null }) {
+        if (tax.has_negative_factor) {
+            return false;
+        }
+        if (tax.price_include_override) {
+            return tax.price_include_override === 'tax_included';
+        }
+        if (document_tax_mode) {
+            return document_tax_mode === 'tax_included';
+        }
+        if (special_mode === 'total_included') {
+            return true;
+        }
+        if (special_mode === 'total_excluded') {
+            return false;
+        }
+        return tax.price_include;
+    },
+
+    /**
+     * [!] Mirror of the same method in account_tax.py.
+     * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+     */
     batch_for_taxes_computation(taxes, { special_mode = null, filter_tax_function = null, document_tax_mode = null } = {}) {
         let { sorted_taxes, group_per_tax } = this.flatten_taxes_and_sort_them(taxes);
         if (filter_tax_function) {
@@ -95,7 +104,7 @@ export const accountTaxHelpers = {
             if (batch.length > 0) {
                 const same_batch =
                     tax.amount_type === batch[0].amount_type &&
-                    (special_mode || tax.price_include_after_document_tax_mode(document_tax_mode) === batch[0].price_include_after_document_tax_mode(document_tax_mode)) &&
+                    (special_mode || this.is_price_included(tax, { document_tax_mode }) === this.is_price_included(batch[0], { document_tax_mode })) &&
                     tax.include_base_amount === batch[0].include_base_amount &&
                     ((tax.include_base_amount && !is_base_affected) || !tax.include_base_amount);
                 if (!same_batch) {
@@ -149,7 +158,7 @@ export const accountTaxHelpers = {
             taxes_data[other_tax.id].extra_base_for_base += sign * tax_amount;
         }
 
-        if (tax.price_include_after_document_tax_mode(document_tax_mode)) {
+        if (this.is_price_included(tax, { document_tax_mode })) {
             // Case: special mode is False or 'total_included'
             if (!special_mode || special_mode === "total_included") {
                 if (tax.include_base_amount) {
@@ -177,7 +186,7 @@ export const accountTaxHelpers = {
                     }
                 }
             }
-        } else if (!tax.price_include_after_document_tax_mode(document_tax_mode)) {
+        } else {
             // Case: special_mode is False or 'total_excluded'
             if (!special_mode || special_mode === "total_excluded") {
                 if (tax.include_base_amount) {
@@ -313,22 +322,11 @@ export const accountTaxHelpers = {
         // Flatten the taxes, order them and filter them if necessary.
 
         function prepare_tax_extra_data(tax, kwargs = {}) {
-            let price_include;
-            if (tax.has_negative_factor) {
-                price_include = false;
-            } else if (document_tax_mode && !tax.price_include_override) {
-                price_include = document_tax_mode === 'tax_included';
-            } else if (special_mode === "total_included") {
-                price_include = true;
-            } else if (special_mode === "total_excluded") {
-                price_include = false;
-            } else {
-                price_include = tax.price_include;
-            }
             return {
                 ...kwargs,
                 tax: tax,
-                price_include: price_include,
+                price_include: this.is_price_included(tax, { document_tax_mode, special_mode }),
+                original_price_include: this.is_price_included(tax, { document_tax_mode }),
                 document_tax_mode: document_tax_mode,
                 extra_base_for_tax: 0.0,
                 extra_base_for_base: 0.0,
@@ -502,7 +500,7 @@ export const accountTaxHelpers = {
         if (
             (original_tax_ids.size === new_tax_ids.size &&
                 [...original_tax_ids].every((value) => new_tax_ids.has(value))) ||
-            original_taxes.some((x) => !x.price_include_after_document_tax_mode(document_tax_mode))
+            original_taxes.some((x) => !this.is_price_included(x, { document_tax_mode }))
         ) {
             return price_unit;
         }
@@ -526,7 +524,7 @@ export const accountTaxHelpers = {
         });
         let delta = 0.0;
         for (const tax_data of taxes_computation.taxes_data) {
-            if (tax_data.tax.price_include_after_document_tax_mode(document_tax_mode)) {
+            if (this.is_price_included(tax_data.tax, { document_tax_mode })) {
                 delta += tax_data.tax_amount;
             }
         }
@@ -1306,7 +1304,7 @@ export const accountTaxHelpers = {
                     const tax = tax_data.tax;
                     involved_tax_ids.add(tax.id);
                     involved_amount_types.add(tax.amount_type);
-                    involved_price_include.add(tax.price_include_after_document_tax_mode(base_lines[0].document_tax_mode));
+                    involved_price_include.add(this.is_price_included(tax, { document_tax_mode: base_line.document_tax_mode }));
                 });
             });
 
@@ -2597,7 +2595,7 @@ export const accountTaxHelpers = {
                 price_unit:
                     (second_tax_details.raw_total_excluded_currency +
                         second_tax_details.taxes_data
-                            .filter((t) => t.tax.price_include_after_document_tax_mode(base_lines[0].document_tax_mode))
+                            .filter((t) => this.is_price_included(t.tax, { document_tax_mode: base_line.document_tax_mode }))
                             .reduce((sum, t) => sum + t.raw_tax_amount_currency, 0)) /
                     (base_line.quantity || 1.0),
                 tax_details: second_tax_details,
