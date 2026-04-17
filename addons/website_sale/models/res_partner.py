@@ -123,6 +123,8 @@ class ResPartner(models.Model):
 
         return frontend_writable_fields
 
+    # FIXME VFE issue with assigning wishes to current partner is that if they finalize/drop their cart/session
+    # they won't have their wishes anymore ?
     def _assign_session_wishes(self):
         """Assign all wishlist without partner from this the current session."""
         self.ensure_one()
