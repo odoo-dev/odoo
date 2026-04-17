@@ -76,13 +76,20 @@ export class GradientPicker extends Component {
         gradient = standardizeGradient(gradient);
         const colors = [
             ...gradient.matchAll(
-                /(#[0-9a-f]{6}|rgba?\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*[,\s*[0-9.]*]?\s*\)|[a-z]+)\s*([[0-9]+%]?)/g
+                /(#[0-9a-f]{6}|rgba?\(\s*[0-9]+\s*,\s*[0-9]+\s*,\s*[0-9]+\s*[,\s*[0-9.]*]?\s*\)|color\([^)]+\)|[a-z]+)\s*([[0-9]+%]?)/g
             ),
         ].filter((color) => rgbaToHex(color[1]) !== "#");
 
         this.colors.splice(0, this.colors.length);
         for (const color of colors) {
-            this.colors.push({ hex: rgbaToHex(color[1]), percentage: color[2].replace("%", "") });
+            const colorValue = color[1];
+            const percentage = color[2].replace('%', '');
+
+            if (typeof colorValue === 'string' && (colorValue.startsWith('color'))) {
+                this.colors.push({ hex: colorValue, percentage });
+            } else {
+                this.colors.push({ hex: rgbaToHex(colorValue), percentage });
+            }
         }
 
         const isLinear = gradient.includes("linear-gradient(");
