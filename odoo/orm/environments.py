@@ -10,7 +10,7 @@ import logging
 import typing
 from collections import defaultdict, deque
 from collections.abc import Mapping, MutableMapping
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from datetime import UTC
 from pprint import pformat
 from weakref import ref as weakref
@@ -947,19 +947,27 @@ class Transaction:
         # Propagate the cache to the registry after the commit.
         # We lock the registry so that another transaction cannot start checking
         # signaling between the commit and the push of the caches.
-        if push_caches:
-            with registry.registry_cache_lock:
-                yield
-                registry.registry_caches__.update(push_caches)
+        if self._registry_invalidated:
+            lock = registry._lock
+        elif push_caches:
+            lock = registry.registry_cache_lock
         else:
+            lock = nullcontext()
+        with lock:
+            # commit
             yield
-        for layer in self.ormcaches__.values():
-            layer.update_parent()
-
-        # skip resetting the registry because the transaction should
-        # re-setup the registry correctly
-        self._registry_invalidated = 0
-        self.reset()
+            # update caches
+            registry.registry_caches__.update(push_caches)
+            for layer in self.ormcaches__.values():
+                layer.update_parent()
+            if self._registry_invalidated:
+                # skip resetting the registry because the transaction should
+                # re-setup the registry correctly
+                self._registry_invalidated = 0
+                if self.registry.ready:
+                    # reload the registry now
+                    Registry.new(self.registry.db_name)
+            self.reset()
 
     @contextmanager
     def rollbacking(self):

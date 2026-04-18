@@ -461,6 +461,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                 while hasattr(layer, 'parent'):
                     layer = layer.parent
                 transaction._registry_caches__[name] = (transaction._registry_caches__[name][0], layer)
+            _logger.debug("skip signaling for previous invalidations")
 
         reset_cached_properties(self)
         self._field_trigger_trees.clear()
