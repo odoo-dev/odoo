@@ -456,7 +456,6 @@ class Registry(Mapping[str, type["BaseModel"]]):
         else:
             # loading the registry, or running at_install tests
             # clear cache to ensure consistency, but do not signal it
-            _logger.debug("setup_models: invalidating cache without signaling")
             transaction.invalidate_ormcache('stable')
             for name, layer in transaction.ormcaches__.items():
                 while hasattr(layer, 'parent'):

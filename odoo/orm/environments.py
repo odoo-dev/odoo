@@ -744,7 +744,7 @@ class Transaction:
         for name, (seq, data) in self._registry_caches__.items():
             self.ormcaches__[name] = CacheLayer(data)
         if not registry.ready:
-            _logger_signaling.debug("%s: skip check signaling, registry not ready", self.registry.db_name)
+            _logger_signaling.debug("Skip signaling check, registry not ready")
             return
 
         db_registry_sequence, db_cache_sequences = registry.get_sequences(cr)
@@ -825,7 +825,7 @@ class Transaction:
             code = frame.f_code
             frame_self = frame.f_locals.get('self')
             frame_str = f'{code.co_filename}:{frame.f_lineno} ({type(frame_self)})'
-            _logger_signaling.debug('Invalidating %s model cache from %s', cache_name, frame_str)
+            _logger_signaling.debug('Invalidating %r model cache from %s', cache_name, frame_str)
 
         for name in _CACHES_BY_KEY.get(cache_name, ()):
             # rebuild a new cache with the correct number of layers
@@ -913,8 +913,6 @@ class Transaction:
         if env is not None and not env.cr._closing:
             self._registry_caches__.clear()
             self._check_signaling(env.cr)
-        else:
-            _logger_signaling.debug("reset() closing transaction, skip signaling")
 
     @contextmanager
     def committing(self):
@@ -1078,8 +1076,8 @@ class CacheLayer(MutableMapping):
         return dict(self)
 
     def clear(self):
-        # XXX document
-        # This is need for tests which put a CacheLayer on the registry
+        # This is need for tests which put a CacheLayer on the registry.
+        # TODO link to odoo.tests.common
         self.data.clear()
         self.parent = {}
 
