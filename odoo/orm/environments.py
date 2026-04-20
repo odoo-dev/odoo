@@ -954,12 +954,12 @@ class Transaction:
         else:
             lock = nullcontext()
         with lock:
-            # commit
             yield
             # update caches
             registry.registry_caches__.update(push_caches)
             for layer in self.ormcaches__.values():
                 layer.update_parent()
+            # reload the registry
             if self._registry_invalidated:
                 # skip resetting the registry because the transaction should
                 # re-setup the registry correctly

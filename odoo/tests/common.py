@@ -1368,7 +1368,7 @@ class TransactionCase(BaseCase):
                 registry.registry_caches__ = set_caches
             return registry
 
-        cls.startClassPatcher(patch.object(Registry, 'new', reset_registry_changes))
+        cls.startClassPatcher(patch.object(Registry, 'new', lambda *a, **kw: cls.registry))
         cls.addClassCleanup(cls._gc_filestore)
         cls.addClassCleanup(reset_registry_changes, set_caches=cls.registry.registry_caches__.copy())
 
