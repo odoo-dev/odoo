@@ -107,6 +107,7 @@ class Savepoint:
         self.name = str(uuid.uuid1())
         self._cr = cr
         self.closed: bool = False
+        _logger.info('Going to create savepoint %s' % self.name)
         cr.execute('SAVEPOINT "%s"' % self.name)
 
     def __enter__(self):
@@ -123,6 +124,7 @@ class Savepoint:
         self._cr.execute('ROLLBACK TO SAVEPOINT "%s"' % self.name)
 
     def _close(self, rollback: bool):
+        _logger.info('Going to (rollback +) release savepoint %s' % self.name)
         if rollback:
             self.rollback()
         self._cr.execute('RELEASE SAVEPOINT "%s"' % self.name)
@@ -144,7 +146,7 @@ class _FlushingSavepoint(Savepoint):
         try:
             if not rollback:
                 self._cr.flush()
-        except Exception:
+        except Exception as e:
             rollback = True
             raise
         finally:
@@ -553,6 +555,7 @@ class Cursor(BaseCursor):
 
     def commit(self) -> None:
         """ Perform an SQL `COMMIT` """
+        _logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA COMMIT")
         self.flush()
         self._cnx.commit()
         self.clear()
@@ -563,6 +566,7 @@ class Cursor(BaseCursor):
 
     def rollback(self) -> None:
         """ Perform an SQL `ROLLBACK` """
+        _logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA ROLLBACK")
         self.clear()
         self.postcommit.clear()
         self.prerollback.run()
