@@ -546,11 +546,13 @@ patch(PosStore.prototype, {
     },
     async _askForPreparation() {
         const order = this.getOrder();
+        const isRefundOrder =
+            order.isRefund || order.lines.some((line) => line.refunded_orderline_id);
         if (
             !order.finalized &&
             this.config.module_pos_restaurant &&
             this.categoryCount.length &&
-            !order.isRefund
+            !isRefundOrder
         ) {
             const confirmed = await ask(this.dialog, {
                 title: _t("Warning !"),
