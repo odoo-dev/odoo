@@ -2141,7 +2141,11 @@ export class Matcher {
      */
     toHaveStyle(style, options) {
         this._assertArguments(arguments, [
-            t.or([t.string(), t.record(t.or([t.string(), t.number()]))]),
+            t.or([
+                t.string(),
+                t.instanceOf(RegExp),
+                t.record(t.or([t.string(), t.instanceOf(RegExp), t.number()])),
+            ]),
             T_MATCHER_DOM_STYLE_OPTIONS,
         ]);
 
