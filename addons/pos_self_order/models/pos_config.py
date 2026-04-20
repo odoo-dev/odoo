@@ -98,6 +98,7 @@ class PosConfig(models.Model):
     )
     has_paper = fields.Boolean("Has paper", default=True)
     self_ordering_primary_color = fields.Char(string="Color", default=lambda self: self.env.company.email_secondary_color)
+    proxy_ip = fields.Char(string="ePOS Proxy IP", help="IP address of the ePOS Proxy for kiosk mode (e.g., 192.168.1.100)")
 
     @api.model
     def _load_pos_self_data_fields(self, pos_config_id):
@@ -375,6 +376,16 @@ class PosConfig(models.Model):
             session = self.env['pos.session'].create({'user_id': self.env.uid, 'config_id': self.id})
             session.set_opening_control(0, "")
             self._notify('STATUS', {'status': 'open'})
+
+        if self.self_ordering_mode == 'kiosk' and self.proxy_ip:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'open_kiosk_proxy',
+                'params': {
+                    'kiosk_url': self.get_kiosk_url(),
+                    'proxy_ip': self.proxy_ip,
+                },
+            }
 
         return {
             'type': 'ir.actions.act_url',

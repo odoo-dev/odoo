@@ -117,10 +117,15 @@ export class SelfOrder extends Reactive {
             }
         });
         if (this.config.self_ordering_mode === "kiosk") {
-            this.data.connectWebSocket("STATUS", ({ status }) => {
+            this.data.connectWebSocket("STATUS", async ({ status }) => {
                 if (status === "closed") {
                     this.pos_session = [];
                     this.ordering = false;
+                    await fetch(`http://${this.config.proxy_ip}/kiosk`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ command: "close" }),
+                    });
                 } else {
                     // reload to get potential new settings
                     // more easier than RPC for now

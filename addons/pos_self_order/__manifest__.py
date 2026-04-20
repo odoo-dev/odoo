@@ -54,6 +54,7 @@
             "pos_self_order/static/src/upgrade_selection_field.js",
             'pos_self_order/static/src/backend/qr_order_button/*',
             'pos_self_order/static/src/backend/pos_open_ui_button/pos_open_ui_button.js',
+            'pos_self_order/static/src/backend/open_kiosk_proxy/open_kiosk_proxy.js',
         ],
         "pos_self_order.assets": [
             "pos_self_order/static/src/app/primary_variables.scss",
