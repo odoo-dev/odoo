@@ -22,6 +22,11 @@ class BinaryValue(Buffer):
         raise NotImplementedError
 
     @property
+    def file_name(self) -> str:
+        """Optional name that the file should have."""
+        return ''
+
+    @property
     def mimetype(self) -> str:
         """Guessed mimetype."""
         from .mimetypes import guess_mimetype  # noqa: PLC0415
@@ -58,15 +63,20 @@ class BinaryValue(Buffer):
 
 class BinaryBytes(BinaryValue):
     """Static binary value."""
-    __slots__ = ('__data',)
+    __slots__ = ('__data', '__file_name')
 
-    def __init__(self, data: Buffer):
+    def __init__(self, data: Buffer, file_name: str = ''):
         # force bytes
         self.__data = bytes(data)
+        self.__file_name = str(file_name or '')
 
     @property
     def content(self):
         return self.__data
+
+    @property
+    def file_name(self):
+        return self.__file_name
 
     def __bool__(self):
         return bool(self.__data)
@@ -75,7 +85,7 @@ class BinaryBytes(BinaryValue):
         data = self.__data
         if len(data) > 30:
             data = data[:27] + b'...'
-        return f"Binary({data!r})"
+        return f"Binary({self.__file_name!r}, {data!r})"
 
 
 EMPTY_BINARY = BinaryBytes(b'')

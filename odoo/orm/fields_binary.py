@@ -76,6 +76,12 @@ class Binary(Field[BinaryValue]):
             # a string may come from RPC, it is base64 encoded
             decoded_value = base64.b64decode(value, validate=validate)
             return BinaryBytes(decoded_value)
+        if isinstance(value, dict):
+            # {file_name, content}
+            if 'content' not in value:
+                raise ValueError(f"{self}: missing 'content' when writing")
+            value = self.convert_to_cache(value['content'], record).content
+            return BinaryBytes(value, file_name=value.get('file_name', ''))
         # Error needed because we used to write base64 encoded data and we
         # cannot distinguish whether bytes are encoded or not in base64.
         if isinstance(value, bytes) and (self.related_field or self).name == 'raw':
@@ -104,6 +110,14 @@ class Binary(Field[BinaryValue]):
         if not value:
             return False
         value = self.convert_to_cache(value, record, validate=False)
+        if record.env.context.get('bin_read_info'):
+            file_name = value.file_name
+            if file_name == self.name:
+                file_name = None
+            return {
+                'file_name': file_name,
+                'content': value.content,
+            }
         if (
             record.env.context.get('bin_size')
             or record.env.context.get('bin_size_' + self.name)
@@ -136,7 +150,6 @@ class Binary(Field[BinaryValue]):
         env = record_values[0][0].env
         env['ir.attachment'].sudo().create([
             {
-                'name': self.name,
                 'res_model': self.model_name,
                 'res_field': self.name,
                 'res_id': record.id,
@@ -184,7 +197,6 @@ class Binary(Field[BinaryValue]):
                 missing = (real_records - atts_records)
                 if missing:
                     atts.create([{
-                            'name': self.name,
                             'res_model': record._name,
                             'res_field': self.name,
                             'res_id': record.id,
@@ -350,6 +362,13 @@ class BinaryValueAttachment(BinaryValue):
     def content(self) -> bytes:
         self._check_concurrent_modification()
         return self.__attachment.raw.content
+
+    @property
+    def file_name(self) -> str:
+        self._check_concurrent_modification()
+        name = self.__attachment.name
+        field_name = self.__attachment.res_field
+        return name if name != field_name else ''
 
     @property
     def mimetype(self) -> str:
