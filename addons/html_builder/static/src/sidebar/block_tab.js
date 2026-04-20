@@ -82,7 +82,7 @@ export class BlockTab extends Component {
                         snippet,
                         {
                             onSelect: (snippet) => {
-                                snippetEl = snippet.content.cloneNode(true);
+                                snippetEl = this.document.importNode(snippet.content, true);
 
                                 // Add the dropzones corresponding to the snippet
                                 // and make them invisible.
@@ -166,7 +166,7 @@ export class BlockTab extends Component {
                 snippet,
                 {
                     onSelect: (snippet) => {
-                        selectedSnippetEl = snippet.content.cloneNode(true);
+                        selectedSnippetEl = this.document.importNode(snippet.content, true);
                         hookEl.replaceWith(selectedSnippetEl);
                         return selectedSnippetEl;
                     },
@@ -293,7 +293,7 @@ export class BlockTab extends Component {
                 const category = element.closest(".o_snippets_container").id;
                 const id = element.dataset.id;
                 snippet = this.snippetModel.getSnippet(category, id);
-                snippetEl = snippet.content.cloneNode(true);
+                snippetEl = this.document.importNode(snippet.content, true);
                 isSnippetGroup = category === "snippet_groups";
 
                 // Check if the snippet is inline. Add it temporarily to the
