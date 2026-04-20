@@ -1,4 +1,3 @@
-import { signal } from "@odoo/owl";
 import { DynamicList } from "./dynamic_list";
 
 /**
@@ -14,11 +13,6 @@ export class DynamicRecordList extends DynamicList {
      */
     setup(config, data) {
         super.setup(config);
-        const _records = signal.Array([]);
-        Object.defineProperty(this, "records", {
-            get: _records,
-            set: _records.set,
-        });
         this._setData(data);
     }
 

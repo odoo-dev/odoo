@@ -3,7 +3,6 @@
 import { Domain } from "@web/core/domain";
 import { DynamicList } from "./dynamic_list";
 import { getGroupServerValue } from "./utils";
-import { signal } from "@odoo/owl";
 
 export const MOVABLE_RECORD_TYPES = ["char", "boolean", "integer", "selection", "many2one"];
 
@@ -22,11 +21,6 @@ export class DynamicGroupList extends DynamicList {
 
         this.isGrouped = true;
         this._nbRecordsMatchingDomain = null;
-        const _groups = signal.Array([]);
-        Object.defineProperty(this, "groups", {
-            get: _groups,
-            set: _groups.set,
-        });
         this._setData(data);
     }
 

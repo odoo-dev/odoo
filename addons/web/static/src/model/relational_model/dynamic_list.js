@@ -7,7 +7,6 @@ import { Operation } from "./operation";
 import { Record as RelationalRecord } from "./record";
 import { getFieldsSpec, getScheduleORMExtras, resequence } from "./utils";
 import { ConnectionLostError } from "@web/core/network/rpc";
-import { signal } from "@odoo/owl";
 
 /**
  * @typedef {import("./record").Record} RelationalRecord
@@ -30,11 +29,7 @@ export class DynamicList extends DataPoint {
         if (!this.handleField && DEFAULT_HANDLE_FIELD in this.fields) {
             this.handleField = DEFAULT_HANDLE_FIELD;
         }
-        const _isDomainSelected = signal(false);
-        Object.defineProperty(this, "isDomainSelected", {
-            get: _isDomainSelected,
-            set: _isDomainSelected.set,
-        });
+        this.isDomainSelected = false;
         this.evalContext = this.context;
     }
 
