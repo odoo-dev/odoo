@@ -6,6 +6,7 @@ import { sortBy } from "@web/core/utils/arrays";
 
 import { Component } from "@odoo/owl";
 import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
 
 const debugSectionRegistry = registry.category("debug_section");
 
@@ -27,6 +28,11 @@ export class DebugMenuBasic extends Component {
 
     setup() {
         this.debugContext = useEnvDebugContext();
+        this.ui = useService("ui");
+    }
+
+    get canDisplay() {
+        return !this.ui.isSmall;
     }
 
     async loadGroupedItems() {

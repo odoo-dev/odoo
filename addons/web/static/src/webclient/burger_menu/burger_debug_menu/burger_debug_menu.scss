@@ -1,0 +1,5 @@
+@include media-breakpoint-down(md) {
+    .o-overlay-item:has(.o-debug-manager-dropdown-header) {
+        z-index: $zindex-tooltip + 15;
+    }
+}

@@ -27,6 +27,7 @@
         <nav class="o_burger_menu_content flex-grow-1 flex-shrink-1 overflow-auto o_burger_menu_app">
           <MobileSwitchCompanyMenu t-if="this.user.allowedCompanies.length > 1" />
           <BurgerUserMenu onMenuClicked.bind="this._closeBurger"/>
+          <BurgerDebugMenu t-if="env.debug"/>
         </nav>
       </div>
     </Transition>

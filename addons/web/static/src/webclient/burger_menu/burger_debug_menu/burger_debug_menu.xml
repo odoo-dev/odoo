@@ -1,0 +1,12 @@
+
+<t t-name="web.BurgerDebugMenu" t-inherit="web.DebugMenu" t-inherit-mode="primary">
+    <xpath expr="//div[hasclass('o_debug_manager')]" position="attributes">
+        <attribute name="class" remove="d-none d-md-block" add="px-3 py-2" separator=" "/>
+    </xpath>
+    <xpath expr="//button" position="attributes">
+        <attribute name="class" add="border-0 p-0 bg-transparent w-100 text-start text-body" separator=" "/>
+    </xpath>
+    <xpath expr="//i[hasclass('fa-bug')]" position="replace">
+        Open Developer tools
+    </xpath>
+</t>

@@ -1,5 +1,5 @@
 import { expect, test } from "@odoo/hoot";
-import { click, queryAllTexts, waitFor } from "@odoo/hoot-dom";
+import { click, queryAll, queryAllTexts, waitFor } from "@odoo/hoot-dom";
 import { Deferred, animationFrame } from "@odoo/hoot-mock";
 import { Component, xml } from "@odoo/owl";
 import {
@@ -46,6 +46,7 @@ import { listView } from "@web/views/list/list_view";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
 import { clearUncommittedChanges } from "@web/webclient/actions/action_service";
 import { WebClient } from "@web/webclient/webclient";
+import { config as transitionConfig } from "@web/core/transition";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
 
@@ -2386,7 +2387,8 @@ test("do not restore after action button clicked", async () => {
     expect(".o_control_panel_main_buttons .o_form_button_save").not.toHaveCount();
 });
 
-test("debugManager is active for views", async () => {
+test.tags("desktop");
+test("debugManager is active for views on systray (desktop)", async () => {
     serverState.debug = "1";
     onRpc("has_access", () => true);
     await mountWithCleanup(WebClient);
@@ -2394,6 +2396,32 @@ test("debugManager is active for views", async () => {
     expect(".o-dropdown--menu .o-dropdown-item:contains('View: Kanban')").toHaveCount(0);
     await contains(".o_debug_manager .dropdown-toggle").click();
     expect(".o-dropdown--menu .o-dropdown-item:contains('View: Kanban')").toHaveCount(1);
+});
+
+test.tags("mobile");
+test("debugManager is active for views on burger menu (mobile)", async () => {
+    serverState.debug = "1";
+    patchWithCleanup(transitionConfig, { disabled: true });
+    onRpc("has_access", () => true);
+    await mountWithCleanup(WebClient);
+    await getService("action").doAction(1);
+    await contains(".o_burger_menu_avatar").click();
+    expect(
+        queryAll(".o_burger_menu_content > .o_debug_manager", { root: document.body })
+    ).toHaveCount(1);
+    expect(
+        queryAll(".o-dropdown--menu .o-dropdown-item:contains('View: Kanban')", {
+            root: document.body,
+        })
+    ).toHaveCount(0);
+    await contains(".o_burger_menu_content .o_debug_manager button", {
+        root: document.body,
+    }).click();
+    expect(
+        queryAll(".o-dropdown--menu .o-dropdown-item:contains('View: Kanban')", {
+            root: document.body,
+        })
+    ).toHaveCount(1);
 });
 
 test.tags("desktop");
