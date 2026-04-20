@@ -964,7 +964,7 @@ class Transaction:
                 # skip resetting the registry because the transaction should
                 # re-setup the registry correctly
                 self._registry_invalidated = 0
-                if self.registry.ready:
+                if self.registry.ready and False:  # XXX not working
                     # reload the registry now
                     Registry.new(self.registry.db_name)
             self.reset()
