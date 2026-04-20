@@ -361,6 +361,7 @@ export class ORM {
     webSave(model, ids, data, kwargs = {}) {
         validatePrimitiveList("ids", "number", ids);
         validateObject("data", data);
+        console.log("WebSave");
         return this.call(model, "web_save", [ids, data], kwargs);
     }
 

@@ -51,7 +51,8 @@ export class Builder extends Component {
         snippetsName: { type: String },
         toggleMobile: { type: Function },
         overlayRef: { type: Function },
-        iframeLoaded: { type: Object },
+        isIframe: { type: Boolean, optional: true },
+        iframeLoaded: { type: Object, optional: true },
         isMobile: { type: Boolean },
         Plugins: { type: Array, optional: true },
         // This fragment of config will be passed to the Editor and be
@@ -70,6 +71,7 @@ export class Builder extends Component {
         themeTabDisplayName: _t("Theme"),
         initialTab: "blocks",
         onlyCustomizeTab: false,
+        isIframe: true,
     };
 
     setup() {
@@ -226,13 +228,20 @@ export class Builder extends Component {
             // Ensure that the iframe is loaded and the editor is created before
             // instantiating the sub components that potentially need the
             // editor.
-            const iframeEl = await this.props.iframeLoaded;
-            if (status(this) === "destroyed") {
-                return;
+
+            // ADRM NOTE: we do'nt need an iframe. And I'm pretty sure iframe do'nt work w/ embedded components,
+            // because of instanceOf HTMLElements stuff in owl.
+            if (!this.props.isIframe) {
+                this.editableEl = document.querySelector(this.props.editableSelector);
+            } else {
+                const iframeEl = await this.props.iframeLoaded;
+                if (status(this) === "destroyed") {
+                    return;
+                }
+                this.editableEl = iframeEl.contentDocument.body.querySelector(
+                    this.props.editableSelector
+                );
             }
-            this.editableEl = iframeEl.contentDocument.body.querySelector(
-                this.props.editableSelector
-            );
 
             if (this.editableEl.matches(".o_rtl")) {
                 this.editor.config.isEditableRTL = true;
