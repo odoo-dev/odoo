@@ -14,7 +14,8 @@ from odoo.tools.sql import SQL, column_exists, create_column
 from odoo.tools.translate import adapt_translated_field_value, html_translate
 
 from odoo.addons.website.models import ir_http
-from odoo.addons.website.tools import text_from_html
+from odoo.addons.website.helpers.jsonld_builder import JsonLd
+from odoo.addons.website_sale.const import SHOP_PATH
 
 # A delimiter that users aren't likely to search for in product codes.
 RARE_DELIMITER = "\u241e"
@@ -40,6 +41,7 @@ class ProductTemplate(models.Model):
         "website.seo.metadata",
         "website.published.multi.mixin",
         "website.searchable.mixin",
+        "website.structured_data.mixin",
     ]
     _mail_post_access = "read"
     _check_company_auto = True
@@ -1348,24 +1350,44 @@ class ProductTemplate(models.Model):
                 ), pricelist_rule_id
         return price, pricelist_rule_id
 
-    def _to_markup_data(self, website):
-        """Generate JSON-LD markup data for the current product template.
+    def _build_base_product_schema(self):
+        """Lightweight Product structured data for listing and category pages.
 
-        If the template has multiple variants, the https://schema.org/ProductGroup schema is used.
-        Otherwise, the markup data generation is delegated to the variant to use the
-        https://schema.org/Product schema.
-
-        :param website website: The current website.
-        :return: The JSON-LD markup data.
-        :rtype: dict
+        :returns: JsonLd Product schema with name, URL, description, image, and offer
+        :rtype: JsonLd
         """
         self.ensure_one()
+        website = self.env["website"].get_current_website()
+        base_url = website.get_base_url()
+        schema_data = {
+            "name": self.with_context(display_default_code=False).display_name,
+            "url": f"{base_url}{self.website_url}",
+        }
+        if self.description_sale:
+            schema_data["description"] = self.description_sale
+        nested_schema_data = {
+            "image": JsonLd("ImageObject", {"url": f"{base_url}{website.image_url(self, 'image_1024')}"}),
+        }
+        return JsonLd("Product", schema_data).add_nested(nested_schema_data)
 
+    def _build_product_schema(self):
+        """Full Product structured data for product detail pages.
+
+        Returns either a single Product schema (for templates with one variant)
+        or a ProductGroup schema (for multi-variant templates). Includes product
+        name, URL, description, image, brand, variants, and ratings if available.
+
+        :returns: JsonLd Product or ProductGroup schema with full details
+        :rtype: JsonLd
+        """
+        self.ensure_one()
+        website = self.env["website"].get_current_website()
         if self.product_variant_count == 1:
-            markup_data = self.product_variant_id._to_markup_data(website)
+            # Single variant: return variant product schema directly
+            product_group_jsonld = self.product_variant_id._build_product_schema()
         else:
-            # perf: temporal solution to avoid slowness when product have many variants and
-            # pricelist rules
+            # Multiple variants: build ProductGroup schema
+            # Performance: Limit variants to avoid slowness with large variant counts and pricelist rules
             limit = (
                 self
                 .env["ir.config_parameter"]
@@ -1373,31 +1395,121 @@ class ProductTemplate(models.Model):
                 .get_int("website_sale.markup_data_limit_variants")
                 or None
             )
-            if limit:
-                product_variant_ids = self.product_variant_ids[:limit]
-            else:
-                product_variant_ids = self.product_variant_ids
-
-            base_url = website.get_base_url()
-            markup_data = {
-                "@context": "https://schema.org",
-                "@type": "ProductGroup",
+            product_variant_ids = self.product_variant_ids[:limit] if limit else self.product_variant_ids
+            base_url = self.get_base_url()
+            variant = next((v for v in product_variant_ids if v.default_code), None)
+            product_group_id = variant.default_code if variant else f"TEMPLATE-{self.id}"
+            schema_data = {
                 "name": self.name,
-                "image": f"{base_url}{website.image_url(self, 'image_1920')}",
                 "url": f"{base_url}{self.website_url}",
-                "hasVariant": [product._to_markup_data(website) for product in product_variant_ids],
+                "productGroupID": product_group_id,
             }
             if self.description_ecommerce:
-                markup_data["description"] = text_from_html(self.description_ecommerce)
-
-        if website.is_view_active("website_sale.product_comment") and self.rating_count:
-            markup_data["aggregateRating"] = {
-                "@type": "AggregateRating",
-                # sudo: product.product - visitor can access product average rating
+                schema_data["description"] = self.description_ecommerce
+            nested_schema_data = {
+                "image": JsonLd("ImageObject", {"url": f"{base_url}{website.image_url(self, 'image_1024')}"}),
+                "brand": JsonLd("Organization", {"@id": f"{base_url}/#organization"}),
+                "hasVariant": [variant._build_product_schema() for variant in product_variant_ids],
+            }
+            product_group_jsonld = JsonLd("ProductGroup", schema_data).add_nested(nested_schema_data)
+        if website.is_view_active('website_sale.product_comment') and self.rating_count:
+            rating_jsonld = JsonLd("AggregateRating", {
                 "ratingValue": self.sudo().rating_avg,
                 "reviewCount": self.rating_count,
-            }
-        return markup_data
+            })
+            product_group_jsonld.add_nested({"aggregateRating": rating_jsonld})
+        return product_group_jsonld
+
+    def _build_collectionpage_schema(self, category=None):
+        """CollectionPage structured data for shop listing pages.
+
+        Generates schema for product collection pages (shop, category pages) with
+        hasPart containing individual product summary schemas and isPartOf pointing
+        to the organization.
+
+        :param category: Optional product category to filter and contextualize the page
+        :returns: JsonLd CollectionPage schema with hasPart products and organization link
+        :rtype: JsonLd
+        """
+        website = self.env["website"].get_current_website()
+        base_url = website.get_base_url()
+        page_url = f"{base_url}{SHOP_PATH}"
+        if category:
+            page_url += f"/category/{self.env['ir.http']._slug(category)}"
+        schema_data = {
+            "name": category.name if category else self.env._("Shop"),
+            "url": page_url,
+        }
+        product_template_jsonlds = [
+            product_template._build_base_product_schema()
+            for product_template in self
+        ]
+        main_entity_jsonld = JsonLd("ItemList").add_nested({
+            "itemListElement": [
+                JsonLd("ListItem", {"position": i + 1}).add_nested({
+                    "item": product_jsonld,
+                })
+                for i, product_jsonld in enumerate(product_template_jsonlds)
+            ],
+        })
+        nested_schema_data = {
+            "mainEntity": main_entity_jsonld,
+            "isPartOf": JsonLd("Organization", {"@id": f"{base_url}/#organization"}),
+        }
+        return JsonLd("CollectionPage", schema_data).add_nested(nested_schema_data)
+
+    def _get_breadcrumb_items(self, is_detail_page=False, category=None):
+        """Breadcrumb navigation items for shop and product pages.
+
+        Generates a list of tuples (name, url) representing breadcrumb navigation.
+        Includes website home, shop link, category hierarchy (if applicable), and
+        product name (if detail page).
+
+        :param is_detail_page: If True, adds the product name as the final breadcrumb
+        :param category: Optional category to include in breadcrumb path
+        :returns: List of (name, url) tuples representing breadcrumb trail
+        :rtype: list[tuple[str, str]]
+        """
+        website = self.env["website"].get_current_website()
+        base_url = website.get_base_url()
+        items = [
+            (website.name, base_url),
+            (self.env._("Shop"), f"{base_url}{SHOP_PATH}"),
+        ]
+        if category:
+            slug = self.env["ir.http"]._slug
+            for cat in category.parents_and_self:
+                items.append((cat.name, f"{base_url}{SHOP_PATH}/category/{slug(cat)}"))
+        if is_detail_page:
+            self.ensure_one()
+            items.append((self.name, f"{base_url}{self.website_url}"))
+        return items
+
+    def _build_structured_data(self, is_detail_page=False):
+        """Build complete structured data schemas for shop and product pages.
+
+        Generates all necessary JSON-LD schemas for a product listing or detail page,
+        including product/collection page schema and breadcrumb navigation. Calls
+        parent's structured data builder first, then appends product-specific schemas.
+
+        :param is_detail_page: If True, builds product detail schema; if False, builds
+            collection page schema for listings
+        :type is_detail_page: bool
+        :returns: List of JsonLd schemas for the page
+        :rtype: list[JsonLd]
+        """
+        schemas = super()._build_structured_data(is_detail_page=is_detail_page)
+        category = self.env["product.public.category"].browse(
+            self.env.context.get("shop_category_id"),
+        ).exists()
+        breadcrumb_jsonld = self._build_breadcrumb_schema(
+            self._get_breadcrumb_items(is_detail_page=is_detail_page, category=category),
+        )
+        if is_detail_page:
+            schemas.extend([self._build_product_schema(), breadcrumb_jsonld])
+            return schemas
+        schemas.extend([self._build_collectionpage_schema(category=category), breadcrumb_jsonld])
+        return schemas
 
     def _get_ribbon(self, price_vals=None, auto_assign_ribbons=None, variant=None):
         """Return the ribbon to display for the current template.
