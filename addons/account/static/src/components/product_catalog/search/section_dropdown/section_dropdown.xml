@@ -2,7 +2,7 @@
 
 <templates>
     <t t-name="account.SectionDropdown">
-        <Dropdown class="'ms-auto'">
+        <Dropdown class="ms-auto">
             <button style="min-width: 30px" class="btn p-0 border-0 bg-transparent">
                 <i class="fa fa-ellipsis-v text-muted"/>
             </button>

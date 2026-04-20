@@ -65,6 +65,11 @@ class ProductCatalogMixin(models.AbstractModel):
             'id': section.id,
             'sequence': section.sequence,
             'display_type': display_type,
+            'subtotal': 0.0,
+            'currency_id': self.currency_id.id,
+            'collapse_prices': False, #update
+            'collapse_composition': False, #update
+            'is_optional': False, #update
         }
 
     def _get_new_line_sequence(self, child_field, section_id):
@@ -80,7 +85,7 @@ class ProductCatalogMixin(models.AbstractModel):
         if section_id:
             # Insert after the selected section line
             sequence = lines.filtered_domain([
-                ('display_type', '=', 'line_section'),
+                ('display_type', 'in', ['line_section', 'line_subsection']),
                 ('id', '=', section_id),
             ]).sequence + 1
         elif (
@@ -109,6 +114,7 @@ class ProductCatalogMixin(models.AbstractModel):
         """
         sections = {}
         no_section_count = 0
+        no_section_subtotal = 0.0
         lines = self[child_field]
         for line in lines.sorted('sequence'):
             if line.display_type in ('line_section', 'line_subsection'):
@@ -130,17 +136,15 @@ class ProductCatalogMixin(models.AbstractModel):
                     values['is_optional'] = line.is_optional
                 sections[line.id] = values
             elif self._is_line_valid_for_section_line_count(line):
-                section = line.get_parent_section_line()
-                subsection = line.get_parent_subsection_line()
+                if line.parent_id and line.parent_id.id in sections:
+                    sections[line.parent_id.id]['line_count'] += 1
 
-                if subsection and subsection.id in sections:
-                    sections[subsection.id]['line_count'] += 1
+                if line.parent_id and line.parent_id.parent_id and line.parent_id.parent_id.id in sections:
+                    sections[line.parent_id.parent_id.id]['line_count'] += 1
 
-                if section and section.id in sections:
-                    sections[section.id]['line_count'] += 1
-
-                if not (section or subsection):
+                if not line.parent_id:
                     no_section_count += 1
+                    no_section_subtotal += line.price_subtotal
 
         if no_section_count > 0 or not sections:
             # If there are products outside of a section or no section at all
@@ -150,6 +154,9 @@ class ProductCatalogMixin(models.AbstractModel):
                 'sequence': lines[0].sequence - 1 if lines else 0,
                 'parent_id': False,
                 'line_count': no_section_count,
+                'display_type': False,
+                'subtotal': no_section_subtotal,
+                'currency_id': self.currency_id.id,
             }
 
         return sorted(sections.values(), key=lambda x: x['sequence'])

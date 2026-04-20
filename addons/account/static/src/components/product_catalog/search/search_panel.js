@@ -273,11 +273,21 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         );
     }
 
-    updateSectionLineCount({ detail: { sectionId, lineCountChange } }) {
+    updateSectionLineCount({ detail: { sectionId, lineCountChange, subtotalDelta } }) {
         const section = this._findSectionById(sectionId, this.state.sections);
         if (!section) return;
 
-        section.line_count = Math.max(0, (section.line_count || 0) + lineCountChange);
+        section.line_count = Math.max(0, section.line_count + lineCountChange);
+
+        section.subtotal = (section.subtotal || 0) + subtotalDelta;
+
+        if (section.parent_id) {
+            const parent = this._findSectionById(section.parent_id, this.state.sections);
+            if (parent) {
+                parent.line_count = Math.max(0, parent.line_count + lineCountChange);
+                parent.subtotal = (parent.subtotal || 0) + subtotalDelta;
+            }
+        }
 
         if (section.line_count === 0 && sectionId === false && this.state.sections.length > 1) {
             this.state.sections = this.state.sections.filter(sec => sec.id !== sectionId);

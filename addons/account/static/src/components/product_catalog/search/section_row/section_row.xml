@@ -12,16 +12,17 @@
 
                 <!-- Expand / collapse -->
                 <i
-                    t-if="this.props.section.children.length"
-                    t-att-class="'fa me-1 ' + (this.props.section.isOpen ? 'fa-caret-down' : 'fa-caret-right')"
-                    t-on-click="() => this.toggle(this.props.section)"
-                />
-
-                <i
                     t-if="this.props.section.id === false"
                     class="fa fa-pencil"
                     t-on-click="() => this.env.enableSectionInput('top')"
                 />
+                <button
+                    t-elif="this.props.section.children.length"
+                    t-att-class="'fa me-1 btn p-0 border-0 bg-transparent o_section_hover_control ' + (this.props.section.isOpen ? 'fa-caret-down' : 'fa-caret-right')"
+                    t-on-click="() => this.toggle(this.props.section)"
+                    style="min-width: 20px"
+                />
+
                 <input
                     t-if="this.props.section.id === false and this.props.state.isAddingSection === 'top'"
                     class="ms-2 o_section_input"
@@ -43,7 +44,7 @@
                 </div>
 
                 <!-- Actions -->
-                <div class="d-flex align-items-center ms-2 gap-2">
+                <div class="d-flex align-items-center ms-2 gap-2 o_section_hover_control">
                     <span
                         class="text-muted"
                         t-out="this.getFormattedSubTotal(this.props.section)"
@@ -69,6 +70,7 @@
                         class="fa fa-plus text-muted"
                         t-on-click="() => this.env.enableSectionInput('subsection', this.props.section.id)"
                         t-if="this.props.section.display_type === 'line_section'"
+                        title="Add a subsection"
                     />
                 </div>
             </div>
