@@ -22,7 +22,7 @@ import { renderToElement } from "@web/core/utils/render";
 export class EmbeddedComponentPlugin extends Plugin {
     static id = "embeddedComponents";
     static dependencies = ["history", "protectedNode", "selection"];
-    static shared = ["renderBlueprintToElement"];
+    static shared = ["renderBlueprintToElement", "getStateChangeManager"];
     /** @type {import("plugins").EditorResources} */
     resources = {
         /** Handlers */
@@ -108,6 +108,7 @@ export class EmbeddedComponentPlugin extends Plugin {
     }
 
     forEachEmbeddedComponentHost(elem, callback) {
+        console.log("forEachEmbeddedComponentHost");
         const selector = `[data-embedded]`;
         const targets = [...elem.querySelectorAll(selector)];
         if (elem.matches(selector)) {
@@ -142,6 +143,7 @@ export class EmbeddedComponentPlugin extends Plugin {
      *        unchanged
      */
     onChangeAttribute(attributeChange, { forNewStep = false } = {}) {
+        console.log("onChangeAttribute", attributeChange);
         const attributeValue = attributeChange.value;
         let newAttributeValue;
         if (attributeChange.attributeName === "data-embedded-state") {
@@ -327,6 +329,7 @@ export class EmbeddedComponentPlugin extends Plugin {
     }
 
     cleanForSave(clone) {
+        console.log("clean for save");
         this.forEachEmbeddedComponentHost(clone, (host, { getEditableDescendants }) => {
             // In this case, host is a cloned element, there is no OWL root
             // attached to it.

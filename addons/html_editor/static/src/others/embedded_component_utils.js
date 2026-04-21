@@ -143,6 +143,7 @@ function embeddedStateProxyHandler(state, stateChangeManager) {
                 stateChangeManager.previousEmbeddedState = JSON.parse(
                     JSON.stringify(stateChangeManager.embeddedState)
                 );
+                console.log("set");
             }
             return Reflect.set(target, key, value, receiver);
         },
