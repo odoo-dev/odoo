@@ -670,7 +670,7 @@ class IrModelFields(models.Model):
                     field_name=name,
                     related_field=self.related,
                 ))
-            if not field.store and index < last:
+            if self.env.registry.ready and not field.store and index < last:
                 raise UserError(_(
                     'Field "%(field_name)s" in related path "%(related_field)s" is not stored. '
                     'Non-stored fields cannot be used in related fields.',
