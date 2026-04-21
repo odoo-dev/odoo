@@ -30,6 +30,7 @@ from odoo.tools import (
     lazy_classproperty,
     remove_accents,
     sql,
+    mute_logger,
 )
 from odoo.tools.func import locked, reset_cached_properties
 from odoo.tools.lru import LRU
@@ -493,8 +494,9 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
             done = set()
             for field in todo:
-                if field in done:
-                    continue
+                with mute_logger('odoo.fields'):
+                    if field in done:
+                        continue
 
                 model_cls = self[field.model_name]
                 if model_cls._setup_done__ and field._base_fields__:
@@ -512,10 +514,12 @@ class Registry(Mapping[str, type["BaseModel"]]):
                     models_field_depends_done.discard(model_cls)
 
                 # partial invalidation of field_depends[_context]
-                self.field_depends.pop(field, None)
-                self.field_depends_context.pop(field, None)
+                with mute_logger('odoo.fields'):
+                    self.field_depends.pop(field, None)
+                    self.field_depends_context.pop(field, None)
 
-                done.add(field)
+                with mute_logger('odoo.fields'):
+                    done.add(field)
                 todo.extend(self.field_setup_dependents.pop(field, ()))
 
         self.many2one_company_dependents.clear()
