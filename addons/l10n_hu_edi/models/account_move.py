@@ -113,6 +113,9 @@ class AccountMove(models.Model):
         string='Transaction messages',
         compute='_compute_message_html',
     )
+    l10n_hu_delivery_date = fields.Date(
+        string='Delivery Date',
+    )
 
     # === Constraints === #
 
@@ -129,11 +132,24 @@ class AccountMove(models.Model):
     def _compute_expected_currency_rate(self):
         super()._compute_expected_currency_rate()
 
-    def _get_invoice_currency_rate_date(self):
-        self.ensure_one()
-        if self.country_code == 'HU' and self.delivery_date:
-            return self.delivery_date
-        return super()._get_invoice_currency_rate_date()
+    # @api.depends('l10n_hu_delivery_date')
+    # def _compute_delivery_date(self):
+    #     # EXTENDS 'account'
+    #     super()._compute_delivery_date()
+    #     for move in self.filtered(lambda m: m.country_code == 'HU' and m.l10n_hu_delivery_date):
+    #         move.delivery_date = move.l10n_hu_delivery_date
+
+    @api.onchange('l10n_hu_delivery_date')
+    def _onchange_l10n_hu_delivery_date(self):
+        self.delivery_date = self.l10n_hu_delivery_date
+
+    @api.depends('l10n_hu_delivery_date')
+    def _compute_currency_rate_date(self):
+        use_delivery_date = self.filtered(lambda m: m.country_code == 'HU' and m.l10n_hu_delivery_date)
+        for move in use_delivery_date:
+            move.currency_rate_date = move.delivery_date
+
+        super(AccountMove, self - use_delivery_date)._compute_currency_rate_date()
 
     @api.depends('l10n_hu_edi_messages')
     def _compute_message_html(self):
@@ -287,7 +303,7 @@ class AccountMove(models.Model):
             from_currency=self.currency_id,
             to_currency=self.env.ref('base.HUF'),
             company=self.company_id,
-            date=self._get_invoice_currency_rate_date(),
+            date=self.currency_rate_date,
         )
 
     def _l10n_hu_edi_set_chain_index(self):
