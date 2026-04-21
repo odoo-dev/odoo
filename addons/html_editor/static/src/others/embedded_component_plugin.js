@@ -108,7 +108,6 @@ export class EmbeddedComponentPlugin extends Plugin {
     }
 
     forEachEmbeddedComponentHost(elem, callback) {
-        console.log("forEachEmbeddedComponentHost");
         const selector = `[data-embedded]`;
         const targets = [...elem.querySelectorAll(selector)];
         if (elem.matches(selector)) {
@@ -119,7 +118,6 @@ export class EmbeddedComponentPlugin extends Plugin {
             if (!embedding) {
                 continue;
             }
-            console.log("forEachEmbeddedComponentHost", host);
             callback(host, embedding);
         }
     }
