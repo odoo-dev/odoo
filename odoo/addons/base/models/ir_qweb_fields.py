@@ -210,6 +210,7 @@ class IrQwebFieldFloat(models.AbstractModel):
         options = super().get_available_options()
         options.update(
             precision=dict(type='integer', string=_('Rounding precision')),
+            hide_decimal_zeros=dict(type='boolean', string=_("Hide Decimal Zeros")),
         )
         return options
 
@@ -230,6 +231,12 @@ class IrQwebFieldFloat(models.AbstractModel):
         max_dec_digits = max(15 - int_digits, 0)
         precision = min(precision, max_dec_digits)
 
+        value = float_utils.float_round(value, precision_digits=precision)
+        if options.get('hide_decimal_zeros'):
+            if float(value).is_integer():
+                return self.user_lang().format('%d', int(value), grouping=True)
+            return value
+
         fmt = f'%.{precision}f'
         if min_precision and min_precision < precision:
             _, dec_part = float_utils.float_split_str(value, precision)
@@ -239,7 +246,6 @@ class IrQwebFieldFloat(models.AbstractModel):
             elif digits_count < precision:
                 fmt = f'%.{digits_count}f'
 
-        value = float_utils.float_round(value, precision_digits=precision)
         return self.user_lang().format(fmt, value, grouping=True).replace(r'-', '-\N{ZERO WIDTH NO-BREAK SPACE}')
 
     @api.model

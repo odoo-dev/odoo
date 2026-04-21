@@ -244,7 +244,7 @@
                                     </div>
                                 </td>
                                 <td name="td_product_quantity" class="o_td_quantity text-end">
-                                    <span t-field="line.product_uom_qty" class="text-nowrap">3</span>
+                                    <span t-field="line.product_uom_qty" t-options="{'hide_decimal_zeros': True}" class="text-nowrap">3</span>
                                     <span t-field="line.product_uom_id">units</span>
                                     <span t-if="line.product_uom_id != line.product_id.uom_id" class="text-muted small">
                                         <t t-set="quantity_in_product_uom" t-value="line.product_uom_id._compute_quantity(line.product_uom_qty, line.product_id.uom_id)"/>
