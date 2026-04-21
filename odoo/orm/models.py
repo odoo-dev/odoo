@@ -5744,6 +5744,8 @@ class BaseModel(metaclass=MetaModel):
     @api.private
     def update(self, values: ValuesType) -> None:
         """ Update the records in ``self`` with ``values``. """
+        if not values:
+            self.check_access('write')
         for name, value in values.items():
             self[name] = value
 
