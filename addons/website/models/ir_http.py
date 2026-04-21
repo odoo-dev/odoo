@@ -476,10 +476,12 @@ class IrHttp(models.AbstractModel):
 
         visitor = self.env['website.visitor'].sudo().search_fetch([('access_token', '=', visitor_identifier)])
 
-        if not force_create and not self.env.cr.readonly and visitor and not visitor.timezone:
-            tz = self.env['website.visitor']._get_visitor_timezone()
-            if tz:
-                visitor._update_visitor_timezone(tz)
+        if visitor and not self.env.cr.readonly:
+            visitor._update_visitor_last_visit()
+            if not visitor.timezone:
+                tz = self.env['website.visitor']._get_visitor_timezone()
+                if tz:
+                    visitor._update_visitor_timezone(tz)
 
         return visitor
 

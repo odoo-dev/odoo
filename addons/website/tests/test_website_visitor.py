@@ -11,6 +11,7 @@ from unittest.mock import patch
 from odoo.tests import HttpCase, common, tagged
 
 from odoo.addons.base.tests.common import HttpCaseWithUserDemo
+from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.addons.website.models.ir_http import IrHttp
 
 
@@ -406,6 +407,18 @@ class WebsiteVisitorTests(WebsiteVisitorTestsCommon):
         visitor_portal.invalidate_model(['visit_count'])
         # check number of visits
         self.assertEqual(visitor_portal.visit_count, 2, "There should be 2 visits for the portal user")
+
+    def test_last_connection_update(self):
+        existing_visitors = self.env['website.visitor'].search([])
+        self._url_open_with_tracking(self.tracked_page.url)
+        new_visitor = self.env['website.visitor'].search([('id', 'not in', existing_visitors.ids)])
+        expired_time = new_visitor.last_connection_datetime - timedelta(hours=9)
+        new_visitor.write({'last_connection_datetime': expired_time})
+        new_visitor.flush_recordset(['last_connection_datetime'])
+        with MockRequest(self.env(user=self.env.ref('base.public_user')), session_sid=new_visitor.access_token):
+            get_visitor = self.env['ir.http']._get_visitor_from_request(force_create=False)
+        self.assertEqual(new_visitor, get_visitor)
+        self.assertTrue(get_visitor.last_connection_datetime > expired_time, "last visit changes")
 
     def test_clean_inactive_visitors(self):
         inactive_visitors = self.env['website.visitor'].create([{

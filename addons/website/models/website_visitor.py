@@ -190,7 +190,7 @@ class WebsiteVisitor(models.Model):
             `inserted` or `updated).
         """
         create_values = {
-            'access_token': identifier,
+            'access_token': str(identifier),
             'lang_id': lang_id,
             'country_code': country_code,
             'website_id': website_id,
@@ -202,44 +202,73 @@ class WebsiteVisitor(models.Model):
             # used instead as the token.
             'partner_id': None if len(str(identifier)) > 31 else identifier,
         }
-        query = SQL("""
-            INSERT INTO website_visitor (
-                partner_id, access_token, last_connection_datetime, visit_count, lang_id,
-                website_id, timezone, write_uid, create_uid, write_date, create_date, country_id)
-            VALUES (
-                %(partner_id)s, %(access_token)s, now() at time zone 'UTC', 1, %(lang_id)s,
-                %(website_id)s, %(timezone)s, %(create_uid)s, %(write_uid)s,
-                now() at time zone 'UTC', now() at time zone 'UTC', (
-                    SELECT id FROM res_country WHERE code = %(country_code)s
+        ctes = [
+            SQL("""
+                new_visitor AS (
+                    INSERT INTO website_visitor (
+                        partner_id, access_token, last_connection_datetime, visit_count, lang_id,
+                        website_id, timezone, write_uid, create_uid, write_date, create_date, country_id
+                    )
+                    VALUES (
+                        %(partner_id)s, %(access_token)s, now() at time zone 'UTC', 1, %(lang_id)s,
+                        %(website_id)s, %(timezone)s, %(create_uid)s, %(write_uid)s,
+                        now() at time zone 'UTC', now() at time zone 'UTC', (
+                            SELECT id FROM res_country WHERE code = %(country_code)s
+                        )
+                    )
+                    ON CONFLICT (access_token)
+                    DO NOTHING
+                    RETURNING id, 'inserted' AS status
                 )
-            )
-            ON CONFLICT (access_token)
-            DO UPDATE SET
-                last_connection_datetime=excluded.last_connection_datetime,
-                write_date = excluded.write_date,
-                visit_count = CASE WHEN website_visitor.last_connection_datetime < NOW() AT TIME ZONE 'UTC' - INTERVAL '8 hours'
-                                    THEN website_visitor.visit_count + 1
-                                    ELSE website_visitor.visit_count
-                                END
-            RETURNING id, CASE WHEN create_date = write_date THEN 'inserted' ELSE 'updated' END AS upsert
-        """, **create_values)
+                """,
+                **create_values,
+            ),
+            SQL("""
+                visitor_source AS (
+                    SELECT id, 'inserted' AS status FROM new_visitor
+                     UNION ALL
+                    SELECT id, 'updated' AS status
+                      FROM website_visitor
+                     WHERE access_token = %(access_token)s
+                     LIMIT 1
+                )
+                """,
+                **create_values,
+            ),
+            SQL("""
+                visitor_update AS (
+                    %(update_query)s
+                )
+                """,
+                update_query=self._get_last_visit_update_no_lock_query(
+                    id_sql="(SELECT id FROM visitor_source WHERE status = 'updated')",
+                ),
+            ),
+        ]
 
         if url:
             cols_extra, vals_extra = self._get_additional_track_query_parts(**kwargs)
-            query = SQL("""
-                WITH visitor AS (
-                    %(query)s
-                ), track AS (
-                    INSERT INTO website_track (visitor_id, url, visit_datetime %(cols_extra)s)
-                    SELECT id, %(url)s, now() at time zone 'UTC' %(vals_extra)s FROM visitor
+            ctes.append(
+                SQL("""
+                    track AS (
+                        INSERT INTO website_track (visitor_id, url, visit_datetime %(cols_extra)s)
+                        SELECT id, %(url)s, now() at time zone 'UTC' %(vals_extra)s FROM visitor_source
+                    )
+                    """,
+                    url=url,
+                    cols_extra=cols_extra,
+                    vals_extra=vals_extra,
                 )
-                SELECT id, upsert from visitor;
-                """,
-                query=query,
-                url=url,
-                cols_extra=cols_extra,
-                vals_extra=vals_extra,
             )
+
+        query = SQL("""
+            WITH %(joined_ctes)s
+            SELECT id,
+                   status
+              FROM visitor_source
+            """,
+            joined_ctes=SQL(", ").join(ctes)
+        )
 
         [result] = self.env.execute_query(query)
         return result
@@ -313,19 +342,33 @@ class WebsiteVisitor(models.Model):
         """
         self.env.cr.execute(query, (timezone, self.id))
 
+    def _get_last_visit_update_no_lock_query(self, id_sql):
+        # TODO: Check if updating last_connection_datetime every 8 hours is good enough
+        # livechat seemed to keep it up to date
+        # https://github.com/odoo/odoo/blob/6e0920869b8a62df00b9f942cc9b19ef4a3aebac/addons/website_livechat/models/discuss_channel.py#L79
+        return SQL("""
+            UPDATE website_visitor
+               SET visit_count = visit_count + 1,
+                   last_connection_datetime = now() at time zone 'UTC'
+             WHERE id IN (
+                SELECT id
+                  FROM website_visitor
+                 WHERE id = %(id_sql)s
+                   AND last_connection_datetime < (now() at time zone 'UTC' - INTERVAL '8 hours')
+                   FOR NO KEY UPDATE SKIP LOCKED
+             )
+         RETURNING id
+            """,
+            id_sql=SQL(str(id_sql)),
+        )
+
     def _update_visitor_last_visit(self):
-        date_now = datetime.now()
-        query = "UPDATE website_visitor SET "
-        if self.last_connection_datetime < (date_now - timedelta(hours=8)):
-            query += "visit_count = visit_count + 1,"
-        query += """
-            last_connection_datetime = %s
-            WHERE id IN (
-                SELECT id FROM website_visitor WHERE id = %s
-                FOR NO KEY UPDATE SKIP LOCKED
-            )
-        """
-        self.env.cr.execute(query, (date_now, self.id), log_exceptions=False)
+        self.ensure_one()
+        # TODO: check if 8 hour updates are ok
+        if self.last_connection_datetime < (fields.Datetime.now() - timedelta(hours=8)):
+            query = self._get_last_visit_update_no_lock_query(id_sql=self.id)
+            self.env.cr.execute(query, log_exceptions=False)
+            self.invalidate_recordset(['last_connection_datetime', 'visit_count'])
 
     def _get_visitor_timezone(self):
         tz = request.cookies.get('tz') if request else None
