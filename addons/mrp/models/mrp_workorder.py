@@ -254,7 +254,7 @@ class MrpWorkorder(models.Model):
                     'date_from': wo.date_start,
                     'date_to': wo.date_finished,
                     'resource_id': wo.workcenter_id.resource_id.id,
-                    'count_as': 'working_time',
+                    'count_as_worked_time': True,
                 })
 
     @api.constrains('blocked_by_workorder_ids')
@@ -436,7 +436,7 @@ class MrpWorkorder(models.Model):
             return (date_start or self.date_start) + timedelta(seconds=duration_in_seconds)
         return workcenter.resource_calendar_id.plan_hours(
             self.duration_expected / 60.0, date_start or self.date_start,
-            compute_leaves=True, domain=[('count_as', 'in', ['absence', 'working_time'])]
+            compute_leaves=True, domain=[('count_as_worked_time', 'in', [False, True])]
         )
 
     @api.onchange('date_finished')
@@ -452,7 +452,7 @@ class MrpWorkorder(models.Model):
             return ((date_finished or self.date_finished) - (date_start or self.date_start)).total_seconds() / 60
         interval = self.workcenter_id.resource_calendar_id.get_work_duration_data(
             date_start or self.date_start, date_finished or self.date_finished,
-            domain=[('count_as', 'in', ['absence', 'working_time'])]
+            domain=[('count_as_worked_time', 'in', [False, True])]
         )
         return interval['hours'] * 60
 
@@ -616,7 +616,7 @@ class MrpWorkorder(models.Model):
                     'date_from': best_date_start,
                     'date_to': best_date_finished,
                     'resource_id': best_workcenter.resource_id.id,
-                    'count_as': 'working_time',
+                    'count_as_worked_time': True,
                 })],
             })
 
@@ -675,7 +675,7 @@ class MrpWorkorder(models.Model):
                     'date_from': date_start,
                     'date_to': wo._calculate_date_finished(date_start),
                     'resource_id': wo.workcenter_id.resource_id.id,
-                    'count_as': 'working_time'
+                    'count_as_worked_time': True
                 })
                 vals['date_finished'] = leave.date_to
                 vals['leave_id'] = leave.id

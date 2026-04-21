@@ -169,7 +169,7 @@ class HrVersion(models.Model):
                     leave_interval = (leave_start_dt, leave_end_dt, leave)
                     leave_interval = version._get_valid_leave_intervals(expected_attendances, leave_interval)
                     if leave_interval:
-                        if leave.count_as == 'absence':
+                        if not leave.count_as_worked_time:
                             leave_result[resource.id] += leave_interval
                         else:
                             work_result[resource.id] += leave_interval
@@ -389,7 +389,7 @@ class HrVersion(models.Model):
         if 'work_entry_type_id' not in vals:
             return False
         work_entry_type = vals['work_entry_type_id']
-        return work_entry_type.count_as == 'absence'
+        return not work_entry_type.count_as_worked_time
 
     @api.model
     def _generate_work_entries_postprocess(self, vals_list):

@@ -31,13 +31,7 @@ class HrWorkEntryType(models.Model):
         domain=lambda self: [('id', 'in', self.env.companies.country_id.ids)]
     )
     country_code = fields.Char(related='country_id.code')
-    count_as = fields.Selection(
-        [("working_time", "Working Time"), ("absence", "Absence")],
-        default="working_time",
-        required=True,
-        tracking=True,
-        help="Determines if the entry counts as working time or absence.",
-    )
+    count_as_worked_time = fields.Boolean(help="Determines if the entry counts as working time or absence.", tracking=True,)
     amount_rate = fields.Float(
         string="Rate",
         default=1.0,

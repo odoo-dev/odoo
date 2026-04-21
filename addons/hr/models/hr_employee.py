@@ -2030,7 +2030,7 @@ class HrEmployee(models.Model):
                                     min(date_to, version_end),
                                     resources_per_tz=resources_per_tz,
                                     compute_leaves=True,
-                                    domain=[('company_id', 'in', [False, self.company_id.id]), ('count_as', '=', 'absence')])[self.resource_id.id]
+                                    domain=[('company_id', 'in', [False, self.company_id.id]), ('count_as_worked_time', '=', False)])[self.resource_id.id]
             duration_data = duration_data | version_intervals
         return duration_data
 

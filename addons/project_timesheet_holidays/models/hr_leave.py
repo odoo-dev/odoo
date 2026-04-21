@@ -26,7 +26,7 @@ class HrLeave(models.Model):
         for leave in self:
             project, task = leave.employee_id.company_id.internal_project_id, leave.employee_id.company_id.leave_timesheet_task_id
 
-            if not project or not task or leave.work_entry_type_id.count_as == 'working_time':
+            if not project or not task or leave.work_entry_type_id.count_as_worked_time:
                 continue
 
             leave_ids.append(leave.id)

@@ -7,13 +7,13 @@
             <search string="Search Time Type">
                 <field name="name" filter_domain="['|', ('name', 'ilike', self), ('code', 'ilike', self)]"/>
                 <separator/>
-                <filter name="working_time" string="Working Time" domain="[('count_as', '=', 'working_time')]"/>
-                <filter name="absence_time" string="Absence Time" domain="[('count_as', '=', 'absence')]"/>
+                <filter name="working_time" string="Working Time" domain="[('count_as_worked_time', '=', True)]"/>
+                <filter name="absence_time" string="Absence Time" domain="[('count_as_worked_time', '=', False)]"/>
                 <separator/>
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <separator/>
                 <filter name="group_country" string="Country" context="{'group_by': 'country_id'}"/>
-                <filter name="group_work_type" string="Type of Work" context="{'group_by': 'count_as'}"/>
+                <filter name="group_work_type" string="Count as Worked time" context="{'group_by': 'count_as_worked_time'}"/>
             </search>
         </field>
     </record>
@@ -41,7 +41,7 @@
                 <field name="external_code" optional="hide"/>
                 <field name="display_code" string="Display"/>
                 <field name="country_id"/>
-                <field string="Type of Work" name="count_as" optional="hide"/>
+                <field string="Type of Work" name="count_as_worked_time" optional="hide"/>
                 <field name="color" widget="color_picker"/>
             </list>
         </field>
@@ -57,14 +57,14 @@
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="Time Type Name"/>
+                            <field name="name" placeholder="e.g. Paid Time Off, Sick Leave, Work From Home"/>
                         </h1>
                     </div>
                     <group name="main_group">
                         <group name="identification" class="o_form_fw_labels">
                             <field name="active" invisible="1"/>
                             <field name="code" string="Code" placeholder="e.g. WORK100, LEAVE210, OUT, ..."/>
-                            <field string="Considered as" name="count_as" widget="radio" options="{'horizontal': True}" />
+                            <field name="count_as_worked_time"/>
                         </group>
                         <group>
                             <field name="country_id" options="{'no_create': True, 'no_open': True}" placeholder="All Countries"/>
@@ -76,9 +76,10 @@
 
                     <notebook>
                         <page string="Payroll">
+                            <span class="text-muted fst-italic">Define how this time type affects payslip and salary computation.</span>
                             <group string="Computation">
                                 <group name='computation'>
-                                    <label for="amount_rate"/>
+                                    <label for="amount_rate" string="Pay Rate"/>
                                     <div name="amount_rate">
                                         <field style='width: 4em;' name="amount_rate" widget="percentage"/>
                                     </div>

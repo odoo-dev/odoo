@@ -156,13 +156,13 @@ class HrWorkEntryType(models.Model):
     @api.constrains('allow_request_on_top')
     def _check_allow_request_on_top(self):
         for leave in self:
-            if leave.count_as == "absence" and leave.allow_request_on_top:
+            if not leave.count_as_worked_time and leave.allow_request_on_top:
                 raise ValidationError(self.env._("You cannot allow requests on top of leaves of type 'Absence'."))
 
     @api.constrains('elligible_for_accrual_rate')
     def _check_elligible_for_accrual_rate(self):
         for leave in self:
-            if leave.count_as == "working_time" and not leave.elligible_for_accrual_rate:
+            if leave.count_as_worked_time and not leave.elligible_for_accrual_rate:
                 raise ValidationError(self.env._("leaves of type 'Worked Time' should be always eligible for accrual rate."))
 
     @api.constrains('include_public_holidays_in_duration')
@@ -374,10 +374,10 @@ class HrWorkEntryType(models.Model):
             record.display_name = f"{name} ({record.country_id.name or self.env._("Generic")})"
         return None
 
-    @api.depends('count_as')
+    @api.depends('count_as_worked_time')
     def _compute_eligible_for_accrual_rate(self):
         for work_entry_type in self:
-            work_entry_type.elligible_for_accrual_rate = work_entry_type.count_as != 'absence'
+            work_entry_type.elligible_for_accrual_rate = work_entry_type.count_as_worked_time
 
     @api.model
     def _search(self, domain, offset=0, limit=None, order=None, **kwargs):

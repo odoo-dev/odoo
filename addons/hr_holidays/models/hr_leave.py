@@ -583,7 +583,7 @@ class HrLeave(models.Model):
                 resource_calendar or leave.resource_calendar_id
             ] += leave.employee_id
         # We force the company in the domain as we are more than likely in a compute_sudo
-        domain = [('count_as', '=', 'absence'),
+        domain = [('count_as_worked_time', '=', False),
                   ('company_id', 'in', self.env.companies.ids + self.env.context.get('allowed_company_ids', [])),
                   # When searching for resource leave intervals, we exclude the one that
                   # is related to the leave we're currently trying to compute for.
@@ -607,7 +607,7 @@ class HrLeave(models.Model):
                 continue
             hours, days = (0, 0)
             if leave.employee_id:
-                if leave.work_entry_type_id.count_as != 'absence' and leave.work_entry_type_id.request_unit == 'hour':
+                if leave.work_entry_type_id.count_as_worked_time and leave.work_entry_type_id.request_unit == 'hour':
                     hours = (leave.date_to - leave.date_from).total_seconds() / 3600
                     days = 1
                 # For flexible employees, if it's a single day leave, we force it to the real duration since the virtual intervals might not match reality on that day, especially for custom hours
@@ -1061,7 +1061,7 @@ class HrLeave(models.Model):
             'resource_id': self.employee_id.resource_id.id,
             'calendar_id': self.resource_calendar_id.id,
             'work_entry_type_id': self.work_entry_type_id.id,
-            'count_as': self.work_entry_type_id.count_as,
+            'count_as_worked_time': self.work_entry_type_id.count_as_worked_time,
             'elligible_for_accrual_rate': self.work_entry_type_id.elligible_for_accrual_rate,
         }
 
@@ -1211,7 +1211,7 @@ class HrLeave(models.Model):
             'LEAVE117',  # Work Accident (Unpaid)
         ]
         return self.filtered(
-            lambda l: l.employee_id and not l.number_of_days and l.work_entry_type_id.count_as == 'absence' and l.work_entry_type_id.code not in bypass_work_entry_types)
+            lambda l: l.employee_id and not l.number_of_days and not l.work_entry_type_id.count_as_worked_time and l.work_entry_type_id.code not in bypass_work_entry_types)
 
     def _split_leaves(self, split_date_from, split_date_to=False):
         """

@@ -239,7 +239,7 @@ class HrVersion(models.Model):
         if 'work_entry_type_id' not in vals or not vals.get('leave_ids'):
             return res
         work_entry_type = vals['work_entry_type_id']
-        return res or (work_entry_type.count_as == 'absence' or work_entry_type.request_unit != 'hour')
+        return res or (not work_entry_type.count_as_worked_time or work_entry_type.request_unit != 'hour')
 
     @api.model
     def _get_work_entry_source_fields(self):

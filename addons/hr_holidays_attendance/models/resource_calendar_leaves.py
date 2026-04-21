@@ -8,7 +8,7 @@ class ResourceCalendarLeaves(models.Model):
     def _get_attendance_domain(self):
         domain = []
 
-        leaves_time_type_leave = self.filtered(lambda leave: leave.count_as == 'absence')
+        leaves_time_type_leave = self.filtered(lambda leave: not leave.count_as_worked_time)
 
         resource_leaves = leaves_time_type_leave.filtered(lambda leave: leave.resource_id.employee_id)
         domain.extend([[
@@ -40,7 +40,7 @@ class ResourceCalendarLeaves(models.Model):
         return res
 
     def write(self, vals):
-        affects_attendances = bool({'date_from', 'date_to', 'resource_id', 'calendar_id', 'company_id', 'count_as'} & set(vals.keys()))
+        affects_attendances = bool({'date_from', 'date_to', 'resource_id', 'calendar_id', 'company_id', 'count_as_worked_time'} & set(vals.keys()))
         if affects_attendances:
             before_domain = self._get_attendance_domain()
         res = super().write(vals)

@@ -427,7 +427,7 @@ class ResourceCalendar(models.Model):
         assert start_dt.tzinfo and end_dt.tzinfo
 
         if domain is None:
-            domain = [('count_as', '=', 'absence')]
+            domain = [('count_as_worked_time', '=', False)]
         if self:
             domain = domain + [('calendar_id', 'in', [False] + self.ids)]
 
@@ -719,7 +719,7 @@ class ResourceCalendar(models.Model):
             account the global leaves.
 
             `domain` controls the way leaves are recognized.
-            None means default value ('count_as', '=', 'absence')
+            None means default value ('count_as_worked_time', '=', False)
 
             Counts the number of work hours between two datetimes.
         """
@@ -747,7 +747,7 @@ class ResourceCalendar(models.Model):
             compute it.
 
             `domain` is used in order to recognise the leaves to take,
-            None means default value ('count_as', '=', 'absence')
+            None means default value ('count_as_worked_time', '=', False)
 
             Returns a dict {'days': n, 'hours': h} containing the
             quantity of working time expressed as days and as hours.
@@ -771,7 +771,7 @@ class ResourceCalendar(models.Model):
         account the global leaves.
 
         `domain` controls the way leaves are recognized.
-        None means default value ('count_as', '=', 'absence')
+        None means default value ('count_as_worked_time', '=', False)
 
         Return datetime after having planned hours
         """
@@ -817,7 +817,7 @@ class ResourceCalendar(models.Model):
         account the global leaves.
 
         `domain` controls the way leaves are recognized.
-        None means default value ('count_as', '=', 'absence')
+        None means default value ('count_as_worked_time', '=', False)
 
         Returns the datetime of a days scheduling.
         """

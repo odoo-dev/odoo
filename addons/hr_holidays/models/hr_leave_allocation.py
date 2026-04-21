@@ -410,7 +410,7 @@ class HrLeaveAllocation(models.Model):
         end_dt = datetime.combine(end_date, datetime_min_time)
         leaves_eligible = self.employee_id.sudo()._get_leave_days_data_batch(start_dt, end_dt,
             calendar=self.employee_id._get_calendars(start_dt)[self.employee_id.id],
-            domain=[('count_as', '=', 'absence'), ('elligible_for_accrual_rate', '=', True)])[self.employee_id.id]['hours']
+            domain=[('count_as_worked_time', '=', False), ('elligible_for_accrual_rate', '=', True)])[self.employee_id.id]['hours']
         worked = self.employee_id._get_work_days_data_batch(start_dt, end_dt,
             calendar=self.employee_id.resource_calendar_id)[self.employee_id.id]['hours']
         worked += leaves_eligible
@@ -419,7 +419,7 @@ class HrLeaveAllocation(models.Model):
             end_dt = datetime.combine(end_period, datetime_min_time)
             leaves_eligible = self.employee_id.sudo()._get_leave_days_data_batch(start_dt, end_dt,
                 calendar=self.employee_id._get_calendars(start_dt)[self.employee_id.id],
-                domain=[('count_as', '=', 'absence'), ('elligible_for_accrual_rate', '=', True)])[self.employee_id.id]['hours']
+                domain=[('count_as_worked_time', '=', False), ('elligible_for_accrual_rate', '=', True)])[self.employee_id.id]['hours']
             planned_worked = self.employee_id._get_work_days_data_batch(start_dt, end_dt,
                 calendar=self.employee_id.resource_calendar_id)[self.employee_id.id]['hours']
             planned_worked += leaves_eligible
@@ -427,7 +427,7 @@ class HrLeaveAllocation(models.Model):
             planned_worked = worked
         left = self.employee_id.sudo()._get_leave_days_data_batch(start_dt, end_dt,
             calendar=self.employee_id._get_calendars(start_dt)[self.employee_id.id],
-            domain=[('count_as', '=', 'absence'), ('elligible_for_accrual_rate', '=', False)])[self.employee_id.id]['hours']
+            domain=[('count_as_worked_time', '=', False), ('elligible_for_accrual_rate', '=', False)])[self.employee_id.id]['hours']
         if level.frequency in level._get_hourly_frequencies():
             if level.accrual_plan_id.is_based_on_worked_time:
                 work_entry_prorata = planned_worked

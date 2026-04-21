@@ -211,7 +211,7 @@ class HrEmployee(models.Model):
             employee.leave_date_from = min(emp_holidays.mapped('date_from')).date()
             employee.leave_date_to = employee_back_on.get(employee.id, latest_emp_holiday.date_to).date()
             employee.current_leave_state = latest_emp_holiday.state
-            employee.is_absent = any(e_h.work_entry_type_id.count_as == 'absence' for e_h in emp_holidays)
+            employee.is_absent = any(not e_h.work_entry_type_id.count_as_worked_time for e_h in emp_holidays)
 
         no_data = self - holidays.employee_id
         no_data.update({

@@ -6,7 +6,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="generic_work_entry_type_overtime" model="hr.work.entry.type">
@@ -28,7 +28,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="generic_work_entry_type_compensatory" model="hr.work.entry.type">
@@ -36,7 +36,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="generic_work_entry_type_home_working" model="hr.work.entry.type">
@@ -44,7 +44,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="generic_work_entry_type_unpaid_leave" model="hr.work.entry.type">
@@ -52,7 +52,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="generic_work_entry_type_sick_leave" model="hr.work.entry.type">
@@ -60,7 +60,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="generic_work_entry_type_legal_leave" model="hr.work.entry.type">
@@ -68,7 +68,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
 <!-- AE : United Arab Emirates -->
@@ -77,7 +77,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.ae"/>
     </record>
 
@@ -102,7 +102,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ae"/>
     </record>
 
@@ -111,7 +111,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ae"/>
     </record>
 
@@ -120,7 +120,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ae"/>
     </record>
 
@@ -129,7 +129,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ae"/>
     </record>
 
@@ -138,7 +138,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ae"/>
     </record>
 
@@ -147,7 +147,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ae"/>
     </record>
 
@@ -165,7 +165,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.au"/>
     </record>
 
@@ -190,7 +190,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.au"/>
     </record>
 
@@ -199,7 +199,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.au"/>
     </record>
 
@@ -208,7 +208,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.au"/>
     </record>
 
@@ -217,7 +217,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.au"/>
     </record>
 
@@ -226,7 +226,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.au"/>
     </record>
 
@@ -235,7 +235,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.au"/>
     </record>
 
@@ -244,7 +244,7 @@
         <field name="color">5</field>
         <field name="code">AU.PT</field>
         <field name="country_id" ref="base.au"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_au_work_entry_type_long_service_leave" model="hr.work.entry.type">
@@ -252,7 +252,7 @@
         <field name="color">5</field>
         <field name="code">AU.LS</field>
         <field name="country_id" ref="base.au"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_au_work_entry_type_personal_leave" model="hr.work.entry.type">
@@ -260,7 +260,7 @@
         <field name="color">5</field>
         <field name="code">AU.PL</field>
         <field name="country_id" ref="base.au"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_au_work_entry_type_other" model="hr.work.entry.type">
@@ -355,7 +355,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
@@ -380,7 +380,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
@@ -389,7 +389,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
@@ -398,7 +398,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
@@ -407,7 +407,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
@@ -416,7 +416,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
@@ -425,7 +425,7 @@
         <field name="display_code">STOWC</field>
         <field name="code">LEAVE111</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
@@ -434,7 +434,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
@@ -458,7 +458,7 @@
         <field name="display_code">PH</field>
         <field name="color">3</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_upcomming_public_holiday" model="hr.work.entry.type">
@@ -467,7 +467,7 @@
         <field name="display_code">UPH</field>
         <field name="color">3</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_solicitation_time_off" model="hr.work.entry.type">
@@ -475,7 +475,7 @@
         <field name="code">LEAVE600</field>
         <field name="display_code">SOL</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_unjustified_reason" model="hr.work.entry.type">
@@ -483,7 +483,7 @@
         <field name="code">LEAVE700</field>
         <field name="display_code">UJR</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_justified_reason_paid" model="hr.work.entry.type">
@@ -491,7 +491,7 @@
         <field name="code">LEAVE701</field>
         <field name="display_code">JRP</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_justified_reason_unpaid" model="hr.work.entry.type">
@@ -499,7 +499,7 @@
         <field name="code">LEAVE702</field>
         <field name="display_code">JRU</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_small_unemployment" model="hr.work.entry.type">
@@ -508,7 +508,7 @@
         <field name="color">5</field>
         <field name="display_code">SUH</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_economic_unemployment" model="hr.work.entry.type">
@@ -517,7 +517,7 @@
         <field name="color">5</field>
         <field name="display_code">ECO</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_corona" model="hr.work.entry.type">
@@ -526,7 +526,7 @@
         <field name="color">5</field>
         <field name="display_code">COV</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_maternity" model="hr.work.entry.type">
@@ -535,7 +535,7 @@
         <field name="color">5</field>
         <field name="display_code">MAT</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_paternity_company" model="hr.work.entry.type">
@@ -544,7 +544,7 @@
         <field name="color">5</field>
         <field name="display_code">PTC</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_paternity_legal" model="hr.work.entry.type">
@@ -552,70 +552,70 @@
         <field name="code">LEAVE230</field>
         <field name="color">5</field>
         <field name="display_code">PTL</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
     <record id="l10n_be_work_entry_type_child_ceremony" model="hr.work.entry.type">
         <field name="name">Child Ceremony (Communion / Secular Youth)</field>
         <field name="code">YOUNG02</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
     <record id="l10n_be_work_entry_type_child_adoption" model="hr.work.entry.type">
         <field name="name">Child Adoption / Long-Term Foster Care</field>
         <field name="code">LEAVE650</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
     <record id="l10n_be_work_entry_type_marriage_employee" model="hr.work.entry.type">
         <field name="name">Marriage (Employee)</field>
         <field name="code">LEAVE550</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
     <record id="l10n_be_work_entry_type_marriage_family" model="hr.work.entry.type">
         <field name="name">Marriage of a Family Member</field>
         <field name="code">LEAVE551</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
     <record id="l10n_be_work_entry_type_death_close_family" model="hr.work.entry.type">
         <field name="name">Death of Partner or Child</field>
         <field name="code">LEAVE450</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
     <record id="l10n_be_work_entry_type_death_parents" model="hr.work.entry.type">
         <field name="name">Death of Parent or In-law</field>
         <field name="code">LEAVE451</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
     <record id="l10n_be_work_entry_type_death_extended_family" model="hr.work.entry.type">
         <field name="name">Death of Extended Family Member</field>
         <field name="code">LEAVE452</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
     <record id="l10n_be_work_entry_type_death_one_day" model="hr.work.entry.type">
         <field name="name">Death (One Day Leave)</field>
         <field name="code">LEAVE453</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
     <record id="l10n_be_work_entry_type_civic_duty" model="hr.work.entry.type">
         <field name="name">Civic or Judicial Duty</field>
         <field name="code">LEAVE350</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.be"/>
     </record>
 
@@ -625,7 +625,7 @@
         <field name="color">5</field>
         <field name="display_code">URU</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_training" model="hr.work.entry.type">
@@ -642,7 +642,7 @@
         <field name="color">5</field>
         <field name="display_code">EDU</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_flemish_training_time_off" model="hr.work.entry.type">
@@ -651,7 +651,7 @@
         <field name="color">5</field>
         <field name="display_code">FED</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_long_sick" model="hr.work.entry.type">
@@ -660,7 +660,7 @@
         <field name="color">5</field>
         <field name="display_code">LTS</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_breast_feeding" model="hr.work.entry.type">
@@ -669,7 +669,7 @@
         <field name="color">5</field>
         <field name="display_code">BFB</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_medical_assistance" model="hr.work.entry.type">
@@ -678,7 +678,7 @@
         <field name="color">5</field>
         <field name="display_code">MED</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_youth_time_off" model="hr.work.entry.type">
@@ -687,7 +687,7 @@
         <field name="color">5</field>
         <field name="display_code">YSO</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_recovery_additional" model="hr.work.entry.type">
@@ -696,7 +696,7 @@
         <field name="color">5</field>
         <field name="display_code">RAT</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_additional_paid" model="hr.work.entry.type">
@@ -713,7 +713,7 @@
         <field name="color">5</field>
         <field name="display_code">NTC</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_phc" model="hr.work.entry.type">
@@ -722,7 +722,7 @@
         <field name="color">3</field>
         <field name="display_code">PHC</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_extra_legal" model="hr.work.entry.type">
@@ -731,7 +731,7 @@
         <field name="color">5</field>
         <field name="display_code">XLT</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_part_sick" model="hr.work.entry.type">
@@ -740,7 +740,7 @@
         <field name="color">5</field>
         <field name="display_code">SGS</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_recovery" model="hr.work.entry.type">
@@ -749,7 +749,7 @@
         <field name="color">5</field>
         <field name="display_code">RBH</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_european" model="hr.work.entry.type">
@@ -758,7 +758,7 @@
         <field name="color">5</field>
         <field name="display_code">EUR</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_credit_time" model="hr.work.entry.type">
@@ -767,7 +767,7 @@
         <field name="color">8</field>
         <field name="display_code">CRT</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_parental_time_off" model="hr.work.entry.type">
@@ -776,7 +776,7 @@
         <field name="color">8</field>
         <field name="display_code">PAR</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_simple_holiday_pay_variable_salary" model="hr.work.entry.type">
@@ -785,7 +785,7 @@
         <field name="color">3</field>
         <field name="display_code">FVS</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_accident" model="hr.work.entry.type">
@@ -794,7 +794,7 @@
         <field name="color">5</field>
         <field name="display_code">WAP</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_accident_unpaid" model="hr.work.entry.type">
@@ -803,7 +803,7 @@
         <field name="color">5</field>
         <field name="display_code">WAU</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_occupational_disease_unpaid" model="hr.work.entry.type">
@@ -812,7 +812,7 @@
         <field name="color">5</field>
         <field name="display_code">ODU</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_partial_incapacity" model="hr.work.entry.type">
@@ -821,7 +821,7 @@
         <field name="color">4</field>
         <field name="display_code">PIN</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_strike" model="hr.work.entry.type">
@@ -830,7 +830,7 @@
         <field name="color">5</field>
         <field name="display_code">STR</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_small_unemployment_birth" model="hr.work.entry.type">
@@ -839,7 +839,7 @@
         <field name="color">5</field>
         <field name="display_code">BHB</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_non_taxable_political_service" model="hr.work.entry.type">
@@ -848,7 +848,7 @@
         <field name="color">5</field>
         <field name="display_code">NTS</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_be_work_entry_type_other_presence" model="hr.work.entry.type">
@@ -857,7 +857,7 @@
         <field name="color">5</field>
         <field name="display_code">OSC</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_be_work_entry_type_paid_compensatory_rest" model="hr.work.entry.type">
@@ -866,7 +866,7 @@
         <field name="color">5</field>
         <field name="display_code">CRP</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_be_work_entry_type_unpaid_compensatory_rest" model="hr.work.entry.type">
@@ -875,7 +875,7 @@
         <field name="color">5</field>
         <field name="display_code">CRU</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_be_work_entry_type_paid_recovered_compensatory_rest" model="hr.work.entry.type">
@@ -884,7 +884,7 @@
         <field name="color">5</field>
         <field name="display_code">CHP</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
 <!-- YTI TODO: Encore unpaid work entry types on structure -->
@@ -894,7 +894,7 @@
         <field name="color">5</field>
         <field name="display_code">CHU</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_be_work_entry_type_sectoral_compensatory_rest" model="hr.work.entry.type">
@@ -903,7 +903,7 @@
         <field name="color">5</field>
         <field name="display_code">SCT</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_be_work_entry_type_public_holiday_temporary_unemployment" model="hr.work.entry.type">
@@ -912,7 +912,7 @@
         <field name="color">5</field>
         <field name="display_code">PUT</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_extra_legal_public_holiday" model="hr.work.entry.type">
@@ -921,7 +921,7 @@
         <field name="color">5</field>
         <field name="display_code">XPH</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_extra_legal_sectoral_holiday" model="hr.work.entry.type">
@@ -930,7 +930,7 @@
         <field name="color">5</field>
         <field name="display_code">XSH</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_untaken_time_off_first_year" model="hr.work.entry.type">
@@ -939,7 +939,7 @@
         <field name="color">5</field>
         <field name="display_code">VY1</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_untaken_time_off_second_year" model="hr.work.entry.type">
@@ -948,7 +948,7 @@
         <field name="color">5</field>
         <field name="display_code">VY2</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_worker_time_off" model="hr.work.entry.type">
@@ -957,7 +957,7 @@
         <field name="color">5</field>
         <field name="display_code">WTO</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_sailor_time_off" model="hr.work.entry.type">
@@ -966,7 +966,7 @@
         <field name="color">5</field>
         <field name="display_code">SEA</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_incapacity_first_week" model="hr.work.entry.type">
@@ -975,7 +975,7 @@
         <field name="color">5</field>
         <field name="display_code">IW1</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_incapacity" model="hr.work.entry.type">
@@ -984,7 +984,7 @@
         <field name="color">5</field>
         <field name="display_code">IWM</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_incapacity_sickness_credit" model="hr.work.entry.type">
@@ -993,7 +993,7 @@
         <field name="color">5</field>
         <field name="display_code">ISC</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_incapacity_worker_second_week" model="hr.work.entry.type">
@@ -1003,7 +1003,7 @@
         <field name="amount_rate">0.8588</field>
         <field name="display_code">IW2</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_incapacity_worker_after_second_week" model="hr.work.entry.type">
@@ -1012,7 +1012,7 @@
         <field name="color">5</field>
         <field name="display_code">ISS</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_common_law_illness_non_attributable_to_worker" model="hr.work.entry.type">
@@ -1021,7 +1021,7 @@
         <field name="color">5</field>
         <field name="display_code">CL1</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_common_law_illness_attributable_to_worker" model="hr.work.entry.type">
@@ -1030,7 +1030,7 @@
         <field name="color">5</field>
         <field name="display_code">CL2</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_common_law_illness_after_legal_period" model="hr.work.entry.type">
@@ -1039,7 +1039,7 @@
         <field name="color">5</field>
         <field name="display_code">CLA</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_prophylactic_time_off" model="hr.work.entry.type">
@@ -1048,7 +1048,7 @@
         <field name="color">5</field>
         <field name="display_code">PRO</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_common_law_illness_ami" model="hr.work.entry.type">
@@ -1057,7 +1057,7 @@
         <field name="color">5</field>
         <field name="display_code">AMI</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_accident_first_week" model="hr.work.entry.type">
@@ -1066,7 +1066,7 @@
         <field name="color">5</field>
         <field name="display_code">WA1</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_accident_guaranteed_monthly" model="hr.work.entry.type">
@@ -1075,7 +1075,7 @@
         <field name="color">5</field>
         <field name="display_code">WAM</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_work_accident_second_week" model="hr.work.entry.type">
@@ -1085,7 +1085,7 @@
         <field name="display_code">WAS</field>
         <field name="amount_rate">0.8588</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_temporary_unemployment_dismissal" model="hr.work.entry.type">
@@ -1094,7 +1094,7 @@
         <field name="color">5</field>
         <field name="display_code">TUP</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_temporary_unemployment_incident" model="hr.work.entry.type">
@@ -1103,7 +1103,7 @@
         <field name="color">5</field>
         <field name="display_code">TUT</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_temporary_unemployment_force_majeure" model="hr.work.entry.type">
@@ -1112,7 +1112,7 @@
         <field name="color">5</field>
         <field name="display_code">TUA</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_temporary_unemployment_force_majeure_medical" model="hr.work.entry.type">
@@ -1121,7 +1121,7 @@
         <field name="color">5</field>
         <field name="display_code">TUM</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_temporary_unemployment_collective_closure" model="hr.work.entry.type">
@@ -1130,7 +1130,7 @@
         <field name="color">5</field>
         <field name="display_code">TUH</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_temporary_unemployment_collective_closure_agreeement" model="hr.work.entry.type">
@@ -1139,7 +1139,7 @@
         <field name="color">5</field>
         <field name="display_code">TUC</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_temporary_unemployment_collective_closure_reduction" model="hr.work.entry.type">
@@ -1148,7 +1148,7 @@
         <field name="color">5</field>
         <field name="display_code">TUR</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_temporary_unemployment_strike" model="hr.work.entry.type">
@@ -1157,7 +1157,7 @@
         <field name="color">5</field>
         <field name="display_code">TUS</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_temporary_unemployment_bad_weather" model="hr.work.entry.type">
@@ -1166,7 +1166,7 @@
         <field name="color">5</field>
         <field name="display_code">TUB</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_non_provided_service_childminders" model="hr.work.entry.type">
@@ -1175,7 +1175,7 @@
         <field name="color">5</field>
         <field name="display_code">CHI</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_other_training" model="hr.work.entry.type">
@@ -1184,7 +1184,7 @@
         <field name="color">5</field>
         <field name="display_code">TRX</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_be_work_entry_type_training_social_promotion" model="hr.work.entry.type">
@@ -1193,7 +1193,7 @@
         <field name="color">5</field>
         <field name="display_code">SPT</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_maternity_time_off_converted" model="hr.work.entry.type">
@@ -1202,7 +1202,7 @@
         <field name="color">5</field>
         <field name="display_code">MLC</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_postponed_paid_time_off_n1" model="hr.work.entry.type">
@@ -1211,7 +1211,7 @@
         <field name="color">11</field>
         <field name="display_code">PN1</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_postponed_paid_time_off_n2" model="hr.work.entry.type">
@@ -1220,7 +1220,7 @@
         <field name="color">11</field>
         <field name="display_code">PN2</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_adoption_company" model="hr.work.entry.type">
@@ -1229,7 +1229,7 @@
         <field name="color">5</field>
         <field name="display_code">AFP</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_adoption_legal" model="hr.work.entry.type">
@@ -1238,7 +1238,7 @@
         <field name="color">5</field>
         <field name="display_code">AFU</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_foster_care" model="hr.work.entry.type">
@@ -1247,7 +1247,7 @@
         <field name="color">5</field>
         <field name="display_code">FOS</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_available_not_working" model="hr.work.entry.type">
@@ -1256,7 +1256,7 @@
         <field name="color">5</field>
         <field name="display_code">AVL</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_construction_bad_weather_first_day" model="hr.work.entry.type">
@@ -1265,7 +1265,7 @@
         <field name="color">5</field>
         <field name="display_code">FDB</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_construction_imperative_maintained_salary" model="hr.work.entry.type">
@@ -1274,7 +1274,7 @@
         <field name="color">5</field>
         <field name="display_code">IMS</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_environmental_protection" model="hr.work.entry.type">
@@ -1283,7 +1283,7 @@
         <field name="color">5</field>
         <field name="display_code">TME</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_union_mission" model="hr.work.entry.type">
@@ -1292,7 +1292,7 @@
         <field name="color">5</field>
         <field name="display_code">UMP</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_end_of_carreer_exemption" model="hr.work.entry.type">
@@ -1301,7 +1301,7 @@
         <field name="color">5</field>
         <field name="display_code">EXC</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_social_judge" model="hr.work.entry.type">
@@ -1310,7 +1310,7 @@
         <field name="color">5</field>
         <field name="display_code">FSJ</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_union_mission_unpaid" model="hr.work.entry.type">
@@ -1319,7 +1319,7 @@
         <field name="color">5</field>
         <field name="display_code">UMU</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_civic_duty_unpaid" model="hr.work.entry.type">
@@ -1328,7 +1328,7 @@
         <field name="color">5</field>
         <field name="display_code">CIV</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_public_mandate_unpaid" model="hr.work.entry.type">
@@ -1337,7 +1337,7 @@
         <field name="color">5</field>
         <field name="display_code">PMU</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_militia_obligation" model="hr.work.entry.type">
@@ -1346,7 +1346,7 @@
         <field name="color">5</field>
         <field name="display_code">MIL</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_be_work_entry_type_normal_inactivity" model="hr.work.entry.type">
@@ -1355,7 +1355,7 @@
         <field name="color">5</field>
         <field name="display_code">NDI</field>
         <field name="country_id" ref="base.be"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
 <!-- BD : Bangladesh -->
@@ -1364,7 +1364,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.bd"/>
     </record>
 
@@ -1389,7 +1389,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.bd"/>
     </record>
 
@@ -1398,7 +1398,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.bd"/>
     </record>
 
@@ -1407,7 +1407,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.bd"/>
     </record>
 
@@ -1416,7 +1416,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.bd"/>
     </record>
 
@@ -1425,7 +1425,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.bd"/>
     </record>
 
@@ -1434,7 +1434,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.bd"/>
     </record>
 
@@ -1444,7 +1444,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.ch"/>
     </record>
 
@@ -1469,7 +1469,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ch"/>
     </record>
 
@@ -1478,7 +1478,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ch"/>
     </record>
 
@@ -1487,7 +1487,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ch"/>
     </record>
 
@@ -1496,7 +1496,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ch"/>
     </record>
 
@@ -1505,7 +1505,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ch"/>
     </record>
 
@@ -1514,7 +1514,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ch"/>
     </record>
 
@@ -1523,7 +1523,7 @@
         <field name="code">CHPUBHOL</field>
         <field name="color">3</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_ch_swissdec_monthly_wt" model="hr.work.entry.type">
@@ -1532,7 +1532,7 @@
         <field name="sequence">0</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_ch_swissdec_hourly_wt" model="hr.work.entry.type">
@@ -1541,7 +1541,7 @@
         <field name="sequence">5</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_ch_swissdec_lesson_wt" model="hr.work.entry.type">
@@ -1550,7 +1550,7 @@
         <field name="sequence">10</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_ch_swissdec_overtime_wt" model="hr.work.entry.type">
@@ -1559,7 +1559,7 @@
         <field name="sequence">6</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_ch_swissdec_overtime_125_wt" model="hr.work.entry.type">
@@ -1568,7 +1568,7 @@
         <field name="sequence">7</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
     </record>
 
     <record id="l10n_ch_swissdec_unpaid_wt" model="hr.work.entry.type">
@@ -1577,7 +1577,7 @@
         <field name="sequence">15</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_ch_swissdec_illness_wt" model="hr.work.entry.type">
@@ -1586,7 +1586,7 @@
         <field name="sequence">20</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_ch_swissdec_accident_wt" model="hr.work.entry.type">
@@ -1595,7 +1595,7 @@
         <field name="sequence">25</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_ch_swissdec_maternity_wt" model="hr.work.entry.type">
@@ -1604,7 +1604,7 @@
         <field name="sequence">30</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_ch_swissdec_military_wt" model="hr.work.entry.type">
@@ -1613,7 +1613,7 @@
         <field name="sequence">35</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_ch_swissdec_illness_wt_hourly" model="hr.work.entry.type">
@@ -1622,7 +1622,7 @@
         <field name="sequence">20</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_ch_swissdec_accident_wt_hourly" model="hr.work.entry.type">
@@ -1631,7 +1631,7 @@
         <field name="sequence">25</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_ch_swissdec_maternity_wt_hourly" model="hr.work.entry.type">
@@ -1640,7 +1640,7 @@
         <field name="sequence">30</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_ch_swissdec_military_wt_hourly" model="hr.work.entry.type">
@@ -1649,7 +1649,7 @@
         <field name="sequence">35</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_ch_swissdec_interruption_wt" model="hr.work.entry.type">
@@ -1658,7 +1658,7 @@
         <field name="sequence">40</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.ch"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
 <!-- EG: Egypt -->
@@ -1667,7 +1667,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.eg"/>
     </record>
 
@@ -1692,7 +1692,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.eg"/>
     </record>
 
@@ -1701,7 +1701,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.eg"/>
     </record>
 
@@ -1710,7 +1710,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.eg"/>
     </record>
 
@@ -1719,7 +1719,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.eg"/>
     </record>
 
@@ -1728,7 +1728,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.eg"/>
     </record>
 
@@ -1737,7 +1737,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.eg"/>
     </record>
 
@@ -1745,56 +1745,56 @@
         <field name="name">Marriage Leave</field>
         <field name="code">Marriage Leave</field>
         <field name="country_id" ref="base.eg"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_eg_work_entry_type_maternity" model="hr.work.entry.type">
         <field name="name">Maternity Leave</field>
         <field name="code">Maternity Leave</field>
         <field name="country_id" ref="base.eg"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_eg_work_entry_type_hajj" model="hr.work.entry.type">
         <field name="name">Hajj Leave</field>
         <field name="code">Hajj Leave</field>
         <field name="country_id" ref="base.eg"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_eg_work_entry_type_death" model="hr.work.entry.type">
         <field name="name">Death Leave</field>
         <field name="code">Death Leave</field>
         <field name="country_id" ref="base.eg"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_eg_work_entry_type_paid_sick_leave" model="hr.work.entry.type">
         <field name="name">Paid Sick Time off</field>
         <field name="code">EGSICKLEAVE100</field>
         <field name="country_id" ref="base.eg"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_eg_work_entry_type_sick_leave_75" model="hr.work.entry.type">
         <field name="name">Sick Time off (75% Paid)</field>
         <field name="code">EGSICKLEAVE75</field>
         <field name="country_id" ref="base.eg"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_eg_work_entry_type_sick_leave_unpaid" model="hr.work.entry.type">
         <field name="name">Sick Time off (Unpaid)</field>
         <field name="code">EGSICKLEAVE0</field>
         <field name="country_id" ref="base.eg"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_eg_work_entry_type_overtime_work_days_daytime" model="hr.work.entry.type">
         <field name="name">Overtime Workday Daytime</field>
         <field name="code">OVTWD</field>
         <field name="color">4</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="is_extra_hours" eval="True"/>
         <field name="amount_rate">1.35</field>
         <field name="country_id" ref="base.eg"/>
@@ -1804,7 +1804,7 @@
         <field name="name">Overtime Workday Nighttime</field>
         <field name="code">OVTWDN</field>
         <field name="color">4</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="is_extra_hours" eval="True"/>
         <field name="amount_rate">1.7</field>
         <field name="country_id" ref="base.eg"/>
@@ -1814,7 +1814,7 @@
         <field name="name">Overtime Restday</field>
         <field name="code">OVTWEND</field>
         <field name="color">4</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="is_extra_hours" eval="True"/>
         <field name="amount_rate">2</field>
         <field name="country_id" ref="base.eg"/>
@@ -1827,7 +1827,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.fr"/>
     </record>
 
@@ -1852,7 +1852,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.fr"/>
     </record>
 
@@ -1861,7 +1861,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.fr"/>
     </record>
 
@@ -1870,7 +1870,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.fr"/>
     </record>
 
@@ -1879,7 +1879,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.fr"/>
     </record>
 
@@ -1888,7 +1888,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.fr"/>
     </record>
 
@@ -1897,7 +1897,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.fr"/>
     </record>
 
@@ -1908,7 +1908,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.hk"/>
     </record>
 
@@ -1933,7 +1933,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.hk"/>
     </record>
 
@@ -1942,7 +1942,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.hk"/>
     </record>
 
@@ -1951,7 +1951,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.hk"/>
     </record>
 
@@ -1960,7 +1960,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.hk"/>
     </record>
 
@@ -1969,7 +1969,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.hk"/>
     </record>
 
@@ -1978,7 +1978,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.hk"/>
     </record>
 
@@ -1987,7 +1987,7 @@
         <field name="code">HKLEAVE111</field>
         <field name="color">6</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="amount_rate">0.8</field>
     </record>
 
@@ -1996,7 +1996,7 @@
         <field name="code">HKLEAVE130</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_hk_work_entry_type_marriage_leave" model="hr.work.entry.type">
@@ -2004,7 +2004,7 @@
         <field name="code">HKLEAVE140</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_hk_work_entry_type_examination_leave" model="hr.work.entry.type">
@@ -2012,7 +2012,7 @@
         <field name="code">HKLEAVE150</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_hk_work_entry_type_maternity_leave" model="hr.work.entry.type">
@@ -2020,7 +2020,7 @@
         <field name="code">HKLEAVE210</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_hk_work_entry_type_maternity_leave_80" model="hr.work.entry.type">
@@ -2028,7 +2028,7 @@
         <field name="code">HKLEAVE211</field>
         <field name="color">6</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="amount_rate">0.8</field>
     </record>
 
@@ -2037,7 +2037,7 @@
         <field name="code">HKLEAVE220</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_hk_work_entry_type_paternity_leave_80" model="hr.work.entry.type">
@@ -2045,7 +2045,7 @@
         <field name="code">HKLEAVE221</field>
         <field name="color">6</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="amount_rate">0.8</field>
     </record>
 
@@ -2054,7 +2054,7 @@
         <field name="code">HKLEAVE500</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_hk_work_entry_type_public_holiday" model="hr.work.entry.type">
@@ -2062,7 +2062,7 @@
         <field name="code">HKLEAVE510</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_hk_work_entry_type_weekend" model="hr.work.entry.type">
@@ -2070,7 +2070,7 @@
         <field name="code">HKLEAVE600</field>
         <field name="color">10</field>
         <field name="country_id" ref="base.hk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
 <!-- ID : Indonesia -->
@@ -2080,7 +2080,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.id"/>
     </record>
 
@@ -2105,7 +2105,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.id"/>
     </record>
 
@@ -2114,7 +2114,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.id"/>
     </record>
 
@@ -2123,7 +2123,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.id"/>
     </record>
 
@@ -2132,7 +2132,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.id"/>
     </record>
 
@@ -2141,7 +2141,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.id"/>
     </record>
 
@@ -2150,7 +2150,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.id"/>
     </record>
 
@@ -2159,7 +2159,7 @@
         <field name="code">IDLEAVE100</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.id"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_id_work_entry_type_marriage_leave" model="hr.work.entry.type">
@@ -2167,7 +2167,7 @@
         <field name="code">IDLEAVE110</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.id"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_id_work_entry_type_maternity_leave" model="hr.work.entry.type">
@@ -2175,7 +2175,7 @@
         <field name="code">IDLEAVE120</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.id"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_id_work_entry_type_paternity_leave" model="hr.work.entry.type">
@@ -2183,7 +2183,7 @@
         <field name="code">IDLEAVE130</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.id"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_id_work_entry_type_public_holiday" model="hr.work.entry.type">
@@ -2191,7 +2191,7 @@
         <field name="code">IDLEAVE140</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.id"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
 <!-- IN : India -->
@@ -2201,7 +2201,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.in"/>
     </record>
 
@@ -2226,7 +2226,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.in"/>
     </record>
 
@@ -2235,7 +2235,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.in"/>
     </record>
 
@@ -2244,7 +2244,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.in"/>
     </record>
 
@@ -2253,7 +2253,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.in"/>
     </record>
 
@@ -2262,7 +2262,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.in"/>
     </record>
 
@@ -2271,7 +2271,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.in"/>
     </record>
 
@@ -2282,7 +2282,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.it"/>
     </record>
 
@@ -2307,7 +2307,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.it"/>
     </record>
 
@@ -2316,7 +2316,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.it"/>
     </record>
 
@@ -2325,7 +2325,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.it"/>
     </record>
 
@@ -2334,7 +2334,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.it"/>
     </record>
 
@@ -2343,7 +2343,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.it"/>
     </record>
 
@@ -2352,7 +2352,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.it"/>
     </record>
 
@@ -2363,7 +2363,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2380,7 +2380,7 @@
         <field name="color">4</field>
         <field name="display_code">OT</field>
         <field name="code">DAYOVERTIME</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="is_extra_hours" eval="True"/>
         <field name="amount_rate">1.5</field>
         <field name="country_id" ref="base.iq"/>
@@ -2391,7 +2391,7 @@
         <field name="color">4</field>
         <field name="display_code">OT</field>
         <field name="code">NIGHTOVERTIME</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="is_extra_hours" eval="True"/>
         <field name="amount_rate">2.0</field>
         <field name="country_id" ref="base.iq"/>
@@ -2410,7 +2410,7 @@
         <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2419,7 +2419,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2428,7 +2428,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2437,7 +2437,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2446,7 +2446,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2455,7 +2455,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2464,7 +2464,7 @@
         <field name="display_code">WED</field>
         <field name="code">WEDDING</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2473,7 +2473,7 @@
         <field name="display_code">PDU</field>
         <field name="code">PUBLICDUTY</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2482,7 +2482,7 @@
         <field name="display_code">COM</field>
         <field name="code">COMPASSIONATE</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2491,7 +2491,7 @@
         <field name="display_code">TUD</field>
         <field name="code">TRADEUNION</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2500,7 +2500,7 @@
         <field name="display_code">IDD</field>
         <field name="code">IDDAH</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2509,7 +2509,7 @@
         <field name="display_code">MTY</field>
         <field name="code">MATERNITY</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.iq"/>
     </record>
 
@@ -2520,7 +2520,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.ke"/>
     </record>
 
@@ -2545,7 +2545,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ke"/>
     </record>
 
@@ -2554,7 +2554,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ke"/>
     </record>
 
@@ -2563,7 +2563,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ke"/>
     </record>
 
@@ -2572,7 +2572,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ke"/>
     </record>
 
@@ -2581,7 +2581,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ke"/>
     </record>
 
@@ -2590,7 +2590,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ke"/>
     </record>
 
@@ -2601,7 +2601,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.lt"/>
     </record>
 
@@ -2626,7 +2626,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lt"/>
     </record>
 
@@ -2635,7 +2635,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lt"/>
     </record>
 
@@ -2644,7 +2644,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lt"/>
     </record>
 
@@ -2653,7 +2653,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lt"/>
     </record>
 
@@ -2662,7 +2662,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lt"/>
     </record>
 
@@ -2671,7 +2671,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lt"/>
     </record>
 
@@ -2682,7 +2682,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2707,7 +2707,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2716,7 +2716,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2725,7 +2725,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2734,7 +2734,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2743,7 +2743,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2752,7 +2752,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2760,7 +2760,7 @@
         <field name="name">Sick Leave (Unpaid)</field>
         <field name="color">7</field>
         <field name="code">SICKLEAVE0</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
         <field name="amount_rate">1</field>  <!-- Unpaid, but treated in a separate rule -->
     </record>
@@ -2770,7 +2770,7 @@
         <field name="display_code">MAT</field>
         <field name="code">MATERNITY</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2779,7 +2779,7 @@
         <field name="display_code">PIL</field>
         <field name="code">PILGRIMAGE</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2788,7 +2788,7 @@
         <field name="display_code">PAT</field>
         <field name="code">PATERNITY</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2797,7 +2797,7 @@
         <field name="display_code">STU</field>
         <field name="code">STUDY</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.jo"/>
     </record>
 
@@ -2805,7 +2805,7 @@
         <field name="name">Rest Days Overtime</field>
         <field name="code">JOROVT</field>
         <field name="color">4</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="is_extra_hours" eval="True"/>
         <field name="amount_rate">1.5</field>
         <field name="country_id" ref="base.jo"/>
@@ -2815,7 +2815,7 @@
         <field name="name">Week Days Overtime</field>
         <field name="code">JOWOVT</field>
         <field name="color">4</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="is_extra_hours" eval="True"/>
         <field name="amount_rate">1.25</field>
         <field name="country_id" ref="base.jo"/>
@@ -2827,7 +2827,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2852,7 +2852,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2861,7 +2861,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2870,7 +2870,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2879,7 +2879,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2888,7 +2888,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2897,7 +2897,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2906,14 +2906,14 @@
         <field name="color">5</field>
         <field name="code">LEAVE400</field>
         <field name="country_id" ref="base.lu"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_lu_work_entry_type_sick_leave" model="hr.work.entry.type">
         <field name="name">Luxembourg Sick Time Off</field>
         <field name="color">5</field>
         <field name="code">LUXSICK</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2921,7 +2921,7 @@
         <field name="name">Family Reason Time Off</field>
         <field name="color">5</field>
         <field name="code">LUFRTO</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2929,7 +2929,7 @@
         <field name="name">Maternity Leave</field>
         <field name="color">5</field>
         <field name="code">LUMAT</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2937,7 +2937,7 @@
         <field name="name">Welcome Leave</field>
         <field name="color">5</field>
         <field name="code">LUACC</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2945,7 +2945,7 @@
         <field name="name">Caring Leave</field>
         <field name="color">5</field>
         <field name="code">LUCAR</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.lu"/>
     </record>
 
@@ -2956,7 +2956,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.ma"/>
     </record>
 
@@ -2981,7 +2981,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ma"/>
     </record>
 
@@ -2990,7 +2990,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ma"/>
     </record>
 
@@ -2999,7 +2999,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ma"/>
     </record>
 
@@ -3008,7 +3008,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ma"/>
     </record>
 
@@ -3017,7 +3017,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ma"/>
     </record>
 
@@ -3026,7 +3026,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ma"/>
     </record>
 
@@ -3037,7 +3037,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.mx"/>
     </record>
 
@@ -3062,7 +3062,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.mx"/>
     </record>
 
@@ -3071,7 +3071,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.mx"/>
     </record>
 
@@ -3080,7 +3080,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.mx"/>
     </record>
 
@@ -3089,7 +3089,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.mx"/>
     </record>
 
@@ -3098,7 +3098,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.mx"/>
     </record>
 
@@ -3107,7 +3107,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.mx"/>
     </record>
 
@@ -3116,7 +3116,7 @@
         <field name="color">5</field>
         <field name="code">LEAVE1000</field>
         <field name="country_id" ref="base.mx"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_mx_work_entry_type_maternity_imss" model="hr.work.entry.type">
@@ -3124,7 +3124,7 @@
         <field name="color">5</field>
         <field name="code">LEAVE1100</field>
         <field name="country_id" ref="base.mx"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_mx_work_entry_type_disability_due_to_illness_imss" model="hr.work.entry.type">
@@ -3132,7 +3132,7 @@
         <field name="color">5</field>
         <field name="code">LEAVE1200</field>
         <field name="country_id" ref="base.mx"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
     <record id="l10n_mx_work_entry_type_care_children_with_cancer_imss" model="hr.work.entry.type">
@@ -3140,7 +3140,7 @@
         <field name="color">5</field>
         <field name="code">LEAVE1300</field>
         <field name="country_id" ref="base.mx"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
     </record>
 
 <!-- MY : Malaysia -->
@@ -3150,7 +3150,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.my"/>
     </record>
 
@@ -3175,7 +3175,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.my"/>
     </record>
 
@@ -3184,7 +3184,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.my"/>
     </record>
 
@@ -3193,7 +3193,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.my"/>
     </record>
 
@@ -3202,7 +3202,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.my"/>
     </record>
 
@@ -3211,7 +3211,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.my"/>
     </record>
 
@@ -3220,7 +3220,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.my"/>
     </record>
 
@@ -3231,7 +3231,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.nl"/>
     </record>
 
@@ -3256,7 +3256,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.nl"/>
     </record>
 
@@ -3265,7 +3265,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.nl"/>
     </record>
 
@@ -3274,7 +3274,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.nl"/>
     </record>
 
@@ -3283,7 +3283,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.nl"/>
     </record>
 
@@ -3292,7 +3292,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.nl"/>
     </record>
 
@@ -3301,7 +3301,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.nl"/>
     </record>
 
@@ -3312,7 +3312,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.pk"/>
     </record>
 
@@ -3337,7 +3337,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pk"/>
     </record>
 
@@ -3346,7 +3346,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pk"/>
     </record>
 
@@ -3355,7 +3355,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pk"/>
     </record>
 
@@ -3364,7 +3364,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pk"/>
     </record>
 
@@ -3373,7 +3373,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pk"/>
     </record>
 
@@ -3382,7 +3382,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pk"/>
     </record>
 
@@ -3393,7 +3393,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.pl"/>
     </record>
 
@@ -3418,7 +3418,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pl"/>
     </record>
 
@@ -3427,7 +3427,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pl"/>
     </record>
 
@@ -3436,7 +3436,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pl"/>
     </record>
 
@@ -3445,7 +3445,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pl"/>
     </record>
 
@@ -3454,7 +3454,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pl"/>
     </record>
 
@@ -3463,7 +3463,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.pl"/>
     </record>
 
@@ -3472,7 +3472,7 @@
         <field name="color">4</field>
         <field name="code">PLSICK3166</field>
         <field name="country_id" ref="base.pl"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="amount_rate">0.8</field>
     </record>
 
@@ -3483,7 +3483,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.ro"/>
     </record>
 
@@ -3508,7 +3508,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ro"/>
     </record>
 
@@ -3517,7 +3517,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ro"/>
     </record>
 
@@ -3526,7 +3526,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ro"/>
     </record>
 
@@ -3535,7 +3535,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ro"/>
     </record>
 
@@ -3544,7 +3544,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ro"/>
     </record>
 
@@ -3553,7 +3553,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.ro"/>
     </record>
 
@@ -3564,7 +3564,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
@@ -3589,7 +3589,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
@@ -3598,7 +3598,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
@@ -3607,7 +3607,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
@@ -3616,7 +3616,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
@@ -3625,7 +3625,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
@@ -3634,56 +3634,56 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
     <record id="l10n_sa_work_entry_type_marriage" model="hr.work.entry.type">
         <field name="name">Marriage Leave</field>
         <field name="code">Marriage Leave</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
     <record id="l10n_sa_work_entry_type_maternity" model="hr.work.entry.type">
         <field name="name">Maternity Leave</field>
         <field name="code">SAMATERNITY</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
     <record id="l10n_sa_work_entry_type_iddah" model="hr.work.entry.type">
         <field name="name">Iddah Leave</field>
         <field name="code">Iddah Leave</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
     <record id="l10n_sa_work_entry_type_hajj" model="hr.work.entry.type">
         <field name="name">Hajj Leave</field>
         <field name="code">Hajj Leave</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
     <record id="l10n_sa_work_entry_type_paternity" model="hr.work.entry.type">
         <field name="name">Paternity Leave</field>
         <field name="code">Paternity Leave</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
     <record id="l10n_sa_work_entry_type_study" model="hr.work.entry.type">
         <field name="name">Study Leave</field>
         <field name="code">Study Leave</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
     <record id="l10n_sa_work_entry_type_emergency" model="hr.work.entry.type">
         <field name="name">Emergency Leave</field>
         <field name="code">SAEMERGENCY</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sa"/>
     </record>
 
@@ -3691,7 +3691,7 @@
         <field name="name">Overtime</field>
         <field name="code">SAOVERTIME</field>
         <field name="color">4</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="is_extra_hours" eval="True"/>
         <field name="amount_rate">1.5</field>
         <field name="country_id" ref="base.sa"/>
@@ -3703,7 +3703,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.sk"/>
     </record>
 
@@ -3728,7 +3728,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sk"/>
     </record>
 
@@ -3737,7 +3737,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sk"/>
     </record>
 
@@ -3746,7 +3746,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sk"/>
     </record>
 
@@ -3755,7 +3755,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sk"/>
     </record>
 
@@ -3764,7 +3764,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sk"/>
     </record>
 
@@ -3773,7 +3773,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.sk"/>
     </record>
 
@@ -3782,7 +3782,7 @@
         <field name="code">SICK25</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.sk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="amount_rate">0.25</field>
     </record>
 
@@ -3791,7 +3791,7 @@
         <field name="code">SICK55</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.sk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="amount_rate">0.55</field>
     </record>
 
@@ -3800,7 +3800,7 @@
         <field name="code">SICK0</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.sk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="amount_rate">0.0</field>
     </record>
 
@@ -3809,7 +3809,7 @@
         <field name="code">MATERNITY</field>
         <field name="color">5</field>
         <field name="country_id" ref="base.sk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="amount_rate">0.75</field>
     </record>
 
@@ -3818,7 +3818,7 @@
         <field name="code">PARENTAL</field>
         <field name="color">8</field>
         <field name="country_id" ref="base.sk"/>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="amount_rate">0.0</field>
     </record>
 
@@ -3828,7 +3828,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3853,7 +3853,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3862,7 +3862,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3871,7 +3871,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3880,7 +3880,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3889,7 +3889,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3898,7 +3898,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3907,7 +3907,7 @@
         <field name="display_code">MAT</field>
         <field name="code">MATERNITY</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3916,7 +3916,7 @@
         <field name="display_code">PAT</field>
         <field name="code">PATERNITY</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3925,7 +3925,7 @@
         <field name="display_code">BER</field>
         <field name="code">BEREAVEMENT</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3934,7 +3934,7 @@
         <field name="display_code">EXC</field>
         <field name="code">EXCUSE</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.tr"/>
     </record>
 
@@ -3944,7 +3944,7 @@
         <field name="color">0</field>
         <field name="display_code">A</field>
         <field name="code">WORK100</field>
-        <field name="count_as">working_time</field>
+        <field name="count_as_worked_time">True</field>
         <field name="country_id" ref="base.us"/>
     </record>
 
@@ -3969,7 +3969,7 @@
          <field name="display_code">GTO</field>
         <field name="code">LEAVE100</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.us"/>
     </record>
 
@@ -3978,7 +3978,7 @@
         <field name="display_code">CTO</field>
         <field name="code">LEAVE105</field>
         <field name="color">3</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.us"/>
     </record>
 
@@ -3987,7 +3987,7 @@
         <field name="display_code">HW</field>
         <field name="code">WORK110</field>
         <field name="color">2</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.us"/>
     </record>
 
@@ -3996,7 +3996,7 @@
         <field name="color">5</field>
         <field name="display_code">UN</field>
         <field name="code">LEAVE90</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.us"/>
     </record>
 
@@ -4005,7 +4005,7 @@
         <field name="display_code">STO</field>
         <field name="code">LEAVE110</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.us"/>
     </record>
 
@@ -4014,7 +4014,7 @@
         <field name="display_code">PTO</field>
         <field name="code">LEAVE120</field>
         <field name="color">5</field>
-        <field name="count_as">absence</field>
+        <field name="count_as_worked_time">False</field>
         <field name="country_id" ref="base.us"/>
     </record>
 

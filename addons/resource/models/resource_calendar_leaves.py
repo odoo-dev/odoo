@@ -45,8 +45,7 @@ class ResourceCalendarLeaves(models.Model):
     resource_id = fields.Many2one(
         "resource.resource", 'Resource', index=True,
         help="If empty, this is a generic time off for the company. If a resource is set, the time off is only for this resource")
-    count_as = fields.Selection([('absence', 'Absence'), ('working_time', 'Working Time')], default='absence',
-                                 help="Whether this should be computed as a time off or as work time (eg: formation)")
+    count_as_worked_time = fields.Boolean(help="Whether this should be computed as a time off or as work time (eg: formation)")
 
     @api.depends('resource_id.calendar_id')
     def _compute_calendar_id(self):
@@ -81,5 +80,5 @@ class ResourceCalendarLeaves(models.Model):
             'name': self.name,
             'date_from': self.date_from,
             'date_to': self.date_to,
-            'count_as': self.count_as,
+            'count_as_worked_time': self.count_as_worked_time,
         }
