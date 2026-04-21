@@ -1,63 +1,82 @@
 .s_whatsapp {
-    $o-wa-green: #25D366;
-    $o-wa-green-hover: #1ebe5c;
+    --o-wa-green: #25d366;
+    --o-wa-color: #ffffff;
+    --o-wa-green-dark: oklch(from var(--o-wa-green) calc(l * 0.35) calc(c * 0.8) h);
+    --o-wa-green-hover: oklch(from var(--o-wa-green) calc(l * 0.85) c h);
+    --o-wa-message-bg: #{if(lightness($body-bg) < 50%, #252626, #ffffff)};
+    --o-wa-light-color: #{if(lightness($body-bg) < 50%, #111211, #F4F0E9)};
+    --o-wa-focus-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--o-wa-green) 25%, transparent);
 
-    right: 25px;
-    left: auto;
+    right: map-get($spacers, 4);
+    bottom: map-get($spacers, 4);
     z-index: 1000;
-    margin-bottom: 10px;
 
     &:has(.wa-fab.o_pos_left) {
         right: auto;
-        left: 25px;
+        left: map-get($spacers, 4);
 
-        .chatbox {
+        .wa-chatbox {
             right: auto;
             left: 0;
         }
     }
 
-    &:not(.no_icon_color) .wa-fab {
-        background: $o-wa-green;
-        color: white;
+    .btn {
+        --#{$prefix}btn-focus-box-shadow: var(--o-wa-focus-shadow);
+        --#{$prefix}btn-bg: var(--o-wa-green);
+        --#{$prefix}btn-hover-bg: var(--o-wa-green-hover);
+        --#{$prefix}btn-active-bg: var(--o-wa-green-hover);
+        --#{$prefix}btn-color: var(--o-wa-color);
+        --#{$prefix}btn-hover-color: var(--o-wa-color);
+        --#{$prefix}btn-active-color: var(--o-wa-color);
     }
 
     .wa-fab {
-        width: 50px;
-        height: 50px;
-        font-size: x-large;
-        cursor: pointer;
+        width: 48px;
+        height: 48px;
 
-        &.fa-2x {
-            width: 70px;
-            height: 70px;
-            font-size: xx-large;
+        &:has(.fs-3) {
+            width: 64px;
+            height: 64px;
         }
 
-        &.fa-3x {
+        &:has(.fs-2) {
             width: 80px;
             height: 80px;
-            font-size: xxx-large;
         }
+
+        &.no_icon_color {
+            color: $body-color;
+            background-color: $body-bg;
+
+            &.wa-fab-circle {
+                border-color: $body-color;
+            }
+        }
+
     }
 
-    .notification-badge {
+    .wa-fab-circle {
+        border: $border-width * 2 solid var(--o-wa-green);
+        background-color: $body-bg;
+        color: var(--o-wa-green);
+        border-radius: $border-radius-pill;
+    }
+
+    .wa-notification-badge {
         inset: -8% 12% auto auto;
-        width: 25%;
-        height: 25%;
-        border: 2px solid white;
+        border: $border-width * 2 solid #ffffff;
         transform: translate(50%, 50%);
     }
 
-    .chatbox {
-        right: 0;
+    .wa-chatbox {
         bottom: 100%;
-        left: auto;
-        width: 300px;
+        width: 320px;
+        background-color: var(--o-wa-light-color);
     }
 
-    .header {
-        background: #075E54;
+    .wa-header {
+        background: var(--o-wa-green-dark);
 
         img {
             width: 40px;
@@ -67,48 +86,48 @@
     }
 
     .wa-messages {
-        background: #ECE5DD;
+        height: 32vh;
+        min-height: 10rem;
+
+        .wa-agent-msg {
+            background-color: var(--o-wa-message-bg);
+
+            &::before {
+            content: '';
+            @include o-position-absolute($bottom: -12px, $left: 4px);
+            border: 8px solid transparent;
+            border-top-color: var(--o-wa-message-bg);
+            border-right: 0;
+            transform: rotate(270deg);
+            }
+        }
     }
 
     .wa-input-box {
         display: flex;
-    }
 
-    .wa-user-message {
-        overflow-y: auto;
-        min-height: 2.5rem;
-        max-height: 6rem;
-        resize: none;
-        outline: none;
-    }
+        textarea {
+            --#{$prefix}border-radius: 1.5rem;
+            resize: none;
 
-    .wa-send {
-        background: $o-wa-green;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        margin: 6px;
+            &:focus {
+                border-color: color-mix(in srgb, var(--o-wa-green) 30%, transparent);
+                box-shadow: var(--o-wa-focus-shadow);
+            }
+        }
 
-        &:hover {
-            background: $o-wa-green-hover;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+        .wa-send {
+            width: 2.25rem;
+            height: 2.25rem;
+
+            &:hover {
+                background: var(--o-wa-green-hover);
+            }
         }
     }
 
     .wa-cta-box {
         display: none;
-    }
-
-    .wa-cta-btn {
-        font-size: 17px;
-        background: $o-wa-green;
-        transition: all 0.2s ease-in-out;
-
-        &:hover {
-            background: $o-wa-green-hover;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
-            transform: translateY(-2px);
-        }
     }
 
     // Toggle between input box and CTA button

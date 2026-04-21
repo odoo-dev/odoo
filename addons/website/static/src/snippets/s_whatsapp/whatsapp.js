@@ -14,7 +14,7 @@ export class Whatsapp extends Interaction {
     };
 
     start() {
-        this.chatbox = this.el.querySelector(".chatbox");
+        this.chatbox = this.el.querySelector(".wa-chatbox");
         const rawNumber = this.el.dataset.whatsappNumber || "";
         this.companyNumber = rawNumber.replace(/[^\d]/g, "");
     }

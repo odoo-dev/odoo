@@ -48,7 +48,7 @@
 		</BuilderRow>
 
 		<BuilderRow label.translate="Show Notification">
-			<BuilderCheckbox applyTo="'.notification-badge'" classAction="'d-none'" inverseAction="true"/>
+			<BuilderCheckbox applyTo="'.wa-notification-badge'" classAction="'d-none'" inverseAction="true"/>
 		</BuilderRow>
 
 		<BuilderRow label.translate="Position">
@@ -61,21 +61,21 @@
 		<BuilderRow label.translate="Layout">
 			<BuilderSelect applyTo="'.wa-fab'">
 				<BuilderSelectItem classAction="'rounded-circle'">Disk</BuilderSelectItem>
-				<BuilderSelectItem classAction="'rounded-empty-circle'">Circle</BuilderSelectItem>
+				<BuilderSelectItem classAction="'wa-fab-circle'">Circle</BuilderSelectItem>
 				<BuilderSelectItem classAction="'rounded'">Square</BuilderSelectItem>
 			</BuilderSelect>
 		</BuilderRow>
 
 		<BuilderRow label.translate="Size">
-			<BuilderSelect applyTo="'.wa-fab'">
-				<BuilderSelectItem classAction="''">Small</BuilderSelectItem>
-				<BuilderSelectItem classAction="'fa-2x'">Medium</BuilderSelectItem>
-				<BuilderSelectItem classAction="'fa-3x'">Big</BuilderSelectItem>
+			<BuilderSelect applyTo="'.wa-fab > i'">
+				<BuilderSelectItem classAction="'fs-4'">Small</BuilderSelectItem>
+				<BuilderSelectItem classAction="'fs-3'">Medium</BuilderSelectItem>
+				<BuilderSelectItem classAction="'fs-2'">Large</BuilderSelectItem>
 			</BuilderSelect>
 		</BuilderRow>
 
 		<BuilderRow label.translate="Color">
-			<BuilderCheckbox classAction="'no_icon_color'" inverseAction="true"/>
+			<BuilderCheckbox applyTo="'.wa-fab'" classAction="'no_icon_color'" inverseAction="true"/>
 		</BuilderRow>
 	</t>
 

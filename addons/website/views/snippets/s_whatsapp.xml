@@ -3,7 +3,7 @@
 
 	<template id="s_whatsapp" name="WhatsApp Snippet">
         <section
-            class="s_whatsapp position-fixed bottom-0 o_no_save"
+            class="s_whatsapp position-fixed o_no_save"
             t-att-data-whatsapp-number="env['website'].get_current_website().company_id.phone or ''"
             data-agent-avatar-src="/website/static/src/img/snippets_demo/s_whatsapp_agent.webp"
         >
@@ -18,9 +18,9 @@
                     <input type="hidden" class="o_translatable_input_hidden d-block mb-1 w-100" data-name="CTA Label" name="cta_label" value="Start Conversation"/>
                 </div>
             </div>
-            <button class="p-0 border-0 bg-transparent position-relative d-inline-flex o_not_editable" aria-label="Open WhatsApp chat">
-                <i class="fa fa-whatsapp wa-fab rounded-circle d-flex align-items-center justify-content-center shadow-lg o_pos_right"></i>
-                <span class="notification-badge bg-danger position-absolute rounded-circle"></span>
+            <button class="o_not_editable btn p-0 position-relative d-inline-flex align-items-center justify-content-center rounded-circle wa-fab o_pos_right" aria-label="Open WhatsApp chat" contenteditable="false">
+                <i class="fa fa-whatsapp fs-4" contenteditable="false"/>
+                <span class="wa-notification-badge bg-danger position-absolute rounded-circle w-25 h-25"/>
             </button>
         </section>
     </template>
