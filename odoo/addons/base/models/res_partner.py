@@ -860,9 +860,10 @@ class ResPartner(models.Model):
             partner.is_company = partner.commercial_partner_id == partner and not partner._is_vat_void(partner.vat)
 
     def _compute_is_public(self):
-        for partner in self.with_context(active_test=False):
-            users = partner.user_ids
-            partner.is_public = users and any(user._is_public() for user in users)
+        users = self.env['res.users'].with_context(active_test=False).search_fetch([('partner_id', 'in', self.ids)], ['partner_id'])
+        public_partners = users.filtered(lambda u: u._is_public()).partner_id
+        public_partners.is_public = True
+        (self - public_partners).is_public = False
 
     def write(self, vals):
         self._clean_additional_identifiers(vals)
