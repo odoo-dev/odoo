@@ -5,9 +5,18 @@
     <t t-set="url" t-value="url or '#'"/>
     <section class="s_product_list pt64 pb64" data-vcss="001">
         <div class="container">
-            <h2 class="h3-fs">Our finest selection</h2>
+            <div class="o_text_columns o-contenteditable-false" contenteditable="false">
+                <div class="row mx-0 w-100">
+                    <div class="col-8 ps-0 o-contenteditable-true o_draggable" contenteditable="true">
+                        <h2 class="h3-fs">Our finest selection</h2>
+                    </div>
+                    <div class="col-4 pe-0 o-contenteditable-true" contenteditable="true" style="text-align: end;">
+                        <a href="#" class="o_translate_inline btn btn-primary">View all</a>
+                    </div>
+                </div>
+            </div>
             <div class="row">
-                <div data-name="Card" class="col-lg-2 col-6">
+                <div data-name="Card" class="col-lg-4 col-6">
                     <div class="s_card o_card_img_top card o_cc o_cc1" data-snippet="s_card" data-vxml="001" data-name="Card">
                         <figure class="o_card_img_wrapper ratio ratio-4x3 mb-0">
                             <a t-att-href="url" aria-label="Link to product">
@@ -19,7 +28,7 @@
                         </div>
                     </div>
                 </div>
-                <div data-name="Card" class="col-lg-2 col-6">
+                <div data-name="Card" class="col-lg-4 col-6">
                     <div class="s_card o_card_img_top card o_cc o_cc1" data-snippet="s_card" data-vxml="001" data-name="Card">
                         <figure class="o_card_img_wrapper ratio ratio-4x3 mb-0">
                             <a t-att-href="url" aria-label="Link to product">
@@ -31,7 +40,7 @@
                         </div>
                     </div>
                 </div>
-                <div data-name="Card" class="col-lg-2 col-6">
+                <div data-name="Card" class="col-lg-4 col-6">
                     <div class="s_card o_card_img_top card o_cc o_cc1" data-snippet="s_card" data-vxml="001" data-name="Card">
                         <figure class="o_card_img_wrapper ratio ratio-4x3 mb-0">
                             <a t-att-href="url" aria-label="Link to product">
@@ -43,7 +52,7 @@
                         </div>
                     </div>
                 </div>
-                <div data-name="Card" class="col-lg-2 col-6">
+                <div data-name="Card" class="col-lg-4 col-6">
                     <div class="s_card o_card_img_top card o_cc o_cc1" data-snippet="s_card" data-vxml="001" data-name="Card">
                         <figure class="o_card_img_wrapper ratio ratio-4x3 mb-0">
                             <a t-att-href="url" aria-label="Link to product">
@@ -55,7 +64,7 @@
                         </div>
                     </div>
                 </div>
-                <div data-name="Card" class="col-lg-2 col-6">
+                <div data-name="Card" class="col-lg-4 col-6">
                     <div class="s_card o_card_img_top card o_cc o_cc1" data-snippet="s_card" data-vxml="001" data-name="Card">
                         <figure class="o_card_img_wrapper ratio ratio-4x3 mb-0">
                             <a t-att-href="url" aria-label="Link to product">
@@ -67,7 +76,7 @@
                         </div>
                     </div>
                 </div>
-                <div data-name="Card" class="col-lg-2 col-6">
+                <div data-name="Card" class="col-lg-4 col-6">
                     <div class="s_card o_card_img_top card o_cc o_cc1" data-snippet="s_card" data-vxml="001" data-name="Card">
                         <figure class="o_card_img_wrapper ratio ratio-4x3 mb-0">
                             <a t-att-href="url" aria-label="Link to product">
