@@ -2,6 +2,7 @@ import contextlib
 from unittest.mock import MagicMock, Mock, patch
 
 import geoip2.models
+from types import SimpleNamespace
 from werkzeug.exceptions import NotFound
 from werkzeug.test import EnvironBuilder
 
@@ -48,7 +49,7 @@ def MockRequest(
             referrer=referrer or '',
             remote_addr=remote_addr,
             url_root=url_root,
-            user_agent=DotDict(
+            user_agent=SimpleNamespace(
                 string='mockrequest',
             ),
             args=[],
