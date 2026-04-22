@@ -897,25 +897,42 @@ class SaleOrder(models.Model):
         :return: Tuple of advantage tax excluded and advantage tax included
         :rtype: tuple(float, float)
         """
+
+        def grouping_function(base_line, tax_data):
+            return True
+            # return base_line['special_type'] not in ('global_discount', 'loyalty_discount')
+
         self.ensure_one()
         AccountTax = self.env["account.tax"]
-        total_excluded = total_included = 0
-
-        for line in self.order_line:
-            # Exclude global discounts, down payments and coupons
-            if line._is_line_excluded_from_totals():
-                continue
-
+        order_lines = self._get_priced_lines()
+        base_lines = [
             # Calculate base_line without discount, except if negative (=surcharge)
-            discount = 0 if line.discount > 0 else line.discount
-            base_line = line._prepare_base_line_for_taxes_computation(discount=discount)
-            AccountTax._add_tax_details_in_base_line(base_line, self.company_id)
-            total_excluded += base_line["tax_details"]["raw_total_excluded_currency"]
-            total_included += base_line["tax_details"]["raw_total_included_currency"]
-
-        advantage_tax_excl = self.amount_untaxed - total_excluded
-        advantage_tax_incl = self.amount_total - total_included
-
+            line._prepare_base_line_for_taxes_computation(discount=min(line.discount, 0))
+            for line in order_lines
+            # Exclude global discounts, down payments and coupons
+            if not line._is_line_excluded_from_totals()
+        ]
+        base_lines += (
+            self._add_base_lines_for_early_payment_discount()
+        )  # Needed? No early payment discount in a quotation
+        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
+        AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
+            base_lines, grouping_function
+        )
+        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(
+            base_lines_aggregated_values
+        )
+        advantage_tax_excl = self.amount_untaxed - sum(
+            values["total_excluded_currency"]
+            for grouping_key, values in values_per_grouping_key.items()
+            if grouping_key
+        )
+        advantage_tax_incl = self.amount_total - sum(
+            values["total_excluded_currency"] + values["tax_amount_currency"]
+            for grouping_key, values in values_per_grouping_key.items()
+            if grouping_key
+        )
         if not float_is_zero(advantage_tax_incl, precision_rounding=self.currency_id.rounding):
             return advantage_tax_excl, advantage_tax_incl
 
@@ -926,7 +943,12 @@ class SaleOrder(models.Model):
         for order in self:
             if order.state != "sale" or not order.order_line:
                 order.delivery_status = False
-            elif all(line.qty_delivered >= line.product_uom_qty if line.product_uom_qty > 0 else line.qty_delivered <= line.product_uom_qty for line in order.order_line):
+            elif all(
+                line.qty_delivered >= line.product_uom_qty
+                if line.product_uom_qty > 0
+                else line.qty_delivered <= line.product_uom_qty
+                for line in order.order_line
+            ):
                 order.delivery_status = "full"
             elif any(line.qty_delivered for line in order.order_line):
                 order.delivery_status = "partial"
@@ -1030,7 +1052,12 @@ class SaleOrder(models.Model):
         for order in self:
             order.show_deliver_button = (
                 order.state == "sale"
-                and any(line.qty_delivered < line.product_uom_qty if line.product_uom_qty > 0 else line.qty_delivered > line.product_uom_qty for line in order.order_line)
+                and any(
+                    line.qty_delivered < line.product_uom_qty
+                    if line.product_uom_qty > 0
+                    else line.qty_delivered > line.product_uom_qty
+                    for line in order.order_line
+                )
                 and all(line.qty_delivered_method == "manual" for line in order.order_line)
             )
 
