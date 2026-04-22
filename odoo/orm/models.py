@@ -267,6 +267,9 @@ class MetaModel(type):
             if _inherit and isinstance(_inherit, str):
                 attrs.setdefault('_name', _inherit)
                 attrs['_inherit'] = [_inherit]
+            if _inherit and attrs['_name'] in attrs['_inherit'] and attrs['_name'] != attrs['_inherit'][0]:
+                attrs['_inherit'].remove(attrs['_name'])
+                attrs['_inherit'] = [attrs['_name']] + attrs['_inherit']
 
             if not attrs.get('_name'):
                 # add '.' before every uppercase letter preceded by any non-underscore char

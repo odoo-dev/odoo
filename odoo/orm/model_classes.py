@@ -167,16 +167,17 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
     # all models except 'base' implicitly inherit from 'base'
     name = model_def._name
     parent_names = list(model_def._inherit)
-    if name != 'base':
-        parent_names.append('base')
 
     # create or retrieve the model's class
     if name in parent_names:
         if name not in registry:
             raise TypeError(f"Model {name!r} does not exist in registry.")
+        assert name == parent_names[0]
         model_cls = registry[name]
         _check_model_extension(model_cls, model_def)
     else:
+        if name != 'base':
+            parent_names.append('base')
         model_cls = type(name, (model_def,), {
             'pool': registry,                       # this makes it a model class
             '_name': name,
@@ -187,27 +188,32 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
             '_inherits_children': set(),            # names of children models
             '_fields__': {},                        # populated in _setup()
             '_table_objects': frozendict(),         # populated in _setup()
+            '_merged_def_classes__': [],
         })
         model_cls._fields = MappingProxyType(model_cls._fields__)
 
     # determine all the classes the model should inherit from
-    bases = LastOrderedSet([model_def])
-    for parent_name in parent_names:
+    merged_def_classes = [model_def] + model_cls._merged_def_classes__
+    inherit_registry_classes = OrderedSet()
+    is_extend = name in parent_names
+
+    for parent_name in (parent_names[1:] if is_extend else parent_names):
         if parent_name not in registry:
             raise TypeError(f"Model {name!r} inherits from non-existing model {parent_name!r}.")
         parent_cls = registry[parent_name]
-        if parent_name == name:
-            for base in parent_cls._base_classes__:
-                bases.add(base)
-        else:
-            _check_model_parent_extension(model_cls, model_def, parent_cls)
-            bases.add(parent_cls)
-            model_cls._inherit_module[parent_name] = model_def._module
-            parent_cls._inherit_children.add(name)
+        _check_model_parent_extension(model_cls, model_def, parent_cls)
+        inherit_registry_classes.add(parent_cls)
+        model_cls._inherit_module[parent_name] = model_def._module
+        parent_cls._inherit_children.add(name)
+    if is_extend:
+        for cls in model_cls._inherit_registry_classes__:
+            inherit_registry_classes.add(cls)
 
     # model_cls.__bases__ must be assigned those classes; however, this
     # operation is quite slow, so we do it once in method _prepare_setup()
-    model_cls._base_classes__ = tuple(bases)
+    model_cls._merged_def_classes__ = merged_def_classes
+    model_cls._inherit_registry_classes__ = inherit_registry_classes
+    model_cls._base_classes__ = tuple(merged_def_classes) + tuple(inherit_registry_classes)
 
     # determine the attributes of the model's class
     _init_model_class_attributes(model_cls)
@@ -336,7 +342,11 @@ def _prepare_setup(model_cls: type[BaseModel]):
 
     # changing base classes is costly, do it only when necessary
     if model_cls.__bases__ != model_cls._base_classes__:
-        model_cls.__bases__ = model_cls._base_classes__
+        try:
+            model_cls.__bases__ = model_cls._base_classes__
+        except TypeError:
+            _logger.exception("Failed to set base classes for model %s", model_cls._name)
+            raise
 
     # reset those attributes on the model's class for _setup_fields() below
     for attr in ('_rec_name', '_active_name'):
