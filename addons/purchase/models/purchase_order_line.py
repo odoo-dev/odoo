@@ -758,11 +758,42 @@ class PurchaseOrderLine(models.Model):
             "force_uom": True,
         }
 
+    def is_in_section(self, section_id):
+        """Check if line belongs to given section or subsection in catalog."""
+        self.ensure_one()
+
+        if not section_id:
+            # Lines that does not belong to any section
+            return not self.get_parent_section_line()
+
+        section = self.browse(section_id)
+        return section._is_line_in_section(self)
+
     def get_parent_section_line(self):
         if not self.display_type and self.parent_id.display_type == 'line_subsection':
             return self.parent_id.parent_id
 
         return self.parent_id
+
+    def get_section_subtotal(self):
+        section_lines = self._get_section_lines()
+        return sum(section_lines.mapped('price_subtotal'))
+
+    def _get_section_lines(self):
+        self.ensure_one()
+        return self.order_id.order_line.filtered(self._is_line_in_section)
+
+    def _is_line_in_section(self, line):
+        """Return whether the line is a direct or indirect child of the section."""
+        self.ensure_one()
+        is_direct_child = line.parent_id == self
+        is_indirect_child = (
+            self.display_type == "line_section"
+            and line.parent_id
+            and line.parent_id.display_type == "line_subsection"
+            and line.parent_id.parent_id == self
+        )
+        return is_direct_child or is_indirect_child
 
     def _get_rounding(self):
         self.ensure_one()

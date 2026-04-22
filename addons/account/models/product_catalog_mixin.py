@@ -67,9 +67,7 @@ class ProductCatalogMixin(models.AbstractModel):
             'display_type': display_type,
             'subtotal': 0.0,
             'currency_id': self.currency_id.id,
-            'collapse_prices': False, #update
-            'collapse_composition': False, #update
-            'is_optional': False, #update
+            **self._get_extra_values_for_section(section),
         }
 
     def _get_new_line_sequence(self, child_field, section_id):
@@ -125,16 +123,12 @@ class ProductCatalogMixin(models.AbstractModel):
                     'parent_id': line.parent_id.id if line.display_type == 'line_subsection' else False,
                     'line_count': 0,
                     'display_type': line.display_type,
-                    'subtotal': line._get_section_totals('price_subtotal'),
+                    'subtotal': line.get_section_subtotal(),
                     'currency_id': self.currency_id.id,
                 }
-                if hasattr(line, 'collapse_prices'):
-                    values['collapse_prices'] = line.collapse_prices
-                if hasattr(line, 'collapse_composition'):
-                    values['collapse_composition'] = line.collapse_composition
-                if hasattr(line, 'is_optional'):
-                    values['is_optional'] = line.is_optional
+                values.update(self._get_extra_values_for_section(line))
                 sections[line.id] = values
+
             elif self._is_line_valid_for_section_line_count(line):
                 if line.parent_id and line.parent_id.id in sections:
                     sections[line.parent_id.id]['line_count'] += 1
@@ -169,6 +163,15 @@ class ProductCatalogMixin(models.AbstractModel):
         """
         return {}
 
+    def _get_extra_values_for_section(self, section):
+        """Return extra values to display in the section for the product catalog.
+
+        :param recordset section: A record of a section line.
+        :return: A dictionary with extra values to display in the catalog.
+        :rtype: dict
+        """
+        return {}
+
     def _get_parent_field_on_child_model(self):
         """Return the parent field for the order lines.
 
@@ -191,6 +194,8 @@ class ProductCatalogMixin(models.AbstractModel):
         )
 
     def _resequence_sections(self, child_field, id, parent_id, before_id=None, **kwargs):
+        if self._name == 'account.move':
+            child_field = 'invoice_line_ids'
         lines = self[child_field].sorted("sequence")
         section = lines.browse(id)
 

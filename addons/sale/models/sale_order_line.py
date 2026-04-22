@@ -601,7 +601,9 @@ class SaleOrderLine(models.Model):
                 line.product_id.sale_line_warn_msg if has_warning_group else ""
             )
 
-    @api.depends("product_id", "product_id.uom_id", "product_id.uom_ids", "product_id.extra_uom_ids")
+    @api.depends(
+        "product_id", "product_id.uom_id", "product_id.uom_ids", "product_id.extra_uom_ids"
+    )
     def _compute_allowed_uom_ids(self):
         for line in self:
             line.allowed_uom_ids = line.product_id._get_available_uoms()
@@ -1561,21 +1563,21 @@ class SaleOrderLine(models.Model):
 
     def write(self, vals):
         values = vals
-        # if "display_type" in values:
-        # new_type = values.get("display_type")
-        # invalid_lines = self.filtered(
-        #     lambda line: (
-        #         line.display_type != new_type
-        #         and not (line.display_type == "line_subsection" and new_type == "line_section")
-        #     )
-        # )
-        # if invalid_lines:
-        #     raise UserError(
-        #         _(
-        #             "You cannot change the type of a sale order line. Instead you should "
-        #             "delete the current line and create a new line of the proper type."
-        #         )
-        #     )
+        if "display_type" in values:
+            new_type = values.get("display_type")
+            invalid_lines = self.filtered(
+                lambda line: (
+                    line.display_type != new_type
+                    and not (line.display_type == "line_subsection" and new_type == "line_section")
+                )
+            )
+            if invalid_lines:
+                raise UserError(
+                    _(
+                        "You cannot change the type of a sale order line. Instead you should "
+                        "delete the current line and create a new line of the proper type."
+                    )
+                )
 
         if "product_id" in values and any(
             sol.product_id.id != values["product_id"] and not sol.product_updatable for sol in self
@@ -1865,11 +1867,25 @@ class SaleOrderLine(models.Model):
             ]
         return res or [{"tax_labels": [], "price_subtotal": 0.0, "price_total": 0.0}]
 
+    def is_in_section(self, section_id):
+        """Check if line belongs to given section or subsection in catalog."""
+        self.ensure_one()
+
+        if not section_id:
+            # Lines that does not belong to any section
+            return not self.get_parent_section_line()
+
+        section = self.browse(section_id)
+        return section._is_line_in_section(self)
+
     def get_parent_section_line(self):
         if not self.display_type and self.parent_id.display_type == "line_subsection":
             return self.parent_id.parent_id
 
         return self.parent_id
+
+    def get_section_subtotal(self):
+        return self._get_section_totals("price_subtotal")
 
     def _get_section_totals(self, totals_field):
         """Return the total/subtotal amount sale order lines linked to section."""

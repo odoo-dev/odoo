@@ -2644,11 +2644,17 @@ class SaleOrder(models.Model):
             if (
                 line.display_type
                 or line.product_id.id not in product_ids
-                or line.parent_id.id != section_id
+                or not line.is_in_section(section_id)
             ):
                 continue
             grouped_lines[line.product_id] |= line
         return grouped_lines
+
+    def _get_extra_values_for_section(self, line):
+        return {
+            "collapse_prices": line.collapse_prices,
+            "collapse_composition": line.collapse_composition,
+        }
 
     def _get_parent_field_on_child_model(self):
         return "order_id"
@@ -2668,7 +2674,7 @@ class SaleOrder(models.Model):
         """
         request.update_context(catalog_skip_tracking=True)
         sol = self.order_line.filtered(
-            lambda line: line.product_id.id == product.id and line.parent_id.id == section_id
+            lambda line: line.product_id.id == product.id and line.is_in_section(section_id)
         )
         if sol:
             if quantity != 0:

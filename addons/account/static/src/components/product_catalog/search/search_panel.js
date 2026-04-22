@@ -53,16 +53,23 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
                 return !id;
             },
             isAllowed: (ctx) => {
-                const placeholder = ctx.placeHolder;
+                const { element, placeHolder } = ctx;
 
-                const parent = placeholder.parentElement?.closest("li.o_section");
-                const next = placeholder.nextElementSibling;
+                const draggedId = parseInt(element.dataset.id);
+                if (!draggedId) return false;
 
-                if (parent && !parent.dataset.id) {
-                    return false;
-                }
+                const draggedNode = this._findSectionById(draggedId, this.state.sections);
+                if (!draggedNode) return false;
 
-                if (next && !next.dataset.id) {
+                const isDraggedSection = !draggedNode.parent_id;
+
+                // target parent
+                const parentEl = placeHolder.parentElement?.closest("li.o_section");
+                const targetParentId = parentEl ? parseInt(parentEl.dataset.id) : false;
+
+                const isTargetSectionLevel = !targetParentId;
+
+                if (isDraggedSection !== isTargetSectionLevel) {
                     return false;
                 }
 

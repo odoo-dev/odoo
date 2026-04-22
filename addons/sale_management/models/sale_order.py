@@ -151,3 +151,8 @@ class SaleOrder(models.Model):
             if order.sale_order_template_id.mail_template_id:
                 order._send_order_notification_mail(order.sale_order_template_id.mail_template_id)
         return res
+
+    # === BUSINESS METHODS === #
+
+    def _get_extra_values_for_section(self, line):
+        return {**super()._get_extra_values_for_section(line), "is_optional": line.is_optional}

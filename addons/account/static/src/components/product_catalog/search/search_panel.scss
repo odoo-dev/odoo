@@ -13,14 +13,6 @@
     }
 }
 
-.o_row_handle {
-    cursor: grab;
-    color: #adb5bd;
-    &:hover {
-        color: #666666;
-    }
-}
-
 .o_section_row:not(.o_selected_section):hover {
     background-color: var(--list-group-action-hover-bg);
 }

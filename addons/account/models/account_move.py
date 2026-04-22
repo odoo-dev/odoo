@@ -2961,7 +2961,7 @@ class AccountMove(models.Model):
             )
         for line in self.line_ids:
             if (
-                line.get_parent_section_line().id == section_id
+                line.is_in_section(section_id)
                 and line.display_type == 'product'
                 and line.product_id.id in product_ids
             ):
@@ -2982,8 +2982,7 @@ class AccountMove(models.Model):
         :rtype: float
         """
         move_line = self.line_ids.filtered(
-            lambda line: line.product_id.id == product.id
-            and line.get_parent_section_line().id == section_id,
+            lambda line: line.product_id.id == product.id and line.is_in_section(section_id)
         )
         if move_line:
             if quantity != 0:
@@ -3013,6 +3012,12 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         return self.state == 'cancel'
+
+    def _get_extra_values_for_section(self, line):
+        return {
+            'collapse_prices': line.collapse_prices,
+            'collapse_composition': line.collapse_composition,
+        }
 
     def _get_parent_field_on_child_model(self):
         return 'move_id'
