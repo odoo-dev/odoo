@@ -194,9 +194,12 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
 
     # determine all the classes the model should inherit from
     merged_def_classes = [model_def] + model_cls._merged_def_classes__
-    inherit_registry_classes = OrderedSet()
+    inherit_registry_classes = LastOrderedSet()
     is_extend = name in parent_names
 
+    if is_extend:
+        for cls in model_cls._inherit_registry_classes__:
+            inherit_registry_classes.add(cls)
     for parent_name in (parent_names[1:] if is_extend else parent_names):
         if parent_name not in registry:
             raise TypeError(f"Model {name!r} inherits from non-existing model {parent_name!r}.")
@@ -205,9 +208,6 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
         inherit_registry_classes.add(parent_cls)
         model_cls._inherit_module[parent_name] = model_def._module
         parent_cls._inherit_children.add(name)
-    if is_extend:
-        for cls in model_cls._inherit_registry_classes__:
-            inherit_registry_classes.add(cls)
 
     # model_cls.__bases__ must be assigned those classes; however, this
     # operation is quite slow, so we do it once in method _prepare_setup()
