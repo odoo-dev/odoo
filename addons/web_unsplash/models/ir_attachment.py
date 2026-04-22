@@ -13,6 +13,6 @@ class Attachment(models.Model):
         # which is by default forbidden for non admin.
         # See `_check_serving_attachments`
         forbidden = 'url' in attachment_data and attachment_data.get('type', 'binary') == 'binary'
-        if forbidden and attachment_data['url'].startswith('/unsplash/'):
+        if self.env.user._is_internal() and forbidden and attachment_data['url'].startswith('/unsplash/'):
             return True
         return super()._can_bypass_rights_on_media_dialog(**attachment_data)

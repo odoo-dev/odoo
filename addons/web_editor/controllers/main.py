@@ -386,6 +386,10 @@ class Web_Editor(http.Controller):
             not request.env.is_admin()
             and IrAttachment._can_bypass_rights_on_media_dialog(**attachment_data)
         ):
+            request.env[res_model].check_access_rights('write')
+            if res_id:
+                request.env[res_model].browse(res_id).check_access_rule('write')
+
             attachment = IrAttachment.sudo().create(attachment_data)
             # When portal users upload an attachment with the wysiwyg widget,
             # the access token is needed to use the image in the editor. If
