@@ -211,7 +211,8 @@ migrationStepRegistry.add("19.1.2", {
 migrationStepRegistry.add("19.3.10", {
     migrate(data) {
         for (const list of Object.values(data.lists || {})) {
-            list.columns = list.columns?.map((col) => ({ name: col, string: col })) || [];
+            // Keep the display name empty to let list headers use the field display name.
+            list.columns = list.columns?.map((col) => ({ name: col, string: "" })) || [];
         }
         renameFunctions(data, { "ODOO.LIST": "ODOO.LIST.VALUE" });
 

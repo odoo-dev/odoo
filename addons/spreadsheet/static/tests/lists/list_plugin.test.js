@@ -1581,6 +1581,31 @@ test("List header labels are loaded even if there are no corresponding list valu
     expect(getCellValue(model, "B1")).toBe("Product Name");
 });
 
+test("List header labels fall back to field metadata when the column string is empty", async function () {
+    const spreadsheetData = {
+        sheets: [
+            {
+                cells: {
+                    A1: '=ODOO.LIST.HEADER(1, "foo")',
+                },
+            },
+        ],
+        lists: {
+            1: {
+                id: 1,
+                columns: [{ name: "foo", string: "" }],
+                domain: [],
+                model: "partner",
+                orderBy: [],
+                context: {},
+            },
+        },
+    };
+    const { model } = await createModelWithDataSource({ spreadsheetData });
+    await waitForDataLoaded(model);
+    expect(getCellValue(model, "A1")).toBe("Foo");
+});
+
 test("INSERT_ODOO_LIST should provide a list of columns with name and string at minimum", function () {
     const model = new Model();
     const result = model.dispatch("INSERT_ODOO_LIST", {
@@ -1597,6 +1622,18 @@ test("INSERT_ODOO_LIST should provide a list of columns with name and string at 
         },
     });
     expect(result.reasons).toEqual([CommandResult.InvalidListDefinition]);
+});
+
+test("UPDATE_ODOO_LIST accepts empty column string as field display name fallback", async () => {
+    const { model } = await createSpreadsheetWithList();
+    const listId = model.getters.getListIds()[0];
+    const definition = model.getters.getListDefinition(listId);
+
+    const result = model.dispatch("UPDATE_ODOO_LIST", {
+        listId,
+        list: { ...definition, columns: [{ name: "foo", string: "" }] },
+    });
+    expect(result.isSuccessful).toBe(true);
 });
 
 test("UPDATE_ODOO_LIST should provide a list of columns with name and string at minimum", async () => {

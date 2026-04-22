@@ -7,7 +7,7 @@ const { getMaxObjectId, deepEquals, deepCopy } = helpers;
 /**
  * @typedef {Object} ListColumn
  * @property {string} name The technical field path of the column
- * @property {string} string The custom display name of the column
+ * @property {string} string The custom display name of the column. If empty, the field display name is used.
  * @property {boolean} [hidden] Whether the column is hidden or not
  */
 
@@ -301,7 +301,7 @@ export class ListCorePlugin extends OdooCorePlugin {
     _checkDefinition(definition) {
         if (
             !definition.columns ||
-            definition.columns.some((column) => !column.name || !column.string)
+            definition.columns.some((column) => !column.name || typeof column.string !== "string")
         ) {
             return CommandResult.InvalidListDefinition;
         }

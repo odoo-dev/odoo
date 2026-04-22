@@ -905,7 +905,7 @@ test("19.3.10: List columns are converted as objects", () => {
     };
     const migratedData = load(data);
     expect(migratedData.lists["1"].columns).toEqual([
-        { name: "foo", string: "foo" },
-        { name: "bar", string: "bar" },
+        { name: "foo", string: "" },
+        { name: "bar", string: "" },
     ]);
 });
