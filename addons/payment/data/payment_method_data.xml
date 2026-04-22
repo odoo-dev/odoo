@@ -161,7 +161,7 @@
     </record>
 
     <record id="payment_method_alipay_hk" model="payment.method">
-        <field name="name">AliPayHK</field>
+        <field name="name">AlipayHK</field>
         <field name="code">alipay_hk</field>
         <field name="sequence">1000</field>
         <field name="active">False</field>
@@ -1206,7 +1206,7 @@
         <field name="code">fps</field>
         <field name="sequence">1000</field>
         <field name="active">False</field>
-        <field name="image" type="bytes" file="payment/static/img/card.png"/>
+        <field name="image" type="bytes" file="payment/static/img/fps.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_manual_capture">none</field>
@@ -4397,7 +4397,7 @@
     <record id="payment_method_unionpay" model="payment.method">
         <field name="name">UnionPay</field>
         <field name="code">unionpay</field>
-        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>
+<!--        <field name="primary_payment_method_id" eval="ref('payment.payment_method_card')"/>-->
         <field name="sequence">1000</field>
         <field name="active">False</field>
         <field name="image" type="bytes" file="payment/static/img/unionpay.png"/>
