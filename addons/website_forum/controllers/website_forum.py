@@ -307,7 +307,7 @@ class WebsiteForum(WebsiteProfile):
             'main_object': question,
             'edit_in_backend': True,
             'question': question,
-            'seo_microdata': question._get_microdata(),
+            'structured_data': question.get_json_ld(is_detail_page=True),
             'header': {'question_data': True},
             'filters': 'question',
             'reversed': reversed,

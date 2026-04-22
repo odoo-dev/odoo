@@ -7,10 +7,10 @@ from collections.abc import Iterable
 from datetime import datetime
 
 from odoo import api, fields, models, tools, _
+from odoo.addons.website.helpers.jsonld_builder import JsonLd
 from odoo.exceptions import UserError, ValidationError, AccessError
 from odoo.fields import Domain
 from odoo.tools import sql, SQL
-from odoo.tools.json import scriptsafe as json_safe
 from odoo.tools.mail import email_normalize, formataddr
 
 _logger = logging.getLogger(__name__)
@@ -23,6 +23,7 @@ class ForumPost(models.Model):
         'website.seo.metadata',
         'website.located.mixin',
         'website.searchable.mixin',
+        'website.structured_data.mixin',
     ]
     _order = "is_correct DESC, vote_count DESC, last_activity_date DESC"
 
@@ -820,65 +821,106 @@ class ForumPost(models.Model):
     # WEBSITE
     # ----------------------------------------------------------------------
 
-    def _get_microdata(self):
-        """
-        Generate structured data (microdata) for the post.
+    def _get_breadcrumb_items(self):
+        """Get the list of items to build the breadcrumb on website."""
+        self.ensure_one()
+        website = self.env['website'].get_current_website()
+        base_url = website.get_base_url()
+        forum_slug = self.env['ir.http']._slug(self.forum_id)
+        return [
+            (website.name, base_url),
+            (self.env._('Forums'), f"{base_url}/forum"),
+            (self.forum_id.name, f"{base_url}/forum/{forum_slug}"),
+            (self.name, base_url + self.website_url),
+        ]
 
-        Returns:
-            str or None: Microdata in JSON format representing the post, or None
-            if not applicable.
+    def _build_structured_data(self, is_detail_page=False):
+        """Render structured data using the website_blog pattern."""
+        schemas = super()._build_structured_data(is_detail_page=is_detail_page)
+        items = self._get_breadcrumb_items()
+        breadcrumb_jsonld = self._build_breadcrumb_schema(items)
+        if is_detail_page:
+            if forum_post_jsonld := self._build_forum_post_schema():
+                schemas.append(forum_post_jsonld)
+        schemas.append(breadcrumb_jsonld)
+        return schemas
+
+    def _build_forum_post_schema(self):
+        """Build a QAPage schema for a question post.
+        :returns: A JsonLd object representing the `QAPage` schema of the
+                    question, or None if the post is not a question or
+                    doesn't have any answer.
+        :rtype: JsonLd or None
         """
         self.ensure_one()
-        # Return if it's not a question.
+
+        # Answers don't generate QAPage structured data on their own, only
+        # questions do. Answers are included in the parent's QAPage if they are
+        # correct or among the top 5 suggested answers.
         if self.parent_id:
             return None
-        correct_posts = self.child_ids.filtered(lambda post: post.is_correct)
-        suggested_posts = self.child_ids.filtered(lambda post: not post.is_correct)[:5]
-        # A QAPage schema must have one accepted answer or at least one suggested answer
-        if not suggested_posts and not correct_posts:
+
+        correct_post = None
+        suggested_posts = []
+        for child in self.child_ids:
+            if child.is_correct and not correct_post:
+                correct_post = child
+            elif not child.is_correct and len(suggested_posts) < 5:
+                suggested_posts.append(child)
+            if correct_post and len(suggested_posts) >= 5:
+                break
+
+        # A QAPage schema must have one accepted answer or at least one suggested answer.
+        if not correct_post and not suggested_posts:
             return None
 
-        structured_data = {
-            "@context": "https://schema.org",
-            "@type": "QAPage",
-            "mainEntity": self._get_structured_data(post_type="question"),
-        }
-        if correct_posts:
-            structured_data["mainEntity"]["acceptedAnswer"] = correct_posts[0]._get_structured_data()
+        main_entity = self._build_question_schema()
+        if correct_post:
+            main_entity.add_nested({
+                "acceptedAnswer": correct_post._build_answer_schema(),
+            })
         if suggested_posts:
-            structured_data["mainEntity"]["suggestedAnswer"] = [
-                suggested_post._get_structured_data()
-                for suggested_post in suggested_posts
-            ]
-        return json_safe.dumps(structured_data, indent=2)
+            main_entity.add_nested({
+                "suggestedAnswer": [
+                    post._build_answer_schema()
+                    for post in suggested_posts
+                ],
+            })
+        return JsonLd("QAPage").add_nested({"mainEntity": main_entity})
 
-    def _get_structured_data(self, post_type="answer"):
+    def _build_question_schema(self):
+        """Build a Question schema for a question post.
+        :returns: A JsonLd object representing the `Question` schema of the question.
+        :rtype: JsonLd
         """
-        Generate structured data (microdata) for an answer or a question.
-
-        Returns:
-            dict: microdata.
-        """
-        res = {
-            "upvoteCount": self.vote_count,
-            "datePublished": self.create_date.isoformat() + 'Z',
-            "url": self.env['ir.http']._url_for(self.website_url),
-            "author": {
-                "@type": "Person",
-                "name": self.create_uid.sudo().name,
+        self.ensure_one()
+        return JsonLd(
+            "Question",
+            {
+                "name": self.name,
+                "text": self.plain_content or self.name,
+                "answerCount": self.child_count,
+                "upvoteCount": self.vote_count,
+                "datePublished": JsonLd.to_iso_datetime(self.create_date),
+                "url": f"{self.get_base_url()}{self.website_url}",
             },
-        }
-        if post_type == "answer":
-            res["@type"] = "Answer"
-            res["text"] = self.plain_content
-        else:
-            res["@type"] = "Question"
-            res["name"] = self.name
-            res["text"] = self.plain_content or self.name
-            res["answerCount"] = self.child_count
-        if self.create_uid.sudo().website_published:
-            res["author"]["url"] = self.env['ir.http']._url_for(f"/profile/user/{ self.create_uid.sudo().id }")
-        return res
+        ).add_nested({"author": JsonLd("Person", {"name": self.create_uid.name})})
+
+    def _build_answer_schema(self):
+        """Build an Answer schema for an answer post.
+        :returns: A JsonLd object representing the `Answer` schema of the answer.
+        :rtype: JsonLd
+        """
+        self.ensure_one()
+        return JsonLd(
+            "Answer",
+            {
+                "text": self.plain_content,
+                "upvoteCount": self.vote_count,
+                "datePublished": JsonLd.to_iso_datetime(self.create_date),
+                "url": f"{self.get_base_url()}{self.website_url}",
+            },
+        ).add_nested({"author": JsonLd("Person", {"name": self.create_uid.name})})
 
     def go_to_website(self):
         self.ensure_one()

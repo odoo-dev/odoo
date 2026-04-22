@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models, _
+from odoo.addons.website.helpers.jsonld_builder import JsonLd
 from odoo.tools import mute_logger
 from odoo.tools.urls import urljoin as url_join
 from odoo.tools.translate import html_translate
@@ -13,6 +14,7 @@ class HrJob(models.Model):
         'website.seo.metadata',
         'website.published.multi.mixin',
         'website.searchable.mixin',
+        'website.structured_data.mixin',
     ]
 
     @mute_logger('odoo.addons.base.models.ir_qweb')
@@ -164,3 +166,115 @@ spirit. To be successful, you will have solid solving problem skills.''')
                     job_address.country_id.name,
                 ]))
         return results_data
+
+    def _build_structured_data(self, is_detail_page=False):
+        """Render structured data for jobs listing and detail pages."""
+        schemas = super()._build_structured_data(is_detail_page=is_detail_page)
+        items = self._get_breadcrumb_items(is_detail_page)
+        breadcrumb_jsonld = self._build_breadcrumb_schema(items)
+        if is_detail_page:
+            self.ensure_one()
+            schemas.extend([self._build_job_post_schema(), breadcrumb_jsonld])
+            return schemas
+        schemas.extend([self._build_collection_page_schema(), breadcrumb_jsonld])
+        return schemas
+
+    def _get_breadcrumb_items(self, is_detail_page=False):
+        """Return breadcrumb items for jobs listing and job detail pages."""
+        website = self.env['website'].get_current_website()
+        base_url = website.get_base_url()
+        items = [
+            (website.name, base_url),
+            (self.env._("Jobs"), f"{base_url}/jobs"),
+        ]
+        if is_detail_page:
+            self.ensure_one()
+            items.append((self.name, f"{base_url}{self.website_url}"))
+        return items
+
+    def _build_job_post_schema(self):
+        """Build full JobPosting schema for a single job detail page."""
+        self.ensure_one()
+        job_post_jsonld = self._to_structured_data_summary_jobposting()
+        job_post_jsonld.set({
+            "directApply": True,
+            "description": self.website_description,
+        })
+        nested_schema_data = {}
+        if self.department_id and self.department_id.company_id:
+            department_company = self.department_id.company_id
+            nested_schema_data["identifier"] = JsonLd(
+                "PropertyValue",
+                {
+                    "name": department_company.name,
+                    "value": f"{department_company.id}-{self.id}",
+                },
+            )
+        return job_post_jsonld.add_nested(nested_schema_data)
+
+    def _to_structured_data_summary_jobposting(self):
+        """Build summary JobPosting schema used by both listing and detail pages.
+        :return: Summary JobPosting schema.
+        :rtype: JsonLd
+        """
+        self.ensure_one()
+        base_url = self.get_base_url()
+        location_type = 'ON_SITE' if self.address_id else 'TELECOMMUTE'
+        contract_type = self.employee_type_id.sudo()
+        schema_data = {
+            "title": self.name,
+            "url": f"{base_url}{self.website_url}",
+            "description": self.description,
+            "datePosted": JsonLd.to_iso_datetime(self.create_date),
+            "jobLocationType": location_type,
+            "totalJobOpenings": self.no_of_recruitment,
+        }
+        if contract_type:
+            schema_data["employmentType"] = contract_type.name
+        if self.department_id and self.department_id.name:
+            schema_data["occupationalCategory"] = self.department_id.name
+
+        nested_schema_data = {
+            "hiringOrganization": JsonLd("Organization", {"@id": f"{base_url}/#organization"}),
+        }
+        country_code = self.company_id.country_id.code
+        if country_code:
+            nested_schema_data["applicantLocationRequirements"] = JsonLd(
+                "Country",
+                {"name": country_code},
+            )
+
+        # Public users cannot read partner addresses; sudo to safely access address fields.
+        address_id = self.address_id.sudo()
+        if address_id:
+            place_nested_schema_data = {}
+            if address_id.street:
+                place_nested_schema_data["streetAddress"] = address_id.street
+            if address_id.city:
+                place_nested_schema_data["addressLocality"] = address_id.city
+            if address_id.zip:
+                place_nested_schema_data["postalCode"] = address_id.zip
+            if address_id.state_id.code:
+                place_nested_schema_data["addressRegion"] = address_id.state_id.code
+            if address_id.country_id.code:
+                place_nested_schema_data["addressCountry"] = address_id.country_id.code
+            if place_nested_schema_data:
+                nested_schema_data["jobLocation"] = JsonLd("Place").add_nested({
+                    "address": JsonLd("PostalAddress", place_nested_schema_data),
+                })
+        return JsonLd("JobPosting", schema_data).add_nested(nested_schema_data)
+
+    def _build_collection_page_schema(self):
+        """Return CollectionPage structured data for jobs listing pages."""
+        website = self.env['website'].get_current_website()
+        base_url = website.get_base_url()
+        return JsonLd(
+            "CollectionPage",
+            {
+                "name": self.env._("Jobs"),
+                "url": f"{base_url}/jobs",
+            },
+        ).add_nested({
+            "hasPart": [job._to_structured_data_summary_jobposting() for job in self],
+            "isPartOf": JsonLd("Organization", {"@id": f"{base_url}/#organization"}),
+        })
