@@ -167,17 +167,16 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
     # all models except 'base' implicitly inherit from 'base'
     name = model_def._name
     parent_names = list(model_def._inherit)
+    if name != 'base':
+        parent_names.append('base')
 
     # create or retrieve the model's class
     if name in parent_names:
         if name not in registry:
             raise TypeError(f"Model {name!r} does not exist in registry.")
-        assert name == parent_names[0]
         model_cls = registry[name]
         _check_model_extension(model_cls, model_def)
     else:
-        if name != 'base':
-            parent_names.append('base')
         model_cls = type(name, (model_def,), {
             'pool': registry,                       # this makes it a model class
             '_name': name,
@@ -195,19 +194,18 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
     # determine all the classes the model should inherit from
     merged_def_classes = [model_def] + model_cls._merged_def_classes__
     inherit_registry_classes = LastOrderedSet()
-    is_extend = name in parent_names
-
-    if is_extend:
-        for cls in model_cls._inherit_registry_classes__:
-            inherit_registry_classes.add(cls)
-    for parent_name in (parent_names[1:] if is_extend else parent_names):
+    for parent_name in parent_names:
         if parent_name not in registry:
             raise TypeError(f"Model {name!r} inherits from non-existing model {parent_name!r}.")
         parent_cls = registry[parent_name]
-        _check_model_parent_extension(model_cls, model_def, parent_cls)
-        inherit_registry_classes.add(parent_cls)
-        model_cls._inherit_module[parent_name] = model_def._module
-        parent_cls._inherit_children.add(name)
+        if parent_name == name:
+            for cls in parent_cls._inherit_registry_classes__:
+                inherit_registry_classes.add(cls)
+        else:
+            _check_model_parent_extension(model_cls, model_def, parent_cls)
+            inherit_registry_classes.add(parent_cls)
+            model_cls._inherit_module[parent_name] = model_def._module
+            parent_cls._inherit_children.add(name)
 
     # model_cls.__bases__ must be assigned those classes; however, this
     # operation is quite slow, so we do it once in method _prepare_setup()
