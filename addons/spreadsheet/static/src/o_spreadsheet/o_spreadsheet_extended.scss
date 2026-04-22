@@ -29,3 +29,10 @@
         flex-wrap: wrap;
     }
 }
+
+// ADRM TODO: put this css somewhere better (for the iframe) & probably remove most of it
+.o-spreadsheet {
+    .o-html-grid {
+        position: relative !important;
+    }
+}
