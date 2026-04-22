@@ -489,7 +489,7 @@ class SaleOrderLine(models.Model):
     def _compute_translated_product_name(self):
         for line in self:
             line.translated_product_name = line.product_id.with_context(
-                lang=line.order_id._get_lang(), partner_id=None
+                lang=line.order_id._get_lang()
             ).display_name
 
     @api.depends('display_type', 'product_id', 'product_packaging_qty')

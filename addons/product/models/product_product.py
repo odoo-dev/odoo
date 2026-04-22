@@ -535,7 +535,8 @@ class ProductProduct(models.Model):
                 # not be a performance issue.
                 if company_id:
                     sellers = [x for x in sellers if x.company_id.id in [company_id, False]]
-            if sellers:
+            # breakpoint()
+            if sellers and sellers[0].partner_id.id != partner_id :
                 temp = []
                 for s in sellers:
                     seller_variant = s.product_name and (

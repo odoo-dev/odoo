@@ -441,7 +441,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
     def test_sol_description(self):
         """
         Ensure the SOL description is correctly set when vendor product name
-        and code are present
+        and code are present and vendor is a customer
         """
         test_product = self.env['product.product'].create({
             'name': 'Test Product',
@@ -457,4 +457,5 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
                 line.product_id = test_product
                 self.assertEqual(line.name, "[P123] Name1")
         order = order.save()
+        self.assertEqual(order.order_line.translated_product_name, "Test Product")
         self.assertEqual(order.order_line.name, "[P123] Name1")
