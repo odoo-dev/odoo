@@ -3,10 +3,9 @@ from difflib import SequenceMatcher
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import ValidationError
 from odoo.fields import Domain
-from odoo.tools import format_amount, frozendict
+from odoo.tools import format_amount, frozendict, float_round
 from odoo.tools.misc import split_every
 from odoo.tools.constants import PREFETCH_MAX
-
 
 ACCOUNT_DOMAIN = "[('account_type', 'not in', ('asset_receivable','liability_payable','asset_cash','liability_credit_card','off_balance'))]"
 
@@ -115,7 +114,7 @@ class ProductTemplate(models.Model):
     def _construct_tax_string(self, price):
         currency = self.currency_id
         res = self.taxes_id._filter_taxes_by_company(self.env.company).compute_all(
-            price, product=self, partner=self.env['res.partner']
+            price, product=self, partner=self.env['res.partner'],
         )
         joined = []
         included = res['total_included']
@@ -222,19 +221,16 @@ class ProductProduct(models.Model):
     def _get_product_accounts(self):
         return self.product_tmpl_id._get_product_accounts()
 
-    def _get_default_product_values(self, document_type):
+    def _get_default_product_values(self, company, document_type):
         """ Get the default product values for a document type.
 
         :param document_type:   The type of the document.
         :return:                A dictionary of default product values.
         """
         self.ensure_one()
-        company = self.company_id or self.env.company
 
-        # Uom.
         uom = self.uom_id
 
-        # Taxes.
         if document_type == 'sale':
             taxes = self.taxes_id._filter_taxes_by_company(company)
         elif document_type == 'purchase':
@@ -242,10 +238,6 @@ class ProductProduct(models.Model):
         else:
             taxes = self.env['account.tax']
 
-        # Currency.
-        currency = company.currency_id
-
-        # Price.
         if document_type == 'sale':
             price = self.with_company(company).lst_price
         elif document_type == 'purchase':
@@ -253,12 +245,20 @@ class ProductProduct(models.Model):
         else:
             price = 0.0
 
+        if document_type == 'sale':
+            currency = self.currency_id
+        elif document_type == 'purchase':
+            currency = company.currency_id
+        else:
+            currency = self.env['res.currency']
+
         return {
             'product': self,
             'price': price,
             'uom': uom,
             'taxes': taxes,
             'currency': currency,
+            'company': company,
             'document_tax_mode': None,
         }
 
@@ -266,10 +266,11 @@ class ProductProduct(models.Model):
     def _adapt_product_values_to_currency(self, product_values, currency, conversion_date):
         """ Adapt the product values to the given currency at a specific date.
 
-        :param product_values:  The product values created by '_get_default_product_values'.
-        :param currency:        The currency to adapt to.
-        :param conversion_date: The date to use for the currency conversion.
-        :return:                A dictionary of adapted product values.
+        :param product_values:     The product values created by '_get_default_product_values' or prepared in
+                                   '_get_line_price_unit'.
+        :param currency:           The currency to adapt to.
+        :param conversion_date:    The date to use for the currency conversion.
+        :return:                   A dictionary of adapted product values.
         """
         product_currency = product_values['currency']
 
@@ -294,9 +295,10 @@ class ProductProduct(models.Model):
     def _adapt_product_values_to_document_tax_mode(self, product_values, document_tax_mode):
         """ Adapt the product values to the tax mode forced for the document.
 
-        :param product_values:      The product values created by '_get_default_product_values'.
-        :param document_tax_mode:   The tax mode forced for the document.
-        :return:                A dictionary of adapted product values.
+        :param product_values:       The product values created by '_get_default_product_values' or prepared in
+                                     '_get_line_price_unit'.
+        :param document_tax_mode:    The tax mode forced for the document.
+        :return:                     A dictionary of adapted product values.
         """
         if document_tax_mode is None:
             return product_values
@@ -307,11 +309,18 @@ class ProductProduct(models.Model):
             rounding_method='round_globally',
             product=product_values['product'],
             product_uom=product_values['uom'],
+            document_tax_mode=product_values['document_tax_mode'],
         )
         if document_tax_mode == 'tax_included':
             price = results['total_included']
+            for tax in results['taxes_data']:
+                if tax['tax'].price_include_override == 'tax_excluded':
+                    price -= tax['tax_amount']
         else:
             price = results['total_excluded']
+            for tax in results['taxes_data']:
+                if tax['tax'].price_include_override == 'tax_included':
+                    price += tax['tax_amount']
 
         return {
             **product_values,
@@ -323,11 +332,11 @@ class ProductProduct(models.Model):
     def _adapt_product_values_to_uom(self, product_values, uom):
         """ Adapt the product values to the given uom.
 
-        :param product_values:  The product values created by '_get_default_product_values'.
-        :param uom:             The uom to adapt to.
-        :return:                A dictionary of adapted product values.
+        :param product_values:    The product values created by '_get_default_product_values' or prepared in
+                                  '_get_line_price_unit'.
+        :param uom:               The uom to adapt to.
+        :return:                  A dictionary of adapted product values.
         """
-        product = product_values['product']
         product_uom = product_values['uom']
 
         # Apply unit of measure.
@@ -346,20 +355,20 @@ class ProductProduct(models.Model):
     def _adapt_product_values_to_fiscal_position(self, product_values, fiscal_position):
         """ Adapt the product values to the fiscal position.
 
-        :param product_values:  The product values created by '_get_default_product_values'.
-        :param fiscal_position: The fiscal position to adapt to.
-        :return:                A dictionary of adapted product values.
+        :param product_values:     The product values created by '_get_default_product_values' or prepared in
+                                   '_get_line_price_unit'.
+        :param fiscal_position:    The fiscal position to adapt to.
+        :return:                   A dictionary of adapted product values.
         """
-        product = product_values['product']
-        price = product_values['price']
         taxes = product_values['taxes']
+        price = product_values['price']
 
         if taxes and fiscal_position:
             taxes_after_fp = fiscal_position.map_tax(taxes)
             if taxes != taxes_after_fp:
                 price = taxes._adapt_price_unit_to_another_taxes(
-                    price_unit=price,
-                    product=product,
+                    price_unit=product_values['price'],
+                    product=product_values['product'],
                     original_taxes=taxes,
                     new_taxes=taxes_after_fp,
                     document_tax_mode=product_values['document_tax_mode'],
@@ -372,155 +381,99 @@ class ProductProduct(models.Model):
             'taxes': taxes,
         }
 
-    @api.model
-    def _adapt_price_unit_json_to_new_values(self, new_values, price_unit_json):
-        def to_json(results):
-            return {
-                'price_unit': results['price'],
-                'product_uom_id': results['uom'].id,
-                'product_id': results['product'].id,
-                'document_tax_mode': results['document_tax_mode'],
-            }
+    def _get_line_price_unit(self, line, document_type, price=None):
+        """ Helper for account.move, sale.order and purchase.order to get the price unit
+        in various cases, even when there isn't a specified product (self = self.env['product.product']).
 
-        # The values we kept from the previous call.
-        if price_unit_json:
-            old_values = {
-                'product': self.env['product.product'].browse(price_unit_json['product_id']),
-                'uom': self.env['uom.uom'].browse(price_unit_json['product_uom_id']),
-                'price': price_unit_json['price_unit'],
-                'document_tax_mode': price_unit_json['document_tax_mode'],
-            }
-        else:
-            old_values = None
+        :param line:            Line from account.move, sale.order or purchase.order.
+        :param document_type:   The type of document, either 'sale' or 'purchase'.
+        :param price:           Used in sale.order and purchase.order to pass on the price_unit after further adaptation
+                                due to pricelist/discounts/combos..etc. Important note: if price is not None it means
+                                that if there is a fiscal position set on the document we need to apply it again.
+        :return:                Unit price after adapting it to any changes made on the line.
+        """
+        product = self
 
-        # The default product values if we have to recompute from it.
-        if product := new_values['product']:
-            product_values = product._get_default_product_values(new_values['document_type'])
-            product_values = self._adapt_product_values_to_currency(product_values, new_values['currency'], new_values['conversion_date'])
-            product_values = self._adapt_product_values_to_document_tax_mode(product_values, new_values['document_tax_mode'])
-            product_values = self._adapt_product_values_to_uom(product_values, new_values['uom'])
-            product_values = self._adapt_product_values_to_fiscal_position(product_values, new_values['fiscal_position'])
-        else:
+        # Handling line values that have different names in the three models
+        is_account_move = 'move_id' in line._fields
+        line_parent_id = line.move_id if is_account_move else line.order_id
+        line_date = line_parent_id.date if is_account_move else line_parent_id.date_order
+        line_uom = line.uom_id if 'uom_id' in line._fields else line.product_uom_id
+
+        new_product_set = product and (not line.price_unit_json or not line.price_unit_json['product_id'] or line.price_unit_json['product_id'] != product.id)
+
+        # Adapt the uom if it is the first time the price unit is computed and when the uom has changed since the last computation
+        apply_uom = (not line.price_unit_json and not price) or (line.price_unit_json and line.price_unit_json['uom_id'] != line_uom.id)
+
+        # Adapt the document tax mode if it is the first time the price unit is computed, when the tax mode is different than the one set on the product and when the document tax mode has changed since the last computation
+        apply_document_tax_mode = (not line.price_unit_json and not price) or (line.document_tax_mode != line.company_id.account_price_include) or (line.price_unit_json and line.price_unit_json['document_tax_mode'] != line.document_tax_mode)
+
+        # Adapt the fiscal position here only when a new product is set on the line and the fiscal position set is not domestic
+        apply_fiscal_position = (new_product_set and line_parent_id.fiscal_position_id and line_parent_id.fiscal_position_id != line.company_id.domestic_fiscal_position_id) or (
+            line.price_unit_json and line.price_unit_json.get('fpos_id', False) and line.price_unit_json['fpos_id'] != line_parent_id.fiscal_position_id.id
+        )
+
+        # When a new product is set on the line and no price param is provided it means we can use the default values
+        # from the product in _get_tax_included_unit_price.
+        # For sale.order and purchase.order when the fiscal position is changed we also start the computation from the default values
+        if (is_account_move and new_product_set) or (not is_account_move and apply_fiscal_position):
             product_values = None
-
-        if (
-            product_values
-            and (not old_values or old_values['product'] == product_values['product'])
-        ):
-            # Recompute from the product.
-            return to_json({
-                'product': product_values['product'],
-                'uom': product_values['uom'],
-                'price': product_values['price'],
-                'document_tax_mode': product_values['document_tax_mode'],
-            })
-
-        # Without previous values, keep the values as they are.
-        if not old_values:
-            return to_json({
-                'product': new_values['product'],
-                'uom': new_values['uom'],
-                'price': new_values['price'],
-                'document_tax_mode': new_values['document_tax_mode'],
-            })
-
-        results = {
-            'product': new_values['product'],
-            'price': new_values['price'],
-            'currency': new_values['currency'],
-            'taxes': new_values['taxes'],
-
-            'document_tax_mode': old_values['document_tax_mode'],
-            'uom': old_values['uom'],
-        }
-
-        # Deduce if the current price_unit is an user input or not.
-        if (
-            product_values
-            and all(product_values[key] == new_values[key] for key in ('uom', 'document_tax_mode'))
-        ):
-            is_user_input = not new_values['currency'].compare_amounts(product_values['price'], new_values['price'])
+            apply_uom = apply_document_tax_mode = True
+        # When we cannot use the default values we need to prepare the product_values as a screenshot of the state right
+        # before the change that has triggered the price_unit compute leading up to this method
         else:
-            is_user_input = True
-
-        # Adapt the document tax mode.
-        if new_values['document_tax_mode'] != results['document_tax_mode']:
-            if is_user_input:
-                new_values['price'] = self._adapt_product_values_to_document_tax_mode(results, new_values['document_tax_mode'])
+            if line.price_unit_json:
+                uom = self.env['uom.uom'].browse(line.price_unit_json['uom_id']) if line.price_unit_json['uom_id'] else None
+                dtm = line.price_unit_json['document_tax_mode'] if line.price_unit_json['document_tax_mode'] else None
             else:
-                new_values['price'] = product_values['price']
-            results['document_tax_mode'] = new_values['document_tax_mode']
+                uom = line_uom
+                dtm = line.company_id.account_price_include
 
-        # Adapt the UOM.
-        if old_values['uom'] != new_values['uom']:
-            if is_user_input:
-                new_values['price'] = self._adapt_product_values_to_uom(results, new_values['uom'])
-            else:
-                new_values['price'] = product_values['price']
-            results['uom'] = new_values['uom']
+            product_values = {
+                'product': product,
+                'uom': uom,
+                'price': price if price is not None else line.price_unit,  # condition needs to be 'is not None' because price could be 0.0
+                'taxes': line.tax_ids,
+                'document_tax_mode': dtm,
+                'currency': line.currency_id,
+                'company': line.company_id,
+            }
 
-        return to_json(results)
+        return product._get_tax_included_unit_price(
+            product_price_unit=price,
+            company=line.company_id,
+            currency=line.currency_id,
+            document_date=line_date,
+            document_type=document_type,
+            fiscal_position=line_parent_id.fiscal_position_id if apply_fiscal_position else None,
+            product_uom=line_uom if apply_uom else None,
+            document_tax_mode=line.document_tax_mode if apply_document_tax_mode else None,
+            product_values=product_values,
+        )
 
     def _get_tax_included_unit_price(self, company, currency, document_date, document_type,
         is_refund_document=False, product_uom=None, product_currency=None,
-        product_price_unit=None, product_taxes=None, fiscal_position=None, document_tax_mode=None,
+        product_price_unit=None, product_taxes=None, fiscal_position=None,
+        document_tax_mode=None, product_values=None,
     ):
         """ Helper to get the price unit from different models.
             This is needed to compute the same unit price in different models (sale order, account move, etc.) with same parameters.
         """
-        self.ensure_one()
+        self == self.env['product.product'] or self.ensure_one()
 
-        product_values = self._get_default_product_values(document_type)
-        product_values = self._adapt_product_values_to_currency(product_values, currency, document_date)
-        product_values = self._adapt_product_values_to_document_tax_mode(product_values, document_tax_mode)
-        product_values = self._adapt_product_values_to_uom(product_values, product_uom)
+        if not product_values:
+            product_values = self._get_default_product_values(company, document_type)
+            if product_currency:
+                product_values['currency'] = product_currency
+            if product_taxes:
+                product_values['taxes'] = product_taxes
+            if product_price_unit:
+                product_values['price'] = product_price_unit
+
         product_values = self._adapt_product_values_to_fiscal_position(product_values, fiscal_position)
-
-        # company.ensure_one()
-
-        # product = self
-
-        # assert document_type
-
-        # product_values = self._get_default_product_values(document_type)
-        # if product_uom is not None:
-        #     product_values = self._adapt_product_values_to_uom(product_values, product_uom)
-
-        # if product_uom is None:
-        #     product_uom = product.uom_id
-        # if not product_currency:
-        #     if document_type == 'sale':
-        #         product_currency = product.currency_id
-        #     elif document_type == 'purchase':
-        #         product_currency = company.currency_id
-        # if product_price_unit is None:
-        #     if document_type == 'sale':
-        #         product_price_unit = product.with_company(company).lst_price
-        #     elif document_type == 'purchase':
-        #         product_price_unit = product.with_company(company).standard_price
-        #     else:
-        #         return 0.0
-        # if product_taxes is None:
-        #     if document_type == 'sale':
-        #         product_taxes = product.taxes_id.filtered(lambda x: x.company_id == company)
-        #     elif document_type == 'purchase':
-        #         product_taxes = product.supplier_taxes_id.filtered(lambda x: x.company_id == company)
-        # # Apply unit of measure.
-        # if product_uom and product.uom_id != product_uom:
-        #     product_price_unit = product.uom_id._compute_price(product_price_unit, product_uom)
-
-        # # Apply fiscal position.
-        # if product_taxes and fiscal_position:
-        #     product_price_unit = self._get_tax_included_unit_price_from_price(
-        #         product_price_unit,
-        #         product_taxes,
-        #         fiscal_position=fiscal_position,
-        #         document_tax_mode=document_tax_mode,
-        #     )
-
-        # # Apply currency rate.
-        # if currency != product_currency:
-        #     product_price_unit = product_currency._convert(product_price_unit, currency, company, document_date, round=False)
+        product_values = self._adapt_product_values_to_uom(product_values, product_uom)
+        product_values = self._adapt_product_values_to_document_tax_mode(product_values, document_tax_mode)
+        product_values = self._adapt_product_values_to_currency(product_values, currency, document_date)
 
         return product_values['price']
 
@@ -552,33 +505,6 @@ class ProductProduct(models.Model):
     def _compute_tax_string(self):
         for record in self:
             record.tax_string = record.product_tmpl_id._construct_tax_string(record.lst_price)
-
-    def _get_opposite_tax_mode_price(self, line, price_from_product):
-        '''Helper to get the opposite tax mode price_unit when switching between tax included and excluded
-        for different models: account_move, sale_order and purchase_order.
-
-        :param line:                 Either an account_move_line, sale_order_line or purchase_order_line.
-        :param price_from_product:   Price normally computed from _get_tax_included_unit_price that has already
-                                     dealt with currency, fiscal position and unit of measure.
-
-        :return:                     The price calculated using the opposite tax mode set on the product which
-                                     follows the tax mode set on the company.
-        '''
-        self.ensure_one()
-        product = self
-        total_price_mapping = {
-            'tax_included': 'total_excluded',
-            'tax_excluded': 'total_included',
-        }
-        product_tax_mode = line.company_id.account_price_include
-        return line.tax_ids._filter_taxes_by_company(line.company_id)._get_tax_details(
-            price_from_product,
-            1.0,
-            rounding_method='round_globally',
-            product=product,
-            product_uom=line.product_uom_id if 'product_uom_id' in line._fields else line.uom_id,
-            document_tax_mode=product_tax_mode,
-        )[total_price_mapping[product_tax_mode]]
 
     # -------------------------------------------------------------------------
     # EDI

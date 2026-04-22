@@ -66,17 +66,17 @@ export const accountTaxHelpers = {
         if (tax.has_negative_factor) {
             return false;
         }
-        if (tax.price_include_override) {
-            return tax.price_include_override === 'tax_included';
-        }
-        if (document_tax_mode) {
-            return document_tax_mode === 'tax_included';
-        }
         if (special_mode === 'total_included') {
             return true;
         }
         if (special_mode === 'total_excluded') {
             return false;
+        }
+        if (tax.price_include_override) {
+            return tax.price_include_override === 'tax_included';
+        }
+        if (document_tax_mode) {
+            return document_tax_mode === 'tax_included';
         }
         return tax.price_include;
     },
@@ -325,8 +325,8 @@ export const accountTaxHelpers = {
             return {
                 ...kwargs,
                 tax: tax,
-                price_include: this.is_price_included(tax, { document_tax_mode, special_mode }),
-                original_price_include: this.is_price_included(tax, { document_tax_mode }),
+                price_include: self.is_price_included(tax, { document_tax_mode, special_mode }),
+                original_price_include: self.is_price_included(tax, { document_tax_mode }),
                 document_tax_mode: document_tax_mode,
                 extra_base_for_tax: 0.0,
                 extra_base_for_base: 0.0,
@@ -681,7 +681,7 @@ export const accountTaxHelpers = {
             currency_id: currency,
             sign: load("sign", 1.0),
             special_mode: kwargs.special_mode || null,
-            document_tax_mode: kwargs.document_tax_mode || null,
+            document_tax_mode: load("document_tax_mode", null),
             special_type: kwargs.special_type || null,
             rate: load("rate", 1.0),
             filter_tax_function: kwargs.filter_tax_function || null,

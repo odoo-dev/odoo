@@ -277,7 +277,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
                 Command.create({
                     "applied_on": "1_product",
                     "product_tmpl_id": product.product_tmpl_id.id,
-                    "min_quantity": 0,
+                    "min_quantity": 6,
                     "compute_price": "fixed",
                     "fixed_price": 10,
                 }),

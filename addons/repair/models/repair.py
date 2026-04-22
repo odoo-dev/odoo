@@ -690,7 +690,7 @@ class RepairOrder(models.Model):
             add_moves = repair.move_ids.filtered(lambda m: m.repair_line_type == 'add' and m.sale_line_id)
             if repair.under_warranty:
                 add_moves.sale_line_id.price_unit = 0.0
-                add_moves.sale_line_id.price_unit_last_computed_vals = {}
+                add_moves.sale_line_id.price_unit_json = {}
             else:
                 add_moves.sale_line_id._compute_price_unit()
 

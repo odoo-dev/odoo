@@ -14,19 +14,15 @@ class TestPurchaseOrderTaxMode(TestDocumentTaxModeCommon):
         cls.tax_10_override_exclude.write({'type_tax_use': 'purchase'})
         cls.tax_10_default.write({'type_tax_use': 'purchase'})
         cls.tax_20_default.write({'type_tax_use': 'purchase'})
-        cls.test_product_a.update({
-            'standard_price': 1000,
-            'supplier_taxes_id': cls.tax_10_default,
-        })
+
+        cls.test_product_a.supplier_taxes_id = cls.tax_10_default
         cls.purchase_order_one_line_with_product = cls.env['purchase.order'].create([{
             'partner_id': cls.partner_a.id,
             'order_line': [
                 Command.create({'product_id': cls.test_product_a.id}),
             ],
         }])
-        cls.test_product_b.update({
-            'standard_price': 1000,
-        })
+
         cls.purchase_order_one_line_with_product_tax_incl_company = cls.env['purchase.order'].create([{
             'company_id': cls.company_tax_included.id,
             'partner_id': cls.partner_a.id,
@@ -63,6 +59,10 @@ class TestPurchaseOrderTaxMode(TestDocumentTaxModeCommon):
         purchase_order = self.purchase_order_one_line_with_product
         self._test_tax_mode_change_uom_change_manual_price_unit_with_product(purchase_order, 'purchase_order')
 
-    def test_purchase_order_tax_mode_change_add_tax_with_product(self):
+    def test_purchase_order_tax_mode_change_add_tax_manual_price_unit_with_product(self):
         purchase_order = self.purchase_order_one_line_with_product
-        self._test_tax_mode_change_add_tax_with_product(purchase_order, 'purchase_order')
+        self._test_tax_mode_change_add_tax_manual_price_unit_with_product(purchase_order, 'purchase_order')
+
+    def test_purchase_order_tax_mode_change_with_fpos_manual_price_unit_with_product(self):
+        purchase_order = self.purchase_order_one_line_with_product
+        self._test_tax_mode_change_with_fpos_manual_price_unit_with_product(purchase_order, 'purchase_order')

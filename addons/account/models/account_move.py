@@ -636,9 +636,7 @@ class AccountMove(models.Model):
         precompute=True,
         store=True,
         readonly=False,
-        required=True,
     )
-    disable_tax_mode_selection = fields.Boolean(compute='_compute_disable_tax_mode_selection')
 
     # === Reverse feature fields === #
     reversed_entry_id = fields.Many2one(
@@ -2510,16 +2508,12 @@ class AccountMove(models.Model):
     @api.depends('company_id')
     def _compute_document_tax_mode(self):
         for move in self:
-            company = move.company_id or self.env.company
-            move.document_tax_mode = company.account_price_include
-
-    @api.depends('state')
-    def _compute_disable_tax_mode_selection(self):
-        for move in self:
-            if move.state != 'draft' or any(line.sale_line_ids if 'sale_line_ids' in line._fields else False for line in move.invoice_line_ids):
-                move.disable_tax_mode_selection = True
-            else:
-                move.disable_tax_mode_selection = False
+            if not move.document_tax_mode:
+                if (move.is_sale_document() or move.is_purchase_document()):
+                    company = move.company_id or self.env.company
+                    move.document_tax_mode = company.account_price_include
+                else:
+                    move.document_tax_mode = None
 
     # -------------------------------------------------------------------------
     # ALERTS
@@ -2837,13 +2831,9 @@ class AccountMove(models.Model):
     @api.onchange('document_tax_mode')
     def _onchange_document_tax_mode(self):
         for move in self:
+            '''Managed here due to limitations of the account.move.line model in handling related fields'''
             for line in move.invoice_line_ids:
                 line.document_tax_mode = move.document_tax_mode
-                if not line.product_id:
-                    continue
-                product_taxes = line.product_id.taxes_id if not move.fiscal_position_id else move.fiscal_position_id.map_tax(line.product_id.taxes_id) 
-                if line.tax_ids.ids != product_taxes.ids:
-                    line.tax_ids = line.product_id.taxes_id
 
     # -------------------------------------------------------------------------
     # CONSTRAINT METHODS
@@ -2952,6 +2942,13 @@ class AccountMove(models.Model):
                 and move.invoice_currency_rate <= 0
             ):
                 raise ValidationError(_("The currency rate must be strictly positive."))
+
+    @api.constrains('document_tax_mode')
+    def _check_document_tax_mode(self):
+        """Ensure that when a move is a sale or purchase document the field is set."""
+        for move in self:
+            if (move.is_sale_document() or move.is_purchase_document()) and not move.document_tax_mode:
+                raise ValidationError(_("The document tax mode must be set."))
 
     # -------------------------------------------------------------------------
     # CATALOG
@@ -5004,6 +5001,12 @@ class AccountMove(models.Model):
 
         return res
 
+    def get_default_create_values(self):
+        '''The default for the tax mode for all imported invoices should be tax excluded'''
+        values = super().get_default_create_values()
+        values['document_tax_mode'] = 'tax_excluded'
+        return values
+
     @contextmanager
     def _get_edi_creation(self):
         """Get an environment to import documents from other sources.
@@ -6248,12 +6251,14 @@ class AccountMove(models.Model):
                 lines_to_recompute |= line
                 continue
             new_taxes = line._get_computed_taxes()
-            if line.tax_ids.filtered('price_include') != new_taxes.filtered('price_include'):
-                line.price_unit = line.product_id._get_tax_included_unit_price_from_price(
+            if [tax for tax in line.tax_ids if tax._is_price_included(line.document_tax_mode)] != [tax for tax in new_taxes if tax._is_price_included(line.document_tax_mode)]:
+                line.price_unit_json['fiscal_position'] = line.move_id.fiscal_position_id.id
+                line.price_unit = line.price_unit_json['price_unit'] = line.product_id._get_tax_included_unit_price_from_price(
                     line.price_unit,
                     line.tax_ids,
                     fiscal_position=line.move_id.fiscal_position_id,
                     product_taxes_after_fp=new_taxes,
+                    document_tax_mode=line.document_tax_mode,
                 )
         lines_to_recompute._compute_price_unit()
         self.invoice_line_ids._compute_tax_ids()
