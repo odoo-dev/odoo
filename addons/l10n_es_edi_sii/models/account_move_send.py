@@ -14,7 +14,6 @@ class AccountMoveSend(models.AbstractModel):
         return move.l10n_es_edi_is_required and move.l10n_es_edi_sii_state == 'sent'
 
     def _get_all_extra_edis(self) -> dict:
-        # EXTENDS 'account'
         res = super()._get_all_extra_edis()
         res.update({
             'es_edi_sii': {
@@ -28,6 +27,12 @@ class AccountMoveSend(models.AbstractModel):
                 'help': self.env._("Resend the e-invoice data to SII as a modification"),
             }
         })
+        return res
+
+    def _get_default_extra_edis(self, move):
+        res = super()._get_default_extra_edis(move)
+        res.discard('es_edi_sii')
+        res.discard('es_edi_sii_resend')
         return res
 
     # -------------------------------------------------------------------------

@@ -2,10 +2,9 @@
 from collections import defaultdict, Counter
 import math
 
-from odoo import api, fields, models
+from odoo import api, fields, models, tools
 from odoo.exceptions import LockError, UserError
 from odoo.tools.float_utils import float_round
-from markupsafe import Markup
 
 
 class AccountMove(models.Model):
@@ -147,6 +146,20 @@ class AccountMove(models.Model):
     # BUSINESS LOGIC
     # -------------------------------------------------------------------------
 
+    def action_l10n_es_sii_send_in_batch(self):
+        """ Groups selected invoices and sends them to SII via batched payloads. """
+        moves_to_process = self.filtered(lambda m: m.l10n_es_edi_is_required and m.state == 'posted')
+
+        batches = moves_to_process.grouped(lambda m: (m.company_id, m.is_sale_document(), bool(m.l10n_es_edi_csv)))
+
+        for batch_moves in batches.values():
+            for i in range(0, len(batch_moves), 10000):
+                chunk = batch_moves[i:i+10000]
+                self.env['l10n_es_edi_sii.document']._send_batch_to_sii(chunk)
+
+                if not tools.config['test_enable']:
+                    self.env.cr.commit()
+
     def _send_l10n_es_sii_document(self, cancel=False):
         """ Creates doc, calls webservice and updates states. """
         self.ensure_one()
@@ -154,37 +167,9 @@ class AccountMove(models.Model):
         # Avoid the move to be sent if it is being modified by a parallel transaction (for example reset to draft)
         # It will also avoid the move to be sent by different parallel transactions
         self._l10n_es_sii_lock_move()
-
         target_state = 'to_cancel' if cancel else 'to_send'
 
-        document = self.l10n_es_edi_sii_document_ids.filtered(lambda d: d.state == target_state)[:1]
-        if not document:
-            document = self.env['l10n_es_edi_sii.document'].sudo().create({
-                'move_id': self.id,
-                'state': target_state,
-            })
-
-        errors = self._l10n_es_sii_check_move_configuration()
-        if errors:
-            document.sudo().write({
-                'response_message': Markup("%s<br/>%s") % (
-                    self.env._("Invalid invoice configuration:"),
-                    Markup("<br/>").join(errors)
-                )
-            })
-            return False
-
-        communication_type = self.l10n_es_edi_csv and not cancel and 'A1' or 'A0'
-        info_list = self._l10n_es_edi_get_invoices_info()
-
-        # Trigger the document model to handle the actual sending
-        result = document._post_to_web_service(info_list, communication_type)
-
-        # Retry logic for 1117
-        if result and result.get('error_1117') and not self.env.context.get('error_1117'):
-            document.sudo().unlink()
-            return self.with_context(error_1117=True)._send_l10n_es_sii_document(cancel=cancel)
-
+        self.env['l10n_es_edi_sii.document']._send_batch_to_sii(self, target_state=target_state)
         return True
 
     def _l10n_es_sii_check_move_configuration(self):
@@ -227,9 +212,6 @@ class AccountMove(models.Model):
                 errors.append(
                     self.env._("Line %s should only have one main tax type.", line.display_name)
                 )
-
-        all_taxes = lines.tax_ids.flatten_taxes_hierarchy()
-        is_foreign = self.commercial_partner_id._l10n_es_is_foreign()
 
         all_taxes = lines.tax_ids.flatten_taxes_hierarchy()
         is_foreign = self.commercial_partner_id._l10n_es_is_foreign()
