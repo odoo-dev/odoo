@@ -5,8 +5,6 @@ from contextlib import contextmanager
 from datetime import datetime
 from unittest.mock import patch
 
-from odoo import Command
-from odoo.addons.google_calendar.models.calendar_calendar import CalendarCalendar
 from odoo.addons.google_calendar.utils.google_calendar_service import GoogleCalendarService
 from odoo.addons.google_account.models.google_service import GoogleService
 from odoo.addons.google_calendar.models.res_users import ResUsers
