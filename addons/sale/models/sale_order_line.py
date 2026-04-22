@@ -223,13 +223,12 @@ class SaleOrderLine(models.Model):
         required=True,
         precompute=True,
     )
-    price_unit_last_computed_vals = fields.Json(
-        help="Technical field storing last computed values for price_unit computation",
+    # Technical field storing last computed values for price_unit computation.
+    price_unit_json = fields.Json(
         compute='_compute_price_unit',
-        readonly=False,
         store=True,
         precompute=True,
-        default={},
+        readonly=False,
     )
 
     discount = fields.Float(
@@ -629,7 +628,7 @@ class SaleOrderLine(models.Model):
         for line in self:
             line.allowed_uom_ids = line.product_id._get_available_uoms()
 
-    @api.depends("product_id", "company_id")
+    @api.depends("product_id", "company_id", "document_tax_mode")
     def _compute_tax_ids(self):
         lines_by_company = defaultdict(lambda: self.env["sale.order.line"])
         cached_taxes = {}
@@ -663,7 +662,6 @@ class SaleOrderLine(models.Model):
                     and result != line.tax_ids
                 ):
                     line.env.add_to_compute(self._fields["price_unit"], line)
-
                 # If company_id is set, always filter taxes by the company
                 line.tax_ids = result
 
@@ -685,53 +683,44 @@ class SaleOrderLine(models.Model):
 
     @api.depends("product_id", "product_uom_id", "product_uom_qty", "document_tax_mode")
     def _compute_price_unit(self):
-        def should_not_be_recomputed(line):
-            # No recomputation needed when price_unit has been manually changed, unless the uom or product changes
-            return line.price_unit and (
-                line.price_unit != (line.price_unit_last_computed_vals or {}).get('price_unit')
-            ) and (
-                line.product_uom_id.id == (line.price_unit_last_computed_vals or {}).get('product_uom_id')
-            ) and (
-                line.product_id.id == (line.price_unit_last_computed_vals or {}).get('product_id')
-            )
-
-        force_recompute = self.env.context.get("force_price_recomputation")
         for line in self:
             # Don't compute the price for deleted lines or lines for which the
             # price unit doesn't come from the product.
-            if not line.order_id or line.is_downpayment or line._is_global_discount():
+            if not line.order_id or line.is_downpayment or line._is_global_discount() or line._is_delivery():
                 continue
 
             # check if the price has been manually set or there is already invoiced amount.
             # if so, the price shouldn't change as it might have been manually edited.
             if (
-                (not force_recompute and should_not_be_recomputed(line))
-                or line.qty_invoiced > 0
+                line.qty_invoiced > 0
                 or (line.product_id.reinvoice_policy == "cost" and line.is_expense)
             ):
                 continue
             line = line.with_context(sale_write_from_compute=True)
             if not line.product_uom_id or not line.product_id:
                 line.price_unit = 0.0
-                line.price_unit_last_computed_vals['price_unit'] = 0.0
             else:
-                price = line._get_display_price()
-                product_taxes = line.product_id.taxes_id._filter_taxes_by_company(line.company_id)
-                product_tax_mode = line.company_id.account_price_include
-                price_from_product = line.product_id._get_tax_included_unit_price_from_price(
-                    price, product_taxes=product_taxes, fiscal_position=line.order_id.fiscal_position_id,
-                )
-                if product_tax_mode == line.document_tax_mode:
-                    line.price_unit = price_from_product
-                else:
-                    line.price_unit = line.product_id._get_opposite_tax_mode_price(line, price_from_product)
+                # When price is set to None _get_line_price_unit will fall back on the price on the line
+                price = None if line.price_unit else line._get_display_price()
 
-                line.price_unit_last_computed_vals = {
-                    'price_unit': line.price_unit,
-                    'product_id': line.product_id.id,
-                    'product_uom_id': line.product_uom_id.id,
-                    'document_tax_mode': line.document_tax_mode,
-                }
+                product_change = line.price_unit_json and line.price_unit_json['product_id'] != line.product_id.id
+                quantity_price_change = line.price_unit_json and line.product_id and line.price_unit_json['pricelist_price'] != line._get_pricelist_price()
+                fpos_change = line.price_unit_json and line.product_id and line.price_unit_json['fpos_id'] != line.order_id.fiscal_position_id.id
+
+                if product_change or quantity_price_change or fpos_change:
+                    price = line._get_display_price()
+                    line.price_unit_json = None
+
+                line.price_unit = line.product_id._get_line_price_unit(line, 'sale', price)
+
+            line.price_unit_json = {
+                'price_unit': line.price_unit,
+                'uom_id': line.product_uom_id.id,
+                'product_id': line.product_id.id,
+                'document_tax_mode': line.document_tax_mode,
+                'fpos_id': line.order_id.fiscal_position_id.id,
+                'pricelist_price': line._get_pricelist_price() if line.product_id else None,
+            }
 
     @api.depends("is_storable", "product_uom_qty", "qty_delivered", "state", "product_uom_id")
     def _compute_display_qty_widget(self):

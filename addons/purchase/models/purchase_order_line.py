@@ -16,20 +16,22 @@ class PurchaseOrderLine(models.Model):
     _order = 'order_id, sequence, id'
 
     name = fields.Text(
-        string='Description', required=True, compute='_compute_price_unit_and_date_planned_and_name', store=True, readonly=False)
+        string='Description', required=True, compute='_compute_price_unit_and_date_planned_and_name', store=True, readonly=False, precompute=True)
     translated_product_name = fields.Text(compute='_compute_translated_product_name')
     sequence = fields.Integer(string='Sequence', default=10)
     product_qty = fields.Float(string='Quantity', digits='Product Unit', required=True)
     product_uom_qty = fields.Float(string='Total Quantity', compute='_compute_product_uom_qty', store=True)
     date_planned = fields.Datetime(
         string='Expected Arrival', index=True,
-        compute="_compute_price_unit_and_date_planned_and_name", readonly=False, store=True,
+        compute="_compute_price_unit_and_date_planned_and_name", readonly=False, store=True, precompute=True,
         help="Delivery date expected from vendor. This date respectively defaults to vendor pricelist lead time then today's date.")
     discount = fields.Float(
         string="Discount (%)",
         compute='_compute_price_unit_and_date_planned_and_name',
         digits='Discount',
-        store=True, readonly=False)
+        store=True, readonly=False,
+        precompute=True,
+    )
     tax_ids = fields.Many2many('account.tax', string='Taxes', context={'active_test': False, 'hide_original_tax_ids': True})
     document_tax_mode = fields.Selection(related='order_id.document_tax_mode')
     allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
@@ -38,7 +40,7 @@ class PurchaseOrderLine(models.Model):
     product_type = fields.Selection(related='product_id.type', readonly=True)
     price_unit = fields.Float(
         string='Unit Price', required=True, min_display_digits='Product Price', aggregator='avg',
-        compute="_compute_price_unit_and_date_planned_and_name", readonly=False, store=True)
+        compute="_compute_price_unit_and_date_planned_and_name", readonly=False, store=True, precompute=True)
     price_unit_product_uom = fields.Float(
         string='Unit Price Product UoM', min_display_digits='Product Price', compute="_compute_price_unit_product_uom",
         help="The Price of one unit of the product's Unit of Measure", aggregator='avg', store=True)
@@ -51,7 +53,7 @@ class PurchaseOrderLine(models.Model):
 
     order_id = fields.Many2one('purchase.order', string='Order Reference', index=True, required=True, ondelete='cascade')
 
-    company_id = fields.Many2one('res.company', related='order_id.company_id', string='Company', store=True, readonly=True, index=True)
+    company_id = fields.Many2one('res.company', related='order_id.company_id', string='Company', store=True, readonly=True, index=True, precompute=True)
     state = fields.Selection(related='order_id.state')
 
     invoice_lines = fields.One2many('account.move.line', 'purchase_line_id', string="Bill Lines", readonly=True, copy=False)
@@ -112,12 +114,12 @@ class PurchaseOrderLine(models.Model):
         string="Parent Section Line",
         compute='_compute_parent_id',
     )
-    price_unit_last_computed_vals = fields.Json(
-        help="Technical field storing last computed values for price_unit computation",
+    # Technical field storing last computed values for price_unit computation.
+    price_unit_json = fields.Json(
         compute='_compute_price_unit_and_date_planned_and_name',
-        readonly=False,
         store=True,
-        default={},
+        precompute=True,
+        readonly=False,
     )
 
     @api.depends('product_qty', 'price_unit', 'tax_ids', 'discount')
@@ -162,7 +164,20 @@ class PurchaseOrderLine(models.Model):
             fpos = line.order_id.fiscal_position_id or line.order_id.fiscal_position_id._get_fiscal_position(line.order_id.partner_id)
             # filter taxes by company
             taxes = line.product_id.supplier_taxes_id._filter_taxes_by_company(line.company_id)
-            line.tax_ids = fpos.map_tax(taxes)
+            new_taxes = fpos.map_tax(taxes)
+            if (
+                line.env.context.get("recompute_unit_price_on_tax_change", False)
+                and new_taxes != line.tax_ids
+            ):
+                if [tax for tax in line.tax_ids if tax._is_price_included(line.document_tax_mode)] != [tax for tax in new_taxes if tax._is_price_included(line.document_tax_mode)]:
+                    line.price_unit = line.price_unit_json['price_unit'] = line.product_id._get_tax_included_unit_price_from_price(
+                        line.price_unit,
+                        line.tax_ids,
+                        fiscal_position=line.order_id.fiscal_position_id,
+                        product_taxes_after_fp=new_taxes,
+                        document_tax_mode=line.document_tax_mode,
+                    )
+            line.tax_ids = new_taxes
 
     @api.depends('discount', 'price_unit')
     def _compute_price_unit_discounted(self):
@@ -400,7 +415,8 @@ class PurchaseOrderLine(models.Model):
             return
 
         # Reset date, price and quantity since _onchange_quantity will provide default values
-        self.price_unit = self.product_qty = self.price_unit_last_computed_vals['price_unit'] = 0.0
+        self.price_unit = self.product_qty = 0.0
+        self.price_unit_json = {}
 
         self._product_id_change()
 
@@ -428,7 +444,7 @@ class PurchaseOrderLine(models.Model):
             ).uom_id
             line.allowed_uom_ids = line.product_id._get_available_uoms() | seller_uom
 
-    @api.depends('product_qty', 'uom_id', 'company_id', 'order_id.partner_id', 'document_tax_mode')
+    @api.depends('product_qty', 'uom_id', 'company_id', 'order_id.partner_id', 'document_tax_mode', 'product_id')
     def _compute_price_unit_and_date_planned_and_name(self):
         for line in self:
             if not line.product_id or line.invoice_lines or not line.company_id or self.env.context.get('skip_uom_conversion'):
@@ -465,52 +481,36 @@ class PurchaseOrderLine(models.Model):
             # If not seller, use the standard price. It needs a proper currency conversion.
             if not line.selected_seller_id:
                 line.discount = 0
-                po_line_uom = line.uom_id or line.product_id.uom_id
-                price_unit = line.env['account.tax']._fix_tax_included_price_company(
-                    line.product_id.uom_id._compute_price(line.product_id.standard_price, po_line_uom),
-                    line.product_id.supplier_taxes_id,
-                    line.tax_ids,
-                    line.company_id,
-                    line.document_tax_mode,
-                )
-                price_unit = line.product_id.cost_currency_id._convert(
-                    price_unit,
-                    line.currency_id,
-                    line.company_id,
-                    line.date_order or fields.Date.context_today(line),
-                    False
-                )
-                price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
-
+                currency = line.product_id.cost_currency_id
+                price_unit = line.product_id.standard_price
+                seller_price_change = line.price_unit_json and line.price_unit_json['seller_price']
             elif line.selected_seller_id:
-                price_unit = line.env['account.tax']._fix_tax_included_price_company(line.selected_seller_id.price, line.product_id.supplier_taxes_id, line.tax_ids, line.company_id, line.document_tax_mode) if line.selected_seller_id else 0.0
-                price_unit = line.selected_seller_id.currency_id._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
-                price_unit = line.selected_seller_id.uom_id._compute_price(price_unit, line.uom_id)
+                price_unit = line.selected_seller_id.price
+                currency = line.selected_seller_id.currency_id
                 line.discount = line.selected_seller_id.discount or 0.0
+                # In order to make sure that when the selected seller or their set price changes the price is adapted
+                seller_price_change = line.price_unit_json['seller_price'] != line.selected_seller_id.price if line.price_unit_json else False
 
-            # No recomputation needed when price_unit has been manually changed, unless the uom or product changes
-            if line.price_unit and (
-                line.price_unit != (line.price_unit_last_computed_vals or {}).get('price_unit')
-            ) and (
-                line.uom_id.id == (line.price_unit_last_computed_vals or {}).get('uom_id')
-            ) and (
-                line.product_id.id == (line.price_unit_last_computed_vals or {}).get('product_id')
-            ):
-                continue
+            # Cases in which we need to get values from the product: at the creation of the line or when the product is changed
+            if not line.price_unit_json or (line.price_unit_json and line.price_unit_json['product_id'] != line.product_id.id):
+                line.price_unit = 0.0
+                line.price_unit_json = {}
+                line._compute_tax_id()
+                line._suggest_quantity()
 
-            price_from_product_opposite_tax_mode = line.product_id._get_opposite_tax_mode_price(line, price_unit)
-            product_tax_mode = line.company_id.account_price_include
-            if product_tax_mode == line.document_tax_mode:
-                line.price_unit = price_unit
-            else:
-                line.price_unit = price_from_product_opposite_tax_mode
+            # When price_unit is set to None _get_line_price_unit will fall back on the price on the line
+            price_unit = None if line.price_unit and not seller_price_change else price_unit
+            price_unit = line.product_id._get_line_price_unit(line, 'purchase', price_unit)
+            price_unit = currency._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
+            line.price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
 
-            line.price_unit_last_computed_vals = {
-                    'price_unit': line.price_unit,
-                    'product_id': line.product_id.id,
-                    'uom_id': line.uom_id.id,
-                    'document_tax_mode': line.document_tax_mode,
-                }
+            line.price_unit_json = {
+                'price_unit': line.price_unit,
+                'uom_id': line.uom_id.id,
+                'product_id': line.product_id.id,
+                'document_tax_mode': line.document_tax_mode,
+                'seller_price': line.selected_seller_id.price if line.selected_seller_id else None,
+            }
 
     @api.depends('product_id')
     def _compute_translated_product_name(self):

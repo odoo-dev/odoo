@@ -6,7 +6,7 @@
     'category': 'Supply Chain/Purchase',
     'sequence': 60,
     'summary': 'Purchase Orders, Receipts, Vendor Bills for Stock',
-    'depends': ['stock_account', 'purchase'],
+    'depends': ['stock_account', 'purchase', 'sale'],
     'data': [
         'data/purchase_stock_data.xml',
         'data/mail_templates.xml',

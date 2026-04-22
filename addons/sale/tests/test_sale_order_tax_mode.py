@@ -49,6 +49,10 @@ class TestSaleOrderTaxMode(TestDocumentTaxModeCommon):
         sale_order = self.sale_order_one_line_with_product
         self._test_tax_mode_change_uom_change_manual_price_unit_with_product(sale_order, 'sale_order')
 
-    def test_sale_order_tax_mode_change_add_tax_with_product(self):
+    def test_sale_order_tax_mode_change_add_tax_manual_price_unit_with_product(self):
         sale_order = self.sale_order_one_line_with_product
-        self._test_tax_mode_change_add_tax_with_product(sale_order, 'sale_order')
+        self._test_tax_mode_change_add_tax_manual_price_unit_with_product(sale_order, 'sale_order')
+
+    def test_sale_order_tax_mode_change_with_fpos_manual_price_unit_with_product(self):
+        sale_order = self.sale_order_one_line_with_product
+        self._test_tax_mode_change_with_fpos_manual_price_unit_with_product(sale_order, 'sale_order')

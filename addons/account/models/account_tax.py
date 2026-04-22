@@ -944,14 +944,14 @@ class AccountTax(models.Model):
         self.ensure_one()
         if self.has_negative_factor:
             return False
-        if self.price_include_override:
-            return self.price_include_override == 'tax_included'
-        if document_tax_mode:
-            return document_tax_mode == 'tax_included'
         if special_mode == 'total_included':
             return True
         if special_mode == 'total_excluded':
             return False
+        if self.price_include_override:
+            return self.price_include_override == 'tax_included'
+        if document_tax_mode:
+            return document_tax_mode == 'tax_included'
         return self.price_include
 
     def _batch_for_taxes_computation(self, special_mode=False, filter_tax_function=None, document_tax_mode=None):
@@ -1358,6 +1358,8 @@ class AccountTax(models.Model):
                     'batch': batching_results['batch_per_tax'][tax_data['tax'].id],
                     'tax_amount': tax_data['tax_amount'],
                     'price_include': tax_data['price_include'],
+                    'original_price_include': tax_data['original_price_include'],
+                    'raw_base': raw_base,
                     'base_amount': tax_data['base'],
                     'is_reverse_charge': tax_data.get('is_reverse_charge', False),
                 }
@@ -1416,7 +1418,6 @@ class AccountTax(models.Model):
             product=product,
             product_uom=product_uom,
             special_mode='total_excluded',
-            document_tax_mode=document_tax_mode,
         )
         delta = sum(x['tax_amount'] for x in taxes_computation['taxes_data'] if x['tax']._is_price_included(document_tax_mode))
         return price_unit + delta
