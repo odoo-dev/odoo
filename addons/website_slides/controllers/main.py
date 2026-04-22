@@ -484,6 +484,7 @@ class WebsiteSlides(WebsiteProfile):
                 page=page,
                 step=page_size,
                 scope=3) if page else False,
+            'structured_data': channels.get_json_ld(),
         })
 
         return render_values
@@ -648,6 +649,7 @@ class WebsiteSlides(WebsiteProfile):
         render_values.update({
             'channel': channel,
             'main_object': channel,
+            'structured_data': channel.get_json_ld(is_detail_page=True),
             'active_tab': kw.get('active_tab', 'home'),
             # search
             'search_category': category,

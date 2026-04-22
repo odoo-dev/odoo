@@ -9,6 +9,8 @@ from dateutil.relativedelta import relativedelta
 from markupsafe import Markup
 
 from odoo import api, fields, models, tools, _
+from odoo.addons.website.helpers.jsonld_builder import JsonLd
+from odoo.addons.website.tools import text_from_html
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import is_html_empty
@@ -30,6 +32,7 @@ class SlideChannel(models.Model):
         'website.seo.metadata',
         'website.published.multi.mixin',
         'website.searchable.mixin',
+        'website.structured_data.mixin',
     ]
     _order = 'sequence, id'
     _partner_unfollow_enabled = True
@@ -1117,3 +1120,65 @@ class SlideChannel(models.Model):
     @api.model
     def _allow_publish_rating_stats(self):
         return True
+
+    def _build_slide_schema(self):
+        self.ensure_one()
+        website = self.env['website'].get_current_website()
+        base_url = website.get_base_url()
+        description = self.description_short and text_from_html(self.description_short, True)
+        if not description and self.description:
+            description = text_from_html(self.description, True)
+
+        schema_data = {
+            "name": self.name,
+        }
+        if self.website_url:
+            schema_data["url"] = f"{base_url}{self.website_url}"
+        if description:
+            schema_data["description"] = description
+        course_data = JsonLd("Course", schema_data)
+        nested_schema_data = {
+            "provider": JsonLd("Organization", {"@id": f"{base_url}/#organization"}),
+        }
+        course_data.add_nested(nested_schema_data)
+        if image_url := self.env['website'].image_url(self, 'image_1024'):
+            full_image_url = image_url if image_url.startswith('http') else f"{base_url}{image_url}"
+            nested_schema_data = {"image": JsonLd("ImageObject", {"url": full_image_url})}
+            course_data.add_nested(nested_schema_data)
+        return course_data
+
+    def _get_breadcrumb_items(self, is_detail_page=False):
+        website = self.env['website'].get_current_website()
+        base_url = website.get_base_url()
+        items = [
+            (website.name, base_url),
+            (self.env._("Courses"), f"{base_url}/slides"),
+        ]
+        if is_detail_page:
+            self.ensure_one()
+            items.append((self.name, f"{base_url}{self.website_url}"))
+        return items
+
+    def _build_collection_page_schema(self):
+        website = self.env['website'].get_current_website()
+        base_url = website.get_base_url()
+        schema_data = {
+            "name": self.env._("Courses"),
+            "url": f"{base_url}/slides",
+        }
+        nested_schema_data = {
+            "has_part": [channel._build_slide_schema() for channel in self],
+            "is_part_of": JsonLd("Organization", {"@id": f"{base_url}/#organization"}),
+        }
+        return JsonLd("CollectionPage", schema_data).add_nested(nested_schema_data)
+
+    def _build_structured_data(self, is_detail_page=False):
+        schemas = super()._build_structured_data()
+        items = self._get_breadcrumb_items(is_detail_page)
+        breadcrumb_jsonld = self._build_breadcrumb_schema(items)
+        if is_detail_page:
+            self.ensure_one()
+            schemas.extend([self._build_slide_schema(), breadcrumb_jsonld])
+            return schemas
+        schemas.extend([self._build_collection_page_schema(), breadcrumb_jsonld])
+        return schemas

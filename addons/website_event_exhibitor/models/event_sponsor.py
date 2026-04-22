@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, UTC
 from zoneinfo import ZoneInfo
 
 from odoo import api, fields, models
+from odoo.addons.website.helpers.jsonld_builder import JsonLd
 from odoo.tools import is_html_empty
 from odoo.tools.date_utils import float_to_time
 from odoo.tools.translate import html_translate
@@ -20,6 +21,7 @@ class EventSponsor(models.Model):
         'mail.activity.mixin',
         'website.published.mixin',
         'website.searchable.mixin',
+        'website.structured_data.mixin',
     ]
 
     def _default_sponsor_type_id(self):
@@ -172,6 +174,101 @@ class EventSponsor(models.Model):
     @api.depends('event_id.website_id.domain')
     def _compute_website_absolute_url(self):
         super()._compute_website_absolute_url()
+
+    def _build_base_event_exhibitor_schema(self):
+        """Build the base structured data for the exhibitor.
+        :return: JsonLd object with the base schema.org data for the exhibitor
+        :rtype: JsonLd
+        """
+        self.ensure_one()
+        base_url = self.get_base_url()
+        schema_type = "LocalBusiness" if self.partner_id.is_company else "Person"
+        schema_data = {
+            "@id": f"{base_url}{self.website_url}/#{schema_type}",
+            "name": self.name,
+            "description": self.subtitle,
+            "mainEntityOfPage": f"{base_url}{self.website_url}",
+        }
+        if self.url:
+            schema_data["url"] = self.url
+        schema = JsonLd(schema_type, schema_data)
+        if image_url := self.website_image_url:
+            schema.add_nested({"image": JsonLd("ImageObject", {"url": f"{base_url}{image_url}"})})
+        return schema
+
+    def _build_event_exhibitor_schema(self):
+        """Build structured data for the exhibitor, to be used in both
+        collection and detail page, with some variations.
+        :return: JsonLd object with schema.org data for the exhibitor
+        :rtype: JsonLd
+        """
+        self.ensure_one()
+        exhibitor_jsonld = self._build_base_event_exhibitor_schema()
+        base_url = self.get_base_url()
+        schema_data = {
+            "telephone": self.phone,
+            "email": self.email,
+            "sameAs": f"{base_url}{self.website_url}",
+        }
+        return exhibitor_jsonld.set(schema_data)
+
+    def _get_exhibitor_breadcrumb_items(self, is_detail_page=False):
+        """Get breadcrumb items for the exhibitor."""
+        event = self[0].event_id
+        website = self.env['website'].get_current_website()
+        base_url = website.get_base_url()
+        event_slug = self.env['ir.http']._slug(event)
+        items = [
+            (website.name, base_url),
+            (self.env._("Events"), f"{base_url}/event"),
+            (event.name, f"{base_url}{event.website_url}"),
+            (self.env._("Exhibitors"), f"{base_url}/event/{event_slug}/exhibitors"),
+        ]
+        if is_detail_page:
+            items.append((self.name, f"{base_url}{self.website_url}"))
+        return items
+
+    def _build_collection_page_schema(self):
+        """ Build structured data for the exhibitors collection page.
+        :return: JsonLd object with CollectionPage schema
+        :rtype: JsonLd
+        """
+        event = self[0].event_id
+        website = self.env['website'].get_current_website()
+        base_url = website.get_base_url()
+        event_slug = self.env['ir.http']._slug(event)
+        collection_url = f"{base_url}/event/{event_slug}/exhibitors"
+        schema_data = {
+            "name": self.env._("Exhibitors"),
+            "url": collection_url,
+        }
+        list_items = [
+            JsonLd("ListItem", {"position": index + 1}).add_nested({
+                "item": sponsor._build_base_event_exhibitor_schema(),
+            }) for index, sponsor in enumerate(self)
+        ]
+        main_entity_jsonld = JsonLd("ItemList").add_nested({
+            "itemListElement": list_items,
+        })
+        return JsonLd("CollectionPage", schema_data).add_nested({"mainEntity": main_entity_jsonld})
+
+    def _build_structured_data(self, is_detail_page=False):
+        """ Build structured data for the exhibitor, either for the collection page or the detail page.
+        :param is_detail_page: Whether the structured data is for the detail page or the collection page
+        :type is_detail_page: bool
+        :return: List of JsonLd objects
+        :rtype: List[JsonLd]
+        """
+        schemas = super()._build_structured_data()
+        if not self:
+            return schemas
+        breadcrumb_items = self._get_exhibitor_breadcrumb_items(is_detail_page)
+        breadcrumb_jsonld = self._build_breadcrumb_schema(breadcrumb_items)
+        if is_detail_page:
+            schemas.extend([self._build_event_exhibitor_schema(), breadcrumb_jsonld])
+            return schemas
+        schemas.extend([self._build_collection_page_schema(), breadcrumb_jsonld])
+        return schemas
 
     @api.model
     def _search_get_detail(self, website, order, options):
