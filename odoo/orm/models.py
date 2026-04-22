@@ -6598,7 +6598,14 @@ class BaseModel(metaclass=MetaModel):
                 real_records = self - new_records
                 records = model.browse()
                 if real_records:
-                    records = model.search([(field.name, 'in', real_records.ids)], order='id')
+                    # if a field is not searchable, ignore the error during generation of the SQL value
+                    try:
+                        records = model.search([(field.name, 'in', real_records.ids)], order='id')
+                    except ValueError:
+                        if field._description_searchable:
+                            raise
+                        _logger.warning("Failed to determine triggers for non-searchable field %s", field)
+                        records = model.search([], order='id')
                 if new_records:
                     field_cache = field._get_cache(model.env)
                     cache_records = model.browse(field_cache)
