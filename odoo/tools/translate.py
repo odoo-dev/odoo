@@ -97,12 +97,10 @@ def _get_frame(stack_level: int = 0) -> types.FrameType | None:
 
     stack_level += 1  # +1 to skip this function
     frame = origin_frame = inspect.currentframe()
-    # breakpoint()
+
     while frame:
-        # print(frame.f_globals.get('__name__', 'noname'))
         if frame.f_code is not wrapper_func.__code__:
-            frame_name = frame.f_globals.get('__name__', '')
-            if frame_name is not __name__ and frame_name.startswith('odoo.'):
+            if stack_level == 0:
                 return frame
             stack_level -= 1
         frame = frame.f_back
