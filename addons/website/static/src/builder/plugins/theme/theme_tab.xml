@@ -197,6 +197,14 @@
     </BuilderContext>
 </t>
 
+<t t-name="website.ThemeCardOption">
+    <BuilderContext preview="false">
+        <BuilderRow label.translate="Border Radius" action="'customizeWebsiteVariable'">
+            <BuilderNumberInput actionParam="'card-border-radius'" default="null" unit="'px'" saveUnit="'rem'"/>
+        </BuilderRow>
+    </BuilderContext>
+</t>
+
 <t t-name="website.ThemeRoundnessOption">
     <BuilderRow label.translate="Roundness">
         <BuilderRange action="'customizeBorderRadiusVariable'" min="0" max="24" step="1" unit="'px'" saveUnit="'rem'" withNumberInput="true"/>
