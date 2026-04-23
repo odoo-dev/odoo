@@ -13,7 +13,13 @@ import { uuid } from "@web/core/utils/strings";
 import { ComboConfiguratorDialog } from "./combo_configurator_dialog/combo_configurator_dialog";
 import { ProductCombo } from "./models/product_combo";
 import { ProductConfiguratorDialog } from "./product_configurator_dialog/product_configurator_dialog";
-import { getLinkedSaleOrderLines, serializeComboItem, getSelectedCustomPtav } from "./sale_utils";
+import {
+    getLinkedSaleOrderLines,
+    serializeComboItem,
+    getSelectedCustomPtav,
+    serializeProduct,
+} from "./sale_utils";
+import { getFieldsSpec } from "@web/model/relational_model/utils";
 
 async function applyProduct(record, product) {
     // handle custom values & no variants
@@ -265,17 +271,50 @@ export class SaleOrderLineProductField extends ProductLabelSectionAndNoteField {
                     ? [applyProduct(this.props.record, mainProduct)]
                     : [];
 
-                for (const [i, product] of optionalProducts.entries()) {
-                    const index =
-                        saleOrderRecord.data.order_line.records.indexOf(this.props.record)
-                        + selectedComboItems.length
-                        + i;
-                    const line = await saleOrderRecord.data.order_line.addNewRecordAtIndex(index, {
-                        mode: 'readonly',
-                    });
-                    const productData = this._prepareNewLineData(line, product);
-                    proms.push(applyProduct(line, productData));
-                }
+                const serializedOptionalProducts = optionalProducts.map(serializeProduct);
+
+                const orderChanges = {
+                    order_id: {
+                        ...(await saleOrderRecord.getChanges()),
+                        ...(!saleOrderRecord.isNew && { id: this.props.record.resId }),
+                    },
+                };
+
+                const fieldsSpec = getFieldsSpec(
+                    saleOrderRecord.data.order_line.activeFields,
+                    saleOrderRecord.data.order_line.fields,
+                    saleOrderRecord.data.order_line.evalContext,
+                    { withInvisible: true },
+                );
+
+                const optionalProductsValues = await this.orm.call(
+                    "sale.order.line",
+                    "prepare_optional_products_values",
+                    [serializedOptionalProducts, orderChanges, fieldsSpec],
+                );
+
+                const currentSequence = saleOrderRecord.data.sequence;
+
+                const createCommands = optionalProductsValues.map((values, index) =>
+                    x2ManyCommands.create(undefined, {
+                        ...values,
+                        sequence: currentSequence + index + 1,
+                    }),
+                );
+
+                proms.push(saleOrderRecord.data.order_line.applyCommands(createCommands));
+
+                // for (const [i, product] of optionalProducts.entries()) {
+                //     const index =
+                //         saleOrderRecord.data.order_line.records.indexOf(this.props.record)
+                //         + selectedComboItems.length
+                //         + i;
+                //     const line = await saleOrderRecord.data.order_line.addNewRecordAtIndex(index, {
+                //         mode: 'readonly',
+                //     });
+                //     const productData = this._prepareNewLineData(this.props.record, product);
+                //     proms.push(applyProduct(line, productData));
+                // }
 
                 await Promise.all(proms);
                 this._onProductUpdate();

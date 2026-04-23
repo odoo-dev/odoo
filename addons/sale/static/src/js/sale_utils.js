@@ -63,3 +63,18 @@ export function getSelectedCustomPtav(ptal) {
     const selectedPtavIds = new Set(ptal.selected_attribute_value_ids);
     return ptal.attribute_values.find(ptav => ptav.is_custom && selectedPtavIds.has(ptav.id));
 }
+
+/**
+ * Serialize a product into a format understandable by the server.
+ *
+ * @param {Product} product The product to serialize.
+ * @return {Object} The serialized product.
+ */
+export function serializeProduct(product) {
+    return {
+        product_id: product.id,
+        product_uom_qty: product.quantity,
+        ...(product.uom && { product_uom_id: product.uom.id }),
+        // same way we can serialize ptals and pcavs for server
+    };
+}
