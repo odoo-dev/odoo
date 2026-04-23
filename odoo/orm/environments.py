@@ -295,6 +295,14 @@ class Environment(Mapping[str, "BaseModel"]):
         #   - when loading an binary image on a template
         return self['res.company'].browse(user_company_ids)
 
+    @property
+    def website(self) -> BaseModel:
+        """Return the current website (as an instance).
+
+        :returns: current user - sudoed
+        :rtype: :class:`website record<~odoo.addons.base.models.website.Website>`"""
+        return self(su=True)['website'].browse(self.context.get('website_id') or False)
+
     @functools.cached_property
     def tz(self) -> tzinfo:
         """Return the current timezone info, defaults to UTC."""
