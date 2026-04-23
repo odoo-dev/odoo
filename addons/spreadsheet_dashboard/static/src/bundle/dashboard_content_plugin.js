@@ -47,3 +47,4 @@ export class DashboardContentPlugin extends OdooCorePlugin {
 
 registries.corePluginRegistry.add("DashboardContentPlugin", DashboardContentPlugin);
 coreTypes.add("SET_DASHBOARD_CONTENT");
+registries.inverseCommandRegistry.add("SET_DASHBOARD_CONTENT", (cmd) => [cmd]);

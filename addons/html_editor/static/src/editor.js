@@ -308,6 +308,9 @@ export class Editor {
      * @returns {Array<any>}
      */
     trigger(resourceId, ...args) {
+        // if (resourceId === "on_element_dropped_over_handlers") {
+        // console.log("trigger", resourceId, { ...args });
+        // }
         if (!resourceId.endsWith("_handlers")) {
             warnOfNamingConvention("trigger", resourceId, {
                 prefix: "on",
