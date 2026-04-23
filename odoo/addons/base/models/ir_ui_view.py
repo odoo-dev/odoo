@@ -85,7 +85,11 @@ def _hasclass(context, *cls):
 
 
 def get_view_arch_from_file(filepath, xmlid):
-    module, view_id = xmlid.split('.')
+    xmlid = str(xmlid or '').strip().strip("'\"")
+    module, _, view_id = xmlid.partition('.')
+    if not module or not view_id:
+        _logger.warning("Could not parse xmlid '%s' while reading file '%s'", xmlid, filepath)
+        return None
 
     xpath = f"//*[@id='{xmlid}' or @id='{view_id}']"
     # when view is created from model with inheritS of ir_ui_view, the
