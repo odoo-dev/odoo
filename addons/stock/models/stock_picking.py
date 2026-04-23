@@ -1198,7 +1198,7 @@ class StockPicking(models.Model):
 
     def action_confirm(self):
         self._check_company()
-        if not self.env.context.get('skip_zero_demand_check') and not modules.module.current_test:
+        if not self.env.context.get('skip_zero_demand_check'):
             # Check for zero demand moves before confirming
             zero_demand_moves = self.move_ids.filtered(lambda m: m.product_uom_qty <= 0)
             if zero_demand_moves:
