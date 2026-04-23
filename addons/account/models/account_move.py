@@ -2029,7 +2029,7 @@ class AccountMove(models.Model):
             and self.move_type in ('out_invoice', 'out_receipt', 'in_invoice', 'in_receipt') \
             and self.invoice_payment_term_id.early_discount \
             and (not reference_date or reference_date <= self.invoice_payment_term_id._get_last_discount_date(self.invoice_date)) \
-            and self.payment_state == 'not_paid'
+            and self.payment_state in ('not_paid', 'partial')
 
     # -------------------------------------------------------------------------
     # BUSINESS MODELS SYNCHRONIZATION
