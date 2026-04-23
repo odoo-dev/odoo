@@ -201,7 +201,7 @@ class SalePdfFormField(models.Model):
             # guarantees that bin_size is always set to False
             records = records.with_context(bin_size=False)
 
-        for document in records:
+        for document in records.exists():
             if document.datas:
                 form_fields = utils._get_form_fields_from_pdf(document.datas)
                 for field in form_fields:
