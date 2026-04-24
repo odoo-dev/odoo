@@ -830,6 +830,8 @@ class PurchaseOrder(models.Model):
                 if line.display_type in ('line_section', 'line_subsection'):
                     pending_section = line
                     continue
+                if not line.qty_received:
+                    continue
                 if pending_section:
                     line_vals = pending_section._prepare_account_move_line()
                     line_vals.update({'sequence': sequence})
