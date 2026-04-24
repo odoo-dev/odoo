@@ -1,5 +1,5 @@
 import { Component } from "@odoo/owl";
-import { formatCurrency } from '@web/core/currency';
+import { formatCurrency } from "@web/core/currency";
 import { SectionDropdown } from "../section_dropdown/section_dropdown";
 
 export class SectionRow extends Component {

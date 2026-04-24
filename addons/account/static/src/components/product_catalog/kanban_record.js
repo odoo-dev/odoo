@@ -58,16 +58,16 @@ patch(ProductCatalogKanbanRecord.prototype, {
             const subtotalDelta =
                 newSubtotal - this._pendingSectionUpdate.oldSubtotal;
 
-            this.notifySectionUpdate({
-                lineCountChange: this._pendingSectionUpdate.lineCountChange,
+            this.notifySectionUpdate(
+                this._pendingSectionUpdate.lineCountChange,
                 subtotalDelta,
-            });
+            );
 
             this._pendingSectionUpdate = null;
         }
     },
 
-    notifySectionUpdate({lineCountChange, subtotalDelta}) {
+    notifySectionUpdate(lineCountChange, subtotalDelta) {
         this.env.searchModel.trigger('section-line-count-change', {
             sectionId: this.env.selectedSectionId,
             lineCountChange: lineCountChange,

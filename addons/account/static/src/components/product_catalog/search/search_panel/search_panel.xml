@@ -19,6 +19,7 @@
                     <i
                         class="fa fa-fw fa-plus-square cursor-pointer"
                         t-on-click="() => this.enableSectionInput('bottom')"
+                        title="Add a section"
                     />
                     <div class="d-flex align-items-center ms-auto">
                         <span class="me-2">Filter</span>
@@ -35,7 +36,7 @@
                         </div>
                     </div>
                 </header>
-                <ul class="list-group d-block" t-ref="mainTree">
+                <ul class="list-group d-block" t-ref="sectionTreeRef">
                     <t t-foreach="this.state.sections" t-as="section" t-key="section.id">
                         <SectionRow section="section" state="this.state"/>
                     </t>

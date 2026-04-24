@@ -1,8 +1,6 @@
-.o_section_input {
-    border: none;
-    outline: none;
-    background: transparent;
-    border-bottom: 2px solid var(--primary);
+.o_section_icon {
+    min-width: 20px;
+    width: 20px;
 }
 
 .o_selected_section {
@@ -15,10 +13,6 @@
 
 .o_section_row:not(.o_selected_section):hover {
     background-color: var(--list-group-action-hover-bg);
-}
-
-.o_product_catalog_search_panel {
-    width: 300px;
 }
 
 .o_section_row .o_section_hover_control{
