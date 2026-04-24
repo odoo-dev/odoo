@@ -176,7 +176,7 @@ def check_company_domain_parent_of(self, companies):
 
     companies = to_record_ids(companies)
     if not companies:
-        return [('company_id', '=', False)]
+        return []
 
     return [('company_id', 'in', [
         int(parent)
