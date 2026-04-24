@@ -15,8 +15,9 @@ class ResPartnerBank(models.Model):
     _inherit = ['res.partner.bank', 'mail.thread', 'mail.activity.mixin']
 
     journal_id = fields.One2many(
-        'account.journal', 'bank_account_id', domain=[('type', '=', 'bank')], string='Account Journal', readonly=True,
-        check_company=True,
+        'account.journal', 'bank_account_id',
+        domain="[('type', '=', 'bank'), '|', ('company_id', 'parent_of', company_id), ('company_id', '=?', company_id)]",
+        string='Account Journal', readonly=True,
         help="The accounting journal corresponding to this bank account.")
     has_iban_warning = fields.Boolean(
         compute='_compute_display_account_warning',
