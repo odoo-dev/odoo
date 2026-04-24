@@ -23,6 +23,7 @@ class TestRegistry(TransactionCase):
             for field in weak_fields:
                 registry.is_modifying_relations(field)
                 registry.get_field_trigger_tree(field)
+            registry.check_null_constraints(self.cr)
             self.env.user.read()  # run some code
         registry._setup_models__(self.cr)
         registry.clear_all_caches()  # stuff may remain in the cache

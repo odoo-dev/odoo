@@ -540,6 +540,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         # Reinstall registry hooks. Because of the condition, this only happens
         # on a fully loaded registry, and not on a registry being loaded.
         if self.ready:
+            self.check_null_constraints(env.cr)
             for model in env.values():
                 model._register_hook()
             env.flush_all()
@@ -622,6 +623,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
             # may be missing from these maps
             self.field_depends.pop(f, None)
             self.field_depends_context.pop(f, None)
+            self.not_null_fields.discard(f)
 
         # discard fields from all cached properties
         reset_cached_properties(self)
