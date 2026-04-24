@@ -13,9 +13,12 @@ import { BusBus } from "./mock_server/mock_models/bus_bus";
 import { IrWebSocket } from "./mock_server/mock_models/ir_websocket";
 import { getWebSocketWorker, onWebsocketEvent } from "./mock_websocket";
 
-import { busService } from "@bus/services/bus_service";
+import { BusService, busService } from "@bus/services/bus_service";
 import { WEBSOCKET_CLOSE_CODES } from "@bus/workers/websocket_worker";
+
 import { on, runAllTimers, waitUntil } from "@odoo/hoot-dom";
+import { toRaw } from "@odoo/owl";
+
 import { registry } from "@web/core/registry";
 import { deepEqual } from "@web/core/utils/objects";
 import { patch } from "@web/core/utils/patch";
@@ -42,21 +45,30 @@ import { patch } from "@web/core/utils/patch";
 // Setup
 //-----------------------------------------------------------------------------
 
-patch(busService, {
-    _onMessage(env, id, type, payload) {
-        // Generic handlers (namely: debug info)
-        if (type in busMessageHandlers) {
-            busMessageHandlers[type](env, id, payload);
-        } else {
-            registerDebugInfo("bus message", { id, type, payload });
+patch(BusService.prototype, {
+    _onWorkerMessage(messageEv) {
+        super._onWorkerMessage(messageEv);
+        const { type, data } = messageEv.data;
+        if (type !== "BUS:NOTIFICATION") {
+            return;
         }
+        const env = toRaw(this._env);
+        const notifications = data.map(({ id, message }) => ({ id, ...message }));
+        for (const { id, type, payload } of notifications) {
+            // Generic handlers (namely: debug info)
+            if (type in busMessageHandlers) {
+                busMessageHandlers[type](env, id, payload);
+            } else {
+                registerDebugInfo("bus message", { id, type, payload });
+            }
 
-        // Notifications
-        if (!busNotifications.has(env)) {
-            busNotifications.set(env, []);
-            after(() => busNotifications.clear());
+            // Notifications
+            if (!busNotifications.has(env)) {
+                busNotifications.set(env, []);
+                after(() => busNotifications.clear());
+            }
+            busNotifications.get(env).push({ id, type, payload });
         }
-        busNotifications.get(env).push({ id, type, payload });
     },
 });
 
