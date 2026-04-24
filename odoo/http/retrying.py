@@ -67,7 +67,7 @@ def retrying[T](func: Callable[[], T], env: Environment) -> T:
                     # We need to reset the `session` attribute of `request`
                     # which may have been modified during the transaction.
                     # The `dbname` remains the same (consistent with the session).
-                    _set_session_and_dbname(request)
+                    _set_session_and_dbname(request, apply_db=False)
                     # Rewind files in case of failure
                     for filename, file in request.httprequest.files.items():
                         if hasattr(file, "seekable") and file.seekable():

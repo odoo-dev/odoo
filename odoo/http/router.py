@@ -488,7 +488,7 @@ def _get_profiler_context_manager(request: Request) -> typing.ContextManager:
     return nullcontext()
 
 
-def _set_session_and_dbname(request: Request) -> None:
+def _set_session_and_dbname(request: Request, apply_db=True) -> None:
     sid = request.httprequest.cookies.get('session_id', '')
     session = session_store().get(sid, keep_sid=True)
 
@@ -523,7 +523,8 @@ def _set_session_and_dbname(request: Request) -> None:
 
     session.is_dirty = False
     request.session = session
-    request.db = dbname
+    if apply_db:
+        request.db = dbname
 
 
 def _set_request_dispatcher(request: Request, rule: werkzeug.routing.Rule):
