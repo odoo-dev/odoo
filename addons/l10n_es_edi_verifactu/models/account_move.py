@@ -282,7 +282,7 @@ class AccountMove(models.Model):
         move_type = self.move_type
         if move_type == 'out_invoice' and substituted_move:
             verifactu_move_type = 'correction_substitution'
-        elif move_type == 'out_invoice':
+        elif move_type == 'out_invoice' or move_type == 'in_invoice':
             verifactu_move_type = 'invoice'
         elif move_type == 'out_refund' and reversed_move.l10n_es_edi_verifactu_substitution_move_ids:
             verifactu_move_type = 'reversal_for_substitution'
@@ -339,3 +339,11 @@ class AccountMove(models.Model):
         document_map = self._l10n_es_edi_verifactu_create_documents(cancellation=cancellation)
         self.env['l10n_es_edi_verifactu.document'].trigger_next_batch()
         return document_map
+
+    @api.depends('move_type', 'state', 'journal_id.is_self_billing')
+    def _compute_display_send_button(self):
+        super()._compute_display_send_button()
+        for move in self:
+            if move.move_type in ['in_invoice',
+                                  'in_refund'] and move.state == 'posted' and move.journal_id.is_self_billing:
+                move.display_send_button = True
