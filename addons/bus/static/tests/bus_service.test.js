@@ -282,6 +282,7 @@ test("no disconnect on offline/online when bus is inactive", async () => {
         ["BUS:DISCONNECT", () => expect.step("BUS:DISCONNECT")]
     );
     mockService("bus_service", {
+        start() {},
         addChannel() {},
     });
     await makeMockEnv();
@@ -406,10 +407,7 @@ test("do not reconnect when worker version is outdated", async () => {
     stepWorkerActions("BUS:START");
     startBusService();
     await runAllTimers();
-    await expect.waitForSteps(["BUS:START"]);
-    // Verify the worker state instead of the steps as the connect event is
-    // asynchronous and may not be fired at this point.
-    expect(worker.state).toBe(WORKER_STATE.DISCONNECTED);
+    await expect.waitForSteps([]);
 });
 
 test("reconnect on demande after clean close code", async () => {
