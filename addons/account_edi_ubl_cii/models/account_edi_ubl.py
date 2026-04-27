@@ -1,6 +1,5 @@
 import io
 import logging
-from functools import wraps
 
 from markupsafe import Markup
 

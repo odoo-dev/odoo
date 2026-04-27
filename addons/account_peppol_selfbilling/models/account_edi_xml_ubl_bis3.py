@@ -21,8 +21,6 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         if vals['process_type'] != 'selfbilling':
             return
 
-        # TODO: when should it be `pint_credit_note`? (CreditNoteTypeCode = 261)
-        # vals['pint_key'] = 'pint_invoice'
         customer = vals['customer']
         supplier = vals['supplier']
         vals['supplier'] = customer

@@ -125,6 +125,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
             'hr_category_name': tax.l10n_hr_tax_category_id.name,
             'invoice_legal_notes_str': invoice_legal_notes_str,
         })
+        import logging; from rich.pretty import install; install(); logging.getLogger('odoo.tests.common').setLevel(logging.ERROR); breakpoint()
         return grouping_key
 
     @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])

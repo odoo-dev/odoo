@@ -1,13 +1,8 @@
 from odoo import models
 from odoo.addons.account_edi_ubl_cii.models.account_edi_common import documents
+from odoo.addons.l10n_ro_edi.models.account_edi_xml_ubl_ciusro import get_formatted_sector_ro, _has_vat
 
 DEFAULT_VAT = '0000000000000'
-
-def _has_vat(vat):
-    return bool(vat and len(vat) > 1)
-
-def get_formatted_sector_ro(city: str):
-    return city.upper().replace(' ', '')
 
 
 class AccountEdiUBLPintRO(models.AbstractModel):

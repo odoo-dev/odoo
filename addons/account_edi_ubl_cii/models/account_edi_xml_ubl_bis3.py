@@ -1,5 +1,3 @@
-import inspect
-
 from odoo import _, api, models
 from odoo.tools.misc import str2bool
 from odoo.addons.account.tools import dict_to_xml
@@ -570,8 +568,10 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
 
     def _pint_add_values(self, vals, invoice):
         # EXTEND account.edi.ubl_pint
+        # doc_types: ['eu_invoice', 'invoice'] OR ['eu_credit_note', 'credit_note']
         super()._pint_add_values(vals, invoice)
         if (invoice := vals.get('invoice')) and invoice.move_type in ('out_invoice', 'out_refund'):
+            vals['_pint_values']['doc_types'] = [f"eu_{vals['document_type']}", vals['document_type']]
             vals['_pint_values']['model'] = self.env['account.edi.ubl_pint_eu']
 
     # -------------------------------------------------------------------------

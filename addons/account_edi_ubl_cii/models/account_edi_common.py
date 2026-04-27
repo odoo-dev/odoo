@@ -144,9 +144,11 @@ SUPPORTED_FILE_TYPES = {
     'text/csv': '.csv',
 }
 
+
 # -------------------------------------------------------------------------
 # UBL/PINT LAYER SYSTEM DECORATORS
 # -------------------------------------------------------------------------
+
 
 def dispatch_by_document(func):
     @wraps(func)
@@ -175,6 +177,7 @@ def dispatch_by_document(func):
 
         return func(self, vals, *args, **kwargs)
     return wrapper
+
 
 def documents(doc_types: list[str]):
     """

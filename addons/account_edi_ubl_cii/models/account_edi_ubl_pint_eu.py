@@ -8,19 +8,19 @@ class AccountEdiUBLPintEU(models.AbstractModel):
     _inherit = 'account.edi.ubl_pint'
     _description = "UBL PINT-EU Layer"
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['eu_invoice', 'eu_credit_note'])
     def _ubl_add_customization_id_node__eu_base(self, vals):
         # EXTENDS account.edi.ubl
         super()._ubl_add_customization_id_node(vals)
         vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0'
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['eu_invoice', 'eu_credit_note'])
     def _ubl_add_profile_id_node__eu_base(self, vals):
         # EXTENDS account.edi.ubl
         super()._ubl_add_profile_id_node(vals)
         vals['document_node']['cbc:ProfileID']['_text'] = 'urn:fdc:peppol.eu:2017:poacc:billing:01:1.0'
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['eu_invoice', 'eu_credit_note'])
     def _ubl_invoice_update_delivery_node_from_delivery_address__eu_base(self, vals, node):
         # EXTENDS account.edi.ubl_pint
         # Intracom delivery inside European area.
@@ -36,7 +36,7 @@ class AccountEdiUBLPintEU(models.AbstractModel):
             node['cbc:ActualDeliveryDate']['_text'] = invoice.invoice_date
         return node
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['eu_invoice', 'eu_credit_note'])
     def _ubl_invoice_update_add_payment_means_nodes__eu_base(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_invoice_update_add_payment_means_nodes(vals)
@@ -49,7 +49,7 @@ class AccountEdiUBLPintEU(models.AbstractModel):
                 node['cbc:PaymentMeansCode']['_text'] = 1
                 node['cbc:PaymentMeansCode']['name'] = 'unknown'
 
-    @documents(['credit_note'])
+    @documents(['eu_credit_note'])
     def _ubl_add_billing_reference_nodes__eu_credit_note(self, vals):
         # EXTENDS account.edi.xml.ubl_pint
         super()._ubl_add_billing_reference_nodes(vals)
