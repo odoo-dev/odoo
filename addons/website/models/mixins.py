@@ -627,6 +627,34 @@ class WebsiteSearchableMixin(models.AbstractModel):
     _name = 'website.searchable.mixin'
     _description = 'Website Searchable Mixin'
 
+    name_similarity = fields.Float(compute='_compute_name_similarity', compute_sql='_compute_sql_name_similarity', compute_sudo=True)
+
+    @api.depends_context('similarity_term')
+    def _compute_name_similarity(self):
+        query = self._search([('id', 'in', self.ids)])
+        similarity_results = {
+            id: similarity_val
+            for id, similarity_val in self.env.execute_query(
+                query.select(
+                    query.table.id,
+                    query.table.name_similarity,
+                )
+            )
+        }
+        for record in self:
+            record.name_similarity = similarity_results.get(record.id, 0.0)
+
+    @api.depends_context('similarity_term')
+    def _compute_sql_name_similarity(self, table):
+        similarity_term = self.env.context.get('similarity_term')
+        if not similarity_term:
+            return SQL("0.0")
+        return SQL(
+            "strict_word_similarity(%(col_name)s, %(search_term)s)",
+            col_name=table.name,
+            search_term=similarity_term,
+        )
+
     def _split_for_highlight(self, text, term):
         """
         Splits a string into parts around search term matches.
