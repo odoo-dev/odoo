@@ -1269,12 +1269,16 @@ class Website(models.CachedModel):
             page_temp = page_url + (inc and "-%s" % inc or "")
         return page_temp
 
-    def _is_tracking_enabled(self, main_object):
+    def _is_tracking_enabled(self, main_object, response_template=None):
         if self.env['ir.http'].is_a_bot():
             return False
         if main_object._name in ['ir.ui.view', 'website.page']:
             return main_object.track
-        return True
+        if isinstance(response_template, int):
+            return self.env['ir.ui.view'].browse(response_template).track
+        if isinstance(response_template, str):
+            return self.env.ref(response_template).track
+        return False
 
     def _get_plausible_script_url(self):
         return self.env['ir.config_parameter'].sudo().get_str(

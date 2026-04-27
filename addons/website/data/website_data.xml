@@ -564,14 +564,12 @@
             <field name="is_published">True</field>
             <field name="published_date" eval="time.strftime('%Y-%m-%d %H:%M:%S')"/>
             <field name="view_id" ref="contactus"/>
-            <field name="track">True</field>
             <field name="website_meta_description">This is the contact us page of the website</field>
         </record>
         <record id="privacy_policy_page" model="website.page">
             <field name="url">/privacy</field>
             <field name="view_id" ref="privacy_policy"/>
             <field name="is_published">True</field>
-            <field name="track">True</field>
             <field name="website_meta_description">This is the privacy policy page of the website</field>
         </record>
 
