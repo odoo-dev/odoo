@@ -39,4 +39,8 @@
     .o-html-grid {
         position: relative !important;
     }
+
+    .row {
+        --gutter-x: 16px;
+    }
 }
