@@ -327,7 +327,7 @@ export class SearchModel extends EventBus {
 
         this.searchPanelInfo = { ...searchPanelInfo, loaded: false, shouldReload: false };
 
-        await Promise.all(labels.map((cb) => cb(this.orm)));
+        await Promise.all(labels.map((cb) => cb(this.orm).catch(() => {})));
 
         // prepare search items (populate this.searchItems)
         for (const preGroup of preSearchItems || []) {
