@@ -36,28 +36,35 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         # To be overriden by custom format if required
         pass
 
-    def _export_invoice(self, invoice):
-        """ Generates an UBL 2.0 xml for a given invoice. """
-        # 1. Validate the structure of the taxes
-        self._validate_taxes(invoice.invoice_line_ids.tax_ids)
+    def _prepare_invoice_vals(self, invoice):
+        """ Build the enriched `vals` dict used as the source of truth for both
+        the XML export and the PDF rendering.
 
-        # 2. Instantiate the XML builder
+        The dict is the same one that `_get_invoice_node` produces internally;
+        exposing it lets the send pipeline hand the PDF side an invoice-total
+        shape computed from the reshaped `base_lines` (recycling contribution
+        reclassified as allowance/charge, emptying taxes turned into base lines,
+        cash rounding extracted) so the two renderings agree.
+        """
+        self._validate_taxes(invoice.invoice_line_ids.tax_ids)
         vals = {'invoice': invoice.with_context(lang=invoice.partner_id.lang)}
         document_node = self._get_invoice_node(vals)
-
-        # 3. Run constraints
         vals['document_node'] = document_node
         constraints = self._flatten_multilevel_constraints(self._export_invoice_constraints(invoice, vals))
-        errors = [constraint for constraint in constraints.values() if constraint]
+        errors = {constraint for constraint in constraints.values() if constraint}
+        return vals, errors
 
+    def _render_invoice_xml(self, vals):
+        """ Serialise the enriched `vals` (as returned by `_prepare_invoice_vals`) to XML bytes. """
         template = self._get_document_template(vals)
         nsmap = self._get_document_nsmap(vals)
+        xml_content = dict_to_xml(vals['document_node'], nsmap=nsmap, template=template)
+        return etree.tostring(xml_content, xml_declaration=True, encoding='UTF-8')
 
-        # 4. Render the XML
-        xml_content = dict_to_xml(document_node, nsmap=nsmap, template=template)
-
-        # 5. Format the XML
-        return etree.tostring(xml_content, xml_declaration=True, encoding='UTF-8'), set(errors)
+    def _export_invoice(self, invoice):
+        """ Generates an UBL 2.0 xml for a given invoice. """
+        vals, errors = self._prepare_invoice_vals(invoice)
+        return self._render_invoice_xml(vals), errors
 
     # -------------------------------------------------------------------------
     # EXPORT: Helpers

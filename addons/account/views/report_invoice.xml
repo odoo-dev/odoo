@@ -2,6 +2,7 @@
 <odoo>
     <data>
         <template id="report_invoice_document">
+            <t t-set="edi" t-value="edi_by_doc and edi_by_doc.get(o.id) or {}"/>
             <t t-set="layout_document_title">
                 <t t-if="not proforma">
                     <span t-if="o.move_type == 'out_invoice' and o.state == 'posted'">
@@ -360,7 +361,7 @@
 
                                             <!-- Tax totals summary (invoice currency) -->
                                             <t t-if="o.tax_totals" t-call="account.document_tax_totals"
-                                                tax_totals="o.tax_totals"
+                                                tax_totals="edi.get('tax_totals') or o.tax_totals"
                                                 currency="o.currency_id"/>
 
                                             <!--Payments-->
@@ -403,7 +404,7 @@
 
                                 <!-- Tax totals summary (company currency) -->
                                 <t t-if="o.tax_totals and o.tax_totals.get('display_in_company_currency')">
-                                    <t t-call="account.document_tax_totals_company_currency_template" tax_totals="o.tax_totals"/>
+                                    <t t-call="account.document_tax_totals_company_currency_template" tax_totals="edi.get('tax_totals') or o.tax_totals"/>
                                 </t>
                                 <t t-else="">
                                     <div class="oe_structure"/>

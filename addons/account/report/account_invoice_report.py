@@ -177,11 +177,19 @@ class ReportAccountReport_Invoice(models.AbstractModel):
                 if new_code_url:
                     qr_code_urls[invoice.id] = new_code_url
 
+        edi_by_doc = dict((data or {}).get('edi_prepared_vals') or {})
+        move_send = self.env['account.move.send']
+        for invoice in docs:
+            if invoice.id not in edi_by_doc:
+                if prepared := move_send._prepare_edi_vals(invoice):
+                    edi_by_doc[invoice.id] = prepared
+
         return {
             'doc_ids': docids,
             'doc_model': 'account.move',
             'docs': docs,
             'qr_code_urls': qr_code_urls,
+            'edi_by_doc': edi_by_doc,
         }
 
 

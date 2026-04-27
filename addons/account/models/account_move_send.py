@@ -392,6 +392,22 @@ class AccountMoveSend(models.AbstractModel):
         return True
 
     @api.model
+    def _prepare_edi_vals(self, invoice, invoice_data=None):
+        """ Return a dict of pre-rendered EDI values for this invoice, or None.
+
+        Source is free: UBL/CII builds the dict in memory from the XML builder's
+        reshaped `base_lines`; CFDI parses it back from the stamped XML
+        attachment. The same dict is threaded to the PDF renderer so both
+        renderings agree on totals and any other legally-authoritative fields.
+
+        Callable from the send pipeline (with `invoice_data` in hand) and
+        standalone from `report.account.report_invoice._get_report_values`
+        (no `invoice_data`, lazy rebuild for direct `/report/pdf/...` URLs and
+        Studio previews).
+        """
+        return None
+
+    @api.model
     def _hook_invoice_document_before_pdf_report_render(self, invoice, invoice_data):
         """ Hook allowing to add some extra data for the invoice passed as parameter before the rendering of the pdf
         report.
@@ -414,8 +430,14 @@ class AccountMoveSend(models.AbstractModel):
 
         for pdf_report, group_invoices_data in grouped_invoices_by_report.items():
             ids = [inv.id for inv in group_invoices_data]
+            edi_prepared_vals = {
+                inv.id: data['edi_prepared_vals']
+                for inv, data in group_invoices_data.items()
+                if data.get('edi_prepared_vals')
+            }
+            pdf_data = {'edi_prepared_vals': edi_prepared_vals} if edi_prepared_vals else None
 
-            content, report_type = self.env['ir.actions.report'].with_company(company_id)._pre_render_qweb_pdf(pdf_report.report_name, res_ids=ids)
+            content, report_type = self.env['ir.actions.report'].with_company(company_id)._pre_render_qweb_pdf(pdf_report.report_name, res_ids=ids, data=pdf_data)
             content_by_id = self.env['ir.actions.report']._get_splitted_report(pdf_report.report_name, content, report_type)
             if len(content_by_id) == 1 and False in content_by_id:
                 raise ValidationError(_("Cannot identify the invoices in the generated PDF: %s", ids))
@@ -717,6 +739,8 @@ class AccountMoveSend(models.AbstractModel):
                                     proforma PDF report instead.
         """
         for invoice, invoice_data in invoices_data.items():
+            if prepared_vals := self._prepare_edi_vals(invoice, invoice_data):
+                invoice_data['edi_prepared_vals'] = prepared_vals
             self._hook_invoice_document_before_pdf_report_render(invoice, invoice_data)
             invoice_data['blocking_error'] = invoice_data.get('error') \
                                              and not (allow_fallback_pdf and invoice_data.get('error_but_continue'))

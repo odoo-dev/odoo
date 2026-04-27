@@ -15,3 +15,4 @@ from . import test_ubl_import_bis3_invoice_be_retrieve_partner
 from . import test_ubl_import_bis3_invoice_be_retrieve_product
 from . import test_ubl_import_bis3_invoice_be_retrieve_tax
 from . import test_ubl_export_bis3_invoice_selfbilling_be
+from . import test_pdf_xml_parity

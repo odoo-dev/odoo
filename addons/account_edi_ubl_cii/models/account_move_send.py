@@ -120,17 +120,73 @@ class AccountMoveSend(models.AbstractModel):
     # BUSINESS ACTIONS
     # -------------------------------------------------------------------------
 
+    def _prepare_edi_vals(self, invoice, invoice_data=None):
+        # EXTENDS 'account'
+        prepared = super()._prepare_edi_vals(invoice, invoice_data)
+        edi_format = (invoice_data or {}).get('invoice_edi_format') or self._get_default_invoice_edi_format(invoice)
+        if not edi_format or not invoice._need_ubl_cii_xml(edi_format):
+            return prepared
+
+        builder = invoice.partner_id.commercial_partner_id._get_edi_builder(edi_format)
+        if builder is None or not hasattr(builder, '_prepare_invoice_vals'):
+            return prepared
+
+        sending_methods = (invoice_data or {}).get('sending_methods') or set()
+        ubl_vals, errors = (
+            builder
+            .with_context(from_peppol='peppol' in sending_methods)
+            ._prepare_invoice_vals(invoice)
+        )
+
+        prepared = dict(prepared or {})
+        prepared['_ubl_vals'] = ubl_vals
+        prepared['_ubl_builder'] = builder
+        prepared['_ubl_errors'] = errors
+
+        if not errors:
+            prepared['tax_totals'] = self._get_edi_tax_totals(invoice, ubl_vals)
+            if ubl_vals.get('cash_rounding_base_amount_currency'):
+                prepared['tax_totals']['cash_rounding_base_amount_currency'] = ubl_vals['cash_rounding_base_amount_currency']
+                prepared['tax_totals']['cash_rounding_base_amount'] = ubl_vals.get('cash_rounding_base_amount', 0.0)
+
+        return prepared
+
+    @api.model
+    def _get_edi_tax_totals(self, invoice, ubl_vals):
+        """ Build a dict matching `account.move.tax_totals` shape from the UBL
+        builder's reshaped `base_lines` so the invoice QWeb template renders the
+        same totals that are written to the XML.
+        """
+        tax_totals = self.env['account.tax']._get_tax_totals_summary(
+            base_lines=ubl_vals['base_lines'],
+            currency=invoice.currency_id,
+            company=invoice.company_id,
+        )
+        tax_totals['display_in_company_currency'] = (
+            invoice.company_id.display_invoice_tax_company_currency
+            and invoice.company_currency_id != invoice.currency_id
+            and tax_totals['has_tax_groups']
+            and invoice.is_sale_document(include_receipts=True)
+        )
+        return tax_totals
+
     def _hook_invoice_document_before_pdf_report_render(self, invoice, invoice_data):
         # EXTENDS 'account'
         super()._hook_invoice_document_before_pdf_report_render(invoice, invoice_data)
 
         if invoice._need_ubl_cii_xml(invoice_data['invoice_edi_format']):
-            builder = invoice.partner_id.commercial_partner_id._get_edi_builder(invoice_data['invoice_edi_format'])
-            xml_content, errors = (
-                builder
-                .with_context(from_peppol='peppol' in invoice_data['sending_methods'])
-                ._export_invoice(invoice)
-            )
+            prepared = invoice_data.get('edi_prepared_vals') or {}
+            builder = prepared.get('_ubl_builder') or invoice.partner_id.commercial_partner_id._get_edi_builder(invoice_data['invoice_edi_format'])
+
+            if '_ubl_vals' in prepared:
+                errors = prepared.get('_ubl_errors') or set()
+                xml_content = builder._render_invoice_xml(prepared['_ubl_vals']) if not errors else b''
+            else:
+                xml_content, errors = (
+                    builder
+                    .with_context(from_peppol='peppol' in invoice_data['sending_methods'])
+                    ._export_invoice(invoice)
+                )
             filename = builder._export_invoice_filename(invoice)
 
             # Failed.
