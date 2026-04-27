@@ -32,6 +32,10 @@
 
 // ADRM TODO: put this css somewhere better (for the iframe) & probably remove most of it
 .o-spreadsheet {
+    &.odoo-editor-editable {
+        height: 100%;
+        background: #fafafa;
+    }
     .o-html-grid {
         position: relative !important;
     }
