@@ -486,25 +486,32 @@ class AccountEdiUBLPint(models.AbstractModel):
         else:
             document_node['cac:Delivery'] = None
 
-    def _ubl_invoice_update_legal_monetary_total_prepaid_payable_amount_node(self, vals):
+    def _ubl_invoice_update_legal_monetary_total_prepaid_payable_amount_node(self, vals, in_foreign_currency=True):
         invoice = vals['invoice']
-        currency = vals['currency']
+        currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
         node = vals['legal_monetary_total_node']
-        tax_withholding_amount = vals['_ubl_values']['tax_withholding_amount']
+
+        if in_foreign_currency:
+            amount_total = invoice.amount_total
+            amount_residual = invoice.amount_residual
+        else:
+            amount_total = invoice.amount_total_signed * -invoice.direction_sign
+            amount_residual = invoice.amount_residual_signed * -invoice.direction_sign
+
         node['cbc:PayableAmount']['_text'] = FloatFmt(
-            invoice.amount_residual,
-            min_dp=currency.decimal_places,
+            amount_residual,
+            max_dp=currency.decimal_places,
         )
         node['cbc:PrepaidAmount']['_text'] = FloatFmt(
-            invoice.amount_total
-            - invoice.amount_residual
+            amount_total
+            - amount_residual
             # WithholdingTaxTotal is not allowed.
             # Instead, withholding tax amounts are reported as a PrepaidAmount.
             # Suppose an invoice of 1000 with a tax 21% +100 -100.
             # The super will compute a PrepaidAmount or 0.0 and a PayableAmount or 1000.
             # This extension is there to increase PrepaidAmount to 210 and PayableAmount to 1210.
-            + tax_withholding_amount,
-            min_dp=currency.decimal_places,
+            + vals['_ubl_values']['tax_withholding_amount'],
+            max_dp=currency.decimal_places,
         )
 
     def _ubl_invoice_update_legal_monetary_total_payable_rounding_amount_node(self, vals):
@@ -744,7 +751,7 @@ class AccountEdiUBLPint(models.AbstractModel):
         self._ubl_invoice_update_legal_monetary_total_payable_rounding_amount_node(vals)
 
     @documents(['invoice', 'credit_note'])
-    def _ubl_add_legal_monetary_total_prepaid_payable_amount_node__base(self, vals):
+    def _ubl_add_legal_monetary_total_prepaid_payable_amount_node__base(self, vals, in_foreign_currency=True):
         # DECORATES account.edi.ubl
-        super()._ubl_add_legal_monetary_total_prepaid_payable_amount_node(vals)
-        self._ubl_invoice_update_legal_monetary_total_prepaid_payable_amount_node(vals)
+        super()._ubl_add_legal_monetary_total_prepaid_payable_amount_node(vals, in_foreign_currency=in_foreign_currency)
+        self._ubl_invoice_update_legal_monetary_total_prepaid_payable_amount_node(vals, in_foreign_currency=in_foreign_currency)
