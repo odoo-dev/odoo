@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <template id="payment_worldline.method_form" inherit_id="payment.method_form">
+        <xpath expr="//t[@t-set='pms_to_display_sudo']" position="after">
+            <t t-if="provider_sudo.code == 'worldline'"
+               t-set="pms_to_display_sudo"
+               t-value="pms_to_display_sudo - pm_sudo._get_worldline_incompatible_card_brands(partner_id=partner_id, currency_id=currency and currency.id)"/>
+        </xpath>
+    </template>
+
+</odoo>

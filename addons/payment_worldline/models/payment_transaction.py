@@ -156,6 +156,16 @@ class PaymentTransaction(models.Model):
                         'groups': ['cards'],
                     },
                 }
+                if (incompatible_brands := self.payment_method_id._get_worldline_incompatible_card_brands(
+                        partner_id=self.partner_id.id,
+                        currency_id=self.currency_id.id
+                )):
+                    payload['hostedCheckoutSpecificInput']['paymentProductFilters']['exclude'] = {
+                        'products': [
+                            const.PAYMENT_METHODS_MAPPING.get(incompatible_brand.code, 0)
+                            for incompatible_brand in incompatible_brands
+                        ]
+                    }
 
         checkout_session_data = self._send_api_request('POST', 'hostedcheckouts', json=payload)
 
