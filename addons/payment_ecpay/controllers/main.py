@@ -15,7 +15,8 @@ _logger = get_payment_logger(__name__)
 
 
 class EcpayController(http.Controller):
-    # GET is used to redirect back to the merchant shop when using deferred payment methods (e.g., 7-Eleven).
+    # GET is used to redirect back to the merchant shop when using deferred payment methods (e.g.,
+    # 7-Eleven).
     @http.route(
         const.PAYMENT_RETURN_ROUTE,
         type="http",
@@ -53,7 +54,8 @@ class EcpayController(http.Controller):
                 tx_sudo._process("ecpay", data)
         else:
             _logger.info(
-                "Received payment simulation notification from ECPay, skipping processing of the data."
+                "Received payment simulation notification from ECPay, skipping processing of the"
+                " data."
             )
         return "1|OK"
 

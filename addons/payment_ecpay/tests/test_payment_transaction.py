@@ -34,8 +34,8 @@ class TestPaymentTransaction(EcpayCommon):
         self.assertEqual(tx.reference, reference)
 
     def test_apply_updates_sets_payment_values(self):
-        """Test that the transaction state is set to 'done' and Provider Reference and Payment Method
-        are updated according to the payment data on successful payment."""
+        """Test that the transaction state is set to 'done' and Provider Reference and Payment
+        Method are updated according to the payment data on successful payment."""
         tx = self._create_transaction("redirect")
         tx._apply_updates(self.payment_result_data)
         self.assertEqual(tx.state, "done")

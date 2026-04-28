@@ -43,7 +43,8 @@ PAYMENT_METHODS_MAPPING = {
     ],  # Unused but required to compute the ignored methods to send to ECPay
 }
 
-# Mapping of Odoo's payment method codes to the ones included in the notification data sent by ECPay after payment.
+# Mapping of Odoo's payment method codes to the ones included in the notification data sent by ECPay
+# after payment.
 PAYMENT_METHODS_RESPONSE_MAPPING = {
     "ok_mart": "CVS_OK",
     "hi_life": "CVS_HILIFE",
