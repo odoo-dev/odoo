@@ -2,6 +2,7 @@ import base64
 import io
 import inspect
 import logging
+import re
 from collections import OrderedDict
 from datetime import date, datetime
 from unittest.mock import patch
@@ -5444,3 +5445,36 @@ class TestWriteOverrideTranslatedFields(TransactionCase):
         if checked_field_names:
             _logger.warning("Some checked fields maybe not be used in the write anymore %s", checked_field_names)
         self.assertFalse(len(violations), "Override `write`(maybe also `create`) for translated fields \n" + '\n'.join(violations))
+
+
+class TestTrivialComputeFields(TransactionCase):
+
+    TRIVIAL_COMPUTE_RE = re.compile(
+        r"^    @api\.depends\(['\"]([\w.]+)['\"]\)\n"
+        r"    def _compute_(\w+)\(self\):\n"
+        r"        for (\w+) in self:\n"
+        r"            \3\.(\w+) = \3\.\1\n$"
+    )
+
+    def test_trivial_compute_fields_should_be_related(self):
+        warnings_to_raise = []
+        for model in self.registry.values():
+            for name, method in inspect.getmembers(model, inspect.isfunction):
+                if not name.startswith('_compute_'):
+                    continue
+                try:
+                    source = inspect.getsource(method)
+                except OSError:
+                    continue
+                if not (match := self.TRIVIAL_COMPUTE_RE.match(source)):
+                    continue
+
+                field_name = match[4]
+                field = model._fields.get(field_name)
+                if field and not field.store and not field.inverse:
+                    warnings_to_raise.append(
+                        f"{model._name}.{field_name} uses trivial compute method {name}"
+                    )
+
+        if warnings_to_raise:
+            _logger.warning("\n" + "\n".join(warnings_to_raise), stacklevel=1)
