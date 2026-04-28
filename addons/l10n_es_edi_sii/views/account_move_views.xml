@@ -13,6 +13,12 @@
                 <field name="ref" position="attributes">
                     <attribute name="readonly">l10n_es_edi_csv</attribute>
                 </field>
+                <xpath expr="//button[@name='action_export_xml']" position="after">
+                    <button name="action_download_aeat_xml"
+                            string="Descargar XML"
+                            type="object"
+                            class="oe_highlight"/>
+                </xpath>
             </field>
         </record>
     </data>

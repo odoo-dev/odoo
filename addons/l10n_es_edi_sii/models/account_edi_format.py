@@ -1,12 +1,15 @@
 import json
 import math
 from collections import defaultdict
-
+import base64
 import requests
 
 from odoo import _, fields, models
 from odoo.tools import html_escape, zeep
 from odoo.tools.float_utils import float_round
+from zeep.plugins import HistoryPlugin
+from lxml import etree
+from odoo.exceptions import UserError
 
 from odoo.addons.certificate.tools import CertificateAdapter
 
@@ -210,7 +213,7 @@ class AccountEdiFormat(models.Model):
             com_partner = invoice.commercial_partner_id
             is_simplified = invoice.l10n_es_is_simplified
             is_navarra = invoice.company_id.l10n_es_sii_tax_agency == 'navarra'
-            periodo_key = 'PeriodoLiquidacion' if is_navarra else 'PeriodoImpositivo'
+            periodo_key = 'PeriodoImpositivo'
 
             info = {
                 periodo_key: {
@@ -463,7 +466,10 @@ class AccountEdiFormat(models.Model):
         session.cert = company.l10n_es_sii_certificate_id
         session.mount('https://', CertificateAdapter(ciphers=EUSKADI_CIPHERS))
 
-        client = zeep.Client(connection_vals['url'], operation_timeout=60, timeout=60, session=session)
+        history = HistoryPlugin()
+
+
+        client = zeep.Client(connection_vals['url'], operation_timeout=60, timeout=60, session=session, plugins=[history])
 
         if connection_vals.get('custom_navarra'):
             # We Inject the namespaces directly in the header dictionary
@@ -504,6 +510,19 @@ class AccountEdiFormat(models.Model):
             error_msg = _("Networking error:\n%s", error)
         except Exception as error:
             error_msg = str(error)
+
+        if history.last_sent:
+            xml_data = etree.tostring(history.last_sent['envelope'], encoding='utf-8', xml_declaration=True)
+            
+            # NO uses 'results', usa 'invoices' que es la lista que ya tienes disponible
+            for inv in invoices:
+                edi_doc = inv.edi_document_ids.filtered(lambda d: d.edi_format_id.code == 'es_sii')
+                if edi_doc:
+                    edi_doc.write({
+                        'l10n_es_xml_sii_content': base64.b64encode(xml_data)
+                    })
+        
+            
 
         if error_msg:
             return {inv: {
@@ -592,6 +611,10 @@ class AccountEdiFormat(models.Model):
                     'error': _("[%(error_code)s] %(error_message)s", error_code=respl.CodigoErrorRegistro, error_message=respl.DescripcionErrorRegistro),
                     'blocking_level': 'error',
                 }
+    
+
+        
+
 
         return results
 
