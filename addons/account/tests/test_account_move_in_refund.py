@@ -368,12 +368,18 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
             {
                 **self.product_line_vals_1,
                 'price_unit': 960.0,
-                'price_subtotal': 800.0,
-                'price_total': 1176.0,
+                'price_subtotal': 960.0,
+                'price_total': 1411.2,
                 'tax_ids': (self.tax_purchase_a + self.tax_armageddon).ids,
+                'amount_currency': -960.0,
+                'credit': 960.0,
             },
             self.product_line_vals_2,
-            self.tax_line_vals_1,
+            {
+                **self.tax_line_vals_1,
+                'amount_currency': -168.0,
+                'credit': 168.0,
+            },
             self.tax_line_vals_2,
             {
                 'name': child_tax_1.name,
@@ -389,9 +395,9 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
                 'tax_ids': child_tax_2.ids,
                 'tax_line_id': child_tax_1.id,
                 'currency_id': self.company_data['currency'].id,
-                'amount_currency': -96.0,
+                'amount_currency': -115.2,
                 'debit': 0.0,
-                'credit': 96.0,
+                'credit': 115.2,
                 'date_maturity': False,
             },
             {
@@ -408,9 +414,9 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
                 'tax_ids': child_tax_2.ids,
                 'tax_line_id': child_tax_1.id,
                 'currency_id': self.company_data['currency'].id,
-                'amount_currency': -64.0,
+                'amount_currency': -76.8,
                 'debit': 0.0,
-                'credit': 64.0,
+                'credit': 76.8,
                 'date_maturity': False,
             },
             {
@@ -427,9 +433,9 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
                 'tax_ids': [],
                 'tax_line_id': child_tax_2.id,
                 'currency_id': self.company_data['currency'].id,
-                'amount_currency': -96.0,
+                'amount_currency': -115.2,
                 'debit': 0.0,
-                'credit': 96.0,
+                'credit': 115.2,
                 'date_maturity': False,
             },
             {
@@ -437,14 +443,14 @@ class TestAccountMoveInRefundOnchanges(AccountTestInvoicingCommon):
                 'price_unit': 0.0,
                 'price_subtotal': 0.0,
                 'price_total': 0.0,
-                'amount_currency': 1384.0,
-                'debit': 1384.0,
+                'amount_currency': 1619.2,
+                'debit': 1619.2,
             },
         ], {
             **self.move_vals,
-            'amount_untaxed': 960.0,
-            'amount_tax': 424.0,
-            'amount_total': 1384.0,
+            'amount_untaxed': 1120.0,
+            'amount_tax': 499.2,
+            'amount_total': 1619.2,
         })
 
     def test_in_refund_line_onchange_currency_1(self):

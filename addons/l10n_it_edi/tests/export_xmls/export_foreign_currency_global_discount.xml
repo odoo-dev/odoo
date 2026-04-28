@@ -64,7 +64,7 @@
         <Divisa>EUR</Divisa>
         <Data>2024-08-07</Data>
         <Numero>INV/2024/00003</Numero>
-        <ImportoTotaleDocumento>474.62</ImportoTotaleDocumento>
+        <ImportoTotaleDocumento>474.63</ImportoTotaleDocumento>
       </DatiGeneraliDocumento>
     </DatiGenerali>
     <DatiBeniServizi>
@@ -109,8 +109,8 @@
       <DatiRiepilogo>
         <AliquotaIVA>0.00</AliquotaIVA>
         <Natura>N3.1</Natura>
-        <Arrotondamento>-0.00230049</Arrotondamento>
-        <ImponibileImporto>474.62</ImponibileImporto>
+        <Arrotondamento>0.00769951</Arrotondamento>
+        <ImponibileImporto>474.63</ImponibileImporto>
         <Imposta>0.00</Imposta>
         <EsigibilitaIVA>I</EsigibilitaIVA>
         <RiferimentoNormativo>Art. 8, c.1, lett.a - D.P.R. 633/1972</RiferimentoNormativo>

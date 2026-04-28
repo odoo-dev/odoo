@@ -77,7 +77,7 @@
           <Tipo>SC</Tipo>
           <Percentuale>15.00</Percentuale>
         </ScontoMaggiorazione>
-        <PrezzoTotale>841.49921216</PrezzoTotale>
+        <PrezzoTotale>841.49596812</PrezzoTotale>
         <AliquotaIVA>0.00</AliquotaIVA>
         <Natura>N3.1</Natura>
         <AltriDatiGestionali>
@@ -94,7 +94,7 @@
       <DatiRiepilogo>
         <AliquotaIVA>0.00</AliquotaIVA>
         <Natura>N3.1</Natura>
-        <Arrotondamento>0.00078784</Arrotondamento>
+        <Arrotondamento>0.00403188</Arrotondamento>
         <ImponibileImporto>841.50</ImponibileImporto>
         <Imposta>0.00</Imposta>
         <EsigibilitaIVA>I</EsigibilitaIVA>
