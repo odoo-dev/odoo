@@ -125,7 +125,6 @@ class AccountEdiXmlUBLPINTMY(models.AbstractModel):
     def _pint_add_values(self, vals, invoice):
         super()._pint_add_values(vals, invoice)
         vals['_pint_values']['model'] = self.env['account.edi.ubl_pint_my']
-        vals['_pint_values']['doc_types'] = ['pint_my', vals['document_type']]
 
     def _add_invoice_tax_total_nodes(self, document_node, vals):
         # EXTENDS account.edi.xml.ubl_bis3

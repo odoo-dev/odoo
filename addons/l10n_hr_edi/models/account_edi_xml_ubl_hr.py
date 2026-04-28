@@ -21,7 +21,6 @@ class AccountEdiXmlUBLHR(models.AbstractModel):
     def _pint_add_values(self, vals, invoice):
         super()._pint_add_values(vals, invoice)
         vals['_pint_values']['model'] = self.env['account.edi.ubl_pint_eu_hr']
-        vals['_pint_values']['doc_types'] = [f"pint_eu_hr_{vals['document_type']}", vals['document_type']]
 
     def _get_document_template(self, vals):
         ext_template = {

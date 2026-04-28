@@ -584,7 +584,7 @@ class AccountEdiUBLPint(models.AbstractModel):
     def _pint_add_values(self, vals, invoice):
         # to extend / override
         vals['_pint_values'] = {
-            'doc_types': ['invoice'] if invoice.move_type == 'out_invoice' else ['credit_note'],
+            'pint_doc_type': 'invoice' if invoice.move_type == 'out_invoice' else 'credit_note',
             'model': self.env['account.edi.ubl_pint'],
         }
 
@@ -637,19 +637,31 @@ class AccountEdiUBLPint(models.AbstractModel):
     # EXPORT: Invoice & Credit Note layer
     # -------------------------------------------------------------------------
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['self_invoice', 'self_credit_note'])
+    def _ubl_add_customization_id_node__self_base(self, vals):
+        # EXTENDS account.edi.ubl_pint
+        super()._ubl_add_customization_id_node(vals)
+        vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:selfbilling:3.0'
+
+    @documents(['self_invoice', 'self_credit_note'])
+    def _ubl_add_profile_id_node__self_base(self, vals):
+        # EXTENDS account.edi.ubl_pint
+        super()._ubl_add_profile_id_node(vals)
+        vals['document_node']['cbc:ProfileID']['_text'] = 'urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0'
+
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_id_node__base(self, vals):
         # DECORATES account.edi.ubl
         super()._ubl_add_id_node(vals)
         self._ubl_invoice_update_id_node(vals)
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_issue_date_node__base(self, vals):
         # DECORATES account.edi.ubl
         super()._ubl_add_issue_date_node(vals)
         self._ubl_invoice_update_issue_date_node(vals)
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_due_date_node__base(self, vals):
         # DECORATES account.edi.ubl
         super()._ubl_add_due_date_node(vals)
@@ -661,38 +673,50 @@ class AccountEdiUBLPint(models.AbstractModel):
         super()._ubl_add_invoice_type_code_node(vals)
         vals['document_node']['cbc:InvoiceTypeCode']['_text'] = 380
 
+    @documents(['self_invoice'])
+    def _ubl_add_invoice_type_code_node__self_invoice(self, vals):
+        # EXTENDS account.edi.ubl_pint
+        super()._ubl_add_invoice_type_code_node(vals)
+        vals['document_node']['cbc:InvoiceTypeCode']['_text'] = 389
+
     @documents(['credit_note'])
     def _ubl_add_credit_note_type_code_node__credit_note(self, vals):
         # DECORATES account.edi.ubl
         super()._ubl_add_credit_note_type_code_node(vals)
         vals['document_node']['cbc:CreditNoteTypeCode']['_text'] = 381
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['self_credit_note'])
+    def _ubl_add_credit_note_type_code_node__self_credit_note(self, vals):
+        # EXTENDS account.edi.ubl_pint_credit_note
+        super()._ubl_add_credit_note_type_code_node(vals)
+        vals['document_node']['cbc:CreditNoteTypeCode']['_text'] = 261
+
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_notes_nodes__base(self, vals):
         # DECORATES account.edi.ubl_pint
         self._ubl_add_notes_nodes(vals)
         self._ubl_invoice_update_notes_node(vals)
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_order_reference_node__base(self, vals):
         # DECORATES account.edi.ubl
         super()._ubl_add_order_reference_node(vals)
         self._ubl_invoice_update_order_reference_node(vals)
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_get_delivery_node_from_delivery_address___base(self, vals):
         # DECORATES account.edi.ubl
         node = super()._ubl_get_delivery_node_from_delivery_address(vals)
         self._ubl_invoice_update_delivery_node_from_delivery_address(vals, node)
         return node
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_invoice_delivery_nodes__base(self, vals):
         # DECORATES account.edi.ubl
         super()._ubl_add_invoice_delivery_nodes(vals)
         self._ubl_invoice_update_delivery_nodes(vals)
 
-    @documents(['credit_note'])
+    @documents(['credit_note', 'self_credit_note'])
     def _ubl_add_billing_reference_nodes__credit_note(self, vals):
         # DECORATES account.edi.ubl
         # A group of business terms providing information on one or more preceding Invoices.
@@ -720,31 +744,31 @@ class AccountEdiUBLPint(models.AbstractModel):
                 }
             })
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_payment_means_nodes__base(self, vals):
         # DECORATES account.edi.ubl
         super()._ubl_add_payment_means_nodes(vals)
         self._ubl_invoice_update_add_payment_means_nodes(vals)
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_payment_terms_nodes__invoice(self, vals):
         # DECORATES account.edi.ubl
         super()._ubl_add_payment_terms_nodes(vals)
         self._ubl_invoice_update_add_payment_terms_nodes(vals)
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_allowance_charge_nodes__base(self, vals):
         # DECORATES account.edi.ubl
         super()._ubl_add_allowance_charge_nodes(vals)
         self._ubl_invoice_update_add_allowance_charge_nodes(vals)
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_legal_monetary_total_payable_rounding_amount_node__base(self, vals):
         # DECORATES account.edi.ubl
         super()._ubl_add_legal_monetary_total_payable_rounding_amount_node(vals)
         self._ubl_invoice_update_legal_monetary_total_payable_rounding_amount_node(vals)
 
-    @documents(['invoice', 'credit_note'])
+    @documents(['invoice', 'credit_note', 'self_invoice', 'self_credit_note'])
     def _ubl_add_legal_monetary_total_prepaid_payable_amount_node__base(self, vals, in_foreign_currency=True):
         # DECORATES account.edi.ubl
         super()._ubl_add_legal_monetary_total_prepaid_payable_amount_node(vals, in_foreign_currency=in_foreign_currency)

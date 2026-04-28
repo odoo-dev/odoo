@@ -7,19 +7,19 @@ class AccountEdiUBLPintMYInvoice(models.AbstractModel):
     _inherit = 'account.edi.ubl_pint'
     _description = "UBL PINT MY Invoice"
 
-    @documents(['pint_my'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_customization_id_node__pint_my(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_customization_id_node(vals)
         vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:peppol:pint:billing-1@my-1'
 
-    @documents(['pint_my'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_profile_id_node__pint_my(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_profile_id_node(vals)
         vals['document_node']['cbc:ProfileID']['_text'] = 'urn:peppol:bis:billing'
 
-    @documents(['pint_my'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_default_tax_category_grouping_key__pint_my(self, base_line, tax_data, vals, currency):
         # EXTENDS account.edi.ubl_pint
         # In Malaysia, tax on goods is paid at the manufacturer level. It is thus common to invoice without taxes,
@@ -45,7 +45,7 @@ class AccountEdiUBLPintMYInvoice(models.AbstractModel):
 
         return grouping_key
 
-    @documents(['pint_my'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_party_tax_scheme_nodes__pint_my(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_party_tax_scheme_nodes(vals)
@@ -60,7 +60,7 @@ class AccountEdiUBLPintMYInvoice(models.AbstractModel):
                 },
             }]
 
-    @documents(['pint_my'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_accounting_supplier_party_tax_scheme_nodes__pint_my(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)

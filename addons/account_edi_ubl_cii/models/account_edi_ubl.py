@@ -65,6 +65,7 @@ class AccountEdiUBL(models.AbstractModel):
         """
         return base_line['special_type'] == 'cash_rounding'
 
+    @dispatch_by_document
     def _ubl_default_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
         """ Give the values about the tax category for a given tax.
 

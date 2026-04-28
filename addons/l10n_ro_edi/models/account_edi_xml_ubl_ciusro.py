@@ -151,7 +151,6 @@ class AccountEdiXmlUBLRO(models.AbstractModel):
     def _pint_add_values(self, vals, invoice):
         super()._pint_add_values(vals, invoice)
         vals['_pint_values']['model'] = self.env['account.edi.ubl_pint_eu_ro']
-        vals['_pint_values']['doc_types'] = ['pint_eu_ro', vals['document_type']]
 
     def _export_invoice_constraints_new(self, invoice, vals):
         # OVERRIDE 'account.edi.xml.ubl_bis3': don't apply Peppol rules

@@ -8,7 +8,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
     _inherit = 'account.edi.ubl_pint_eu'
     _description = "UBL PINT-EU-HR Layer"
 
-    @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_id_node__pint_eu_hr_base(self, vals):
         # EXTENDS account.edi.ubl_pint_eu
         super()._ubl_add_id_node(vals)
@@ -18,13 +18,13 @@ class AccountEdiUBLPintHR(models.AbstractModel):
         # For Croatia, ID should be the Croatian-format fiscalization number
         vals['document_node']['cbc:ID']['_text'] = invoice.l10n_hr_fiscalization_number
 
-    @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_customization_id_node__pint_eu_hr_base(self, vals):
         # EXTENDS account.edi.ubl_pint_eu
         super()._ubl_add_customization_id_node(vals)
         vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:cen.eu:en16931:2017#compliant#urn:mfin.gov.hr:cius-2025:1.0#conformant#urn:mfin.gov.hr:ext-2025:1.0'
 
-    @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_profile_id_node__pint_eu_hr_base(self, vals):
         # EXTENDS account.edi.ubl_pint_eu
         super()._ubl_add_profile_id_node(vals)
@@ -37,7 +37,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
         else:
             vals['document_node']['cbc:ProfileID']['_text'] = invoice.l10n_hr_process_type
 
-    @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_issue_date_node__pint_eu_hr_base(self, vals):
         # EXTENDS account.edi.ubl_pint_eu
         super()._ubl_add_issue_date_node(vals)
@@ -49,7 +49,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
         vals['document_node']['cbc:IssueDate']['_text'] = issue_date_str
         vals['document_node']['cbc:IssueTime']['_text'] = issue_time_str
 
-    @documents(['pint_eu_hr_invoice'])
+    @documents(['invoice'])
     def _ubl_add_invoice_type_code_node__pint_eu_hr_invoice(self, vals):
         # EXTENDS account.edi.ubl_pint_eu
         super()._ubl_add_invoice_type_code_node(vals)
@@ -62,7 +62,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
         ):
             vals['document_node']['cbc:InvoiceTypeCode']['_text'] = '386'
 
-    @documents(['pint_eu_hr_credit_note'])
+    @documents(['credit_note'])
     def _ubl_add_credit_note_type_code_node__pint_eu_hr_credit_note(self, vals):
         # EXTENDS account.edi.ubl_pint_credit_note
         super()._ubl_add_credit_note_type_code_node(vals)
@@ -77,7 +77,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
         elif invoice.l10n_hr_process_type == 'P9':
             vals['document_node']['cbc:CreditNoteTypeCode']['_text'] = '381'
 
-    @documents(['pint_eu_hr_credit_note'])
+    @documents(['credit_note'])
     def _ubl_add_billing_reference_nodes__pint_eu_hr_credit_note(self, vals):
         # EXTENDS account.edi.ubl_pint_credit_note
         super()._ubl_add_billing_reference_nodes(vals)
@@ -94,7 +94,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
                 },
             }]
 
-    @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_default_tax_category_grouping_key__pint_eu_hr_base(self, base_line, tax_data, vals, currency):
         # EXTENDS account.edi.ubl_pint_eu
         grouping_key = super()._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
@@ -125,10 +125,9 @@ class AccountEdiUBLPintHR(models.AbstractModel):
             'hr_category_name': tax.l10n_hr_tax_category_id.name,
             'invoice_legal_notes_str': invoice_legal_notes_str,
         })
-        import logging; from rich.pretty import install; install(); logging.getLogger('odoo.tests.common').setLevel(logging.ERROR); breakpoint()
         return grouping_key
 
-    @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_get_tax_category_node__pint_eu_hr_base(self, vals, tax_category):
         # EXTENDS account.edi.ubl_pint_eu
         node = super()._ubl_get_tax_category_node(vals, tax_category)
@@ -136,7 +135,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
         node['hrextac:HRObracunPDVPoNaplati'] = {'_text': tax_category['invoice_legal_notes_str']}
         return node
 
-    @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_get_line_item_node_classified_tax_category_node__pint_eu_hr_base(self, vals, tax_category):
         # EXTENDS account.edi.ubl_pint_eu
         node = super()._ubl_get_line_item_node_classified_tax_category_node(vals, tax_category)
@@ -145,7 +144,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
         node['cbc:TaxExemptionReason']['_text'] = tax_category.get('tax_exemption_reason')
         return node
 
-    @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_copy_indicator_node__pint_eu_hr_base(self, vals):
         # EXTENDS account.edi.xml.ubl_bis3
         super()._ubl_add_copy_indicator_node(vals)
@@ -157,7 +156,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
         #   This doesn't appear to be currently supported in Odoo, and is set to 'false' in TR localization using a similar format
         vals['document_node']['cbc:CopyIndicator']['_text'] = 'false'
 
-    @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_party_endpoint_id_node__pint_eu_hr_base(self, vals):
         # EXTENDS account.edi.ubl_bis3
         super()._ubl_add_party_endpoint_id_node(vals)
@@ -175,7 +174,7 @@ class AccountEdiUBLPintHR(models.AbstractModel):
         vals['party_node']['cbc:EndpointID']['_text'] = endpoint
         vals['party_node']['cbc:EndpointID']['schemeID'] = scheme_id
 
-    @documents(['pint_eu_hr_invoice', 'pint_eu_hr_credit_note'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_party_identification_nodes__pint_eu_hr_base(self, vals):
         # EXTENDS account.edi.ubl_bis3
         super()._ubl_add_party_identification_nodes(vals)

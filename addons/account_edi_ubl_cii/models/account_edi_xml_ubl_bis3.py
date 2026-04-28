@@ -571,7 +571,7 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         # doc_types: ['eu_invoice', 'invoice'] OR ['eu_credit_note', 'credit_note']
         super()._pint_add_values(vals, invoice)
         if (invoice := vals.get('invoice')) and invoice.move_type in ('out_invoice', 'out_refund'):
-            vals['_pint_values']['doc_types'] = [f"eu_{vals['document_type']}", vals['document_type']]
+            vals['_pint_values']['pint_doc_type'] = vals['document_type']
             vals['_pint_values']['model'] = self.env['account.edi.ubl_pint_eu']
 
     # -------------------------------------------------------------------------

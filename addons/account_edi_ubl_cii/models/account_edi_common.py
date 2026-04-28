@@ -154,26 +154,27 @@ def dispatch_by_document(func):
     @wraps(func)
     def wrapper(self, vals, *args, **kwargs):
         if (pint_vals := vals.get('_pint_values')) and pint_vals.get('current_method') != func.__name__:
-            doc_types = pint_vals['doc_types']
+            doc_type = pint_vals['pint_doc_type']
             layer_model = pint_vals['model']
-            eligible_methods = []
+            current_class = layer_model.__class__
 
-            for attr_name in dir(layer_model):
-                if not attr_name.startswith('_ubl_'):
-                    continue
-                method = getattr(layer_model, attr_name)
-                if (
-                        callable(method) and
-                        any(doc_type in getattr(method, '_pint_doc_types', []) for doc_type in doc_types) and
-                        getattr(method, '_pint_method', None) == func.__name__
-                ):
-                    eligible_methods.append(method)
+            while current_class.__name__ != 'account.edi.common':
+                parent_class = current_class._BaseModel__base_classes[1]
+                current_dir = set(dir(current_class))
+                parent_dir = set(dir(parent_class))
+                current_methods = current_dir - parent_dir
 
-            for doc_type in doc_types:
-                for method in eligible_methods:
-                    if doc_type in getattr(method, '_pint_doc_types'):
+                for method_name in current_methods:
+                    method = getattr(current_class, method_name)
+                    if (
+                            callable(method) and
+                            doc_type in getattr(method, '_pint_doc_types', []) and
+                            getattr(method, '_pint_method', None) == func.__name__
+                    ):
                         pint_vals['current_method'] = func.__name__
-                        return method(vals, *args, **kwargs)
+                        return method(layer_model, vals, *args, **kwargs)
+
+                current_class = parent_class
 
         return func(self, vals, *args, **kwargs)
     return wrapper

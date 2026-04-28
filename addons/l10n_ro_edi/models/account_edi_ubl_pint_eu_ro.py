@@ -10,18 +10,18 @@ class AccountEdiUBLPintRO(models.AbstractModel):
     _inherit = "account.edi.ubl_pint_eu"
     _description = "UBL PINT RO Common"
 
-    @documents(['pint_eu_ro'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_customization_id_node__pint_eu_ro(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_customization_id_node(vals)
         vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1'
 
-    @documents(['pint_eu_ro'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_tax_currency_code_node__pint_eu_ro(self, vals):
         # EXTENDS account.edi.ubl_pint
         self._ubl_add_tax_currency_code_node_company_currency(vals)
 
-    @documents(['pint_eu_ro'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_get_partner_address_node__pint_eu_ro(self, vals, partner):
         # EXTENDS account.edi.ubl_pint
         node = super()._ubl_get_partner_address_node(vals, partner)
@@ -37,7 +37,7 @@ class AccountEdiUBLPintRO(models.AbstractModel):
 
         return node
 
-    @documents(['pint_eu_ro'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_accounting_supplier_party_tax_scheme_nodes__pint_eu_ro(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)
@@ -58,7 +58,7 @@ class AccountEdiUBLPintRO(models.AbstractModel):
             },
         }] if company_id else []
 
-    @documents(['pint_eu_ro'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_accounting_supplier_party_legal_entity_nodes__pint_eu_ro(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_accounting_supplier_party_legal_entity_nodes(vals)
@@ -77,7 +77,7 @@ class AccountEdiUBLPintRO(models.AbstractModel):
             else:
                 vals['party_node']['cac:PartyLegalEntity'] = []
 
-    @documents(['pint_eu_ro'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_accounting_customer_party_tax_scheme_nodes__pint_eu_ro(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_accounting_customer_party_tax_scheme_nodes(vals)
@@ -96,7 +96,7 @@ class AccountEdiUBLPintRO(models.AbstractModel):
             },
         }] if company_id else []
 
-    @documents(['pint_eu_ro'])
+    @documents(['invoice', 'credit_note'])
     def _ubl_add_accounting_customer_party_legal_entity_nodes__pint_eu_ro(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_accounting_customer_party_legal_entity_nodes(vals)
