@@ -1,14 +1,13 @@
-import { useLayoutEffect, useRef, useState } from "@web/owl2/utils";
-import { Component, onMounted } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { toolbarButtonProps } from "@html_editor/main/toolbar/toolbar";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { useDebounced } from "@web/core/utils/timing";
-import { cookie } from "@web/core/browser/cookie";
-import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
 import { useDropdownAutoVisibility } from "@html_editor/dropdown_autovisibility_hook";
 import { useChildRef } from "@web/core/utils/hooks";
+import { IframeInput } from "@web/core/iframe_input/iframe_input";
+import { useLayoutEffect, useState } from "@web/owl2/utils";
 
 export const MAX_FONT_SIZE = 400;
 
@@ -23,7 +22,7 @@ export class FontSizeSelector extends Component {
         document: { validate: (p) => p.nodeType === Node.DOCUMENT_NODE },
         ...toolbarButtonProps,
     };
-    static components = { Dropdown, DropdownItem };
+    static components = { Dropdown, DropdownItem, IframeInput };
 
     setup() {
         this.items = this.props.getItems();
@@ -31,77 +30,10 @@ export class FontSizeSelector extends Component {
         this.dropdown = useDropdownState();
         this.menuRef = useChildRef();
         useDropdownAutoVisibility(this.env.overlayState, this.menuRef);
-        this.iframeContentRef = useRef("iframeContent");
+        this.iframeContentRef = useChildRef();
+        this.fontSizeInputRef = useChildRef();
         this.debouncedCustomFontSizeInput = useDebounced(this.onCustomFontSizeInput, 200);
 
-        onMounted(() => {
-            const iframeEl = this.iframeContentRef.el;
-
-            const initFontSizeInput = () => {
-                const iframeDoc = iframeEl.contentWindow.document;
-
-                // Skip if already/still initialized.
-                if (this.fontSizeInput?.closest("body") === iframeDoc.body || !iframeDoc.body) {
-                    return;
-                }
-
-                this.fontSizeInput = iframeDoc.createElement("input");
-                this.fontSizeInput.addEventListener("blur", () => {
-                    this.props.onBlur?.();
-                });
-                const isDarkMode = cookie.get("color_scheme") === "dark";
-                const htmlStyle = getHtmlStyle(document);
-                const backgroundColor = getCSSVariableValue(
-                    isDarkMode ? "gray-200" : "white",
-                    htmlStyle
-                );
-                const color = getCSSVariableValue("black", htmlStyle);
-                const fontFamily = getCSSVariableValue("o-system-fonts", htmlStyle);
-                Object.assign(iframeDoc.body.style, {
-                    padding: "0",
-                    margin: "0",
-                });
-                Object.assign(this.fontSizeInput.style, {
-                    width: "100%",
-                    height: "100%",
-                    border: "none",
-                    outline: "none",
-                    textAlign: "center",
-                    backgroundColor: backgroundColor,
-                    color: color,
-                    fontFamily: fontFamily,
-                });
-                this.fontSizeInput.type = "text";
-                this.fontSizeInput.name = "font-size-input";
-                this.fontSizeInput.autocomplete = "off";
-                this.fontSizeInput.value = this.state.displayName;
-                iframeDoc.body.appendChild(this.fontSizeInput);
-                this.fontSizeInput.addEventListener("click", () => {
-                    if (!this.dropdown.isOpen) {
-                        this.dropdown.open();
-                    }
-                });
-                this.fontSizeInput.addEventListener("input", this.debouncedCustomFontSizeInput);
-                this.fontSizeInput.addEventListener(
-                    "keydown",
-                    this.onKeyDownFontSizeInput.bind(this)
-                );
-            };
-            if (iframeEl.contentDocument.readyState === "complete") {
-                initFontSizeInput();
-            }
-            // If iframe is moved around in DOM, it restarts from scratch and needs to be repopulated.
-            iframeEl.addEventListener("load", initFontSizeInput);
-        });
-        useLayoutEffect(
-            () => {
-                if (this.fontSizeInput) {
-                    // Update `fontSizeInputValue` whenever the font size changes.
-                    this.fontSizeInput.value = this.state.displayName;
-                }
-            },
-            () => [this.state.displayName]
-        );
         useLayoutEffect(
             () => {
                 if (this.fontSizeInput) {
@@ -118,6 +50,16 @@ export class FontSizeSelector extends Component {
             },
             () => [this.dropdown.isOpen]
         );
+    }
+
+    get fontSizeInput() {
+        return this.fontSizeInputRef.el;
+    }
+
+    onClickFontSizeInput() {
+        if (!this.dropdown.isOpen) {
+            this.dropdown.open();
+        }
     }
 
     onCustomFontSizeInput(ev) {

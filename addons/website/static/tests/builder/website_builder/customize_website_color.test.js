@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { expect, queryOne, test, waitUntil } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 import { addBuilderOption } from "@html_builder/../tests/helpers";
@@ -144,7 +144,14 @@ test("BuilderColorPicker with action “customizeWebsiteColor” is correctly di
         '.hb-sliding-panel-content div[data-label="Background"] .o_we_color_preview'
     ).click();
     await contains(".o-hb-colorpicker .custom-tab").click();
-    await contains(".o_color_picker_inputs input.o_hex_input").edit("#77FF006E");
+    const hexIframeEl = queryOne(
+        ".o_font_color_selector .o_color_picker_inputs iframe.o_hex_iframe"
+    );
+    const hexInputEl = await waitUntil(() => {
+        const input = hexIframeEl.contentWindow.document?.querySelector("input[name='hex_input']");
+        return input?.value && input;
+    });
+    await contains(hexInputEl).edit("#77FF006E");
     await expect.waitForSteps([
         '/website/static/src/scss/options/colors/user_color_palette.scss {"o-cc1-bg":"#77FF006E"}',
         '/website/static/src/scss/options/user_values.scss {"o-cc1-bg-gradient":"null"}',

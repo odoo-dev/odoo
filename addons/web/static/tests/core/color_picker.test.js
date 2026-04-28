@@ -1,5 +1,12 @@
-import { test, expect } from "@odoo/hoot";
-import { press, click, animationFrame, queryOne, hover, manuallyDispatchProgrammaticEvent } from "@odoo/hoot-dom";
+import { test, expect, waitUntil } from "@odoo/hoot";
+import {
+    press,
+    click,
+    animationFrame,
+    queryOne,
+    hover,
+    manuallyDispatchProgrammaticEvent,
+} from "@odoo/hoot-dom";
 import { Component, xml, useState } from "@odoo/owl";
 import { defineStyle, mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { ColorPicker, DEFAULT_COLORS } from "@web/core/color_picker/color_picker";
@@ -281,7 +288,12 @@ test("custom color picker sets default color as selected", async () => {
             defaultColor: "#FF0000",
         },
     });
-    expect("input.o_hex_input").toHaveValue("#FF0000");
+    const hexIframeEl = queryOne(".o_color_picker_inputs iframe.o_hex_iframe");
+    const hexInputEl = await waitUntil(() => {
+        const input = hexIframeEl.contentWindow.document?.querySelector("input[name='hex_input']");
+        return input?.value && input;
+    });
+    expect(hexInputEl).toHaveValue("#FF0000");
 });
 
 test("should preserve color slider when picking max lightness color", async () => {
@@ -322,9 +334,15 @@ test("should preserve color slider when picking max lightness color", async () =
 
 test("custom color picker change color on click in hue slider", async () => {
     await mountWithCleanup(CustomColorPicker, { props: { selectedColor: "#FF0000" } });
-    expect("input.o_hex_input").toHaveValue("#FF0000");
+    const hexIframeEl = queryOne(".o_color_picker_inputs iframe.o_hex_iframe");
+    const hexInputEl = await waitUntil(() => {
+        const input = hexIframeEl.contentWindow.document?.querySelector("input[name='hex_input']");
+        return input?.value && input;
+    });
+    expect(hexInputEl).toHaveValue("#FF0000");
     await click(".o_color_slider");
-    expect("input.o_hex_input").not.toHaveValue("#FF0000");
+    await animationFrame();
+    expect(hexInputEl).not.toHaveValue("#FF0000");
 });
 
 class ExtraTab extends Component {

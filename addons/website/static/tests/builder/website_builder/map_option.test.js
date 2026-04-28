@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { expect, queryOne, test, waitUntil } from "@odoo/hoot";
 import { contains } from "@web/../tests/web_test_helpers";
 import {
     defineWebsiteModels,
@@ -32,11 +32,21 @@ test("test description option", async () => {
     // Check Custom tab background color
     await contains("div[data-label='Background Color'] .o_we_color_preview").click();
     await contains(".o_popover .o_font_color_selector .btn-tab:contains('Custom')").click();
-    await contains(".o_popover .o_colorpicker_widget .o_hex_input").edit("#E4F641");
+    let hexIframeEl = queryOne(".o_font_color_selector .o_color_picker_inputs iframe.o_hex_iframe");
+    let hexInputEl = await waitUntil(() => {
+        const input = hexIframeEl.contentWindow.document?.querySelector("input[name='hex_input']");
+        return input?.value && input;
+    });
+    await contains(hexInputEl).edit("#E4F641");
     expect(":iframe .s_map .description").toHaveStyle({ "background-color": "rgb(228, 246, 65)" });
 
     // Check text color
     await contains("div[data-label='Text Color'] .o_we_color_preview").click();
-    await contains(".o_popover .o_colorpicker_widget .o_hex_input").edit("#EB28EB");
+    hexIframeEl = queryOne(".o_font_color_selector .o_color_picker_inputs iframe.o_hex_iframe");
+    hexInputEl = await waitUntil(() => {
+        const input = hexIframeEl.contentWindow.document?.querySelector("input[name='hex_input']");
+        return input?.value && input;
+    });
+    await contains(hexInputEl).edit("#EB28EB");
     expect(":iframe .s_map .description").toHaveStyle({ color: "rgb(235, 40, 235)" });
 });

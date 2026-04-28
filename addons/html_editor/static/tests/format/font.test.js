@@ -1,9 +1,10 @@
 import { waitFor } from "@odoo/hoot-dom";
 import { setupEditor } from "../_helpers/editor";
 import { getContent } from "../_helpers/selection";
-import { expect, test } from "@odoo/hoot";
+import { expect, queryOne, test, waitUntil } from "@odoo/hoot";
 import { expandToolbar } from "../_helpers/toolbar";
 import { contains } from "@web/../tests/web_test_helpers";
+import { expectElementCount } from "../_helpers/ui_expectations";
 
 test("should change the containing block with the font", async () => {
     const { el } = await setupEditor("<p>ab[cde]fg</p>");
@@ -30,7 +31,7 @@ test("should have font tool only if the block is content editable", async () => 
 });
 
 test("Should show the default font display name", async () => {
-    const { el } = await setupEditor(`
+    await setupEditor(`
         <ul>
             <li class="display-2-fs">
                 <div class="o-paragraph">abc</div>
@@ -40,9 +41,15 @@ test("Should show the default font display name", async () => {
             </li>
         </ul>    
     `);
-    await waitFor(".btn[name='font_size']");
-    const fontSelectorInput = el.ownerDocument
-        .querySelector("iframe")
-        .contentDocument.querySelector("input");
-    expect(fontSelectorInput.value).toBe("14");
+    await expectElementCount(".o-we-toolbar", 1);
+    const iframeEl = queryOne(
+        ".o-we-toolbar [name='font_size'] iframe.o_font_size_selector_iframe"
+    );
+    const inputEl = await waitUntil(() => {
+        const input = iframeEl.contentWindow.document?.querySelector(
+            "input[name='font_size_input']"
+        );
+        return input?.value && input;
+    });
+    expect(inputEl.value).toBe("14");
 });

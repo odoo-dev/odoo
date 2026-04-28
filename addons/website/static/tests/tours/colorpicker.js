@@ -29,9 +29,14 @@ function checkBackgroundColorWithHEX(hexCode) {
     return [
         {
             content: "Check if the RGBA color matches the selected color",
-            trigger: ".o_popover .o_colorpicker_widget .o_hex_input",
-            run: function () {
-                const hex = this.anchor.value;
+            trigger: ".o_popover .o_colorpicker_widget .o_hex_div iframe.o_hex_iframe",
+            async run({ waitUntil }) {
+                const input = await waitUntil(() => {
+                    const input =
+                        this.anchor.contentWindow.document.querySelector("input[name='hex_input']");
+                    return input?.value && input;
+                });
+                const hex = input.value;
                 if (hex !== hexCode) {
                     console.error("There may be a problem with the RGBA colorpicker");
                 }

@@ -314,9 +314,19 @@ registerWebsitePreviewTour(
         }),
         ...updateAndCheckCustomGradient({
             updateStep: {
-                trigger: ".o_popover .o_color_picker_inputs .o_hex_div input",
+                trigger: ".o_popover .o_color_picker_inputs .o_hex_div iframe.o_hex_iframe",
                 content: "Pick step color",
-                run: "edit #FF0000",
+                async run({ waitUntil }) {
+                    const input = await waitUntil(() => {
+                        const input =
+                            this.anchor.contentWindow.document.querySelector(
+                                "input[name='hex_input']"
+                            );
+                        return input?.value && input;
+                    });
+                    input.value = "#FF0000";
+                    input.dispatchEvent(new Event("input"));
+                },
             },
             checkGradient: "linear-gradient(135deg, #cb5eee 0%, #FF0000 45%, #4be1ec 100%)",
         }),
@@ -331,9 +341,20 @@ registerWebsitePreviewTour(
         // Linear
         ...updateAndCheckCustomGradient({
             updateStep: {
-                trigger: ".o_popover input[name='angle']",
+                trigger: ".o_popover iframe.o_angle_iframe",
                 content: "Change angle",
-                run: "edit 50 && click .o_color_picker_inputs",
+                async run({ waitUntil }) {
+                    const input = await waitUntil(() => {
+                        const input = this.anchor.contentWindow.document.querySelector(
+                            "input[name='angle_input']"
+                        );
+                        return input?.value && input;
+                    });
+                    input.value = 50;
+                    input.dispatchEvent(new Event("change"));
+                    const colorPickerInputs = document.querySelector(".o_color_picker_inputs");
+                    colorPickerInputs.click();
+                },
             },
             checkGradient: "linear-gradient(50deg, #cb5eee 0%, #4be1ec 100%)",
         }),
@@ -349,18 +370,40 @@ registerWebsitePreviewTour(
         }),
         ...updateAndCheckCustomGradient({
             updateStep: {
-                trigger: ".o_popover input[name='positionX']",
+                trigger: ".o_popover iframe.o_position_x_iframe",
                 content: "Change X position",
-                run: "edit 33 && click .o_color_picker_inputs",
+                async run({ waitUntil }) {
+                    const input = await waitUntil(() => {
+                        const input = this.anchor.contentWindow.document.querySelector(
+                            "input[name='position_x_input']"
+                        );
+                        return input?.value && input;
+                    });
+                    input.value = 33;
+                    input.dispatchEvent(new Event("change"));
+                    const colorPickerInputs = document.querySelector(".o_color_picker_inputs");
+                    colorPickerInputs.click();
+                },
             },
             checkGradient:
                 "radial-gradient(circle closest-side at 33% 25%, #cb5eee 0%, #4be1ec 100%)",
         }),
         ...updateAndCheckCustomGradient({
             updateStep: {
-                trigger: ".o_popover input[name='positionY']",
+                trigger: ".o_popover iframe.o_position_y_iframe",
                 content: "Change Y position",
-                run: "edit 75 && click .o_color_picker_inputs",
+                async run({ waitUntil }) {
+                    const input = await waitUntil(() => {
+                        const input = this.anchor.contentWindow.document.querySelector(
+                            "input[name='position_y_input']"
+                        );
+                        return input?.value && input;
+                    });
+                    input.value = 75;
+                    input.dispatchEvent(new Event("change"));
+                    const colorPickerInputs = document.querySelector(".o_color_picker_inputs");
+                    colorPickerInputs.click();
+                },
             },
             checkGradient:
                 "radial-gradient(circle closest-side at 33% 75%, #cb5eee 0%, #4be1ec 100%)",

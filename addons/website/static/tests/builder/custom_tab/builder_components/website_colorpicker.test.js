@@ -1,4 +1,4 @@
-import { expect, test } from "@odoo/hoot";
+import { expect, queryOne, test, waitUntil } from "@odoo/hoot";
 import { animationFrame, click } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 import { addBuilderOption, waitForEndOfOperation } from "@html_builder/../tests/helpers";
@@ -71,7 +71,14 @@ test("should work with color transition", async () => {
 
     await contains(":iframe .test-options-target").click();
     await contains(".we-bg-options-container .o_we_color_preview").click();
-    await contains(".o_colorpicker_widget .o_hex_input").edit("#0000FF");
+    const hexIframeEl = queryOne(
+        ".o_font_color_selector .o_color_picker_inputs iframe.o_hex_iframe"
+    );
+    const hexInputEl = await waitUntil(() => {
+        const input = hexIframeEl.contentWindow.document?.querySelector("input[name='hex_input']");
+        return input?.value && input;
+    });
+    await contains(hexInputEl).edit("#0000FF");
     await waitForEndOfOperation();
     expect(":iframe .test-options-target").toHaveStyle("color: rgb(0, 0, 255)");
     await contains(".we-bg-options-container .o_we_color_preview").click();

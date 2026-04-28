@@ -29,8 +29,17 @@ registerWebsitePreviewTour(
         {
             content:
                 "Input the value for the new website main color (also make sure it is independent from the backend)",
-            trigger: ".o_hex_input",
-            run: `edit ${WEBSITE_MAIN_COLOR} && click body`,
+            trigger: ".o_popover .o_color_picker_inputs .o_hex_div iframe.o_hex_iframe",
+            async run({ waitUntil }) {
+                const input = await waitUntil(() => {
+                    const input =
+                        this.anchor.contentWindow.document.querySelector("input[name='hex_input']");
+                    return input?.value && input;
+                });
+                input.value = WEBSITE_MAIN_COLOR;
+                input.dispatchEvent(new Event("input"));
+                document.body.click();
+            },
         },
         goBackToBlocks(),
         ...insertSnippet({ id: "s_text_block", name: "Text", groupName: "Text" }),
@@ -47,8 +56,17 @@ registerWebsitePreviewTour(
         },
         {
             content: "Select main color",
-            trigger: ".o_colorpicker_widget .o_color_picker_inputs .o_hex_input",
-            run: `edit ${WEBSITE_MAIN_COLOR} && click body`,
+            trigger: ".o_popover .o_color_picker_inputs .o_hex_div iframe.o_hex_iframe",
+            async run({ waitUntil }) {
+                const input = await waitUntil(() => {
+                    const input =
+                        this.anchor.contentWindow.document.querySelector("input[name='hex_input']");
+                    return input?.value && input;
+                });
+                input.value = WEBSITE_MAIN_COLOR;
+                input.dispatchEvent(new Event("input"));
+                document.body.click();
+            },
         },
         {
             content: "Check that paragraph now uses the main color *class*",

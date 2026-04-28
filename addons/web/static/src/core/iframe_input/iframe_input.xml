@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates xml:space="preserve">
+    <t t-name="web.IframeInput">
+        <iframe t-ref="iframeRef" t-att-class="props.iframeClass" t-att-style="props.iframeStyle" />
+    </t>
+</templates>

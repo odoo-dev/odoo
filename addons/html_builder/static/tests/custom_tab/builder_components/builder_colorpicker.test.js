@@ -6,10 +6,11 @@ import {
 } from "@html_builder/../tests/helpers";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { undo } from "@html_editor/../tests/_helpers/user_actions";
-import { before, describe, expect, test } from "@odoo/hoot";
+import { before, describe, expect, queryOne, test } from "@odoo/hoot";
 import { animationFrame, click, hover, press, tick, waitFor } from "@odoo/hoot-dom";
 import { xml } from "@odoo/owl";
 import { contains } from "@web/../tests/web_test_helpers";
+import { waitUntil } from "@web/core/macro";
 
 describe.current.tags("desktop");
 
@@ -198,10 +199,17 @@ test("should apply transparent color if no color is defined", async () => {
     await contains(".we-bg-options-container .o_we_color_preview").click();
     await contains(".o-overlay-item button:contains('Custom')").click();
     expect.verifySteps(["getValue"]);
-    expect(".o-overlay-item .o_hex_input").toHaveValue("#FFFFFF00");
+    const hexIframeEl = queryOne(
+        ".o_font_color_selector .o_color_picker_inputs iframe.o_hex_iframe"
+    );
+    const hexInputEl = await waitUntil(() => {
+        const input = hexIframeEl.contentWindow.document?.querySelector("input[name='hex_input']");
+        return input?.value && input;
+    });
+    expect(hexInputEl).toHaveValue("#FFFFFF00");
     expect(":iframe .test-options-target").not.toHaveAttribute("data-color");
     await contains(".o-overlay-item .o_color_pick_area").click({ top: "50%", left: "50%" });
-    expect(".o-overlay-item .o_hex_input").not.toHaveValue("#FFFFFF00");
+    expect(hexInputEl).not.toHaveValue("#FFFFFF00");
     expect(":iframe .test-options-target").toHaveAttribute("data-color");
     expect.verifySteps(["apply"]); // Preview
     await contains(".options-container-header").click(); // Close the popover by clicking outside.
@@ -434,12 +442,22 @@ test("should work with force and allowImportant params", async () => {
     await contains(":iframe .test-options-target").click();
 
     await contains(".we-bg-options-container .o_we_color_preview:nth-child(1)").click();
-    await contains(".o_colorpicker_widget .o_hex_input").edit("#0000FF");
+    let hexIframeEl = queryOne(".o_font_color_selector .o_color_picker_inputs iframe.o_hex_iframe");
+    let hexInputEl = await waitUntil(() => {
+        const input = hexIframeEl.contentWindow.document?.querySelector("input[name='hex_input']");
+        return input?.value && input;
+    });
+    await contains(hexInputEl).edit("#0000FF");
     await waitForEndOfOperation();
     expect(":iframe .test-options-target").toHaveStyle("color: rgb(0, 0, 255)", { inline: true });
-
+    // baaki hai.
     await contains(".we-bg-options-container .o_we_color_preview:nth-child(2)").click();
-    await contains(".o_colorpicker_widget .o_hex_input").edit("#0000FF");
+    hexIframeEl = queryOne(".o_font_color_selector .o_color_picker_inputs iframe.o_hex_iframe");
+    hexInputEl = await waitUntil(() => {
+        const input = hexIframeEl.contentWindow.document?.querySelector("input[name='hex_input']");
+        return input?.value && input;
+    });
+    await contains(hexInputEl).edit("#0000FF");
     await waitForEndOfOperation();
     expect(":iframe .test-options-target").toHaveStyle(
         "background-color: rgb(0, 0, 255) !important",

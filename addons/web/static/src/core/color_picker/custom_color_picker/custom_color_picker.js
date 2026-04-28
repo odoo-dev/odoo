@@ -1,4 +1,4 @@
-import { useExternalListener, useRef } from "@web/owl2/utils";
+import { useExternalListener, useRef, useState } from "@web/owl2/utils";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
 import {
@@ -13,6 +13,7 @@ import { clamp } from "@web/core/utils/numbers";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
 
 import { Component, onMounted, onWillUpdateProps } from "@odoo/owl";
+import { IframeInput } from "@web/core/iframe_input/iframe_input";
 
 const ARROW_KEYS = ["arrowup", "arrowdown", "arrowleft", "arrowright"];
 const SLIDER_KEYS = [...ARROW_KEYS, "pageup", "pagedown", "home", "end"];
@@ -21,6 +22,7 @@ const DEFAULT_COLOR = "#FF0000";
 
 export class CustomColorPicker extends Component {
     static template = "web.CustomColorPicker";
+    static components = { IframeInput };
     static props = {
         document: { type: true, optional: true },
         defaultColor: { type: String, optional: true },
@@ -61,6 +63,7 @@ export class CustomColorPicker extends Component {
         this.colorComponents = {};
         this.uniqueId = uniqueId("colorpicker");
         this.selectedHexValue = "";
+        this.hexDisplay = useState({ value: "" });
         this.shouldSetSelectedColor = false;
         this.lastFocusedSliderEl = undefined;
         if (!this.props.selectedColor) {
@@ -238,6 +241,9 @@ export class CustomColorPicker extends Component {
     _updateUI() {
         // Update inputs
         for (const [color, value] of Object.entries(this.colorComponents)) {
+            if (color === "hex") {
+                continue;
+            }
             const input = this.el.querySelector(`.o_${color}_input`);
             if (input) {
                 input.value = value;
@@ -410,6 +416,7 @@ export class CustomColorPicker extends Component {
         const b = this.colorComponents.blue;
         const a = this.colorComponents.opacity;
         Object.assign(this.colorComponents, { cssColor: convertRgbaToCSSColor(r, g, b, a) });
+        this.hexDisplay.value = this.colorComponents.hex;
         if (this.previewActive) {
             this.props.onColorPreview(this.colorComponents);
         }
@@ -439,14 +446,18 @@ export class CustomColorPicker extends Component {
         if (this.props.stopClickPropagation) {
             ev.stopPropagation();
         }
-
-        if (ev.target.dataset.colorMethod === "hex" && !this.selectedHexValue) {
-            ev.target.select();
-            this.selectedHexValue = ev.target.value;
-            return;
-        }
         this.selectedHexValue = "";
     }
+
+    onHexInputClick(ev) {
+        if (!this.selectedHexValue) {
+            ev.target.select();
+            this.selectedHexValue = ev.target.value;
+        } else {
+            this.selectedHexValue = "";
+        }
+    }
+
     onPointerUp() {
         if (this.pickerFlag || this.sliderFlag || this.opacitySliderFlag) {
             this.shouldSetSelectedColor = true;
