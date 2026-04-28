@@ -730,8 +730,7 @@ class SaleOrder(models.Model):
             order_lines = order._get_priced_lines()
             base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
             base_lines += order._add_base_lines_for_early_payment_discount()
-            AccountTax._add_tax_details_in_base_lines(base_lines, order.company_id)
-            AccountTax._round_base_lines_tax_details(base_lines, order.company_id)
+            AccountTax._add_tax_details(base_lines, order.company_id)
             tax_totals = AccountTax._get_tax_totals_summary(
                 base_lines=base_lines,
                 currency=order.currency_id or order.company_id.currency_id,
@@ -969,8 +968,7 @@ class SaleOrder(models.Model):
 
         # Original lines
         base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
-        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+        AccountTax._add_tax_details(base_lines, self.company_id)
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
             base_lines, grouping_function
         )
@@ -982,8 +980,7 @@ class SaleOrder(models.Model):
             line._prepare_base_line_for_taxes_computation(discount=min(line.discount, 0))
             for line in order_lines
         ]
-        AccountTax._add_tax_details_in_base_lines(base_lines_undiscounted, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines_undiscounted, self.company_id)
+        AccountTax._add_tax_details(base_lines_undiscounted, self.company_id)
         base_lines_undiscounted_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
             base_lines_undiscounted, grouping_function
         )
@@ -1182,8 +1179,7 @@ class SaleOrder(models.Model):
             order_lines = order._get_priced_lines()
             base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
             base_lines += order._add_base_lines_for_early_payment_discount()
-            AccountTax._add_tax_details_in_base_lines(base_lines, order.company_id)
-            AccountTax._round_base_lines_tax_details(base_lines, order.company_id)
+            AccountTax._add_tax_details(base_lines, order.company_id)
             order.tax_totals = AccountTax._get_tax_totals_summary(
                 base_lines=base_lines,
                 currency=order.currency_id or order.company_id.currency_id,

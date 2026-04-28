@@ -190,8 +190,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
             )
             for line in order_lines
         ]
-        AccountTax._add_tax_details_in_base_lines(base_lines, order.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, order.company_id)
+        AccountTax._add_tax_details(base_lines, order.company_id)
 
         recomputed_amount = self.amount_total * self.percentage
         if self.currency_id.compare_amounts(recomputed_amount, self.amount) == 0:

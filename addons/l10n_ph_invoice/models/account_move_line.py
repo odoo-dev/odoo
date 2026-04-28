@@ -31,8 +31,7 @@ class AccountMoveLine(models.Model):
         company = self.company_id or self.env.company
         base_line = self.move_id._prepare_product_base_line_for_taxes_computation(self)
         base_line["discount"] = 0.0
-        self.env["account.tax"]._add_tax_details_in_base_line(base_line, company)
-        self.env["account.tax"]._round_base_lines_tax_details([base_line], company)
+        self.env["account.tax"]._add_tax_details([base_line], company)
         gross_price_subtotal = base_line["tax_details"]["raw_total_excluded_currency"]
         gross_price_total = base_line["tax_details"]["raw_total_included_currency"]
         return (
@@ -52,6 +51,50 @@ class AccountMoveLine(models.Model):
     )
     def _compute_l10n_ph_discount_amounts(self):
         super()._compute_l10n_ph_discount_amounts()
+
+    # --- Price unit / taxes / discount helpers (called by the wizard) ---
+
+    def _adjust_price_unit_from_privilege(self, price_unit, tax_ids):
+        """
+        Compute the new price_unit and original_price_unit to set on the
+        line after applying (or removing) the privilege's fiscal position.
+        """
+        self.ensure_one()
+        fiscal_position = self.l10n_ph_discount_privilege_id.fiscal_position_id
+        if fiscal_position:
+            tax_ids = self.l10n_ph_original_tax_ids or tax_ids
+            taxes_after_fp = fiscal_position.map_tax(tax_ids)
+            new_price_unit = tax_ids._adapt_price_unit_to_another_taxes(
+                price_unit=self.l10n_ph_original_price_unit or price_unit,
+                product=None,
+                currency=self.currency_id,
+                company=self.company_id or self.env.company,
+                original_taxes=tax_ids,
+                new_taxes=taxes_after_fp,
+                document_tax_mode=self.document_tax_mode,
+            )
+            original_price_unit = self.l10n_ph_original_price_unit or price_unit
+        elif self.l10n_ph_original_price_unit:
+            new_price_unit = self.l10n_ph_original_price_unit
+            original_price_unit = 0.0
+        else:
+            new_price_unit = price_unit
+            original_price_unit = 0.0
+        return new_price_unit, original_price_unit
+
+    def _adjust_taxes_from_privilege(self, tax_ids):
+        """
+        Compute the new tax_ids and original tax_ids to set on the line
+        after applying (or removing) the privilege's fiscal position.
+        """
+        self.ensure_one()
+        fiscal_position = self.l10n_ph_discount_privilege_id.fiscal_position_id
+        if fiscal_position:
+            original_taxes = self.l10n_ph_original_tax_ids or tax_ids
+            new_taxes = fiscal_position.map_tax(original_taxes)
+            return new_taxes, original_taxes
+        new_taxes = self.l10n_ph_original_tax_ids or tax_ids
+        return new_taxes, self.env["account.tax"]
 
     # --- Discount allocation (invoice lines only) ---
 

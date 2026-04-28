@@ -571,8 +571,7 @@ class HrExpense(models.Model):
         AccountTax = self.env['account.tax']
         for expense in self.filtered('product_has_cost'):
             base_line = expense._prepare_base_line_for_taxes_computation(price_unit=expense.price_unit, quantity=expense.quantity)
-            AccountTax._add_tax_details_in_base_line(base_line, expense.company_id)
-            AccountTax._round_base_lines_tax_details([base_line], expense.company_id)
+            AccountTax._add_tax_details([base_line], expense.company_id)
             expense.total_amount_currency = base_line['tax_details']['total_included_currency']
 
     @api.onchange('total_amount_currency')
@@ -613,8 +612,7 @@ class HrExpense(models.Model):
                     currency_id=expense.company_currency_id,
                     rate=1.0,
                 )
-                AccountTax._add_tax_details_in_base_line(base_line, expense.company_id)
-                AccountTax._round_base_lines_tax_details([base_line], expense.company_id)
+                AccountTax._add_tax_details([base_line], expense.company_id)
                 expense.total_amount = base_line['tax_details']['total_included_currency']
             else:  # Mono-currency case computation shortcut
                 expense.total_amount = expense.total_amount_currency
@@ -629,8 +627,7 @@ class HrExpense(models.Model):
                     quantity=1.0,
                     currency=expense.company_currency_id,
                 )
-                AccountTax._add_tax_details_in_base_line(base_line, expense.company_id)
-                AccountTax._round_base_lines_tax_details([base_line], expense.company_id)
+                AccountTax._add_tax_details([base_line], expense.company_id)
                 tax_details = base_line['tax_details']
                 expense.tax_amount = tax_details['total_included_currency'] - tax_details['total_excluded_currency']
                 expense.untaxed_amount =  tax_details['total_excluded_currency']
@@ -747,8 +744,7 @@ class HrExpense(models.Model):
                 price_unit=expense.total_amount_currency,
                 quantity=1.0,
             )
-            AccountTax._add_tax_details_in_base_line(base_line, expense.company_id)
-            AccountTax._round_base_lines_tax_details([base_line], expense.company_id)
+            AccountTax._add_tax_details([base_line], expense.company_id)
             tax_details = base_line['tax_details']
             expense.tax_amount_currency = tax_details['total_included_currency'] - tax_details['total_excluded_currency']
             expense.untaxed_amount_currency = tax_details['total_excluded_currency']
@@ -774,8 +770,7 @@ class HrExpense(models.Model):
                     quantity=1.0,
                     currency=expense.company_currency_id,
                 )
-                AccountTax._add_tax_details_in_base_line(base_line, expense.company_id)
-                AccountTax._round_base_lines_tax_details([base_line], expense.company_id)
+                AccountTax._add_tax_details([base_line], expense.company_id)
                 tax_details = base_line['tax_details']
                 expense.tax_amount = tax_details['total_included_currency'] - tax_details['total_excluded_currency']
                 expense.untaxed_amount = tax_details['total_excluded_currency']
@@ -1927,8 +1922,7 @@ class HrExpense(models.Model):
             rate=rate,
         )
         base_lines = [base_line]
-        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+        AccountTax._add_tax_details(base_lines, self.company_id)
         AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, self.company_id, include_caba_tags=self.payment_mode == 'company_account')
         tax_results = AccountTax._prepare_tax_lines(base_lines, self.company_id)
 
