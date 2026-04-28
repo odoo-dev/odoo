@@ -2,6 +2,7 @@ import base64
 import io
 import inspect
 import logging
+import re
 from collections import OrderedDict
 from datetime import date, datetime
 from unittest.mock import patch
@@ -5444,3 +5445,67 @@ class TestWriteOverrideTranslatedFields(TransactionCase):
         if checked_field_names:
             _logger.warning("Some checked fields maybe not be used in the write anymore %s", checked_field_names)
         self.assertFalse(len(violations), "Override `write`(maybe also `create`) for translated fields \n" + '\n'.join(violations))
+
+
+class TestTrivialComputeFields(TransactionCase):
+
+    TRIVIAL_COMPUTE_RE = re.compile(
+        r"^    @api\.depends\(['\"]([\w.]+)['\"]\)\n"
+        r"    def _compute_(\w+)\(self\):\n"
+        r"        for (\w+) in self:\n"
+        r"            \3\.(\w+) = \3\.\1\n$"
+    )
+
+    def test_trivial_compute_fields_should_be_related(self):
+        warnings_to_raise = []
+        for model in self.registry.values():
+            if 'test_' in model._module:
+                continue
+            for name, method in inspect.getmembers(model, inspect.isfunction):
+                if not name.startswith('_compute_'):
+                    continue
+                try:
+                    source = inspect.getsource(method)
+                except OSError:
+                    continue
+                if not (match := self.TRIVIAL_COMPUTE_RE.match(source)):
+                    continue
+
+                field_name = match[4]
+                field = model._fields.get(field_name)
+
+                if not field:
+                    continue
+
+                if field.store or field.inverse:
+                    # the field is writable
+                    continue
+
+                if next(
+                    m._name for m in reversed(model.mro())
+                    if not getattr(m, 'pool', None) and getattr(m, field_name, None)
+                ) != model._name:
+                    # the field is firstly introdueced by another mixin model
+                    continue
+
+                related = match[1]
+                comodel = model
+                for rel_field in related.split('.')[:-1]:
+                    related_field = comodel._fields[rel_field]
+                    if related_field.type != 'many2one':
+                        related_field = None
+                        break
+                    comodel = self.registry[related_field.comodel_name]
+                else:
+                    related_field = comodel._fields[related.split('.')[-1]]
+                if not related_field or related_field.type != field.type:
+                    # relation path has x2many fields or
+                    # the field type is different from the related field type
+                    continue
+
+                warnings_to_raise.append(
+                    f"{model._name}.{field_name} uses trivial compute method {name}"
+                )
+
+        if warnings_to_raise:
+            _logger.warning("%s trivial compute fields can be replaced with related:\n%s", len(warnings_to_raise), "\n".join(warnings_to_raise))
