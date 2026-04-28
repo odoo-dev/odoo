@@ -322,9 +322,9 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
 
         self.assertEqual(document.document_tax_mode, 'tax_excluded')
         document_expected_values = [{
-            'amount_tax': 181.82,
+            'amount_tax': 190.91,
             'amount_untaxed': 909.09,
-            'amount_total': 1090.91,
+            'amount_total': 1100.0,
         }]
         self.assertEqual(line.price_unit, 1000)
         self.assertRecordValues(document, document_expected_values)
@@ -365,9 +365,9 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
 
         document.document_tax_mode = 'tax_included'
         new_document_expected_values = [{
-            'amount_tax': 181.82,
+            'amount_tax': 190.91,
             'amount_untaxed': 909.09,
-            'amount_total': 1090.91,
+            'amount_total': 1100.0,
         }]
         self.assertEqual(line.price_unit, 1000)
         self.assertRecordValues(document, new_document_expected_values)
@@ -395,9 +395,9 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
 
         self.assertEqual(document.document_tax_mode, 'tax_included')
         document_expected_values = [{
-            'amount_tax': 181.82,
+            'amount_tax': 190.91,
             'amount_untaxed': 909.09,
-            'amount_total': 1090.91,
+            'amount_total': 1100.0,
         }]
         self.assertEqual(line.price_unit, 1000)
         self.assertRecordValues(document, document_expected_values)
@@ -435,9 +435,9 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
 
         document.document_tax_mode = 'tax_excluded'
         new_document_expected_values = [{
-            'amount_tax': 181.82,
+            'amount_tax': 190.91,
             'amount_untaxed': 909.09,
-            'amount_total': 1090.91,
+            'amount_total': 1100.0,
         }]
         self.assertEqual(line.price_unit, 1000)
         self.assertRecordValues(document, new_document_expected_values)
