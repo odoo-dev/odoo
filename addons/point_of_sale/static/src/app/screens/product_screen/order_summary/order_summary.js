@@ -10,7 +10,6 @@ import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/n
 import { parseFloat } from "@web/views/fields/parsers";
 import { OrderDisplay } from "@point_of_sale/app/components/order_display/order_display";
 import { ChoseComboPopup } from "@point_of_sale/app/components/popups/chose_combo_popup/chose_combo_popup";
-import { getSortedBestPotentialCombos } from "@point_of_sale/app/models/utils/combo_suggestion";
 
 export class OrderSummary extends Component {
     static template = "point_of_sale.OrderSummary";
@@ -47,7 +46,10 @@ export class OrderSummary extends Component {
     }
 
     updatePotentialCombos() {
-        this.state.potentialCombos = this.pos.getApplicableProductCombo("limited");
+        this.state.potentialCombos = this.pos.comboSuggestion.getApplicableProductCombo(
+            this.currentOrder,
+            "limited"
+        );
     }
 
     get currentOrder() {
@@ -382,16 +384,6 @@ export class OrderSummary extends Component {
     get isComboApplicable() {
         return this.state.potentialCombos.length > 0;
     }
-    getSortedBestPotentialCombos() {
-        return getSortedBestPotentialCombos({
-            order: this.currentOrder,
-            models: this.pos.data.models,
-            productCombos: this.pos.productCombos,
-            currency: this.pos.currency,
-            company: this.pos.company,
-            config: this.pos.config,
-        });
-    }
     get bestComboName() {
         let name = `
             ${this.state.potentialCombos[0].quantity} ${this.state.potentialCombos[0].product.display_name}`;
@@ -402,7 +394,7 @@ export class OrderSummary extends Component {
     }
     async applyBestCombo(keepOpen = false) {
         let comboToApply = false;
-        const bestPotentialCombos = this.getSortedBestPotentialCombos();
+        const bestPotentialCombos = this.pos.comboSuggestion.getPotentialCombos(this.currentOrder);
         if (
             bestPotentialCombos.upsell.length + bestPotentialCombos.applicable.length >
             (keepOpen ? 0 : 1)

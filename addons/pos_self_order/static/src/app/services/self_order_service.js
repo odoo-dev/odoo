@@ -23,7 +23,6 @@ import { initLNA } from "@point_of_sale/app/utils/init_lna";
 import { GeneratePrinterData } from "@point_of_sale/app/utils/printer/generate_printer_data";
 import { SnoozedProductTracker } from "@point_of_sale/app/models/utils/snooze_tracker";
 import { session } from "@web/session";
-import { getApplicableProductCombo } from "@point_of_sale/app/models/utils/combo_suggestion";
 
 const { DateTime } = luxon;
 
@@ -80,7 +79,6 @@ export class SelfOrder extends Reactive {
         this.productByCategIds = {};
         this.availableCategories = [];
         this.snoozedProductTracker = new SnoozedProductTracker();
-        this.productCombos = [];
         this.pendingComboConversion = null;
 
         this.env.utils = {
@@ -623,10 +621,6 @@ export class SelfOrder extends Reactive {
             });
             this.productByCategIds["0"] = productWoCat;
         }
-
-        this.productCombos = this.models["product.product"]
-            .getAll()
-            .filter((product) => product.type === "combo");
     }
 
     initHardware() {
@@ -1037,22 +1031,6 @@ export class SelfOrder extends Reactive {
     isTaxesIncludedInPrice() {
         return this.config.iface_tax_included === "total";
     }
-
-    getApplicableProductCombo(mode = "limited", productTmpl = null) {
-        return getApplicableProductCombo(
-            {
-                order: this.currentOrder,
-                models: this.data.models,
-                productCombos: this.productCombos,
-                currency: this.currency,
-                company: this.company,
-                config: this.config,
-            },
-            mode,
-            productTmpl
-        );
-    }
-
     /**
      * Removes or decrements the standalone lines that were converted into a combo line.
      *

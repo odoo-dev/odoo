@@ -42,7 +42,7 @@ import { logPosMessage } from "../utils/pretty_console_log";
 import { initLNA } from "../utils/init_lna";
 import { SnoozedProductTracker } from "@point_of_sale/app/models/utils/snooze_tracker";
 import { Domain } from "@web/core/domain";
-import { getApplicableProductCombo } from "../models/utils/combo_suggestion";
+import { ComboSuggestion } from "../models/utils/combo_suggestion_class";
 
 const { DateTime } = luxon;
 export const CONSOLE_COLOR = "#F5B427";
@@ -173,6 +173,12 @@ export class PosStore extends WithLazyGetterTrap {
         });
 
         this.handleQRPaymentLines();
+        this.comboSuggestion = new ComboSuggestion(
+            this.models,
+            this.currency,
+            this.company,
+            this.config
+        );
     }
 
     handleQRPaymentLines() {
@@ -531,7 +537,6 @@ export class PosStore extends WithLazyGetterTrap {
     async processProductAttributes() {
         const productIds = new Set();
         const productTmplIds = new Set();
-        const productCombos = [];
         const productModel = this.models["product.product"].toRaw();
 
         productModel.forEach((product) => {
@@ -540,12 +545,7 @@ export class PosStore extends WithLazyGetterTrap {
                 productTmplIds.add(product_tmpl_id);
                 productIds.add(product.id);
             }
-
-            if (product.product_tmpl_id?.type === "combo") {
-                productCombos.push(product);
-            }
         });
-        this.productCombos = productCombos;
 
         if (productIds.size > 0) {
             try {
@@ -2525,44 +2525,6 @@ export class PosStore extends WithLazyGetterTrap {
         return Boolean(this.selectedOrder?.getSelectedOrderline()?.isPartOfCombo());
     }
 
-    /**
-     * This method is called in three different contexts.
-     *
-     * 1. Each time `order_summary` is rendered, this method is called in “limited” mode to
-     *    determine whether it is possible to create combos with the order lines.
-     *
-     * 2. When you click on “apply combos,” a popup opens if there are several possibilities, this
-     *    time in “combinations” mode.
-     *
-     * 3. When choosing a combo in the popup, this method is called in “full” mode to get all
-     *    possible combinations.
-     *
-     * Limited mode: this mode returns when more than one combo possibility is
-     * found.
-     *
-     * Combination mode: this mode returns 1 combination for each possible combo. It limits the computation time
-     * while giving all information needed for the popup.
-     *
-     * Full mode: returns all possibilities; this mode is more complex, hence the limited mode for
-     * rendering.
-     *
-     * @param {string} mode: limited | full | combinaison
-     * @param {ProductTemplate} productTmpl: ProductTmpl
-     */
-    getApplicableProductCombo(mode = "limited", productTmpl = null) {
-        return getApplicableProductCombo(
-            {
-                order: this.selectedOrder,
-                models: this.data.models,
-                productCombos: this.productCombos,
-                currency: this.currency,
-                company: this.company,
-                config: this.config,
-            },
-            mode,
-            productTmpl
-        );
-    }
     async createComboFromLines(product, combinations) {
         const concernedLinesQty = {};
         combinations.forEach((items) => {

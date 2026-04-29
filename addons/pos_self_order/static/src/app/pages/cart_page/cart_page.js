@@ -82,7 +82,6 @@ export class CartPage extends Component {
         return getSortedBestPotentialCombos({
             order: this.selfOrder.currentOrder,
             models: this.selfOrder.data.models,
-            productCombos: this.selfOrder.productCombos,
             currency: this.selfOrder.currency,
             company: this.selfOrder.company,
             config: this.selfOrder.config,
