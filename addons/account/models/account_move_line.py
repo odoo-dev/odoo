@@ -854,8 +854,10 @@ class AccountMoveLine(models.Model):
 
             base_line = line.move_id._prepare_product_base_line_for_taxes_computation(line)
             AccountTax._add_tax_details_in_base_line(base_line, line.company_id)
-            line.price_subtotal = base_line['tax_details']['raw_total_excluded_currency']
-            line.price_total = base_line['tax_details']['raw_total_included_currency']
+            AccountTax._round_base_lines_tax_details([base_line], line.company_id)
+            tax_details = base_line['tax_details']
+            line.price_subtotal = tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency']
+            line.price_total = line.price_subtotal + sum(tax_data['tax_amount_currency'] for tax_data in tax_details['taxes_data'])
 
     @api.depends('product_id', 'product_uom_id')
     def _compute_price_unit(self):
