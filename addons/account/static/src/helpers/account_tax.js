@@ -776,7 +776,7 @@ export const accountTaxHelpers = {
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      */
-    round_tax_details_tax_amounts_l10n_ar(context) {
+    round_tax_details_tax_amounts_l10n_peppol(context) {
         const values = context.values;
         const grouping_key = context.grouping_key;
         const mode = context.mode;
@@ -785,9 +785,6 @@ export const accountTaxHelpers = {
         const tax = grouping_key.tax;
 
         // Foreign currency.
-        // We need to compute first the delta amounts in foreign currency because we want them to be
-        // the reference. The amounts expressed in company currency are just the ones expressed in
-        // foreign currency but with the rate applied.
         const foreign_currency_context = {
             ...context,
             delta_currency: currency,
@@ -795,22 +792,36 @@ export const accountTaxHelpers = {
         };
 
         let foreign_currency_results;
-        let target_base_amount_currency;
-
         if (mode === "excluded") {
             // Price excluded.
             foreign_currency_results =
                 this.round_tax_details_tax_amounts_price_exclude(foreign_currency_context);
-            target_base_amount_currency =
-                values.base_amount_currency +
-                foreign_currency_results.delta_total_base_amount;
+
+            let base_amount_currency = 0.0;
+            for (const [base_line, _] of values.base_line_x_taxes_data) {
+                const tax_details = base_line.tax_details;
+                base_amount_currency += tax_details.total_excluded_currency;
+                for (const tax_data of tax_details.taxes_data) {
+                    if (tax_data.tax === tax) {
+                        break;
+                    }
+
+                    if (tax_data.taxes && tax_data.taxes.includes(tax)) {
+                        base_amount_currency += tax_data.tax_amount_currency;
+                    }
+                }
+            }
+            foreign_currency_results.delta_total_base_amount = base_amount_currency - currency.round(values.base_amount_currency);
+            
+            if (tax.amount_type === 'percent') {
+                const tax_amount_currency = roundPrecision(base_amount_currency * tax.amount / 100.0, currency.rounding);
+                foreign_currency_results.delta_total_tax_amount =
+                    tax_amount_currency - roundPrecision(values.tax_amount_currency, currency.rounding);
+            }
         } else {
             // Price included.
             foreign_currency_results =
                 this.round_tax_details_tax_amounts_price_include(foreign_currency_context);
-            target_base_amount_currency =
-                values.base_amount_currency +
-                foreign_currency_results.delta_total_base_amount;
         }
 
         if (

@@ -1694,22 +1694,14 @@ class AccountTax(models.Model):
         }
 
     @api.model
-    def _round_tax_details_tax_amounts_l10n_ar(self, context):
+    def _round_tax_details_tax_amounts_l10n_peppol(self, context):
         """
         Compute the delta total tax amount and delta total base amount for a group of taxes
-        when the country is Argentina.
-        There are two things to consider:
+        when the country is using Peppol.
 
-        First, the tax amount is computed from the base amount but rounded.
-        Suppose price_unit = 100.0245 and a 21% tax.
-        In the default behavior, the tax amount is computed as
-        100.0245 * 0.21 = 21.005145 ≃ 21.01
-        The expected behavior is to compute it as:
-        round(100.0245) * 0.21 = 21.0042 ≃ 20.00
-
-        Also, the amounts expressed in company currency when a foreign currency is
-        involved have to be the amounts expressed in foreign currency rounded, then the
-        rate is applied.
+        The base amount has to be rounded to every line.
+        The tax amount has to be applied on the sum of those rounded base amounts.
+        The rate has to be applied on the rounded amounts.
 
         :param context:     The necessary information about the current group.
         :return:            A dictionary containing:
@@ -1724,9 +1716,6 @@ class AccountTax(models.Model):
         tax = grouping_key['tax']
 
         # Foreign currency.
-        # We need to compute first the delta amounts in foreign currency because we want them to be
-        # the reference. The amounts expressed in company currency are just the ones expressed in
-        # foreign currency but with the rate applied.
         foreign_currency_context = {
             **context,
             'delta_currency': currency,
@@ -1735,57 +1724,60 @@ class AccountTax(models.Model):
         if mode == 'excluded':
             # Price excluded.
             foreign_currency_results = self._round_tax_details_tax_amounts_price_exclude(foreign_currency_context)
-            target_base_amount_currency = values['base_amount_currency'] + foreign_currency_results['delta_total_base_amount']
+
+            base_amount_currency = 0.0
+            for base_line, _ in values['base_line_x_taxes_data']:
+                tax_details = base_line['tax_details']
+                base_amount_currency += tax_details['total_excluded_currency']
+                for tax_data in tax_details['taxes_data']:
+                    if tax_data['tax'] == tax:
+                        break
+
+                    if tax in tax_data['taxes']:
+                        base_amount_currency += tax_data['tax_amount_currency']
+            foreign_currency_results['delta_total_base_amount'] = base_amount_currency - currency.round(values['base_amount_currency'])
+
+            if tax.amount_type == 'percent':
+                tax_amount_currency = currency.round(base_amount_currency * tax.amount / 100.0)
+                foreign_currency_results['delta_total_tax_amount'] = tax_amount_currency - currency.round(values['tax_amount_currency'])
         else:
             # Price included.
+            # Suppose price_unit = 263145.3, discount = 25.0, tax = 21% included
+            # target_total_amount_currency = 263145.3 * 0.75 = 197358.975 ≃ 197358.98
+            # target_tax_amount_currency = 197358.98 * 0.21 / 1.21 = 34252.384958678 ≃ 34252.38
+            # target_base_amount_currency = 197358.98 - 34252.38 = 163106.60
             foreign_currency_results = self._round_tax_details_tax_amounts_price_include(foreign_currency_context)
-            target_base_amount_currency = values['base_amount_currency'] + foreign_currency_results['delta_total_base_amount']
-
-        if (
-            # Only for taxes that scale as a percentage.
-            tax.amount_type == 'percent'
-            # If the tax amount is fully forced with manual tax amount, don't change it.
-            and all(
-                not base_line['manual_tax_amounts'] or not base_line['manual_tax_amounts'].get(str(tax_data['tax'].id))
-                for base_line, taxes_data in values['base_line_x_taxes_data']
-                for tax_data in taxes_data
+            target_total_amount_currency = (
+                values['base_amount_currency']
+                + foreign_currency_results['delta_total_base_amount']
+                + values['tax_amount_currency']
+                + foreign_currency_results['delta_total_tax_amount']
             )
-        ):
-            if mode == 'excluded':
-                # Price excluded.
-                # Suppose price_unit = 263145.3, discount = 25.0, tax = 21%
-                # target_base_amount_currency = 263145.3 * 0.75 = 197358.975 ≃ 197358.98
-                # target_tax_amount_currency = 197358.98 * 0.21 = 41445.3858 ≃ 41445.39
-                target_tax_amount_currency = currency.round(target_base_amount_currency * tax.amount / 100.0)
-                foreign_currency_results['delta_total_tax_amount'] = target_tax_amount_currency - values['tax_amount_currency']
-            else:
-                # Price included.
-                # Suppose price_unit = 263145.3, discount = 25.0, tax = 21% included
-                # target_total_amount_currency = 263145.3 * 0.75 = 197358.975 ≃ 197358.98
-                # target_tax_amount_currency = 197358.98 * 0.21 / 1.21 = 34252.384958678 ≃ 34252.38
-                # target_base_amount_currency = 197358.98 - 34252.38 = 163106.60
-                target_total_amount_currency = (
-                    target_base_amount_currency
-                    + values['tax_amount_currency']
-                    + foreign_currency_results['delta_total_tax_amount']
-                )
+            if values['base_amount_currency'] > 100000:
+                A = 1
+            if tax.amount_type == 'percent':
                 target_tax_amount_currency = currency.round(target_total_amount_currency * tax.amount / (100.0 + tax.amount))
                 foreign_currency_results['delta_total_tax_amount'] = target_tax_amount_currency - values['tax_amount_currency']
+                foreign_currency_results['delta_total_base_amount'] = (
+                    target_total_amount_currency
+                    - target_tax_amount_currency
+                    - values['base_amount_currency']
+                )
 
         # Company currency.
         if currency == delta_currency:
             return foreign_currency_results
 
         rate = grouping_key['rate']
-        if not rate:
-            if mode == 'excluded':
-                return self._round_tax_details_tax_amounts_price_exclude(context)
-            else:
-                return self._round_tax_details_tax_amounts_price_include(context)
-
         target_tax_amount_currency = values['tax_amount_currency'] + foreign_currency_results['delta_total_tax_amount']
-        delta_total_base_amount = delta_currency.round(target_base_amount_currency / rate) - values['base_amount']
-        delta_total_tax_amount = delta_currency.round(target_tax_amount_currency / rate) - values['tax_amount']
+        target_base_amount_currency = values['base_amount_currency'] + foreign_currency_results['delta_total_base_amount']
+        if rate:
+            delta_total_base_amount = delta_currency.round(target_base_amount_currency / rate) - values['base_amount']
+            delta_total_tax_amount = delta_currency.round(target_tax_amount_currency / rate) - values['tax_amount']
+        else:
+            delta_total_base_amount = 0.0
+            delta_total_tax_amount = 0.0
+
         return {
             'delta_total_tax_amount': delta_total_tax_amount,
             'delta_total_base_amount': delta_total_base_amount,
@@ -1860,8 +1852,8 @@ class AccountTax(models.Model):
                     'mode': current_mode,
                 }
 
-                if rounding_method == 'round_globally' and country_code == 'AR':
-                    results = self._round_tax_details_tax_amounts_l10n_ar(context)
+                if rounding_method == 'round_globally' and country_code in ('BE', 'NL', 'RO', 'DK'):
+                    results = self._round_tax_details_tax_amounts_l10n_peppol(context)
                 elif rounding_method == 'round_globally' and country_code == 'PT':
                     results = self._round_tax_details_tax_amounts_l10n_pt(context)
                 elif current_mode == 'included':
@@ -1941,13 +1933,11 @@ class AccountTax(models.Model):
         return delta_currency.round(target_total_amount) - total_amount
 
     @api.model
-    def _round_tax_details_base_lines_l10n_ar(self, context):
+    def _round_tax_details_base_lines_l10n_peppol(self, context):
         """
-        Compute the delta of the untaxed amount for the whole document when the country is Argentina.
-        The amounts expressed in company currency when a foreign currency is
-        involved have to be the amounts expressed in foreign currency rounded, then the
-        rate is applied.
-        
+        Compute the delta of the untaxed amount for the whole document when the country is using Peppol.
+        The base amount has to be rounded per line.
+
         :param context:     The necessary information about the lines.
         :return:            The delta to be spread in the base amounts.
         """
@@ -1967,7 +1957,7 @@ class AccountTax(models.Model):
             'suffix': '_currency',
         }
         if mode == 'excluded':
-            delta_total_excluded_currency = self._round_tax_details_base_lines_price_exclude(foreign_currency_context)
+            delta_total_excluded_currency = 0.0
         else:
             delta_total_excluded_currency = self._round_tax_details_base_lines_price_include(foreign_currency_context)
 
@@ -2066,8 +2056,8 @@ class AccountTax(models.Model):
                     'mode': current_mode,
                 }
 
-                if rounding_method == 'round_globally' and country_code == 'AR':
-                    delta_total_excluded = self._round_tax_details_base_lines_l10n_ar(context)
+                if rounding_method == 'round_globally' and country_code in ('BE', 'NL', 'RO', 'DK'):
+                    delta_total_excluded = self._round_tax_details_base_lines_l10n_peppol(context)
                 elif rounding_method == 'round_globally' and country_code == 'PT':
                     delta_total_excluded = self._round_tax_details_base_lines_l10n_pt(context)
                 elif current_mode == 'excluded':

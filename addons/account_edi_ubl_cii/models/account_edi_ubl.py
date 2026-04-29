@@ -1155,23 +1155,30 @@ class AccountEdiUBL(models.AbstractModel):
         }
 
     def _ubl_add_line_allowance_charge_nodes_for_discount(self, vals, in_foreign_currency=True):
+        AccountTax = self.env['account.tax']
         line_node = vals['line_node']
         base_line = vals['line_vals']['base_line']
         currency = base_line['currency_id'] if in_foreign_currency else vals['company_currency']
         suffix = '_currency' if in_foreign_currency else ''
         tax_details = base_line['tax_details']
 
-        raw_discount_amount = tax_details[f'discount_amount{suffix}']
-        if currency.is_zero(raw_discount_amount):
+        raw_gross_total_excluded = AccountTax._get_gross_total_without_tax(
+            base_line=base_line,
+            company=vals['company'],
+            in_foreign_currency=in_foreign_currency,
+        )
+        gross_total_excluded = currency.round(raw_gross_total_excluded)
+        discount_amount = gross_total_excluded - tax_details[f'total_excluded{suffix}']
+        if currency.is_zero(discount_amount):
             return
 
         allowance_charges_nodes = line_node['cac:AllowanceCharge']
         allowance_charges_nodes.append(self._ubl_get_line_allowance_charge_discount_node(vals, {
             'currency': currency,
             'percent': base_line['discount'],
-            'is_charge': raw_discount_amount < 0.0,
-            'amount': raw_discount_amount,
-            'base_amount': tax_details[f'gross_total_excluded{suffix}'],
+            'is_charge': discount_amount < 0.0,
+            'amount': discount_amount,
+            'base_amount': gross_total_excluded,
         }))
 
     def _ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(self, vals, in_foreign_currency=True):
@@ -1975,37 +1982,41 @@ class AccountEdiUBL(models.AbstractModel):
         }
 
     def _ubl_add_legal_monetary_total_payable_rounding_amount_node_from_cash_rounding(self, vals, in_foreign_currency=True):
-        # DEPRECATED: TO BE REMOVED
-        pass
-
-    def _ubl_add_legal_monetary_total_payable_rounding_amount_node(self, vals):
         AccountTax = self.env['account.tax']
         base_lines = vals['base_lines']
-        currency = vals['currency_id']
         node = vals['legal_monetary_total_node']
-        tax_inclusive_amount = node['cbc:TaxInclusiveAmount']['_text']
+        suffix = '_currency' if in_foreign_currency else ''
+        currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
 
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
             base_lines=base_lines,
-            grouping_function=lambda base_line, tax_data: True,
+            grouping_function=lambda base_line, tax_data: self._ubl_is_cash_rounding_base_line(base_line),
         )
         values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
-        expected_tax_inclusive_amount = sum(
-             values['total_excluded_currency'] + values['tax_amount_currency']
-             for values in values_per_grouping_key.values()
-        )
+        payable_rounding_amount = None
+        for grouping_key, values in values_per_grouping_key.items():
+            if not grouping_key:
+                continue
 
-        payable_rounding_amount = expected_tax_inclusive_amount - tax_inclusive_amount
-        if currency.is_zero(payable_rounding_amount):
+            if payable_rounding_amount is None:
+                payable_rounding_amount = 0.0
+            payable_rounding_amount += values[f'total_excluded{suffix}']
+
+        if payable_rounding_amount is None:
             node['cbc:PayableRoundingAmount'] = {
                 '_text': None,
                 'currencyID': None,
             }
         else:
             node['cbc:PayableRoundingAmount'] = {
-                '_text': FloatFmt(payable_rounding_amount, max_dp=currency.decimal_places),
+                '_text': FloatFmt(payable_rounding_amount, min_dp=currency.decimal_places),
                 'currencyID': currency.name,
             }
+
+    def _ubl_add_legal_monetary_total_payable_rounding_amount_node(self, vals):
+        vals['legal_monetary_total_node']['cbc:PayableRoundingAmount'] = None
+        # Cash rounding lines should not appear as lines but in PayableRoundingAmount.
+        self._ubl_add_legal_monetary_total_payable_rounding_amount_node_from_cash_rounding(vals)
 
     def _ubl_add_legal_monetary_total_node(self, vals):
         node = vals['document_node']['cac:LegalMonetaryTotal'] = {}

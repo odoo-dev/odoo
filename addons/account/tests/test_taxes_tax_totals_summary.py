@@ -40,10 +40,10 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
         Furthermore, it's a complicated setup due to the usage of include_base_amount / is_base_affected.
         """
         self.change_company_country(self.env.company, self.env.ref('base.in'))
-        tax1 = self.percent_tax(6, include_base_amount=True)
-        tax2 = self.percent_tax(6, include_base_amount=True, is_base_affected=False)
+        fixed_1 = self.percent_tax(6, include_base_amount=True)
+        tax_21 = self.percent_tax(6, include_base_amount=True, is_base_affected=False)
         tax3 = self.percent_tax(3)
-        taxes = tax1 + tax2 + tax3
+        taxes = fixed_1 + tax_21 + tax3
 
         document_params = self.init_document(
             lines=[
@@ -224,8 +224,8 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 }
                 yield 4, self.populate_document(document_params), expected_values
 
-        tax1.price_include_override = 'tax_included'
-        tax2.price_include_override = 'tax_included'
+        fixed_1.price_include_override = 'tax_included'
+        tax_21.price_include_override = 'tax_included'
         document_params = self.init_document(
             lines=[
                 {'price_unit': 17.79, 'tax_ids': taxes},
@@ -423,12 +423,12 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
         computed as part of the price_unit.
         """
         self.change_company_country(self.env.company, self.env.ref('base.br'))
-        tax1 = self.division_tax(5)
-        tax2 = self.division_tax(3)
+        fixed_1 = self.division_tax(5)
+        tax_21 = self.division_tax(3)
         tax3 = self.division_tax(0.65)
         tax4 = self.division_tax(9)
         tax5 = self.division_tax(15)
-        taxes = tax1 + tax2 + tax3 + tax4 + tax5
+        taxes = fixed_1 + tax_21 + tax3 + tax4 + tax5
 
         document_params = self.init_document(
             lines=[
@@ -879,9 +879,10 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
         one.
         """
         self.change_company_country(self.env.company, self.env.ref('base.be'))
-        tax1 = self.fixed_tax(1, include_base_amount=True)
-        tax2 = self.percent_tax(21)
-        taxes = tax1 + tax2
+        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        fixed_1 = self.fixed_tax(1, include_base_amount=True)
+        tax_21 = self.percent_tax(21)
+        taxes = fixed_1 + tax_21
 
         document_params = self.init_document(
             lines=[
@@ -892,157 +893,80 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             rate=0.5,
         )
         with self.same_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
-                expected_values = {
-                    'same_tax_base': True,
-                    'currency_id': self.foreign_currency.id,
-                    'company_currency_id': self.currency.id,
-                    'base_amount_currency': 33.58,
-                    'base_amount': 67.16,
-                    'tax_amount_currency': 9.48,
-                    'tax_amount': 18.96,
-                    'total_amount_currency': 43.06,
-                    'total_amount': 86.12,
-                    'subtotals': [
-                        {
-                            'name': "Untaxed Amount",
-                            'base_amount_currency': 33.58,
-                            'base_amount': 67.16,
-                            'tax_amount_currency': 9.48,
-                            'tax_amount': 18.96,
-                            'tax_groups': [
-                                {
-                                    'id': self.tax_groups[0].id,
-                                    'base_amount_currency': 33.58,
-                                    'base_amount': 67.16,
-                                    'tax_amount_currency': 9.48,
-                                    'tax_amount': 18.96,
-                                    'display_base_amount_currency': 33.58,
-                                    'display_base_amount': 67.16,
-                                },
-                            ],
-                        },
-                    ],
-                }
-                yield 1, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
-                expected_values = {
-                    'same_tax_base': True,
-                    'currency_id': self.foreign_currency.id,
-                    'company_currency_id': self.currency.id,
-                    'base_amount_currency': 33.58,
-                    'base_amount': 67.16,
-                    'tax_amount_currency': 9.47,
-                    'tax_amount': 18.94,
-                    'total_amount_currency': 43.05,
-                    'total_amount': 86.1,
-                    'subtotals': [
-                        {
-                            'name': "Untaxed Amount",
-                            'base_amount_currency': 33.58,
-                            'base_amount': 67.16,
-                            'tax_amount_currency': 9.47,
-                            'tax_amount': 18.94,
-                            'tax_groups': [
-                                {
-                                    'id': self.tax_groups[0].id,
-                                    'base_amount_currency': 33.58,
-                                    'base_amount': 67.16,
-                                    'tax_amount_currency': 9.47,
-                                    'tax_amount': 18.94,
-                                    'display_base_amount_currency': 33.58,
-                                    'display_base_amount': 67.16,
-                                },
-                            ],
-                        },
-                    ],
-                }
-                yield 2, self.populate_document(document_params), expected_values
+            expected_values = {
+                'same_tax_base': True,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 33.58,
+                'base_amount': 67.16,
+                'tax_amount_currency': 9.47,
+                'tax_amount': 18.94,
+                'total_amount_currency': 43.05,
+                'total_amount': 86.1,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 33.58,
+                        'base_amount': 67.16,
+                        'tax_amount_currency': 9.47,
+                        'tax_amount': 18.94,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 33.58,
+                                'base_amount': 67.16,
+                                'tax_amount_currency': 9.47,
+                                'tax_amount': 18.94,
+                                'display_base_amount_currency': 33.58,
+                                'display_base_amount': 67.16,
+                            },
+                        ],
+                    },
+                ],
+            }
+            yield 1, self.populate_document(document_params), expected_values
         with self.different_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
-                expected_values = {
-                    'same_tax_base': False,
-                    'currency_id': self.foreign_currency.id,
-                    'company_currency_id': self.currency.id,
-                    'base_amount_currency': 33.58,
-                    'base_amount': 67.16,
-                    'tax_amount_currency': 9.48,
-                    'tax_amount': 18.96,
-                    'total_amount_currency': 43.06,
-                    'total_amount': 86.12,
-                    'subtotals': [
-                        {
-                            'name': "Untaxed Amount",
-                            'base_amount_currency': 33.58,
-                            'base_amount': 67.16,
-                            'tax_amount_currency': 9.48,
-                            'tax_amount': 18.96,
-                            'tax_groups': [
-                                {
-                                    'id': self.tax_groups[0].id,
-                                    'base_amount_currency': 33.58,
-                                    'base_amount': 67.16,
-                                    'tax_amount_currency': 2.0,
-                                    'tax_amount': 4.0,
-                                    'display_base_amount_currency': False,
-                                    'display_base_amount': False,
-                                },
-                                {
-                                    'id': self.tax_groups[1].id,
-                                    'base_amount_currency': 35.58,
-                                    'base_amount': 71.16,
-                                    'tax_amount_currency': 7.48,
-                                    'tax_amount': 14.96,
-                                    'display_base_amount_currency': 35.58,
-                                    'display_base_amount': 71.16,
-                                },
-                            ],
-                        },
-                    ],
-                }
-                yield 3, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
-                expected_values = {
-                    'same_tax_base': False,
-                    'currency_id': self.foreign_currency.id,
-                    'company_currency_id': self.currency.id,
-                    'base_amount_currency': 33.58,
-                    'base_amount': 67.16,
-                    'tax_amount_currency': 9.47,
-                    'tax_amount': 18.94,
-                    'total_amount_currency': 43.05,
-                    'total_amount': 86.1,
-                    'subtotals': [
-                        {
-                            'name': "Untaxed Amount",
-                            'base_amount_currency': 33.58,
-                            'base_amount': 67.16,
-                            'tax_amount_currency': 9.47,
-                            'tax_amount': 18.94,
-                            'tax_groups': [
-                                {
-                                    'id': self.tax_groups[0].id,
-                                    'base_amount_currency': 33.58,
-                                    'base_amount': 67.16,
-                                    'tax_amount_currency': 2.0,
-                                    'tax_amount': 4.0,
-                                    'display_base_amount_currency': False,
-                                    'display_base_amount': False,
-                                },
-                                {
-                                    'id': self.tax_groups[1].id,
-                                    'base_amount_currency': 35.58,
-                                    'base_amount': 71.16,
-                                    'tax_amount_currency': 7.47,
-                                    'tax_amount': 14.94,
-                                    'display_base_amount_currency': 35.58,
-                                    'display_base_amount': 71.16,
-                                },
-                            ],
-                        },
-                    ],
-                }
-                yield 4, self.populate_document(document_params), expected_values
+            expected_values = {
+                'same_tax_base': False,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 33.58,
+                'base_amount': 67.16,
+                'tax_amount_currency': 9.47,
+                'tax_amount': 18.94,
+                'total_amount_currency': 43.05,
+                'total_amount': 86.1,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 33.58,
+                        'base_amount': 67.16,
+                        'tax_amount_currency': 9.47,
+                        'tax_amount': 18.94,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 33.58,
+                                'base_amount': 67.16,
+                                'tax_amount_currency': 2.0,
+                                'tax_amount': 4.0,
+                                'display_base_amount_currency': False,
+                                'display_base_amount': False,
+                            },
+                            {
+                                'id': self.tax_groups[1].id,
+                                'base_amount_currency': 35.58,
+                                'base_amount': 71.16,
+                                'tax_amount_currency': 7.47,
+                                'tax_amount': 14.94,
+                                'display_base_amount_currency': 35.58,
+                                'display_base_amount': 71.16,
+                            },
+                        ],
+                    },
+                ],
+            }
+            yield 2, self.populate_document(document_params), expected_values
 
         taxes.price_include_override = 'tax_included'
 
@@ -1055,200 +979,182 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             rate=0.5,
         )
         with self.same_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
-                expected_values = {
-                    'same_tax_base': True,
-                    'currency_id': self.foreign_currency.id,
-                    'company_currency_id': self.currency.id,
-                    'base_amount_currency': 33.58,
-                    'base_amount': 67.16,
-                    'tax_amount_currency': 9.48,
-                    'tax_amount': 18.96,
-                    'total_amount_currency': 43.06,
-                    'total_amount': 86.12,
-                    'subtotals': [
-                        {
-                            'name': "Untaxed Amount",
-                            'base_amount_currency': 33.58,
-                            'base_amount': 67.16,
-                            'tax_amount_currency': 9.48,
-                            'tax_amount': 18.96,
-                            'tax_groups': [
-                                {
-                                    'id': self.tax_groups[0].id,
-                                    'base_amount_currency': 33.58,
-                                    'base_amount': 67.16,
-                                    'tax_amount_currency': 9.48,
-                                    'tax_amount': 18.96,
-                                    'display_base_amount_currency': 33.58,
-                                    'display_base_amount': 67.16,
-                                },
-                            ],
-                        },
-                    ],
-                }
-                yield 5, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
-                expected_values = {
-                    'same_tax_base': True,
-                    'currency_id': self.foreign_currency.id,
-                    'company_currency_id': self.currency.id,
-                    'base_amount_currency': 33.59,
-                    'base_amount': 67.17,
-                    'tax_amount_currency': 9.47,
-                    'tax_amount': 18.95,
-                    'total_amount_currency': 43.06,
-                    'total_amount': 86.12,
-                    'subtotals': [
-                        {
-                            'name': "Untaxed Amount",
-                            'base_amount_currency': 33.59,
-                            'base_amount': 67.17,
-                            'tax_amount_currency': 9.47,
-                            'tax_amount': 18.95,
-                            'tax_groups': [
-                                {
-                                    'id': self.tax_groups[0].id,
-                                    'base_amount_currency': 33.59,
-                                    'base_amount': 67.17,
-                                    'tax_amount_currency': 9.47,
-                                    'tax_amount': 18.95,
-                                    'display_base_amount_currency': 33.59,
-                                    'display_base_amount': 67.17,
-                                },
-                            ],
-                        },
-                    ],
-                }
-                yield 6, self.populate_document(document_params), expected_values
-        with self.different_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
-                expected_values = {
-                    'same_tax_base': False,
-                    'currency_id': self.foreign_currency.id,
-                    'company_currency_id': self.currency.id,
-                    'base_amount_currency': 33.58,
-                    'base_amount': 67.16,
-                    'tax_amount_currency': 9.48,
-                    'tax_amount': 18.96,
-                    'total_amount_currency': 43.06,
-                    'total_amount': 86.12,
-                    'subtotals': [
-                        {
-                            'name': "Untaxed Amount",
-                            'base_amount_currency': 33.58,
-                            'base_amount': 67.16,
-                            'tax_amount_currency': 9.48,
-                            'tax_amount': 18.96,
-                            'tax_groups': [
-                                {
-                                    'id': self.tax_groups[0].id,
-                                    'base_amount_currency': 33.58,
-                                    'base_amount': 67.16,
-                                    'tax_amount_currency': 2.0,
-                                    'tax_amount': 4.0,
-                                    'display_base_amount_currency': False,
-                                    'display_base_amount': False,
-                                },
-                                {
-                                    'id': self.tax_groups[1].id,
-                                    'base_amount_currency': 35.58,
-                                    'base_amount': 71.16,
-                                    'tax_amount_currency': 7.48,
-                                    'tax_amount': 14.96,
-                                    'display_base_amount_currency': 35.58,
-                                    'display_base_amount': 71.16,
-                                },
-                            ],
-                        },
-                    ],
-                }
-                yield 7, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
-                expected_values = {
-                    'same_tax_base': False,
-                    'currency_id': self.foreign_currency.id,
-                    'company_currency_id': self.currency.id,
-                    'base_amount_currency': 33.59,
-                    'base_amount': 67.17,
-                    'tax_amount_currency': 9.47,
-                    'tax_amount': 18.95,
-                    'total_amount_currency': 43.06,
-                    'total_amount': 86.12,
-                    'subtotals': [
-                        {
-                            'name': "Untaxed Amount",
-                            'base_amount_currency': 33.59,
-                            'base_amount': 67.17,
-                            'tax_amount_currency': 9.47,
-                            'tax_amount': 18.95,
-                            'tax_groups': [
-                                {
-                                    'id': self.tax_groups[0].id,
-                                    'base_amount_currency': 33.59,
-                                    'base_amount': 67.17,
-                                    'tax_amount_currency': 2.0,
-                                    'tax_amount': 4.0,
-                                    'display_base_amount_currency': False,
-                                    'display_base_amount': False,
-                                },
-                                {
-                                    'id': self.tax_groups[1].id,
-                                    'base_amount_currency': 35.59,
-                                    'base_amount': 71.17,
-                                    'tax_amount_currency': 7.47,
-                                    'tax_amount': 14.95,
-                                    'display_base_amount_currency': 35.59,
-                                    'display_base_amount': 71.17,
-                                },
-                            ],
-                        },
-                    ],
-                }
-                yield 8, self.populate_document(document_params), expected_values
-
-        document_params = self.init_document(
-            lines=[
-                {'price_unit': -20.00, 'tax_ids': tax1, 'quantity': -1.0},
-                {'price_unit': 0.00, 'tax_ids': tax1, 'quantity': -1.0},
-                {'price_unit': -20.00, 'tax_ids': tax1, 'quantity': 1.0},
-            ],
-            currency=self.foreign_currency,
-            rate=0.5,
-        )
-        with self.with_tax_calculation_rounding_method('round_globally'):
             expected_values = {
                 'same_tax_base': True,
                 'currency_id': self.foreign_currency.id,
                 'company_currency_id': self.currency.id,
-                'base_amount_currency': 1.0,
-                'base_amount': 2.0,
-                'tax_amount_currency': -1.0,
-                'tax_amount': -2.0,
-                'total_amount_currency': 0.0,
-                'total_amount': 0.0,
+                'base_amount_currency': 33.59,
+                'base_amount': 67.18,
+                'tax_amount_currency': 9.47,
+                'tax_amount': 18.94,
+                'total_amount_currency': 43.06,
+                'total_amount': 86.12,
                 'subtotals': [
                     {
                         'name': "Untaxed Amount",
-                        'base_amount_currency': 1.00,
-                        'base_amount': 2.00,
-                        'tax_amount_currency': -1.0,
-                        'tax_amount': -2.0,
+                        'base_amount_currency': 33.59,
+                        'base_amount': 67.18,
+                        'tax_amount_currency': 9.47,
+                        'tax_amount': 18.94,
                         'tax_groups': [
                             {
                                 'id': self.tax_groups[0].id,
-                                'base_amount_currency': 1.00,
-                                'base_amount': 2.00,
-                                'tax_amount_currency': -1.0,
-                                'tax_amount': -2.0,
-                                'display_base_amount_currency': False,
-                                'display_base_amount': False,
+                                'base_amount_currency': 33.59,
+                                'base_amount': 67.18,
+                                'tax_amount_currency': 9.47,
+                                'tax_amount': 18.94,
+                                'display_base_amount_currency': 33.59,
+                                'display_base_amount': 67.18,
                             },
                         ],
                     },
                 ],
             }
-            yield 9, self.populate_document(document_params), expected_values
+            yield 3, self.populate_document(document_params), expected_values
+        with self.different_tax_group(taxes):
+            expected_values = {
+                'same_tax_base': False,
+                'currency_id': self.foreign_currency.id,
+                'company_currency_id': self.currency.id,
+                'base_amount_currency': 33.59,
+                'base_amount': 67.18,
+                'tax_amount_currency': 9.47,
+                'tax_amount': 18.94,
+                'total_amount_currency': 43.06,
+                'total_amount': 86.12,
+                'subtotals': [
+                    {
+                        'name': "Untaxed Amount",
+                        'base_amount_currency': 33.59,
+                        'base_amount': 67.18,
+                        'tax_amount_currency': 9.47,
+                        'tax_amount': 18.94,
+                        'tax_groups': [
+                            {
+                                'id': self.tax_groups[0].id,
+                                'base_amount_currency': 33.59,
+                                'base_amount': 67.18,
+                                'tax_amount_currency': 2.0,
+                                'tax_amount': 4.0,
+                                'display_base_amount_currency': False,
+                                'display_base_amount': False,
+                            },
+                            {
+                                'id': self.tax_groups[1].id,
+                                'base_amount_currency': 35.59,
+                                'base_amount': 71.18,
+                                'tax_amount_currency': 7.47,
+                                'tax_amount': 14.94,
+                                'display_base_amount_currency': 35.59,
+                                'display_base_amount': 71.18,
+                            },
+                        ],
+                    },
+                ],
+            }
+            yield 4, self.populate_document(document_params), expected_values
+
+        document_params = self.init_document(
+            lines=[
+                {'price_unit': -20.00, 'tax_ids': fixed_1, 'quantity': -1.0},
+                {'price_unit': 0.00, 'tax_ids': fixed_1, 'quantity': -1.0},
+                {'price_unit': -20.00, 'tax_ids': fixed_1, 'quantity': 1.0},
+            ],
+            currency=self.foreign_currency,
+            rate=0.5,
+        )
+        expected_values = {
+            'same_tax_base': True,
+            'currency_id': self.foreign_currency.id,
+            'company_currency_id': self.currency.id,
+            'base_amount_currency': 1.0,
+            'base_amount': 2.0,
+            'tax_amount_currency': -1.0,
+            'tax_amount': -2.0,
+            'total_amount_currency': 0.0,
+            'total_amount': 0.0,
+            'subtotals': [
+                {
+                    'name': "Untaxed Amount",
+                    'base_amount_currency': 1.00,
+                    'base_amount': 2.00,
+                    'tax_amount_currency': -1.0,
+                    'tax_amount': -2.0,
+                    'tax_groups': [
+                        {
+                            'id': self.tax_groups[0].id,
+                            'base_amount_currency': 1.00,
+                            'base_amount': 2.00,
+                            'tax_amount_currency': -1.0,
+                            'tax_amount': -2.0,
+                            'display_base_amount_currency': False,
+                            'display_base_amount': False,
+                        },
+                    ],
+                },
+            ],
+        }
+        yield 5, self.populate_document(document_params), expected_values
+
+        taxes.price_include_override = 'tax_excluded'
+
+        document_params = self.init_document(
+            lines=[{'price_unit': 263145.3, 'tax_ids': tax_21, 'discount': 25.0}],
+        )
+        expected_values = {
+            'same_tax_base': True,
+            'currency_id': self.currency.id,
+            'base_amount_currency': 197358.98,
+            'tax_amount_currency': 41445.39,
+            'total_amount_currency': 238804.37,
+            'subtotals': [
+                {
+                    'name': "Untaxed Amount",
+                    'base_amount_currency': 197358.98,
+                    'tax_amount_currency': 41445.39,
+                    'tax_groups': [
+                        {
+                            'id': self.tax_groups[0].id,
+                            'base_amount_currency': 197358.98,
+                            'tax_amount_currency': 41445.39,
+                            'display_base_amount_currency': 197358.98,
+                        },
+                    ],
+                },
+            ],
+        }
+        yield 6, self.populate_document(document_params), expected_values
+
+        taxes.price_include_override = 'tax_included'
+
+        document = self.populate_document(self.init_document(
+            lines=[
+                {'price_unit': 263145.3, 'discount': 25.0, 'tax_ids': tax_21},
+            ],
+        ))
+        expected_values = {
+            'same_tax_base': True,
+            'currency_id': self.currency.id,
+            'base_amount_currency': 163106.60,
+            'tax_amount_currency': 34252.38,
+            'total_amount_currency': 197358.98,
+            'subtotals': [
+                {
+                    'name': "Untaxed Amount",
+                    'base_amount_currency': 163106.60,
+                    'tax_amount_currency': 34252.38,
+                    'tax_groups': [
+                        {
+                            'id': self.tax_groups[0].id,
+                            'base_amount_currency': 163106.60,
+                            'tax_amount_currency': 34252.38,
+                            'display_base_amount_currency': 163106.60,
+                        },
+                    ],
+                },
+            ],
+        }
+        yield 7, document, expected_values
 
     def test_taxes_l10n_be_generic_helpers(self):
         for test_index, document, expected_values in self._test_taxes_l10n_be():
@@ -2111,134 +2017,6 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
         }
         self._assert_tax_totals_summary(invoice.tax_totals, expected_values)
 
-    def _test_taxes_l10n_ar(self):
-        self.change_company_country(self.env.company, self.env.ref('base.ar'))
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
-
-        tax_21 = self.percent_tax(21, tax_group_id=self.tax_groups[0].id)
-        tax_0_2 = self.percent_tax(0.2, tax_group_id=self.tax_groups[1].id)
-
-        document = self.populate_document(self.init_document(
-            lines=[
-                {'quantity': 7.0, 'price_unit': 124.0, 'tax_ids': tax_21 + tax_0_2},
-            ],
-            currency=self.foreign_currency,
-            rate=1 / 1129.179,
-        ))
-        expected_values = {
-            'same_tax_base': True,
-            'currency_id': self.foreign_currency.id,
-            'company_currency_id': self.currency.id,
-            'base_amount_currency': 868.0,
-            'base_amount': 980127.37,
-            'tax_amount_currency': 184.02,
-            'tax_amount': 207791.52,
-            'total_amount_currency': 1052.02,
-            'total_amount': 1187918.89,
-            'subtotals': [
-                {
-                    'name': "Untaxed Amount",
-                    'base_amount_currency': 868.0,
-                    'base_amount': 980127.37,
-                    'tax_amount_currency': 184.02,
-                    'tax_amount': 207791.52,
-                    'tax_groups': [
-                        {
-                            'id': self.tax_groups[0].id,
-                            'base_amount_currency': 868.0,
-                            'base_amount': 980127.37,
-                            'tax_amount_currency': 182.28,
-                            'tax_amount': 205826.75,
-                            'display_base_amount_currency': 868.0,
-                            'display_base_amount': 980127.37,
-                        },
-                        {
-                            'id': self.tax_groups[1].id,
-                            'base_amount_currency': 868.0,
-                            'base_amount': 980127.37,
-                            'tax_amount_currency': 1.74,
-                            'tax_amount': 1964.77,
-                            'display_base_amount_currency': 868.0,
-                            'display_base_amount': 980127.37,
-                        },
-                    ],
-                },
-            ],
-        }
-        yield 1, document, expected_values
-
-        document = self.populate_document(self.init_document(
-            lines=[
-                {'price_unit': 263145.3, 'discount': 25.0, 'tax_ids': tax_21},
-            ],
-        ))
-        expected_values = {
-            'same_tax_base': True,
-            'currency_id': self.currency.id,
-            'base_amount_currency': 197358.98,
-            'tax_amount_currency': 41445.39,
-            'total_amount_currency': 238804.37,
-            'subtotals': [
-                {
-                    'name': "Untaxed Amount",
-                    'base_amount_currency': 197358.98,
-                    'tax_amount_currency': 41445.39,
-                    'tax_groups': [
-                        {
-                            'id': self.tax_groups[0].id,
-                            'base_amount_currency': 197358.98,
-                            'tax_amount_currency': 41445.39,
-                            'display_base_amount_currency': 197358.98,
-                        },
-                    ],
-                },
-            ],
-        }
-        yield 2, document, expected_values
-
-        tax_21.price_include_override = 'tax_included'
-
-        document = self.populate_document(self.init_document(
-            lines=[
-                {'price_unit': 263145.3, 'discount': 25.0, 'tax_ids': tax_21},
-            ],
-        ))
-        expected_values = {
-            'same_tax_base': True,
-            'currency_id': self.currency.id,
-            'base_amount_currency': 163106.60,
-            'tax_amount_currency': 34252.38,
-            'total_amount_currency': 197358.98,
-            'subtotals': [
-                {
-                    'name': "Untaxed Amount",
-                    'base_amount_currency': 163106.60,
-                    'tax_amount_currency': 34252.38,
-                    'tax_groups': [
-                        {
-                            'id': self.tax_groups[0].id,
-                            'base_amount_currency': 163106.60,
-                            'tax_amount_currency': 34252.38,
-                            'display_base_amount_currency': 163106.60,
-                        },
-                    ],
-                },
-            ],
-        }
-        yield 3, document, expected_values
-
-    def test_taxes_l10n_ar_generic_helpers(self):
-        for test_index, document, expected_values in self._test_taxes_l10n_ar():
-            with self.subTest(test_index=test_index):
-                self.assert_tax_totals_summary(document, expected_values)
-        self._run_js_tests()
-
-    def test_taxes_l10n_ar_invoices(self):
-        for test_index, document, expected_values in self._test_taxes_l10n_ar():
-            with self.subTest(test_index=test_index):
-                invoice = self.convert_document_to_invoice(document)
-                self.assert_invoice_tax_totals_summary(invoice, expected_values)
-
     def _test_reverse_charge_taxes_1(self):
         tax = self.percent_tax(
             21.0,
@@ -2425,12 +2203,12 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             self.assert_invoice_tax_totals_summary(invoice, expected_values)
 
     def _test_cash_rounding(self):
-        tax1 = self.division_tax(5)
-        tax2 = self.division_tax(3)
+        fixed_1 = self.division_tax(5)
+        tax_21 = self.division_tax(3)
         tax3 = self.division_tax(0.65)
         tax4 = self.division_tax(9)
         tax5 = self.division_tax(15)
-        taxes = tax1 + tax2 + tax3 + tax4 + tax5
+        taxes = fixed_1 + tax_21 + tax3 + tax4 + tax5
 
         with self.same_tax_group(taxes), self.with_tax_calculation_rounding_method('round_per_line'):
             cash_rounding = self.env['account.cash.rounding'].create({
@@ -2603,12 +2381,12 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
     def test_cash_rounding_with_excluded_tax_groups(self):
         # Excluded tax groups are not managed js-side nor on invoices. However, they are used
         # in some localizations to build another tax totals aside.
-        tax1 = self.division_tax(5, tax_group_id=self.tax_groups[0].id)
-        tax2 = self.division_tax(3, tax_group_id=self.tax_groups[1].id)
+        fixed_1 = self.division_tax(5, tax_group_id=self.tax_groups[0].id)
+        tax_21 = self.division_tax(3, tax_group_id=self.tax_groups[1].id)
         tax3 = self.division_tax(0.65, tax_group_id=self.tax_groups[2].id)
         tax4 = self.division_tax(9, tax_group_id=self.tax_groups[3].id)
         tax5 = self.division_tax(15, tax_group_id=self.tax_groups[4].id)
-        taxes = tax1 + tax2 + tax3 + tax4 + tax5
+        taxes = fixed_1 + tax_21 + tax3 + tax4 + tax5
 
         cash_rounding = self.env['account.cash.rounding'].create({
             'name': 'biggest_tax',

@@ -8,6 +8,7 @@ class TestUblCiiCommon(AccountTestInvoicingCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.change_company_country(cls.env.company, cls.env.company.country_id)
         cls.partner_be = cls._create_partner_be()
         cls.partner_lu_dig = cls._create_partner_lu_dig()
         cls.partner_nl = cls._create_partner_nl()
