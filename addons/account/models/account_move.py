@@ -6119,6 +6119,20 @@ class AccountMove(models.Model):
             wizard.action_send_and_print(force_synchronous=force_synchronous)
         return wizard
 
+    def _ensure_invoice_pdf_report(self):
+        """Generate and link the official invoice PDF attachment when missing.
+        This reuses the standard document generation flow in manual mode so we
+        create the legal PDF attachment without sending emails.
+        """
+        moves_to_generate = self.filtered(lambda move: not move.invoice_pdf_report_id)
+        if moves_to_generate:
+            self.env['account.move.send']._generate_and_send_invoices(
+                moves_to_generate,
+                sending_methods={'manual'},
+                allow_fallback_pdf=False,
+            )
+        return True
+
     def _get_invoice_pdf_proforma(self):
         """ Generate the Proforma of the invoice.
         :return dict: the Proforma's data such as

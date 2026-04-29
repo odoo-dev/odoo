@@ -63,6 +63,22 @@ class TestDownloadDocs(AccountTestInvoicingHttpCommon):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.content, self.invoices[0].invoice_pdf_report_id.raw)
 
+    def test_download_invoice_documents_filetype_generates_missing_pdf(self):
+        """Ensures that the route properly generates the PDF report when
+        it doesn't exist yet, and then serves it. This mimics the behavior
+        of the 'Download: PDF' button on the invoice form view.
+        """
+        invoice = self._create_invoice(move_type='out_invoice', post=True)
+        self.assertFalse(invoice.invoice_pdf_report_id)
+
+        url = f'/account/download_invoice_documents/{invoice.id}/pdf'
+        self.authenticate(self.env.user.login, self.env.user.login)
+        res = self.url_open(url)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(invoice.invoice_pdf_report_id)
+        self.assertEqual(res.content, invoice.invoice_pdf_report_id.raw)
+
     def test_download_invoice_documents_filetype_multiple(self):
         url = f'/account/download_invoice_documents/{",".join(map(str, self.invoices.ids))}/pdf'
         self.authenticate(self.env.user.login, self.env.user.login)

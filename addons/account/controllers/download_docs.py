@@ -48,6 +48,8 @@ class AccountDocumentDownloadController(http.Controller):
     def download_invoice_documents_filetype(self, invoices, filetype, allow_fallback=True):
         invoices.check_access('read')
         invoices.line_ids.check_access('read')
+        if filetype in ('pdf', 'all'):
+            invoices._ensure_invoice_pdf_report()
         docs_data = []
         for invoice in invoices:
             if filetype == 'all' and (doc_data := invoice._get_invoice_legal_documents_all(allow_fallback=allow_fallback)):
