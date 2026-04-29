@@ -79,5 +79,6 @@ access_stock_replenish_option,stock.replenishment.option,stock.replenishment.opt
 access_stock_quant_relocate,access.stock.quant.relocate,stock.quant.relocate,stock.group_stock_manager,cru,
 access_stock_package_history_user,access_stock_package_history_user,stock.package.history,stock.group_stock_user,cru,
 access_stock_put_in_pack_user,acess.stock.put.in.pack.user,stock.put.in.pack,stock.group_stock_user,cru,
+access_stock_put_in_pack_weight_warning_user,access.stock.put.in.pack.weight.warning.user,stock.put.in.pack.weight.warning,stock.group_stock_user,cru,
 access_stock_reference,access_stock_reference,stock.reference,base.group_user,cru,
 access_stock_zero_demand_confirmation,access_stock_zero_demand_confirmation,stock.zero.demand.confirmation,stock.group_stock_user,cru,

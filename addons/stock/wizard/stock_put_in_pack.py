@@ -29,12 +29,79 @@ class StockPutInPack(models.TransientModel):
 
     def action_put_in_pack(self):
         context = self._get_put_in_pack_context()
+
+        records = self.package_ids or self.move_line_ids
+        package_id = self.result_package_id.id
+        package_type_id = self.package_type_id.id
+
+        # weight warning check
         if self.package_ids:
-            return self.package_ids.with_context(**context).action_put_in_pack(package_id=self.result_package_id.id, package_type_id=self.package_type_id.id)
-        return self.move_line_ids.with_context(**context).action_put_in_pack(package_id=self.result_package_id.id, package_type_id=self.package_type_id.id)
+            action = records._get_put_in_pack_weight_warning_action(self.package_type_id, self.result_package_id)
+        else:
+            action = records._get_put_in_pack_weight_warning_action(self.package_type_id, self.result_package_id)
+
+        if action:
+            return action
+
+        return records.with_context(**context).action_put_in_pack(
+            package_id=package_id,
+            package_type_id=package_type_id,
+        )
 
     def _get_put_in_pack_context(self):
         return {
             **self.env.context,
             'from_package_wizard': True,
         }
+
+
+class StockPutInPackWeightWarning(models.TransientModel):
+    _name = 'stock.put.in.pack.weight.warning'
+    _description = 'Put in Pack Weight Warning'
+
+    move_line_ids = fields.Many2many('stock.move.line', string='Move lines', readonly=True)
+    package_ids = fields.Many2many('stock.package', string='Packages', readonly=True)
+    package_id = fields.Many2one('stock.package', string='Package', readonly=True)
+    package_type_id = fields.Many2one('stock.package.type', string='Package Type', readonly=True)
+    package_name = fields.Char('Package Name', readonly=True)
+    description = fields.Text('Description', compute='_compute_description', readonly=True)
+
+    @api.depends('package_type_id', 'package_id')
+    def _compute_description(self):
+        for wizard in self:
+            package_type_name = wizard.package_type_id.name or (wizard.package_id.package_type_id.name if wizard.package_id and wizard.package_id.package_type_id else '')
+            if wizard.move_line_ids:
+                wizard.description = self.env._(
+                    "The total weight of the products exceeds the maximum weight allowed for the selected package type %(package_type)s.\n"
+                    "Do you want to continue adding the products to this package?",
+                    package_type=package_type_name,
+                )
+            elif wizard.package_ids:
+                wizard.description = self.env._(
+                    "The total weight of the packages exceeds the maximum weight allowed for the selected package type %(package_type)s.\n"
+                    "Do you want to continue adding the packages to this package?",
+                    package_type=package_type_name,
+                )
+            else:
+                wizard.description = self.env._(
+                    "The total weight exceeds the maximum weight allowed for the selected package type %(package_type)s.\n"
+                    "Do you want to continue?",
+                    package_type=package_type_name,
+                )
+
+    def process(self):
+        context = dict(self.env.context, skip_put_in_pack_weight_warning=True)
+        if self.move_line_ids:
+            return self.move_line_ids.with_context(**context).action_put_in_pack(
+                package_id=self.package_id.id,
+                package_type_id=self.package_type_id.id,
+                package_name=self.package_name,
+            )
+        return self.package_ids.with_context(**context).action_put_in_pack(
+            package_id=self.package_id.id,
+            package_type_id=self.package_type_id.id,
+            package_name=self.package_name,
+        )
+
+    def process_cancel(self):
+        return {'type': 'ir.actions.act_window_close'}

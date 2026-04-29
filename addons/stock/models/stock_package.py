@@ -340,6 +340,39 @@ class StockPackage(models.Model):
             return action
         return False
 
+    def _get_put_in_pack_weight_warning_action(self, package_type_id=False, package_id=False):
+        if not (package_type_id or package_id):
+            return False
+        weight_used = self._compute_put_in_pack_weight()
+        pkg_type = package_type_id or (package_id and package_id.package_type_id)
+        weight_capacity = pkg_type.max_weight if pkg_type else 0
+        if package_id:
+            weight_used += package_id._get_current_weight()
+        if not (weight_capacity and weight_used > weight_capacity):
+            return False
+
+        action = self.env["ir.actions.actions"]._for_xml_id("stock.action_put_in_pack_weight_warning")
+        action['context'] = {
+            **literal_eval(action.get('context', '{}')),
+            'default_package_ids': self.ids,
+            'default_package_type_id': pkg_type.id,
+        }
+        return action
+
+    def _compute_put_in_pack_weight(self):
+        return sum(package._get_current_weight() for package in self)
+
+    def _get_current_weight(self, move_line_ids=False):
+        self.ensure_one()
+        if self.shipping_weight:
+            return self.shipping_weight
+        if move_line_ids:
+            ml_ids = self.move_line_ids.filtered(lambda ml: ml.id in move_line_ids)
+            content_weight = ml_ids._compute_put_in_pack_weight()
+        else:
+            content_weight = self.move_line_ids._compute_put_in_pack_weight()
+        return content_weight + (self.package_type_id.base_weight or 0.0)
+
     def _post_put_in_pack_hook(self):
         self.ensure_one()
         return self

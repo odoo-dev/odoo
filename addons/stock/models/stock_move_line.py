@@ -1065,6 +1065,51 @@ class StockMoveLine(models.Model):
             }
             return action
 
+    def action_put_in_pack_weight_warning_wizard(self, package_type_id=False, package_id=False):
+        return self._get_put_in_pack_weight_warning_action(package_type_id=package_type_id, package_id=self.env['stock.package'].browse(package_id) if package_id else False)
+
+    def _get_put_in_pack_weight_warning_action(self, package_type_id=False, package_id=False):
+        if not (package_type_id or package_id):
+            return False
+
+        weight_used = self._compute_put_in_pack_weight()
+
+        pkg_type = package_type_id or (package_id and package_id.package_type_id)
+        weight_capacity = pkg_type.max_weight if pkg_type else 0
+
+        if package_id:
+            if self.env.context.get('ml_changes'):
+                move_line_ids = self.move_id.move_line_ids - self
+            weight_used += package_id._get_current_weight(move_line_ids=move_line_ids.ids)
+
+        if not (weight_capacity and weight_used > weight_capacity):
+            return False
+
+        action = self.env["ir.actions.actions"]._for_xml_id("stock.action_put_in_pack_weight_warning")
+
+        action['context'] = {
+            **literal_eval(action.get('context', '{}')),
+            'default_move_line_ids': self.ids,
+            'default_package_id': package_id.id,
+            'default_package_type_id': pkg_type.id,
+        }
+
+        return action
+
+    def _compute_put_in_pack_weight(self):
+        if changes := self.env.context.get('ml_changes'):
+            changes_map = {c['id']: c['changes'] for c in changes}
+            weight = 0
+            for line in self:
+                line_changes = changes_map.get(line.id, {})
+                qty = line_changes.get('quantity', line.quantity)
+                uom_id = line_changes.get('uom_id')
+                uom = self.env['uom.uom'].browse(uom_id) if uom_id else line.uom_id
+                qty_in_product_uom = uom._compute_quantity(qty, line.product_id.uom_id, rounding_method='HALF-UP')
+                weight += qty_in_product_uom * line.product_id.weight
+            return weight
+        return sum(line.quantity_product_uom * line.product_id.weight for line in self)
+
     def _check_destinations(self):
         if len(self.location_dest_id) > 1:
             view_id = self.env.ref('stock.stock_package_destination_form_view').id
