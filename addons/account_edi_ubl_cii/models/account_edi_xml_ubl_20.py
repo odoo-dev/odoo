@@ -83,7 +83,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         }
 
     def format_float(self, amount, precision_digits=2):
-        return FloatFmt(amount, precision_digits)
+        return FloatFmt(amount, max_dp=precision_digits)
 
     def _get_tags_for_document_type(self, vals):
         return {
