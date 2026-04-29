@@ -94,6 +94,8 @@ DEFAULT_BLOCKED_THIRD_PARTY_DOMAINS = '\n'.join([  # noqa: FLY002
     'google.co.zw', 'google.cat',
 ])
 
+CTA_PRIORITY_DEFAULT = 10
+
 
 class Website(models.CachedModel):
     _name = 'website'
@@ -560,8 +562,39 @@ class Website(models.CachedModel):
         # For text content generation
         return self._api_rpc(route, params, 'website.olg_api_endpoint', DEFAULT_OLG_ENDPOINT, **kwargs)
 
-    def get_cta_data(self, website_purpose, website_type):
-        return {'cta_btn_text': False, 'cta_btn_href': '/contactus', 'shop_btn_href': '#'}
+    def get_cta_data(self, website_type):
+        """Resolve CTA button data using a priority-based approach.
+
+        Each installed module contributes CTA candidates via
+        `_get_cta_candidates()`. The candidate with the highest priority wins.
+
+        :param str website_type: Type of the website
+        :return: CTA configuration dictionary
+        :rtype: dict
+        """
+        candidates = self._get_cta_candidates(website_type)
+        selected_cta = dict(max(candidates, key=lambda c: c[0])[1])
+        selected_cta['shop_btn_href'] = '#'
+        return selected_cta
+
+    def _get_cta_candidates(self, website_type):
+        """Return CTA candidates.
+
+        Each candidate is a tuple containing a priority and a dictionary
+        of CTA values.
+
+        :param str website_type: Type of the website (e.g. blog, event)
+        :return: List of (priority, values) tuples
+        :rtype: list[tuple[int, dict]]
+        """
+        contactus_page = self.env.ref('website.contactus_page', raise_if_not_found=False)
+        return [(
+            CTA_PRIORITY_DEFAULT,
+            {
+                'cta_btn_text': False,
+                'cta_btn_href': contactus_page.url if contactus_page else '#',
+            },
+        )]
 
     def _get_snippet_defaults(self, snippet):
         """Retrieve the default configuration for a given dynamic snippet."""
@@ -911,39 +944,57 @@ class Website(models.CachedModel):
                 )
 
         # Update CTA
-        cta_data = website.get_cta_data(kwargs.get('website_purpose'), kwargs.get('website_type'))
+        cta_data = website.get_cta_data(kwargs.get('website_type'))
+        xpath_view = 'website.snippets'
+        parent_view = self.env['website'].with_context(website_id=website.id).viewref(xpath_view)
+        cta_btn_text_xpath = ""
         if cta_data['cta_btn_text']:
-            xpath_view = 'website.snippets'
-            parent_view = self.env['website'].with_context(website_id=website.id).viewref(xpath_view)
-            self.env['ir.ui.view'].create({
-                'name': parent_view.key + ' CTA',
-                'key': parent_view.key + "_cta",
-                'inherit_id': parent_view.id,
-                'website_id': website.id,
-                'type': 'qweb',
-                'priority': 32,
-                'arch_db': """
-                    <data>
-                        <xpath expr="//t[@t-set='cta_btn_href']" position="replace">
-                            <t t-set="cta_btn_href">%s</t>
-                        </xpath>
-                        <xpath expr="//t[@t-set='cta_btn_text']" position="replace">
-                            <t t-set="cta_btn_text">%s</t>
-                        </xpath>
-                    </data>
-                """ % (cta_data['cta_btn_href'], cta_data['cta_btn_text'])
-            })
-            try:
-                view_id = self.env['website'].viewref('website.header_call_to_action')
-                if view_id:
-                    el = etree.fromstring(view_id.arch_db)
-                    btn_cta_el = el.xpath("//a[hasclass('btn_cta')]")
-                    if btn_cta_el:
-                        btn_cta_el[0].attrib['href'] = cta_data['cta_btn_href']
+            cta_btn_text_xpath = f"""
+                    <xpath expr="//t[@t-set='cta_btn_text']" position="replace">
+                        <t t-set="cta_btn_text">{cta_data['cta_btn_text']}</t>
+                    </xpath>
+            """
+        arch_db = f"""
+                <data>
+                    <xpath expr="//t[@t-set='cta_btn_href']" position="replace">
+                        <t t-set="cta_btn_href">{cta_data['cta_btn_href']}</t>
+                    </xpath>
+                    { cta_btn_text_xpath }
+                </data>
+            """
+        self.env['ir.ui.view'].create({
+            'name': parent_view.key + ' CTA',
+            'key': parent_view.key + "_cta",
+            'inherit_id': parent_view.id,
+            'website_id': website.id,
+            'type': 'qweb',
+            'priority': 32,
+            'arch_db': arch_db,
+        })
+        try:
+            view_id = self.env['website'].viewref('website.header_call_to_action')
+            if view_id:
+                el = etree.fromstring(view_id.arch_db)
+                btn_cta_el = el.xpath("//a[hasclass('btn_cta')]")
+                if btn_cta_el:
+                    btn_cta_el[0].attrib['href'] = cta_data['cta_btn_href']
+                    if cta_data['cta_btn_text']:
                         btn_cta_el[0].text = cta_data['cta_btn_text']
-                    view_id.with_context(website_id=website.id).write({'arch_db': etree.tostring(el)})
-            except ValueError as e:
-                logger.warning(e)
+                view_id.with_context(website_id=website.id).write({'arch_db': etree.tostring(el)})
+        except ValueError as e:
+            logger.warning(e)
+
+        if cta_data['cta_btn_text']:
+            contactus_page = self.env.ref('website.contactus_page', raise_if_not_found=False)
+            if contactus_page and cta_data['cta_btn_href'] != contactus_page.url:
+                self.env['website.menu'].create({
+                    'name': website.with_context(lang=website.default_lang_id.code).env._("Contact us"),
+                    'url': contactus_page.url,
+                    'page_id': contactus_page.id,
+                    'parent_id': website.menu_id.id,
+                    'website_id': website.id,
+                    'sequence': 60,
+                })
 
         # Extension hook: allows installed modules to perform additional setup
         # steps on the generated website.
