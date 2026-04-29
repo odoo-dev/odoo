@@ -8,6 +8,15 @@
             </button>
             <t t-set-slot="content">
                 <DropdownItem
+                    t-if="this.props.section.display_type === 'line_section'"
+                    onSelected="() => this.env.enableSectionInput(this.props.section.id)"
+                >
+                    <i class="me-1 fa fa-fw fa-level-down"/><span>Add a subsection</span>
+                </DropdownItem>
+                <DropdownItem onSelected="() => this.env.enableRenameSectionInput(this.props.section.id)">
+                    <i class="me-1 fa fa-fw fa-pencil"/><span>Rename Section/Subsection</span>
+                </DropdownItem>
+                <DropdownItem
                     t-if="'collapse_prices' in this.props.section"
                     onSelected="() => this.toggleFieldOfSection('collapse_prices')"
                     attrs="{ 'class': this.disablePricesButton() ? 'disabled' : '' }"

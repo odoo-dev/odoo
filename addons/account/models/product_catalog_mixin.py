@@ -6,12 +6,11 @@ from odoo import models
 class ProductCatalogMixin(models.AbstractModel):
     _inherit = 'product.catalog.mixin'
 
-    def _create_section(self, child_field, name, position, *, parent_id=None, **kwargs):
+    def _create_section(self, child_field, name, *, parent_id=None, **kwargs):
         """Create a new section in order.
 
         :param str child_field: Field name of the order's lines (e.g., 'order_line').
         :param str name: The name of the section to create.
-        :param str position: The position of the section where it should be created.
         :param int parent_id: The id of the parent section.
         :param dict kwargs: Additional values given for inherited models.
 
@@ -34,9 +33,7 @@ class ProductCatalogMixin(models.AbstractModel):
                 lines[-1].sequence + 1 if lines else 10
             )
         else:
-            sequence = (
-                lines[0].sequence - 1 if position == 'top' else lines[-1].sequence + 1
-            ) if lines else 10
+            sequence = lines[-1].sequence + 1 if lines else 10
 
         section = self.env[line_model].create({
             parent_field: self.id,
@@ -93,12 +90,10 @@ class ProductCatalogMixin(models.AbstractModel):
         :param str child_field: Field name of the order's lines (e.g., 'order_line').
         :param dict kwargs: Additional values given for inherited models.
         :rtype: list
-        :return: List of section dicts with 'id', 'name', 'sequence', 'parent_id', 'line_count',
-                 'display_type', 'subtotal' and 'currency_id' + any additional values given by
-                 inherited models.
+        :return: List of section dicts with 'id', 'name', 'sequence', 'parent_id', 'display_type',
+                 'subtotal' and 'currency_id' + any additional values given by inherited models.
         """
         sections = {}
-        no_section_count = 0
         no_section_subtotal = 0.0
         lines = self[child_field]
         for line in lines.sorted('sequence'):
@@ -108,7 +103,6 @@ class ProductCatalogMixin(models.AbstractModel):
                     'name': line.name,
                     'sequence': line.sequence,
                     'parent_id': line.parent_id.id if line.parent_id else False,
-                    'line_count': 0,
                     'display_type': line.display_type,
                     'subtotal': line.get_section_subtotal(),
                     'currency_id': self.currency_id.id,
@@ -116,33 +110,18 @@ class ProductCatalogMixin(models.AbstractModel):
                 values.update(self._get_extra_values_for_section(line))
                 sections[line.id] = values
 
-            elif self._is_line_valid_for_section_line_count(line):
-                if line.parent_id and line.parent_id.id in sections:
-                    sections[line.parent_id.id]['line_count'] += 1
+            elif not line.parent_id:
+                no_section_subtotal += line.price_subtotal
 
-                if (
-                    line.parent_id
-                    and line.parent_id.parent_id
-                    and line.parent_id.parent_id.id in sections
-                ):
-                    sections[line.parent_id.parent_id.id]['line_count'] += 1
-
-                if not line.parent_id:
-                    no_section_count += 1
-                    no_section_subtotal += line.price_subtotal
-
-        if no_section_count > 0 or not sections:
-            # If there are products outside of a section or no section at all
-            sections[False] = {
-                'id': False,
-                'name': self.env._("No Section"),
-                'sequence': lines[0].sequence - 1 if lines else 0,
-                'parent_id': False,
-                'line_count': no_section_count,
-                'display_type': False,
-                'subtotal': no_section_subtotal,
-                'currency_id': self.currency_id.id,
-            }
+        sections[False] = {
+            'id': False,
+            'name': self.env._("No Section"),
+            'sequence': lines[0].sequence - 1 if lines else 0,
+            'parent_id': False,
+            'display_type': False,
+            'subtotal': no_section_subtotal,
+            'currency_id': self.currency_id.id,
+        }
 
         return sorted(sections.values(), key=lambda x: x['sequence'])
 
@@ -170,19 +149,6 @@ class ProductCatalogMixin(models.AbstractModel):
         :rtype: str
         """
         return ''
-
-    def _is_line_valid_for_section_line_count(self, line):
-        """Check if a line is valid for inclusion in the section's line count.
-
-        :param recordset line: A record of an order line.
-        :return: whether this line should be considered in the section lines count.
-        :rtype: bool
-        """
-        return (
-            not line.display_type
-            and line.product_type != 'combo'
-            and line.product_uom_qty > 0
-        )
 
     def _resequence_sections(
         self,
@@ -375,6 +341,11 @@ class ProductCatalogMixin(models.AbstractModel):
             )
 
         lines_to_delete.unlink()
+
+    def _rename_section(self, child_field, section_id, new_name, **kwargs):
+        section = self[child_field].browse(section_id)
+        if section:
+            section.name = new_name
 
     def _toggle_field_of_section(self, child_field, section_id, field_name, **kwargs):
         """Toggle the given field of the given section.

@@ -1,25 +1,16 @@
 .o_section_icon {
-    min-width: 20px;
-    width: 20px;
+    min-width: 10px;
+    width: 10px;
 }
 
 .o_selected_section {
     background-color: var(--list-group-active-bg);
-
-    .o_section_name {
-        font-weight: bold;
-    }
 }
 
 .o_section_row:not(.o_selected_section):hover {
     background-color: var(--list-group-action-hover-bg);
 }
 
-.o_section_row .o_section_hover_control{
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.o_section_row:hover .o_section_hover_control {
-    opacity: 1;
+.o_section_row {
+    border-radius: var(--border-radius);
 }

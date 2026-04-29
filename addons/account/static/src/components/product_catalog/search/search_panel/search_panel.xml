@@ -14,11 +14,11 @@
 
         <section position="before">
             <section t-if="this.showSections" class="o_search_panel_sections mt-4 pb-4 border-bottom">
-                <header class="d-flex align-items-center cursor-default mb-3 ps-2">
-                    <b class="text-uppercase mx-2">Sections</b>
+                <header class="d-flex align-items-center cursor-default mb-3">
+                    <b class="text-uppercase me-2">Sections</b>
                     <i
                         class="fa fa-fw fa-plus-square cursor-pointer"
-                        t-on-click="() => this.enableSectionInput('bottom')"
+                        t-on-click="() => this.enableSectionInput()"
                         title="Add a section"
                     />
                     <div class="d-flex align-items-center ms-auto">
@@ -42,7 +42,7 @@
                     </t>
                 </ul>
                 <input
-                    t-if="this.state.isAddingSection === 'bottom'"
+                    t-if="this.state.isAddingSection === 'section'"
                     class="o_section_input py-1"
                     type="text"
                     placeholder="Enter a description"

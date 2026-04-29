@@ -22,7 +22,6 @@ class ProductCatalogAccountController(ProductCatalogController):
                     'name': string,
                     'sequence': int,
                     'parent_id': int or False,
-                    'line_count': int,
                     'display_type': string,
                     'subtotal': float,
                     'currency_id': int,
@@ -35,7 +34,7 @@ class ProductCatalogAccountController(ProductCatalogController):
 
     @route('/product/catalog/create_section', auth='user', type='jsonrpc')
     def product_catalog_create_section(
-        self, res_model, order_id, child_field, name, position, **kwargs,
+        self, res_model, order_id, child_field, name, **kwargs,
     ):
         """Create a new section on the given order.
 
@@ -43,14 +42,11 @@ class ProductCatalogAccountController(ProductCatalogController):
         :param int order_id: The order id.
         :param string child_field: The field name of the lines in the order model.
         :param string name: The name of the section to create.
-        :param str position: The position of the section where it should be created.
         :return: A dictionary with values of the created section.
         :rtype: dict
         """
         order = request.env[res_model].browse(order_id)
-        return order.with_company(order.company_id)._create_section(
-            child_field, name, position, **kwargs,
-        )
+        return order.with_company(order.company_id)._create_section(child_field, name, **kwargs)
 
     @route('/product/catalog/resequence_sections', auth='user', type='jsonrpc')
     def product_catalog_resequence_sections(
@@ -101,6 +97,23 @@ class ProductCatalogAccountController(ProductCatalogController):
         order = request.env[res_model].browse(order_id)
         return order.with_company(order.company_id)._duplicate_section(
             child_field, section_id, **kwargs
+        )
+
+    @route('/product/catalog/rename_section', auth='user', type='jsonrpc')
+    def product_catalog_rename_section(
+        self, res_model, order_id, child_field, section_id, new_name, **kwargs
+    ):
+        """Rename the given section.
+
+        :param string res_model: The order model.
+        :param int order_id: The order id.
+        :param string child_field: The field name of the lines in the order model.
+        :param int section_id: The section id.
+        :param string new_name: The new name for the section.
+        """
+        order = request.env[res_model].browse(order_id)
+        order.with_company(order.company_id)._rename_section(
+            child_field, section_id, new_name, **kwargs
         )
 
     @route('/product/catalog/toggle_field_of_section', auth='user', type='jsonrpc')

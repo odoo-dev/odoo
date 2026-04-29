@@ -3022,19 +3022,6 @@ class AccountMove(models.Model):
     def _get_parent_field_on_child_model(self):
         return 'move_id'
 
-    def _is_line_valid_for_section_line_count(self, line):
-        """Check if a line is valid for inclusion in the section's line count.
-
-        :param recordset line: A record of a move line.
-        :return: True if this line is a valid, else False.
-        :rtype: bool
-        """
-        return (
-            line.product_id
-            and line.product_id.product_tmpl_id.type != 'combo'
-            and line.quantity > 0
-        )
-
     # -------------------------------------------------------------------------
     # EARLY PAYMENT DISCOUNT
     # -------------------------------------------------------------------------

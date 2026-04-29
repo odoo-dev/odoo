@@ -20,20 +20,23 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
             isAddingSection: "",
             newSectionName: "",
             dragging: false,
+            renamingSectionId: null,
         });
 
         useSubEnv({
             setSelectedSection: this.setSelectedSection.bind(this),
             enableSectionInput: this.enableSectionInput.bind(this),
+            enableRenameSectionInput: this.enableRenameSectionInput.bind(this),
             createSection: this.createSection.bind(this),
             loadSections: this.loadSections.bind(this),
+            renameSection: this.renameSection.bind(this),
             onSectionInputKeydown: this.onSectionInputKeydown.bind(this),
             findSectionById: this.findSectionById.bind(this),
             getSectionInfoParams: this.getSectionInfoParams.bind(this),
             sortSectionsBySequence : this.sortSectionsBySequence.bind(this),
         })
 
-        useBus(this.env.searchModel, "section-line-count-change", this.updateSectionLineCount);
+        useBus(this.env.searchModel, "section-subtotal-change", this.updateSectionSubtotal);
 
         onWillStart(async () => await this.loadSections());
 
@@ -89,21 +92,36 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         return this.env.searchModel.selectedSection;
     }
 
-    enableSectionInput(type, parentId = null) {
+    enableSectionInput(parentId = null) {
         this.state.isAddingSection = parentId
             ? `subsection_${parentId}`
-            : type;
+            : "section";
         setTimeout(() => document.querySelector(".o_section_input")?.focus(), 100);
     }
 
-    onSectionInputKeydown(ev, parentId) {
+    enableRenameSectionInput(sectionId) {
+        const section = this.findSectionById(sectionId);
+        if (!section) return;
+
+        this.state.renamingSectionId = sectionId;
+        this.state.newSectionName = section.name;
+
+        setTimeout(() => document.querySelector(".o_section_input")?.focus(), 100);
+    }
+
+    onSectionInputKeydown(ev, parentId, renameId = null) {
         const hotkey = getActiveHotkey(ev);
         if (hotkey === "enter") {
-            this.createSection(parentId);
+            if (renameId) {
+                this.renameSection(renameId);
+            } else {
+                this.createSection(parentId);
+            }
         } else if (hotkey === "escape") {
             Object.assign(this.state, {
                 isAddingSection: "",
                 newSectionName: "",
+                renamingSectionId: null,
             });
         }
     }
@@ -116,33 +134,20 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         const sectionName = this.state.newSectionName.trim();
         if (!sectionName) return this.state.isAddingSection = '';
 
-        const position = this.state.isAddingSection;
         const section = await rpc("/product/catalog/create_section",
             this.getSectionInfoParams({
                 name: sectionName,
-                position: position,
                 parent_id: parentId,
             })
         );
 
         if (section) {
-            let newLineCount = 0;
-
-            if (position === 'top') {
-                const noSection = this.state.sections.find(sec => sec.id === false);
-                if (noSection) {
-                    newLineCount = noSection.line_count;
-                    this.state.sections = this.state.sections.filter(sec => sec.id !== false);
-                }
-            }
-
             const newNode = {
                 ...section,
                 name: sectionName,
                 children: [],
                 isOpen: true,
                 parent_id: parentId,
-                line_count: newLineCount
             };
 
             if (parentId) {
@@ -156,7 +161,7 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
             this.setSelectedSection(section.id);
         }
         Object.assign(this.state, {
-            isAddingSection: '',
+            isAddingSection: "",
             newSectionName: "",
         });
     }
@@ -186,6 +191,30 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         if (sectionTree.length) {
             this.setSelectedSection(sectionId ?? sectionTree[0].id);
         }
+    }
+
+    async renameSection(sectionId) {
+        const name = this.state.newSectionName.trim();
+        if (!name) {
+            this.state.renamingSectionId = null;
+            return;
+        }
+
+        await rpc(
+            "/product/catalog/rename_section",
+            this.getSectionInfoParams({
+                section_id: sectionId,
+                new_name: name,
+            })
+        );
+
+        const section = this.findSectionById(sectionId);
+        if (section) {
+            section.name = name;
+        }
+
+        this.state.renamingSectionId = null;
+        this.state.newSectionName = "";
     }
 
     resequenceSections({ element, parent, next }) {
@@ -235,30 +264,22 @@ export class AccountProductCatalogSearchPanel extends SearchPanel {
         return null;
     }
 
-    updateSectionLineCount({ detail: { sectionId, lineCountChange, subtotalDelta } }) {
+    updateSectionSubtotal({ detail: { sectionId, subtotalDelta } }) {
         const section = this.findSectionById(sectionId);
         if (!section) return;
 
-        section.line_count = Math.max(0, section.line_count + lineCountChange);
-
-        section.subtotal = (section.subtotal || 0) + subtotalDelta;
+        section.subtotal += subtotalDelta;
 
         if (section.parent_id) {
             const parent = this.findSectionById(section.parent_id);
             if (parent) {
-                parent.line_count = Math.max(0, parent.line_count + lineCountChange);
-                parent.subtotal = (parent.subtotal || 0) + subtotalDelta;
+                parent.subtotal += subtotalDelta;
             }
-        }
-
-        if (section.line_count === 0 && sectionId === false && this.state.sections.length > 1) {
-            this.state.sections = this.state.sections.filter(sec => sec.id !== sectionId);
-            this.setSelectedSection(this.state.sections.length ? this.state.sections[0].id : null);
         }
     }
 
     findSectionById(id) {
-         for (const sec of this.state.sections) {
+        for (const sec of this.state.sections) {
             if (sec.id === id) return sec;
 
             const child = sec.children.find(c => c.id === id);
