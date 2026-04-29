@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
+
     <record id="payment_provider_form" model="ir.ui.view">
         <field name="name">ECPay Provider Form</field>
         <field name="model">payment.provider</field>
@@ -7,19 +8,26 @@
         <field name="arch" type="xml">
             <group name="provider_credentials" position='inside'>
                 <group invisible="code != 'ecpay'">
-                    <field name="ecpay_merchant_id"
-                           string="Merchant ID"
-                           required="code == 'ecpay' and state != 'disabled'"/>
-                    <field name="ecpay_hash_key"
-                           string="Secure Hash Secret"
-                           required="code == 'ecpay' and state != 'disabled'"
-                           password="True"/>
-                    <field name="ecpay_hash_iv"
-                           string="Secure Hash IV"
-                           required="code == 'ecpay' and state != 'disabled'"
-                           password="True"/>
+                    <field
+                        string="Merchant ID"
+                        name="ecpay_merchant_id"
+                        required="code == 'ecpay' and state != 'disabled'"
+                    />
+                    <field
+                        string="Secure Hash Secret"
+                        name="ecpay_hash_key"
+                        required="code == 'ecpay' and state != 'disabled'"
+                        password="True"
+                    />
+                    <field
+                        string="Secure Hash IV"
+                        name="ecpay_hash_iv"
+                        required="code == 'ecpay' and state != 'disabled'"
+                        password="True"
+                    />
                 </group>
             </group>
         </field>
     </record>
+
 </odoo>

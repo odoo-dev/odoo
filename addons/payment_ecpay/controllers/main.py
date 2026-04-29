@@ -15,12 +15,12 @@ _logger = get_payment_logger(__name__)
 
 
 class EcpayController(http.Controller):
-    # GET is used to redirect back to the merchant shop when using deferred payment methods (e.g.,
-    # 7-Eleven).
     @http.route(
         const.PAYMENT_RETURN_ROUTE,
         type="http",
         auth="public",
+        # GET is used to redirect back to the merchant shop when using deferred payment methods
+        # (e.g., 7-Eleven).
         methods=["GET", "POST"],
         csrf=False,
         save_session=False,
@@ -28,7 +28,15 @@ class EcpayController(http.Controller):
     def ecpay_return_from_checkout(self, **data):
         """Process the notification data sent by ECPay after redirection.
 
-        :param dict data: The notification data.
+        The route is flagged with `save_session=False` to prevent Odoo from assigning a new session
+        to the user if they are redirected to this route with a POST request. Indeed, as the session
+        cookie is created without a `SameSite` attribute, some browsers that don't implement the
+        recommended default `SameSite=Lax` behavior will not include the cookie in the redirection
+        request from the payment provider to Odoo. As the redirection to the '/payment/status' page
+        will satisfy any specification of the `SameSite` attribute, the session of the user will be
+        retrieved and with it the transaction which will be immediately post-processed.
+
+        :param dict data: The payment data.
         """
         if data:
             _logger.info("Handling redirection from ECPay with data:\n%s", pprint.pformat(data))
@@ -40,9 +48,9 @@ class EcpayController(http.Controller):
 
     @http.route(const.WEBHOOK_ROUTE, type="http", auth="public", methods=["POST"], csrf=False)
     def ecpay_webhook(self, **data):
-        """Process the notification data sent by ECPay to the webhook.
+        """Process the payment data sent by ECPay to the webhook.
 
-        :param dict data: The notification data.
+        :param dict data: The payment data.
         :return: The '1|OK' string to acknowledge the notification.
         :rtype: str
         """

@@ -114,12 +114,7 @@ class PaymentTransaction(models.Model):
         return {"amount": amount, "currency_code": self.currency_id.name}
 
     def _apply_updates(self, payment_data):
-        """Override of `payment` to process the transaction based on ECPay data.
-
-        :param dict payment_data: The payment_data data sent by the provider.
-        :return: None
-        :raise ValidationError: If inconsistent data are received.
-        """
+        """Override of `payment` to update the transaction based on the payment data."""
         if self.provider_code != "ecpay":
             return super()._apply_updates(payment_data)
 
@@ -135,17 +130,16 @@ class PaymentTransaction(models.Model):
 
         # Update the payment state.
         return_code = payment_data.get("RtnCode")
-        return_message = payment_data.get("RtnMsg")
-
         if not return_code:
             self._set_error(self.env._("Received data with missing return code."))
         elif return_code in const.SUCCESS_CODE_MAPPING["done"]:
             self._set_done()
         else:
+            return_message = payment_data.get("RtnMsg")
             self._set_error(
                 self.env._(
-                    "An error occurred "
-                    "(return code %(return_code)s; return message %(return_message)s).",
+                    "An error occurred (return code %(return_code)s; return message"
+                    " %(return_message)s).",
                     return_code=return_code,
                     return_message=return_message,
                 )
