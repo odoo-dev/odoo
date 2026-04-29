@@ -259,10 +259,6 @@ export class AutoComplete extends Component {
     }
 
     onInputBlur() {
-        if (this.ignoreBlur) {
-            this.ignoreBlur = false;
-            return;
-        }
         this.props.onBlur({
             inputValue: this.inputRef.el.value,
         });
@@ -276,9 +272,6 @@ export class AutoComplete extends Component {
         }
     }
     onInputChange(ev) {
-        if (this.ignoreBlur) {
-            ev.stopImmediatePropagation();
-        }
         this.props.onChange({
             inputValue: this.inputRef.el.value,
         });
