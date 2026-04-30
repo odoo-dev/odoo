@@ -102,5 +102,5 @@ class SaleOrderTemplateLine(models.Model):
             'sequence': self.sequence,
         }
         if self.name:
-            vals['name'] = self.name
+            vals['name'] = f"{self.product_id.with_context(lang=self.env.context.get('lang')).display_name}\n{self.name}" if self.product_id else self.name
         return vals
