@@ -1403,7 +1403,7 @@
         <field name="code">ideal</field>
         <field name="sequence">1000</field>
         <field name="active">False</field>
-        <field name="image" type="bytes" file="payment/static/img/ideal.png"/>
+        <field name="image" type="bytes" file="payment/static/img/ideal_wero.png"/>
         <field name="support_tokenization">False</field>
         <field name="support_express_checkout">False</field>
         <field name="support_manual_capture">none</field>
@@ -4263,6 +4263,15 @@
         <field name="sequence">1000</field>
         <field name="active">False</field>
         <field name="image" type="bytes" file="payment/static/img/hi_life.png"/>
+    </record>
+
+    <record id="payment_method_ideal_brand" model="payment.method">
+        <field name="name">iDEAL</field>
+        <field name="code">ideal_brand</field>
+        <field name="primary_payment_method_id" eval="ref('payment.payment_method_ideal')"/>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="bytes" file="payment/static/img/ideal.png"/>
     </record>
 
     <record id="payment_method_ipass_money" model="payment.method">

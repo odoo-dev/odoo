@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+
 import collections
 import hashlib
 from urllib.parse import quote_plus
@@ -48,10 +49,10 @@ class PaymentProvider(models.Model):
     # === CONSTRAINT METHODS === #
 
     @api.constrains("available_currency_ids")
-    def _limit_available_currency_ids(self):
+    def _check_currency_is_supported(self):
         for provider in self.filtered(lambda p: p.code == "ecpay"):
             if provider.available_currency_ids.filtered(
-                lambda c: c.name not in const.SUPPORTED_CURRENCY
+                lambda c: c.name != const.SUPPORTED_CURRENCY
             ):
                 raise ValidationError(self.env._("ECPay only supports TWD."))
 

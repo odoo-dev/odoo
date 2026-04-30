@@ -5,12 +5,9 @@
     "category": "Accounting/Payment Providers",
     "sequence": 350,
     "summary": "A payment provider covering the Taiwanese market.",
+    "description": " ",  # Non-empty string to avoid loading the README file.
     "depends": ["payment"],
-    "data": [
-        "views/payment_ecpay_templates.xml",
-        "views/payment_provider_views.xml",
-        "data/payment_provider_data.xml",
-    ],
+    "data": ["data/payment_provider_data.xml", "views/payment_provider_views.xml"],
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",
     "author": "Odoo S.A.",

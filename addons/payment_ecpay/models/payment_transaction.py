@@ -59,15 +59,14 @@ class PaymentTransaction(models.Model):
         ignored_payment_methods = "#".join(
             all_payment_methods.difference(const.PAYMENT_METHODS_MAPPING[self.payment_method_code])
         )
-        display_name = (
-            ", ".join(
-                self.sale_order_ids.mapped("display_name")
-                or self.invoice_ids.mapped("display_name")
-            )
-            or " "
-        )
+        display_names = []
+        if "sale_order_ids" in self._fields:
+            display_names = self.sale_order_ids.mapped("display_name")
+        if not display_names and "invoice_ids" in self._fields:
+            display_names = self.invoice_ids.mapped("display_name")
+        display_name = ", ".join(display_names) or self.reference
 
-        rendering_values = {
+        url_params = {
             "MerchantID": self.provider_id.ecpay_merchant_id,
             "MerchantTradeNo": self.reference,
             "MerchantTradeDate": (
@@ -91,11 +90,10 @@ class PaymentTransaction(models.Model):
                 self.env.context.get("lang", "en_US"), const.LANGUAGE_CODES_MAPPING
             ),
         }
-        rendering_values.update({
-            "CheckMacValue": self.provider_id._ecpay_calculate_signature(rendering_values),
-            "api_url": self.provider_id._ecpay_get_api_url(),
+        url_params.update({
+            "CheckMacValue": self.provider_id._ecpay_calculate_signature(url_params)
         })
-        return rendering_values
+        return {"api_url": self.provider_id._ecpay_get_api_url(), "url_params": url_params}
 
     @api.model
     def _extract_reference(self, provider_code, payment_data):
@@ -111,7 +109,7 @@ class PaymentTransaction(models.Model):
             return super()._extract_amount_data(payment_data)
 
         amount = float(payment_data.get("TradeAmt"))
-        return {"amount": amount, "currency_code": self.currency_id.name}
+        return {"amount": amount, "currency_code": self.currency_id.name, "precision_digits": 0}
 
     def _apply_updates(self, payment_data):
         """Override of `payment` to update the transaction based on the payment data."""
