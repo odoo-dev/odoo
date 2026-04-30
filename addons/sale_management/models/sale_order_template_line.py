@@ -106,7 +106,7 @@ class SaleOrderTemplateLine(models.Model):
         self.ensure_one()
         return {
             'display_type': self.display_type,
-            'name': self.name,
+            'name': self.product_id.display_name + "\n" + self.name,
             'product_id': self.product_id.id,
             'product_uom_qty': self.product_uom_qty,
             'product_uom': self.product_uom_id.id,
