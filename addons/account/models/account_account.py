@@ -32,6 +32,8 @@ class AccountAccount(models.Model):
 
     @api.constrains('account_type')
     def _check_account_type_unique_current_year_earning(self):
+        if self.env.context.get('chart_template_load'):
+            return
         result = self.with_context(active_test=False)._read_group(
             domain=[('account_type', '=', 'equity_unaffected')],
             groupby=['company_ids'],
