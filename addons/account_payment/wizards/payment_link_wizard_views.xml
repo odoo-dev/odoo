@@ -25,7 +25,7 @@
             </div>
 
             <field name="amount" position="after">
-                <field name="invoice_amount_due" invisible="res_model != 'account.move'"/>
+                <field name="amount_max" string="Amount Due" invisible="res_model != 'account.move'"/>
             </field>
 
             <field name="currency_id" position="after">
