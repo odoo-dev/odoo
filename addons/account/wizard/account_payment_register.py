@@ -19,7 +19,7 @@ class AccountPaymentRegister(models.TransientModel):
         default=fields.Date.context_today)
     amount = fields.Monetary(currency_field='currency_id', store=True, readonly=False,
         compute='_compute_amount')
-    hide_writeoff_section = fields.Boolean(compute="_compute_hide_writeoff_section")
+    hide_writeoff_section = fields.Boolean(string='Hide Writeoff Section', related='early_payment_discount_mode')
     communication = fields.Char(string="Memo", store=True, readonly=False,
         compute='_compute_communication')
     group_payment = fields.Boolean(string="Group Payments", store=True, readonly=False,
@@ -894,11 +894,6 @@ class AccountPaymentRegister(models.TransientModel):
                 wizard.payment_difference_handling = 'reconcile' if wizard.early_payment_discount_mode else 'open'
             else:
                 wizard.payment_difference_handling = False
-
-    @api.depends('early_payment_discount_mode')
-    def _compute_hide_writeoff_section(self):
-        for wizard in self:
-            wizard.hide_writeoff_section = wizard.early_payment_discount_mode
 
     @api.depends('partner_bank_id', 'amount', 'currency_id', 'payment_method_line_id', 'payment_type', 'communication')
     def _compute_qr_code(self):
