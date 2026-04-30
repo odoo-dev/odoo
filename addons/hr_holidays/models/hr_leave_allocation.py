@@ -101,7 +101,7 @@ class HrLeaveAllocation(models.Model):
         'Number of Days', compute='_compute_number_of_days', store=True, readonly=False, tracking=True, default=1,
         help='Duration in days. Reference field to use when necessary.')
     number_of_days_display = fields.Float(
-        'Duration (days)', compute='_compute_number_of_days_display',
+        'Duration (days)', related='number_of_days',
         help="For an Accrual Allocation, this field contains the theorical amount of time given to the employee, due to a previous start date, on the first run of the plan. This can be manually edited.")
     number_of_hours_display = fields.Float(
         'Duration (hours)', default_export_compatible=True, compute='_compute_number_of_hours_display', store=True,
@@ -225,11 +225,6 @@ class HrLeaveAllocation(models.Model):
             allocation.max_leaves = virtual_leave['max_leaves']
             allocation.leaves_taken = virtual_leave['leaves_taken']
             allocation.virtual_remaining_leaves = virtual_leave['virtual_remaining_leaves']
-
-    @api.depends('number_of_days')
-    def _compute_number_of_days_display(self):
-        for allocation in self:
-            allocation.number_of_days_display = allocation.number_of_days
 
     @api.depends('number_of_days', 'employee_id')
     def _compute_number_of_hours_display(self):
