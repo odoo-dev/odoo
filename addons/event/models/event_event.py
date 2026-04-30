@@ -426,6 +426,7 @@ class EventEvent(models.Model):
 
     @api.depends('address_id')
     def _compute_address_search(self):
+        # use compute instead of related for customized search
         for event in self:
             event.address_search = event.address_id
 
