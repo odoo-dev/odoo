@@ -184,7 +184,11 @@ class SmsComposer(models.TransientModel):
             if self.comment_single_recipient and not self.recipient_single_valid:
                 raise UserError(_('Invalid recipient number. Please update it.'))
             elif not self.comment_single_recipient and self.recipient_invalid_count:
+<<<<<<< HEAD
                 raise UserError(_('%s invalid recipients on %s id(s): %s', self.recipient_invalid_count, self.res_model, self.res_ids))
+=======
+               raise UserError(_('%s invalid recipients on %s(%s)', self.recipient_invalid_count, self.res_model, self.res_ids))
+>>>>>>> 4c45df0b4db5 ([IMP] sms: added more info to error message)
         self._action_send_sms()
         return False
 
