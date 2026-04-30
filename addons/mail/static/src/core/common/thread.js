@@ -3,7 +3,13 @@ import { DateSection } from "@mail/core/common/date_section";
 import { Message } from "@mail/core/common/message";
 import { NotificationMessage } from "./notification_message";
 import { Record } from "@mail/model/export";
-import { useChildRefs, useMessageSelection, useVisible } from "@mail/utils/common/hooks";
+import {
+    useChildRefs,
+    useMessageSelection,
+    useScrolling,
+    useScrollingState,
+    useVisible,
+} from "@mail/utils/common/hooks";
 
 import {
     Component,
@@ -21,6 +27,7 @@ import { Transition } from "@web/core/transition";
 import { Deferred } from "@web/core/utils/concurrency";
 import { useBus, useRefListener, useService } from "@web/core/utils/hooks";
 import { escape } from "@web/core/utils/strings";
+import { closestScrollableY } from "@web/core/utils/scrolling";
 
 export const PRESENT_VIEWPORT_THRESHOLD = 1;
 /**
@@ -55,12 +62,6 @@ export class Thread extends Component {
     };
     static template = "mail.Thread";
 
-    /** @type {Deferred} */
-    smoothScrollingDeferred;
-    /** @type {number} */
-    smoothScrollingTimeout;
-    isSmoothScrolling = false;
-
     setup() {
         super.setup();
         this.escape = escape;
@@ -80,11 +81,13 @@ export class Thread extends Component {
         this.lastJumpPresent = this.props.jumpPresent;
         this.orm = useService("orm");
         this.ui = useService("ui");
-        /** @type {ReturnType<import('@mail/utils/common/hooks').useMessageScrolling>|null} */
+        /** @type {ReturnType<import('@mail/utils/common/hooks').useMessageHighlight>|null} */
         this.messageHighlight = this.env.messageHighlight
             ? useState(this.env.messageHighlight)
             : null;
         this.scrollingToHighlight = false;
+        this.scrollingState = this.env.scrollingState ?? useScrollingState();
+        this.scrolling = useScrolling({ state: this.scrollingState });
         useLayoutEffect(
             () => {
                 this.scrollToHighlighted();
@@ -111,10 +114,7 @@ export class Thread extends Component {
         this.loadOlderState = useVisible(
             "load-older",
             async () => {
-                await Promise.all([
-                    this.messageHighlight?.scrollPromise,
-                    this.smoothScrollingDeferred,
-                ]);
+                await this.scrollingState?.scrollPromise;
                 if (this.loadOlderState.isVisible) {
                     toRaw(this.props.thread).fetchMoreMessages({
                         routeParams: this.messageFetchRouteParams,
@@ -126,10 +126,7 @@ export class Thread extends Component {
         this.loadNewerState = useVisible(
             "load-newer",
             async () => {
-                await Promise.all([
-                    this.messageHighlight?.scrollPromise,
-                    this.smoothScrollingDeferred,
-                ]);
+                await this.scrollingState.scrollPromise;
                 if (this.loadNewerState.isVisible) {
                     toRaw(this.props.thread).fetchMoreMessages({
                         epoch: "newer",
@@ -456,7 +453,7 @@ export class Thread extends Component {
             }
             if (
                 (this.lastSetValue === undefined || Math.abs(this.lastSetValue - value) > 1) &&
-                !this.isSmoothScrolling
+                !this.scrollingState.isScrolling
             ) {
                 this.setScroll(value, {
                     smooth:
@@ -669,10 +666,8 @@ export class Thread extends Component {
         const el = this.messageRefs.get(this.messageHighlight.highlightedMessageId)?.el;
         if (el) {
             this.scrollingToHighlight = true;
-
-            await this.messageHighlight.startupDeferred;
-            this.messageHighlight
-                .scrollTo(el.querySelector(".o-mail-Message-jumpTarget"))
+            this.scrolling
+                .scrollToElement(el.querySelector(".o-mail-Message-jumpTarget"), { smooth: true })
                 .then(() => (this.scrollingToHighlight = false));
         }
     }
@@ -694,26 +689,7 @@ export class Thread extends Component {
     }
 
     setScroll(value, { smooth = false } = {}) {
-        if (smooth) {
-            clearTimeout(this.smoothScrollingTimeout);
-            this.isSmoothScrolling = true;
-            this.smoothScrollingDeferred = new Deferred();
-            const onSmoothScrollingEnd = () => {
-                this.smoothScrollingDeferred.resolve();
-                this.smoothScrollingDeferred = undefined;
-                this.isSmoothScrolling = false;
-            };
-            if ("onscrollend" in window) {
-                document.addEventListener("scrollend", onSmoothScrollingEnd, {
-                    capture: true,
-                    once: true,
-                });
-            } else {
-                // To remove when safari will support the "scrollend" event.
-                this.smoothScrollingTimeout = setTimeout(onSmoothScrollingEnd, 250);
-            }
-        }
-        this.scrollableRef.el.scrollTo({ behavior: smooth ? "smooth" : undefined, top: value });
+        this.scrolling.scrollToValue(value, closestScrollableY(this.root.el), { smooth });
         this.lastSetValue = value;
         this.messageHighlight?.startupDeferred?.resolve();
         this.saveScroll();

@@ -6,7 +6,7 @@ import { CallActionList } from "@mail/discuss/call/common/call_action_list";
 import {
     inDiscussCallViewProps,
     useInDiscussCallView,
-    useMessageScrolling,
+    useMessageHighlight,
 } from "@mail/utils/common/hooks";
 
 import { Component, onMounted, onWillUnmount } from "@odoo/owl";
@@ -60,7 +60,7 @@ export class Meeting extends Component {
             },
         });
         this.threadActions = useThreadActions({ thread: () => this.channel.thread });
-        this.messageHighlight = useMessageScrolling({ thread: () => this.channel.thread });
+        this.messageHighlight = useMessageHighlight({ thread: () => this.channel.thread });
         this.messageSearch = useMessageSearch(this.channel.thread);
         useChildSubEnv({
             hasPreviousActionPanel: () => this.threadActions.actionStack.length > 0,

@@ -1,6 +1,8 @@
 import {
     reactive,
+    useChildSubEnv,
     useComponent,
+    useEnv,
     useLayoutEffect,
     useRef,
     useState,
@@ -377,43 +379,135 @@ export function useVisible(refName, cb, { ready = true } = {}) {
     return state;
 }
 
+const SCROLLING_NESTING = Symbol("SCROLLING_NESTING");
+
+function _useScrollingState() {
+    return {
+        /** @type {Promise} Deferred when ongoing scrolling */
+        scrollPromise: null,
+        /** @type {number} */
+        smoothScrollingTimeout: null,
+        isScrolling: false,
+        /**
+         * @type {Promise} Deferred during highlight startup, i.e. highlight is initiated but isn't scrolling yet
+         * Useful to set correct starting condition to initiate scroll to highlight, like scroll to bottom.
+         */
+        startupDeferred: null,
+    };
+}
+
 /**
- * @typedef {Object} MessageScrolling
- * @property {function} clear
- * @property {function} highlightMessage
- * @property {number|null} highlightedMessageId
+ * @typedef {Object} NestingStateOptions
+ * @property {boolean} [fromNesting=true] determines whether this state is inherited from nesting.
+ *  Nesting state means that the state is shared for all users of hook, meaning that scrolls/highlights are awaited and queued
  */
 
 /**
- * @param {Object} params
- * @param {function(): import("models").Thread|null} params.thread
- * @param {function(): Object} [params.messageFetchRouteParams]
- * @param {number} [params.duration=1500]
- * @returns {MessageScrolling}
+ * @param {NestingStateOptions} [params]
+ * @returns {ReturnType<_useScrollingState>}
  */
-export function useMessageScrolling({
-    thread: threadFn,
-    messageFetchRouteParams = () => ({}),
-    duration = 1500,
-}) {
-    let timeout;
-    const state = useState({
+export function useScrollingState({ fromNesting = true } = {}) {
+    const env = useEnv();
+    const scrollingState =
+        (fromNesting ? env[SCROLLING_NESTING] : undefined) ?? useState(_useScrollingState());
+    useChildSubEnv({ [SCROLLING_NESTING]: scrollingState });
+    return scrollingState;
+}
+
+/**
+ * @param {Object} [params]
+ * @param {ReturnType<_useScrollingState>} [params.state]
+ * @param {NestingStateOptions} [params.options]
+ */
+export function useScrolling({ state, ...options } = {}) {
+    const scrollService = useService("discuss.scroll");
+
+    const processScroll = async (fn) => {
+        await scrollService.startupDeferred;
+        scrollService.scrollPromise?.resolve();
+        const scrollPromise = new Deferred();
+        const onSmoothScrollingEnd = () => {
+            scrollService.scrollPromise.resolve();
+            scrollService.scrollPromise = undefined;
+            scrollService.isSmoothScrolling = false;
+        };
+        scrollService.scrollPromise = scrollPromise;
+        if ("onscrollend" in window) {
+            document.addEventListener("scrollend", onSmoothScrollingEnd, {
+                capture: true,
+                once: true,
+            });
+        } else {
+            // To remove when safari will support the "scrollend" event.
+            scrollService.smoothScrollingTimeout = setTimeout(onSmoothScrollingEnd, 250);
+        }
+        fn();
+        await scrollPromise;
+    };
+
+    return {
+        /**
+         * Scroll the element into view and expose a promise that will resolved
+         * once the scroll is done.
+         *
+         * @param {Element} el
+         * @param {Object} [params1={}]
+         * @param {boolean} [params1.smooth=false]
+         */
+        async scrollToElement(el, { smooth } = {}) {
+            await processScroll(() => {
+                el.scrollIntoView({ behavior: smooth ? "smooth" : undefined, block: "center" });
+            });
+        },
+        /**
+         * Scroll the element into view and expose a promise that will resolved
+         * once the scroll is done.
+         *
+         * @param {number} value
+         * @param {Component} scrollableEl
+         * @param {Object} [params2={}]
+         * @param {boolean} [params2.smooth=false]
+         */
+        async scrollToValue(value, scrollableEl, { smooth } = {}) {
+            await processScroll(() => {
+                scrollableEl.scrollTo({ behavior: smooth ? "smooth" : undefined, top: value });
+            });
+        },
+    };
+}
+
+const MESSAGE_HIGHLIGHT_NESTING = Symbol("MESSAGE_HIGHLIGHT_NESTING");
+
+/**
+ * @typedef {Object} MessageHighlightParams
+ * @property {number} duration
+ * @property {() => Object} messageFetchRouteParams
+ * @property {ReturnType<_useScrollingState>} scrollingState
+ * @property {() => import("models").Thread} threadFn
+ */
+
+function _useMessageHighlightState({
+    duration,
+    messageFetchRouteParams,
+    scrollingState,
+    threadFn,
+} = {}) {
+    const scrollService = useService("discuss.scroll");
+    return {
         clear() {
             if (this.highlightedMessageId) {
-                browser.clearTimeout(timeout);
-                timeout = null;
+                browser.clearTimeout(this.highlightedMessageTimeoutId);
+                this.highlightedMessageTimeoutId = null;
                 this.highlightedMessageId = null;
             }
         },
-        /**
-         * @param {import("models").Message} message
-         */
+        /** @param {import("models").Message} message */
         async highlightMessage(message) {
+            /** @type {import("models").Thread} */
             const thread = threadFn();
             if (!thread) {
                 return;
             }
-            state.initiated = true;
             let messageScrollDirection;
             if (message.notIn(thread.messages)) {
                 messageScrollDirection = message.id < thread.messages[0]?.id ? "top" : "bottom";
@@ -422,7 +516,7 @@ export function useMessageScrolling({
                     routeParams: messageFetchRouteParams(),
                 });
             }
-            const lastHighlightedMessageId = state.highlightedMessageId;
+            const lastHighlightedMessageId = this.highlightedMessageId;
             this.clear();
             if (lastHighlightedMessageId === message.id) {
                 // Give some time for the state to update.
@@ -430,47 +524,62 @@ export function useMessageScrolling({
             }
             thread.scrollTop = messageScrollDirection === "top" ? "bottom" : undefined;
             if (thread.scrollTop === "bottom") {
-                state.startupDeferred = new Deferred();
-                await state.startupDeferred;
-                state.startupDeferred = null;
+                scrollingState.startupDeferred = new Deferred();
+                await scrollingState.startupDeferred;
+                scrollingState.startupDeferred = null;
             }
-            state.highlightedMessageId = message.id;
-            state.initiated = false;
-            timeout = browser.setTimeout(() => this.clear(), duration);
-        },
-        initiated: false,
-        /**
-         * Deferred during highlight startup, i.e. highlight is initiated but isn't scrolling yet
-         * Useful to set correct starting condition to initiate scroll to highlight, like scroll to bottom.
-         */
-        startupDeferred: null,
-        /** Deferred during scrolling to highlight */
-        scrollPromise: null,
-        /**
-         * Scroll the element into view and expose a promise that will resolved
-         * once the scroll is done.
-         *
-         * @param {Element} el
-         */
-        scrollTo(el) {
-            state.scrollPromise?.resolve();
-            const scrollPromise = new Deferred();
-            state.scrollPromise = scrollPromise;
-            if ("onscrollend" in window) {
-                document.addEventListener("scrollend", scrollPromise.resolve, {
-                    capture: true,
-                    once: true,
-                });
-            } else {
-                // To remove when safari will support the "scrollend" event.
-                setTimeout(scrollPromise.resolve, 250);
-            }
-            el.scrollIntoView({ behavior: "smooth", block: "center" });
-            return scrollPromise;
+            this.highlightedMessageId = message.id;
+            this.highlightedMessageTimeoutId = browser.setTimeout(() => this.clear(), duration);
         },
         highlightedMessageId: null,
-    });
+        highlightedMessageTimeoutId: null,
+    };
+}
+
+/**
+ * @param {MessageHighlightParams} [params={}]
+ * @returns {ReturnType<_useMessageHighlightState>}
+ */
+export function useMessageHighlightState({ duration, fromNesting, scrollingState } = {}) {
+    const env = useEnv();
+    const state =
+        (fromNesting ? env[MESSAGE_HIGHLIGHT_NESTING] : undefined) ??
+        useState(_useMessageHighlightState({ duration, scrollingState }));
+    useChildSubEnv({ [MESSAGE_HIGHLIGHT_NESTING]: state });
     return state;
+}
+
+/**
+ * @typedef {Object} MessageHighlight
+ * @property {function} clear
+ * @property {function} highlightMessage
+ * @property {number|null} highlightedMessageId
+ * @property {number|null} highlightedMessageTimeoutId
+ */
+
+/**
+ * @param {Object} params
+ * @param {function(): import("models").Thread|null} params.thread
+ * @param {function(): Object} [params.messageFetchRouteParams]
+ * @param {number} [params.duration=1500]
+ * @param {ReturnType<_useScrollingState>} [params.scrollingState]
+ * @param {NestingStateOptions} [params.nestingStateOptions]
+ * @returns {MessageHighlight}
+ */
+export function useMessageHighlight({
+    thread: threadFn,
+    messageFetchRouteParams = () => ({}),
+    duration = 1500,
+    nestingStateOptions,
+    scrollingState: scrollingStateParam,
+}) {
+    const scrollingState = scrollingStateParam ?? useScrollingState(nestingStateOptions);
+    return useMessageHighlightState({
+        duration,
+        messageFetchRouteParams,
+        scrollingState,
+        threadFn,
+    });
 }
 
 export function useMessageSelection() {

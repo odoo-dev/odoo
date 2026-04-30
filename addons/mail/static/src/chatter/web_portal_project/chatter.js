@@ -1,7 +1,7 @@
 import { useChildSubEnv, useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { Composer } from "@mail/core/common/composer";
 import { Thread } from "@mail/core/common/thread";
-import { useMessageScrolling } from "@mail/utils/common/hooks";
+import { useMessageHighlight } from "@mail/utils/common/hooks";
 
 import { Component, onMounted, onWillUpdateProps } from "@odoo/owl";
 
@@ -29,7 +29,7 @@ export class Chatter extends Component {
             aside: false,
             disabled: !this.props.threadId,
         });
-        this.messageHighlight = useMessageScrolling({
+        this.messageHighlight = useMessageHighlight({
             thread: () => this.state.thread,
             messageFetchRouteParams: () => this.messageFetchRouteParams,
         });

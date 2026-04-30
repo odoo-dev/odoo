@@ -5,6 +5,7 @@ declare module "services" {
     import { discussCorePublic } from "@mail/discuss/core/public/discuss_core_public_service";
     import { discussCorePublicWeb } from "@mail/discuss/core/public_web/discuss_core_public_web_service";
     import { discussCoreWeb } from "@mail/discuss/core/web/discuss_core_web_service";
+    import { discussScrollService } from "@mail/core/common/discuss_scroll_service";
     import { im_status } from "@mail/core/common/im_status_service";
     import { mailCoreCommon } from "@mail/core/common/mail_core_common_service";
     import { mailCoreWeb } from "@mail/core/web/mail_core_web_service";
@@ -27,6 +28,7 @@ declare module "services" {
         "discuss.p2p": typeof discussP2P;
         "discuss.ptt_extension": typeof pttExtensionHookService;
         "discuss.rtc": typeof rtcService;
+        "discuss.scroll": typeof discussScrollService;
         "discuss.voice_message": typeof voiceMessageService;
         "mail.attachment_upload": typeof attachmentUploadService;
         "mail.core.common": typeof mailCoreCommon;
