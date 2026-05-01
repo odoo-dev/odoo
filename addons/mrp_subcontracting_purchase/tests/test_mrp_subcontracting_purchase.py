@@ -1092,3 +1092,24 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
             {'product_id': self.comp3.id, 'product_uom_qty': 1.0},
             {'product_id': self.comp4.id, 'product_uom_qty': 1.0},
         ])
+
+    def test_monthly_demand_subcontracting_resupply(self):
+        """Ensure that monthly demand is correctly counted for subcontracting
+        resupply transfers generated from a subcontracting purchase order.
+        """
+        resupply_product = self.comp3
+        resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')], limit=1)
+        resupply_product.route_ids = [Command.link(resupply_sub_on_order_route.id)]
+
+        purchase_order = self.env['purchase.order'].create({
+            'partner_id': self.subcontractor_partner1.id,
+            'order_line': [Command.create({
+                'product_id': self.finished2.id,
+                'product_qty': 20,
+            })],
+        })
+        purchase_order.button_confirm()
+
+        # Monthly demand should be 20.0 with and without warehouse.
+        self.assertEqual(resupply_product.with_context(warehouse_id=self.warehouse.id).monthly_demand, 20.0)
+        self.assertEqual(resupply_product.monthly_demand, 20.0)
