@@ -101,6 +101,6 @@ class SaleOrderTemplateLine(models.Model):
             'product_uom': self.product_uom_id.id,
             'sequence': self.sequence,
         }
-        if self.name:
+        if self.name and self.display_type:
             vals['name'] = self.name
         return vals
