@@ -108,10 +108,20 @@ export class SnippetViewer extends Component {
         this.props.snippetModel.deleteCustomSnippet(snippet);
     }
 
-    getSnippetPreviews() {
+    getNbColumns() {
+        return this.props.state.isMobilePreviewMode ? 3 : 2;
+    }
+
+    getSnippetColumns() {
         const snippets = this.getSelectedSnippets();
+        const nbColumns = this.getNbColumns();
+        const columns = Array.from({ length: nbColumns }, () => []);
+
+        for (const [index, snippet] of snippets.entries()) {
+            columns[index % nbColumns].push(snippet);
+        }
         this.props.hasSearchResults(snippets.length > 0);
-        return snippets;
+        return columns;
     }
 
     onClick(snippet) {

@@ -9,7 +9,6 @@ import { _t } from "@web/core/l10n/translation";
 import { getFirstAndLastTabableElements } from "@web/core/ui/ui_service";
 import { cookie } from "@web/core/browser/cookie";
 import { useAutofocus, useChildRef } from "@web/core/utils/hooks";
-import { useDebounced } from "@web/core/utils/timing";
 import { SnippetViewer } from "./snippet_viewer";
 
 /**
@@ -45,10 +44,6 @@ export class AddSnippetDialog extends Component {
             hasNoSearchResults: false,
             isMobilePreviewMode: false,
         });
-
-        this.debouncedSetSearch = useDebounced((value) => {
-            this.state.search = value;
-        }, 200);
 
         useLayoutEffect(
             (isMobilePreviewMode) => {
@@ -231,9 +226,5 @@ export class AddSnippetDialog extends Component {
 
     toggleMobilePreview() {
         this.state.isMobilePreviewMode = !this.state.isMobilePreviewMode;
-    }
-
-    onSearchInput(ev) {
-        this.debouncedSetSearch(ev.target.value);
     }
 }

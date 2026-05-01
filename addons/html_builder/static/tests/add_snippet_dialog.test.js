@@ -21,14 +21,13 @@ test("Toggling mobile preview button manages snippet layout and restores origina
 
     const iframeEl = document.querySelector(SNIPPET_IFRAME);
     const iframeDoc = iframeEl.contentDocument;
-    const snippetsContainer = iframeDoc.querySelector(".o_snippets_container");
-    expect(snippetsContainer).toHaveStyle({ "column-count": "2" });
+    expect(iframeDoc.querySelectorAll(".o_snippets_preview_row > div")).toHaveCount(2);
 
     await contains(MOBILE_BTN).click();
-    expect(snippetsContainer).toHaveStyle({ "column-count": "3" });
+    expect(iframeDoc.querySelectorAll(".o_snippets_preview_row > div")).toHaveCount(3);
 
     await contains(MOBILE_BTN).click();
-    expect(snippetsContainer).toHaveStyle({ "column-count": "2" });
+    expect(iframeDoc.querySelectorAll(".o_snippets_preview_row > div")).toHaveCount(2);
 });
 
 test("Selecting a snippet while mobile preview is active drops it into the editable", async () => {
