@@ -1,5 +1,5 @@
 import { useRef } from "@web/owl2/utils";
-import { Component, markup } from "@odoo/owl";
+import { Component, markup, onMounted } from "@odoo/owl";
 import { useMatrixKeyNavigation } from "@html_builder/utils/keyboard_navigation";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { localization } from "@web/core/l10n/localization";
@@ -30,6 +30,9 @@ export class SnippetViewer extends Component {
             () => [this.content.el],
             ".o_snippet_preview_wrap"
         );
+        onMounted(() => {
+            this.render();
+        });
     }
 
     /**
@@ -115,13 +118,51 @@ export class SnippetViewer extends Component {
     getSnippetColumns() {
         const snippets = this.getSelectedSnippets();
         const nbColumns = this.getNbColumns();
-        const columns = Array.from({ length: nbColumns }, () => []);
 
-        for (const [index, snippet] of snippets.entries()) {
-            columns[index % nbColumns].push(snippet);
+        const items = snippets.map((snippet) => ({
+            snippet,
+            height: this._measureSnippetHeight(snippet, nbColumns),
+        }));
+        items.sort((a, b) => b.height - a.height);
+
+        const columns = Array.from({ length: nbColumns }, () => []);
+        const columnHeights = Array(nbColumns).fill(0);
+
+        for (const { snippet, height } of items) {
+            const shortestIndex = columnHeights.indexOf(Math.min(...columnHeights));
+
+            columns[shortestIndex].push(snippet);
+            columnHeights[shortestIndex] += height;
         }
+
         this.props.hasSearchResults(snippets.length > 0);
         return columns;
+    }
+
+    _measureSnippetHeight(snippet, nbColumns) {
+        if (!this.content.el) {
+            return 1;
+        }
+        this.el = this.props.iframeRef.el.contentDocument.body;
+        let measurer = this.el.querySelector("#o_snippet_measurer");
+
+        if (!measurer) {
+            measurer = document.createElement("div");
+            measurer.id = "o_snippet_measurer";
+            measurer.classList = "col-4 col-lg-6";
+            measurer.style.position = "absolute";
+            measurer.style.visibility = "hidden";
+            measurer.style.pointerEvents = "none";
+            measurer.style.left = "0";
+            measurer.style.top = "0";
+            this.el.querySelector(".o_snippets_preview_row").appendChild(measurer);
+        }
+
+        measurer.innerHTML = "";
+        const clone = snippet.content.cloneNode(true);
+        measurer.appendChild(clone);
+        const height = clone.offsetHeight;
+        return height || 200;
     }
 
     onClick(snippet) {

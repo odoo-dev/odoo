@@ -1,4 +1,4 @@
-import { onWillRender, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
+import { onWillRender, useRef, useState } from "@web/owl2/utils";
 import { Component, onMounted, onWillUnmount } from "@odoo/owl";
 import { loadBundle, loadCSS } from "@web/core/assets";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
@@ -45,15 +45,6 @@ export class AddSnippetDialog extends Component {
             isMobilePreviewMode: false,
         });
 
-        useLayoutEffect(
-            (isMobilePreviewMode) => {
-                const iframeEl = this.iframeRef.el;
-                const htmlEl = iframeEl.contentDocument.documentElement;
-                iframeEl.classList.toggle("o_is_mobile_preview", isMobilePreviewMode);
-                htmlEl.classList.toggle("o_is_mobile_preview", isMobilePreviewMode);
-            },
-            () => [this.state.isMobilePreviewMode]
-        );
         this.snippetViewerProps = {
             state: this.state,
             hasSearchResults: (has) => {
@@ -68,6 +59,7 @@ export class AddSnippetDialog extends Component {
             frontendDirection: this.props.editor.editable.classList.contains("o_rtl")
                 ? "rtl"
                 : "ltr",
+            iframeRef: this.iframeRef,
         };
 
         let root;
@@ -226,5 +218,9 @@ export class AddSnippetDialog extends Component {
 
     toggleMobilePreview() {
         this.state.isMobilePreviewMode = !this.state.isMobilePreviewMode;
+        const iframeEl = this.iframeRef.el;
+        const htmlEl = iframeEl.contentDocument.documentElement;
+        iframeEl.classList.toggle("o_is_mobile_preview", this.state.isMobilePreviewMode);
+        htmlEl.classList.toggle("o_is_mobile_preview", this.state.isMobilePreviewMode);
     }
 }
