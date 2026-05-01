@@ -107,6 +107,9 @@ export class ProductNameAndDescriptionField extends Component {
 
     get label() {
         let label = this.props.record.data[this.descriptionColumn];
+        if (!label.includes("\n")) {
+            return label.trim();
+        }
         this.currentProductName = this.productName ? label.split("\n")[0] : "";
 
         if(this.productName && label.startsWith(this.productName)){
