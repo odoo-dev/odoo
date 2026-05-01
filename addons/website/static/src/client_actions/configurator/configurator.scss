@@ -4,10 +4,6 @@
     $input-font-size: 40%;
 
     .o_configurator_screen {
-        // ==== Variables
-        --ConfiguratorPreview-height: MIN(70vh, 560px);
-        --ConfiguratorSmallPreview-height: MIN(60vh, 500px);
-
         // ==== Animations
         @keyframes configuratorFadeIn{
             from {opacity: 0}
@@ -15,11 +11,7 @@
         }
 
         @keyframes theme_screenshot_scroll {
-            to { transform: translate3d(0, calc((100% - var(--ConfiguratorPreview-height)) * -1), 0)}
-        }
-
-        @keyframes theme_screenshot_scroll_small {
-            to { transform: translate3d(0, calc((100% - var(--ConfiguratorSmallPreview-height)) * -1), 0)}
+            to { transform: translate3d(0, -100%, 0)}
         }
 
         // ==== General Components
@@ -211,28 +203,10 @@
         }
 
         &.o_palette_selection_screen {
-            @include media-breakpoint-down(lg) {
-                .o_detect_logo {
-                    width: 100% !important;
-                }
-
-                .o_content_container {
-                    height: 100% !important;
-                    flex-direction: column !important;
-                }
-
-                .o_palettes_separator {
-                    width: 100% !important;
-                }
-
-                .o_palettes_container {
-                    width: 100% !important;
-                }
-            }
-
-            @include media-breakpoint-down(md) {
+            @include media-breakpoint-up(lg) {
                 .o_palette_card_container {
-                    width: 50% !important;
+                    flex: 0 0 20%;
+                    max-width: 20%;
                 }
             }
 
@@ -240,40 +214,8 @@
                 cursor: pointer;
                 box-shadow: 0 0 0 1px map-get($grays, '200');
 
-                .color_sample {
-                    padding-top: 20%;
-                }
-
                 &:hover, &:focus-visible, &.selected {
                     box-shadow: 0 0 0 1px #FFF, 0 0 0 3px map-get($theme-colors, "primary")
-                }
-            }
-
-            .o_configurator_logo_wrapper {
-                transition: opacity .1s ease;
-
-                &:hover {
-                    transition: opacity .3s ease;
-                    opacity: .1;
-                }
-
-                img {
-                    height: 120px;
-                    max-width: 90%;
-                }
-            }
-
-            .o_configurator_logo_upload {
-                cursor: pointer;
-                @include o-hover-text-color(map-get($grays, '400'), map-get($grays, '800'));
-            }
-
-            .palette_selection_or {
-                @include o-position-absolute(50%);
-                transform: translateY(-50%);
-
-                @include media-breakpoint-up(lg) {
-                    right: 0;
                 }
             }
         }
@@ -332,12 +274,7 @@
             }
 
             .theme_preview {
-                @include media-breakpoint-down(lg) {
-                    --ConfiguratorPreview-height: 300px;
-                    --ConfiguratorSmallPreview-height: var(--ConfiguratorPreview-height);
-                }
-
-                height: var(--ConfiguratorPreview-height);
+                aspect-ratio: 16/9;
 
                 img {
                     box-shadow: $box-shadow-sm;
@@ -346,10 +283,6 @@
                 @include media-breakpoint-up(lg) {
                     &:hover {
                         transform: translate3d(0,-10px,0);
-                    }
-
-                    &.small {
-                        height: var(--ConfiguratorSmallPreview-height);
                     }
                 }
 
@@ -366,11 +299,6 @@
 
                     .theme_svg_container svg {
                         animation: theme_screenshot_scroll 4s cubic-bezier(0.455, 0.030, 0.515, 0.955) .1s infinite alternate;
-                    }
-
-                    &.small .theme_svg_container svg {
-                        animation-name: theme_screenshot_scroll_small;
-                        animation-duration: 5s;
                     }
                 }
             }

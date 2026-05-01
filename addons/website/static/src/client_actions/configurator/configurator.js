@@ -92,7 +92,64 @@ export const PALETTE_NAMES = [
 // from CSS and added in each palette.
 export const CUSTOM_BG_COLOR_ATTRS = ["menu", "footer"];
 
-const MAX_NBR_DISPLAY_MAIN_THEMES = 3;
+// Columns = font class (Sans Serif, Serif, Script, Decorative, Gothic), rows = color palettes
+export const PALETTE_FONT_COMBOS = [
+    // Row 1
+    { palette: "default-light-2", headingsFont: "Roboto", bodyFont: "Inter", label: "Modern", description: "Clean & Efficient" },
+    { palette: "default-light-2", headingsFont: "Playfair Display", bodyFont: "Source Sans Pro", label: "Classic", description: "Timeless & Refined" },
+    { palette: "default-light-2", headingsFont: "Dancing Script", bodyFont: "Open Sans", label: "Creative", description: "Warm & Personal" },
+    { palette: "default-light-2", headingsFont: "Lobster", bodyFont: "Roboto", label: "Playful", description: "Fun & Friendly" },
+    { palette: "default-light-2", headingsFont: "Oswald", bodyFont: "Inter", label: "Bold", description: "Strong & Striking" },
+    // Row 2
+    { palette: "default-light-5", headingsFont: "Roboto", bodyFont: "Inter", label: "Modern", description: "Clean & Efficient" },
+    { palette: "default-light-5", headingsFont: "Playfair Display", bodyFont: "Source Sans Pro", label: "Classic", description: "Timeless & Refined" },
+    { palette: "default-light-5", headingsFont: "Dancing Script", bodyFont: "Open Sans", label: "Creative", description: "Warm & Personal" },
+    { palette: "default-light-5", headingsFont: "Lobster", bodyFont: "Roboto", label: "Playful", description: "Fun & Friendly" },
+    { palette: "default-light-5", headingsFont: "Oswald", bodyFont: "Inter", label: "Bold", description: "Strong & Striking" },
+    // Row 3
+    { palette: "default-light-7", headingsFont: "Roboto", bodyFont: "Inter", label: "Modern", description: "Clean & Efficient" },
+    { palette: "default-light-7", headingsFont: "Playfair Display", bodyFont: "Source Sans Pro", label: "Classic", description: "Timeless & Refined" },
+    { palette: "default-light-7", headingsFont: "Dancing Script", bodyFont: "Open Sans", label: "Creative", description: "Warm & Personal" },
+    { palette: "default-light-7", headingsFont: "Lobster", bodyFont: "Roboto", label: "Playful", description: "Fun & Friendly" },
+    { palette: "default-light-7", headingsFont: "Oswald", bodyFont: "Inter", label: "Bold", description: "Strong & Striking" },
+    // Row 4
+    { palette: "default-24", headingsFont: "Roboto", bodyFont: "Inter", label: "Modern", description: "Clean & Efficient" },
+    { palette: "default-24", headingsFont: "Playfair Display", bodyFont: "Source Sans Pro", label: "Classic", description: "Timeless & Refined" },
+    { palette: "default-24", headingsFont: "Dancing Script", bodyFont: "Open Sans", label: "Creative", description: "Warm & Personal" },
+    { palette: "default-24", headingsFont: "Lobster", bodyFont: "Roboto", label: "Playful", description: "Fun & Friendly" },
+    { palette: "default-24", headingsFont: "Oswald", bodyFont: "Inter", label: "Bold", description: "Strong & Striking" },
+    // Row 5
+    { palette: "default-light-11", headingsFont: "Roboto", bodyFont: "Inter", label: "Modern", description: "Clean & Efficient" },
+    { palette: "default-light-11", headingsFont: "Playfair Display", bodyFont: "Source Sans Pro", label: "Classic", description: "Timeless & Refined" },
+    { palette: "default-light-11", headingsFont: "Dancing Script", bodyFont: "Open Sans", label: "Creative", description: "Warm & Personal" },
+    { palette: "default-light-11", headingsFont: "Lobster", bodyFont: "Roboto", label: "Playful", description: "Fun & Friendly" },
+    { palette: "default-light-11", headingsFont: "Oswald", bodyFont: "Inter", label: "Bold", description: "Strong & Striking" },
+    // Row 6 (dark)
+    { palette: "default-9", headingsFont: "Roboto", bodyFont: "Inter", dark: true, label: "Modern", description: "Clean & Efficient" },
+    { palette: "default-9", headingsFont: "Playfair Display", bodyFont: "Source Sans Pro", dark: true, label: "Classic", description: "Timeless & Refined" },
+    { palette: "default-9", headingsFont: "Dancing Script", bodyFont: "Open Sans", dark: true, label: "Creative", description: "Warm & Personal" },
+    { palette: "default-9", headingsFont: "Lobster", bodyFont: "Roboto", dark: true, label: "Playful", description: "Fun & Friendly" },
+    { palette: "default-9", headingsFont: "Oswald", bodyFont: "Inter", dark: true, label: "Bold", description: "Strong & Striking" },
+];
+
+const GOOGLE_FONTS_URL = "https://fonts.googleapis.com/css?family="
+    + "Roboto:400,700|Inter:400,700|Playfair+Display:400,700|Dancing+Script:400,700|"
+    + "Lobster:400|Oswald:400,700|Open+Sans:400,700|Source+Sans+Pro:400,700"
+    + "&display=swap";
+
+let _googleFontsLoaded = false;
+function loadGoogleFonts() {
+    if (_googleFontsLoaded) {
+        return;
+    }
+    _googleFontsLoaded = true;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = GOOGLE_FONTS_URL;
+    document.head.appendChild(link);
+}
+
+const MAX_NBR_DISPLAY_MAIN_THEMES = 6;
 
 /**
  * Returns a list of maximum "resultNbrMax" themes that depends on the wanted
@@ -109,8 +166,11 @@ const MAX_NBR_DISPLAY_MAIN_THEMES = 3;
 async function getRecommendedThemes(orm, state, resultNbrMax = MAX_NBR_DISPLAY_MAIN_THEMES) {
     return orm.call("website", "configurator_recommended_themes", [], {
         industry_id: state.selectedIndustry.id,
+        industry_name: state.selectedIndustry.label,
         palette: state.selectedPalette,
         result_nbr_max: resultNbrMax,
+        website_type: WEBSITE_TYPES[state.selectedType]?.name || "business",
+        positioning: state.selectedPositioning || state.formerSelectedPositioning || "",
     });
 }
 
@@ -176,7 +236,7 @@ export class DescriptionScreen extends Component {
                     this.industrySelection.el.querySelector("input").focus();
                 }
                 if (selectedIndustry) {
-                    this.purposeSelectionRef.el.focus();
+                    this.purposeSelectionRef.el?.focus();
                 }
             },
             () => [this.state.selectedType, this.state.selectedIndustry]
@@ -186,19 +246,35 @@ export class DescriptionScreen extends Component {
     }
 
     onMounted() {
-        this.selectWebsitePurpose();
+        this.state.selectPositioning();
     }
-    /**
-     * Set the input's parent label value to automatically adapt input size
-     * and update the selected industry.
-     *
-     * @private
-     * @param {string} label
-     * @param {number} id
-     */
+
     _setSelectedIndustry(label, id) {
         this.state.selectIndustry(label, id);
-        this.checkDescriptionCompletion();
+        this.fetchPositionings(label);
+    }
+
+    async fetchPositionings(industryLabel) {
+        const fallback = ["premium", "affordable", "professional", "modern", "community-focused", "innovative"];
+        this.state.positionings = [];
+        this.state.selectedPositioning = undefined;
+        this.state.positioningsLoading = true;
+        try {
+            const prompt = `Design a website for my ${industryLabel} business with a _______ positioning. Return only a JSON array of 6 possibilities to fill in the blank.`;
+            const response = await rpc("/html_editor/generate_text", {
+                prompt,
+                conversation_history: [],
+            });
+            const match = response?.match(/\[[\s\S]*\]/);
+            const parsed = match && JSON.parse(match[0]);
+            this.state.positionings =
+                Array.isArray(parsed) && parsed.every((item) => typeof item === "string")
+                    ? parsed
+                    : fallback;
+        } catch {
+            this.state.positionings = fallback;
+        }
+        this.state.positioningsLoading = false;
     }
 
     _splitToSet(string) {
@@ -338,16 +414,14 @@ export class DescriptionScreen extends Component {
         this.checkDescriptionCompletion();
     }
 
-    selectWebsitePurpose(id) {
-        this.state.selectWebsitePurpose(id);
+    selectPositioning(positioning) {
+        this.state.selectPositioning(positioning);
         this.checkDescriptionCompletion();
     }
 
     checkDescriptionCompletion() {
-        const { selectedType, selectedPurpose, selectedIndustry } = this.state;
-        if (selectedType && selectedPurpose && selectedIndustry) {
-            // If the industry name is not known by the server, send it to the
-            // IAP server.
+        const { selectedType, selectedPositioning, selectedIndustry } = this.state;
+        if (selectedType && selectedPositioning && selectedIndustry) {
             if (selectedIndustry.id === -1) {
                 this.orm.call("website", "configurator_missing_industry", [], {
                     unknown_industry: selectedIndustry.label,
@@ -404,10 +478,26 @@ export class PaletteSelectionScreen extends Component {
         this.orm = useService("orm");
 
         onMounted(() => {
+            loadGoogleFonts();
             if (this.state.logo) {
                 this.updatePalettes();
             }
         });
+    }
+
+    get paletteFontCombos() {
+        return PALETTE_FONT_COMBOS.map((combo) => {
+            const colors = this.state.palettes[combo.palette];
+            if (!colors) {
+                return null;
+            }
+            return {
+                ...combo,
+                colors,
+                bgColor: combo.dark ? colors.color5 : colors.color3,
+                textColor: combo.dark ? colors.color4 : colors.color5,
+            };
+        }).filter(Boolean);
     }
 
     uploadLogo() {
@@ -484,9 +574,9 @@ export class PaletteSelectionScreen extends Component {
         this.state.setRecommendedPalette(color1, color2);
     }
 
-    selectPalette(paletteName) {
-        this.state.selectPalette(paletteName);
-        this.props.navigate(ROUTES.featuresSelectionScreen);
+    selectPalette(paletteName, headingsFont, bodyFont) {
+        this.state.selectPalette(paletteName, headingsFont, bodyFont);
+        this.props.navigate(ROUTES.themeSelectionScreen);
     }
 
     /**
@@ -605,10 +695,11 @@ export class ApplyConfiguratorScreen extends Component {
             industry_id: this.state.selectedIndustry.id,
             industry_name: this.state.selectedIndustry.label.toLowerCase(),
             selected_palette: selectedPalette,
+            selected_font: this.state.selectedFont,
+            selected_headings_font: this.state.selectedHeadingsFont,
             theme_name: themeName,
             website_purpose:
-                WEBSITE_PURPOSES[this.state.selectedPurpose || this.state.formerSelectedPurpose]
-                    .name,
+                this.state.selectedPositioning || this.state.formerSelectedPositioning || "general",
             website_type: WEBSITE_TYPES[this.state.selectedType].name,
             logo_attachment_id: this.state.logoAttachmentId,
         };
@@ -795,22 +886,25 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
             useRef("ThemePreview1"),
             useRef("ThemePreview2"),
             useRef("ThemePreview3"),
+            useRef("ThemePreview4"),
+            useRef("ThemePreview5"),
+            useRef("ThemePreview6"),
         ];
         this.extraThemesButtonRef = useRef("extraThemesButton");
         this.extraThemeSVGPreviews = [];
         for (let i = 0; i < this.maxNbrDisplayExtraThemes; i++) {
             this.extraThemeSVGPreviews.push(useRef(`ExtraThemePreview${i}`));
         }
-        onWillStart(async () => {
-            const themes = await getRecommendedThemes(this.orm, this.state);
-            if (!themes.length) {
-                await this.applyConfigurator("theme_default");
-            } else {
+        onMounted(async () => {
+            loadGoogleFonts();
+            if (!this.state.themes.length) {
+                const themes = await getRecommendedThemes(this.orm, this.state);
+                if (!themes.length) {
+                    await this.applyConfigurator("theme_default");
+                    return;
+                }
                 this.state.updateRecommendedThemes(themes);
             }
-        });
-
-        onMounted(() => {
             this.blockUiDuringImageLoading(this.state.themes, this.themeSVGPreviews);
         });
 
@@ -848,11 +942,16 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         }
         const proms = [];
         this.uiService.block({ delay: 700 });
+        const headingsFont = this.state.selectedHeadingsFont || "Inter Tight";
+        const bodyFont = this.state.selectedFont || "Inter";
         themes.forEach((theme, idx) => {
             const svgEl = new DOMParser().parseFromString(
                 theme.svg,
                 "image/svg+xml"
             ).documentElement;
+            const styleEl = document.createElementNS("http://www.w3.org/2000/svg", "style");
+            styleEl.textContent = `@import url('${GOOGLE_FONTS_URL}'); * { font-family: '${headingsFont}', '${bodyFont}', sans-serif !important; }`;
+            svgEl.insertBefore(styleEl, svgEl.firstChild);
             for (const imgEl of svgEl.querySelectorAll("image")) {
                 proms.push(
                     new Promise((resolve, reject) => {
@@ -1002,12 +1101,21 @@ export class Store {
         this.logoAttachmentId = attachmentId;
     }
 
-    selectPalette(paletteName) {
+    selectPositioning(positioning) {
+        if (!positioning && this.selectedPositioning) {
+            this.formerSelectedPositioning = this.selectedPositioning;
+        }
+        this.selectedPositioning = positioning;
+    }
+
+    selectPalette(paletteName, headingsFont, bodyFont) {
         if (paletteName === "recommendedPalette") {
             this.selectedPalette = this.recommendedPalette;
         } else {
             this.selectedPalette = this.palettes[paletteName];
         }
+        this.selectedHeadingsFont = headingsFont || "Inter Tight";
+        this.selectedFont = bodyFont || "Inter";
     }
 
     toggleFeature(featureId) {
@@ -1225,8 +1333,14 @@ export class Configurator extends Component {
             selectedType: undefined,
             selectedPurpose: undefined,
             formerSelectedPurpose: undefined,
+            positionings: [],
+            positioningsLoading: false,
+            selectedPositioning: undefined,
+            formerSelectedPositioning: undefined,
             selectedIndustry: undefined,
             selectedPalette: undefined,
+            selectedFont: undefined,
+            selectedHeadingsFont: undefined,
             recommendedPalette: undefined,
             defaultColors: defaultColors,
             palettes: palettes,
@@ -1244,8 +1358,13 @@ export class Configurator extends Component {
             logoAttachmentId: state.logoAttachmentId,
             selectedIndustry: state.selectedIndustry,
             selectedPalette: state.selectedPalette,
+            selectedFont: state.selectedFont,
+            selectedHeadingsFont: state.selectedHeadingsFont,
             selectedPurpose: state.selectedPurpose,
             formerSelectedPurpose: state.formerSelectedPurpose,
+            positionings: state.positionings,
+            selectedPositioning: state.selectedPositioning,
+            formerSelectedPositioning: state.formerSelectedPositioning,
             selectedType: state.selectedType,
             recommendedPalette: state.recommendedPalette,
         });

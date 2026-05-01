@@ -675,23 +675,89 @@ class Website(models.CachedModel):
         return r
 
     @api.model
-    def configurator_recommended_themes(self, industry_id, palette, result_nbr_max=3):
+    def configurator_recommended_themes(self, industry_id, palette, result_nbr_max=6,
+                                         industry_name='', website_type='', positioning=''):
         Module = request.env['ir.module.module']
         domain = Module.get_themes_domain()
         domain = Domain.AND([[('name', '!=', 'theme_default')], domain])
         client_themes = Module.search(domain).mapped('name')
         client_themes_img = {t: get_manifest(t).get('images_preview_theme', {}) for t in client_themes if get_manifest(t)}
-        themes_suggested = self._website_api_rpc(
-            '/api/website/2/configurator/recommended_themes/%s' % (industry_id if industry_id > 0 else ''),
-            {
-                'client_themes': client_themes_img,
-                'result_nbr_max': result_nbr_max,
-            }
+
+        # Build theme catalog with summaries for AI
+        theme_catalog = {}
+        for theme_name in client_themes:
+            manifest = get_manifest(theme_name)
+            if manifest:
+                theme_catalog[theme_name] = manifest.get('summary', '')
+
+        # Use AI to pick the best themes for this business
+        ai_theme_names = self._ai_recommend_themes(
+            theme_catalog, industry_name, website_type, positioning, result_nbr_max
         )
+
+        # Build the theme list: AI-recommended first, then fill from IAP
+        themes_suggested = []
+        try:
+            iap_themes = self._website_api_rpc(
+                '/api/website/2/configurator/recommended_themes/%s' % (industry_id if industry_id > 0 else ''),
+                {
+                    'client_themes': client_themes_img,
+                    'result_nbr_max': max(result_nbr_max, 20),
+                }
+            )
+        except Exception:
+            iap_themes = []
+
+        iap_by_name = {t['name']: t for t in iap_themes}
+        # Add AI-recommended themes first (in AI order)
+        for name in ai_theme_names:
+            if name in iap_by_name:
+                themes_suggested.append(iap_by_name.pop(name))
+        # Fill remaining slots from IAP results
+        for theme in iap_themes:
+            if len(themes_suggested) >= result_nbr_max:
+                break
+            if theme['name'] not in {t['name'] for t in themes_suggested}:
+                themes_suggested.append(theme)
+
         process_svg = self.env['website.configurator.feature']._process_svg
-        for theme in themes_suggested:
+        for theme in themes_suggested[:result_nbr_max]:
             theme['svg'] = process_svg(theme['name'], palette, theme.pop('image_urls'))
-        return themes_suggested
+        return themes_suggested[:result_nbr_max]
+
+    def _ai_recommend_themes(self, theme_catalog, industry_name, website_type, positioning, count):
+        """Use OLG to pick the best themes for a given business context."""
+        if not industry_name:
+            return []
+        try:
+            catalog_desc = "\n".join(
+                f"- {name}: {summary}" for name, summary in theme_catalog.items() if summary
+            )
+            prompt = (
+                f"I'm building {website_type or 'a'} website for a {industry_name} business "
+                f"with a {positioning or 'general'} positioning.\n"
+                f"Available themes:\n{catalog_desc}\n\n"
+                f"Pick the {count} best-fitting themes. Return ONLY a JSON array of theme names, "
+                f"e.g. [\"theme_clean\", \"theme_cobalt\"]. No explanation."
+            )
+            IrConfigParameter = self.env['ir.config_parameter'].sudo()
+            olg_api_endpoint = IrConfigParameter.get_str('html_editor.olg_api_endpoint') or 'https://olg.api.odoo.com'
+            database_id = IrConfigParameter.get_str('database.uuid')
+            response = iap_tools.iap_jsonrpc(olg_api_endpoint + "/api/olg/1/chat", params={
+                'prompt': prompt,
+                'conversation_history': [],
+                'database_id': database_id,
+            }, timeout=15)
+            if response.get('status') == 'success':
+                content = response['content']
+                match = re.search(r'\[[\s\S]*\]', content)
+                if match:
+                    names = json.loads(match.group())
+                    if isinstance(names, list) and all(isinstance(n, str) for n in names):
+                        return [n for n in names if n in theme_catalog][:count]
+        except Exception:
+            pass
+        return []
 
     @api.model
     def configurator_skip(self):
@@ -736,14 +802,21 @@ class Website(models.CachedModel):
         elif not logo_attachment_id and not company.uses_default_logo:
             website.logo = company.logo.decode('utf-8')
 
-        # Configure the color palette
+        # Configure the color palette and fonts
         selected_palette = kwargs.get('selected_palette')
         if selected_palette:
             Assets = self.env['website.assets']
             selected_palette_name = selected_palette if isinstance(selected_palette, str) else 'base-1'
+            customization_values = {'color-palettes-name': "'%s'" % selected_palette_name}
+            selected_font = kwargs.get('selected_font')
+            selected_headings_font = kwargs.get('selected_headings_font')
+            if selected_font:
+                customization_values['font'] = "'%s'" % selected_font
+            if selected_headings_font:
+                customization_values['headings-font'] = "'%s'" % selected_headings_font
             Assets.make_scss_customization(
                 '/website/static/src/scss/options/user_values.scss',
-                {'color-palettes-name': "'%s'" % selected_palette_name}
+                customization_values
             )
             if isinstance(selected_palette, list):
                 Assets.make_scss_customization(
