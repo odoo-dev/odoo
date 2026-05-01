@@ -105,6 +105,13 @@ export class OptionsContainer extends BaseOptionComponent {
         for (const option of this.props.options) {
             title = option.title || title;
         }
+        if (!title) {
+            const snippetKey = this.props.editingElement.dataset.snippet;
+            if (snippetKey) {
+                const snippet = this.props.snippetModel.getOriginalSnippet(snippetKey);
+                title = snippet.title;
+            }
+        }
         const titleExtraInfo = this.props.containerTitle.getTitleExtraInfo
             ? this.props.containerTitle.getTitleExtraInfo(this.props.editingElement)
             : "";
