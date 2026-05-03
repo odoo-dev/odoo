@@ -477,12 +477,84 @@ export class PaletteSelectionScreen extends Component {
         this.notification = useService("notification");
         this.orm = useService("orm");
 
-        onMounted(() => {
+        onMounted(async () => {
             loadGoogleFonts();
             if (this.state.logo) {
                 this.updatePalettes();
             }
+            await this.fetchStyleRecommendation();
+            this.prefetchThemes();
         });
+    }
+
+    async fetchStyleRecommendation() {
+        const { selectedIndustry, selectedType, selectedPositioning, formerSelectedPositioning } = this.state;
+        const industry = selectedIndustry?.label || "general";
+        const type = WEBSITE_TYPES[selectedType]?.name || "business";
+        const positioning = selectedPositioning || formerSelectedPositioning || "";
+        const catalog = {};
+        PALETTE_FONT_COMBOS.forEach((c, idx) => {
+            catalog[idx] = `${c.label} font (${c.headingsFont}), palette ${c.palette}${c.dark ? " (dark)" : ""}`;
+        });
+        const prompt = `For a ${industry} ${type} business with a ${positioning} positioning, recommend a style from this catalog:\n${JSON.stringify(catalog)}\n\nReturn ONLY a JSON object with:
+- "id": the numeric ID from the catalog
+- "reason": a short sentence mentioning the business context, like: "For a family restaurant with a cozy positioning, I'd recommend a playful font and warm colors to feel welcoming."`;
+        this.state.styleRecommendationLoading = true;
+        this.state.styleRecommendation = undefined;
+        try {
+            const response = await rpc("/html_editor/generate_text", {
+                prompt,
+                conversation_history: [],
+            });
+            const match = response?.match(/\{[\s\S]*\}/);
+            const parsed = match && JSON.parse(match[0]);
+            if (parsed) {
+                const combo = PALETTE_FONT_COMBOS[parsed.id];
+                if (parsed.reason) {
+                    this.state.styleRecommendation = parsed.reason;
+                }
+                this.state.styleRecommendationLoading = false;
+                if (combo) {
+                    this.state.aiRecommendedPalette = combo.palette;
+                    this.state.aiRecommendedHeadingsFont = combo.headingsFont;
+                    this.state.selectPalette(combo.palette, combo.headingsFont, combo.bodyFont);
+                }
+                return;
+            }
+        } catch {
+            // Silently fail — the user can still pick manually
+        }
+        this.state.styleRecommendationLoading = false;
+    }
+
+    async prefetchThemes() {
+        if (!this.state.themes.length) {
+            const themes = await getRecommendedThemes(this.orm, this.state);
+            if (themes.length) {
+                this.state.updateRecommendedThemes(themes);
+            }
+        }
+    }
+
+    get recommendedFontCombos() {
+        const colors = this.state.recommendedPalette;
+        if (!colors) {
+            return [];
+        }
+        const FONT_CLASSES = [
+            { headingsFont: "Roboto", bodyFont: "Inter", label: "Modern", description: "Clean & Efficient" },
+            { headingsFont: "Playfair Display", bodyFont: "Source Sans Pro", label: "Classic", description: "Timeless & Refined" },
+            { headingsFont: "Dancing Script", bodyFont: "Open Sans", label: "Creative", description: "Warm & Personal" },
+            { headingsFont: "Lobster", bodyFont: "Roboto", label: "Playful", description: "Fun & Friendly" },
+            { headingsFont: "Oswald", bodyFont: "Inter", label: "Bold", description: "Strong & Striking" },
+        ];
+        return FONT_CLASSES.map((font) => ({
+            ...font,
+            palette: "recommendedPalette",
+            colors,
+            bgColor: colors.color3,
+            textColor: colors.color5,
+        }));
     }
 
     get paletteFontCombos() {
@@ -576,6 +648,13 @@ export class PaletteSelectionScreen extends Component {
 
     selectPalette(paletteName, headingsFont, bodyFont) {
         this.state.selectPalette(paletteName, headingsFont, bodyFont);
+        if (!this.state.themes.length) {
+            getRecommendedThemes(this.orm, this.state).then((themes) => {
+                if (themes.length) {
+                    this.state.updateRecommendedThemes(themes);
+                }
+            });
+        }
         this.props.navigate(ROUTES.themeSelectionScreen);
     }
 
@@ -905,8 +984,13 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
                 }
                 this.state.updateRecommendedThemes(themes);
             }
-            this.blockUiDuringImageLoading(this.state.themes, this.themeSVGPreviews);
         });
+
+        useLayoutEffect(
+            () =>
+                this.blockUiDuringImageLoading(this.state.themes, this.themeSVGPreviews),
+            () => [this.state.themes]
+        );
 
         useLayoutEffect(
             () =>
@@ -1109,6 +1193,7 @@ export class Store {
     }
 
     selectPalette(paletteName, headingsFont, bodyFont) {
+        const prevPalette = this.selectedPalette;
         if (paletteName === "recommendedPalette") {
             this.selectedPalette = this.recommendedPalette;
         } else {
@@ -1116,6 +1201,11 @@ export class Store {
         }
         this.selectedHeadingsFont = headingsFont || "Inter Tight";
         this.selectedFont = bodyFont || "Inter";
+        if (this.selectedPalette !== prevPalette) {
+            this.themes = [];
+            this.extraThemes = [];
+            this.extraThemesLoaded = false;
+        }
     }
 
     toggleFeature(featureId) {
@@ -1144,6 +1234,10 @@ export class Store {
             this.recommendedPalette = undefined;
         }
         this.selectedPalette = this.recommendedPalette;
+        if (this.recommendedPalette) {
+            this.selectedHeadingsFont = "Roboto";
+            this.selectedFont = "Inter";
+        }
     }
 
     updateRecommendedThemes(themes) {
@@ -1342,6 +1436,10 @@ export class Configurator extends Component {
             selectedFont: undefined,
             selectedHeadingsFont: undefined,
             recommendedPalette: undefined,
+            styleRecommendationLoading: false,
+            styleRecommendation: undefined,
+            aiRecommendedPalette: undefined,
+            aiRecommendedHeadingsFont: undefined,
             defaultColors: defaultColors,
             palettes: palettes,
             features: features,

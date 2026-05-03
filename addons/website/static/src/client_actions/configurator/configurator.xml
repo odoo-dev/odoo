@@ -128,28 +128,48 @@
         <div class="o_configurator_screen_content container palette_selection d-flex flex-grow-1 h-100">
             <div class="o_content_container d-flex flex-column w-100 h-auto align-self-md-center o_configurator_show">
                 <div class="o_palettes_container w-100 o_configurator_show_fast">
-                    <h1 class="text-center mb-1">
-                        <b>Choose</b> your Style</h1>
-                    <h2 class="text-center mb-5 fw-normal">
-                        <input type="file" class="logo_selection_input" t-on-change="this.changeLogo" style="display:none" name="logo_selection" t-custom-ref="logoSelectionInput" accept="image/*"/>
+                    <input type="file" class="logo_selection_input" t-on-change="this.changeLogo" style="display:none" name="logo_selection" t-custom-ref="logoSelectionInput" accept="image/*"/>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div>
+                            <h1 class="mb-0"><b>Choose</b> your Style</h1>
+                            <p class="text-muted mb-0 o_configurator_show" t-if="this.state.styleRecommendationLoading">Thinking<span class="o_thinking_dots"/></p>
+                            <p class="text-muted mb-0 o_configurator_show_fast" t-if="!this.state.styleRecommendationLoading and this.state.styleRecommendation" t-out="this.state.styleRecommendation"/>
+                        </div>
                         <t t-if="this.state.logo">
-                            <span class="text-muted">Logo uploaded.</span>
-                            <a href="#" class="ms-1" t-on-click.prevent="this.uploadLogo">Change</a>
-                            <span class="mx-1 text-muted">|</span>
-                            <a href="#" t-on-click.prevent="this.removeLogo">Remove</a>
-                            <t t-if="this.state.recommendedPalette">
-                                <span class="mx-1 text-muted">—</span>
-                                <a href="#" t-on-click.prevent="() => this.selectPalette('recommendedPalette', 'Inter Tight', 'Inter')">Use recommended style</a>
-                            </t>
+                            <div class="d-flex align-items-center gap-3">
+                                <img t-att-src="this.state.logo" alt="Logo" style="max-height: 60px; cursor: pointer;" t-on-click="this.uploadLogo"/>
+                                <div class="d-flex flex-column">
+                                    <a href="#" class="small" t-on-click.prevent="this.uploadLogo">Change</a>
+                                    <a href="#" class="small" t-on-click.prevent="this.removeLogo">Remove</a>
+                                </div>
+                            </div>
                         </t>
                         <t t-else="">
-                            <a href="#" t-on-click.prevent="this.uploadLogo">Upload your logo</a> <span class="text-muted">to get recommendations.</span>
+                            <button class="btn o_btn_reset bg-100 rounded-3 border d-flex align-items-center gap-3 p-3" t-on-click="this.uploadLogo">
+                                <i class="fa fa-cloud-upload fa-3x text-muted"/>
+                                <h4 class="text-start lh-sm mb-0">Upload<br/>your <b>Logo</b></h4>
+                            </button>
                         </t>
-                    </h2>
+                    </div>
                     <div class="row g-3">
+                        <t t-foreach="this.recommendedFontCombos" t-as="combo" t-key="'rec_' + combo_index">
+                            <div class="o_palette_card_container col-md-3 col-6">
+                                <button t-attf-class="palette_card o_btn_reset w-100 rounded overflow-hidden d-flex align-items-center p-3 {{this.state.getSelectedPaletteName() == combo.palette and this.state.selectedHeadingsFont == combo.headingsFont ? 'selected' : ''}} {{this.state.aiRecommendedHeadingsFont == combo.headingsFont and this.state.aiRecommendedPalette == combo.palette ? 'ai_recommended' : ''}}"
+                                     t-on-click="() => this.selectPalette(combo.palette, combo.headingsFont, combo.bodyFont)" t-attf-style="background-color: {{combo.bgColor}}">
+                                    <div class="flex-grow-1 text-start pe-2 overflow-hidden">
+                                        <h2 class="fw-bold text-truncate mb-0" t-attf-style="font-family: '{{combo.headingsFont}}', sans-serif; color: {{combo.textColor}}; line-height: 1.2;" t-out="combo.label"/>
+                                        <div class="text-truncate" t-attf-style="font-family: '{{combo.bodyFont}}', sans-serif; color: {{combo.textColor}}; margin: 0; font-size: 12px; line-height: 1.3;" t-out="combo.description"/>
+                                    </div>
+                                    <div class="d-flex gap-1 flex-shrink-0">
+                                        <div t-attf-style="background-color: {{combo.colors.color1}}; width: 26px; height: 26px; border-radius: 4px;"/>
+                                        <div t-attf-style="background-color: {{combo.colors.color2}}; width: 26px; height: 26px; border-radius: 4px;"/>
+                                    </div>
+                                </button>
+                            </div>
+                        </t>
                         <t t-foreach="this.paletteFontCombos" t-as="combo" t-key="combo_index">
                             <div class="o_palette_card_container col-md-3 col-6">
-                                <button t-attf-class="palette_card o_btn_reset w-100 rounded overflow-hidden d-flex align-items-center p-3 {{this.state.getSelectedPaletteName() == combo.palette ? 'selected' : ''}}"
+                                <button t-attf-class="palette_card o_btn_reset w-100 rounded overflow-hidden d-flex align-items-center p-3 {{this.state.getSelectedPaletteName() == combo.palette and this.state.selectedHeadingsFont == combo.headingsFont ? 'selected' : ''}} {{this.state.aiRecommendedHeadingsFont == combo.headingsFont and this.state.aiRecommendedPalette == combo.palette ? 'ai_recommended' : ''}}"
                                      t-on-click="() => this.selectPalette(combo.palette, combo.headingsFont, combo.bodyFont)" t-attf-style="background-color: {{combo.bgColor}}">
                                     <div class="flex-grow-1 text-start pe-2 overflow-hidden">
                                         <h2 class="fw-bold text-truncate mb-0" t-attf-style="font-family: '{{combo.headingsFont}}', sans-serif; color: {{combo.textColor}}; line-height: 1.2;" t-out="combo.label"/>

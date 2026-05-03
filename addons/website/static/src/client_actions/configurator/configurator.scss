@@ -14,6 +14,18 @@
             to { transform: translate3d(0, -100%, 0)}
         }
 
+        @keyframes thinkingDots {
+            0% { content: ''; }
+            25% { content: '.'; }
+            50% { content: '..'; }
+            75% { content: '...'; }
+        }
+
+        .o_thinking_dots::after {
+            content: '';
+            animation: thinkingDots 1.5s infinite;
+        }
+
         // ==== General Components
         %o_configurator_titles_weight {
             font-weight: 300;
@@ -216,6 +228,10 @@
 
                 &:hover, &:focus-visible, &.selected {
                     box-shadow: 0 0 0 1px #FFF, 0 0 0 3px map-get($theme-colors, "primary")
+                }
+
+                &.ai_recommended {
+                    box-shadow: 0 0 15px 5px rgba(255, 255, 0, 0.75);
                 }
             }
         }
