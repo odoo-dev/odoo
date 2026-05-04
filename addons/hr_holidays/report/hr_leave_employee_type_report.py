@@ -105,6 +105,7 @@ class LeaveReport(models.Model):
 						ga.date_from as date_from,
 						ga.date_to as date_to,
 						ga.company_id as company_id,
+                        ga.overlap_group as overlap_group,
 						ROW_NUMBER() OVER (
 							PARTITION BY ga.employee_id, ga.leave_type, ga.overlap_group
 							ORDER BY ga.date_from, ga.allocation_id
@@ -122,23 +123,34 @@ class LeaveReport(models.Model):
                     FROM grouped_allocations ga
                 ),
 
-                /* Leaves applicable to each allocation */
-                taken_per_allocation as (
+                /* Total leaves taken per employee+leave_type+overlap_group (not per allocation) */
+                taken_per_group as (
                     SELECT
-                        oa.allocation_id,
+                        oa.employee_id,
+                        oa.leave_type,
+                        oa.overlap_group,
                         SUM(vl.number_of_days) as taken_days,
-						SUM(vl.number_of_hours) as taken_hours
-                    FROM ordered_allocations oa
+                        SUM(vl.number_of_hours) as taken_hours
+                    FROM (
+                        /* One representative row per overlap group to get the group's date range */
+                        SELECT DISTINCT ON (employee_id, leave_type, overlap_group)
+                            employee_id,
+                            leave_type,
+                            overlap_group,
+                            MIN(date_from) OVER (
+                                PARTITION BY employee_id, leave_type, overlap_group
+                            ) as group_date_from,
+                            MAX(COALESCE(date_to, 'infinity'::date)) OVER (
+                                PARTITION BY employee_id, leave_type, overlap_group
+                            ) as group_date_to
+                        FROM ordered_allocations
+                    ) oa
                     LEFT JOIN validated_leaves vl
                         ON vl.employee_id = oa.employee_id
                         AND vl.leave_type = oa.leave_type
-                        AND vl.date_from <= COALESCE(oa.date_to, 'infinity')
-                        AND (
-                            oa.date_to IS NULL
-                            OR
-                            vl.date_to >= oa.date_from
-                        )
-                    GROUP BY oa.allocation_id
+                        AND vl.date_from <= oa.group_date_to
+                        AND vl.date_to >= oa.group_date_from
+                    GROUP BY oa.employee_id, oa.leave_type, oa.overlap_group
                 ),
 
                 /* FIFO remaining balance per allocation */
@@ -146,12 +158,28 @@ class LeaveReport(models.Model):
                     SELECT
                         oa.employee_id as employee_id,
                         oa.active_employee as active_employee,
-                        GREATEST(oa.number_of_days - GREATEST(
-							COALESCE(tpa.taken_days, 0) - (oa.cumulative_allocated_days - oa.number_of_days), 0),
-						0) as number_of_days,
-						GREATEST(oa.number_of_hours - GREATEST(
-							COALESCE(tpa.taken_hours, 0) - (oa.cumulative_allocated_hours - oa.number_of_hours), 0),
-						0) as number_of_hours,
+                        /*
+                         * FIFO logic:
+                         * - total taken for the group is tpg.taken_days
+                         * - allocations are consumed in order (fifo_rank)
+                         * - this allocation absorbs: taken_days minus what prior allocations already absorbed
+                         * - prior absorbed = cumulative_allocated_days of previous allocs
+                         *   = (cumulative_allocated_days - number_of_days)
+                         */
+                        GREATEST(
+                            oa.number_of_days - GREATEST(
+                                COALESCE(tpg.taken_days, 0) - (oa.cumulative_allocated_days - oa.number_of_days),
+                                0
+                            ),
+                            0
+                        ) as number_of_days,
+                        GREATEST(
+                            oa.number_of_hours - GREATEST(
+                                COALESCE(tpg.taken_hours, 0) - (oa.cumulative_allocated_hours - oa.number_of_hours),
+                                0
+                            ),
+                            0
+                        ) as number_of_hours,
                         oa.department_id as department_id,
                         oa.leave_type as leave_type,
                         oa.state as state,
@@ -159,8 +187,10 @@ class LeaveReport(models.Model):
                         oa.date_to as date_to,
                         oa.company_id as company_id
                     FROM ordered_allocations oa
-                    LEFT JOIN taken_per_allocation tpa
-                        ON tpa.allocation_id = oa.allocation_id
+                    LEFT JOIN taken_per_group tpg
+                        ON tpg.employee_id = oa.employee_id
+                        AND tpg.leave_type = oa.leave_type
+                        AND tpg.overlap_group = oa.overlap_group
                 )
 
                 /* Final unified result */
