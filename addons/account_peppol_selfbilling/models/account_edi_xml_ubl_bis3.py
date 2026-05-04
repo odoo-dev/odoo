@@ -1,4 +1,5 @@
 from odoo import models
+from odoo.addons.account_edi_ubl_cii.models.account_edi_ubl_pint_eu import AccountEdiUBLPintEU
 
 
 class AccountEdiXmlUBLBIS3(models.AbstractModel):
@@ -12,7 +13,7 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         super()._pint_add_values(vals, invoice)
         if vals['process_type'] == 'selfbilling' and vals['document_type'] in ('invoice', 'credit_note'):
             vals['_pint_values']['pint_doc_type'] = f"self_{vals['document_type']}"  # 'self_invoice' or 'self_credit_note'
-            vals['_pint_values']['model'] = self.env['account.edi.ubl_pint_eu']
+            vals['_pint_values']['class'] = AccountEdiUBLPintEU
 
     def _add_invoice_config_vals(self, vals):
         # EXTENDS account.edi.ubl_bis3

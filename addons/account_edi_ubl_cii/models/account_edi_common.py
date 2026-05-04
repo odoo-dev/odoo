@@ -151,50 +151,69 @@ SUPPORTED_FILE_TYPES = {
 
 
 def dispatch_by_document(func):
+
+    def is_in_history(vals, model_name, method_name):
+        document_type_data = vals['_document_type']
+        history_models, history_method_name = document_type_data.get('history', ([], None))
+        return (
+            model_name in history_models
+            and method_name == history_method_name
+        )
+
+    def update_history(vals, model, method_name):
+        document_type_data = vals['_document_type']
+        history_models, history_method_name = document_type_data.get('history', (None, None))
+        if history_method_name != method_name:
+            history_models, history_method_name = document_type_data['history'] = ([], method_name)
+        history_models.append(model._name)
+
     @wraps(func)
     def wrapper(self, vals, *args, **kwargs):
-        if (pint_vals := vals.get('_pint_values')) and pint_vals.get('current_method') != func.__name__:
-            doc_type = pint_vals['pint_doc_type']
-            layer_model = pint_vals['model']
-            current_class = layer_model.__class__
+        if document_type_data := vals.get('_document_type'):
+            document_type = document_type_data['name']
+            root_method_name = func.__name__
+            history = document_type_data.get('history', [])
 
-            while current_class.__name__ != 'account.edi.common':
-                parent_class = current_class._BaseModel__base_classes[1]
-                current_dir = set(dir(current_class))
-                parent_dir = set(dir(parent_class))
-                current_methods = current_dir - parent_dir
+            current_model = document_type_data['model']
+            while current_model._name != 'account.edi.common':
+                python_class = current_model.python_class
+                for method_name in dir(python_class):
+                    if not method_name.startswith(root_method_name):
+                        continue
 
-                for method_name in current_methods:
-                    method = getattr(current_class, method_name)
+                    if is_in_history(vals, current_model._name, root_method_name):
+                        break
+
+                    method = getattr(current_model.__class__, method_name, None)
                     if (
-                            callable(method) and
-                            doc_type in getattr(method, '_pint_doc_types', []) and
-                            getattr(method, '_pint_method', None) == func.__name__
+                        method
+                        and callable(method)
+                        and document_type in getattr(method, '_document_types', [])
+                        and getattr(method, '_root_method_name', None) == root_method_name
                     ):
-                        pint_vals['current_method'] = func.__name__
-                        return method(layer_model, vals, *args, **kwargs)
+                        update_history(vals, current_model, root_method_name)
+                        return method(current_model, vals, *args, **kwargs)
 
-                current_class = parent_class
+                current_model = current_model.env[current_model._BaseModel__base_classes[1]._name]
 
         return func(self, vals, *args, **kwargs)
     return wrapper
 
 
-def documents(doc_types: list[str]):
+def documents(document_types: list[str]):
     """
     Method name should have the following format: `{base_method}__{document_type}`.
     e.g. `_ubl_add_notes_nodes__base` overrides the `_ubl_add_notes_nodes` when the vals['document_type']
     """
     def decorator(func):
-        func._pint_doc_types = doc_types
-        func._pint_method = func.__name__.split('__')[0]
+        func._document_types = document_types
+        func._root_method_name = func.__name__.split('__')[0]
 
         @wraps(func)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
         return wrapper
     return decorator
-
 
 class FloatFmt(float):
     """ A float with a given precision.
@@ -240,9 +259,19 @@ class AccountEdiCommon(models.AbstractModel):
     _name = "account.edi.common"
     _description = "Common functions for EDI documents: generate the data, the constraints, etc"
 
+    @property
+    def python_class(self):
+        return AccountEdiCommon
+
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
+
+    def _define_document_type(self, vals, document_type):
+        vals['_document_type'] = {
+            'name': document_type,
+            'model': self,
+        }
 
     def module_installed(self, module_name):
         return self.env['ir.module.module']._get(module_name).state == 'installed'

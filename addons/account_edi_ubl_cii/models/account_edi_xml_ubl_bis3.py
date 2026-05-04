@@ -2,6 +2,7 @@ from odoo import _, api, models
 from odoo.tools.misc import str2bool
 from odoo.addons.account.tools import dict_to_xml
 from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES
+from odoo.addons.account_edi_ubl_cii.models.account_edi_ubl_pint_eu import AccountEdiUBLPintEU
 from odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20 import UBL_NAMESPACES
 
 from stdnum.no import mva
@@ -563,18 +564,6 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         vals['currency_dp'] = 2  # In BIS 3, always use 2 decimal places
 
     # -------------------------------------------------------------------------
-    # EXPORT: PINT LAYER
-    # -------------------------------------------------------------------------
-
-    def _pint_add_values(self, vals, invoice):
-        # EXTEND account.edi.ubl_pint
-        # doc_types: ['eu_invoice', 'invoice'] OR ['eu_credit_note', 'credit_note']
-        super()._pint_add_values(vals, invoice)
-        if (invoice := vals.get('invoice')) and invoice.move_type in ('out_invoice', 'out_refund'):
-            vals['_pint_values']['pint_doc_type'] = vals['document_type']
-            vals['_pint_values']['model'] = self.env['account.edi.ubl_pint_eu']
-
-    # -------------------------------------------------------------------------
     # EXPORT: BIS3 LAYER
     # -------------------------------------------------------------------------
 
@@ -800,6 +789,18 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         super()._add_invoice_config_vals(vals)
         self._invoice_init_vals(vals, vals['invoice'])
 
+        # == Determine document type ==
+        invoice = vals['invoice']
+        AccountEdiUBLPintEU = self.env['account.edi.ubl_pint_eu']
+        if invoice.move_type == 'out_invoice':
+            AccountEdiUBLPintEU._define_document_type(vals, 'invoice')
+        elif invoice.move_type == 'out_refund':
+            AccountEdiUBLPintEU._define_document_type(vals, 'credit_note')
+        elif vals.get('process_type') == 'selfbilling' and invoice.move_type == 'in_invoice':
+            AccountEdiUBLPintEU._define_document_type(vals, 'self_invoice')
+        elif vals.get('process_type') == 'selfbilling' and invoice.move_type == 'in_refund':
+            AccountEdiUBLPintEU._define_document_type(vals, 'self_credit_note')
+
     def _setup_base_lines(self, vals):
         # OVERRIDE
         pass
@@ -832,33 +833,29 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
         This xslt was obtained by transforming the corresponding sch
         https://docs.peppol.eu/poacc/billing/3.0/files/CEN-EN16931-UBL.sch.
         """
-        eu_countries = self.env.ref('base.europe').country_ids
-        intracom_delivery = (vals['customer'].country_id in eu_countries
-                             and vals['supplier'].country_id in eu_countries
-                             and vals['customer'].country_id != vals['supplier'].country_id)
-
         nsmap = self._get_document_nsmap(vals)
 
-        constraints = {
+        constraints = {}
+        eu_countries = self.env.ref('base.europe').country_ids
+        intracom_delivery = (
+            vals['customer'].country_id in eu_countries
+            and vals['supplier'].country_id in eu_countries
+            and vals['customer'].country_id != vals['supplier'].country_id
+        )
+        if intracom_delivery:
             # [BR-IC-12]-In an Invoice with a VAT breakdown (BG-23) where the VAT category code (BT-118) is
             # "Intra-community supply" the Deliver to country code (BT-80) shall not be blank.
-            'cen_en16931_delivery_country_code': (
-                _("For intracommunity supply, the delivery address should be included.")
-            ) if intracom_delivery and dict_to_xml(vals['document_node']['cac:Delivery']['cac:DeliveryLocation'], nsmap=nsmap, tag='cac:DeliveryLocation') is None else None,
+            if dict_to_xml(vals['document_node']['cac:Delivery']['cac:DeliveryLocation'], nsmap=nsmap, tag='cac:DeliveryLocation') is None:
+                constraints['cen_en16931_delivery_country_code'] = _("For intracommunity supply, the delivery address should be included.")
 
             # [BR-IC-11]-In an Invoice with a VAT breakdown (BG-23) where the VAT category code (BT-118) is
             # "Intra-community supply" the Actual delivery date (BT-72) or the Invoicing period (BG-14)
             # shall not be blank.
-            'cen_en16931_delivery_date_invoicing_period': (
-                _("For intracommunity supply, the actual delivery date or the invoicing period should be included.")
-                if (
-                    intracom_delivery
-                    and dict_to_xml(vals['document_node']['cac:Delivery']['cbc:ActualDeliveryDate'], nsmap=nsmap, tag='cbc:ActualDeliveryDate') is None
-                    and dict_to_xml(vals['document_node']['cac:InvoicePeriod'], nsmap=nsmap, tag='cac:InvoicePeriod') is None
-                )
-                else None
-            )
-        }
+            if (
+                dict_to_xml(vals['document_node']['cac:Delivery']['cbc:ActualDeliveryDate'], nsmap=nsmap, tag='cbc:ActualDeliveryDate') is None
+                and dict_to_xml(vals['document_node']['cac:InvoicePeriod'], nsmap=nsmap, tag='cac:InvoicePeriod') is None
+            ):
+                constraints['cen_en16931_delivery_date_invoicing_period'] = _("For intracommunity supply, the actual delivery date or the invoicing period should be included.")
 
         # [BR-61]-If the Payment means type code (BT-81) means SEPA credit transfer, Local credit transfer or
         # Non-SEPA international credit transfer, the Payment account identifier (BT-84) shall be present.
