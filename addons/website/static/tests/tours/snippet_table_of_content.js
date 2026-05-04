@@ -26,7 +26,6 @@ const checkTOCNavBar = function (tocPosition, activeHeaderPosition) {
 registerWebsitePreviewTour(
     "snippet_table_of_content",
     {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         edition: true,
     },
     () => [

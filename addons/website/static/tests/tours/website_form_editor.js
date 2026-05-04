@@ -179,7 +179,6 @@ const compareIds = ({ content, firstElSelector, secondElSelector, errorMessage }
 registerWebsitePreviewTour(
     "website_form_editor_tour",
     {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         edition: true,
     },
     () => [

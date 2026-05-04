@@ -35,67 +35,60 @@ registerWebsitePreviewTour("snippet_translation", {}, () => [
         trigger: '.btn[data-action="save"]:contains("Save in fu_GB")',
     },
 ]);
-registerWebsitePreviewTour(
-    "snippet_translation_changing_lang",
+registerWebsitePreviewTour("snippet_translation_changing_lang", {}, () => [
+    stepUtils.goToUrl(getClientActionUrl()),
+    stepUtils.waitIframeIsReady(),
     {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
+        content: "Open dropdown language selector",
+        trigger: ":iframe .js_language_selector button",
+        run: "click",
     },
-    () => [
-        stepUtils.goToUrl(getClientActionUrl()),
-        stepUtils.waitIframeIsReady(),
-        {
-            content: "Open dropdown language selector",
-            trigger: ":iframe .js_language_selector button",
-            run: "click",
-        },
-        {
-            content: "Select the language to Parseltongue",
-            trigger: ":iframe .js_language_selector .js_change_lang[data-url_code=pa_GB]",
-            run: "click",
-        },
-        {
-            content: "Wait the language has changed.",
-            trigger: ":iframe header.o_top_fixed_element nav li:contains(parseltongue)",
-        },
-        {
-            content: "Open dropdown language selector",
-            trigger: ":iframe .js_language_selector button",
-            run: "click",
-        },
-        {
-            content: "Select the language to English",
-            trigger: ":iframe .js_language_selector .js_change_lang[data-url_code=en]",
-            run: "click",
-        },
-        {
-            content: "Wait the language has changed.",
-            trigger: ":iframe nav li:contains(english)",
-        },
-        {
-            content: "Open Edit dropdown",
-            trigger: ".o_edit_website_container button",
-            run: "click",
-        },
-        {
-            content: "Enable translation",
-            trigger: ".o_translate_website_dropdown_item",
-            run: "click",
-        },
-        {
-            content: "Close the dialog",
-            trigger: ".modal-footer .btn-primary",
-            run: "click",
-        },
-        ...clickOnSave(),
-        ...clickOnEditAndWaitEditModeInTranslatedPage(),
-        ...insertSnippet({ name: "Cover", id: "s_cover", groupName: "Intro" }),
-        {
-            content: "Check that contact us contain Parseltongue",
-            trigger:
-                ':iframe .s_cover .btn-outline-secondary:contains("Contact us in Parseltongue")',
-        },
-    ]
-);
+    {
+        content: "Select the language to Parseltongue",
+        trigger: ":iframe .js_language_selector .js_change_lang[data-url_code=pa_GB]",
+        run: "click",
+    },
+    {
+        content: "Wait the language has changed.",
+        trigger: ":iframe header.o_top_fixed_element nav li:contains(parseltongue)",
+    },
+    {
+        content: "Open dropdown language selector",
+        trigger: ":iframe .js_language_selector button",
+        run: "click",
+    },
+    {
+        content: "Select the language to English",
+        trigger: ":iframe .js_language_selector .js_change_lang[data-url_code=en]",
+        run: "click",
+    },
+    {
+        content: "Wait the language has changed.",
+        trigger: ":iframe nav li:contains(english)",
+    },
+    {
+        content: "Open Edit dropdown",
+        trigger: ".o_edit_website_container button",
+        run: "click",
+    },
+    {
+        content: "Enable translation",
+        trigger: ".o_translate_website_dropdown_item",
+        run: "click",
+    },
+    {
+        content: "Close the dialog",
+        trigger: ".modal-footer .btn-primary",
+        run: "click",
+    },
+    ...clickOnSave(),
+    ...clickOnEditAndWaitEditModeInTranslatedPage(),
+    ...insertSnippet({ name: "Cover", id: "s_cover", groupName: "Intro" }),
+    {
+        content: "Check that contact us contain Parseltongue",
+        trigger: ':iframe .s_cover .btn-outline-secondary:contains("Contact us in Parseltongue")',
+    },
+]);
 registerWebsitePreviewTour("snippet_translation_switching_website", {}, () => [
     stepUtils.goToUrl(getClientActionUrl()),
     ...clickOnEditAndWaitEditModeInTranslatedPage(),

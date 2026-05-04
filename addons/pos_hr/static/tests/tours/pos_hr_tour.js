@@ -265,7 +265,6 @@ registry.category("web_tour.tours").add("test_cost_and_margin_visibility", {
 });
 
 registry.category("web_tour.tours").add("pos_hr_go_backend_closed_registered", {
-    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () =>
         [
             // Admin --> 403: not the one that opened the session

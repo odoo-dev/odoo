@@ -51,7 +51,6 @@ registerWebsitePreviewTour(
     {
         // Remove this key to make the tour fail with error:
         // "The scroll animation in the modal did not start properly"
-        undeterministicTour_doNotCopy: true,
         edition: true,
     },
     () => [
