@@ -377,6 +377,10 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
     _createDownpaymentLines(sale_order, total_down_payment, clickedOrder, down_payment_product) {
         //This function will create all the downpaymentlines. We will create one downpayment line per unique tax combination
         const percentage = total_down_payment / sale_order.amount_total;
+        const isFullDownPayment = floatIsZero(
+            total_down_payment - sale_order.amount_total,
+            this.pos.currency.rounding
+        );
         const grouped = {};
         sale_order.order_line.forEach((obj) => {
             const sortedTaxes = obj.tax_id.slice().sort((a, b) => a - b);
@@ -389,6 +393,7 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
 
         // We need one unique line for the fixed amount taxes
         const down_payment_line_to_create = [];
+        debugger;
 
         Object.keys(grouped).forEach((key) => {
             const group = grouped[key];
@@ -408,15 +413,18 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
                 const tax = this.pos.taxes_by_id[tax_id];
                 return total + tax.amount;
             }, 0);
-            const total_price = group.reduce(
-                (total, line) =>
-                    (total += line.price_total - line.product_uom_qty * fixed_tax_total_amount),
-                0
-            );
+            const total_price = group.reduce((total, line) => {
+                if (isFullDownPayment) {
+                    return total + line.price_total;
+                }
+                return total + (line.price_total - line.product_uom_qty * fixed_tax_total_amount);
+            }, 0);
             const down_payment_line_price = total_price * percentage;
             // We apply the taxes and keep the same price
             const taxes_to_apply = group[0].tax_id
-                .filter((id) => this.pos.taxes_by_id[id].amount_type !== "fixed")
+                .filter(
+                    (id) => isFullDownPayment || this.pos.taxes_by_id[id].amount_type !== "fixed"
+                )
                 .map((id) => {
                     return { ...this.pos.taxes_by_id[id], price_include: true };
                 });
@@ -434,7 +442,7 @@ export class SaleOrderManagementScreen extends ControlButtonsMixin(Component) {
                 price: new_price,
                 tab: tab,
                 tax_ids: group[0].tax_id.filter(
-                    (id) => this.pos.taxes_by_id[id].amount_type !== "fixed"
+                    (id) => isFullDownPayment || this.pos.taxes_by_id[id].amount_type !== "fixed"
                 ),
             });
         });
