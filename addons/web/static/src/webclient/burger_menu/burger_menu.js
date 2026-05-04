@@ -10,6 +10,7 @@ import { MobileSwitchCompanyMenu } from "@web/webclient/burger_menu/mobile_switc
 import { BurgerDebugMenu } from "@web/webclient/burger_menu/burger_debug_menu/burger_debug_menu";
 
 import { Component } from "@odoo/owl";
+import { BurgerMenuSystray } from "@web/webclient/burger_menu/burger_menu_systray/burger_menu_systray";
 
 /**
  * This file includes the widget Menu in mobile to render the BurgerMenu which
@@ -24,6 +25,7 @@ export class BurgerMenu extends Component {
     static components = {
         BurgerUserMenu,
         BurgerDebugMenu,
+        BurgerMenuSystray,
         MobileSwitchCompanyMenu,
         Transition,
     };

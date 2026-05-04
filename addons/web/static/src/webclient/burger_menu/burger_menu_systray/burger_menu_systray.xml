@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="web.BurgerMenuSystray">
+        <div class="o_burger_menu_systray px-3 py-2 d-flex flex-column gap-2 text-body" t-ref="root">
+            <hr/>
+            <t t-foreach="this.systrayItems" t-as="item" t-key="item.key">
+                <div t-att-data-key="item.key" t-att-data-index="item.index">
+                    <ErrorHandler onError="error => this.handleItemError(error, item)">
+                        <t t-component="item.Component" t-props="item.props"/>
+                    </ErrorHandler>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

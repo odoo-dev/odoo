@@ -1,0 +1,9 @@
+.o_burger_menu_systray {
+    button {
+        border: none;
+        background: inherit;
+    }
+    .ai-systray-icon, i::before {
+        display:none;
+    }
+}

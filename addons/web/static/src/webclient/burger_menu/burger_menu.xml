@@ -28,6 +28,7 @@
           <MobileSwitchCompanyMenu t-if="this.user.allowedCompanies.length > 1" />
           <BurgerUserMenu onMenuClicked.bind="this._closeBurger"/>
           <BurgerDebugMenu t-if="env.debug"/>
+          <BurgerMenuSystray />
         </nav>
       </div>
     </Transition>
