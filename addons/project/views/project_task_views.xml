@@ -287,7 +287,7 @@
             <field name="res_model">project.task</field>
             <field name="view_mode">list,kanban,form,calendar,pivot,graph,activity</field>
             <field name="search_view_id" ref="project.view_task_search_form"/>
-            <field name="domain">[('id', 'child_of', active_id), ('id', '!=', active_id), ('has_template_ancestor', '=', False)]</field>
+            <field name="domain">[('id', 'child_of', active_id), ('id', '!=', active_id), ('is_template', '=', False)]</field>
             <field name="context">{'show_project_update': False, 'default_parent_id': active_id}</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
