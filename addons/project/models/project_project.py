@@ -1018,7 +1018,9 @@ class ProjectProject(models.Model):
             'active_id': self.id,
             'allow_milestones': self.allow_milestones,
             'allow_task_dependencies': self.allow_task_dependencies,
-            })
+        })
+        if 'load_first_embedded_action' in self.env.context:
+            context['load_first_embedded_action'] = self.env.context['load_first_embedded_action']
         action['context'] = context
         if self.is_template:
             action['context'].update({'template_project': True})

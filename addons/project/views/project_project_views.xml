@@ -41,7 +41,7 @@
                     </header>
                 <sheet string="Project">
                     <div class="oe_button_box" name="button_box" groups="base.group_user">
-                        <button class="oe_stat_button" type="object" name="action_view_tasks" icon="check">
+                        <button class="oe_stat_button" type="object" name="action_view_tasks" icon="check" context="{'load_first_embedded_action': False}">
                             <div class="o_field_widget o_stat_info">
                                 <field class="o_stat_text" name="label_tasks" readonly="1"/>
                                 <span class="o_stat_value">
