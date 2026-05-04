@@ -45,7 +45,7 @@ class IrProfile(models.Model):
     entry_count = fields.Integer('Entry count')
 
     speedscope = fields.Binary('Speedscope', compute='_compute_speedscope')
-    speedscope_url = fields.Text('Open', compute='_compute_speedscope_url')
+    speedscope_url = fields.Text('Open', compute='_compute_speedscope_url', store=True)
 
     config_url = fields.Text('Open profiles config', compute='_compute_config_url')
 
