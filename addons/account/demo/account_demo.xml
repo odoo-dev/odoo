@@ -13,7 +13,7 @@
         <!-- TAGS FOR RETRIEVING THE DEMO ACCOUNTS -->
         <record id="demo_capital_account" model="account.account.tag">
             <field name="name">Demo Capital Account</field>
-        </record>
+        </record> 
         <record id="demo_stock_account" model="account.account.tag">
             <field name="name">Demo Stock Account</field>
         </record>
