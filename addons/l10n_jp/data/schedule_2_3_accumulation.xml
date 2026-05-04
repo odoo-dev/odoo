@@ -26,7 +26,7 @@
                 <field name="name">1. Taxable sales amount (excluding tax)</field>
                 <field name="code">ACC_S2_3_1</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_1_balance_a" model="account.report.expression">
                         <field name="label">balance_a</field>
@@ -71,7 +71,7 @@
                 <field name="name">2. Tax-free sales amount</field>
                 <field name="code">ACC_S2_3_2</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_2_balance_c" model="account.report.expression">
                         <field name="label">balance_c</field>
@@ -84,7 +84,7 @@
                 <field name="name">3. Amount of exports, etc. of non-taxable assets, value of assets transferred to overseas branches, etc.</field>
                 <field name="code">ACC_S2_3_3</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_3_balance_c" model="account.report.expression">
                         <field name="label">balance_c</field>
@@ -97,7 +97,7 @@
                 <field name="name">4. Amount of consideration for transfer of taxable assets (1+2+3)</field>
                 <field name="code">ACC_S2_3_4</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_4_balance_c" model="account.report.expression">
                         <field name="label">balance_c</field>
@@ -110,7 +110,7 @@
                 <field name="name">5. Amount of consideration for transfer, etc. of taxable assets (amount in 4)</field>
                 <field name="code">ACC_S2_3_5</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_5_balance_c" model="account.report.expression">
                         <field name="label">balance_c</field>
@@ -123,7 +123,7 @@
                 <field name="name">6. Tax-exempt sales amount</field>
                 <field name="code">ACC_S2_3_6</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_6_balance_c" model="account.report.expression">
                         <field name="label">balance_c</field>
@@ -136,7 +136,7 @@
                 <field name="name">7. Amount of consideration for asset transfer, etc. (5+6)</field>
                 <field name="code">ACC_S2_3_7</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_7_balance_c" model="account.report.expression">
                         <field name="label">balance_c</field>
@@ -149,7 +149,7 @@
                 <field name="name">8. Taxable sales ratio (4/7)</field>
                 <field name="code">ACC_S2_3_8</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_8_balance_c" model="account.report.expression">
                         <field name="label">balance_c</field>
@@ -169,7 +169,7 @@
                 <field name="name">9. Amount paid for taxable purchases (tax included)</field>
                 <field name="code">ACC_S2_3_9</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_9_balance_a" model="account.report.expression">
                         <field name="label">balance_a</field>
@@ -212,7 +212,7 @@
                 <field name="name">10. Consumption tax amount on taxable purchases</field>
                 <field name="code">ACC_S2_3_10</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_10_balance_a" model="account.report.expression">
                         <field name="label">balance_a</field>
@@ -235,7 +235,7 @@
                 <field name="name">11. Amount of consideration paid (tax included) for taxable purchases that are subject to transitional measures regarding taxable purchases made from parties other than qualified invoice issuing businesses</field>
                 <field name="code">ACC_S2_3_11</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_11_balance_a" model="account.report.expression">
                         <field name="label">balance_a</field>
@@ -298,7 +298,7 @@
                 <field name="name">12. Amount deemed to be the consumption tax amount related to taxable purchases due to transitional measures related to taxable purchases made from parties other than qualified invoice issuing businesses</field>
                 <field name="code">ACC_S2_3_12</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_12_balance_a" model="account.report.expression">
                         <field name="label">balance_a</field>
@@ -321,7 +321,7 @@
                 <field name="name">13. Amount of consideration paid for specified taxable purchases</field>
                 <field name="code">ACC_S2_3_13</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_13_balance_b" model="account.report.expression">
                         <field name="label">balance_b</field>
@@ -345,7 +345,7 @@
                 <field name="name">14. Consumption tax amount on specified taxable purchases</field>
                 <field name="code">ACC_S2_3_14</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_14_balance_b" model="account.report.expression">
                         <field name="label">balance_b</field>
@@ -369,7 +369,7 @@
                 <field name="name">15. Consumption tax amount on taxable cargo</field>
                 <field name="code">ACC_S2_3_15</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_15_balance_a" model="account.report.expression">
                         <field name="label">balance_a</field>
@@ -402,7 +402,7 @@
                 <field name="name">16. Amount of consumption tax adjustment</field>
                 <field name="code">ACC_S2_3_16</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_16_balance_a" model="account.report.expression">
                         <field name="label">balance_a</field>
@@ -427,7 +427,7 @@
                 <field name="name">17. Amount of consumption tax adjustment (10+12+14+15±16)</field>
                 <field name="code">ACC_S2_3_17</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_17_balance_a" model="account.report.expression">
                         <field name="label">balance_a</field>
@@ -450,7 +450,7 @@
                 <field name="name">18. If the taxable sales amount is 500 million yen or less and the taxable sales ratio is 95% or more, 18 (amount in 17)</field>
                 <field name="code">ACC_S2_3_18</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_18_balance_a" model="account.report.expression">
                         <field name="label">balance_a</field>
@@ -493,19 +493,19 @@
                 <field name="name">If taxable sales exceed 500 million yen or taxable sales ratio is less than 95%</field>
                 <field name="code">ACC_S2_3_TSEX</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="children_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_tsexi" model="account.report.line">
                         <field name="name">Itemized Method</field>
                         <field name="code">ACC_S2_3_TSEXI</field>
                         <field name="hierarchy_level">3</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="children_ids">
                             <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_19" model="account.report.line">
                                 <field name="name">19. Of 17, those required only for taxable sales</field>
                                 <field name="code">ACC_S2_3_19</field>
                                 <field name="hierarchy_level">5</field>
-                                <field name="foldable" eval="False"/>
+                                <field name="foldability">always_unfolded</field>
                                 <field name="expression_ids">
                                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_19_balance_a" model="account.report.expression">
                                         <field name="label">balance_a</field>
@@ -541,7 +541,7 @@
                                 <field name="name">20. Of 17, what is required in common for taxable sales and non-taxable sales</field>
                                 <field name="code">ACC_S2_3_20</field>
                                 <field name="hierarchy_level">5</field>
-                                <field name="foldable" eval="False"/>
+                                <field name="foldability">always_unfolded</field>
                                 <field name="expression_ids">
                                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_20_balance_a" model="account.report.expression">
                                         <field name="label">balance_a</field>
@@ -577,7 +577,7 @@
                                 <field name="name">21. Tax amount of taxable purchases, etc. deducted using the itemized method  (19 + (20 * 4 / 7)</field>
                                 <field name="code">ACC_S2_3_21</field>
                                 <field name="hierarchy_level">5</field>
-                                <field name="foldable" eval="False"/>
+                                <field name="foldability">always_unfolded</field>
                                 <field name="expression_ids">
                                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_21_balance_a" model="account.report.expression">
                                         <field name="label">balance_a</field>
@@ -605,7 +605,7 @@
                         <field name="name">22. Tax amount of taxable purchases, etc. deducted by lump-sum proportional distribution method (17 *  4 / 7)</field>
                         <field name="code">ACC_S2_3_22</field>
                         <field name="hierarchy_level">3</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="expression_ids">
                             <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_22_balance_a" model="account.report.expression">
                                 <field name="label">balance_a</field>
@@ -650,13 +650,13 @@
                 <field name="name">Adjustment amount for deduction tax amount</field>
                 <field name="code">ACC_S2_3_AD</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="children_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_23" model="account.report.line">
                         <field name="name">23. Adjustment (addition or subtraction) amount of consumption tax related to fixed assets subject to adjustment when taxable sales ratio changes</field>
                         <field name="code">ACC_S2_3_23</field>
                         <field name="hierarchy_level">3</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="expression_ids">
                             <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_23_balance_a" model="account.report.expression">
                                 <field name="label">balance_a</field>
@@ -681,7 +681,7 @@
                         <field name="name">24. Adjustment (addition or subtraction) amount when fixed assets subject to adjustment are converted to taxable business (tax-exempt business)</field>
                         <field name="code">ACC_S2_3_24</field>
                         <field name="hierarchy_level">3</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="expression_ids">
                             <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_24_balance_a" model="account.report.expression">
                                 <field name="label">balance_a</field>
@@ -706,7 +706,7 @@
                         <field name="name">25. Additional amount when a residential rental building is used for taxable rental (transfer)</field>
                         <field name="code">ACC_S2_3_25</field>
                         <field name="hierarchy_level">3</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="expression_ids">
                             <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_25_balance_a" model="account.report.expression">
                                 <field name="label">balance_a</field>
@@ -733,13 +733,13 @@
                 <field name="name">Deduction</field>
                 <field name="code">ACC_S2_3_D</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="children_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_26" model="account.report.line">
                         <field name="name">26. When the deductible input tax amount [(18, 21 or 22 amount) ± 23 ± 24 + 25] is positive</field>
                         <field name="code">ACC_S2_3_26</field>
                         <field name="hierarchy_level">3</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="expression_ids">
                             <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_26_balance_a" model="account.report.expression">
                                 <field name="label">balance_a</field>
@@ -770,7 +770,7 @@
                         <field name="name">27. When the deduction excessive adjustment tax amount [(amount of 18, 21 or 22) ± 23 ± 24 + 25] is negative</field>
                         <field name="code">ACC_S2_3_27</field>
                         <field name="hierarchy_level">3</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="expression_ids">
                             <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_27_balance_a" model="account.report.expression">
                                 <field name="label">balance_a</field>
@@ -803,7 +803,7 @@
                 <field name="name">28. Consumption tax amount related to bad debt collection</field>
                 <field name="code">ACC_S2_3_28</field>
                 <field name="hierarchy_level">1</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="expression_ids">
                     <record id="l10n_jp_schedule_2_3_accumulation_acc_s2_3_28_balance_a" model="account.report.expression">
                         <field name="label">balance_a</field>

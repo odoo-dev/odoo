@@ -30,13 +30,13 @@
                 <field name="name">Ⅰ Consumption tax amount that is the basis for calculating the amount of input tax eligible for deduction</field>
                 <field name="code">ACC_S5_3_CTA</field>
                 <field name="hierarchy_level">0</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="children_ids">
                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_1" model="account.report.line">
                         <field name="name">1. Consumption tax amount relative to tax base amount</field>
                         <field name="code">ACC_S5_3_1</field>
                         <field name="hierarchy_level">1</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="expression_ids">
                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_1_balance_a" model="account.report.expression">
                                 <field name="label">balance_a</field>
@@ -61,7 +61,7 @@
                         <field name="name">2. Consumption tax amount related to bad debt collection</field>
                         <field name="code">ACC_S5_3_2</field>
                         <field name="hierarchy_level">1</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="expression_ids">
                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_2_balance_a" model="account.report.expression">
                                 <field name="label">balance_a</field>
@@ -86,13 +86,13 @@
                         <field name="name">3. Consumption tax amount related to refund of sales consideration, etc.</field>
                         <field name="code">ACC_S5_3_3</field>
                         <field name="hierarchy_level">1</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                     </record>
                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_4" model="account.report.line">
                         <field name="name">4. Consumption tax amount as basis for calculation of deductible input tax amount</field>
                         <field name="code">ACC_S5_3_4</field>
                         <field name="hierarchy_level">1</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="expression_ids">
                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_4_balance_a" model="account.report.expression">
                                 <field name="label">balance_a</field>
@@ -117,13 +117,13 @@
                 <field name="name">II.Input tax amount eligible for deduction in the case of a specialist in one type of business</field>
                 <field name="code">ACC_S5_3_IT1</field>
                 <field name="hierarchy_level">0</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="children_ids">
                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_5" model="account.report.line">
                         <field name="name">5. 4 x deemed purchase rate</field>
                         <field name="code">ACC_S5_3_5</field>
                         <field name="hierarchy_level">1</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="expression_ids">
                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_5_balance_a" model="account.report.expression">
                                 <field name="label">balance_a</field>
@@ -221,19 +221,19 @@
                 <field name="name">Ⅲ Input tax amount eligible for deduction in the case of businesses operating two or more types of businesses</field>
                 <field name="code">ACC_S5_3_IT2</field>
                 <field name="hierarchy_level">0</field>
-                <field name="foldable" eval="False"/>
+                <field name="foldability">always_unfolded</field>
                 <field name="children_ids">
                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_tsbc" model="account.report.line">
                         <field name="name">(1) Details of taxable sales (excluding tax) by business category</field>
                         <field name="code">ACC_S5_3_TSBC</field>
                         <field name="hierarchy_level">1</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="children_ids">
                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_6" model="account.report.line">
                                 <field name="name">6. Total amount by business category</field>
                                 <field name="code">ACC_S5_3_6</field>
                                 <field name="hierarchy_level">3</field>
-                                <field name="foldable" eval="False"/>
+                                <field name="foldability">always_unfolded</field>
                                 <field name="expression_ids">
                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_6_balance_a" model="account.report.expression">
                                         <field name="label">balance_a</field>
@@ -256,7 +256,7 @@
                                         <field name="name">7. Type 1 business (wholesale trade)</field>
                                         <field name="code">ACC_S5_3_7</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_7_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -279,7 +279,7 @@
                                         <field name="name">8. Type 2 business (retail business, etc.)</field>
                                         <field name="code">ACC_S5_3_8</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_8_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -302,7 +302,7 @@
                                         <field name="name">9. Type 3 business (manufacturing, etc.)</field>
                                         <field name="code">ACC_S5_3_9</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_9_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -325,7 +325,7 @@
                                         <field name="name">10. Type 4 business (other)</field>
                                         <field name="code">ACC_S5_3_10</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_10_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -348,7 +348,7 @@
                                         <field name="name">11. Type 5 business (service industry, etc.)</field>
                                         <field name="code">ACC_S5_3_11</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_11_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -371,7 +371,7 @@
                                         <field name="name">12. Type 6 business (real estate business)</field>
                                         <field name="code">ACC_S5_3_12</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_12_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -398,13 +398,13 @@
                         <field name="name">(2) Details of consumption tax amount on taxable sales by business category in (1)</field>
                         <field name="code">ACC_S5_3_CTABC</field>
                         <field name="hierarchy_level">1</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="children_ids">
                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_13" model="account.report.line">
                                 <field name="name">13. Total amount by business category</field>
                                 <field name="code">ACC_S5_3_13</field>
                                 <field name="hierarchy_level">3</field>
-                                <field name="foldable" eval="False"/>
+                                <field name="foldability">always_unfolded</field>
                                 <field name="expression_ids">
                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_13_balance_a" model="account.report.expression">
                                         <field name="label">balance_a</field>
@@ -427,7 +427,7 @@
                                         <field name="name">14. Type 1 business (wholesale trade)</field>
                                         <field name="code">ACC_S5_3_14</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_14_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -460,7 +460,7 @@
                                         <field name="name">15. Type 2 business (retail business, etc.)</field>
                                         <field name="code">ACC_S5_3_15</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_15_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -493,7 +493,7 @@
                                         <field name="name">16. Type 3 business (manufacturing, etc.)</field>
                                         <field name="code">ACC_S5_3_16</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_16_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -526,7 +526,7 @@
                                         <field name="name">17. Type 4 business (other)</field>
                                         <field name="code">ACC_S5_3_17</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_17_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -559,7 +559,7 @@
                                         <field name="name">18. Type 5 business (service industry, etc.)</field>
                                         <field name="code">ACC_S5_3_18</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_18_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -592,7 +592,7 @@
                                         <field name="name">19. Type 6 business (real estate business)</field>
                                         <field name="code">ACC_S5_3_19</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_19_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -629,19 +629,19 @@
                         <field name="name">(3) Details of calculation formula category for deductible purchase tax amount</field>
                         <field name="code">ACC_S5_3_DPTA</field>
                         <field name="hierarchy_level">1</field>
-                        <field name="foldable" eval="False"/>
+                        <field name="foldability">always_unfolded</field>
                         <field name="children_ids">
                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_pc" model="account.report.line">
                                 <field name="name">A) When applying principle calculation</field>
                                 <field name="code">ACC_S5_3_PC</field>
                                 <field name="hierarchy_level">3</field>
-                                <field name="foldable" eval="False"/>
+                                <field name="foldability">always_unfolded</field>
                                 <field name="children_ids">
                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_20" model="account.report.line">
                                         <field name="name">20. 4×Deemed purchase rate [(14*90%+15*80%+16+70%+17+60%+18*50%+19*40%)/13]</field>
                                         <field name="code">ACC_S5_3_20</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_20_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
@@ -680,19 +680,19 @@
                                 <field name="name">B) When applying special calculation</field>
                                 <field name="code">ACC_S5_3_SC</field>
                                 <field name="hierarchy_level">3</field>
-                                <field name="foldable" eval="False"/>
+                                <field name="foldability">always_unfolded</field>
                                 <field name="children_ids">
                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_o75" model="account.report.line">
                                         <field name="name">(a) 75% or more in one type of business</field>
                                         <field name="code">ACC_S5_3_O75</field>
                                         <field name="hierarchy_level">4</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="children_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_21" model="account.report.line">
                                                 <field name="name">21. 4 x deemed purchase rate (90%/80%/70%/60%/50%/40%)</field>
                                                 <field name="code">ACC_S5_3_21</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_21_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -827,13 +827,13 @@
                                         <field name="name">(b) 75% or more in two types of business</field>
                                         <field name="code">ACC_S5_3_21g</field>
                                         <field name="hierarchy_level">4</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="children_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_22" model="account.report.line">
                                                 <field name="name">22. Type 1 business and Type 2 business (7C + 8C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_22</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_22_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -883,7 +883,7 @@
                                                 <field name="name">23. Type 1 business and Type 3 business (7C + 9C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_23</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_23_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -933,7 +933,7 @@
                                                 <field name="name">24. Type 1 business and Type 4 business (7C + 10C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_24</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_24_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -983,7 +983,7 @@
                                                 <field name="name">25. Type 1 business and Type 5 business (7C + 11C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_25</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_25_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1033,7 +1033,7 @@
                                                 <field name="name">26. Type 1 business and Type 6 business  (7C + 12C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_26</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_26_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1083,7 +1083,7 @@
                                                 <field name="name">27. Type 2 business and Type 3 business (8C+9C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_27</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_27_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1133,7 +1133,7 @@
                                                 <field name="name">28. Type 2 business and Type 4 business (8C+10C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_28</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_28_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1183,7 +1183,7 @@
                                                 <field name="name">29. Type 2 business and Type 5 business (8C+11C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_29</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_29_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1233,7 +1233,7 @@
                                                 <field name="name">30. Type 2 business and Type 6 business (8C+12C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_30</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_30_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1283,7 +1283,7 @@
                                                 <field name="name">31. Type 3 business and Type 4 business (9C+10C)/6C≧75</field>
                                                 <field name="code">ACC_S5_3_31</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_31_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1333,7 +1333,7 @@
                                                 <field name="name">32. Type 3 business and Type 5 business (9C+11C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_32</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_32_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1383,7 +1383,7 @@
                                                 <field name="name">33. Type 3 business and Type 6 business (9C+12C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_33</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_33_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1433,7 +1433,7 @@
                                                 <field name="name">34. Type 4 business and Type 5 business  (10C + 11C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_34</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_34_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1483,7 +1483,7 @@
                                                 <field name="name">35. Type 4 business and Type 6 business (10C + 12C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_35</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_35_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1533,7 +1533,7 @@
                                                 <field name="name">36. Type 5 business and Type 6 business  (11C + 12C)/6C≧75%</field>
                                                 <field name="code">ACC_S5_3_36</field>
                                                 <field name="hierarchy_level">5</field>
-                                                <field name="foldable" eval="False"/>
+                                                <field name="foldability">always_unfolded</field>
                                                 <field name="expression_ids">
                                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_36_balance_a" model="account.report.expression">
                                                         <field name="label">balance_a</field>
@@ -1587,13 +1587,13 @@
                                 <field name="name">C) Deductible purchase tax amount selected from the calculation formula category above</field>
                                 <field name="code">ACC_S5_3_FDPTA</field>
                                 <field name="hierarchy_level">3</field>
-                                <field name="foldable" eval="False"/>
+                                <field name="foldability">always_unfolded</field>
                                 <field name="children_ids">
                                     <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_37" model="account.report.line">
                                         <field name="name">37. Amount selected from selectable calculation formula categories (20 to 36)</field>
                                         <field name="code">ACC_S5_3_37</field>
                                         <field name="hierarchy_level">5</field>
-                                        <field name="foldable" eval="False"/>
+                                        <field name="foldability">always_unfolded</field>
                                         <field name="expression_ids">
                                             <record id="l10n_jp_schedule_5_3_accumulation_acc_s5_3_37_balance_a" model="account.report.expression">
                                                 <field name="label">balance_a</field>
