@@ -10,6 +10,7 @@ export class SectionDropdown extends Component {
     static props = {
         section: Object,
         state: Object,
+        showEllipsis: { type: Boolean, optional: true },
     };
 
     get parent() {

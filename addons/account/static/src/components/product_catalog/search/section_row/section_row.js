@@ -26,4 +26,11 @@ export class SectionRow extends Component {
     toggle(section) {
         section.isOpen = !section.isOpen;
     }
+
+    onSectionLabelKeydown(ev) {
+        if (ev.key === "Enter" || ev.key === " ") {
+            ev.preventDefault();
+            this.env.setSelectedSection(this.props.section.id, this.selectedSection.filtered);
+        }
+    }
 }

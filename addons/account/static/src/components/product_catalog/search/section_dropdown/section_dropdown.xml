@@ -3,7 +3,7 @@
 <templates>
     <t t-name="account.SectionDropdown">
         <Dropdown>
-            <button style="min-width: 30px" class="btn p-0 border-0 bg-transparent">
+            <button t-attf-class="o_section_dropdown_button btn border-0 bg-transparent rounded-start-0 px-2 {{this.props.showEllipsis ? '' : 'opacity-0 pe-none'}}" t-att-tabindex="this.props.showEllipsis ? '0' : '-1'">
                 <i class="fa fa-ellipsis-v text-muted"/>
             </button>
             <t t-set-slot="content">

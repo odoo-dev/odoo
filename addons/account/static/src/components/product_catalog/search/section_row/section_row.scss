@@ -1,16 +1,22 @@
-.o_section_icon {
-    min-width: 10px;
-    width: 10px;
-}
+.o_search_panel_sections {
+    .o_selected_section {
+        background-color: var(--list-group-active-bg);
+    }
 
-.o_selected_section {
-    background-color: var(--list-group-active-bg);
-}
+    .o_section_row {
+        padding-block: 0;
 
-.o_section_row:not(.o_selected_section):hover {
-    background-color: var(--list-group-action-hover-bg);
-}
+        > * {
+            padding-block: var(--list-group-item-padding-y);
+        }
+    }
 
-.o_section_row {
-    border-radius: var(--border-radius);
+    .o_search_panel_label:focus-visible {
+        outline: none;
+        box-shadow: $focus-ring-box-shadow;
+    }
+
+    .o_section_dropdown_button {
+        line-height: normal;
+    }
 }

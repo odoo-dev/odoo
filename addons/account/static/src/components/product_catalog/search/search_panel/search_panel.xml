@@ -13,7 +13,7 @@
         <xpath expr="//header/i" position="replace"/>
 
         <section position="before">
-            <section t-if="this.showSections" class="o_search_panel_sections mt-4 pb-4 border-bottom">
+            <section t-if="this.showSections" class="o_search_panel_sections o_search_panel_section mt-4 pb-4 border-bottom">
                 <header class="d-flex align-items-center cursor-default mb-3">
                     <b class="text-uppercase me-2">Sections</b>
                     <i
