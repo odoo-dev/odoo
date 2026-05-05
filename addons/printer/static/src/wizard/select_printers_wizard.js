@@ -24,12 +24,13 @@ export class SelectPrintersWizard extends FormController {
     }
 
     get extractSettings() {
-        const { printer_ids, do_not_ask_again } = this.model.root.evalContextWithVirtualIds;
+        const { printer_ids, do_not_ask_again, duplex } = this.model.root.evalContextWithVirtualIds;
         return {
-          selectedPrinters: this.props.context.printer_ids.filter((p) =>
-            printer_ids.includes(p.id)
-          ),
-          skipDialog: do_not_ask_again,
+            selectedPrinters: this.props.context.printer_ids.filter((p) =>
+                printer_ids.includes(p.id)
+            ),
+            skipDialog: do_not_ask_again,
+            duplex,
         };
     }
 

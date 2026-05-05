@@ -11,6 +11,9 @@
                 <group>
                     <field name="do_not_ask_again"/>
                 </group>
+                <group>
+                    <field name="duplex" invisible="not is_duplex_hidden"/>
+                </group>
                 <footer>
                     <button string="Print" class="btn-primary" special="cancel" />
                 </footer>
