@@ -2,9 +2,9 @@ import { useState } from "@web/owl2/utils";
 import { SearchMedia } from "./search_media";
 import { fonts } from "@html_editor/utils/fonts";
 import { _t } from "@web/core/l10n/translation";
-import { MS_ICONS_BY_CATEGORY, MS_CATEGORY_LABELS } from "./material_symbols_icons";
-
-import { Component } from "@odoo/owl";
+import { MS_ICONS_BY_CATEGORY, MS_CATEGORY_LABELS } from "@web_icons/material_symbols_icons";
+import { useService } from "@web/core/utils/hooks";
+import { Component, onWillStart } from "@odoo/owl";
 
 /**
  * Custom Odoo UI icons (oi font, not Material Symbols).
@@ -67,10 +67,36 @@ export class IconSelector extends Component {
         // Pre-populate filled state when editing an existing filled icon
         const filled = this.props.media?.classList.contains("oi-filled") ?? false;
         this.state = useState({
+            // `wishlistCategories` holds the MS-filtered set once the wishlist
+            // has been fetched; every other source (OI, FA) is kept as-is.
+            wishlistCategories: this.props.categories,
             categories: this.props.categories,
             needle: "",
             selectedCategory: "",
             filled,
+        });
+
+        const iconService = useService("iconService");
+        onWillStart(async () => {
+            try {
+                const wishlist = await iconService.getWishlist();
+                const wishlistSet = new Set(wishlist);
+                this.state.wishlistCategories = this.props.categories
+                    .map((category) => {
+                        if (category.source !== "ms") {
+                            return category;
+                        }
+                        const icons = category.icons.filter((icon) =>
+                            wishlistSet.has(icon.name)
+                        );
+                        return { ...category, icons };
+                    })
+                    .filter((category) => category.icons.length > 0);
+                // Re-apply current text/category filters against the narrowed set
+                this.applyFilters();
+            } catch {
+                // Wishlist unavailable
+            }
         });
     }
 
@@ -87,7 +113,7 @@ export class IconSelector extends Component {
         const lower = this.state.needle.toLowerCase();
         const catId = this.state.selectedCategory;
 
-        this.state.categories = this.props.categories
+        this.state.categories = this.state.wishlistCategories
             .filter((category) => !catId || category.id === catId)
             .map((category) => {
                 if (!lower) {

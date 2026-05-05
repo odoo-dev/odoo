@@ -1,0 +1,1722 @@
+{
+  "ac_unit": {
+    "outlined": "",
+    "filled": ""
+  },
+  "accessibility": {
+    "outlined": "",
+    "filled": ""
+  },
+  "accessible": {
+    "outlined": "",
+    "filled": ""
+  },
+  "account_balance": {
+    "outlined": "",
+    "filled": ""
+  },
+  "account_circle": {
+    "outlined": "",
+    "filled": ""
+  },
+  "account_tree": {
+    "outlined": "",
+    "filled": ""
+  },
+  "add": {
+    "outlined": "",
+    "filled": ""
+  },
+  "add_2": {
+    "outlined": "",
+    "filled": ""
+  },
+  "add_box": {
+    "outlined": "",
+    "filled": ""
+  },
+  "add_circle": {
+    "outlined": "",
+    "filled": ""
+  },
+  "add_reaction": {
+    "outlined": "",
+    "filled": ""
+  },
+  "add_shopping_cart": {
+    "outlined": "",
+    "filled": ""
+  },
+  "alarm_add": {
+    "outlined": "",
+    "filled": ""
+  },
+  "alternate_email": {
+    "outlined": "",
+    "filled": ""
+  },
+  "anchor": {
+    "outlined": "",
+    "filled": ""
+  },
+  "apps": {
+    "outlined": "",
+    "filled": ""
+  },
+  "archive": {
+    "outlined": "",
+    "filled": ""
+  },
+  "area_chart": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_back": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_back_ios_new": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_circle_down": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_circle_left": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_circle_right": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_circle_up": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_downward": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_drop_down": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_drop_down_circle": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_drop_up": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_forward": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_forward_ios": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_left": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_range": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_right": {
+    "outlined": "",
+    "filled": ""
+  },
+  "arrow_upward": {
+    "outlined": "",
+    "filled": ""
+  },
+  "article": {
+    "outlined": "",
+    "filled": ""
+  },
+  "assignment": {
+    "outlined": "",
+    "filled": ""
+  },
+  "attach_file": {
+    "outlined": "",
+    "filled": ""
+  },
+  "attach_money": {
+    "outlined": "",
+    "filled": ""
+  },
+  "audio_description": {
+    "outlined": "",
+    "filled": ""
+  },
+  "audio_file": {
+    "outlined": "",
+    "filled": ""
+  },
+  "autorenew": {
+    "outlined": "",
+    "filled": ""
+  },
+  "back_hand": {
+    "outlined": "",
+    "filled": ""
+  },
+  "backspace": {
+    "outlined": "",
+    "filled": ""
+  },
+  "badge": {
+    "outlined": "",
+    "filled": ""
+  },
+  "balance": {
+    "outlined": "",
+    "filled": ""
+  },
+  "bar_chart": {
+    "outlined": "",
+    "filled": ""
+  },
+  "barcode": {
+    "outlined": "",
+    "filled": ""
+  },
+  "bathtub": {
+    "outlined": "",
+    "filled": ""
+  },
+  "battery_0_bar": {
+    "outlined": "",
+    "filled": ""
+  },
+  "battery_2_bar": {
+    "outlined": "",
+    "filled": ""
+  },
+  "battery_3_bar": {
+    "outlined": "",
+    "filled": ""
+  },
+  "battery_5_bar": {
+    "outlined": "",
+    "filled": ""
+  },
+  "battery_full": {
+    "outlined": "",
+    "filled": ""
+  },
+  "bed": {
+    "outlined": "",
+    "filled": ""
+  },
+  "blind": {
+    "outlined": "",
+    "filled": ""
+  },
+  "block": {
+    "outlined": "",
+    "filled": ""
+  },
+  "bluetooth": {
+    "outlined": "",
+    "filled": ""
+  },
+  "book": {
+    "outlined": "",
+    "filled": ""
+  },
+  "bookmark": {
+    "outlined": "",
+    "filled": ""
+  },
+  "bug_report": {
+    "outlined": "",
+    "filled": ""
+  },
+  "build": {
+    "outlined": "",
+    "filled": ""
+  },
+  "business": {
+    "outlined": "",
+    "filled": ""
+  },
+  "cake": {
+    "outlined": "",
+    "filled": ""
+  },
+  "calculate": {
+    "outlined": "",
+    "filled": ""
+  },
+  "calendar_add_on": {
+    "outlined": "",
+    "filled": ""
+  },
+  "calendar_clock": {
+    "outlined": "",
+    "filled": ""
+  },
+  "calendar_today": {
+    "outlined": "",
+    "filled": ""
+  },
+  "call_merge": {
+    "outlined": "",
+    "filled": ""
+  },
+  "camera_alt": {
+    "outlined": "",
+    "filled": ""
+  },
+  "campaign": {
+    "outlined": "",
+    "filled": ""
+  },
+  "cancel": {
+    "outlined": "",
+    "filled": ""
+  },
+  "card_giftcard": {
+    "outlined": "",
+    "filled": ""
+  },
+  "cardiology": {
+    "outlined": "",
+    "filled": ""
+  },
+  "chat_bubble": {
+    "outlined": "",
+    "filled": ""
+  },
+  "check": {
+    "outlined": "",
+    "filled": ""
+  },
+  "check_box": {
+    "outlined": "",
+    "filled": ""
+  },
+  "check_circle": {
+    "outlined": "",
+    "filled": ""
+  },
+  "checklist": {
+    "outlined": "",
+    "filled": ""
+  },
+  "chevron_backward": {
+    "outlined": "",
+    "filled": ""
+  },
+  "chevron_forward": {
+    "outlined": "",
+    "filled": ""
+  },
+  "chevron_left": {
+    "outlined": "",
+    "filled": ""
+  },
+  "chevron_right": {
+    "outlined": "",
+    "filled": ""
+  },
+  "child_care": {
+    "outlined": "",
+    "filled": ""
+  },
+  "circle": {
+    "outlined": "",
+    "filled": ""
+  },
+  "clear_all": {
+    "outlined": "",
+    "filled": ""
+  },
+  "close": {
+    "outlined": "",
+    "filled": ""
+  },
+  "close_fullscreen": {
+    "outlined": "",
+    "filled": ""
+  },
+  "close_small": {
+    "outlined": "",
+    "filled": ""
+  },
+  "closed_caption": {
+    "outlined": "",
+    "filled": ""
+  },
+  "cloud": {
+    "outlined": "",
+    "filled": ""
+  },
+  "cloud_download": {
+    "outlined": "",
+    "filled": ""
+  },
+  "cloud_upload": {
+    "outlined": "",
+    "filled": ""
+  },
+  "code": {
+    "outlined": "",
+    "filled": ""
+  },
+  "coffee": {
+    "outlined": "",
+    "filled": ""
+  },
+  "colorize": {
+    "outlined": "",
+    "filled": ""
+  },
+  "confirmation_number": {
+    "outlined": "",
+    "filled": ""
+  },
+  "contact_mail": {
+    "outlined": "",
+    "filled": ""
+  },
+  "contact_page": {
+    "outlined": "",
+    "filled": ""
+  },
+  "content_copy": {
+    "outlined": "",
+    "filled": ""
+  },
+  "content_cut": {
+    "outlined": "",
+    "filled": ""
+  },
+  "content_paste": {
+    "outlined": "",
+    "filled": ""
+  },
+  "contract": {
+    "outlined": "",
+    "filled": ""
+  },
+  "contrast": {
+    "outlined": "",
+    "filled": ""
+  },
+  "copyright": {
+    "outlined": "",
+    "filled": ""
+  },
+  "credit_card": {
+    "outlined": "",
+    "filled": ""
+  },
+  "crisis_alert": {
+    "outlined": "",
+    "filled": ""
+  },
+  "crop": {
+    "outlined": "",
+    "filled": ""
+  },
+  "currency_bitcoin": {
+    "outlined": "",
+    "filled": ""
+  },
+  "currency_lira": {
+    "outlined": "",
+    "filled": ""
+  },
+  "currency_pound": {
+    "outlined": "",
+    "filled": ""
+  },
+  "currency_ruble": {
+    "outlined": "",
+    "filled": ""
+  },
+  "currency_rupee": {
+    "outlined": "",
+    "filled": ""
+  },
+  "currency_yen": {
+    "outlined": "",
+    "filled": ""
+  },
+  "dark_mode": {
+    "outlined": "",
+    "filled": ""
+  },
+  "database": {
+    "outlined": "",
+    "filled": ""
+  },
+  "delete": {
+    "outlined": "",
+    "filled": ""
+  },
+  "deployed_code": {
+    "outlined": "",
+    "filled": ""
+  },
+  "description": {
+    "outlined": "",
+    "filled": ""
+  },
+  "deselect": {
+    "outlined": "",
+    "filled": ""
+  },
+  "design_services": {
+    "outlined": "",
+    "filled": ""
+  },
+  "desktop_access_disabled": {
+    "outlined": "",
+    "filled": ""
+  },
+  "desktop_windows": {
+    "outlined": "",
+    "filled": ""
+  },
+  "device_thermostat": {
+    "outlined": "",
+    "filled": ""
+  },
+  "dialpad": {
+    "outlined": "",
+    "filled": ""
+  },
+  "diamond": {
+    "outlined": "",
+    "filled": ""
+  },
+  "directions_bike": {
+    "outlined": "",
+    "filled": ""
+  },
+  "directions_boat": {
+    "outlined": "",
+    "filled": ""
+  },
+  "directions_bus": {
+    "outlined": "",
+    "filled": ""
+  },
+  "directions_car": {
+    "outlined": "",
+    "filled": ""
+  },
+  "dns": {
+    "outlined": "",
+    "filled": ""
+  },
+  "dock_to_left": {
+    "outlined": "",
+    "filled": ""
+  },
+  "dock_to_right": {
+    "outlined": "",
+    "filled": ""
+  },
+  "download": {
+    "outlined": "",
+    "filled": ""
+  },
+  "drafts": {
+    "outlined": "",
+    "filled": ""
+  },
+  "drag_indicator": {
+    "outlined": "",
+    "filled": ""
+  },
+  "early_on": {
+    "outlined": "",
+    "filled": ""
+  },
+  "east": {
+    "outlined": "",
+    "filled": ""
+  },
+  "eco": {
+    "outlined": "",
+    "filled": ""
+  },
+  "edit": {
+    "outlined": "",
+    "filled": ""
+  },
+  "edit_square": {
+    "outlined": "",
+    "filled": ""
+  },
+  "eject": {
+    "outlined": "",
+    "filled": ""
+  },
+  "emergency": {
+    "outlined": "",
+    "filled": ""
+  },
+  "error": {
+    "outlined": "",
+    "filled": ""
+  },
+  "euro": {
+    "outlined": "",
+    "filled": ""
+  },
+  "event_available": {
+    "outlined": "",
+    "filled": ""
+  },
+  "event_busy": {
+    "outlined": "",
+    "filled": ""
+  },
+  "event_upcoming": {
+    "outlined": "",
+    "filled": ""
+  },
+  "expand_circle_down": {
+    "outlined": "",
+    "filled": ""
+  },
+  "expand_circle_up": {
+    "outlined": "",
+    "filled": ""
+  },
+  "expand_content": {
+    "outlined": "",
+    "filled": ""
+  },
+  "expand_less": {
+    "outlined": "",
+    "filled": ""
+  },
+  "expand_more": {
+    "outlined": "",
+    "filled": ""
+  },
+  "explore": {
+    "outlined": "",
+    "filled": ""
+  },
+  "extension": {
+    "outlined": "",
+    "filled": ""
+  },
+  "factory": {
+    "outlined": "",
+    "filled": ""
+  },
+  "family_history": {
+    "outlined": "",
+    "filled": ""
+  },
+  "fast_forward": {
+    "outlined": "",
+    "filled": ""
+  },
+  "fast_rewind": {
+    "outlined": "",
+    "filled": ""
+  },
+  "favorite": {
+    "outlined": "",
+    "filled": ""
+  },
+  "fax": {
+    "outlined": "",
+    "filled": ""
+  },
+  "female": {
+    "outlined": "",
+    "filled": ""
+  },
+  "filter_alt": {
+    "outlined": "",
+    "filled": ""
+  },
+  "fire_extinguisher": {
+    "outlined": "",
+    "filled": ""
+  },
+  "flag": {
+    "outlined": "",
+    "filled": ""
+  },
+  "flash_on": {
+    "outlined": "",
+    "filled": ""
+  },
+  "flight": {
+    "outlined": "",
+    "filled": ""
+  },
+  "flip_to_back": {
+    "outlined": "",
+    "filled": ""
+  },
+  "flip_to_front": {
+    "outlined": "",
+    "filled": ""
+  },
+  "folder": {
+    "outlined": "",
+    "filled": ""
+  },
+  "folder_open": {
+    "outlined": "",
+    "filled": ""
+  },
+  "folder_zip": {
+    "outlined": "",
+    "filled": ""
+  },
+  "fork_right": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_align_center": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_align_justify": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_align_left": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_align_right": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_bold": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_image_front": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_image_inline_left": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_indent_decrease": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_indent_increase": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_italic": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_list_bulleted": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_list_numbered": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_paragraph": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_quote": {
+    "outlined": "",
+    "filled": ""
+  },
+  "format_underlined": {
+    "outlined": "",
+    "filled": ""
+  },
+  "forum": {
+    "outlined": "",
+    "filled": ""
+  },
+  "forward": {
+    "outlined": "",
+    "filled": ""
+  },
+  "fullscreen": {
+    "outlined": "",
+    "filled": ""
+  },
+  "fullscreen_exit": {
+    "outlined": "",
+    "filled": ""
+  },
+  "gavel": {
+    "outlined": "",
+    "filled": ""
+  },
+  "gif_box": {
+    "outlined": "",
+    "filled": ""
+  },
+  "grain": {
+    "outlined": "",
+    "filled": ""
+  },
+  "graphic_eq": {
+    "outlined": "",
+    "filled": ""
+  },
+  "grid_view": {
+    "outlined": "",
+    "filled": ""
+  },
+  "group": {
+    "outlined": "",
+    "filled": ""
+  },
+  "handshake": {
+    "outlined": "",
+    "filled": ""
+  },
+  "headphones": {
+    "outlined": "",
+    "filled": ""
+  },
+  "hearing": {
+    "outlined": "",
+    "filled": ""
+  },
+  "hearing_disabled": {
+    "outlined": "",
+    "filled": ""
+  },
+  "height": {
+    "outlined": "",
+    "filled": ""
+  },
+  "help": {
+    "outlined": "",
+    "filled": ""
+  },
+  "help_outline": {
+    "outlined": "",
+    "filled": ""
+  },
+  "history": {
+    "outlined": "",
+    "filled": ""
+  },
+  "home": {
+    "outlined": "",
+    "filled": ""
+  },
+  "hourglass_bottom": {
+    "outlined": "",
+    "filled": ""
+  },
+  "hourglass_disabled": {
+    "outlined": "",
+    "filled": ""
+  },
+  "hourglass_empty": {
+    "outlined": "",
+    "filled": ""
+  },
+  "hourglass_top": {
+    "outlined": "",
+    "filled": ""
+  },
+  "image": {
+    "outlined": "",
+    "filled": ""
+  },
+  "inbox": {
+    "outlined": "",
+    "filled": ""
+  },
+  "indeterminate_check_box": {
+    "outlined": "",
+    "filled": ""
+  },
+  "info": {
+    "outlined": "",
+    "filled": ""
+  },
+  "ink_eraser": {
+    "outlined": "",
+    "filled": ""
+  },
+  "inventory_2": {
+    "outlined": "",
+    "filled": ""
+  },
+  "key": {
+    "outlined": "",
+    "filled": ""
+  },
+  "keyboard": {
+    "outlined": "",
+    "filled": ""
+  },
+  "keyboard_arrow_down": {
+    "outlined": "",
+    "filled": ""
+  },
+  "keyboard_arrow_left": {
+    "outlined": "",
+    "filled": ""
+  },
+  "keyboard_arrow_right": {
+    "outlined": "",
+    "filled": ""
+  },
+  "keyboard_arrow_up": {
+    "outlined": "",
+    "filled": ""
+  },
+  "keyboard_double_arrow_down": {
+    "outlined": "",
+    "filled": ""
+  },
+  "keyboard_double_arrow_left": {
+    "outlined": "",
+    "filled": ""
+  },
+  "keyboard_double_arrow_right": {
+    "outlined": "",
+    "filled": ""
+  },
+  "keyboard_double_arrow_up": {
+    "outlined": "",
+    "filled": ""
+  },
+  "label": {
+    "outlined": "",
+    "filled": ""
+  },
+  "laptop": {
+    "outlined": "",
+    "filled": ""
+  },
+  "left_panel_close": {
+    "outlined": "",
+    "filled": ""
+  },
+  "left_panel_open": {
+    "outlined": "",
+    "filled": ""
+  },
+  "light": {
+    "outlined": "",
+    "filled": ""
+  },
+  "light_mode": {
+    "outlined": "",
+    "filled": ""
+  },
+  "lightbulb": {
+    "outlined": "",
+    "filled": ""
+  },
+  "link": {
+    "outlined": "",
+    "filled": ""
+  },
+  "link_off": {
+    "outlined": "",
+    "filled": ""
+  },
+  "list_alt": {
+    "outlined": "",
+    "filled": ""
+  },
+  "local_bar": {
+    "outlined": "",
+    "filled": ""
+  },
+  "local_hospital": {
+    "outlined": "",
+    "filled": ""
+  },
+  "local_shipping": {
+    "outlined": "",
+    "filled": ""
+  },
+  "local_taxi": {
+    "outlined": "",
+    "filled": ""
+  },
+  "location_on": {
+    "outlined": "",
+    "filled": ""
+  },
+  "lock": {
+    "outlined": "",
+    "filled": ""
+  },
+  "lock_open": {
+    "outlined": "",
+    "filled": ""
+  },
+  "login": {
+    "outlined": "",
+    "filled": ""
+  },
+  "logout": {
+    "outlined": "",
+    "filled": ""
+  },
+  "luggage": {
+    "outlined": "",
+    "filled": ""
+  },
+  "mail": {
+    "outlined": "",
+    "filled": ""
+  },
+  "male": {
+    "outlined": "",
+    "filled": ""
+  },
+  "map": {
+    "outlined": "",
+    "filled": ""
+  },
+  "medical_services": {
+    "outlined": "",
+    "filled": ""
+  },
+  "memory": {
+    "outlined": "",
+    "filled": ""
+  },
+  "menu": {
+    "outlined": "",
+    "filled": ""
+  },
+  "mic": {
+    "outlined": "",
+    "filled": ""
+  },
+  "mic_off": {
+    "outlined": "",
+    "filled": ""
+  },
+  "minimize": {
+    "outlined": "",
+    "filled": ""
+  },
+  "mobile_off": {
+    "outlined": "",
+    "filled": ""
+  },
+  "mode_comment": {
+    "outlined": "",
+    "filled": ""
+  },
+  "monitor": {
+    "outlined": "",
+    "filled": ""
+  },
+  "more_horiz": {
+    "outlined": "",
+    "filled": ""
+  },
+  "more_vert": {
+    "outlined": "",
+    "filled": ""
+  },
+  "mouse": {
+    "outlined": "",
+    "filled": ""
+  },
+  "movie": {
+    "outlined": "",
+    "filled": ""
+  },
+  "music_note": {
+    "outlined": "",
+    "filled": ""
+  },
+  "my_location": {
+    "outlined": "",
+    "filled": ""
+  },
+  "newspaper": {
+    "outlined": "",
+    "filled": ""
+  },
+  "no_encryption": {
+    "outlined": "",
+    "filled": ""
+  },
+  "north": {
+    "outlined": "",
+    "filled": ""
+  },
+  "north_east": {
+    "outlined": "",
+    "filled": ""
+  },
+  "north_west": {
+    "outlined": "",
+    "filled": ""
+  },
+  "notifications": {
+    "outlined": "",
+    "filled": ""
+  },
+  "notifications_off": {
+    "outlined": "",
+    "filled": ""
+  },
+  "open_in_browser": {
+    "outlined": "",
+    "filled": ""
+  },
+  "open_in_new": {
+    "outlined": "",
+    "filled": ""
+  },
+  "open_with": {
+    "outlined": "",
+    "filled": ""
+  },
+  "palette": {
+    "outlined": "",
+    "filled": ""
+  },
+  "pan_tool_alt": {
+    "outlined": "",
+    "filled": ""
+  },
+  "park": {
+    "outlined": "",
+    "filled": ""
+  },
+  "pause": {
+    "outlined": "",
+    "filled": ""
+  },
+  "pause_circle": {
+    "outlined": "",
+    "filled": ""
+  },
+  "payments": {
+    "outlined": "",
+    "filled": ""
+  },
+  "percent": {
+    "outlined": "",
+    "filled": ""
+  },
+  "person": {
+    "outlined": "",
+    "filled": ""
+  },
+  "person_add": {
+    "outlined": "",
+    "filled": ""
+  },
+  "person_remove": {
+    "outlined": "",
+    "filled": ""
+  },
+  "pets": {
+    "outlined": "",
+    "filled": ""
+  },
+  "phone": {
+    "outlined": "",
+    "filled": ""
+  },
+  "phone_cancel": {
+    "outlined": "",
+    "filled": ""
+  },
+  "phone_in_talk": {
+    "outlined": "",
+    "filled": ""
+  },
+  "photo_camera": {
+    "outlined": "",
+    "filled": ""
+  },
+  "picture_as_pdf": {
+    "outlined": "",
+    "filled": ""
+  },
+  "pie_chart": {
+    "outlined": "",
+    "filled": ""
+  },
+  "play_arrow": {
+    "outlined": "",
+    "filled": ""
+  },
+  "play_circle": {
+    "outlined": "",
+    "filled": ""
+  },
+  "podcasts": {
+    "outlined": "",
+    "filled": ""
+  },
+  "power": {
+    "outlined": "",
+    "filled": ""
+  },
+  "power_settings_new": {
+    "outlined": "",
+    "filled": ""
+  },
+  "print": {
+    "outlined": "",
+    "filled": ""
+  },
+  "priority_high": {
+    "outlined": "",
+    "filled": ""
+  },
+  "progress_activity": {
+    "outlined": "",
+    "filled": ""
+  },
+  "public": {
+    "outlined": "",
+    "filled": ""
+  },
+  "push_pin": {
+    "outlined": "",
+    "filled": ""
+  },
+  "qr_code": {
+    "outlined": "",
+    "filled": ""
+  },
+  "question_mark": {
+    "outlined": "",
+    "filled": ""
+  },
+  "radio_button_checked": {
+    "outlined": "",
+    "filled": ""
+  },
+  "radio_button_unchecked": {
+    "outlined": "",
+    "filled": ""
+  },
+  "recycling": {
+    "outlined": "",
+    "filled": ""
+  },
+  "redo": {
+    "outlined": "",
+    "filled": ""
+  },
+  "refresh": {
+    "outlined": "",
+    "filled": ""
+  },
+  "remove": {
+    "outlined": "",
+    "filled": ""
+  },
+  "remove_circle": {
+    "outlined": "",
+    "filled": ""
+  },
+  "reorder": {
+    "outlined": "",
+    "filled": ""
+  },
+  "repeat": {
+    "outlined": "",
+    "filled": ""
+  },
+  "reply": {
+    "outlined": "",
+    "filled": ""
+  },
+  "reply_all": {
+    "outlined": "",
+    "filled": ""
+  },
+  "restaurant": {
+    "outlined": "",
+    "filled": ""
+  },
+  "road": {
+    "outlined": "",
+    "filled": ""
+  },
+  "rocket": {
+    "outlined": "",
+    "filled": ""
+  },
+  "rocket_launch": {
+    "outlined": "",
+    "filled": ""
+  },
+  "rss_feed": {
+    "outlined": "",
+    "filled": ""
+  },
+  "save": {
+    "outlined": "",
+    "filled": ""
+  },
+  "schedule": {
+    "outlined": "",
+    "filled": ""
+  },
+  "school": {
+    "outlined": "",
+    "filled": ""
+  },
+  "science": {
+    "outlined": "",
+    "filled": ""
+  },
+  "search": {
+    "outlined": "",
+    "filled": ""
+  },
+  "security": {
+    "outlined": "",
+    "filled": ""
+  },
+  "select_all": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sell": {
+    "outlined": "",
+    "filled": ""
+  },
+  "send": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sentiment_dissatisfied": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sentiment_neutral": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sentiment_sad": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sentiment_satisfied": {
+    "outlined": "",
+    "filled": ""
+  },
+  "settings": {
+    "outlined": "",
+    "filled": ""
+  },
+  "settings_applications": {
+    "outlined": "",
+    "filled": ""
+  },
+  "share": {
+    "outlined": "",
+    "filled": ""
+  },
+  "shopping_bag": {
+    "outlined": "",
+    "filled": ""
+  },
+  "shopping_bag_speed": {
+    "outlined": "",
+    "filled": ""
+  },
+  "shopping_basket": {
+    "outlined": "",
+    "filled": ""
+  },
+  "shopping_cart": {
+    "outlined": "",
+    "filled": ""
+  },
+  "shopping_cart_checkout": {
+    "outlined": "",
+    "filled": ""
+  },
+  "show_chart": {
+    "outlined": "",
+    "filled": ""
+  },
+  "shower": {
+    "outlined": "",
+    "filled": ""
+  },
+  "shuffle": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sign_language": {
+    "outlined": "",
+    "filled": ""
+  },
+  "signal_cellular_4_bar": {
+    "outlined": "",
+    "filled": ""
+  },
+  "signpost": {
+    "outlined": "",
+    "filled": ""
+  },
+  "skip_next": {
+    "outlined": "",
+    "filled": ""
+  },
+  "skip_previous": {
+    "outlined": "",
+    "filled": ""
+  },
+  "slideshow": {
+    "outlined": "",
+    "filled": ""
+  },
+  "smartphone": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sort": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sort_by_alpha": {
+    "outlined": "",
+    "filled": ""
+  },
+  "south": {
+    "outlined": "",
+    "filled": ""
+  },
+  "south_east": {
+    "outlined": "",
+    "filled": ""
+  },
+  "south_west": {
+    "outlined": "",
+    "filled": ""
+  },
+  "speed": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sports_bar": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sports_score": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sports_soccer": {
+    "outlined": "",
+    "filled": ""
+  },
+  "square": {
+    "outlined": "",
+    "filled": ""
+  },
+  "stacks": {
+    "outlined": "",
+    "filled": ""
+  },
+  "stadia_controller": {
+    "outlined": "",
+    "filled": ""
+  },
+  "star": {
+    "outlined": "",
+    "filled": ""
+  },
+  "star_half": {
+    "outlined": "",
+    "filled": ""
+  },
+  "stethoscope": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sticky_note_2": {
+    "outlined": "",
+    "filled": ""
+  },
+  "stop": {
+    "outlined": "",
+    "filled": ""
+  },
+  "stop_circle": {
+    "outlined": "",
+    "filled": ""
+  },
+  "storage": {
+    "outlined": "",
+    "filled": ""
+  },
+  "streetview": {
+    "outlined": "",
+    "filled": ""
+  },
+  "strikethrough_s": {
+    "outlined": "",
+    "filled": ""
+  },
+  "stylus_laser_pointer": {
+    "outlined": "",
+    "filled": ""
+  },
+  "subdirectory_arrow_left": {
+    "outlined": "",
+    "filled": ""
+  },
+  "subdirectory_arrow_right": {
+    "outlined": "",
+    "filled": ""
+  },
+  "subscript": {
+    "outlined": "",
+    "filled": ""
+  },
+  "subtitles": {
+    "outlined": "",
+    "filled": ""
+  },
+  "subway": {
+    "outlined": "",
+    "filled": ""
+  },
+  "superscript": {
+    "outlined": "",
+    "filled": ""
+  },
+  "support": {
+    "outlined": "",
+    "filled": ""
+  },
+  "swap_horiz": {
+    "outlined": "",
+    "filled": ""
+  },
+  "swap_vert": {
+    "outlined": "",
+    "filled": ""
+  },
+  "sync_alt": {
+    "outlined": "",
+    "filled": ""
+  },
+  "table_chart": {
+    "outlined": "",
+    "filled": ""
+  },
+  "tablet": {
+    "outlined": "",
+    "filled": ""
+  },
+  "tag": {
+    "outlined": "",
+    "filled": ""
+  },
+  "terminal": {
+    "outlined": "",
+    "filled": ""
+  },
+  "text_fields": {
+    "outlined": "",
+    "filled": ""
+  },
+  "thumb_down": {
+    "outlined": "",
+    "filled": ""
+  },
+  "thumb_up": {
+    "outlined": "",
+    "filled": ""
+  },
+  "title": {
+    "outlined": "",
+    "filled": ""
+  },
+  "toggle_off": {
+    "outlined": "",
+    "filled": ""
+  },
+  "toggle_on": {
+    "outlined": "",
+    "filled": ""
+  },
+  "toolbar": {
+    "outlined": "",
+    "filled": ""
+  },
+  "train": {
+    "outlined": "",
+    "filled": ""
+  },
+  "transgender": {
+    "outlined": "",
+    "filled": ""
+  },
+  "translate": {
+    "outlined": "",
+    "filled": ""
+  },
+  "travel": {
+    "outlined": "",
+    "filled": ""
+  },
+  "trophy": {
+    "outlined": "",
+    "filled": ""
+  },
+  "troubleshoot": {
+    "outlined": "",
+    "filled": ""
+  },
+  "tty": {
+    "outlined": "",
+    "filled": ""
+  },
+  "tune": {
+    "outlined": "",
+    "filled": ""
+  },
+  "tv": {
+    "outlined": "",
+    "filled": ""
+  },
+  "two_wheeler": {
+    "outlined": "",
+    "filled": ""
+  },
+  "umbrella": {
+    "outlined": "",
+    "filled": ""
+  },
+  "unarchive": {
+    "outlined": "",
+    "filled": ""
+  },
+  "undo": {
+    "outlined": "",
+    "filled": ""
+  },
+  "unpublished": {
+    "outlined": "",
+    "filled": ""
+  },
+  "upload": {
+    "outlined": "",
+    "filled": ""
+  },
+  "usb": {
+    "outlined": "",
+    "filled": ""
+  },
+  "verified": {
+    "outlined": "",
+    "filled": ""
+  },
+  "videocam": {
+    "outlined": "",
+    "filled": ""
+  },
+  "view_column": {
+    "outlined": "",
+    "filled": ""
+  },
+  "view_kanban": {
+    "outlined": "",
+    "filled": ""
+  },
+  "view_list": {
+    "outlined": "",
+    "filled": ""
+  },
+  "view_module": {
+    "outlined": "",
+    "filled": ""
+  },
+  "visibility": {
+    "outlined": "",
+    "filled": ""
+  },
+  "visibility_off": {
+    "outlined": "",
+    "filled": ""
+  },
+  "volume_down": {
+    "outlined": "",
+    "filled": ""
+  },
+  "volume_off": {
+    "outlined": "",
+    "filled": ""
+  },
+  "volume_up": {
+    "outlined": "",
+    "filled": ""
+  },
+  "wand_stars": {
+    "outlined": "",
+    "filled": ""
+  },
+  "warning": {
+    "outlined": "",
+    "filled": ""
+  },
+  "water_drop": {
+    "outlined": "",
+    "filled": ""
+  },
+  "west": {
+    "outlined": "",
+    "filled": ""
+  },
+  "whatshot": {
+    "outlined": "",
+    "filled": ""
+  },
+  "widgets": {
+    "outlined": "",
+    "filled": ""
+  },
+  "wifi": {
+    "outlined": "",
+    "filled": ""
+  },
+  "work": {
+    "outlined": "",
+    "filled": ""
+  },
+  "zoom_in": {
+    "outlined": "",
+    "filled": ""
+  },
+  "zoom_out": {
+    "outlined": "",
+    "filled": ""
+  }
+}
