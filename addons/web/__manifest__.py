@@ -100,7 +100,10 @@ This module provides the core of the Odoo Web Client.
             'web/static/src/core/utils/transitions.scss',
             'web/static/src/model/**/*',
             'web/static/src/search/**/*',
-            'web/static/src/webclient/icons.scss', # variables required in list_controller.scss
+            # icons.scss is included via ('include', 'web.icons_fonts') above.
+            # The explicit listing below is kept as a fallback for ordering
+            # (variables needed by list_controller.scss); web_icons removes it
+            # via ('remove', ...) to avoid double-inclusion.
             'web/static/src/views/**/*',
             ('remove', 'web/static/src/views/graph/**'),
             ('remove', 'web/static/src/views/pivot/**'),
@@ -526,27 +529,16 @@ This module provides the core of the Odoo Web Client.
             '/web/static/lib/fullcalendar/timegrid/index.global.js',
             '/web/static/lib/fullcalendar/list/index.global.js',
         ],
-        # Icons bundles: material_symbols, odoo_ui_icons and both combined. Only the
-        # combination should probably be used. But it is split to allow MS
-        # preload on the frontend.
-        'web.material_symbols_outlined': [
-            '/web/static/src/libs/materialsymbols/MaterialSymbolsOutlined_wgth-400_opsz-24.woff2',
-            '/web/static/src/libs/materialsymbols/material_symbols_outlined.css',
-        ],
-        'web.material_symbols_sharp': [
-            '/web/static/src/libs/materialsymbols/MaterialSymbolsSharp_wgth-400_opsz-24.woff2',
-            '/web/static/src/libs/materialsymbols/material_symbols_sharp.css',
-        ],
-        'web.odoo_ui_icons': [
-            '/web/static/lib/odoo_ui_icons/fonts/odoo_ui_icons.woff2',
-            '/web/static/lib/odoo_ui_icons/fonts/odoo_ui_icons.woff',
-            '/web/static/lib/odoo_ui_icons/odoo_ui_icons.css',
-        ],
+        # Icons bundles: material_symbols, odoo_ui_icons and both combined.
+        # Font files and CSS are owned by the web_icons module; these empty
+        # bundle definitions serve as anchor points for the includes below and
+        # for t-call-assets in webclient_templates.xml.
+        'web.material_symbols_outlined': [],
+        'web.material_symbols_sharp': [],
+        'web.odoo_ui_icons': [],
         'web.icons_fonts': [
             ('include', 'web.material_symbols_outlined'),
-            ('include', 'web.material_symbols_sharp'),
             ('include', 'web.odoo_ui_icons'),
-            'web/static/src/webclient/icons.scss',
         ],
     },
     'bootstrap': True,  # load translations for login screen,
