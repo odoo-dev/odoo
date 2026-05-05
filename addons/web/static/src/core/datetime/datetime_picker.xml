@@ -98,8 +98,12 @@
     </t>
 
     <t t-name="web.DateTimePicker">
+    <ActionSwiper
+        onRightSwipe="this.ui.isSmall ? { action: this.next.bind(this), } : undefined"
+        onLeftSwipe="this.ui.isSmall ? { action: this.previous.bind(this), } : undefined"
+        animationType="'forwards'">
         <div
-            t-att-class="{'o_datetime_picker_reduced': !this.props.showWeekNumbers}"
+            t-att-class="{'o_datetime_picker_reduced': !this.props.showWeekNumbers, 'w-100': this.ui.isSmall }"
             class="o_datetime_picker d-flex flex-column gap-2 user-select-none p-2"
             t-attf-style="--DateTimePicker__Day-template-columns: {{ this.props.showWeekNumbers ? 8 : 7 }}"
         >
@@ -164,5 +168,6 @@
                 <t t-call="web.DateTimePicker.Grid" />
             </t>
         </div>
+    </ActionSwiper>
     </t>
 </templates>

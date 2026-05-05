@@ -1,12 +1,14 @@
 import { onWillRender, useState } from "@web/owl2/utils";
 import { Component, onWillUpdateProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
-import { MAX_VALID_DATE, MIN_VALID_DATE, clampDate, isInRange, today } from "../l10n/dates";
-import { localization } from "../l10n/localization";
-import { ensureArray } from "../utils/arrays";
+import { MAX_VALID_DATE, MIN_VALID_DATE, clampDate, isInRange, today } from "@web/core/l10n/dates";
+import { localization } from "@web/core/l10n/localization";
+import { ensureArray } from "@web/core/utils/arrays";
 import { TimePicker } from "@web/core/time_picker/time_picker";
 import { Time } from "@web/core/l10n/time";
 import { range } from "@web/core/utils/numbers";
+import { ActionSwiper } from "@web/core/action_swiper/action_swiper";
+import { useService } from "@web/core/utils/hooks";
 
 const { DateTime, Info } = luxon;
 
@@ -286,12 +288,18 @@ export class DateTimePicker extends Component {
         focusedDateIndex: { type: Number, optional: true },
         showWeekNumbers: { type: Boolean, optional: true },
         daysOfWeekFormat: { type: String, optional: true },
-        maxDate: { type: [NULLABLE_DATETIME_PROPERTY, { value: "today" }], optional: true },
+        maxDate: {
+            type: [NULLABLE_DATETIME_PROPERTY, { value: "today" }],
+            optional: true,
+        },
         maxPrecision: {
             type: [...PRECISION_LEVELS.keys()].map((value) => ({ value })),
             optional: true,
         },
-        minDate: { type: [NULLABLE_DATETIME_PROPERTY, { value: "today" }], optional: true },
+        minDate: {
+            type: [NULLABLE_DATETIME_PROPERTY, { value: "today" }],
+            optional: true,
+        },
         minPrecision: {
             type: [...PRECISION_LEVELS.keys()].map((value) => ({ value })),
             optional: true,
@@ -331,7 +339,7 @@ export class DateTimePicker extends Component {
     };
 
     static template = "web.DateTimePicker";
-    static components = { TimePicker };
+    static components = { ActionSwiper, TimePicker };
 
     //-------------------------------------------------------------------------
     // Getters
@@ -364,6 +372,7 @@ export class DateTimePicker extends Component {
         this.title = "";
         this.shouldAdjustFocusDate = false;
 
+        this.ui = useService("ui");
         this.state = useState({
             /** @type {DateTime | null} */
             focusDate: null,
@@ -540,7 +549,7 @@ export class DateTimePicker extends Component {
      * @param {PointerEvent} ev
      */
     next(ev) {
-        ev.preventDefault();
+        ev?.preventDefault();
         const { step } = this.activePrecisionLevel;
         this.state.focusDate = this.clamp(this.state.focusDate.plus(step));
     }
@@ -551,7 +560,7 @@ export class DateTimePicker extends Component {
      * @param {PointerEvent} ev
      */
     previous(ev) {
-        ev.preventDefault();
+        ev?.preventDefault();
         const { step } = this.activePrecisionLevel;
         this.state.focusDate = this.clamp(this.state.focusDate.minus(step));
     }
