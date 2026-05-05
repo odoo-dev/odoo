@@ -1,8 +1,8 @@
 {
     "name": "Printer",
-    "summary": "Base module to manage external printers (e.g. ePOS, ZPL)",
+    "summary": "Base module to manage external printers (e.g. ePOS, ZPL, Office)",
     "version": "0.1",
-    "depends": ["base"],
+    "depends": ["base", "base_setup"],
     "author": "Odoo S.A.",
     "license": "LGPL-3",
     "data": [
@@ -10,6 +10,7 @@
         "views/ir_actions_report.xml",
         "views/printer_views.xml",
         "wizard/select_printers_wizard.xml",
+        "views/res_config_settings_views.xml",
     ],
     'demo': [
         'demo/printers.xml'

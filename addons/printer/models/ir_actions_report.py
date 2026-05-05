@@ -117,9 +117,11 @@ class IrActionsReport(models.Model):
             [
                 {
                     "printer_ids": printer_ids.ids,
+                    "duplex": cached.get("duplex", False),
                 }
             ]
         )
+
         return {
             "name": _("Select Printers for %s", self.name),
             "res_id": wizard.id,
@@ -129,8 +131,12 @@ class IrActionsReport(models.Model):
             "views": [[False, "form"]],
             "context": {
                 "report_id": self.id,
+                "report_name": self.report_name,
                 # make printer info available to wizard without doing another RPC call
-                "printer_ids": self.printer_ids.read(["id", "ip_address", "type"]),
+                "printer_ids": self.printer_ids.read(self.load_printer_fields()),
                 "available_printer_ids": self.printer_ids.ids,
             },
         }
+
+    def load_printer_fields(self):
+        return ["id", "ip_address", "type", "use_lna"]
