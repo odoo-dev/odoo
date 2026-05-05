@@ -86,7 +86,8 @@ export class AttachmentList extends Component {
      */
     onClickUnlink(attachment) {
         if (this.env.inComposer) {
-            return this.props.unlinkAttachment(attachment);
+            this.props.unlinkAttachment(attachment);
+            return;
         }
         this.dialog.add(ConfirmationDialog, {
             title: _t("Delete Attachment"),

@@ -170,6 +170,7 @@ export class Message extends Record {
             if (this.needaction) {
                 return this.thread;
             }
+            return undefined;
         },
     });
     threadAsNewest = fields.One("mail.thread");
@@ -178,6 +179,7 @@ export class Message extends Record {
             if (this.composer) {
                 return this.thread;
             }
+            return undefined;
         },
     });
     threadAsPinned = fields.One("mail.thread", {

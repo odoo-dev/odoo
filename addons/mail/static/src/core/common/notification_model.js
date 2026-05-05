@@ -23,7 +23,7 @@ export class Notification extends Record {
         compute() {
             const thread = this.mail_message_id?.thread;
             if (!this.mail_message_id?.isSelfAuthored) {
-                return;
+                return undefined;
             }
             const failure = Object.values(this.store.Failure.records).find(
                 (f) =>
