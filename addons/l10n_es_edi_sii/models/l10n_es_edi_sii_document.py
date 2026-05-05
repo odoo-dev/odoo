@@ -2,6 +2,8 @@ import base64
 import json
 import requests
 
+from markupsafe import Markup
+
 from odoo import api, models, fields
 from odoo.tools import zeep
 from odoo.addons.certificate.tools import CertificateAdapter
@@ -150,7 +152,18 @@ class L10nEsEdiSiiDocument(models.Model):
         for move in batch_moves:
             errors = move._l10n_es_sii_check_move_configuration()
             if errors:
-                move.message_post(body=self.env._("SII Configuration Error: %s") % "\n".join(errors))
+                document = move.l10n_es_edi_sii_document_ids.filtered(lambda d: d.state == target_state)[:1]
+                if not document:
+                    document = self.env['l10n_es_edi_sii.document'].sudo().create({
+                        'move_id': move.id,
+                        'state': target_state,
+                    })
+                document.sudo().write({
+                    'response_message': Markup("%s<br/>%s") % (
+                        self.env._("Invalid invoice configuration:"),
+                        Markup("<br/>").join(errors),
+                    )
+                })
                 continue
             move_payloads[move] = move._l10n_es_edi_get_invoices_info()[0]
 
@@ -161,8 +174,7 @@ class L10nEsEdiSiiDocument(models.Model):
         connection_vals = self._get_agency_urls(company, is_sale)
 
         if not connection_vals:
-            for move in move_payloads:
-                move.message_post(body=self.env._("SII Error: Unknown tax agency."))
+            self._handle_batch_error(move_payloads, header, self.env._("SII Error: Unknown tax agency."))
             return
 
         try:
@@ -224,16 +236,13 @@ class L10nEsEdiSiiDocument(models.Model):
     @api.model
     def _create_batch_attachment(self, move_payloads, header):
         """ Make ONE attachment for all of the documents in the batch """
-        try:
-            frozen_payloads = [payload for payload in move_payloads.values()]
-            full_payload = json.dumps({'Cabecera': header, 'Cuerpo': frozen_payloads}, indent=4)
-            return self.env['ir.attachment'].sudo().create({
-                'name': f"sii_batch_payload_{fields.Datetime.now().strftime('%Y%m%d%H%M%S')}.json",
-                'raw': full_payload.encode('utf-8'),
-                'mimetype': 'application/json',
-            })
-        except Exception:
-            return False
+        frozen_payloads = list(move_payloads.values())
+        full_payload = json.dumps({'Cabecera': header, 'Cuerpo': frozen_payloads}, indent=4)
+        return self.env['ir.attachment'].sudo().create({
+            'name': 'jsondump.json',
+            'raw': full_payload.encode('utf-8'),
+            'mimetype': 'application/json',
+        })
 
     @api.model
     def _process_batch_response(self, move_payloads, res, target_state, header):
@@ -257,8 +266,8 @@ class L10nEsEdiSiiDocument(models.Model):
         for move, line_resp in zip(move_payloads.keys(), resp_lineas):
             line_dict = dict(line_resp)
             estado = line_dict.get('EstadoRegistro', 'Desconocido')
-            err_code = line_dict.get('CodigoErrorRegistro', '')
-            err_desc = line_dict.get('DescripcionErrorRegistro', 'Unknown Error')
+            err_code = line_dict.get('CodigoErrorRegistro')
+            err_desc = line_dict.get('DescripcionErrorRegistro') or self.env._('Unknown Error')
 
             if err_code == 1117 and not self.env.context.get('error_1117'):
                 move.with_context(error_1117=True)._send_l10n_es_sii_document(cancel=target_state == 'to_cancel')

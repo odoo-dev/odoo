@@ -6,6 +6,8 @@ from odoo import api, fields, models, tools
 from odoo.exceptions import LockError, UserError
 from odoo.tools.float_utils import float_round
 
+SII_BATCH_SIZE = 10000
+
 
 class AccountMove(models.Model):
     _inherit = 'account.move'
@@ -36,6 +38,7 @@ class AccountMove(models.Model):
         ],
         string="Spain SII Status",
         compute='_compute_l10n_es_edi_sii_data',
+        search='_search_l10n_es_edi_sii_state',
     )
     l10n_es_edi_csv = fields.Char(
         string="CSV",
@@ -91,6 +94,54 @@ class AccountMove(models.Model):
                 and move.company_id.l10n_es_sii_tax_agency
                 and has_tax
             )
+
+    def _search_l10n_es_edi_sii_state(self, operator, value):
+        """Return a domain equivalent to the computed sii_state field.
+
+        The state is driven by the *latest* SII document per move (mirroring
+        _compute_l10n_es_edi_sii_data), so a flat ORM domain is insufficient —
+        we compute matching IDs via SQL.
+        """
+        if operator not in ('=', '!=') or value not in ('to_send', 'sent', 'cancelled'):
+            raise NotImplementedError()
+
+        # Mirror _compute_l10n_es_edi_sii_data:
+        # - 'sent'      : latest doc accepted/accepted_with_errors,
+        #                 OR latest doc is to_send/to_cancel AND an accepted doc exists
+        # - 'cancelled' : latest doc is cancelled  (even if older accepted docs exist)
+        # - 'to_send'   : no docs, OR latest doc is to_send/to_cancel AND no accepted doc
+        self.env.cr.execute("""
+            SELECT am.id
+              FROM account_move am
+              LEFT JOIN LATERAL (
+                  SELECT d.state
+                    FROM l10n_es_edi_sii_document d
+                   WHERE d.move_id = am.id
+                   ORDER BY d.create_date DESC, d.id DESC
+                   LIMIT 1
+              ) latest ON TRUE
+              LEFT JOIN LATERAL (
+                  SELECT 1 AS found
+                    FROM l10n_es_edi_sii_document d
+                   WHERE d.move_id = am.id
+                     AND d.state IN ('accepted', 'accepted_with_errors')
+                   LIMIT 1
+              ) accepted ON TRUE
+             WHERE am.company_id IN (
+                   SELECT id FROM res_company WHERE l10n_es_sii_tax_agency IS NOT NULL
+             )
+               AND CASE
+                   WHEN latest.state IS NULL                               THEN 'to_send'
+                   WHEN latest.state IN ('accepted', 'accepted_with_errors') THEN 'sent'
+                   WHEN latest.state = 'cancelled'                         THEN 'cancelled'
+                   WHEN accepted.found IS NOT NULL                         THEN 'sent'
+                   ELSE 'to_send'
+               END = %(value)s
+        """, {'value': value})
+        move_ids = [row[0] for row in self.env.cr.fetchall()]
+        if operator == '!=':
+            return [('id', 'not in', move_ids)]
+        return [('id', 'in', move_ids)]
 
     @api.depends('l10n_es_edi_is_required', 'l10n_es_edi_sii_state')
     def _compute_need_cancel_request(self):
@@ -153,8 +204,8 @@ class AccountMove(models.Model):
         batches = moves_to_process.grouped(lambda m: (m.company_id, m.is_sale_document(), bool(m.l10n_es_edi_csv)))
 
         for batch_moves in batches.values():
-            for i in range(0, len(batch_moves), 10000):
-                chunk = batch_moves[i:i+10000]
+            for i in range(0, len(batch_moves), SII_BATCH_SIZE):
+                chunk = batch_moves[i:i + SII_BATCH_SIZE]
                 self.env['l10n_es_edi_sii.document']._send_batch_to_sii(chunk)
 
                 if not tools.config['test_enable']:
