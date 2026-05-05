@@ -40,7 +40,7 @@
         gap: 5px;
 
         &:after {
-            content: "arrow_drop_down";
+                content: "\E019"; // arrow_drop_down PUA codepoint (see icons_pua.scss)
             font-family: 'material_symbols_outlined';
             display: inline-block;
             margin-left: auto;

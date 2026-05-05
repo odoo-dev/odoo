@@ -239,6 +239,8 @@
             "website/static/src/mail/core/common/**/*",
         ],
         'web.assets_frontend': [
+            # Sharp style via the website editor (--icon-font-family CSS var).
+            ('include', 'web.material_symbols_sharp'),
             'html_builder/static/src/utils/scrolling.js',
             'website/static/src/interactions/**/*',
             'website/static/src/core/**/*',

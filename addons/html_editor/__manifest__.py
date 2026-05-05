@@ -9,7 +9,7 @@ This addon provides an extensible, maintainable editor.
 
     'author': 'Odoo S.A.',
     'category': 'Hidden',
-    'depends': ['base', 'bus', 'web'],
+    'depends': ['base', 'bus', 'web', 'web_icons'],
     'data': [
         'security/ir.model.access.csv',
     ],
@@ -59,6 +59,9 @@ This addon provides an extensible, maintainable editor.
         ],
         'html_editor.assets_media_dialog': [
             # Bundle to use the media dialog in the backend and the frontend
+            ('include', 'web_icons.assets'),
+            # Sharp variant needed for the icon picker (website editor font toggle)
+            ('include', 'web.material_symbols_sharp'),
             'html_editor/static/src/components/switch/**/*',
             'html_editor/static/src/main/media/media_dialog/**/*',
         ],
