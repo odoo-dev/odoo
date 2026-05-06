@@ -726,21 +726,28 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 for pa in product_template.attribute_line_ids.attribute_id
             )
         )
+        variant_media_values = (
+            {
+                "attribute_value_ids": [
+                    Command.set(product_product.product_template_attribute_value_ids.ids)
+                ]
+            }
+            if is_variant_media
+            else {}
+        )
+
         if type == "image":  # Image case
             image_ids = request.env["ir.attachment"].browse(i["id"] for i in media)
-            media_create_data = []
-            for image in image_ids:
-                media_create_values = {
+            media_create_data = [
+                Command.create({
                     "name": image.name,  # Images uploaded from url do not have any datas.
-                    # This recovers them manually
+                    # This recovers them manually.
                     "image_1920": image.raw
                     or request.env["ir.qweb.field.image"].load_remote_url(image.url),
-                }
-                if is_variant_media:
-                    media_create_values["attribute_value_ids"] = [
-                        Command.set(product_product.product_template_attribute_value_ids.ids)
-                    ]
-                media_create_data.append(Command.create(media_create_values))
+                    **variant_media_values,
+                })
+                for image in image_ids
+            ]
         elif type == "video":  # Video case
             video_data = media[0]
             thumbnail = None
@@ -750,51 +757,17 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 except Exception:  # noqa: BLE001
                     thumbnail = None
             else:
-                raise ValidationError(self.env._("Invalid video URL provided."))
+                raise ValidationError(_("Invalid video URL provided."))
             media_create_data = [
                 Command.create({
                     "name": video_data.get("name", "Odoo Video"),
                     "video_url": video_data["src"],
                     "image_1920": thumbnail,
+                    **variant_media_values,
                 })
             ]
 
         product_template.write({"product_template_image_ids": media_create_data})
-
-    @route(["/shop/product/clear-images"], type="jsonrpc", auth="user", website=True)
-    def clear_product_images(self, product_product_id, product_template_id):
-        """Unlink all images from the product."""
-        if not request.env.user.has_group("website.group_website_restricted_editor"):
-            raise NotFound
-
-        product_product = (
-            request.env["product.product"].browse(int(product_product_id))
-            if product_product_id
-            else False
-        )
-        product_template = (
-            request.env["product.template"].browse(int(product_template_id))
-            if product_template_id
-            else False
-        )
-
-        if product_product and not product_template:
-            product_template = product_product.product_tmpl_id
-
-        product_variant_images = (
-            product_template.product_template_image_ids.filtered(
-                lambda img: product_product in img.product_variant_ids and img.attribute_value_ids
-            )
-            if product_product
-            else False
-        )
-
-        if product_product and product_variant_images:
-            product_variant_images.unlink()
-        else:
-            product_template.product_template_image_ids.filtered(
-                lambda img: not img.attribute_value_ids
-            ).unlink()
 
     @route(["/shop/product/resequence-image"], type="jsonrpc", auth="user", website=True)
     def resequence_product_image(self, image_res_model, image_res_id, move, product_variant_id):

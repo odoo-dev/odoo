@@ -63,7 +63,11 @@ class ProductProduct(models.Model):
                 ("product_id", "in", self.ids),
                 ("order_id", "any", [("website_id", "!=", False)]),
             ]).unlink()
-        return super().write(vals)
+        res = super().write(vals)
+        if "image_1920" in vals and not vals["image_1920"] and self.is_main_image_manually_set:
+            self.is_main_image_manually_set = False
+            self.product_tmpl_id._set_main_image_from_extra_images(self)
+        return res
 
     # === BUSINESS METHODS ===#
 

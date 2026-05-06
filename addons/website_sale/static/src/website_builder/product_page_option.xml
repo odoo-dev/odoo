@@ -116,7 +116,6 @@
     <t t-if="this.domState.hasImages and !this.isActiveItem('opt_product_page_image_width_hide')">
 	    <BuilderRow label.translate="Extra Media">
 	        <BuilderButton id="'o_wsale_add_extra_images'" type="'success'" action="'productAddExtraImage'">Add More</BuilderButton>
-	        <BuilderButton id="'o_wsale_clear_extra_images'" type="'danger'" action="'productRemoveAllExtraImages'">Remove All</BuilderButton>
 	    </BuilderRow>
         <div class="pb-2"/> <!-- Spacer -->
     </t>

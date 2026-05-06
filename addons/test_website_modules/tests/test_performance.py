@@ -111,9 +111,15 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             'sale_ok': True,
             'website_published': True,
         })
-        cls.product_images = cls.env['product.image'].with_context(default_product_tmpl_id=cls.productC.product_tmpl_id.id).create([{
+        cls.product_images = cls.env['product.image'].create([{
             'name': 'Template image',
+            'image_1920': blue_image,
+            'product_tmpl_id': cls.productC.product_tmpl_id.id,
+        }, {
+            'name': 'Variant image',
             'image_1920': red_image,
+            'product_variant_ids': [Command.link(cls.productC.id)],
+            'product_tmpl_id': cls.productC.product_tmpl_id.id,
         }])
 
         for i in range(20):
@@ -139,12 +145,14 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             images = [{
                 'name': 'Template image',
                 'image_1920': blue_image,
+                'product_tmpl_id': template.id,
             }]
             if i % 2:
                 images.append({
                     'name': 'Variant image',
                     'image_1920': red_image,
                     'product_variant_ids': [Command.link(variant.id)],
+                    'product_tmpl_id': template.id,
                 })
             cls.env['product.image'].create(images)
 
@@ -286,9 +294,9 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
         html = self.url_open('/shop').text
         self.assertIn(f'<img src="/web/image/product.template/{self.productC.product_tmpl_id.id}/', html)
         self.assertIn(f'<img src="/web/image/product.template/{self.productA.product_tmpl_id.id}/', html)
-        self.assertIn(f'<img src="/web/image/product.image/{self.product_images.ids[0]}/', html)
+        self.assertIn(f'<img src="/web/image/product.image/{self.product_images.ids[1]}/', html)
 
-        query_count = 40  # To increase this number you must ask the permission to al
+        query_count = 37  # To increase this number you must ask the permission to al
         queries = {
             'website': 1,
             'res_company': 2,
@@ -308,9 +316,8 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             'product_ribbon': 1,
             'product_attribute_value': 3,
             'product_attribute': 1,
-            'ir_attachment': 4,
+            'ir_attachment': 2,
             'product_image': 2,
-            'product_template_attribute_value': 1,
             'ir_ui_view': 2,
             'website_menu': 1,
             'website_page': 1,
@@ -350,12 +357,11 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
         query_count, queries = self._get_queries_shop()
 
         if self._has_demo_data():
-            query_count += 2
+            query_count += 3
             queries['account_tax'] += 1
             queries['account_account_tag'] += 1
-            queries['ir_attachment'] += -1
             queries['product_ribbon'] += -1
-            queries['product_template_attribute_value'] += 2
+            queries['product_template_attribute_value'] = 2
 
         self.assertEqual(sum(queries.values()), query_count, 'Please learn to count.')
         self._check_url_hot_query('/shop', query_count, queries)
@@ -377,9 +383,8 @@ class TestWebsiteAllPerformanceShop(TestWebsiteAllPerformance):
             queries['uom_uom'] += 1
 
         if self._has_demo_data():
-            query_count += 1
-            queries['ir_attachment'] += -1
-            queries['product_template_attribute_value'] += 2
+            query_count += 2
+            queries['product_template_attribute_value'] = 2
 
         self.assertEqual(sum(queries.values()), query_count, 'Please learn to count.')
         self._check_url_hot_query('/shop', query_count, queries)
