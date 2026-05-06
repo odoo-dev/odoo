@@ -12,7 +12,7 @@ import { useTagNavigation } from "@web/core/record_selectors/tag_navigation_hook
 import { uniqueId } from "@web/core/utils/functions";
 import { RecipientTag, useRecipientChecker } from "./recipient_tag";
 
-import { Component, computed } from "@odoo/owl";
+import { Component, computed, props, types as t } from "@odoo/owl";
 
 /**
  * @typedef {Object} Props
@@ -22,9 +22,11 @@ import { Component, computed } from "@odoo/owl";
 export class RecipientsInput extends Component {
     static template = "mail.RecipientsInput";
     static components = { AutoComplete, RecipientTag, BadgeTag };
-    static props = {
-        thread: { type: Object },
-    };
+    props = props({
+        thread: t.object(),
+        recipientType: t.string(),
+        placeholder: t.string(),
+    });
 
     setup() {
         this.orm = useService("orm");
@@ -223,11 +225,8 @@ export class RecipientsInput extends Component {
                 bus: this.recipientCheckerBus,
             });
         };
-        for (const recipient of this.props.thread.suggestedRecipients) {
+        for (const recipient of this.getAllMailThreadRecipients()) {
             createTagForRecipient(recipient, "suggestedRecipients");
-        }
-        for (const recipient of this.props.thread.additionalRecipients) {
-            createTagForRecipient(recipient, "additionalRecipients");
         }
         return tags;
     }
@@ -237,7 +236,7 @@ export class RecipientsInput extends Component {
         return [
             ...this.props.thread.suggestedRecipients,
             ...this.props.thread.additionalRecipients,
-        ];
+        ].filter((r) => r.recipient_type === this.props.recipientType);
     }
 
     /**
@@ -260,14 +259,14 @@ export class RecipientsInput extends Component {
 
     /** @param {SuggestedRecipient} recipient */
     insertAdditionalRecipient(recipient) {
-        this.props.thread.additionalRecipients.push(recipient);
+        this.props.thread.additionalRecipients.push({
+            ...recipient,
+            recipient_type: this.props.recipientType,
+        });
     }
 
     /** @returns {string} */
     getPlaceholder() {
-        const hasRecipients =
-            this.props.thread.suggestedRecipients.length ||
-            this.props.thread.additionalRecipients.length;
-        return hasRecipients ? "" : _t("Followers only");
+        return this.getAllMailThreadRecipients().length ? "" : this.props.placeholder;
     }
 }

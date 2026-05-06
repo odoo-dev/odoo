@@ -1004,6 +1004,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
             'name': 'only.email.1@test.example.com',
             'partner_id': new_partner.id,
             'create_values': {},
+            'recipient_type': 'to',
         })
 
     @users('employee')
@@ -1671,6 +1672,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "model": "mail.test.simple",
                                     "needaction": True,
                                     "notification_ids": [notif_1.id, notif_2.id],
+                                    "partner_cc_ids": [],
                                     "partner_ids": [],
                                     "pinned_at": False,
                                     "rating_id": False,
@@ -1788,6 +1790,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "model": "mail.test.simple",
                                     "needaction": True,
                                     "notification_ids": [notif_1.id, notif_2.id],
+                                    "partner_cc_ids": [],
                                     "partner_ids": [],
                                     "pinned_at": False,
                                     "rating_id": False,
