@@ -1,0 +1,4 @@
+"id","name","auto_apply","sequence","country_id","country_group_id","vat_required"
+"ge_fiscal_position_vat","Georgia (VAT Registered)","1","10","base.ge","","1"
+"ge_fiscal_position_nonvat","Georgia (non-VAT Registered)","1","20","base.ge","","0"
+"ge_fiscal_position_foreign","Non-Georgia","1","30","","","0"

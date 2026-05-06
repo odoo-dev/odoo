@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <record id="account_report_ge_wht" model="account.report">
+        <field name="name">Withholding Tax Report</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.ge"/>
+        <field name="availability_condition">country</field>
+        <field name="column_ids">
+            <record id="account_report_ge_wht_col_base" model="account.report.column">
+                <field name="name">Base</field>
+                <field name="expression_label">base</field>
+            </record>
+            <record id="account_report_ge_wht_col_tax" model="account.report.column">
+                <field name="name">Tax</field>
+                <field name="expression_label">tax</field>
+            </record>
+        </field>
+
+        <field name="line_ids">
+            <record id="account_report_ge_wht_root" model="account.report.line">
+                <field name="name">Withholding Tax Report</field>
+                <field name="children_ids">
+                    <record id="account_report_ge_wht_line1_insurance" model="account.report.line">
+                        <field name="name">1. 0% Insurance &amp; Re-insurance</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="code">ge_1w</field>
+                        <field name="expression_ids">
+                            <record id="account_report_ge_wht_line1_insurance_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">1(B)_W</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="account_report_ge_wht_line2_oil_gas" model="account.report.line">
+                        <field name="name">2. 4% Oil &amp; Gas subcontractor income</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="code">ge_2w</field>
+                        <field name="expression_ids">
+                            <record id="account_report_ge_wht_line2_oil_gas_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_2w_g.base + ge_2w_d.base</field>
+                            </record>
+                            <record id="account_report_ge_wht_line2_oil_gas_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_2w_g.tax + ge_2w_d.tax</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="account_report_ge_wht_line2_oil_gas_gross" model="account.report.line">
+                                <field name="name">Gross</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_2w_g</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line2_oil_gas_gross_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">2(B)_W_G</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line2_oil_gas_gross_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-2(T)_W_G</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_report_ge_wht_line2_oil_gas_deducted" model="account.report.line">
+                                <field name="name">Deducted</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_2w_d</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line2_oil_gas_deducted_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">2(B)_W_D</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line2_oil_gas_deducted_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-2(T)_W_D</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="account_report_ge_wht_line3_dividends" model="account.report.line">
+                        <field name="name">3. 5% Dividends</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="code">ge_3w</field>
+                        <field name="expression_ids">
+                            <record id="account_report_ge_wht_line3_dividends_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_3w_g.base + ge_3w_d.base</field>
+                            </record>
+                            <record id="account_report_ge_wht_line3_dividends_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_3w_g.tax + ge_3w_d.tax</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="account_report_ge_wht_line3_dividends_gross" model="account.report.line">
+                                <field name="name">Gross</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_3w_g</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line3_dividends_gross_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">3(B)_W_G</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line3_dividends_gross_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-3(T)_W_G</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_report_ge_wht_line3_dividends_deducted" model="account.report.line">
+                                <field name="name">Deducted</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_3w_d</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line3_dividends_deducted_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">3(B)_W_D</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line3_dividends_deducted_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-3(T)_W_D</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="account_report_ge_wht_line4_interest" model="account.report.line">
+                        <field name="name">4. 5% Interest</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="code">ge_4w</field>
+                        <field name="expression_ids">
+                            <record id="account_report_ge_wht_line4_interest_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_4w_g.base + ge_4w_d.base</field>
+                            </record>
+                            <record id="account_report_ge_wht_line4_interest_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_4w_g.tax + ge_4w_d.tax</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="account_report_ge_wht_line4_interest_gross" model="account.report.line">
+                                <field name="name">Gross</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_4w_g</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line4_interest_gross_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">4(B)_W_G</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line4_interest_gross_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-4(T)_W_G</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_report_ge_wht_line4_interest_deducted" model="account.report.line">
+                                <field name="name">Deducted</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_4w_d</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line4_interest_deducted_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">4(B)_W_D</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line4_interest_deducted_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-4(T)_W_D</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="account_report_ge_wht_line5_royalties" model="account.report.line">
+                        <field name="name">5. 5% Royalties</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="code">ge_5w</field>
+                        <field name="expression_ids">
+                            <record id="account_report_ge_wht_line5_royalties_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_5w_g.base + ge_5w_d.base</field>
+                            </record>
+                            <record id="account_report_ge_wht_line5_royalties_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_5w_g.tax + ge_5w_d.tax</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="account_report_ge_wht_line5_royalties_gross" model="account.report.line">
+                                <field name="name">Gross</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_5w_g</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line5_royalties_gross_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">5(B)_W_G</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line5_royalties_gross_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-5(T)_W_G</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_report_ge_wht_line5_royalties_deducted" model="account.report.line">
+                                <field name="name">Deducted</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_5w_d</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line5_royalties_deducted_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">5(B)_W_D</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line5_royalties_deducted_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-5(T)_W_D</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="account_report_ge_wht_line6_intl_transport" model="account.report.line">
+                        <field name="name">6. 10% International transportation/communication</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="code">ge_6w</field>
+                        <field name="expression_ids">
+                            <record id="account_report_ge_wht_line6_intl_transport_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_6w_g.base + ge_6w_d.base</field>
+                            </record>
+                            <record id="account_report_ge_wht_line6_intl_transport_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_6w_g.tax + ge_6w_d.tax</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="account_report_ge_wht_line6_intl_transport_gross" model="account.report.line">
+                                <field name="name">Gross</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_6w_g</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line6_intl_transport_gross_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">6(B)_W_G</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line6_intl_transport_gross_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-6(T)_W_G</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_report_ge_wht_line6_intl_transport_deducted" model="account.report.line">
+                                <field name="name">Deducted</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_6w_d</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line6_intl_transport_deducted_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">6(B)_W_D</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line6_intl_transport_deducted_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-6(T)_W_D</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="account_report_ge_wht_line7_services_ge" model="account.report.line">
+                        <field name="name">7. 10% Income from services rendered in Georgia</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="code">ge_7w</field>
+                        <field name="expression_ids">
+                            <record id="account_report_ge_wht_line7_services_ge_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_7w_g.base + ge_7w_d.base</field>
+                            </record>
+                            <record id="account_report_ge_wht_line7_services_ge_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_7w_g.tax + ge_7w_d.tax</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="account_report_ge_wht_line7_services_ge_gross" model="account.report.line">
+                                <field name="name">Gross</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_7w_g</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line7_services_ge_gross_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">7(B)_W_G</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line7_services_ge_gross_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-7(T)_W_G</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_report_ge_wht_line7_services_ge_deducted" model="account.report.line">
+                                <field name="name">Deducted</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_7w_d</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line7_services_ge_deducted_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">7(B)_W_D</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line7_services_ge_deducted_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-7(T)_W_D</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="account_report_ge_wht_line8_other_income" model="account.report.line">
+                        <field name="name">8. 10% Other Georgian-source income</field>
+                        <field name="hierarchy_level">1</field>
+                        <field name="code">ge_8w</field>
+                        <field name="expression_ids">
+                            <record id="account_report_ge_wht_line8_other_income_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_8w_g.base + ge_8w_d.base</field>
+                            </record>
+                            <record id="account_report_ge_wht_line8_other_income_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_8w_g.tax + ge_8w_d.tax</field>
+                            </record>
+                        </field>
+                        <field name="children_ids">
+                            <record id="account_report_ge_wht_line8_other_income_gross" model="account.report.line">
+                                <field name="name">Gross</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_8w_g</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line8_other_income_gross_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">8(B)_W_G</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line8_other_income_gross_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-8(T)_W_G</field>
+                                    </record>
+                                </field>
+                            </record>
+                            <record id="account_report_ge_wht_line8_other_income_deducted" model="account.report.line">
+                                <field name="name">Deducted</field>
+                                <field name="hierarchy_level">2</field>
+                                <field name="code">ge_8w_d</field>
+                                <field name="expression_ids">
+                                    <record id="account_report_ge_wht_line8_other_income_deducted_base" model="account.report.expression">
+                                        <field name="label">base</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">8(B)_W_D</field>
+                                    </record>
+                                    <record id="account_report_ge_wht_line8_other_income_deducted_tax" model="account.report.expression">
+                                        <field name="label">tax</field>
+                                        <field name="engine">tax_tags</field>
+                                        <field name="formula">-8(T)_W_D</field>
+                                    </record>
+                                </field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="account_report_ge_wht_line_totals" model="account.report.line">
+                        <field name="name">Totals</field>
+                        <field name="hierarchy_level">0</field>
+                        <field name="code">ge_9w</field>
+                        <field name="expression_ids">
+                            <record id="account_report_ge_wht_line_totals_base" model="account.report.expression">
+                                <field name="label">base</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_1w.base + ge_2w.base + ge_3w.base + ge_4w.base + ge_5w.base + ge_6w.base + ge_7w.base + ge_8w.base</field>
+                            </record>
+                            <record id="account_report_ge_wht_line_totals_tax" model="account.report.expression">
+                                <field name="label">tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">ge_2w.tax + ge_3w.tax + ge_4w.tax + ge_5w.tax + ge_6w.tax + ge_7w.tax + ge_8w.tax</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>

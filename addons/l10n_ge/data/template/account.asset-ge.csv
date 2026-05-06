@@ -1,0 +1,15 @@
+id,name,account_asset_id,account_depreciation_id,account_depreciation_expense_id,method,method_number,method_period,prorata_computation_type
+ge_asset_buildings,Buildings & Construction,ge_account_211210,ge_account_221210,ge_account_771210,linear,20,12,none
+ge_asset_machinery,Machinery and Equipment,ge_account_211310,ge_account_221310,ge_account_771310,linear,10,12,none
+ge_asset_office_equipment,Office Equipment,ge_account_211410,ge_account_221410,ge_account_771410,linear,5,12,none
+ge_asset_furniture,Furniture and Fixtures,ge_account_211420,ge_account_221420,ge_account_771420,linear,5,12,none
+ge_asset_vehicles,Vehicles,ge_account_211510,ge_account_221510,ge_account_771510,linear,5,12,none
+ge_asset_leasehold,Leasehold Improvements,ge_account_212610,ge_account_222610,ge_account_772610,linear,5,12,none
+ge_asset_rou,Right of Use Asset (IFRS 16),ge_account_213810,ge_account_223810,ge_account_773810,linear,3,12,none
+ge_asset_other_ppe,Other Fixed Assets,ge_account_216990,ge_account_225990,ge_account_775990,linear,5,12,none
+ge_asset_licenses,Licenses,ge_account_256110,ge_account_266110,ge_account_776110,linear,3,12,none
+ge_asset_software,Computer Software,ge_account_256210,ge_account_266210,ge_account_776210,linear,3,12,none
+ge_asset_franchises,Franchises,ge_account_256310,ge_account_266310,ge_account_776310,linear,5,12,none
+ge_asset_patents,Patents,ge_account_256410,ge_account_266410,ge_account_776410,linear,10,12,none
+ge_asset_goodwill,Goodwill,ge_account_256510,ge_account_266510,ge_account_776510,linear,10,12,none
+ge_asset_other_intangibles,Other Intangible Assets,ge_account_256990,ge_account_266990,ge_account_776990,linear,5,12,none
