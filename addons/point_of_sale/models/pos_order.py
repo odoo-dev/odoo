@@ -1143,21 +1143,39 @@ class PosOrder(models.Model):
     #                 Accounting related methods                 #
     ##############################################################
     def _grouping_function(self, base_line):
-        AccountTax = self.env['account.tax']
         use_product = self.config_id.use_closing_entry_by_product
         product_id = base_line['product_id']
-        # AccountTax._prepare_base_line_grouping_key includes partner_id, which
-        # would split revenue lines per customer.  Revenue lines must aggregate
-        # across ALL partners; only payment lines are per-partner.
-        tax_key = AccountTax._prepare_base_line_grouping_key(base_line)
-        tax_key_no_partner = frozendict({
-            k: v for k, v in tax_key.items() if k != 'partner_id'
-        })
         return frozendict({
             'account_id': base_line['account_id'],
             'product_id': product_id if use_product else False,
-            '_grouping_key': tax_key_no_partner,
+            'tax_ids': base_line['tax_ids'],
         })
+
+    def _prepare_move_line_vals_from_base_line(self, base_line):
+        product = base_line['product_id']
+        name = product.display_name if product else _("PoS Miscellaneous")
+        product_id = product.id if product else False
+
+        if self.config_id._is_quantities_set():
+            quantity = base_line['_aggregated_quantity']
+            price_unit = base_line['price_unit'] / quantity if quantity else base_line['price_unit']
+        else:
+            quantity, price_unit = 1.0, base_line['price_unit']
+
+        line_vals = {
+            'name': name,
+            'quantity': quantity,
+            'price_unit': price_unit,
+            'display_type': 'product',
+            'extra_tax_data': self.env['account.tax']._export_base_line_extra_tax_data(base_line),
+            # **base_line['_grouping_key'],
+            'account_id': base_line['account_id'].id,
+            'tax_ids': [(6, 0, base_line['tax_ids'].ids)],
+        }
+        if self.config_id.use_closing_entry_by_product:
+            line_vals['product_id'] = product_id
+
+        return line_vals
 
     def _aggregate_base_line_and_prepare_account_move_line_data(self, base_lines):
         def aggregate_function(target_base_line, base_line):
@@ -1177,26 +1195,8 @@ class PosOrder(models.Model):
         )
         to_create = []
         for base_line in aggregated:
-            product = base_line['product_id']
-            name = product.display_name if product else _("PoS Miscellaneous")
-            product_id = product.id if product else False
-
-            if self.config_id._is_quantities_set():
-                quantity = base_line['_aggregated_quantity']
-                price_unit = base_line['price_unit'] / quantity if quantity else base_line['price_unit']
-            else:
-                quantity, price_unit = 1.0, base_line['price_unit']
-
             to_create.append({
-                'account.move.line': {
-                    'name': name,
-                    'product_id': product_id,
-                    'quantity': quantity,
-                    'price_unit': price_unit,
-                    'display_type': 'product',
-                    'extra_tax_data': AccountTax._export_base_line_extra_tax_data(base_line),
-                    **base_line['_grouping_key'],
-                },
+                'account.move.line': self._prepare_move_line_vals_from_base_line(base_line),
                 'metadata': {
                     'base_line': base_line,
                 },
