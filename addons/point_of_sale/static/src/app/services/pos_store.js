@@ -176,8 +176,7 @@ export class PosStore extends WithLazyGetterTrap {
         }
 
         window.addEventListener("pos-network-online", () => {
-            // Sync should be done before websocket connection when going online
-            this.syncAllOrdersDebounced();
+            this.posBackOnline();
         });
 
         this.handleQRPaymentLines();
@@ -244,6 +243,11 @@ export class PosStore extends WithLazyGetterTrap {
                 payment.setPaymentStatus("retry");
             }
         });
+    }
+
+    async posBackOnline() {
+        // Sync should be done before websocket connection when going online
+        this.syncAllOrdersDebounced();
     }
 
     async searchProductsFromDB() {
@@ -417,6 +421,10 @@ export class PosStore extends WithLazyGetterTrap {
 
         this.cashier = user;
         this._storeConnectedCashier(user);
+    }
+
+    canLoginCashier(user) {
+        return Boolean(user);
     }
 
     _getConnectedCashier() {
@@ -1618,6 +1626,7 @@ export class PosStore extends WithLazyGetterTrap {
         for (const order of orders) {
             order.setOrderPrices();
         }
+        return orders;
     }
 
     async postSyncAllOrders(orders) {}
@@ -1658,7 +1667,10 @@ export class PosStore extends WithLazyGetterTrap {
 
         for (const order of orders) {
             const context = this.getSyncAllOrdersContext([order], options);
-            await this.preSyncAllOrders([order]);
+            const preSyncOrder = await this.preSyncAllOrders([order]);
+            if (!preSyncOrder) {
+                continue;
+            }
             this.syncingOrders.add(order.uuid);
 
             try {
@@ -2157,7 +2169,7 @@ export class PosStore extends WithLazyGetterTrap {
         });
     }
     async closePos() {
-        this._resetConnectedCashier();
+        this.resetCashier();
         // If pos is not properly loaded, we just go back to /web without
         // doing anything in the order data.
         if (!this) {
