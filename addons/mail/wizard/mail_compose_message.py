@@ -171,10 +171,16 @@ class MailComposeMessage(models.TransientModel):
         string='Replies', compute='_compute_reply_to_mode', inverse='_inverse_reply_to_mode',
         help="Original Discussion: Answers go in the original document discussion thread. \n Another Email Address: Answers go to the email address mentioned in the tracking message-id instead of original document discussion thread. \n This has an impact on the generated message-id.")
     # recipients
+    partner_cc_enabled = fields.Boolean('Cc enabled', compute='_compute_partner_cc_enabled',
+                                        store=True, readonly=False)
     partner_ids = fields.Many2many(
         'res.partner', 'mail_compose_message_res_partner_rel',
         'wizard_id', 'partner_id', 'Additional Contacts',
-        compute='_compute_partner_ids', readonly=False, store=True)
+        compute='_compute_recipient_partners', readonly=False, store=True)
+    partner_cc_ids = fields.Many2many(
+        'res.partner', 'mail_compose_message_res_partner_cc_rel',
+        'wizard_id', 'partner_id', 'Additional Cc contacts',
+        compute='_compute_recipient_partners', readonly=False, store=True)
     partner_ids_all_have_email = fields.Boolean(compute="_compute_partner_ids_all_have_email")
     notified_bcc_contains_share = fields.Boolean(
         'Is an external partner follower of the document?',
@@ -214,6 +220,13 @@ class MailComposeMessage(models.TransientModel):
         """ Check res_ids is a valid list of integers (or Falsy). """
         for composer in self:
             composer._evaluate_res_ids()
+
+    @api.constrains('res_ids', 'partner_cc_enabled')
+    def _check_cc_disabled_on_batch(self):
+        """ Check that partner_cc_enabled is disabled in batch. """
+        for composer in self:
+            if len(composer._evaluate_res_ids()) > 1 and composer.partner_cc_enabled:
+                raise ValidationError(_('Cc must be disabled in batch mode.'))
 
     @api.constrains('res_domain')
     def _check_res_domain(self):
@@ -538,9 +551,16 @@ class MailComposeMessage(models.TransientModel):
             if composer.reply_to_mode != 'new':
                 composer.reply_to = False
 
+    @api.depends('partner_cc_ids')
+    def _compute_partner_cc_enabled(self):
+        """ Display the cc field when a cc partner is modified and not empty (ex: when using a template). """
+        for composer in self:
+            if composer.partner_cc_ids:
+                composer.partner_cc_enabled = True
+
     @api.depends('composition_mode', 'model', 'parent_id', 'res_domain',
                  'res_ids', 'subtype_id', 'template_id')
-    def _compute_partner_ids(self):
+    def _compute_recipient_partners(self):
         """ Computation is coming either from template, either from context.
         When having a template it uses its 3 fields 'email_cc', 'email_to' and
         'partner_to', in monorecord comment mode. Emails are converted into
@@ -568,15 +588,18 @@ class MailComposeMessage(models.TransientModel):
                 )[res_ids[0]]
                 if rendered_values.get('partner_ids'):
                     composer.partner_ids = rendered_values['partner_ids']
+                if rendered_values.get('partner_cc_ids'):
+                    composer.partner_cc_ids = rendered_values['partner_cc_ids']
             elif composer.parent_id and composer.composition_mode == 'comment':
                 composer.partner_ids = composer.parent_id.partner_ids
             elif not composer.template_id:
                 composer.partner_ids = False
 
-    @api.depends('partner_ids')
+    @api.depends('partner_ids', 'partner_cc_ids')
     def _compute_partner_ids_all_have_email(self):
         for record in self:
-            record.partner_ids_all_have_email = all(record.partner_ids.mapped('email'))
+            record.partner_ids_all_have_email = (
+                    all(record.partner_ids.mapped('email')) and all(record.partner_cc_ids.mapped('email')))
 
     @api.depends('composition_batch', 'composition_mode', 'message_type',
                  'model', 'res_ids', 'subtype_id')
@@ -1273,7 +1296,9 @@ class MailComposeMessage(models.TransientModel):
             # recipients: transform partner_ids (field used in mail_message) into
             # recipient_ids, used by mail_mail
             if email_mode:
-                recipient_ids_all = set(mail_values.pop('partner_ids', [])) | set(self.partner_ids.ids)
+                partner_ids = set(mail_values.pop('partner_ids', [])) | set(self.partner_ids.ids)
+                partner_cc_ids = set(mail_values.pop('partner_cc_ids', [])) | set(self.partner_cc_ids.ids)
+                recipient_ids_all = partner_ids | partner_cc_ids
                 mail_values['recipient_ids'] = [(4, pid) for pid in recipient_ids_all]
 
             # when having no specific reply_to -> fetch rendered email_from in mailing mode
@@ -1365,6 +1390,7 @@ class MailComposeMessage(models.TransientModel):
                 'body': self.body or '',
                 'email_from': self.email_from,
                 'partner_ids': self.partner_ids.ids,
+                'partner_cc_ids': self.partner_cc_ids.ids,
                 'scheduled_date': self.scheduled_date,
                 'subject': self.subject or '',
                 **(

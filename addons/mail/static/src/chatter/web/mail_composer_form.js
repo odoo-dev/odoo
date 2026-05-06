@@ -80,7 +80,9 @@ export class MailComposerFormRenderer extends formView.Renderer {
         };
 
         onCloseWizardModal(async () => {
-            const selectedPartnerIds = this.props.record.data.partner_ids.currentIds;
+            const partnerCcIds = this.props.record.data.partner_cc_ids.currentIds;
+            const selectedPartnerIds =
+                this.props.record.data.partner_ids.currentIds.concat(partnerCcIds);
             const selectedPartners = await this.orm.searchRead(
                 "res.partner",
                 [["id", "in", selectedPartnerIds]],
@@ -102,6 +104,7 @@ export class MailComposerFormRenderer extends formView.Renderer {
                         lang: partner.lang,
                         name: partner.name,
                         partner_id: partner.id,
+                        recipient_type: partnerCcIds.includes(partner.id) ? "cc" : "to",
                     };
                 }
                 return recipient;
@@ -144,6 +147,7 @@ export class MailComposerFormRenderer extends formView.Renderer {
                             lang: partner.lang,
                             name: partner.name,
                             partner_id: partner.id,
+                            recipient_type: partnerCcIds.includes(partner.id) ? "cc" : "to",
                         });
                     }
                 }

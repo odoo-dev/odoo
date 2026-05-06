@@ -241,6 +241,8 @@ class MailMessage(models.Model):
     # recipients: include inactive partners (they may have been archived after
     # the message was sent, but they should remain visible in the relation)
     partner_ids = fields.Many2many('res.partner', string='Recipients', context={'active_test': False})
+    partner_cc_ids = fields.Many2many('res.partner', relation='mail_message_res_partner_cc_rel',
+                                      string='Recipients Cc', context={'active_test': False})
     # email recipients of incoming emails: comma separated list of emails (not necessarily normalized)
     incoming_email_to = fields.Text('Emails To')
     incoming_email_cc = fields.Char('Emails Cc')
@@ -558,9 +560,9 @@ class MailMessage(models.Model):
         # once we know they are accessible. At the end, the remaining entries
         # are the invalid ones.
         if self:
-            self.flush_recordset(['model', 'res_id', 'author_id', 'create_uid', 'parent_id', 'message_type', 'partner_ids'])
+            self.flush_recordset(['model', 'res_id', 'author_id', 'create_uid', 'parent_id', 'message_type', 'partner_ids', 'partner_cc_ids'])
         else:
-            self.flush_model(['model', 'res_id', 'author_id', 'create_uid', 'parent_id', 'message_type', 'partner_ids'])
+            self.flush_model(['model', 'res_id', 'author_id', 'create_uid', 'parent_id', 'message_type', 'partner_ids', 'partner_cc_ids'])
         self.env['mail.notification'].flush_model(['mail_message_id', 'res_partner_id'])
         pid = self.env.user.partner_id.id
 
@@ -574,12 +576,15 @@ class MailMessage(models.Model):
             # notified: partner_ids or needaction
             query.add_join('LEFT JOIN', 'partner_rel', 'mail_message_res_partner_rel',
                 SQL('partner_rel.mail_message_id = %s AND partner_rel.res_partner_id = %s', id_sql, pid))
+            query.add_join('LEFT JOIN', 'partner_cc_rel', 'mail_message_res_partner_cc_rel',
+                SQL('partner_cc_rel.mail_message_id = %s AND partner_cc_rel.res_partner_id = %s', id_sql, pid))
             query.add_join('LEFT JOIN', 'needaction_rel', 'mail_notification',
                 SQL('needaction_rel.mail_message_id = %s AND needaction_rel.res_partner_id = %s', id_sql, pid))
             query = query.select(*(
                 table[fname]
                 for fname in ('id', 'model', 'res_id', 'author_id', 'parent_id', 'message_type', 'create_uid')
-            ), SQL('bool_or(partner_rel.res_partner_id IS NOT NULL OR needaction_rel.res_partner_id IS NOT NULL) AS notified'))
+            ), SQL('bool_or(partner_rel.res_partner_id IS NOT NULL OR partner_cc_rel.res_partner_id IS NOT NULL '
+                   'OR needaction_rel.res_partner_id IS NOT NULL) AS notified'))
         elif operation in ('create', 'unlink'):
             query = query.select(*(
                 table[fname]
@@ -1172,6 +1177,14 @@ class MailMessage(models.Model):
             sort="id",
             sudo=True,
         )
+        res.many(
+            "partner_cc_ids",
+            lambda res: res.from_method("_store_avatar_fields"),
+            dynamic_fields="_store_partner_name_dynamic_fields",
+            predicate=lambda m: m.model != "discuss.channel",
+            sort="id",
+            sudo=True,
+        )
         res.attr("pinned_at")
         res.from_method("_store_reaction_group_fields")
         res.attr(
@@ -1496,3 +1509,11 @@ class MailMessage(models.Model):
             .with_prefetch(records_by_model_name[message.model]._prefetch_ids)
             for message in self.filtered(lambda m: m.model and m.res_id)
         }
+
+    def _get_all_partner_ids_from_vals(self, msg_vals):
+        """Get values from msg_vals if partner_ids or partner_cc_ids are present otherwise get them from self. """
+        self.ensure_one()
+        msg_vals = msg_vals or {}
+        if 'partner_ids' in msg_vals or 'partner_cc_ids' in msg_vals:
+            return (msg_vals['partner_ids'] or []) + (msg_vals.get('partner_cc_ids') or [])
+        return self.partner_ids.ids + self.partner_cc_ids.ids

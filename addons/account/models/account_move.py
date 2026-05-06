@@ -6509,7 +6509,7 @@ class AccountMove(models.Model):
 
         if self.move_type != 'entry':
             local_msg_vals = dict(msg_vals or {})
-            partner_ids = local_msg_vals.get('partner_ids', []) if 'partner_ids' in local_msg_vals else message.partner_ids.ids
+            partner_ids = message._get_all_partner_ids_from_vals(local_msg_vals)
             self._portal_ensure_token()
             access_link = self._notify_get_action_link('view', **local_msg_vals, access_token=self.access_token)
 

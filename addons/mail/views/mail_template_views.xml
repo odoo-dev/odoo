@@ -59,11 +59,11 @@
                                         <separator string="Sender &amp; Recipients"/>
                                         <field name="email_from" placeholder="Sender's email" options="{'dynamic_placeholder': true}"/>
                                         <field name="use_default_to"/>
-                                        <field name="email_to" invisible="use_default_to"
+                                        <field name="email_to" invisible="use_default_to" options="{'dynamic_placeholder': true}"
                                                 placeholder="Comma-separated recipient addresses"/>
-                                        <field name="partner_to" invisible="use_default_to"
+                                        <field name="partner_to" invisible="use_default_to" options="{'dynamic_placeholder': true}"
                                                 placeholder="Comma-separated ids of recipient partners"/>
-                                        <field name="email_cc" invisible="use_default_to"
+                                        <field name="email_cc" invisible="use_default_to" options="{'dynamic_placeholder': true}"
                                                 placeholder="Comma-separated carbon copy of recipients addresses"/>
                                         <field name="reply_to" placeholder="Chatter of the record"/>
                                     </group>

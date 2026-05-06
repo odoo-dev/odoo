@@ -876,7 +876,7 @@ class DiscussChannel(models.Model):
 
         recipients_data = []
         author_id = msg_vals.get("author_id") or message.author_id.id
-        pids = msg_vals['partner_ids'] or [] if 'partner_ids' in msg_vals else message.partner_ids.ids
+        pids = message._get_all_partner_ids_from_vals(msg_vals)
         if pids:
             email_from = tools.email_normalize(msg_vals.get('email_from') or message.email_from)
             self.env['res.partner'].flush_model(['active', 'email', 'partner_share'])

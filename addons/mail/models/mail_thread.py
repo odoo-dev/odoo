@@ -27,7 +27,7 @@ from markupsafe import Markup, escape
 from requests import Session
 from werkzeug import urls
 
-from odoo import _, api, exceptions, fields, models, modules, tools
+from odoo import _, api, Command, exceptions, fields, models, modules, tools
 from odoo.addons.mail.tools.discuss import Store
 from odoo.addons.mail.tools.web_push import (
     push_to_end_point, DeviceUnreachableError,
@@ -1231,7 +1231,9 @@ class MailThread(models.AbstractModel):
         email_to_localparts = list(filter(None, (_filter_excluded_local_part(email_to) for email_to in email_to_list)))
         # Delivered-To is a safe bet in most modern MTAs, but we have to fallback on To + Cc values
         # for all the odd MTAs out there, as there is no standard header for the envelope's `rcpt_to` value.
-        rcpt_tos_list = [e.lower() for e in email_split(message_dict['recipients'])]
+        rcpt_tos_list = [
+            e.lower()
+            for e in email_split(message_dict['recipients']) + email_split(message_dict['recipients_cc'])]
         rcpt_tos_localparts = list(filter(None, (_filter_excluded_local_part(email_to) for email_to in rcpt_tos_list)))
         rcpt_tos_valid_list = list(rcpt_tos_list)
 
@@ -1366,6 +1368,7 @@ class MailThread(models.AbstractModel):
         self = self.with_context(attachments_mime_plainxml=True) # import XML attachments as text
         # postpone setting message_dict.partner_ids after message_post, to avoid double notifications
         original_partner_ids = message_dict.pop('partner_ids', [])
+        original_partner_cc_ids = message_dict.pop('partner_cc_ids', [])
         thread = self.browse()
         for model, thread_id, custom_values, user_id, alias in routes or ():
             subtype_id = False
@@ -1432,7 +1435,7 @@ class MailThread(models.AbstractModel):
                 **message_dict,
             )
             # remove computational values not stored on mail.message and avoid warnings when creating it
-            for x in ('from', 'recipients',
+            for x in ('from', 'recipients', 'recipients_cc',
                       'cc', 'to',  # use cc_filtered, to_filtered
                       'references', 'in_reply_to', 'x_odoo_message_id',
                       'is_bounce', 'bounced_email', 'bounced_message', 'bounced_msg_ids', 'bounced_partner'):
@@ -1446,10 +1449,11 @@ class MailThread(models.AbstractModel):
                 thread_root = thread_root.with_context(mail_post_autofollow_author_skip=not message_dict.get('author_id'))
                 new_msg = thread_root.message_post(**post_params)
 
-            if new_msg and original_partner_ids:
+            if new_msg and (original_partner_ids or original_partner_cc_ids):
                 # postponed after message_post, because this is an external message and we don't want to create
                 # duplicate emails due to notifications
-                new_msg.write({'partner_ids': original_partner_ids})
+                new_msg.write(({'partner_ids': original_partner_ids} if original_partner_ids else {}) |
+                              ({'partner_cc_ids': original_partner_cc_ids} if original_partner_cc_ids else {}))
         return thread.with_env(self.env)
 
     @api.model
@@ -1854,16 +1858,23 @@ class MailThread(models.AbstractModel):
         msg_dict['cc'] = ','.join(email_cc_list) if email_cc_list else email_cc
         # Delivered-To is a safe bet in most modern MTAs, but we have to fallback on To + Cc values
         # for all the odd MTAs out there, as there is no standard header for the envelope's `rcpt_to` value.
-        msg_dict['recipients'] = ','.join(set(formatted_email
+        recipients_cc = {
+            formatted_email
+            for address in [
+                decode_message_header(message, 'Cc', separator=','),
+                decode_message_header(message, 'Resent-Cc', separator=',')
+            ] if address
+            for formatted_email in email_split_and_format(address)}
+        recipients = {
+            formatted_email
             for address in [
                 decode_message_header(message, 'Delivered-To', separator=','),
                 decode_message_header(message, 'To', separator=','),
-                decode_message_header(message, 'Cc', separator=','),
                 decode_message_header(message, 'Resent-To', separator=','),
-                decode_message_header(message, 'Resent-Cc', separator=',')
             ] if address
-            for formatted_email in email_split_and_format(address))
-        )
+            for formatted_email in email_split_and_format(address)}
+        msg_dict['recipients'] = ','.join(recipients)
+        msg_dict['recipients_cc'] = ','.join(recipients_cc.difference(recipients))
         email_to_list = list({
             formatted_email
             for address in [
@@ -1924,11 +1935,12 @@ class MailThread(models.AbstractModel):
     def _message_parse_post_process(self, message, message_dict, routes):
         """ Parse and process incoming email values that are better computed
         based on record we are about to create or update. This refers to
-        message author and recipients, which can be preferentially found
+        message author, recipients, recipients_cc which can be preferentially found
         in document followers when possible. """
         values = {
             'author_id': message_dict.get('author_id'),
             'partner_ids': message_dict.get('partner_ids'),
+            'partner_cc_ids': message_dict.get('partner_cc_ids'),
         }
         for model, thread_id, _custom_values, _user_id, alias in routes or ():
             link_doc = self.env[model].browse(thread_id) if thread_id else self.env[model]
@@ -1940,8 +1952,14 @@ class MailThread(models.AbstractModel):
                 author = link_doc._partner_find_from_emails_single([message_dict['email_from']], no_create=True)
                 if author:
                     values['author_id'] = author.id
-            if not values.get('partner_ids') and message_dict['recipients']:
-                values['partner_ids'] = link_doc._partner_find_from_emails_single(email_split(message_dict['recipients']), no_create=True).ids
+            partner_ids = link_doc._partner_find_from_emails_single(
+                email_split(message_dict.get('recipients', '')), no_create=True).ids
+            if not values['partner_ids']:
+                values['partner_ids'] = partner_ids
+            if not values['partner_cc_ids']:
+                partner_cc_ids = link_doc._partner_find_from_emails_single(
+                    email_split(message_dict.get('recipients_cc', '')), no_create=True).ids
+                values['partner_cc_ids'] = list(set(partner_cc_ids) - set(partner_ids))
         return values
 
     def _get_bounced_message_data(self, message, message_dict):
@@ -2218,6 +2236,7 @@ class MailThread(models.AbstractModel):
                      incoming_email_to=False, incoming_email_cc=False,
                      attachments=None, attachment_ids=None, body_is_html=False,
                      tracking_values=None,
+                     partner_cc_ids=None,
                      **kwargs):
         """ Post a new message in an existing thread, returning the new mail.message.
 
@@ -2252,6 +2271,8 @@ class MailThread(models.AbstractModel):
         :param bool body_is_html: indicates body should be threated as HTML even if str
             to be used only for RPC calls
         :param tracking_values: optional list of tracking values
+        :param list(int) partner_cc_ids: partner_ids to notify in "Cc" in addition to partner_ids and
+            partners computed based on subtype / followers matching;
 
         Extra keyword arguments will be used either
           * as default column values for the new mail.message record if they match
@@ -2298,6 +2319,14 @@ class MailThread(models.AbstractModel):
                  )
             )
         partner_ids = list(partner_ids or [])
+        if partner_cc_ids and not is_list_of(partner_cc_ids, int):
+            raise ValueError(
+                _('Posting a message should receive copy carbon partners as a list of IDs (received %(pids)s)',
+                  pids=repr(partner_cc_ids),
+                 )
+            )
+        partner_cc_ids = list(partner_cc_ids or [])
+        all_partner_ids = partner_ids + partner_cc_ids
 
         # split message additional values from notify additional values
         msg_kwargs = {key: val for key, val in kwargs.items()
@@ -2323,12 +2352,12 @@ class MailThread(models.AbstractModel):
             subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
 
         # automatically subscribe recipients if asked to
-        if self.env.context.get('mail_post_autofollow') and partner_ids:
-            self.message_subscribe(partner_ids=list(partner_ids))
+        if self.env.context.get('mail_post_autofollow') and all_partner_ids:
+            self.message_subscribe(partner_ids=list(all_partner_ids))
         # automatically subscribe customer recipient if model expects it
-        elif partner_ids and self.env.context.get('mail_post_autofollow') is not False and self._mail_thread_customer:
+        elif all_partner_ids and self.env.context.get('mail_post_autofollow') is not False and self._mail_thread_customer:
             customer = self._mail_get_customer()
-            if customer.id in partner_ids:
+            if customer.id in all_partner_ids:
                 self.message_subscribe(partner_ids=customer.ids)
 
         msg_values = dict(msg_kwargs)
@@ -2355,6 +2384,7 @@ class MailThread(models.AbstractModel):
             'tracking_values': tracking_values,
             # recipients
             'partner_ids': partner_ids,
+            'partner_cc_ids': partner_cc_ids,
             'incoming_email_to': incoming_email_to,
             'incoming_email_cc': incoming_email_cc,
             'outgoing_email_to': outgoing_email_to,
@@ -3130,7 +3160,9 @@ class MailThread(models.AbstractModel):
 
         for values in values_list:
             create_values = dict(values)
-            create_values['partner_ids'] = [(4, pid) for pid in (create_values.get('partner_ids') or [])]
+            for field in ('partner_ids', 'partner_cc_ids'):
+                if create_values.get(field):
+                    create_values[field] = [Command.link(pid) for pid in (create_values.get(field) or [])]
             create_values_list.append(create_values)
 
         # remove context, notably for default keys, as this thread method is not
@@ -3165,6 +3197,7 @@ class MailThread(models.AbstractModel):
             'outgoing_email_to',
             'parent_id',
             'partner_ids',
+            'partner_cc_ids',
             'record_alias_domain_id',
             'record_company_id',
             'reply_to',
@@ -3964,6 +3997,8 @@ class MailThread(models.AbstractModel):
         })
         if external_emails and len(external_emails) < self._CUSTOMER_HEADERS_LIMIT_COUNT:  # more than threshold = considered as public record (slide, forum, ...) -> do not leak
             headers['X-Msg-To-Add'] = ','.join(external_emails)
+        if message.partner_cc_ids:
+            headers['X-Msg-Cc-Force'] = ','.join(message.partner_cc_ids.mapped('email_formatted'))
         # sudo: access to mail.alias.domain, restricted
         if message_sudo.record_alias_domain_id.bounce_email:
             headers['Return-Path'] = message_sudo.record_alias_domain_id.bounce_email
@@ -4190,8 +4225,7 @@ class MailThread(models.AbstractModel):
         msg_vals = msg_vals or {}
         msg_sudo = message.sudo()
 
-        # get values from msg_vals or from message if msg_vals doen't exists
-        pids = msg_vals['partner_ids'] if 'partner_ids' in msg_vals else msg_sudo.partner_ids.ids
+        pids = message._get_all_partner_ids_from_vals(msg_vals)
         if kwargs.get('notify_skip_followers'):
             # when skipping followers, message acts like user notification, which means
             # relying on required recipients (pids) only
@@ -4512,7 +4546,7 @@ class MailThread(models.AbstractModel):
         # extract internal users being notified to check their OOO status
         # done manually (not when computing recipients data) as it would be costly
         # and difficult with potential inheritance (calendar, ...)
-        pids = msg_vals['partner_ids'] if 'partner_ids' in (msg_vals or {}) else message.partner_ids.ids
+        pids = message._get_all_partner_ids_from_vals(msg_vals)
         internal_uids = [
             r['uid'] for r in recipients_data if (
                 r['active'] and

@@ -121,10 +121,10 @@ class TestMailTemplateTools(TestMailTemplateCommon):
             self.partner_2.email_formatted or self.partner_2.name,
             self.email_1,
             self.email_2,
-            self.email_3,
         ]
 
         self.assertListEqual(sorted(form.recipient_names.split(', ')), sorted(expected_recipients_names))
+        self.assertEqual(form.recipient_cc_names, self.email_3)
 
     @users('employee')
     def test_mail_template_preview_recipients_use_default_to(self):

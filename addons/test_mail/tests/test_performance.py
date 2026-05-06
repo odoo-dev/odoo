@@ -478,7 +478,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
                 composer_form.attachment_ids.add(attachment)
             composer = composer_form.save()
 
-        with self.assertQueryCount(admin=55, employee=55):  # tm 55/55
+        with self.assertQueryCount(admin=56, employee=56):  # tm 55/55
             composer._action_send_mail()
 
         # notifications
@@ -600,7 +600,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
             )
             composer = composer_form.save()
 
-        with self.assertQueryCount(admin=53, employee=52):
+        with self.assertQueryCount(admin=54, employee=53):
             composer._action_send_mail()
 
         # notifications
@@ -630,7 +630,7 @@ class TestBaseAPIPerformance(BaseMailPerformance):
             )
             composer = composer_form.save()
 
-        with self.assertQueryCount(admin=68, employee=68):
+        with self.assertQueryCount(admin=69, employee=68):
             composer._action_send_mail()
 
         # notifications
@@ -1004,6 +1004,7 @@ class TestMailAPIPerformance(BaseMailPerformance):
             'name': 'only.email.1@test.example.com',
             'partner_id': new_partner.id,
             'create_values': {},
+            'recipient_type': 'to',
         })
 
     @users('employee')
@@ -1671,6 +1672,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "model": "mail.test.simple",
                                     "needaction": True,
                                     "notification_ids": [notif_1.id, notif_2.id],
+                                    "partner_cc_ids": [],
                                     "partner_ids": [],
                                     "pinned_at": False,
                                     "rating_id": False,
@@ -1788,6 +1790,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
                                     "model": "mail.test.simple",
                                     "needaction": True,
                                     "notification_ids": [notif_1.id, notif_2.id],
+                                    "partner_cc_ids": [],
                                     "partner_ids": [],
                                     "pinned_at": False,
                                     "rating_id": False,

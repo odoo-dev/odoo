@@ -1401,7 +1401,7 @@ test("[text composer] should send notifications to users with names containing H
     await contains(".o-mail-Message .o_mail_redirect", { text: `@${partnerRaw.name}` });
     await click(".o-mail-Message-notification");
     await contains(".o-mail-MessageNotificationPopover span", {
-        text: `${partnerRaw.name} (${partnerRaw.email})`,
+        text: `To${partnerRaw.name} (${partnerRaw.email})`,
     });
 });
 
@@ -1435,7 +1435,7 @@ test("should send notifications to users with names containing HTML entities", a
     await contains(".o-mail-Message .o_mail_redirect", { text: `@${partnerRaw.name}` });
     await click(".o-mail-Message-notification");
     await contains(".o-mail-MessageNotificationPopover span", {
-        text: `${partnerRaw.name} (${partnerRaw.email})`,
+        text: `To${partnerRaw.name} (${partnerRaw.email})`,
     });
 });
 

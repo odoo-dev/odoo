@@ -1264,22 +1264,33 @@ test("click on message edit button should open edit composer", async () => {
 
 test("Notification Sent", async () => {
     const pyEnv = await startServer();
-    const [threadId, partnerId] = pyEnv["res.partner"].create([
+    const [threadId, partnerId, partnerCcId] = pyEnv["res.partner"].create([
         {},
         { name: "Someone", partner_share: true },
+        { name: "SomeoneInCc", partner_share: true },
     ]);
     const messageId = pyEnv["mail.message"].create({
         body: "not empty",
         message_type: "email",
         model: "res.partner",
         res_id: threadId,
+        partner_ids: [partnerId],
+        partner_cc_ids: [partnerCcId],
     });
-    pyEnv["mail.notification"].create({
-        mail_message_id: messageId,
-        notification_status: "sent",
-        notification_type: "email",
-        res_partner_id: partnerId,
-    });
+    pyEnv["mail.notification"].create([
+        {
+            mail_message_id: messageId,
+            notification_status: "sent",
+            notification_type: "email",
+            res_partner_id: partnerId,
+        },
+        {
+            mail_message_id: messageId,
+            notification_status: "sent",
+            notification_type: "email",
+            res_partner_id: partnerCcId,
+        },
+    ]);
     await start();
     await openFormView("res.partner", threadId);
     await contains(".o-mail-Message");
@@ -1288,9 +1299,10 @@ test("Notification Sent", async () => {
     expect(".o-mail-Message-notification i:first").toHaveClass("fa-envelope-o");
     await click(".o-mail-Message-notification");
     await contains(".o-mail-MessageNotificationPopover");
-    await contains(".o-mail-MessageNotificationPopover i");
-    expect(".o-mail-MessageNotificationPopover i:first").toHaveClass("fa-check");
-    await contains(".o-mail-MessageNotificationPopover:text('Someone')");
+    await contains(".o-mail-MessageNotificationPopover i", { count: 2 });
+    expect(".o-mail-MessageNotificationPopover i:first.fa-check").toHaveClass("fa-check");
+    expect(".o-mail-MessageNotificationPopover i:last.fa-check").toHaveClass("fa-check");
+    await contains(".o-mail-MessageNotificationPopover:text('ToSomeone CcSomeoneInCc')");
 });
 
 test("Notification Error", async () => {
