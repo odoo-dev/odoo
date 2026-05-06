@@ -1,4 +1,5 @@
-import { Component, props, signal } from "@odoo/owl";
+import { Component, props } from "@odoo/owl";
+import { formatDuration } from "@mail/views/fields/call_debrief/call_debrief_utils";
 
 export class CallDebriefMediaControls extends Component {
     static template = "mail.CallDebriefMediaControls";
@@ -10,36 +11,39 @@ export class CallDebriefMediaControls extends Component {
         playbackRates: { type: Array },
         currentTime: { type: Number },
         totalDuration: { type: Number },
-        media: { type: Object, optional: true },
+        mediaUrl: { type: String, optional: true },
         onTogglePlay: { type: Function },
         onSeek: { type: Function },
         onSetPlaybackRate: { type: Function },
         onSetVolume: { type: Function },
         onToggleMute: { type: Function },
         feedback: { type: Object, optional: true },
+        hasVideo: { type: Boolean, optional: true },
+        isFullscreen: { type: Boolean, optional: true },
+        onToggleFullscreen: { type: Function, optional: true },
     };
 
     props = props();
 
-    setup() {
-        this.isVolumeSliderVisible = signal(false);
+    formatDuration(seconds) {
+        return formatDuration(seconds, this.props.totalDuration);
+    }
+
+    downloadMedia() {
+        window.open(this.props.mediaUrl + "?download=1", "_blank");
+    }
+
+    get formattedTotalDuration() {
+        return this.formatDuration(this.props.totalDuration);
     }
 
     get volumeIconClass() {
         if (this.props.isMuted || this.props.volume === 0) {
-            return "fa fa-volume-off";
+            return "fa-volume-off";
         }
         if (this.props.volume < 0.5) {
-            return "fa fa-volume-down";
+            return "fa-volume-down";
         }
-        return "fa fa-volume-up";
-    }
-
-    showVolumeSlider() {
-        this.isVolumeSliderVisible.set(true);
-    }
-
-    hideVolumeSlider() {
-        this.isVolumeSliderVisible.set(false);
+        return "fa-volume-up";
     }
 }
