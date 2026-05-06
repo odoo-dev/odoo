@@ -46,7 +46,7 @@
                                 </span>
                                 <span name="yearly" invisible="frequency != 'yearly'">
                                     on the
-                                    <field nolabel="1" name="yearly_day" class="o_field_accrual" required="frequency == 'yearly'" placeholder="select a day"/>
+                                    <field nolabel="1" name="yearly_day" class="o_field_accrual" widget="day_selection" required="frequency == 'yearly'" placeholder="select a day"/>
                                     of
                                     <field nolabel="1" name="yearly_month" class="o_field_accrual" required="frequency == 'yearly'" placeholder="select a month"/>
                                 </span>

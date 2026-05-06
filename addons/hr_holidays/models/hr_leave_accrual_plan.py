@@ -96,8 +96,19 @@ class HrLeaveAccrualPlan(models.Model):
     @api.depends("carryover_month")
     def _compute_carryover_day(self):
         for plan in self:
-            # 2020 is a leap year, so monthrange(2020, february) will return [2, 29]
-            plan.carryover_day = str(min(monthrange(2020, int(plan.carryover_month))[1], int(plan.carryover_day)))
+            # if the year is 2020 which is a leap year, so monthrange(2020, february) will return [2, 29]
+            _, max_days = monthrange(2020, int(plan.carryover_month))
+            current_day = int(plan.carryover_day)
+            if current_day > max_days:
+                plan.carryover_day = str(max_days)
+
+    @api.constrains('carryover_month', 'carryover_day')
+    def _check_valid_date(self):
+        for plan in self:
+            if plan.carryover_month and plan.carryover_day:
+                max_days = monthrange(2020, int(plan.carryover_month))[1]
+                if int(plan.carryover_day) > max_days:
+                    raise ValidationError(_("Invalid day for the selected month"))
 
     def action_open_accrual_plan_employees(self):
         self.ensure_one()

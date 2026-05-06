@@ -183,6 +183,14 @@ class HrLeaveAccrualLevel(models.Model):
             if level.cap_accrued_time and level.maximum_leave <= 0:
                 raise UserError(self.env._("You cannot have a balance cap on accrued time set to 0."))
 
+    @api.constrains('yearly_month', 'yearly_day')
+    def _check_valid_date(self):
+        for level in self:
+            if level.yearly_month and level.yearly_day:
+                max_days = monthrange(2020, int(level.yearly_month))[1]
+                if int(level.yearly_day) > max_days:
+                    raise ValidationError(_("Invalid day for the selected month"))
+
     @api.depends('start_count', 'start_type')
     def _compute_sequence(self):
         # Not 100% accurate because of odd months/years, but good enough

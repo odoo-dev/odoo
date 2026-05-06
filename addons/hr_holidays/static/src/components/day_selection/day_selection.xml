@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hr_holidays.DaySelectionField">
+        <select 
+            class="o_input" 
+            t-on-change="onChange"
+            t-att-id="props.id">
+            
+            <t t-foreach="days" t-as="day" t-key="day">
+                <option 
+                    t-att-value="day" 
+                    t-att-selected="props.record.data[props.name] === day"
+                    t-esc="day"
+                />
+            </t>
+        </select>
+    </t>
+</templates>
