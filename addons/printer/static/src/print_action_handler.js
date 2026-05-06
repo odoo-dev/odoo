@@ -7,18 +7,22 @@ export class PrintActionHandlerService {
     }
 
     base64Decode(base64) {
+        return new TextDecoder("utf-8").decode(this.base64ToBytes(base64));
+    }
+
+    base64ToBytes(base64) {
         const binary = atob(base64);
         const bytes = new Uint8Array(binary.length);
         for (let i = 0; i < binary.length; i++) {
             bytes[i] = binary.charCodeAt(i);
         }
-        return new TextDecoder("utf-8").decode(bytes);
+        return bytes;
     }
 
-    baseRequestParams(report) {
+    baseRequestParams(body) {
         return {
             method: "POST",
-            body: this.base64Decode(report),
+            body,
             signal: AbortSignal.timeout(30000),
         };
     }
@@ -30,7 +34,7 @@ export class PrintActionHandlerService {
      */
     async zplPrint({ ip_address }, { report }, duplex) {
         const params = {
-            ...this.baseRequestParams(report),
+            ...this.baseRequestParams(this.base64Decode(report)),
             headers: {
                 "Content-Length": report.length,
                 "Content-Type": "text/plain; charset=utf-8",
@@ -50,7 +54,7 @@ export class PrintActionHandlerService {
         try {
             const res = await fetch(
                 `http://${ip_address}/cgi-bin/epos/service.cgi?devid=local_printer`,
-                this.baseRequestParams(report)
+                this.baseRequestParams(this.base64Decode(report))
             );
             const body = await res.text();
             const parser = new DOMParser();
@@ -65,10 +69,24 @@ export class PrintActionHandlerService {
         }
     }
 
+    async sendToPdfProxy({ ip_address }, { report }, duplex) {
+        try {
+            const response = await fetch(`http://${ip_address}/print/pdf?duplex=${duplex}`, {
+                ...this.baseRequestParams(this.base64ToBytes(report)),
+                headers: { "Content-Type": "application/octet-stream" },
+            });
+            return { result: response.ok };
+        } catch (error) {
+            console.error(error);
+            return { result: false };
+        }
+    }
+
     getPrintMethod(type) {
         const map = {
             epos: this.ePosPrint.bind(this),
             zpl: this.zplPrint.bind(this),
+            pdf: this.sendToPdfProxy.bind(this),
         };
         return map[type];
     }

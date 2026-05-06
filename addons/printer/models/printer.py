@@ -12,6 +12,7 @@ class Printer(models.Model):
     type = fields.Selection([
             ('zpl', "ZPL"),
             ('epos', "ePOS"),
+            ('pdf', "PDF"),
         ],
         default="zpl",
         required=True,
@@ -20,5 +21,7 @@ class Printer(models.Model):
             "Choose how this printer is used:\n"
             "- ZPL: Only for Zebra label printers.\n"
             "- ePOS: For Epson label printers.\n"
+            "- PDF: For pdf report/document printing."
         ),
     )
+    use_lna = fields.Boolean(string="Use Local Network Access")
