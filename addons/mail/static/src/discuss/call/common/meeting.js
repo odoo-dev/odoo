@@ -68,6 +68,10 @@ export class Meeting extends Component {
     }
 
     get channel() {
+        console.log(
+            `[${new Date().toLocaleString()}]Meeting component channel called`,
+            this.store.rtc.channel
+        );
         return this.store.rtc.channel;
     }
 }

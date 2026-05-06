@@ -88,6 +88,15 @@ class TestMailPublicPage(HttpCaseWithUserPortal, HttpCaseWithUserDemo):
         self.channel.default_display_mode = 'video_full_screen'
         self.start_tour(self.channel.invitation_url, "discuss_channel_call_public_tour.js")
 
+    def test_discuss_channel_public_page_call_duplicate_tab(self):
+        """Test that duplicating a public meeting tab does not crash or end the host's call."""
+        self.channel.default_display_mode = 'video_full_screen'
+        self.start_tour(
+            self.channel.invitation_url,
+            "discuss_channel_call_public_duplicate_tab_tour.js",
+            watch=True
+        )
+
     def test_mail_group_public_page_as_guest(self):
         self.start_tour(self.group.invitation_url, "discuss_channel_as_guest_tour.js")
         guest = self.env['mail.guest'].search([('channel_ids', 'in', self.channel.id)], limit=1, order='id desc')

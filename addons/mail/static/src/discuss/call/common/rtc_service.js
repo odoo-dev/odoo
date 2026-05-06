@@ -368,6 +368,7 @@ export class Rtc extends Record {
         },
         onUpdate() {
             if (!this.channel) {
+                console.log(`[${new Date().toLocaleString()}]channel not exists`);
                 return;
             }
             this.store["discuss.channel"].getOrFetch(this.channel.id);
@@ -471,6 +472,7 @@ export class Rtc extends Record {
         this.soundEffectsService = services["mail.sound_effects"];
         this.pttExtService = services["discuss.ptt_extension"];
         if (this._broadcastChannel) {
+            console.log(`[${new Date().toLocaleString()}] setting up broadcast channel`);
             this._broadcastChannel.onmessage = this._onBroadcastChannelMessage.bind(this);
             this._postToTabs({ type: CROSS_TAB_CLIENT_MESSAGE.INIT });
         }
@@ -706,6 +708,7 @@ export class Rtc extends Record {
      * Notifies the server and does the cleanup of the current call.
      */
     async leaveCall(channel = this.localChannel) {
+        console.log(`[${new Date().toLocaleString()}] leaveCall called`, channel);
         this.store.fullscreenChannel = null;
         this.hasPendingRequest = true;
         await rpc("/mail/rtc/channel/leave_call", { channel_id: channel.id }, { silent: true });
@@ -723,6 +726,7 @@ export class Rtc extends Record {
         }
         channel.activeRtcSession = undefined;
         if (channel.eq(this.localChannel)) {
+            console.log(`[${new Date().toLocaleString()}] channel.eq(this.localChannel)`);
             this.logs.end = new Date().toISOString();
             this.dumpLogs();
             this.pttExtService.unsubscribe();
@@ -793,6 +797,10 @@ export class Rtc extends Record {
     async enterFullscreen(props) {
         const Meeting = registry.category("discuss.call/components").get("Meeting");
         this.store.fullscreenChannel = this.channel;
+        console.log(
+            `[${new Date().toLocaleString()}] calling enter fullscreen channel`,
+            this.channel
+        );
         await this.fullscreen.enter(Meeting, {
             id: CALL_FULLSCREEN_ID,
             keepBrowserHeader: true,
@@ -814,6 +822,7 @@ export class Rtc extends Record {
      */
     async toggleCall(channel, { audio = true, camera } = {}) {
         if (channel.id === this._remotelyHostedChannelId) {
+            console.log(`[${new Date().toLocaleString()}] ending the call!`);
             this._postToTabs({ type: CROSS_TAB_CLIENT_MESSAGE.LEAVE });
             this.clear();
             return;
@@ -1085,6 +1094,7 @@ export class Rtc extends Record {
             return;
         }
         try {
+            console.log(`[${new Date().toLocaleString()}] posting the message`, message);
             this._broadcastChannel.postMessage(message);
         } catch (error) {
             this.log(this.selfSession, "failed to post message to broadcast channel", { error });
@@ -1152,6 +1162,9 @@ export class Rtc extends Record {
                 if (!this.isHost) {
                     return;
                 }
+                console.log(
+                    `[${new Date().toLocaleString()}]calling leave call from broadcast channel message`
+                );
                 await this.leaveCall(this.channel);
                 return;
             }
@@ -1768,6 +1781,7 @@ export class Rtc extends Record {
             serverInfo: undefined,
             updateAndBroadcastDebounce: undefined,
         });
+        console.log(`[${new Date().toLocaleString()}] this.localChannel`, this.localChannel);
         this.pipService?.closePip();
     }
 

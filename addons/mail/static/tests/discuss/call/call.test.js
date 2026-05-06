@@ -778,6 +778,49 @@ test("Cross tab calls: tabs can interact with calls remotely", async () => {
     await expect.waitForSteps(["is_muted:true"]);
 });
 
+test("Cross tab calls: duplicating a fullscreen meeting tab does not end the call", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "General",
+        default_display_mode: "video_full_screen",
+    });
+    const broadcastChannel = new BroadcastChannel("call_sync_state");
+    const sessionId = pyEnv["discuss.channel.rtc.session"].create({
+        channel_member_id: pyEnv["discuss.channel.member"].create({
+            channel_id: channelId,
+            partner_id: pyEnv["res.partner"].create({ name: "remoteHost" }),
+        }),
+        channel_id: channelId,
+    });
+    await start();
+    // Simulate the ?fullscreen=1 URL that a duplicated tab would have
+    browser.location.search = "?fullscreen=1";
+    // Simulate the host tab broadcasting its state to this new tab
+    broadcastChannel.postMessage({
+        type: CROSS_TAB_HOST_MESSAGE.UPDATE_REMOTE,
+        hostedChannelId: channelId,
+        hostedSessionId: sessionId,
+        changes: {
+            [sessionId]: {
+                is_muted: false,
+                is_deaf: false,
+            },
+        },
+    });
+    broadcastChannel.onmessage = (event) => {
+        if (event.data.type === CROSS_TAB_CLIENT_MESSAGE.LEAVE) {
+            expect.step("leave");
+        }
+    };
+    // Opening discuss triggers restoreDiscussThread -> joinCallWithDefaultSettings
+    // Without the fix, toggleCall -> clear() wipes rtc.channel, so the call UI vanishes
+    // With the fix, isRemote guard skips toggleCall, preserving the remote call state
+    await openDiscuss(channelId);
+    await contains(".o-discuss-Call");
+    expect.verifySteps([]);
+    expect.verifyErrors([]);
+});
+
 test("automatically cancel incoming call after some time", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });

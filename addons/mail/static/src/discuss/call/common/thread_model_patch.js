@@ -60,6 +60,10 @@ const ThreadPatch = {
                 if (shouldPlayLeaveSound) {
                     this.store.env.services["mail.sound_effects"].play("member-leave");
                 }
+                console.log(
+                    `[${new Date().toLocaleString()}] rtc_session_ids updated`,
+                    this.rtc_session_ids.length
+                );
             },
         });
         this.videoCountNotSelf = fields.Attr(0, {
@@ -166,6 +170,7 @@ const ThreadPatch = {
         return this.store.rtc.selfSession && this.channel.eq(this.store.rtc.channel);
     },
     get showCallView() {
+        console.log("rtc fullscreen", this.store.rtc.isFullscreen, this.rtc_session_ids.length);
         return !this.store.rtc.isFullscreen && this.rtc_session_ids.length > 0;
     },
     async focusAvailableVideo() {
