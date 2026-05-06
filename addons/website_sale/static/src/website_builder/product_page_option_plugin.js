@@ -24,7 +24,6 @@ export class ProductPageOptionPlugin extends Plugin {
             ProductPageImageGridSpacingAction,
             ProductPageImageGridColumnsAction,
             ProductAddExtraImageAction,
-            ProductRemoveAllExtraImagesAction,
         },
         clean_for_save_processors: (el) => {
             // TODO the content of this clean_for_save_processors should probably
@@ -353,18 +352,6 @@ export class ProductAddExtraImageAction extends BaseProductPageAction {
         }
         const { imgEls, selectedMedia, type } = loadResult;
         await this.extraMediaSave(el, type, selectedMedia, imgEls);
-    }
-}
-export class ProductRemoveAllExtraImagesAction extends BaseProductPageAction {
-    static id = "productRemoveAllExtraImages";
-    async apply({ editingElement: el }) {
-        // Removes all extra-images from the product.
-        await rpc(`/shop/product/clear-images`, {
-            model: this.model,
-            product_product_id: this.productProductID,
-            product_template_id: this.productTemplateID,
-            combination_ids: this.getSelectedVariantValues(el),
-        })
     }
 }
 

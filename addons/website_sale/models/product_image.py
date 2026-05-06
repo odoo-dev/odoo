@@ -22,7 +22,11 @@ class ProductImage(models.Model):
     image_1920 = fields.Image()
 
     product_tmpl_id = fields.Many2one(
-        string="Product Template", comodel_name="product.template", ondelete="cascade", index=True
+        string="Product Template",
+        comodel_name="product.template",
+        ondelete="cascade",
+        required=True,
+        index=True,
     )
     product_variant_ids = fields.Many2many("product.product")
 
@@ -40,6 +44,7 @@ class ProductImage(models.Model):
         [("primary", "Primary"), ("secondary", "Secondary")],
         default=False,
         compute="_compute_image_type",
+        store=True,
     )
 
     # === COMPUTE METHODS ===#
@@ -61,27 +66,25 @@ class ProductImage(models.Model):
         for image in self:
             image.has_attribute_value = bool(image.attribute_value_ids)
 
+    @api.depends("attribute_value_ids", "product_tmpl_id.image_1920", "sequence")
     def _compute_image_type(self):
-        for template in self.mapped("product_tmpl_id"):
-            tmpl_content = template.image_1920.content
-            primary = secondary = None
+        for image in self:
+            tmpl_content = image.product_tmpl_id.image_1920.content
+            image.image_type = False
 
-            for img in template.product_template_image_ids.sorted(
+            for img in image.product_tmpl_id.product_template_image_ids.sorted(
                 key=lambda img: (img.has_attribute_value, img.sequence)
             ):
                 content = img.image_1920.content
 
-                if not primary and content == tmpl_content:
-                    primary = img
-                    img.image_type = "primary"
-                    continue
+                if content == tmpl_content and img == image:
+                    image.image_type = "primary"
+                    break
 
-                if not secondary and not img.attribute_value_ids and content != tmpl_content:
-                    secondary = img
-                    img.image_type = "secondary"
-                    continue
-
-                img.image_type = False
+                if not img.attribute_value_ids and content != tmpl_content:
+                    if img == image:
+                        image.image_type = "secondary"
+                    break
 
     # === ONCHANGE METHODS ===#
 

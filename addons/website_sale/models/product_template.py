@@ -307,9 +307,18 @@ class ProductTemplate(models.Model):
                     else v
                 ),
             )
-        if "image_1920" in vals and not self.env.context.get("from_extra_image"):
-            self.is_main_image_manually_set = True
-        return super().write(vals)
+        res = super().write(vals)
+
+        if "image_1920" in vals:
+            if vals["image_1920"] and not self.env.context.get("from_extra_image"):
+                self.is_main_image_manually_set = True
+
+            elif not vals["image_1920"] and self.is_main_image_manually_set:
+                self.is_main_image_manually_set = False
+                if self.product_template_image_ids:
+                    self._set_main_image_from_extra_images()
+
+        return res
 
     # === BUSINESS METHODS ===#
 
