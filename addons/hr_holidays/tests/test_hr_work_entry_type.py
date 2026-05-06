@@ -232,3 +232,55 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_compute_virtual_remaining_leaves(self):
+        """Compute virtual remaining leaves during selection in time off creation"""
+        country_id = self.env.ref('base.id')
+
+        work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Cuti Melahirkan',
+            'code': 'leave8080',
+            'requires_allocation': 'yes',
+            'count_days_as': 'working',
+            'country_id': country_id.id,
+            'active': True,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
+        })
+
+        employee = self.env['hr.employee'].create({
+            'name': 'Pria Solo',
+            'work_email': 'solo@example.com',
+            'country_id': country_id.id,
+        })
+
+        employee_allocation = self.env['hr.leave.allocation'].create({
+            'name': 'Annual Allocation for Pria Solo',
+            'employee_id': employee.id,
+            'work_entry_type_id': work_entry_type.id,
+            'number_of_days': 10.0,  # 10 days = 80 hours
+            'date_from': date(2026, 5, 1),
+            'date_to': date(2026, 5, 31),
+        })
+
+        employee_allocation._action_validate()
+        work_entry_ctx = work_entry_type.with_context(employee_id=employee.id)
+
+        leave_request = self.env['hr.leave'].create({
+            'name': 'Budi Taking 3 Days Off',
+            'employee_id': employee.id,
+            'work_entry_type_id': work_entry_type.id,
+            'request_date_from': date(2026, 5, 10),
+            'request_date_to': date(2026, 5, 12),  # 2 days
+        })
+        leave_request.action_approve()
+
+        work_entry_type.invalidate_recordset(['virtual_remaining_leaves'])
+
+        current_virtual = work_entry_ctx.virtual_remaining_leaves
+
+        res_ids = work_entry_ctx._search_virtual_remaining_leaves(">", 5)[0][2]
+
+        # 7. Final Assertions
+        self.assertEqual(current_virtual, 8, "The remaining virtual leaves should be after deducted by 2 days")
+        self.assertIn(work_entry_type.id, res_ids, "The work entry type should be found in the search results")
