@@ -61,42 +61,19 @@ class AccountPaymentRegisterWithholdingLine(models.TransientModel):
             tax_amount_ars, line_currency, self.company_id, wizard.payment_date,
         )
 
-    def _l10n_ar_compute_earnings_amount(self, base_ars):
-        """Apply earnings / earnings_scale rules entirely in ARS, returning the tax amount in ARS."""
+    def _l10n_ar_compute_earnings_amount(self, base_ars, same_period_amounts=None):
+        """Apply earnings / earnings_scale rules entirely in ARS, returning the tax amount in ARS.
+
+        `same_period_amounts` lets callers pass `(base, withholdings)` already queried for this
+        tax+partner+period (see `_l10n_ar_get_same_period_amounts`); the wizard's closed-form
+        solver uses it to avoid re-running the DB queries at every break-point sample.
+        """
         self.ensure_one()
         company_currency = self.company_id.currency_id
-        to_date = self.payment_register_id.payment_date or datetime.date.today()
-        from_date = to_date + relativedelta(day=1)
-        partner = self.payment_register_id.partner_id.commercial_partner_id
-
-        same_period_withholdings = 0.0
-        same_period_base = 0.0
-        domain_same_period_withholdings = [
-            ('company_id', 'child_of', self.tax_id.company_id.id),
-            ('parent_state', '=', 'posted'),
-            ('tax_line_id.l10n_ar_code', '=', self.tax_id.l10n_ar_code),
-            ('tax_line_id.l10n_ar_tax_type', 'in', ('earnings', 'earnings_scale')),
-            ('partner_id', '=', partner.id),
-            ('date', '<=', to_date),
-            ('date', '>=', from_date),
-        ]
-        if same_period_partner_withholdings := self.env['account.move.line'].sudo()._read_group(
-            domain_same_period_withholdings, ['partner_id'], ['balance:sum'],
-        ):
-            same_period_withholdings = abs(same_period_partner_withholdings[0][1])
-        domain_same_period_base = [
-            ('company_id', 'child_of', self.tax_id.company_id.id),
-            ('parent_state', '=', 'posted'),
-            ('tax_ids.l10n_ar_code', '=', self.tax_id.l10n_ar_code),
-            ('tax_ids.l10n_ar_tax_type', 'in', ('earnings', 'earnings_scale')),
-            ('partner_id', '=', partner.id),
-            ('date', '<=', to_date),
-            ('date', '>=', from_date),
-        ]
-        if same_period_partner_base := self.env['account.move.line'].sudo()._read_group(
-            domain_same_period_base, ['partner_id'], ['balance:sum'],
-        ):
-            same_period_base = abs(same_period_partner_base[0][1])
+        if same_period_amounts is None:
+            same_period_base, same_period_withholdings = self._l10n_ar_get_same_period_amounts()
+        else:
+            same_period_base, same_period_withholdings = same_period_amounts
 
         net_amount = max(0.0, base_ars + same_period_base - self.tax_id.l10n_ar_non_taxable_amount)
 
@@ -115,3 +92,47 @@ class AccountPaymentRegisterWithholdingLine(models.TransientModel):
         if self.tax_id.l10n_ar_minimum_threshold > tax_amount:
             tax_amount = 0.0
         return tax_amount
+
+    def _l10n_ar_get_same_period_amounts(self):
+        """Read accumulated base & withholdings (ARS) for this tax+partner in the current month.
+
+        Used both by the line's own `_l10n_ar_compute_earnings_amount` and by the wizard's
+        closed-form gross-up solver in `_l10n_ar_solve_amount_for_target_net`.
+        """
+        self.ensure_one()
+        to_date = self.payment_register_id.payment_date or datetime.date.today()
+        from_date = to_date + relativedelta(day=1)
+        partner = self.payment_register_id.partner_id.commercial_partner_id
+        AML = self.env['account.move.line']
+
+        same_period_withholdings = 0.0
+        domain_same_period_withholdings = [
+            ('company_id', 'child_of', self.tax_id.company_id.id),
+            ('parent_state', '=', 'posted'),
+            ('tax_line_id.l10n_ar_code', '=', self.tax_id.l10n_ar_code),
+            ('tax_line_id.l10n_ar_tax_type', 'in', ('earnings', 'earnings_scale')),
+            ('partner_id', '=', partner.id),
+            ('date', '<=', to_date),
+            ('date', '>=', from_date),
+        ]
+        if same_period_partner_withholdings := AML.sudo()._read_group(
+            domain_same_period_withholdings, ['partner_id'], ['balance:sum'],
+        ):
+            same_period_withholdings = abs(same_period_partner_withholdings[0][1])
+
+        same_period_base = 0.0
+        domain_same_period_base = [
+            ('company_id', 'child_of', self.tax_id.company_id.id),
+            ('parent_state', '=', 'posted'),
+            ('tax_ids.l10n_ar_code', '=', self.tax_id.l10n_ar_code),
+            ('tax_ids.l10n_ar_tax_type', 'in', ('earnings', 'earnings_scale')),
+            ('partner_id', '=', partner.id),
+            ('date', '<=', to_date),
+            ('date', '>=', from_date),
+        ]
+        if same_period_partner_base := AML.sudo()._read_group(
+            domain_same_period_base, ['partner_id'], ['balance:sum'],
+        ):
+            same_period_base = abs(same_period_partner_base[0][1])
+
+        return same_period_base, same_period_withholdings

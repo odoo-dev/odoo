@@ -19,20 +19,17 @@ class TestArWithholdingArRi(TestArCommon):
             'padding': 8,
             'number_increment': 1,
         })
-        # Withholding 1: 1% untaxed_amount
+        # Withholding 1: 10% untaxed_amount (iibb_untaxed)
         cls.tax_wth_test_1 = cls.env.ref('account.%i_ex_tax_withholding_iibb_caba_applied' % cls.env.company.id)
         cls.tax_wth_test_1.write({
             'amount': 10,
-            'amount_type': 'percent',
             'withholding_sequence_id': cls.tax_wth_seq.id,
         })
 
-        # Withholding 2: 10% total_amount
-        cls.tax_wth_test_2 = cls.env.ref('account.%i_ex_tax_withholding_iibb_ba_applied' % cls.env.company.id)
+        # Withholding 2: 10% total_amount (iibb_total)
+        cls.tax_wth_test_2 = cls.env.ref('account.%i_ex_tax_withholding_iibb_cba_applied' % cls.env.company.id)
         cls.tax_wth_test_2.write({
             'amount': 10,
-            'amount_type': 'percent',
-            'l10n_ar_tax_type': 'iibb_total',
             'withholding_sequence_id': cls.tax_wth_seq.id,
         })
 
