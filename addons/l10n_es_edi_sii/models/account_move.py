@@ -5,6 +5,7 @@ import math
 from odoo import api, fields, models, tools
 from odoo.exceptions import LockError, UserError
 from odoo.tools.float_utils import float_round
+from odoo.tools.sql import SQL
 
 SII_BATCH_SIZE = 10000
 
@@ -80,7 +81,7 @@ class AccountMove(models.Model):
                 move.l10n_es_edi_sii_state = 'cancelled'
                 move.l10n_es_edi_sii_error = False
             else:
-                move.l10n_es_edi_sii_state = 'sent' if accepted_docs else 'to_send'
+                move.l10n_es_edi_sii_state = 'to_send'
                 move.l10n_es_edi_sii_error = latest_doc.response_message
 
     @api.depends('move_type', 'company_id', 'invoice_line_ids.tax_ids')
@@ -95,22 +96,9 @@ class AccountMove(models.Model):
                 and has_tax
             )
 
-    def _search_l10n_es_edi_sii_state(self, operator, value):
-        """Return a domain equivalent to the computed sii_state field.
-
-        The state is driven by the *latest* SII document per move (mirroring
-        _compute_l10n_es_edi_sii_data), so a flat ORM domain is insufficient —
-        we compute matching IDs via SQL.
-        """
-        if operator not in ('=', '!=') or value not in ('to_send', 'sent', 'cancelled'):
-            raise NotImplementedError()
-
-        # Mirror _compute_l10n_es_edi_sii_data:
-        # - 'sent'      : latest doc accepted/accepted_with_errors,
-        #                 OR latest doc is to_send/to_cancel AND an accepted doc exists
-        # - 'cancelled' : latest doc is cancelled  (even if older accepted docs exist)
-        # - 'to_send'   : no docs, OR latest doc is to_send/to_cancel AND no accepted doc
-        self.env.cr.execute("""
+    def _get_l10n_es_sii_state_query_parts(self, state):
+        """Return the SQL query parts for moves with the given SII state."""
+        query_str = """
             SELECT am.id
               FROM account_move am
               LEFT JOIN LATERAL (
@@ -120,28 +108,61 @@ class AccountMove(models.Model):
                    ORDER BY d.create_date DESC, d.id DESC
                    LIMIT 1
               ) latest ON TRUE
-              LEFT JOIN LATERAL (
-                  SELECT 1 AS found
-                    FROM l10n_es_edi_sii_document d
-                   WHERE d.move_id = am.id
-                     AND d.state IN ('accepted', 'accepted_with_errors')
-                   LIMIT 1
-              ) accepted ON TRUE
-             WHERE am.company_id IN (
-                   SELECT id FROM res_company WHERE l10n_es_sii_tax_agency IS NOT NULL
-             )
+             WHERE am.move_type IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')
+               AND am.company_id IN (
+                   SELECT id FROM res_company WHERE country_code = 'ES' AND l10n_es_sii_tax_agency IS NOT NULL
+               )
+               AND (
+                   am.move_type NOT IN ('in_invoice', 'in_refund')
+                   OR EXISTS (
+                       SELECT 1 FROM account_move_line aml
+                       JOIN account_tax_move_line_rel rel ON rel.account_move_line_id = aml.id
+                       JOIN account_tax t ON t.id = rel.account_tax_id
+                       WHERE aml.move_id = am.id AND t.l10n_es_type IS NOT NULL AND t.l10n_es_type != 'ignore'
+                   )
+               )
                AND CASE
                    WHEN latest.state IS NULL                               THEN 'to_send'
                    WHEN latest.state IN ('accepted', 'accepted_with_errors') THEN 'sent'
                    WHEN latest.state = 'cancelled'                         THEN 'cancelled'
-                   WHEN accepted.found IS NOT NULL                         THEN 'sent'
                    ELSE 'to_send'
-               END = %(value)s
-        """, {'value': value})
-        move_ids = [row[0] for row in self.env.cr.fetchall()]
-        if operator == '!=':
-            return [('id', 'not in', move_ids)]
-        return [('id', 'in', move_ids)]
+               END = %s
+        """
+        return query_str, (state,)
+
+    def _get_l10n_es_sii_state_move_ids(self, state):
+        """Return move IDs with the given SII state, considering required conditions."""
+        query_str, params = self._get_l10n_es_sii_state_query_parts(state)
+        self.env.cr.execute(SQL(query_str, params))
+        return [row[0] for row in self.env.cr.fetchall()]
+
+    def _search_l10n_es_edi_sii_state(self, operator, value):
+        """Return a domain equivalent to the computed sii_state field.
+
+        The state is driven by the *latest* SII document per move, so a flat ORM domain is insufficient —
+        we compute matching IDs via SQL.
+        """
+        if operator in ('=', 'in'):
+            if isinstance(value, (list, tuple)):
+                states = value
+            else:
+                states = [value]
+            move_ids = set()
+            for state in states:
+                move_ids.update(self._get_l10n_es_sii_state_move_ids(state))
+            return [('id', 'in', list(move_ids))]
+        elif operator in ('!=', 'not in'):
+            if isinstance(value, (list, tuple)):
+                excluded_states = set(value)
+            else:
+                excluded_states = {value}
+            move_ids = set()
+            for state in ('to_send', 'sent', 'cancelled'):
+                if state not in excluded_states:
+                    move_ids.update(self._get_l10n_es_sii_state_move_ids(state))
+            return [('id', 'in', list(move_ids))]
+        else:
+            raise NotImplementedError()
 
     @api.depends('l10n_es_edi_is_required', 'l10n_es_edi_sii_state')
     def _compute_need_cancel_request(self):

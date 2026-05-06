@@ -1,5 +1,6 @@
 from odoo import fields, models
 from datetime import timedelta
+from odoo.tools.sql import SQL
 
 
 class AccountJournal(models.Model):
@@ -16,28 +17,45 @@ class AccountJournal(models.Model):
             return
 
         limit_time = fields.Datetime.now() - timedelta(hours=36)
-        pending_domain = [
-            ('journal_id', 'in', es_journals.ids),
-            ('state', '=', 'posted'),
-            ('l10n_es_edi_sii_state', '=', 'to_send'),
+
+        # Get journal names for formatting
+        journal_names = {j.id: j.name for j in es_journals}
+
+        # Optimized query for pending moves
+        subquery_str, subquery_params = self.env['account.move']._get_l10n_es_sii_state_query_parts('to_send')
+        pending_query = SQL(f"""
+            SELECT am.journal_id, COUNT(*) as count, MAX(am.create_date) as max_date
+            FROM account_move am
+            WHERE am.id IN ({subquery_str})
+            AND am.journal_id IN %s
+            AND am.state = 'posted'
+            GROUP BY am.journal_id
+        """, subquery_params + (tuple(es_journals.ids),))
+        self.env.cr.execute(pending_query)
+        pending_results = self.env.cr.fetchall()
+
+        # Format pending_groups like read_group output
+        pending_groups = [
+            {
+                'journal_id': (row[0], journal_names.get(row[0], '')),
+                'journal_id_count': row[1],
+                'create_date': row[2],
+            }
+            for row in pending_results
         ]
 
-        # Count pending moves per journal; also retrieve the oldest create_date for aging detection.
-        pending_groups = self.env['account.move'].read_group(
-            domain=pending_domain,
-            fields=['journal_id', 'create_date:min'],
-            groupby=['journal_id'],
-        )
-
-        # Which of those journals also have at least one move with an error response.
-        errored_journal_ids = {
-            g['journal_id'][0]
-            for g in self.env['account.move'].read_group(
-                domain=pending_domain + [('l10n_es_edi_sii_document_ids.response_message', '!=', False)],
-                fields=['journal_id'],
-                groupby=['journal_id'],
-            )
-        }
+        # Optimized query for errored journals
+        errored_query = SQL(f"""
+            SELECT DISTINCT am.journal_id
+            FROM account_move am
+            JOIN l10n_es_edi_sii_document d ON d.move_id = am.id
+            WHERE am.id IN ({subquery_str})
+            AND am.journal_id IN %s
+            AND am.state = 'posted'
+            AND d.response_message IS NOT NULL
+        """, subquery_params + (tuple(es_journals.ids),))
+        self.env.cr.execute(errored_query)
+        errored_journal_ids = {row[0] for row in self.env.cr.fetchall()}
 
         for group in pending_groups:
             journal_id = group['journal_id'][0]
