@@ -80,6 +80,27 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
                 'frequency': 'yearly',
             })],
         })
+        cls.leave_type_accrual_cap = cls.env['hr.leave.type'].create({
+            'name': 'Accrual Leaves with Cap',
+            'time_type': 'leave',
+            'requires_allocation': 'yes',
+            'allocation_validation_type': 'no',
+            'request_unit': 'day',
+        })
+        cls.accrual_plan_cap = cls.env['hr.leave.accrual.plan'].create({
+            'name': 'Accrual plan for Accrual Leaves with Cap',
+            'accrued_gain_time': 'end',
+            'carryover_date': 'year_start',
+            'level_ids': [(0, 0, {
+                'start_count': 0,  # Start accruing immediately
+                'start_type': 'day',
+                'added_value': 1,
+                'added_value_type': 'day',
+                'frequency': 'monthly',
+                'cap_accrued_time': True,
+                'maximum_leave': 2,
+            })],
+        })
 
     def setAllocationCreateDate(self, allocation_id, date):
         """ This method is a hack in order to be able to define/redefine the create_date
@@ -3127,3 +3148,63 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
         self.assertEqual(len(children_allocations), 2)
         self.assertEqual(children_allocations[0].number_of_days, 20.0)
         self.assertEqual(children_allocations[1].number_of_days, 20.0)
+
+    def test_taking_leaves_ez(self):
+        with freeze_time('2025-05-27'):
+            allocation = self.env['hr.leave.allocation'].create({
+                'name': 'Accrual allocation for Accrual Cap Test',
+                'accrual_plan_id': self.accrual_plan_cap.id,
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type_accrual_cap.id,
+                'number_of_days': 3,
+                'allocation_type': 'accrual',
+                'date_from': '2025-02-01',
+            })
+            allocation.action_validate()
+            self.assertEqual(allocation.number_of_days, 3)
+
+            self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-03-11', '2025-03-11')
+            self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-05-14', '2025-05-14')
+            self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-04-16', '2025-04-16')
+
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 1, self.employee_emp, '2025-06-10')
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 2, self.employee_emp, '2025-09-01')
+            self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-06-10', '2025-06-10')
+
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 1, self.employee_emp, '2025-06-09')
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 0, self.employee_emp, '2025-06-10')
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 1, self.employee_emp, '2025-07-01')
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 2, self.employee_emp, '2025-08-10')
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 2, self.employee_emp, '2025-09-10')
+
+    def test_taking_leaves(self):
+        with freeze_time('2025-05-27'):
+            allocation = self.env['hr.leave.allocation'].create({
+                'name': 'Accrual allocation for Accrual Cap Test',
+                'accrual_plan_id': self.accrual_plan_cap.id,
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type_accrual_cap.id,
+                'number_of_days': 2,
+                'allocation_type': 'accrual',
+                'date_from': '2025-02-01',
+            })
+            allocation.action_validate()
+            self.assertEqual(allocation.number_of_days, 2)
+            allocation._process_accrual_plans()
+
+            # self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-02-11', '2025-02-11')
+            # self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-03-11', '2025-03-11')
+            # self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-05-14', '2025-05-14')
+            # self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-04-16', '2025-04-16')
+
+            self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-06-10', '2025-06-10')
+            self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-08-12', '2025-08-12')
+            self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-07-14', '2025-07-14')
+            self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-06-11', '2025-06-11')
+            # self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-06-12', '2025-06-12')
+            self._take_leave_and_validate(self.employee_emp, self.leave_type_accrual_cap, '2025-09-12', '2025-09-12')
+
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 1, self.employee_emp, '2025-06-09')
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 0, self.employee_emp, '2025-06-10')
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 1, self.employee_emp, '2025-07-01')
+            self.assert_virtual_leaves_equal(self.leave_type_accrual_cap, 2, self.employee_emp, '2025-09-01')

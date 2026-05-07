@@ -68,10 +68,10 @@ class TestHrHolidaysCommon(common.TransactionCase):
         if not date:
             date = fields.Date.today()
         if digits:
-            self.assertAlmostEqual(allocation_data[employee][0][1]['remaining_leaves'], value,
+            self.assertAlmostEqual(allocation_data[employee][0][1]['virtual_remaining_leaves'], value,
                 digits, f"Virtual leaves for date '{date}' are incorrect.")
         else:
-            self.assertEqual(allocation_data[employee][0][1]['remaining_leaves'],
+            self.assertEqual(allocation_data[employee][0][1]['virtual_remaining_leaves'],
                 value, f"Virtual leaves for date '{date}' are incorrect.")
 
     def _take_leave_and_validate(self, employee, leave_type, date_from, date_to):
