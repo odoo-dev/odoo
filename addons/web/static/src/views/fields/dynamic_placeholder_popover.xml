@@ -7,20 +7,16 @@
                 <div class="border-bottom p-2">
                     <div class="d-flex justify-content-between align-items-center text-dark fw-bolder">
                         <i class="btn btn-link oi me-n2 text-dark"
-                           data-icon="arrow_back"
                            title="Back"
                            role="img"
                            aria-label="Back"
-                           t-on-click="this.onBack"
-                        />
+                           t-on-click="this.onBack">arrow_back</i>
                         <div class="o_model_field_selector_popover_title">Enter a default value</div>
                         <i class="o_model_field_selector_popover_close btn btn-link oi me-n2 text-dark"
-                           data-icon="close"
                            title="Close"
                            role="img"
                            aria-label="Close"
-                           t-on-click="this.props.close"
-                        />
+                           t-on-click="this.props.close">close</i>
                     </div>
                     <t t-if="this.state.fieldName">
                         <span t-out="this.state.fieldName"/>

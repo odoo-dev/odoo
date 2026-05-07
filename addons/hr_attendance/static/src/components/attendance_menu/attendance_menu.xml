@@ -9,10 +9,9 @@
                   state="this.dropdown">
             <button>
                 <i class="oi oi-filled"
-                   data-icon="circle"
                    t-attf-class="text-{{ this.state.checkedIn ? 'success' : 'danger' }}"
                    role="img"
-                   aria-label="Attendance"/>
+                   aria-label="Attendance">circle</i>
             </button>
 
             <t t-set-slot="content">
@@ -69,7 +68,7 @@
                                 t-attf-class="btn btn-{{ this.state.checkedIn ? 'warning' : 'primary' }} w-100">
                             <span t-if="!this.state.checkedIn">Check in</span>
                             <span t-else="">Check out</span>
-                            <i class="oi ms-1" t-attf-data-icon="{{ this.state.checkedIn ? 'logout' : 'login' }}"/>
+                            <i class="oi ms-1"><t t-out="this.state.checkedIn ? 'logout' : 'login'"/></i>
                         </button>
                     </div>
                 </div>

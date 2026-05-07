@@ -12,7 +12,7 @@
                         <label for="start_hour" string="Hour range"/>
                         <div>
                             <field name="start_hour" class="oe_inline o_input_5ch" widget="float_time"/>
-                            <i class="oi mx-2" data-icon="arrow_forward" title="to"/>
+                            <i class="oi mx-2" title="to">arrow_forward</i>
                             <field name="end_hour" class="oe_inline o_input_5ch" widget="float_time"/>
                         </div>
                         <field name="date"/>

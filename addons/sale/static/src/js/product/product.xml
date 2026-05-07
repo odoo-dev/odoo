@@ -90,7 +90,7 @@
                     t-att-class="{'disabled': !this.env.isPossibleCombination(this.props)}"
                     t-on-click="() => this.env.addProduct(this.props.product_tmpl_id)"
                 >
-                    <i class="oi" data-icon="add" role="img"/>
+                    <i class="oi" role="img">add</i>
                     <span name="add_button" class="ms-2 d-none d-md-inline">Add</span>
                 </button>
             </td>

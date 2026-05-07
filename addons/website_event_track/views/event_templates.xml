@@ -68,8 +68,8 @@
                         <div class="h2 mb-3">You're offline!</div>
                         <div class="alert alert-info text-center">
                             <span class="oi-stack oi-4x">
-                                <i class="oi oi-stack-1x" data-icon="wifi"></i>
-                                <i class="oi oi-stack-2x text-muted" data-icon="block"></i>
+                                <i class="oi oi-stack-1x">wifi</i>
+                                <i class="oi oi-stack-2x text-muted">block</i>
                             </span>
                             <p>This page hasn't been saved for offline reading yet.<br/>Please check your network connection.</p>
                             <p>

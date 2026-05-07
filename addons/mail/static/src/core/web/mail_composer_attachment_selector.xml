@@ -4,7 +4,7 @@
         <FileUploader multiUpload="true" onUploaded.bind="this.onFileUploaded">
             <t t-set-slot="toggler">
                 <button class="btn btn-light w-auto" data-hotkey="a" title="Add Attachment">
-                    <i class="oi oi-fw" data-icon="attach_file"/>
+                    <i class="oi oi-fw">attach_file</i>
                 </button>
             </t>
         </FileUploader>

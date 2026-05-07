@@ -26,7 +26,7 @@ export class HootCopyButton extends Component {
                 title="copy to clipboard"
                 t-on-click.stop="this.onClick"
             >
-                <i class="oi" data-icon="assignment" />
+                <i class="oi">assignment</i>
             </button>
         </t>
     `;

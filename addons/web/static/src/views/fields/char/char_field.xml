@@ -28,10 +28,8 @@
                 />
                 <button t-if="this.hasDynamicPlaceholder"
                     class="btn btn-link oi"
-                    data-icon="wand_stars"
                     title="Insert Field"
-                    t-on-click="this.onDynamicPlaceholderOpen"
-                />
+                    t-on-click="this.onDynamicPlaceholderOpen">wand_stars</button>
             </div>
         </t>
     </t>

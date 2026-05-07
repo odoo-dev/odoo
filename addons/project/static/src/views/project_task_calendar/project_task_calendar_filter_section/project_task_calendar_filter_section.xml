@@ -4,7 +4,7 @@
     <t t-name="project.ProjectTaskCalendarFilterSection.filter" t-inherit="web.CalendarFilterSection.filter" t-inherit-mode="primary">
         <xpath expr="//span[@t-out='filter.label']" position="before">
             <span t-if="this.props.model.isCheckProject and !filter.value" class="text-danger pe-1">
-                <i class="oi" data-icon="lock"/>
+                <i class="oi">lock</i>
             </span>
         </xpath>
     </t>

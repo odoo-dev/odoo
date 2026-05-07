@@ -20,7 +20,7 @@
                 </div>
                 <div class="d-flex align-items-center ms-1">
                     <button class="btn-cashier-lock btn btn-lg btn-secondary" title="Lock" t-on-click.stop="() => this.lock()">
-                        <i class="oi oi-fw" data-icon="lock"/>
+                        <i class="oi oi-fw">lock</i>
                     </button>
                 </div>
             </div>
@@ -39,7 +39,7 @@
                         </span>
                     </div>
                 </div>
-                <i class="oi" data-icon="chevron_forward"/>
+                <i class="oi">chevron_forward</i>
             </button>
             <button
                 t-if="this.displayMoreButton"

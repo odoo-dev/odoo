@@ -12,8 +12,7 @@
                         <i
                             data-name="server_action_icon"
                             class="oi"
-                            t-att-class="{'oi-filled': ['object_create', 'object_write', 'mail_post', 'followers', 'remove_followers', 'webhook'].includes(action.data.state)}"
-                            t-att-data-icon="{
+                            t-att-class="{'oi-filled': ['object_create', 'object_write', 'mail_post', 'followers', 'remove_followers', 'webhook'].includes(action.data.state)}"><t t-out="{
                                 'code': 'code',
                                 'object_create': 'add_box',
                                 'object_copy': 'content_copy',
@@ -26,13 +25,12 @@
                                 'sms': 'smartphone',
                                 'webhook': 'send',
                                 'whatsapp': 'whatsapp',
-                            }[action.data.state] || 'radio_button_unchecked'"
-                        />
+                            }[action.data.state] || 'radio_button_unchecked'"/></i>
                         <div class="ps-2" t-out="action.data.name" />
                     </div>
                 </div>
                 <div t-if="!action_last" class="px-3 align-self-center" t-att-data-action-id="action.id">
-                    <i class="oi oi-lg text-primary" data-icon="add"></i>
+                    <i class="oi oi-lg text-primary">add</i>
                 </div>
             </t>
             <t t-if="this.hiddenActionsCount">

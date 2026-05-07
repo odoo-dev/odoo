@@ -53,7 +53,7 @@ export class HootButtons extends Component {
                 t-att-title="isRunning ? 'Stop (Esc)' : 'Run'"
                 t-att-disabled="this.state.disable"
             >
-                <i t-attf-class="oi oi-filled" t-att-data-icon="isRunning ? 'stop' : 'play_arrow'" />
+                <i t-attf-class="oi oi-filled"><t t-out="isRunning ? 'stop' : 'play_arrow'"/></i>
                 <span t-out="isRunning ? 'Stop' : 'Run'" />
             </button>
             <t t-if="showAll or showFailed">
@@ -62,7 +62,7 @@ export class HootButtons extends Component {
                     class="bg-btn px-2 py-1 transition-colors animate-slide-left"
                     t-on-click.stop="this.onToggleClick"
                 >
-                    <i class="oi transition" data-icon="arrow_drop_down" t-att-class="{ 'rotate-180': this.state.open }" />
+                    <i class="oi transition" t-att-class="{ 'rotate-180': this.state.open }">arrow_drop_down</i>
                 </button>
             </t>
             </div>

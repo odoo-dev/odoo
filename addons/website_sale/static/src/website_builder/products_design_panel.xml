@@ -152,9 +152,7 @@
                     style="color: white; font-size: 0.8em"
                 >
                     <i
-                        class="oi me-2"
-                        t-att-data-icon="style.type == 'catalog' ? 'apps' : 'view_list'"
-                    />
+                        class="oi me-2"><t t-out="style.type == 'catalog' ? 'apps' : 'view_list'"/></i>
                     <span t-out="style.label"/>
                 </div>
                 <BuilderSelectItem
@@ -184,9 +182,7 @@
                         </div>
                         <div t-else="" class="d-flex align-items-center ps-1">
                             <i
-                                class="oi me-2"
-                                t-att-data-icon="style.type == 'catalog' ? 'apps' : 'view_list'"
-                            />
+                                class="oi me-2"><t t-out="style.type == 'catalog' ? 'apps' : 'view_list'"/></i>
                             <t t-out="style.label"/>
                         </div>
                 </BuilderSelectItem>
@@ -665,7 +661,7 @@
                             classAction="'o_wsale_products_opt_actions_promote'">
                             <div class="d-flex align-items-center">
                                 <span class="me-1">Promote</span>
-                                <i class="oi ms-2" data-icon="shopping_cart"/>
+                                <i class="oi ms-2">shopping_cart</i>
                             </div>
                         </BuilderSelectItem>
                         <BuilderSelectItem

@@ -133,9 +133,8 @@
                                 <field name="quotation_validity_days" class="text-center" style="width: 3rem;"/>
                                 <div class="d-inline-block">days</div>
                                 <span class="oi oi-lg p-2"
-                                      data-icon="business"
                                       title="Values set here are company-specific."
-                                      groups="base.group_multi_company"/>
+                                      groups="base.group_multi_company">business</span>
                             </div>
                             <div class="text-muted">
                                 Default period during which the quote is valid and can still be accepted by the customer. The default can be changed per order or template.

@@ -7,8 +7,7 @@
             <i
                class="o_button_icon oi oi-fw"
                t-att-class="{'text-warning': this.state.surveyIconWarning}"
-               t-att-data-icon="this.state.surveyIconWarning ? 'warning' : 'fork_right'"
-               t-att-data-tooltip="this.state.triggerTooltip"/>
+               t-att-data-tooltip="this.state.triggerTooltip"><t t-out="this.state.surveyIconWarning ? 'warning' : 'fork_right'"/></i>
         </button>
     </t>
 

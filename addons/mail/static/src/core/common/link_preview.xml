@@ -100,7 +100,7 @@
     <t t-name="mail.LinkPreview.aside">
         <div t-if="this.props.messageLinkPreview.message_id?.allowsEdition and !this.env.inLinkPreviewConfirmDelete" class="position-absolute top-0 end-0 small">
             <button t-attf-class="{{ className }}" class="o-mail-LinkPreview-aside btn" aria-label="Remove" t-on-click="this.onClick">
-                <i class="oi" data-icon="close"/>
+                <i class="oi">close</i>
             </button>
         </div>
     </t>
@@ -108,13 +108,13 @@
     <t t-name="mail.LinkPreviewVideo.preview">
         <div class="o-mail-LinkPreviewVideo-overlay position-relative h-100 rounded-bottom" t-att-class="{'bg-dark': !this.linkPreview.og_image}">
             <img t-if="this.linkPreview.og_image" class="img-fluid h-100 w-100 object-fit-cover rounded" t-att-src="this.linkPreview.og_image" t-att-alt="this.linkPreview.og_title" t-on-load="this.onImageLoaded"/>
-            <i t-elif="this.linkPreview.videoURL" class="oi oi-8x position-absolute top-50 start-50 translate-middle" data-icon="tv"/>
+            <i t-elif="this.linkPreview.videoURL" class="oi oi-8x position-absolute top-50 start-50 translate-middle">tv</i>
             <span t-else="" class="d-flex align-items-center justify-content-center w-100 h-100 bg-100 text-300">
-                <i class="oi oi-2x" data-icon="photo_camera"/>
+                <i class="oi oi-2x">photo_camera</i>
             </span>
             <div class="position-absolute top-50 start-50 translate-middle">
                 <div t-if="!this.state.startVideo" class="o-mail-LinkPreviewVideo-play btn btn-lg rounded transition-base">
-                    <i class="oi" data-icon="play_arrow"/>
+                    <i class="oi">play_arrow</i>
                 </div>
                 <div t-elif="!this.linkPreview.og_image" class="spinner-border text-muted"/>
             </div>

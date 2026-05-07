@@ -5,7 +5,7 @@
         t-attf-class="control-button btn btn-lg {{btnClasses ? btnClasses : ''}} d-inline-flex flex-md-column justify-content-md-center gap-1 overflow-hidden"
         t-on-click="onClick"
         t-att-disabled="disabled ? 'disabled' : ''">
-            <i t-if="iconClasses" t-attf-class="oi {{iconClasses}} {{!this.ui.isSmall ? ' oi-2x oi-fw' : ''}} align-self-center opacity-50" t-att-data-icon="iconName" role="img" aria-hidden="true"/>
+            <i t-if="iconClasses" t-attf-class="oi {{iconClasses}} {{!this.ui.isSmall ? ' oi-2x oi-fw' : ''}} align-self-center opacity-50" role="img" aria-hidden="true"><t t-out="iconName"/></i>
             <t t-if="badge" t-out="badge"/>
             <span t-attf-class="d-flex flex-md-column flex-grow-1 flex-md-grow-0 align-items-center align-items-md-stretch min-w-0 {{this.ui.isSmall ? ' lh-sm' : ''}} text-start text-md-center">
                 <span class="px-1" t-out="btnText"/>
@@ -27,7 +27,7 @@
                 <span t-else="">Preset</span>
             </button>
             <button t-if="!this.ui.isSmall and this.pos.showSaveOrderButton" t-att-disabled="this.pos.getOrder().isEmpty()" t-attf-class="{{ this.buttonClass }} ms-auto" t-on-click="() => this.pos.clickSaveOrder()">
-                <i class="oi" data-icon="upload" aria-hidden="true"/>
+                <i class="oi" aria-hidden="true">upload</i>
             </button>
             <button t-if="!this.ui.isSmall and this.props.onClickMore" class="more-btn btn btn-secondary btn-lg flex-shrink-0 ms-auto lh-lg" t-on-click="this.props.onClickMore">
                 <i class="oi oi-fw oi-ellipsis-v" aria-hidden="true" />

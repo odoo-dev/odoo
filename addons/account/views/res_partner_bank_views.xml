@@ -16,9 +16,7 @@
                                         'text-success': trusted,
                                         'text-danger': !trusted,
                                    }"
-                                   t-attf-data-icon="{{trusted ? 'security' : 'error'}}"
-                                   t-att-title="trusted ? 'Trusted' : 'Untrusted'"
-                                   />
+                                   t-att-title="trusted ? 'Trusted' : 'Untrusted'"><t t-out="trusted ? 'security' : 'error'"/></i>
                                 <field name="display_name"/>
                             </div>
                         </t>

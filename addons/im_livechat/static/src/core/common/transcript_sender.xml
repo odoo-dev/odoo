@@ -8,8 +8,7 @@
                     <i class="oi" t-att-class="{
                         'oi-spin': this.state.status === this.STATUS.SENDING,
                         'oi-filled': this.state.status === this.STATUS.IDLE,
-                    }"
-                    t-attf-data-icon="{{ this.state.status == this.STATUS.SENDING ? 'autorenew' : this.state.status == this.STATUS.SENT ? 'check' : this.state.status == this.STATUS.IDLE ? 'send' : this.state.status == this.STATUS.FAILED ? 'redo' : '' }}"/>
+                    }"><t t-out="this.state.status == this.STATUS.SENDING ? 'autorenew' : this.state.status == this.STATUS.SENT ? 'check' : this.state.status == this.STATUS.IDLE ? 'send' : this.state.status == this.STATUS.FAILED ? 'redo' : ''"/></i>
                 </button>
             </div>
             <div class="form-text ms-1">

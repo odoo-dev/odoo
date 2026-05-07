@@ -10,9 +10,7 @@
                         t-on-click="() => this.clickPrintButton(item)">
                         <i
                             class="oi oi-2x me-1"
-                            t-att-class="{'oi-fw oi-spin': item.status === 'loading'}"
-                            t-att-data-icon="item.status === 'loading' ? 'autorenew' : item.icon"
-                        /><t t-out="item.label" />
+                            t-att-class="{'oi-fw oi-spin': item.status === 'loading'}"><t t-out="item.status === 'loading' ? 'autorenew' : item.icon"/></i><t t-out="item.label" />
                 </button>
             </div>
         </Dialog>

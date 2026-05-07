@@ -13,31 +13,31 @@
                 <DropdownItem
                     class="`d-flex align-items-center`"
                     onSelected="() => this.setState('blocked')">
-                        <span class="oi oi-lg text-warning me-2" data-icon="error"/>
+                        <span class="oi oi-lg text-warning me-2">error</span>
                         <span>Blocked</span>
                 </DropdownItem>
                 <DropdownItem
                     class="`d-flex align-items-center`"
                     onSelected="() => this.setState('ready')">
-                        <span t-attf-class="oi oi-lg oi-filled text-muted me-2" data-icon="circle"/>
+                        <span t-attf-class="oi oi-lg oi-filled text-muted me-2">circle</span>
                         <span>To Do</span>
                 </DropdownItem>
                 <DropdownItem
                     class="`d-flex align-items-center`"
                     onSelected="() => this.setState('progress')">
-                        <span t-attf-class="oi oi-lg oi-filled text-info me-2" data-icon="play_circle"/>
+                        <span t-attf-class="oi oi-lg oi-filled text-info me-2">play_circle</span>
                         <span>In Progress</span>
                 </DropdownItem>
                 <DropdownItem
                     class="`d-flex align-items-center`"
                     onSelected="() => this.setState('cancel')">
-                        <span t-attf-class="oi oi-lg oi-filled text-danger me-2" data-icon="cancel"/>
+                        <span t-attf-class="oi oi-lg oi-filled text-danger me-2">cancel</span>
                         <span>Cancelled</span>
                 </DropdownItem>
                 <DropdownItem
                     class="`d-flex align-items-center`"
                     onSelected="() => this.setState('done')">
-                        <span t-attf-class="oi oi-lg oi-filled text-success me-2" data-icon="check_circle"/>
+                        <span t-attf-class="oi oi-lg oi-filled text-success me-2">check_circle</span>
                         <span>Done</span>
                 </DropdownItem>
             </t>

@@ -30,7 +30,7 @@
                             class="btn btn-primary"
                             t-on-click="this.uploadImage"
                         >
-                            <i class="oi me-1" data-icon="cloud_upload" aria-hidden="true"/>
+                            <i class="oi me-1" aria-hidden="true">cloud_upload</i>
                             Upload New
                         </button>
                 </FileInput>

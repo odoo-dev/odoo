@@ -6,10 +6,8 @@
                 t-att-data-type="this.props.type"
                 class="o-we-table-menu oi"
                 t-attf-class="{{ this.props.type === 'column' ? 'w-100' : 'h-100 px-0' }}"
-                t-attf-data-icon="{{ this.props.type === 'column' ? 'more_horiz' : 'more_vert' }}"
                 title="Click to open options&#10;Drag to move"
-                t-on-pointerdown.prevent="() => {}"
-            />
+                t-on-pointerdown.prevent="() => {}"><t t-out="this.props.type === 'column' ? 'more_horiz' : 'more_vert'"/></button>
             <t t-set-slot="content">
                 <div t-on-pointerdown.stop="() => {}">
                     <t t-foreach="this.items" t-as="item" t-key="item_index">
@@ -18,8 +16,7 @@
                                 <span t-if="item.icon"
                                     class="oi text-center"
                                     t-att-class="item.icon_class"
-                                    style="width:16px;"
-                                    t-att-data-icon="item.icon"/>
+                                    style="width:16px;"><t t-out="item.icon"/></span>
                                 <span class="ms-2" t-out="item.text"/>
                             </div>
                         </DropdownItem>

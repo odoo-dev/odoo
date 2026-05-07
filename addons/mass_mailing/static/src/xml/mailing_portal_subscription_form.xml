@@ -75,11 +75,11 @@
     <!-- Post action informative span -->
     <t t-name="mass_mailing.portal.list_form_update_info">
         <t t-if="this.infoKey == 'subscription_updated'">
-            <i class="oi me-1" data-icon="check"/>
+            <i class="oi me-1">check</i>
             <span>Membership updated</span>
         </t>
         <t t-else="">
-            <i class="oi me-1" data-icon="warning"/>
+            <i class="oi me-1">warning</i>
             <span>An error occurred. Please retry later.</span>
         </t>
     </t>

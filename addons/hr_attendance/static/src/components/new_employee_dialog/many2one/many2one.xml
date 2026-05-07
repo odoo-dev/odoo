@@ -19,6 +19,6 @@
                 </div>
             </t>
         </AutoComplete>
-        <i class="oi dropdown-caret-icon" data-icon="arrow_drop_down"></i>
+        <i class="oi dropdown-caret-icon">arrow_drop_down</i>
     </t>
 </templates>

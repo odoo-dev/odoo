@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     <t t-name="mail.Priority">
         <div class="d-inline" t-att-aria-label="this.label" t-att-title="this.label">
-            <span t-foreach="Array(this.maxStar)" t-as="star" t-key="star_index" class="oi" t-att-class="{'o-mail-priority-star oi-filled': star_index + 1 lte this.priority}" data-icon="star" />
+            <span t-foreach="Array(this.maxStar)" t-as="star" t-key="star_index" class="oi" t-att-class="{'o-mail-priority-star oi-filled': star_index + 1 lte this.priority}">star</span>
         </div>
     </t>
 </templates>

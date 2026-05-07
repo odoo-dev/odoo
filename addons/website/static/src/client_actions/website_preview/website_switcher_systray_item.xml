@@ -6,10 +6,10 @@
             <button data-hotkey="w" class="mx-1 border-0">
                 <div class="d-none d-md-flex align-items-md-center">
                     <span t-out="this.websiteService.currentWebsite?.name" class="me-2 text-truncate" style="max-width: 200px"/>
-                    <i class="oi" data-icon="arrow_drop_down"/>
+                    <i class="oi">arrow_drop_down</i>
                 </div>
                 <div class="d-md-none">
-                    <i class="oi" data-icon="public"/>
+                    <i class="oi">public</i>
                 </div>
             </button>
             <t t-set-slot="content">
@@ -19,7 +19,7 @@
                         class="element.class"
                         attrs="element.dataset">
                         <t t-if="!element.domain">
-                            <span class="oi me-2 text-warning" data-icon="warning"/>
+                            <span class="oi me-2 text-warning">warning</span>
                         </t>
                         <t t-out="element.name"/>
                     </DropdownItem>

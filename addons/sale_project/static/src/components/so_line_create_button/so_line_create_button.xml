@@ -12,7 +12,7 @@
                 data-tooltip="Create Sales Order"
                 t-on-click="this.openSalesOrderDialog"
             >
-                <i class="oi" data-icon="add"/>
+                <i class="oi">add</i>
             </button>
         </div>
     </t>

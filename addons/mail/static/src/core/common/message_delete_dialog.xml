@@ -9,11 +9,11 @@
         </blockquote>
         <t t-set-slot="footer">
             <button class="btn btn-danger me-2" t-on-click="this.onClickConfirm">
-                <i class="oi oi-filled me-1 opacity-50" data-icon="delete"/>
+                <i class="oi oi-filled me-1 opacity-50">delete</i>
                 Delete
             </button>
             <button class="btn btn-secondary me-2" t-on-click="this.props.close">
-                <i class="oi me-1 opacity-50" data-icon="close"/>
+                <i class="oi me-1 opacity-50">close</i>
                 Discard
             </button>
         </t>

@@ -163,13 +163,13 @@
                             <div>
                                 <a type="object" name="action_view_cards_shared" href="#" class="me-1">
                                     <span class="badge rounded-pill">
-                                        <i class="oi oi-fw" data-icon="share" aria-label="Shares" role="img" title="Shares"/>
+                                        <i class="oi oi-fw" aria-label="Shares" role="img" title="Shares">share</i>
                                         <field name="card_share_count"/>
                                     </span>
                                 </a>
                                 <a type="object" name="action_view_cards_clicked" href="#" class="me-1">
                                     <span class="badge rounded-pill">
-                                        <i class="oi oi-fw" data-icon="mouse"  aria-label="Clicks" role="img" title="Clicks"/>
+                                        <i class="oi oi-fw"  aria-label="Clicks" role="img" title="Clicks">mouse</i>
                                         <field name="target_url_click_count"/>
                                     </span>
                                 </a>

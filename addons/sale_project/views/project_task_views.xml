@@ -160,9 +160,9 @@
                         options="{'no_create': True}"
                     />
                     <span
-                        class="oi text-warning" data-icon="warning"
+                        class="oi text-warning"
                         title="The sales order associated with this project has been cancelled. We recommend either updating the sales order item or cancelling this project in alignment with the cancellation of the sales order."
-                        invisible="sale_order_state != 'cancel'"/>
+                        invisible="sale_order_state != 'cancel'">warning</span>
                 </div>
                 <field name="sale_order_state" invisible="1"/>
             </xpath>
@@ -244,9 +244,8 @@
                         placeholder="Non-billable"/>
                     <span
                         class="oi text-warning"
-                        data-icon="warning"
                         title="The sales order associated with this task has been cancelled. We recommend either updating the sales order item or cancelling this task in alignment with the cancellation of the sales order."
-                        invisible="sale_order_state != 'cancel'"/>
+                        invisible="sale_order_state != 'cancel'">warning</span>
                 </div>
                 <field name="allow_billable" invisible="1"/>
                 <field name="sale_order_state" invisible="1"/>

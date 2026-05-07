@@ -6,8 +6,7 @@
             <a title="Mark as done"
                t-on-click.stop="this.onChange"
                class="o_todo_done_button oi oi-lg ps-0"
-               t-att-class="{'oi-filled done_button_enabled': reached.isReached}"
-               data-icon="check_circle"/>
+               t-att-class="{'oi-filled done_button_enabled': reached.isReached}">check_circle</a>
         </xpath>
     </t>
 

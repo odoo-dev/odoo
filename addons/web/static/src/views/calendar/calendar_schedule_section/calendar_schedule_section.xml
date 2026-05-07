@@ -18,7 +18,7 @@
                 t-att-data-res-id="event.id" 
                 t-on-click="() => this.openRecord(event)"
             >
-                <i class="oi o_event_to_schedule_handle" data-icon="drag_indicator"/>
+                <i class="oi o_event_to_schedule_handle">drag_indicator</i>
                 <span class="ps-1" t-out="event.display_name" t-att-title="event.display_name"/>
             </div>
         </div>

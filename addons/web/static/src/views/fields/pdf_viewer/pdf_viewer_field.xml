@@ -12,25 +12,19 @@
                         <t t-set-slot="toggler">
                             <button
                                 class="btn btn-secondary oi oi-filled o_select_file_button"
-                                data-icon="edit"
                                 data-tooltip="Edit"
-                                aria-label="Edit"
-                            />
+                                aria-label="Edit">edit</button>
                         </t>
                             <button
                                 class="btn btn-secondary oi"
-                                data-icon="download"
                                 data-tooltip="Download"
                                 aria-label="Download"
-                                t-on-click="this.onFileDownload"
-                            />
+                                t-on-click="this.onFileDownload">download</button>
                         <button
                             class="btn btn-secondary oi oi-filled o_clear_file_button"
-                            data-icon="edit"
                             data-tooltip="Clear"
                             aria-label="Clear"
-                            t-on-click="this.onFileRemove"
-                        />
+                            t-on-click="this.onFileRemove">edit</button>
                     </FileUploader>
                 </t>
                 <t t-else="">

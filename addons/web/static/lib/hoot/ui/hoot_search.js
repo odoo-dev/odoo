@@ -362,7 +362,7 @@ export class HootSearch extends Component {
                             t-att-disabled="isRunning"
                             t-on-change="this.toggleExact"
                         />
-                        <i class="oi text-gray transition-colors" data-icon="format_quote" />
+                        <i class="oi text-gray transition-colors">format_quote</i>
                     </label>
                     <label
                         class="hoot-search-icon cursor-pointer p-1"
@@ -377,7 +377,7 @@ export class HootSearch extends Component {
                             t-att-disabled="isRunning"
                             t-on-change="this.toggleRegExp"
                         />
-                        <i class="oi text-gray transition-colors" data-icon="emergency" />
+                        <i class="oi text-gray transition-colors">emergency</i>
                     </label>
                     <label
                         class="hoot-search-icon cursor-pointer p-1"
@@ -391,7 +391,7 @@ export class HootSearch extends Component {
                             t-att-disabled="isRunning"
                             t-on-change="this.toggleDebug"
                         />
-                        <i class="oi text-gray transition-colors" data-icon="bug_report" />
+                        <i class="oi text-gray transition-colors">bug_report</i>
                     </label>
                 </div>
                 <t t-if="this.state.showDropdown">

@@ -61,9 +61,7 @@ export class HootSideBarSuite extends Component {
                 t-att-class="{
                     'rotate-90': this.props.unfolded,
                     'opacity-25': !this.props.reporting.failed and !this.props.reporting.tests
-                }"
-                data-icon="chevron_right"
-            />
+                }">chevron_right</i>
         </t>
         <span t-ref="root" t-att-class="this.getClassName()" t-out="this.props.name" />
         <t t-if="this.props.multi">
@@ -168,7 +166,7 @@ export class HootSideBar extends Component {
                         t-att-title="this.state.hideEmpty ? 'Show all suites' : 'Hide other suites'"
                         t-on-click.stop="this.toggleHideEmpty"
                     >
-                        <i class="oi" t-att-data-icon="this.state.hideEmpty ? 'visibility' : 'visibility_off'" />
+                        <i class="oi"><t t-out="this.state.hideEmpty ? 'visibility' : 'visibility_off'"/></i>
                     </button>
                 </t>
                 <t t-set="expanded" t-value="this.unfoldedIds.size === this.env.runner.suites.size" />
@@ -178,7 +176,7 @@ export class HootSideBar extends Component {
                     t-attf-title="{{ expanded ? 'Collapse' : 'Expand' }} all"
                     t-on-click.stop="() => this.toggleExpand(expanded)"
                 >
-                    <i class="oi" t-att-data-icon="expanded ? 'close_fullscreen' : 'expand_content'" />
+                    <i class="oi"><t t-out="expanded ? 'close_fullscreen' : 'expand_content'"/></i>
                 </button>
             </form>
             <ul class="overflow-x-hidden overflow-y-auto" t-ref="suites-list">

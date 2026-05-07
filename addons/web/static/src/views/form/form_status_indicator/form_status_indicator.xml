@@ -13,7 +13,7 @@
                     aria-label="Save manually"
                     data-available-offline=""
                     t-custom-ref="save">
-                    <i class="oi oi-fw" data-icon="cloud_upload" />
+                    <i class="oi oi-fw">cloud_upload</i>
                 </button>
                 <button
                     type="button"
@@ -23,14 +23,14 @@
                     data-tooltip="Discard all changes"
                     data-available-offline=""
                     aria-label="Discard all changes">
-                    <i class="oi oi-fw" data-icon="close" />
+                    <i class="oi oi-fw">close</i>
                 </button>
             </div>
             <span
                 t-if="!this.props.model.root.isNew and this.indicatorMode === 'invalid'"
                 class="text-danger small ms-2"
                 data-tooltip="Unable to save. Correct the issue or discard all changes">
-                <i class="oi" data-icon="warning" />
+                <i class="oi">warning</i>
             </span>
         </div>
     </t>

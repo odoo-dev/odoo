@@ -45,10 +45,8 @@
                         <button class="alert-link btn btn-link btn-sm p-0">
                             <i
                                 class="oi oi-fw"
-                                t-attf-data-icon="{{'refresh' if available_qty else 'delete'}}"
                                 role="presentation"
-                                aria-label="Update cart quantities"
-                            />
+                                aria-label="Update cart quantities"><t t-out="'refresh' if available_qty else 'delete'"/></i>
                             <t t-set="update_cart_button_label">Update cart with available stock</t>
                             <t t-set="remove_from_cart_button_label">Remove</t>
                             <span
@@ -73,7 +71,7 @@
                                     t-att-data-line-id="order_line.id"
                                     t-att-data-product-id="order_line.product_id.id"
                                 >
-                                    <i class="oi oi-fw" data-icon="favorite" role="presentation" aria-label="Add to wishlist"/>
+                                    <i class="oi oi-fw" role="presentation" aria-label="Add to wishlist">favorite</i>
                                     Wishlist
                                 </span>
                             </button>
@@ -81,7 +79,7 @@
                                 t-else=""
                                 class="alert-link small"
                             >
-                                <i class="oi oi-fw oi-filled" data-icon="favorite"/> In wishlist
+                                <i class="oi oi-fw oi-filled">favorite</i> In wishlist
                             </span>
                         </t>
                     </div>
@@ -114,10 +112,8 @@
             <i
                 t-if="request.website.sudo().in_store_dm_id"
                 class="oi oi-fw me-1"
-                t-attf-data-icon="{{'location_on' if dm.delivery_type == 'in_store' else 'local_shipping'}}"
                 role="presentation"
-                aria-label="Delivery method"
-            />
+                aria-label="Delivery method"><t t-out="'location_on' if dm.delivery_type == 'in_store' else 'local_shipping'"/></i>
         </span>
         <div name="o_pickup_location" position="after">
             <t t-if="dm.delivery_type=='in_store' and pickup_location_data">

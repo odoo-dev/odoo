@@ -69,7 +69,7 @@
                                 </h1>
                                 <label for="work_email" class="d-md-none"/>
                                 <div class="d-flex align-items-baseline w-md-50 gap-2">
-                                    <i class="d-none d-md-block oi oi-filled" data-icon="mail" title="Work Email"/>
+                                    <i class="d-none d-md-block oi oi-filled" title="Work Email">mail</i>
                                     <field name="work_email" widget="email" placeholder="e.g. johndoe@example.com" string="Work Email"/>
                                 </div>
                                 <label for="work_phone" class="d-md-none"/>
@@ -112,7 +112,7 @@
                                                         type="action"
                                                         role="button"
                                                         context="{'hierarchy_res_id': id}">
-                                                        <i class="oi me-1 mt-1" data-icon="account_tree"/>
+                                                        <i class="oi me-1 mt-1">account_tree</i>
                                                         <span class="fw-bolder">Zoom</span>
                                                     </a>
                                                 </div>
@@ -187,16 +187,16 @@
                                 <field t-if="record.job_title.raw_value" name="job_title"/>
                                 <field t-elif="record.job_id.raw_value" name="job_id"/>
                                 <div t-if="record.work_email.raw_value" class="text-truncate">
-                                    <i class="oi oi-fw oi-filled me-2" data-icon="mail" title="Email"/>
+                                    <i class="oi oi-fw oi-filled me-2" title="Email">mail</i>
                                     <field name="work_email"/>
                                 </div>
                                 <div t-if="record.work_phone.raw_value">
-                                    <i class="oi oi-fw oi-filled me-2" data-icon="phone" title="Phone"/>
+                                    <i class="oi oi-fw oi-filled me-2" title="Phone">phone</i>
                                     <field name="work_phone"/>
                                 </div>
                                 <div class="d-flex">
                                     <div invisible="birthday_public_display_string == 'hidden'">
-                                        <i class="oi oi-fw me-2 text-primary" data-icon="cake" title="Birthday"/>
+                                        <i class="oi oi-fw me-2 text-primary" title="Birthday">cake</i>
                                         <field name="birthday_public_display_string"/>
                                     </div>
                                     <field name="user_id" widget="many2one_avatar_user" readonly="1" class="ms-auto"/>

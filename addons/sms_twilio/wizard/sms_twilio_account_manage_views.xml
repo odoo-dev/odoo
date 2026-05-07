@@ -16,7 +16,7 @@
                             role="button"
                             href="https://www.odoo.com/documentation/latest/applications/marketing/sms_marketing/twilio.html">
                             Need help ?
-                            <i class="oi" data-icon="open_in_new" aria-hidden="true"/>
+                            <i class="oi" aria-hidden="true">open_in_new</i>
                         </a>
                     </div>
                     <field name="sms_twilio_auth_token" password="True" placeholder="abcde12345abcde12345abcde12345ab"

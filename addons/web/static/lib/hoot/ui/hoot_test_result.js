@@ -94,7 +94,7 @@ const DOC_URL = `https://www.odoo.com/documentation/18.0/developer/reference/fro
 
 const ERROR_TEMPLATE = /* xml */ `
     <div class="text-rose flex items-center gap-1 px-2 truncate">
-        <i class="oi" data-icon="priority_high" />
+        <i class="oi">priority_high</i>
         <strong t-esc="event.label" />
         <span class="flex truncate" t-esc="event.message.join(' ')" />
     </div>
@@ -114,7 +114,7 @@ const EVENT_TEMPLATE = /* xml */ `
             <t t-esc="event.number + '.'" />
         </t>
         <t t-else="">
-            <i class="oi" t-att-class="eventIconClass" t-att-data-icon="eventIcon" />
+            <i class="oi" t-att-class="eventIconClass"><t t-out="eventIcon"/></i>
         </t>
         <a
             class="hover:text-primary flex gap-1 items-center"
@@ -123,9 +123,9 @@ const EVENT_TEMPLATE = /* xml */ `
             target="_blank"
         >
             <t t-if="event.flags">
-                <i t-if="event.hasFlag('rejects')" class="oi" data-icon="close" />
-                <i t-elif="event.hasFlag('resolves')" class="oi" data-icon="arrow_forward" />
-                <i t-if="event.hasFlag('not')" class="oi" data-icon="priority_high" />
+                <i t-if="event.hasFlag('rejects')" class="oi">close</i>
+                <i t-elif="event.hasFlag('resolves')" class="oi">arrow_forward</i>
+                <i t-if="event.hasFlag('not')" class="oi">priority_high</i>
             </t>
             <strong t-esc="event.label" />
         </a>

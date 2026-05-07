@@ -122,26 +122,26 @@
                             <aside class="col-3 me-2">
                                 <div class="display-3 fw-bold text-center text-primary mb-2" t-out="val_stars"/>
                                 <i t-foreach="[...Array(val_integer).keys()]" t-as="num"  t-key="num"
-                                    class="oi oi-filled" data-icon="star"
+                                    class="oi oi-filled"
                                     aria-label="A star"
-                                    role="img"/>
+                                    role="img">star</i>
                                 <i t-if="val_decimal"
-                                    class="oi" data-icon="star_half"
+                                    class="oi"
                                     aria-label="Half a star"
-                                    role="img"/>
+                                    role="img">star_half</i>
                                 <i t-foreach="[...Array(empty_star).keys()]" t-as="num" t-key="num"
-                                    class="oi oi-filled text-black-25" data-icon="star"
+                                    class="oi oi-filled text-black-25"
                                     aria-label="A star"
-                                    role="img"/>
+                                    role="img">star</i>
                             </aside>
                             <main class="col">
                                 <field name="partner_id" class="fw-bold fs-5"/>
                                 <div class="mt0">
-                                    <i class="oi oi-filled me-2" data-icon="folder" aria-label="Open folder"></i>
+                                    <i class="oi oi-filled me-2" aria-label="Open folder">folder</i>
                                     <a type="object" name="action_open_rated_object" t-att-title="record.res_name.raw_value">
                                         <field name="res_name" />
                                     </a>
-                                    <div><i class="oi me-2" data-icon="schedule" aria-label="Create date"/> <field name="rated_on" /></div>
+                                    <div><i class="oi me-2" aria-label="Create date">schedule</i> <field name="rated_on" /></div>
                                     <field name="feedback" class="mt-2"/>
                                 </div>
                             </main>

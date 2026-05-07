@@ -385,9 +385,9 @@
                         <field name="rating_avg" invisible="1"/>
                         <field name="rating_active" invisible="1"/>
                         <button name="action_open_ratings" type="object" invisible="rating_count == 0 or not rating_active or has_template_ancestor or has_project_template" class="oe_stat_button">
-                            <i class="oi oi-fw o_button_icon" data-icon="sentiment_satisfied" invisible="rating_avg &lt; 3.66" title="Happy"/>
-                            <i class="oi oi-fw o_button_icon" data-icon="sentiment_neutral" invisible="rating_avg &lt; 2.33 or rating_avg &gt;= 3.66" title="Neutral"/>
-                            <i class="oi oi-fw o_button_icon" data-icon="sentiment_sad" invisible="rating_avg &gt;= 2.33" title="Unhappy"/>
+                            <i class="oi oi-fw o_button_icon" invisible="rating_avg &lt; 3.66" title="Happy">sentiment_satisfied</i>
+                            <i class="oi oi-fw o_button_icon" invisible="rating_avg &lt; 2.33 or rating_avg &gt;= 3.66" title="Neutral">sentiment_neutral</i>
+                            <i class="oi oi-fw o_button_icon" invisible="rating_avg &gt;= 2.33" title="Unhappy">sentiment_sad</i>
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value"><field name="rating_avg_text" nolabel="1"/></span>
                                 <span class="o_stat_text">Last Rating</span>
@@ -715,7 +715,7 @@
                         <t t-name="card">
                             <main t-att-class="['1_done', '1_canceled'].includes(record.state.raw_value) ? 'opacity-50' : ''">
                                 <a t-if="record.parent_id.raw_value" class="o_kanban_parent mw-100 me-auto pe-3 btn-link o_small-fs text-dark text-truncate" title="See Parent Task" name="action_open_parent_task" type="object" role="button">
-                                    <i class="oi me-1" data-icon="subdirectory_arrow_right"/>
+                                    <i class="oi me-1">subdirectory_arrow_right</i>
                                     <field name="parent_id"/>
                                 </a>
                                 <field name="name" class="fw-bold fs-5"/>
@@ -732,12 +732,12 @@
                                     <div class="d-flex align-items-center gap-1">
                                         <field name="activity_ids" widget="kanban_activity" style="margin-right: 2px"/>
                                         <b t-if="record.rating_active.raw_value and record.rating_count.raw_value &gt; 0">
-                                            <span class="oi oi-fw o_button_icon text-success rating_face" data-icon="sentiment_satisfied" t-if="record.rating_avg.raw_value &gt;= 3.66" title="Average Rating: Happy" role="img" aria-label="Happy face"/>
-                                            <span class="oi oi-fw o_button_icon text-warning rating_face" data-icon="sentiment_neutral" t-elif="record.rating_avg.raw_value &gt;= 2.33" title="Average Rating: Neutral" role="img" aria-label="Neutral face"/>
-                                            <span class="oi oi-fw o_button_icon text-danger rating_face" data-icon="sentiment_sad" t-else="" title="Average Rating: Unhappy" role="img" aria-label="Unhappy face"/>
+                                            <span class="oi oi-fw o_button_icon text-success rating_face" t-if="record.rating_avg.raw_value &gt;= 3.66" title="Average Rating: Happy" role="img" aria-label="Happy face">sentiment_satisfied</span>
+                                            <span class="oi oi-fw o_button_icon text-warning rating_face" t-elif="record.rating_avg.raw_value &gt;= 2.33" title="Average Rating: Neutral" role="img" aria-label="Neutral face">sentiment_neutral</span>
+                                            <span class="oi oi-fw o_button_icon text-danger rating_face" t-else="" title="Average Rating: Unhappy" role="img" aria-label="Unhappy face">sentiment_sad</span>
                                         </b>
                                         <a t-if="!record.project_id.raw_value and !record.is_template.raw_value" class="text-muted" style="font-size: 17px; margin-left: 1.5px">
-                                            <i title="Private Task" class="oi" data-icon="lock"/>
+                                            <i title="Private Task" class="oi">lock</i>
                                         </a>
                                         <t t-if="record.project_id.raw_value and record.subtask_count.raw_value">
                                             <widget name="subtask_counter" class="me-1"/>
@@ -914,7 +914,7 @@
                                 <field name="name" display="full" class="o_text_block"/>
                                 <div t-att-title="record.project_id.value" invisible="context.get('default_project_id', False)">
                                     <field t-if="record.project_id.value" name="project_id" muted="1" class="o_text_block"/>
-                                    <div t-else="" class="fst-italic text-muted"><i class="oi" data-icon="lock"/> Private</div>
+                                    <div t-else="" class="fst-italic text-muted"><i class="oi">lock</i> Private</div>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-end gap-2 flex-grow-1">

@@ -13,7 +13,7 @@
                                 <span class="o_form_label">
                                     E-Factura Details
                                 </span>
-                                <span class="oi oi-lg" data-icon="business" title="Values set here are company-specific."/>
+                                <span class="oi oi-lg" title="Values set here are company-specific.">business</span>
                             </div>
                             <div class="text-muted oe_inline mb-3">
                                 <div class="mb-1">

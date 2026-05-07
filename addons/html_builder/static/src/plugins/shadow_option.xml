@@ -54,9 +54,8 @@
             <t t-out="0"/>
         </div>
         <a class="oi oi-filled btn o-hb-shadow-button"
-                data-icon="edit"
                 title="Edit"
-                t-on-click="onClick"/>
+                t-on-click="onClick">edit</a>
     </div>
 </t>
 

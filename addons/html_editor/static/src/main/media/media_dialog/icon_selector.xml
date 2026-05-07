@@ -37,12 +37,13 @@
                             t-att-aria-label="icon.name"
                             role="img"
                             class="font-icons-icon oi m-2 fs-2 p-3 cursor-pointer text-center"
-                            t-att-data-icon="icon.dataIcon"
                             t-att-class="{
                                 o_we_attachment_selected: this.selectedMediaIds.includes(icon.id),
                                 'oi-filled': state.filled,
                             }"
-                            t-on-click="() => this.onClickIcon(category, icon)"/>
+                            t-on-click="() => this.onClickIcon(category, icon)">
+                            <t t-out="icon.dataIcon"/>
+                        </span>
                     </t>
                     <!-- Legacy FontAwesome icons: rendered via CSS class names -->
                     <t t-else="">

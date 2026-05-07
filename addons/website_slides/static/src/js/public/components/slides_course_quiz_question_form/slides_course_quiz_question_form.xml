@@ -24,7 +24,7 @@
             <div>
                 <t t-call="slide.quiz.buttons"/>
                 <div class="ms-2 text-danger o_wslides_js_quiz_validation_error" t-att-class="{ 'd-none': !this.state.error }">
-                    <i class="oi me-1" data-icon="close"/>
+                    <i class="oi me-1">close</i>
                     <span class="o_wslides_js_quiz_validation_error_text"><t t-out="this.state.error || ''" /></span>
                 </div>
             </div>
@@ -42,25 +42,23 @@
                                 <a class="o_wslides_js_quiz_is_correct" title="This is the correct answer">
                                     <label class="my-0">
                                         <input class="d-none" type="radio" name="radio" t-att-checked="answer.isCorrect" t-on-change="(event) => this.onIsCorrectClick(answer, event.currentTarget.checked)" />
-                                        <i class="o_wslides_js_quiz_icon oi oi-lg text-muted" data-icon="check_circle"/>
+                                        <i class="o_wslides_js_quiz_icon oi oi-lg text-muted">check_circle</i>
                                     </label>
                                 </a>
                             </div>
                         </div>
                     </div>
                     <i
-                        t-attf-class="o_wslides_js_quiz_icon o_wslides_js_quiz_comment_answer oi oi-lg col-auto p-md-2 py-2 ps-2 pe-1 #{answer.comment.trim() !== '' ? 'text-primary' : 'text-muted'}" data-icon="info"
-                        t-on-click="this.onToggleAnswerLineCommentClick" title="Add comment on this answer" />
+                        t-attf-class="o_wslides_js_quiz_icon o_wslides_js_quiz_comment_answer oi oi-lg col-auto p-md-2 py-2 ps-2 pe-1 #{answer.comment.trim() !== '' ? 'text-primary' : 'text-muted'}"
+                        t-on-click="this.onToggleAnswerLineCommentClick" title="Add comment on this answer">info</i>
                     <i
                         class="o_wslides_js_quiz_icon o_wslides_js_quiz_add_answer oi oi-lg col-auto p-md-2 py-2 px-1 text-muted"
-                        data-icon="add_circle"
                         title="Add an answer below this one"
-                        t-on-click="() => this.onAddAnswerLineClick(answer)"/>
+                        t-on-click="() => this.onAddAnswerLineClick(answer)">add_circle</i>
                     <i
                         class="o_wslides_js_quiz_icon o_wslides_js_quiz_remove_answer oi oi-lg col-auto p-md-2 py-2 px-1 text-muted"
-                        data-icon="delete"
                         title="Remove this answer"
-                        t-on-click="() => this.onRemoveAnswerLineClick(answer)"/>
+                        t-on-click="() => this.onRemoveAnswerLineClick(answer)">delete</i>
                 </div>
                 <div class="o_wslides_js_quiz_answer_comment row align-items-center d-none">
                     <div class="col-8 offset-1 p-0">
@@ -68,9 +66,8 @@
                     </div>
                     <i
                         class="o_wslides_js_quiz_icon o_wslides_js_quiz_remove_answer_comment oi oi-lg p-2 text-muted col-auto"
-                        data-icon="delete"
                         title="Remove the answer comment"
-                        t-on-click="(event) => this.onRemoveAnswerLineCommentClick(event, answer)"/>
+                        t-on-click="(event) => this.onRemoveAnswerLineCommentClick(event, answer)">delete</i>
                 </div>
             </div>
         </div>

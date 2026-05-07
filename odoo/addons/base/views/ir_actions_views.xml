@@ -403,7 +403,7 @@
                                 <field name="state" widget="badges_selection" options="{'allowed_selection_field': 'allowed_states'}"/>
                             </div>
                             <div class="alert alert-warning" role="alert" invisible="not warning">
-                                <i class="oi pe-2" data-icon="warning" title="Warning"/><field class="d-inline" name="warning" nolabel="1"/>
+                                <i class="oi pe-2" title="Warning">warning</i><field class="d-inline" name="warning" nolabel="1"/>
                             </div>
                             <div class="d-flex flex-row flex-wrap gap-2" invisible="state != 'object_write'">
                                 <field name="evaluation_type" class="oe_inline"/>
@@ -546,8 +546,7 @@ env['res.partner'].create({'name': partner_name})
                                     'followers': 'oi-filled',
                                     'remove_followers': 'oi-filled',
                                     'webhook': 'oi-filled',
-                                }[record.state.raw_value]"
-                                t-att-data-icon="{
+                                }[record.state.raw_value]"><t t-out="{
                                     'code': 'code',
                                     'object_create': 'add_box',
                                     'object_copy': 'content_copy',
@@ -561,11 +560,10 @@ env['res.partner'].create({'name': partner_name})
                                     'webhook': 'send',
                                     'whatsapp': 'oi_whatsapp',
                                     'ai': 'wand_stars',
-                                }[record.state.raw_value] || 'radio_button_unchecked'"
-                            />
-                            <i class="oi text-warning px-2 m-0" data-icon="warning" invisible="not warning" t-att-title="record.warning.raw_value"/>
+                                }[record.state.raw_value] || 'radio_button_unchecked'"/></i>
+                            <i class="oi text-warning px-2 m-0" invisible="not warning" t-att-title="record.warning.raw_value">warning</i>
                             <field name="name" class="text-truncate" />
-                            <button type="delete" name="delete" class="btn oi oi-filled px-3 ms-auto" data-icon="delete" title="Delete Action" />
+                            <button type="delete" name="delete" class="btn oi oi-filled px-3 ms-auto" title="Delete Action">delete</button>
                         </t>
                     </templates>
                 </kanban>

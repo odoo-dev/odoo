@@ -247,8 +247,7 @@
                                     widget="monetary"
                                     options="{'field_digits': True}"/>
                                 <i class="oi mx-2 oe_edit_only"
-                                    data-icon="east"
-                                    aria-label="Arrow icon" title="Arrow"/>
+                                    aria-label="Arrow icon" title="Arrow">east</i>
                                 <field name="price_max_margin"
                                     string="Max. Margin"
                                     class="oe_inline"

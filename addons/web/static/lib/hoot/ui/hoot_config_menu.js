@@ -49,7 +49,7 @@ export class HootConfigMenu extends Component {
                             t-att-title="presetKey ? preset.label : 'No preset'"
                             t-on-click.stop="() => this.onPresetChange(presetKey)"
                         >
-                            <i class="oi w-5 h-5" t-attf-data-icon="{{ preset.icon or 'block' }}" />
+                            <i class="oi w-5 h-5"><t t-out="preset.icon or 'block'"/></i>
                         </button>
                     </t>
                 </div>
@@ -67,7 +67,7 @@ export class HootConfigMenu extends Component {
                         t-att-title="order.title"
                         t-on-click.stop="() => this.setExecutionOrder(order.value)"
                     >
-                        <i t-attf-class="oi w-5 h-5 #{[order.icon_class]}" t-att-data-icon="[order.icon]"/>
+                        <i t-attf-class="oi w-5 h-5 #{[order.icon_class]}"><t t-out="[order.icon]"/></i>
                     </button>
                 </t>
             </div>
@@ -85,7 +85,7 @@ export class HootConfigMenu extends Component {
                         title="Generate new random seed"
                         t-on-click.stop="this.resetSeed"
                     >
-                        <i class="oi" data-icon="redo" />
+                        <i class="oi">redo</i>
                     </button>
                     <HootCopyButton text="this.config.random.toString()" />
                 </small>
@@ -200,7 +200,7 @@ export class HootConfigMenu extends Component {
                         t-attf-title="{{ isDisplayed ? 'Hide' : 'Show' }} {{ sType }} events"
                         t-on-click.stop="(ev) => this.toggleEventType(ev, sType)"
                     >
-                        <i class="oi" t-att-class="this.CASE_EVENT_TYPES[sType].icon_class" t-att-data-icon="this.CASE_EVENT_TYPES[sType].icon"/>
+                        <i class="oi" t-att-class="this.CASE_EVENT_TYPES[sType].icon_class"><t t-out="this.CASE_EVENT_TYPES[sType].icon"/></i>
                     </button>
                 </t>
             </div>
@@ -223,7 +223,7 @@ export class HootConfigMenu extends Component {
                     <t t-else="">
                         none
                     </t>
-                    <i class="oi" data-icon="sort" t-att-class="{ 'oi-flip-vertical': this.uiState.sortResults === 'desc' }" />
+                    <i class="oi" t-att-class="{ 'oi-flip-vertical': this.uiState.sortResults === 'desc' }">sort</i>
                 </span>
             </button>
             <label
@@ -254,7 +254,7 @@ export class HootConfigMenu extends Component {
                 title="Toggle the color scheme of the UI"
                 t-on-click.stop="this.toggleColorScheme"
             >
-                <i class="oi w-4 h-4" t-att-data-icon="this.color.scheme === 'light' ? 'dark_mode' : 'light_mode'" />
+                <i class="oi w-4 h-4"><t t-out="this.color.scheme === 'light' ? 'dark_mode' : 'light_mode'"/></i>
                 Color scheme
             </button>
 
@@ -271,7 +271,12 @@ export class HootConfigMenu extends Component {
     CASE_EVENT_TYPES = CASE_EVENT_TYPES;
 
     executionOrders = [
-        { value: "fifo", title: "First in, first out", icon: "sort", icon_class: "oi-flip-vertical" },
+        {
+            value: "fifo",
+            title: "First in, first out",
+            icon: "sort",
+            icon_class: "oi-flip-vertical",
+        },
         { value: "lifo", title: "Last in, first out", icon: "sort" },
         { value: "random", title: "Random", icon: "shuffle" },
     ];

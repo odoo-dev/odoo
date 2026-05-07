@@ -11,17 +11,16 @@
                 t-on-click="() => this.offlineService.checkConnection()"
                 class="o_nav_entry o_offline_systray">
                     <i t-attf-class="oi {{ this.labelIconClass }} {{ this.labelColor }}"
-                    t-att-data-icon="this.labelIcon"
                     role="img"
                     t-att-aria-label="this.labelText"
-                    t-att-data-tooltip="this.labelText"/>
+                    t-att-data-tooltip="this.labelText"><t t-out="this.labelIcon"/></i>
             </div>
             <button t-else=""
                 t-attf-class="o_nav_entry px-2 o_tag {{ this.labelColor }} o_offline_systray"
                 data-available-offline=""
                 t-on-click="() => this.offlineService.checkConnection()"
                 data-tooltip="Click to check connection and Sync">
-                <i t-attf-class="oi {{ this.labelIconClass }} me-1" t-att-data-icon="this.labelIcon"/><t t-out="this.labelText"></t><i t-if="this.offlineService.hasScheduledCalls" class="oi ms-2" data-icon="arrow_drop_down"/>
+                <i t-attf-class="oi {{ this.labelIconClass }} me-1"><t t-out="this.labelIcon"/></i><t t-out="this.labelText"></t><i t-if="this.offlineService.hasScheduledCalls" class="oi ms-2">arrow_drop_down</i>
             </button>
             <t t-set-slot="content">
                 <div class="o_offline_systray_content px-2">
@@ -42,7 +41,7 @@
                                     'mb-2': element_last,
                                  }">
                                 <div t-attf-class="text-truncate {{element.error ? 'text-danger': ''}} {{ element.clickable ? '' : 'text-muted'}}">
-                                    <i t-if="element.error" class="o_button_icon oi oi-fw text-danger me-1" data-icon="error"/>
+                                    <i t-if="element.error" class="o_button_icon oi oi-fw text-danger me-1">error</i>
                                     <span
                                         t-att-title="element.displayName"
                                         t-out="element.displayName"/>
@@ -58,10 +57,9 @@
                                 <div>
                                     <button
                                         class="btn btn-link text-danger oi oi-filled py-0"
-                                        data-icon="delete"
                                         title="Discard offline changes"
                                         data-available-offline=""
-                                        t-on-click.stop="() => this.discard(element.id)"/>
+                                        t-on-click.stop="() => this.discard(element.id)">delete</button>
                                 </div>
                             </DropdownItem>
                         </t>

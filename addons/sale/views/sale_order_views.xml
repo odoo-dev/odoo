@@ -479,7 +479,7 @@
                 </div>
                 <div class="badge rounded-pill text-bg-secondary float-end fs-6 border-0"
                     invisible="not locked">
-                    <i class="oi" data-icon="lock"/>
+                    <i class="oi">lock</i>
                     Locked
                 </div>
                 <div class="oe_title">
@@ -591,10 +591,8 @@
                                         <label for="product_id"/>
                                         <div class="d-flex align-items-baseline">
                                             <span class="oi text-warning me-1"
-                                                data-icon="warning"
                                                 title="This product is archived"
-                                                invisible="state not in ['draft', 'sent'] or not is_product_archived"
-                                            />
+                                                invisible="state not in ['draft', 'sent'] or not is_product_archived">warning</span>
                                             <field name="product_id"
                                                 domain="[('type', '!=', 'combo')]"
                                                 context="{
@@ -870,10 +868,8 @@
                                                 <div class="row">
                                                     <div class="col">
                                                         <span class="oi text-warning me-1"
-                                                            data-icon="warning"
                                                             title="This product is archived"
-                                                            invisible="state not in ['draft', 'sent'] or not is_product_archived"
-                                                        />
+                                                            invisible="state not in ['draft', 'sent'] or not is_product_archived">warning</span>
                                                         <field name="product_id" class="fw-bold"/>
                                                     </div>
                                                     <div class="col-auto">

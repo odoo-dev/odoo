@@ -13,7 +13,7 @@
                         t-att-data-line-id="line.id"
                         t-att-data-remove="True"
                     >
-                        <span class="oi" data-icon="remove"/>
+                        <span class="oi">remove</span>
                     </a>
                 </span>
                 <input
@@ -30,7 +30,7 @@
                         href="#"
                         t-att-data-line-id="line.id"
                     >
-                        <span class="oi" data-icon="add"/>
+                        <span class="oi">add</span>
                     </a>
                 </span>
             </div>

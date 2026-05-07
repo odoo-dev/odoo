@@ -145,7 +145,7 @@ export function shareUrlMenuItem(env) {
         description: markup`
             <div class="d-flex align-items-center justify-content-between w-100">
                 <span>${_t("Share")}</span>
-                <span class="oi" data-icon="family_history"></span>
+                <span class="oi">family_history</span>
             </div>`,
         callback: router.shareUrl,
         sequence: 25,

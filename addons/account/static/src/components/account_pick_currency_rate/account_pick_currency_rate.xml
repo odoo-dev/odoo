@@ -8,7 +8,7 @@
             title="Pick the rate on a certain date"
             t-custom-ref="datetime-picker-target"
         >
-            <i class="oi oi-filled" data-icon="calendar_today"/>
+            <i class="oi oi-filled">calendar_today</i>
         </button>
     </t>
 

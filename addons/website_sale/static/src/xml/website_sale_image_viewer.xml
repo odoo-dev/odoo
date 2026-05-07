@@ -8,7 +8,7 @@
                     <div class="o_wsale_image_viewer_header d-flex w-100 text-white">
                         <div class="flex-grow-1"/>
                         <div class="d-flex align-items-center mb-0 px-3 h4 text-reset cursor-pointer">
-                            <span class="oi" data-icon="close" t-on-click="this.data.close"/>
+                            <span class="oi" t-on-click="this.data.close">close</span>
                         </div>
                     </div>
                     <!-- Content -->
@@ -61,11 +61,9 @@
                             >
                                 <i
                                     class="oi border bg-white text-900"
-                                    data-icon="chevron_backward"
                                     role="img"
                                     aria-label="Previous"
-                                    title="Previous"
-                                />
+                                    title="Previous">chevron_backward</i>
                             </a>
                         </div>
                         <div class="o_wsale_image_viewer_control position-absolute d-flex align-items-center me-2 h-100 w-100">
@@ -77,11 +75,9 @@
                             >
                                 <i
                                     class="oi border bg-white text-900"
-                                    data-icon="chevron_forward"
                                     role="img"
                                     aria-label="Next"
-                                    title="Next"
-                                />
+                                    title="Next">chevron_forward</i>
                             </a>
                         </div>
                     </t>

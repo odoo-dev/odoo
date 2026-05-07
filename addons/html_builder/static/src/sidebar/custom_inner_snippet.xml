@@ -16,13 +16,11 @@
                 <div class="rename-input w-100 mx-1 z-1">
                     <input t-custom-ref="rename-input" type="text" autocomplete="chrome-off" t-att-value="this.snippet.title" class="text-start" t-on-pointerdown.stop=""/>
                     <button class="o_we_text_success oi btn btn-outline-success border-0"
-                            data-icon="check"
                             data-tooltip="Confirm"
-                            t-on-click="this.onConfirmRename"/>
+                            t-on-click="this.onConfirmRename">check</button>
                     <button class="o_we_text_danger btn btn-outline-danger border-0"
-                            data-icon="close"
                             data-tooltip="Discard"
-                            t-on-click="this.toggleRenamingState"/>
+                            t-on-click="this.toggleRenamingState">close</button>
                 </div>
             </t>
             <t t-else="">
@@ -31,13 +29,11 @@
         </div>
         <div t-if="!this.state.isRenaming" class="rename-delete-buttons float-end z-1">
             <button class="oi oi-filled btn o_we_hover_success btn-outline-info border-0"
-                    data-icon="edit"
                     t-att-data-tooltip="this.renameButtonTooltip"
-                    t-on-click.stop="this.toggleRenamingState"/>
+                    t-on-click.stop="this.toggleRenamingState">edit</button>
             <button class="oi oi-filled btn o_we_hover_danger btn-outline-danger border-0"
-                    data-icon="delete"
                     t-att-data-tooltip="this.deleteButtonTooltip"
-                    t-on-click="() => this.props.snippetModel.deleteCustomSnippet(this.snippet)"/>
+                    t-on-click="() => this.props.snippetModel.deleteCustomSnippet(this.snippet)">delete</button>
         </div>
     </div>
 </t>

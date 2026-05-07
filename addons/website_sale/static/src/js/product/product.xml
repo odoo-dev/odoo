@@ -43,7 +43,7 @@
             t-if="!this.props.can_be_sold"
             class="text-muted fst-italic"
         >
-            <i class="oi me-1" data-icon="close"/>
+            <i class="oi me-1">close</i>
             Not available for sale
         </div>
     </t>

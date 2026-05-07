@@ -9,8 +9,7 @@
                     'text-danger btn-sm': this.state.playing,
                     'btn-light btn-sm': !this.state.playing,
                 }"
-                t-attf-data-icon="{{ this.state.playing ? 'stop' : (this.state.repeat ? 'redo' : 'play_arrow') }}"
-                t-att-title="playOrPause" t-on-click.stop="() => this.onClickPlayPause()"/>
+                t-att-title="playOrPause" t-on-click.stop="() => this.onClickPlayPause()"><t t-out="this.state.playing ? 'stop' : (this.state.repeat ? 'redo' : 'play_arrow')"/></button>
             <div class="o-mail-VoicePlayer-wrapper">
                 <div t-custom-ref="wrapper" class="h-100 position-relative">
                     <div class="o-mail-VoicePlayer-drawer position-absolute top-0 bottom-0 overflow-hidden" t-custom-ref="drawer">

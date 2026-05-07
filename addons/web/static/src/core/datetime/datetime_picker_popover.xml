@@ -11,7 +11,7 @@
                         t-on-click="this.props.pickerProps.onReset"
                         data-available-offline=""
                     >
-                        <i class="oi" data-icon="ink_eraser" />
+                        <i class="oi">ink_eraser</i>
                     </button>
                     <button
                         class="btn btn-sm btn-primary"

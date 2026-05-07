@@ -2,7 +2,7 @@
 <templates>
     <t t-if="this.nb_attachment > 0" t-name="hr_expense.AttachmentNumber" >
         <div>
-            <span class="oi pe-1 align-middle" data-icon="attach_file"/>
+            <span class="oi pe-1 align-middle">attach_file</span>
             <sup><t class="text-center" t-out="this.nb_attachment"/></sup>
         </div>
     </t>

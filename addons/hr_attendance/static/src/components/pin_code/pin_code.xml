@@ -37,7 +37,7 @@
         </div>
         <div class="o_hr_kiosk_mode_bottom my-4 mx-auto">
             <button class="btn btn-light btn-lg rounded-pill px-5" t-on-click="() => this.props.onClickBack()">
-                <i class="oi me-2" data-icon="chevron_backward"/>
+                <i class="oi me-2">chevron_backward</i>
                 <span>Go back</span>
             </button>
         </div>

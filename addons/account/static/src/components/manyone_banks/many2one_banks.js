@@ -16,7 +16,7 @@ export class Many2XAutocompleteBank extends Many2XAutocomplete {
         const icon = record.allow_out_payment ? "security" : "error";
         const colorClass = record.allow_out_payment ? "text-success" : "text-danger";
         const title = record.allow_out_payment ? _t("Trusted") : _t("Untrusted");
-        recordSuggestion.label = markup`<i class="me-1 oi ${colorClass}" data-icon="${icon}" title="${title}"></i> ${recordSuggestion.label}`;
+        recordSuggestion.label = markup`<i class="me-1 oi ${colorClass}" title="${title}"><t t-out="${icon}"/></i> ${recordSuggestion.label}`;
         return recordSuggestion;
     }
 

@@ -8,7 +8,7 @@
                 t-attf-class="{{positionCenter ? 'pb-0 pt-0' : 'bottom-0'}}"
                 t-custom-ref="emojisButton"
             >
-                <i class="oi" data-icon="add_reaction" role="img" aria-label="Emojis"/>
+                <i class="oi" role="img" aria-label="Emojis">add_reaction</i>
             </button>
         </div>
     </t>

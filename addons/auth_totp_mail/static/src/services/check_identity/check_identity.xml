@@ -3,7 +3,7 @@
 
     <t t-name="auth_totp_mail.CheckIdentityFormTOTPMail">
         <div class="text-center">
-            <i class="oi oi-3x oi-filled" data-icon="mail" aria-hidden="true"/>
+            <i class="oi oi-3x oi-filled" aria-hidden="true">mail</i>
             <h3>Authentication code via email</h3>
         </div>
         <div>

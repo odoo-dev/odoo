@@ -139,8 +139,8 @@
                                 <field name="date_from" nolabel="1"
                                     readonly="state == 'refuse' or (allocation_type == 'accrual' and state != 'confirm')"
                                     invisible="allocation_type == 'regular' and state != 'confirm'"/>
-                                <i class="oi mx-2" data-icon="east" aria-label="Arrow icon" title="Arrow"
-                                    invisible="allocation_type == 'accrual' or state != 'confirm'"/>
+                                <i class="oi mx-2" aria-label="Arrow icon" title="Arrow"
+                                    invisible="allocation_type == 'accrual' or state != 'confirm'">east</i>
                                 <label class="mx-2" for="date_to" string="Run until"
                                     invisible="allocation_type == 'regular'"/>
                                 <field name="date_to" nolabel="1"
@@ -223,8 +223,8 @@
             <field name="date_from" position="attributes">
                 <attribute name="invisible">0</attribute>
             </field>
-            <xpath expr="//i[@data-icon='east']" position="replace">
-                <i class="oi oi-fw mx-2" data-icon="east" aria-label="Arrow icon" title="Arrow" invisible="allocation_type == 'accrual'"/>
+            <xpath expr="//i[@]" position="replace">east
+                <i class="oi oi-fw mx-2" aria-label="Arrow icon" title="Arrow" invisible="allocation_type == 'accrual'">east</i>
             </xpath>
             <field name="date_to" position="attributes">
                 <attribute name="invisible">0</attribute>

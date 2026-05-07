@@ -10,16 +10,14 @@
                             <span t-if="filter.active" class="d-flex align-items-center text-nowrap ms-1 me-2">
                                 <i
                                     class="oi oi-fw"
-                                    t-att-class="this.getFilterColor(filter) !== 'o_color_false' ? 'oi-filled' + this.getFilterColor(filter) : ''"
-                                    data-icon="circle"
-                                />
+                                    t-att-class="this.getFilterColor(filter) !== 'o_color_false' ? 'oi-filled' + this.getFilterColor(filter) : ''">circle</i>
                                 <span name="filter_label" class="ms-1 fw-bold text-nowrap" t-out="filter.label" />
                             </span>
                         </t>
                     </t>
                 </t>
             </div>
-            <i class="oi oi-fw ms-2" t-attf-data-icon="{{this.caretDirection}}" name="expand_filter_button"/>
+            <i class="oi oi-fw ms-2" name="expand_filter_button"><t t-out="this.caretDirection"/></i>
         </div>
     </t>
 

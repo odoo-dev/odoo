@@ -63,7 +63,7 @@ export class DeviceDialog extends Component {
                     <div t-foreach="Object.keys(devices)" t-as="deviceType" t-key="deviceType" class="accordion-item">
                         <h2 class="accordion-header" t-att-id="'heading-' + deviceType">
                             <button class="accordion-button px-3 d-flex gap-3 collapsed" type="button" data-bs-toggle="collapse" t-att-data-bs-target="'#collapse-' + deviceType" t-att-aria-controls="'collapse-' + deviceType">
-                                <span class="oi oi-fw oi-2x" t-att-data-icon="icons[deviceType]"/>
+                                <span class="oi oi-fw oi-2x"><t t-out="icons[deviceType]"/></span>
                                 <span class="fs-5 fw-bold" t-out="devices[deviceType].length"/>
                                 <span class="fs-5" t-out="formatDeviceType(deviceType, devices[deviceType].length)"/>
                             </button>
@@ -73,7 +73,7 @@ export class DeviceDialog extends Component {
                                 <div t-foreach="devices[deviceType]" t-as="device" t-key="device.identifier" class="d-flex flex-column bg-light rounded p-2 gap-1">
                                     <span t-out="device.name" class="one-line"/>
                                     <span class="text-secondary one-line">
-                                        <span class="oi oi-fw me-2" t-att-data-icon="connectionIcons[device.connection]"/>
+                                        <span class="oi oi-fw me-2"><t t-out="connectionIcons[device.connection]"/></span>
                                         <t t-out="device.identifier"/>
                                     </span>
                                 </div>

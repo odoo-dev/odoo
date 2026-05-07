@@ -13,9 +13,9 @@
                                href="#"
                                t-on-click.prevent="() => this.handleOnClick(error_value)"
                             >
-                                <i class="oi ms-1" data-icon="east"/>
+                                <i class="oi ms-1">east</i>
                                 <span class="ms-1" t-out="error_value.action_text"/>
-                                <i t-if="level === 'danger'" class="oi ms-1" data-icon="warning"/>
+                                <i t-if="level === 'danger'" class="oi ms-1">warning</i>
                             </a>
                         </div>
                     </div>

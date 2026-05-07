@@ -24,7 +24,7 @@ export class NewContentSystrayItem extends Component {
     static components = { Dropdown, DropdownItem };
     static props = {
         onNewPage: Function,
-        newInstalledModule: { type: String, optional: true }
+        newInstalledModule: { type: String, optional: true },
     };
 
     setup() {
@@ -266,7 +266,7 @@ export class NewContentSystrayItem extends Component {
                 this.state.newContentElements = this.state.newContentElements.map((el) => {
                     if (el.moduleXmlId === element.moduleXmlId) {
                         el.status = MODULE_STATUS.INSTALLING;
-                        el.icon = xml`<i class="oi oi-spin" data-icon="autorenew"/>`;
+                        el.icon = xml`<i class="oi oi-spin">autorenew</i>`;
                         el.title = sprintf(this.newContentText.installPleaseWait, name);
                     }
                     return el;
@@ -282,7 +282,7 @@ export class NewContentSystrayItem extends Component {
                     this.state.newContentElements = this.state.newContentElements.map((el) => {
                         if (el.moduleXmlId === element.moduleXmlId) {
                             el.status = MODULE_STATUS.FAILED_TO_INSTALL;
-                            el.icon = xml`<i class="oi" data-icon="warning"/>`;
+                            el.icon = xml`<i class="oi">warning</i>`;
                             el.title = sprintf(this.newContentText.failed, name);
                         }
                         return el;
@@ -327,13 +327,11 @@ export class NewContentSystrayItem extends Component {
      * Opens the corresponding snippet new content dialog after the installation
      * of a newly installed snippet module.
      *
-     * @param {string} newInstalledModule - The JSON containing XML ID of the 
+     * @param {string} newInstalledModule - The JSON containing XML ID of the
      * installed module.
      */
     async handlePostModuleInstall(newInstalledModule) {
-        const { moduleXmlId } = JSON.parse(
-            decodeURIComponent(newInstalledModule)
-        );
+        const { moduleXmlId } = JSON.parse(decodeURIComponent(newInstalledModule));
         if (moduleXmlId) {
             const newContentElement = this.state.newContentElements.find(
                 (el) => el.moduleXmlId === moduleXmlId

@@ -16,9 +16,8 @@
                     <span class="me-2" t-out="header"></span>
                     <i
                         class="oi"
-                        t-att-data-icon="this.getSortIcon(header_index)"
                         aria-hidden="true"
-                    ></i>
+                    ><t t-out="this.getSortIcon(header_index)"/></i>
                 </th>
             </tr>
 
@@ -39,20 +38,17 @@
                     <i
                         t-if="row.subData"
                         class="oi o-doc-sub-table-btn d-inline me-1 cursor-pointer"
-                        data-icon="menu"
                         aria-hidden="true"
-                        t-on-click="(ev) => this.showSubTable(ev, row.subData)"
-                    />
+                        t-on-click="(ev) => this.showSubTable(ev, row.subData)">menu</i>
 
                     <t t-if="row and row.type == 'tooltip' and row.value">
                         <i
                             class="oi p-1"
-                            data-icon="help"
                             aria-hidden="true"
                             t-if="row.value"
                             t-on-mouseenter="(ev) => this.showDynamicTooltip(ev, row.value)"
                             t-on-mouseleave="(ev) => this.scheduleHide(ev)"
-                        ></i>
+                        >help</i>
                     </t>
                     <t t-else="" t-tag="this.getTag(row)" t-att-class="this.getClass(row)" t-out="this.getValue(row)"/>
 
@@ -65,9 +61,8 @@
                         <t t-out="row.relation"/>
                         <i
                             class="oi ps-1 d-inline"
-                            data-icon="open_in_new"
                             aria-hidden="true"
-                        ></i>
+                        >open_in_new</i>
                     </a>
                 </td>
             </tr>

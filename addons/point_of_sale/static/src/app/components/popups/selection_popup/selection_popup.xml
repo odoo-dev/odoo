@@ -17,7 +17,7 @@
                         <span t-out="item.description" t-if="item.description" />
                     </div>
                </div>
-                <i class="oi" t-att-class="{ 'text-action': item.isSelected }" t-attf-data-icon="{{ item.isSelected ? 'check' : 'chevron_forward' }}"/>
+                <i class="oi" t-att-class="{ 'text-action': item.isSelected }"><t t-out="item.isSelected ? 'check' : 'chevron_forward'"/></i>
             </button>
         </Dialog>
     </t>

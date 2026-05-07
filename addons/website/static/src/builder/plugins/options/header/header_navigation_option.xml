@@ -31,19 +31,19 @@
         <BuilderSelect action="'websiteConfig'">
             <BuilderSelectItem ltrRtlMapping="'align'" actionParam="{ views: this.getAlignmentViews('left') }">
                 <div title="Align Left">
-                    <i class="oi oi-fw" data-icon="format_align_left" role="img" aria-hidden="true"/>
+                    <i class="oi oi-fw" role="img" aria-hidden="true">format_align_left</i>
                     <span class="visually-hidden">Align Left</span>
                 </div>
             </BuilderSelectItem>
             <BuilderSelectItem actionParam="{ views: this.getAlignmentViews('center') }">
                 <div title="Center">
-                    <i class="oi oi-fw" data-icon="format_align_center" role="img" aria-hidden="true"/>
+                    <i class="oi oi-fw" role="img" aria-hidden="true">format_align_center</i>
                     <span class="visually-hidden">Center</span>
                 </div>
             </BuilderSelectItem>
             <BuilderSelectItem ltrRtlMapping="'align'" actionParam="{ views: this.getAlignmentViews('right') }">
                 <div title="Align Right">
-                    <i class="oi oi-fw" data-icon="format_align_right" role="img" aria-hidden="true"/>
+                    <i class="oi oi-fw" role="img" aria-hidden="true">format_align_right</i>
                     <span class="visually-hidden">Align Right</span>
                 </div>
             </BuilderSelectItem>
@@ -68,19 +68,19 @@
         <BuilderSelect action="'websiteConfig'">
             <BuilderSelectItem ltrRtlMapping="'align'" actionParam="{ views: [] }">
                 <div title="Align Left">
-                    <i class="oi oi-fw" data-icon="format_align_left" role="img" aria-hidden="true"/>
+                    <i class="oi oi-fw" role="img" aria-hidden="true">format_align_left</i>
                     <span class="visually-hidden">Align Left</span>
                 </div>
             </BuilderSelectItem>
             <BuilderSelectItem actionParam="{ views: ['website.template_header_mobile_align_center'] }">
                 <div title="Center">
-                    <i class="oi oi-fw" data-icon="format_align_center" role="img" aria-hidden="true"/>
+                    <i class="oi oi-fw" role="img" aria-hidden="true">format_align_center</i>
                     <span class="visually-hidden">Center</span>
                 </div>
             </BuilderSelectItem>
             <BuilderSelectItem ltrRtlMapping="'align'" actionParam="{ views: ['website.template_header_mobile_align_right'] }">
                 <div title="Align Right">
-                    <i class="oi oi-fw" data-icon="format_align_right" role="img" aria-hidden="true"/>
+                    <i class="oi oi-fw" role="img" aria-hidden="true">format_align_right</i>
                     <span class="visually-hidden">Align Right</span>
                 </div>
             </BuilderSelectItem>

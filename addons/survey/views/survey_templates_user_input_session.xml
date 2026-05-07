@@ -57,11 +57,11 @@
                 <div class="o_survey_session_open_link d-flex flex-column flex-md-row align-items-center gap-3 gap-md-0 justify-content-between px-5 py-4 rounded-3 bg-black-50">
                     <div class="fs-5 o_survey_session_copy cursor-pointer">
                         <a class="o_survey_session_copy_url text-white" href="#" t-out="survey.session_link" aria-label="Copy session link"/>
-                        <i class="oi ms-2" data-icon="content_copy" aria-hidden="true"/>
+                        <i class="oi ms-2" aria-hidden="true">content_copy</i>
                     </div>
                     <a role="button" class="o_survey_session_navigation_next btn btn-lg btn-fill-light w-100 w-md-auto">
                         <span class="o_survey_session_navigation_next_label">Start</span>
-                        <i class="oi" data-icon="chevron_forward" aria-hidden="true"/>
+                        <i class="oi" aria-hidden="true">chevron_forward</i>
                     </a>
                 </div>
             </div>
@@ -128,14 +128,13 @@
             <a role="button"
                 href="#"
                 class="oi o_survey_session_navigation o_survey_session_navigation_previous position-absolute start-0 ms-3 rounded p-3 bg-black-50 text-white z-3"
-                data-icon="chevron_backward"
-                aria-label="Previous Question"/>
+                aria-label="Previous Question">chevron_backward</a>
             <a role="button"
                 href="#"
                 class="o_survey_session_navigation o_survey_session_navigation_next position-absolute end-0 me-3 rounded p-3 bg-black-50 text-white z-3"
                 aria-label="Next Question">
                 <span class="o_survey_session_navigation_next_label me-2 d-none d-md-inline" aria-hidden="true"/>
-                <i class="fw-bold oi" data-icon="chevron_forward" aria-hidden="true"/>
+                <i class="fw-bold oi" aria-hidden="true">chevron_forward</i>
             </a>
             <div class="o_survey_session_manage_container d-flex flex-column p-5 bg-black-50 rounded">
                 <div class="o_survey_session_description_done d-none o_container_small">
@@ -178,7 +177,7 @@
                         <div class="ms-2">
                             <a href="#" role="button" class="o_survey_session_close btn border-light text-light">End the Session</a>
                             <a href="#" role="button" class="o_survey_session_close btn btn-light" t-att-data-show-results="True">
-                                <i class="oi" data-icon="bar_chart" aria-hidden="true"/> Results
+                                <i class="oi" aria-hidden="true">bar_chart</i> Results
                             </a>
                         </div>
                     </div>

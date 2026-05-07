@@ -9,7 +9,7 @@
                         class="btn p-0"
                         t-on-click.synthetic="this.onClickArrowUp"
                 >
-                    <i class="oi" data-icon="expand_less"/>
+                    <i class="oi">expand_less</i>
                 </button>
             </div>
             <div class="o_hierarchy_node w-100 h-100 d-flex flex-column justify-content-between border"
@@ -41,13 +41,13 @@
                 >
                     <t t-if="!this.props.node.nodes.length">
                         <span style="grid-column: 2;">
-                            <i class="oi oi-fw" data-icon="arrow_right"/>
+                            <i class="oi oi-fw">arrow_right</i>
                             <t t-out="this.props.node.childResIds.length + ' ' + (this.props.archInfo.label || 'Unfold')"/>
                         </span>
                     </t>
                     <t t-else="">
                         <span style="grid-column: 2;">
-                            <i class="oi oi-fw" data-icon="arrow_drop_down"/>
+                            <i class="oi oi-fw">arrow_drop_down</i>
                             <t t-out="this.props.node.childResIds.length + ' ' + (this.props.archInfo.label || 'Fold')"/>
                         </span>
                     </t>

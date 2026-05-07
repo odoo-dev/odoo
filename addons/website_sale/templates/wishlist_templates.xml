@@ -77,9 +77,7 @@
                                                 <span class="d-inline-flex align-items-baseline">
                                                     <i
                                                         class="oi oi-fw oi-filled o_not-animable"
-                                                        data-icon="mail"
-                                                        role="presentation"
-                                                    />
+                                                        role="presentation">mail</i>
                                                     <span class="o_label small ms-1">
                                                         Contact Us
                                                     </span>
@@ -99,9 +97,7 @@
                                                 <span class="d-inline-flex align-items-baseline">
                                                     <i
                                                         class="oi oi-fw o_not-animable"
-                                                        data-icon="shopping_cart"
-                                                        role="presentation"
-                                                    />
+                                                        role="presentation">shopping_cart</i>
                                                     <span class="o_label small ms-1">
                                                         Add to Cart
                                                     </span>
@@ -114,12 +110,12 @@
                                                     aria-label="Add to compare"
                                                     t-att-data-product-id="wish.product_id.id"
                                                 >
-                                                    <i class="oi oi-fw" data-icon="swap_horiz" role="presentation"/>
+                                                    <i class="oi oi-fw" role="presentation">swap_horiz</i>
                                                 </button>
 
                                                 <!-- Render placeholder when product is not comparable to ensure alignment -->
                                                 <div t-else="" class="o_add_to_compare_placeholder btn btn-light pe-none opacity-0">
-                                                    <i class="oi oi-fw" data-icon="swap_horiz" aria-hidden="true"/>
+                                                    <i class="oi oi-fw" aria-hidden="true">swap_horiz</i>
                                                 </div>
                                             </t>
                                         </div>
@@ -132,7 +128,7 @@
                                             class="btn btn-light o_wish_rm z-3 rounded-pill lh-1"
                                             title="Remove from wishlist"
                                         >
-                                            <i class="oi" data-icon="close" role="presentation"/>
+                                            <i class="oi" role="presentation">close</i>
                                         </button>
                                     </t>
                                     <t t-set="product_extra_information">
@@ -180,9 +176,7 @@
         >
             <span
                 t-attf-class="oi o_not-animable #{in_wish and 'oi-filled' or ''}"
-                data-icon="favorite"
-                role="presentation"
-            />
+                role="presentation">favorite</span>
             <span t-if="not in_wish" class="o_label small ms-2">Add to wishlist</span>
             <span t-else="" class="o_label small ms-2">In your wishlist</span>
         </button>

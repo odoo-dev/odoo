@@ -84,7 +84,7 @@
                      </div>
                  </button>
                 <button class="btn btn-lg btn-link " t-on-click="()=>this.addImage()">
-                    <i class="oi me-1" data-icon="add"/>Add image
+                    <i class="oi me-1">add</i>Add image
                 </button>
              </div>
 

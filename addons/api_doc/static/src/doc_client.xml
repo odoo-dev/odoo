@@ -14,10 +14,10 @@
             </div>
             <div class="d-flex flex-nowrap gap-1">
                 <button class="btn" t-on-click="() => this.env.modelStore.showApiKeyModal = true">
-                    <i class="oi" data-icon="key" aria-hidden="true"></i>
+                    <i class="oi" aria-hidden="true">key</i>
                 </button>
                 <button class="btn" t-on-click="() => this.toggleTheme()">
-                    <i class="oi" data-icon="dark_mode" aria-hidden="true"></i>
+                    <i class="oi" aria-hidden="true">dark_mode</i>
                 </button>
             </div>
         </header>
@@ -27,7 +27,7 @@
                 <DocModel t-if="this.modelStore.activeModel"/>
             </t>
             <div t-elif="!this.modelStore.error" class="h-100 w-100 d-flex flex-nowrap align-items-center justify-content-center gap-1">
-                <i class="oi o-doc-spinner" data-icon="progress_activity" aria-hidden="true"></i>
+                <i class="oi o-doc-spinner" aria-hidden="true">progress_activity</i>
                 <div>Loading Models</div>
             </div>
 

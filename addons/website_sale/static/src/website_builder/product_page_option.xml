@@ -138,7 +138,7 @@
                 </BuilderSelectItem>
 	            <BuilderSelectItem actionValue="'grid'">
                     <div class="d-flex align-items-center gap-2">
-                        <i class="oi" data-icon="apps"/>Grid
+                        <i class="oi">apps</i>Grid
                     </div>
                 </BuilderSelectItem>
 	        </BuilderSelect>
@@ -370,7 +370,7 @@
             action="'websiteConfig'"
             actionParam="{ views: ['website_sale.product_buy_now'] }"
         >
-            <i class="oi oi-fw" data-icon="flash_on"/>
+            <i class="oi oi-fw">flash_on</i>
             Buy Now
         </BuilderButton>
         <BuilderButton title.translate="Select Quantity" className="'o_we_buy_now_btn'"
@@ -385,14 +385,14 @@
             action="'websiteConfig'"
             actionParam="{views:['website_sale.product_add_to_compare']}"
         >
-            <i class="oi oi-fw" data-icon="swap_horiz"/>
+            <i class="oi oi-fw">swap_horiz</i>
             Compare
         </BuilderButton>
         <BuilderButton title.translate="Wishlist"
             action="'websiteConfig'"
             actionParam="{views:['website_sale.product_add_to_wishlist']}"
         >
-            <i class="oi oi-fw oi-filled" data-icon="favorite"/>
+            <i class="oi oi-fw oi-filled">favorite</i>
             Wishlist
         </BuilderButton>
     </BuilderRow>

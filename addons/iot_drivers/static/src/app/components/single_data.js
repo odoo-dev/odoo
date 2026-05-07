@@ -34,7 +34,7 @@ export class SingleData extends Component {
         <div t-att-class="this.props.style === 'primary' ? 'odoo-bg-primary' : 'odoo-bg-secondary'" class="rounded odoo-pill" />
         <div class="flex-grow-1 overflow-hidden">
             <h6 class="m-0">
-                <i t-if="this.props.icon" class="oi me-2" t-att-class="this.props.icon_class" t-att-data-icon="this.props.icon" aria-hidden="true"></i>
+                <i t-if="this.props.icon" class="oi me-2" t-att-class="this.props.icon_class" aria-hidden="true"><t t-out="this.props.icon"/></i>
                 <t t-esc="this.props.name" />
             </h6>
             <p t-if="!this.valueIsURL" class="m-0 text-secondary one-line" t-esc="this.props.value or 'Not Configured'" />

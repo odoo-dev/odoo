@@ -52,10 +52,10 @@
             <xpath expr="//div[@name='email_details']" position="after">
                 <label for="mobile" class="oe_inline"/>
                 <div class="o_row o_row_readonly" name="phone_details">
-                    <button name="phone_action_blacklist_remove" class="oi text-danger" data-icon="block"
+                    <button name="phone_action_blacklist_remove" class="oi text-danger"
                         title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
                         type="object" context="{'default_phone': mobile}" groups="base.group_user"
-                        invisible="not phone_blacklisted"/>
+                        invisible="not phone_blacklisted">block</button>
                     <field name="mobile" string="Phone" widget="phone" options="{'enable_sms': True}"/>
                     <field name="phone_sanitized" invisible="1"/>
                 </div>
@@ -70,7 +70,7 @@
         <field name="arch" type="xml">
            <xpath expr="//t[@t-name='card']/div[@name='contact_email']" position="after">
                <div invisible="not mobile">
-                   <i class="oi oi-filled text-primary me-2" data-icon="phone" title="Phone"/>
+                   <i class="oi oi-filled text-primary me-2" title="Phone">phone</i>
                    <field name="mobile"/>
                </div>
             </xpath>

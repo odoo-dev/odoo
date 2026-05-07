@@ -2,7 +2,7 @@
     <t t-name="maintenance.MaintenanceRequestStateSelection" t-inherit="web.StateSelectionField" t-inherit-mode="primary">
         <xpath expr="//Dropdown/button/div" position="replace">
             <div t-if="this.isKanbanOrMobileView" class="d-flex align-items-center" t-att-title="this.label">
-                <i t-attf-class="oi {{ this.stateIconClass(this.currentValue) }} {{ this.statusColor(this.currentValue) }}" t-att-data-icon="this.stateIcon(this.currentValue)"/>
+                <i t-attf-class="oi {{ this.stateIconClass(this.currentValue) }} {{ this.statusColor(this.currentValue) }}"><t t-out="this.stateIcon(this.currentValue)"/></i>
             </div>
             <div t-else="" class="d-flex align-items-center">
                 <span class="o_status_label" t-out="this.label"/>

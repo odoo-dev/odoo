@@ -9,21 +9,21 @@
                 <div class="me-3 d-flex">
                     <button class="btn btn-lg lh-lg btn px-2" t-on-click="()=>this.floorPlanStore.undo()"
                             t-att-class="{'disabled': !this.floorPlanStore.canUndo()}">
-                        <i class="oi oi-fw" data-icon="undo"/>
+                        <i class="oi oi-fw">undo</i>
                     </button>
                     <button class="btn btn-lg lh-lg btn px-2" t-on-click="()=>this.floorPlanStore.redo()"
                             t-att-class="{'disabled': !this.floorPlanStore.canRedo()}">
-                        <i class="oi oi-fw" data-icon="redo"/>
+                        <i class="oi oi-fw">redo</i>
                     </button>
                 </div>
                 <button class="btn btn-outline-secondary btn-lg lh-lg" t-on-click="this.onDiscardChanges"
                         title="Discard all changes">
                     <span class="d-none d-sm-inline">Discard</span>
-                    <i class="oi oi-fw d-sm-none" data-icon="close"/>
+                    <i class="oi oi-fw d-sm-none">close</i>
                 </button>
                 <button class="btn btn-primary btn-lg lh-lg" t-on-click="this.onSave" title="Save">
                     <span class="d-none d-sm-inline">Save</span>
-                    <i class="oi oi-fw d-sm-none" data-icon="cloud_upload"/>
+                    <i class="oi oi-fw d-sm-none">cloud_upload</i>
                 </button>
             </div>
         </div>

@@ -17,13 +17,13 @@
                     <button type="object"
                         name="open_google_gmail_uri" class="btn-link px-0"
                         invisible="server_type != 'gmail' or google_gmail_refresh_token">
-                        <i class="oi" data-icon="east"/>
+                        <i class="oi">east</i>
                         Connect your Gmail account
                     </button>
                     <button type="object"
                         name="open_google_gmail_uri" class="btn-link px-0 ms-2"
                         invisible="server_type != 'gmail' or not google_gmail_refresh_token">
-                        <i class="oi oi-filled" data-icon="settings" title="Edit Settings"/>
+                        <i class="oi oi-filled" title="Edit Settings">settings</i>
                     </button>
                 </div>
             </field>

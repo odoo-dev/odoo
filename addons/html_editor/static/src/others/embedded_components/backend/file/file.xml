@@ -17,7 +17,7 @@
             <attribute name="tabindex">-1</attribute>
         </xpath>
         <xpath expr="//span[hasclass('o_file_name')]" position="after">
-            <i class="oi oi-filled mx-1 invisible align-items-center d-inline-flex" data-icon="edit"/>
+            <i class="oi oi-filled mx-1 invisible align-items-center d-inline-flex">edit</i>
         </xpath>
     </t>
 </templates>

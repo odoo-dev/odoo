@@ -15,7 +15,7 @@
                         <strong class="me-1 text-truncate o_redirect cursor-pointer" t-out="this.props.scheduledMessage.author_id.name"/>
                     </span>
                     <small class="o-mail-Message-date text-muted opacity-75" t-att-title="this.scheduledDate">
-                        <i class="oi mx-1" data-icon="send"/>
+                        <i class="oi mx-1">send</i>
                         <RelativeTime datetime="this.props.scheduledMessage.scheduled_date"/>
                     </small>
                 </div>
@@ -54,13 +54,13 @@
                 </div>
                 <div class="o-mail-Scheduled-Message-buttons ps-1 d-flex">
                     <span class="btn btn-link btn-success p-0 me-3" t-if="this.props.scheduledMessage.editable" t-on-click="this.onClickSendNow">
-                        <i class="oi oi-filled" data-icon="send"/> Send Now
+                        <i class="oi oi-filled">send</i> Send Now
                     </span>
                     <span class="btn btn-link text-action p-0 me-3" t-if="this.props.scheduledMessage.editable" t-on-click="this.onClickEdit">
-                        <i class="oi oi-filled" data-icon="edit"/> Edit
+                        <i class="oi oi-filled">edit</i> Edit
                     </span>
                     <span class="btn btn-link btn-danger p-0" t-if="this.props.scheduledMessage.deletable" t-on-click="this.onClickCancel">
-                        <i class="oi" data-icon="close"/> Cancel
+                        <i class="oi">close</i> Cancel
                     </span>
                 </div>
             </div>

@@ -20,7 +20,7 @@
     <t t-name="account.JournalUploadLink">
         <a t-att-class="this.props.btnClass" href="#" draggable="false">
             <div class="d-sm-none">
-                <i class="oi" data-icon="upload"></i>
+                <i class="oi">upload</i>
             </div>
             <div class="d-none d-sm-block">
                 <t t-out="this.props.linkText"/>

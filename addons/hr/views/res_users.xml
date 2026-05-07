@@ -60,17 +60,17 @@
                 <xpath expr="//*[hasclass('o_form_header_details')]" position="inside">
                     <label for="work_email" class="d-md-none"/>
                     <div class="d-flex align-items-baseline w-md-50 gap-2">
-                        <i class="d-none d-md-inline-flex oi oi-filled" data-icon="mail" title="Work Email"/>
+                        <i class="d-none d-md-inline-flex oi oi-filled" title="Work Email">mail</i>
                         <field name="work_email" widget="email" placeholder="Work Email"/>
                     </div>
                     <label for="work_phone" class="d-md-none"/>
                     <div class="d-flex align-items-baseline w-md-50 gap-2">
-                        <i class="d-none d-md-inline-flex oi oi-filled" data-icon="phone" title="Work Phone"/>
+                        <i class="d-none d-md-inline-flex oi oi-filled" title="Work Phone">phone</i>
                         <field name="work_phone" widget="phone" placeholder="Work Phone"/>
                     </div>
                     <label for="mobile_phone" class="d-md-none"/>
                     <div class="d-flex align-items-baseline w-md-50 gap-2">
-                        <i class="d-none d-md-inline-flex oi" data-icon="smartphone" title="Work Mobile"/>
+                        <i class="d-none d-md-inline-flex oi" title="Work Mobile">smartphone</i>
                         <field name="mobile_phone" widget="phone" placeholder="Work Mobile"/>
                     </div>
                 </xpath>
@@ -239,27 +239,27 @@
                 <xpath expr="//div[@name='phone']" position="attributes">
                     <attribute name="invisible">employee_id</attribute>
                 </xpath>
-                <xpath expr="//div[@name='login']/i[@data-icon='mail']" position="attributes">
+                <xpath expr="//div[@name='login']/i[@]" position="attributes">mail
                     <attribute name="invisible">(not employee_id and login != email) or (employee_id and login != work_email)</attribute>
                 </xpath>
-                <xpath expr="//div[@name='login']/i[@data-icon='key']" position="attributes">
+                <xpath expr="//div[@name='login']/i[@]" position="attributes">key
                     <attribute name="invisible">(not employee_id and login == email) or (employee_id and login == work_email)</attribute>
                 </xpath>
                 <xpath expr="//*[hasclass('o_form_header_details')]" position="inside">
                     <label for="work_email" class="d-md-none" invisible="not employee_id or login == work_email"/>
                     <div class="d-flex align-items-baseline w-md-50 gap-2" invisible="not employee_id or login == work_email">
-                        <i class="d-none d-md-inline-flex oi oi-filled oi-fw" data-icon="mail" title="Work Email"/>
+                        <i class="d-none d-md-inline-flex oi oi-filled oi-fw" title="Work Email">mail</i>
                         <field name="email_domain_placeholder" invisible="1" />
                         <field name="work_email" widget="email" options="{'placeholder_field': 'email_domain_placeholder'}"/>
                     </div>
                     <label for="work_phone" class="d-md-none" invisible="not employee_id"/>
                     <div class="d-flex align-items-baseline w-md-50 gap-2" invisible="not employee_id">
-                        <i class="d-none d-md-inline-flex oi oi-filled oi-fw" data-icon="phone" title="Work Phone"/>
+                        <i class="d-none d-md-inline-flex oi oi-filled oi-fw" title="Work Phone">phone</i>
                         <field name="work_phone" widget="phone" placeholder="Work Phone"/>
                     </div>
                     <label for="mobile_phone" class="d-md-none" invisible="not employee_id"/>
                     <div class="d-flex align-items-baseline w-md-50 gap-2" invisible="not employee_id">
-                        <i class="d-none d-md-inline-flex oi oi-fw" data-icon="smartphone" title="Work Mobile"/>
+                        <i class="d-none d-md-inline-flex oi oi-fw" title="Work Mobile">smartphone</i>
                         <field name="mobile_phone" widget="phone" placeholder="Work Mobile"/>
                     </div>
                 </xpath>

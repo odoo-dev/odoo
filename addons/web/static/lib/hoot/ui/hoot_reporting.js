@@ -197,7 +197,7 @@ export class HootReporting extends Component {
                                             class="flex items-center gap-1 text-emerald"
                                             t-on-click.stop="() => this.filterResults('passed')"
                                         >
-                                            <i class="oi oi-filled" data-icon="check_circle" />
+                                            <i class="oi oi-filled">check_circle</i>
                                             <strong t-out="this.runnerReporting.passed" />
                                         </button>
                                         tests passed
@@ -209,7 +209,7 @@ export class HootReporting extends Component {
                                             class="flex items-center gap-1 text-rose"
                                             t-on-click.stop="() => this.filterResults('failed')"
                                         >
-                                            <i class="oi oi-filled" data-icon="cancel" />
+                                            <i class="oi oi-filled">cancel</i>
                                             <strong t-out="this.runnerReporting.failed" />
                                         </button>
                                         tests failed
@@ -221,7 +221,7 @@ export class HootReporting extends Component {
                                             class="flex items-center gap-1 text-cyan"
                                             t-on-click.stop="() => this.filterResults('skipped')"
                                         >
-                                            <i class="oi oi-filled" data-icon="pause_circle" />
+                                            <i class="oi oi-filled">pause_circle</i>
                                             <strong t-out="this.runnerReporting.skipped" />
                                         </button>
                                         tests skipped
@@ -233,7 +233,7 @@ export class HootReporting extends Component {
                                             class="flex items-center gap-1 text-purple"
                                             t-on-click.stop="() => this.filterResults('todo')"
                                         >
-                                            <i class="oi" data-icon="error" />
+                                            <i class="oi">error</i>
                                             <strong t-out="this.runnerReporting.todo" />
                                         </button>
                                         tests to do

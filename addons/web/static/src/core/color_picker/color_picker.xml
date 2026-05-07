@@ -8,7 +8,7 @@
                 <Dropdown>
                     <button class="btn btn-light d-flex justify-content-between w-100 border border-dark">
                         <span class="px-1" t-out="this.state.activeTab"/>
-                        <i class="oi ms-2" data-icon="arrow_drop_down"/>
+                        <i class="oi ms-2">arrow_drop_down</i>
                     </button>
                     <t t-set-slot="content">
                         <t t-foreach="this.tabs" t-as="item" t-key="item.id">
@@ -30,13 +30,12 @@
             </t>
             <div class="flex-grow-1" />
             <button t-attf-class="btn btn-sm oi oi-filled #{ this.isDarkTheme ? 'btn-secondary' : 'btn-light'}"
-                    data-icon="delete"
                     title="Reset"
                     t-on-click="this.onColorApply"
                     t-on-mouseover="this.onColorHover"
                     t-on-mouseout="this.onColorHoverOut"
                     t-on-focusin="this.onColorFocusin"
-                    t-on-focusout="this.onColorFocusout"/>
+                    t-on-focusout="this.onColorFocusout">delete</button>
         </div>
         <t t-set="activeTab" t-value="this.tabs.find((tab) => this.state.activeTab === tab.id)" />
         <t t-component="activeTab.component" t-props="{

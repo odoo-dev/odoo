@@ -93,7 +93,7 @@ export class HootMain extends Component {
                         <HootSearch />
                         <HootDropdown buttonClassName="'bg-btn'">
                             <t t-set-slot="toggler" t-slot-scope="dropdownState">
-                                <i class="oi oi-filled transition" t-att-class="{ 'rotate-90': dropdownState.open }" data-icon="settings" />
+                                <i class="oi oi-filled transition" t-att-class="{ 'rotate-90': dropdownState.open }">settings</i>
                             </t>
                             <t t-set-slot="menu">
                                 <HootConfigMenu />

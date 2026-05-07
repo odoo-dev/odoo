@@ -10,7 +10,7 @@
                 <button
                     class="btn btn-link text-break m-0"
                     t-on-click="this.onPropertyCreateEmpty">
-                    <i class="oi" data-icon="add"/>
+                    <i class="oi">add</i>
                     Add Property
                 </button>
             </div>

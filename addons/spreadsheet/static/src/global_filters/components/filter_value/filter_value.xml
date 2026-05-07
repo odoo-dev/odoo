@@ -30,7 +30,7 @@
                         value="this.filterValue?.minimumValue"
                         onValueChanged="(value) => this.onMinimumValueNumericInput(this.filter.id, value)"
                     />
-                    <i class="oi mx-2" data-icon="east"/>
+                    <i class="oi mx-2">east</i>
                     <NumericFilterValue
                         value="this.filterValue?.maximumValue"
                         onValueChanged="(value) => this.onMaximumValueNumericInput(this.filter.id, value)"
@@ -56,9 +56,8 @@
             </span>
             <i t-if="this.isValid and this.props.showClear and this.getters.isGlobalFilterActive(this.filter.id)"
                 class="oi btn btn-link text-muted ms-1 mt-1"
-                data-icon="close"
                 title="Clear"
-                t-on-click="() => this.clear(this.filter.id)"/>
+                t-on-click="() => this.clear(this.filter.id)">close</i>
         </div>
     </t>
 </templates>

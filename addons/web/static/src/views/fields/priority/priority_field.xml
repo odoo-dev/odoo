@@ -8,19 +8,16 @@
                     <t t-if="this.props.readonly">
                         <span
                             class="o_priority_star oi o_disabled"
-                            data-icon="star"
                             role="radio"
                             t-att-class="{'oi-filled': value_index lte this.index}"
                             tabindex="0"
                             t-att-data-tooltip="this.getTooltip(value[1])"
                             t-att-aria-checked="value_index === this.index ? 'true' : 'false'"
-                            t-att-aria-label="value[1]"
-                        />
+                            t-att-aria-label="value[1]">star</span>
                     </t>
                     <t t-else="">
                         <button
                             class="o_priority_star btn btn-link btn-link-inline oi p-0"
-                            data-icon="star"
                             role="radio"
                             t-att-class="value_index lte this.index ? 'oi-filled' : 'opacity-25 opacity-100-hover'"
                             tabindex="0"
@@ -30,8 +27,7 @@
                             t-on-click.stop="() => this.onStarClicked(value[0])"
                             t-on-mouseenter="() => this.state.index = value_index"
                             t-on-mouseleave="() => this.state.index = -1"
-                            data-available-offline=""
-                        />
+                            data-available-offline="">star</button>
                     </t>
                 </t>
             </t>

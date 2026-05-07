@@ -13,11 +13,9 @@
                         <t name="download" t-if="this.props.record.resId and !this.props.record.dirty">
                             <button
                                 class="btn btn-link oi o_download_file_button"
-                                data-icon="download"
                                 data-tooltip="Download"
                                 aria-label="Download"
-                                t-on-click="this.onFileDownload"
-                            />
+                                t-on-click="this.onFileDownload">download</button>
                         </t>
                         <t t-set-slot="toggler">
                             <span t-if="!this.fileName" class="btn btn-primary o_select_file_button py-0">
@@ -29,11 +27,9 @@
                         </t>
                         <button
                             class="btn btn-link oi oi-filled o_clear_file_button"
-                            data-icon="delete"
                             data-tooltip="Clear"
                             aria-label="Clear"
-                            t-on-click="() => this.update({})"
-                        />
+                            t-on-click="() => this.update({})">delete</button>
                     </FileUploader>
                 </div>
             </t>
@@ -47,7 +43,7 @@
                         <t t-set-slot="toggler">
                             <div class="d-flex">
                                 Upload your file
-                                <button class="btn btn-link oi ms-auto" data-icon="upload"/>
+                                <button class="btn btn-link oi ms-auto">upload</button>
                             </div>
                         </t>
                     </FileUploader>
@@ -56,7 +52,7 @@
         </t>
         <t t-elif="this.props.record.resId and this.props.record.data[this.props.name]">
             <a class="o_form_uri" href="#" t-on-click.prevent="this.onFileDownload">
-                <span class="oi me-2" data-icon="download" />
+                <span class="oi me-2">download</span>
                 <t t-if="this.fileName" t-out="this.fileName" />
             </a>
         </t>
@@ -71,7 +67,7 @@
                     onUploaded.bind="this.update"
                 >
                     <t t-set-slot="toggler">
-                        <i class="oi oi-fw" data-icon="upload"/> Upload your file
+                        <i class="oi oi-fw">upload</i> Upload your file
                     </t>
                 </FileUploader>
             </label>

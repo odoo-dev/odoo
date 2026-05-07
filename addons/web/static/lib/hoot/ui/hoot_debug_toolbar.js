@@ -164,17 +164,15 @@ export class HootDebugToolBar extends Component {
                 <div class="flex items-center gap-2 px-2">
                     <i
                         class="oi text-cyan p-2"
-                        data-icon="bug_report"
                         t-att-class="{ 'cursor-move': !this.state.open }"
-                        t-ref="handle"
-                    />
+                        t-ref="handle">bug_report</i>
                     <div class="flex gap-px rounded my-1 overflow-hidden min-w-fit">
                         <button
                             class="bg-btn px-2 py-1"
                             title="Exit debug mode (Ctrl + Esc)"
                             t-on-click.stop="this.exitDebugMode"
                         >
-                            <i class="oi" data-icon="logout" />
+                            <i class="oi">logout</i>
                         </button>
                         <t t-if="this.done">
                             <button
@@ -182,7 +180,7 @@ export class HootDebugToolBar extends Component {
                                 title="Restart test (F5)"
                                 t-on-click.stop="this.refresh"
                             >
-                                <i class="oi" data-icon="refresh" />
+                                <i class="oi">refresh</i>
                             </button>
                         </t>
                     </div>
@@ -219,7 +217,7 @@ export class HootDebugToolBar extends Component {
                         />
                     </button>
                     <button class="p-2" t-on-click="this.toggleConfig">
-                        <i class="oi oi-filled" data-icon="settings" />
+                        <i class="oi oi-filled">settings</i>
                     </button>
                 </div>
                 <t t-if="this.state.open">

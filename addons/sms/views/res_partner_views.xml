@@ -13,10 +13,10 @@
             </xpath>
             <xpath expr="//field[@name='phone']" position="before">
                 <field name="phone_blacklisted" invisible="1"/>
-                <button name="phone_action_blacklist_remove" class="oi text-danger" data-icon="block"
+                <button name="phone_action_blacklist_remove" class="oi text-danger"
                     title="This phone number is blacklisted for SMS Marketing. Click to unblacklist."
                     type="object" context="{'default_phone': phone}" groups="base.group_user"
-                    invisible="not phone_blacklisted"/>
+                    invisible="not phone_blacklisted">block</button>
             </xpath>
         </field>
     </record>

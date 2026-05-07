@@ -6,11 +6,9 @@
             <t t-if="this.showLabelVisibilityToggler">
                 <button
                     class="btn btn-link oi text-start o_external_button px-1"
-                    data-icon="menu"
                     id="labelVisibilityButtonId"
                     data-tooltip="Click or press enter to add a description"
-                    t-on-click="() => this.switchLabelVisibility()"
-                />
+                    t-on-click="() => this.switchLabelVisibility()">menu</button>
             </t>
         </div>
         <textarea

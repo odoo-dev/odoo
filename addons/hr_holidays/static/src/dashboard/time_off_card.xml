@@ -24,9 +24,7 @@
                     taken
                 </t>
                 <span t-if="show_popover"
-                    class="o_timeoff_info oi"
-                    t-att-data-icon="this.warning ? 'warning' : 'help_outline'"
-                />
+                    class="o_timeoff_info oi"><t t-out="this.warning ? 'warning' : 'help_outline'"/></span>
             </span>
             <span t-if="this.props.requires_allocation and data.closest_allocation_expire !== false" class="text-uppercase o_timeoff_validity">
                 <t t-if="data.closest_allocation_remaining != data.virtual_remaining_leaves">
@@ -74,7 +72,7 @@
             </span>
             <span class="d-inline-block m-0 mb-3"
                 t-if="this.props.closest &amp;&amp; this.props.closest &lt; this.props.left">
-                <i class="oi" data-icon="warning"/> Only <t t-out="this.props.closest"/>
+                <i class="oi">warning</i> Only <t t-out="this.props.closest"/>
                 <t t-if="this.props.unit_of_measure == 'hour'"> hours</t>
                 <t t-else=""> days</t>
                 can be used before the allocation expires.

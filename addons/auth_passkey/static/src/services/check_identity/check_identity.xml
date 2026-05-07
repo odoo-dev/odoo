@@ -4,7 +4,7 @@
     <t t-name="auth_passkey.CheckIdentityFormWebAuthN">
         <input type="hidden" name="webauthn_response"/>
         <div class="text-center">
-            <i class="oi oi-3x" data-icon="security" aria-hidden="true"/>
+            <i class="oi oi-3x" aria-hidden="true">security</i>
             <h3>Passkey</h3>
         </div>
         <div>

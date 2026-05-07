@@ -14,7 +14,7 @@
                             class="o_select_file_button btn btn-light border-0 rounded-circle m-1 p-1"
                             data-tooltip="Edit"
                             aria-label="Edit">
-                            <i class="oi oi-fw oi-filled" data-icon="edit"/>
+                            <i class="oi oi-fw oi-filled">edit</i>
                         </button>
                     </t>
                     <button
@@ -23,7 +23,7 @@
                         data-tooltip="Clear"
                         aria-label="Clear"
                         t-on-click="this.onFileRemove">
-                        <i class="oi oi-fw" data-icon="delete"/>
+                        <i class="oi oi-fw">delete</i>
                     </button>
                 </FileUploader>
             </div>

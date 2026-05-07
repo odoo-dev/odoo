@@ -13,7 +13,7 @@
         t-att-data-attribute-action="this.info.attributeAction"
         t-att-data-attribute-action-value="this.info.attributeActionValue">
         <span t-if="this.props.prefix" class="o-hb-input-prefix" t-out="this.props.prefix"/>
-        <i t-if="this.props.prefixIcon" role="img" class="o-hb-input-prefix oi" t-att-data-icon="this.props.prefixIcon"/> 
+        <i t-if="this.props.prefixIcon" role="img" class="o-hb-input-prefix oi"><t t-out="this.props.prefixIcon"/></i> 
         <input
             t-custom-ref="inputRef"
             t-att-type="this.props.composable ? 'text' : 'number'"

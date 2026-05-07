@@ -21,7 +21,7 @@
                 t-if="!this.props.product.isQuantityAllowed(this.props.quantity)"
                 class="badge text-bg-danger"
             >
-                <i class="oi oi-filled me-2" data-icon="circle"/>
+                <i class="oi oi-filled me-2">circle</i>
                 <span>Out of Stock</span>
             </span>
             <span
@@ -29,11 +29,10 @@
                 class="text-warning"
             >
                 <i
-                    class="oi" data-icon="warning"
+                    class="oi"
                     data-toggle="tooltip"
                     data-trigger="click hover focus"
-                    t-att-title="this.allQuantitySelectedTooltip"
-                />
+                    t-att-title="this.allQuantitySelectedTooltip">warning</i>
             </span>
         </h6>
         <img name="product_card_image" position="attributes">

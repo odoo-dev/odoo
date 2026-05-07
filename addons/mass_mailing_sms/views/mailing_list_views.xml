@@ -11,7 +11,7 @@
                     <field name="contact_count_sms" class="fw-normal"/>
                     <br/>
                     <span class="text-muted">
-                        <i class="oi oi-filled" data-icon="phone"/> Contacts
+                        <i class="oi oi-filled">phone</i> Contacts
                     </span>
                 </a>
             </xpath>

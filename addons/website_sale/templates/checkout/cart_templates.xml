@@ -159,7 +159,7 @@
                                 title="Remove"
                                 aria-label="Remove"
                             >
-                                <i class="oi oi-fw" data-icon="delete"/>
+                                <i class="oi oi-fw">delete</i>
                             </button>
                         </div>
                     </div>
@@ -184,7 +184,7 @@
                     aria-label="Remove one"
                     title="Remove one"
                 >
-                    <i class="oi position-relative z-1" data-icon="remove"/>
+                    <i class="oi position-relative z-1">remove</i>
                 </button>
                 <input
                     type="text"
@@ -199,11 +199,10 @@
                 <t t-if="line._get_shop_warning(clear=False)">
                     <a href="#" class="btn btn-link">
                         <i
-                            class="oi text-warning" data-icon="warning"
+                            class="oi text-warning"
                             t-att-title="line._get_shop_warning()"
                             role="img"
-                            aria-label="Warning"
-                        />
+                            aria-label="Warning">warning</i>
                     </a>
                 </t>
                 <button
@@ -212,7 +211,7 @@
                     aria-label="Add one"
                     title="Add one"
                 >
-                    <i class="oi position-relative z-1" data-icon="add"/>
+                    <i class="oi position-relative z-1">add</i>
                 </button>
             </t>
             <t t-else="">
@@ -351,7 +350,7 @@
                 aria-controls="quick_reorder_sidebar"
                 t-att-disabled="not order_history"
             >
-                <i class="oi me-2" data-icon="undo"/>Quick reorder
+                <i class="oi me-2">undo</i>Quick reorder
             </button>
         </span>
         <t t-call="website_sale.quick_reorder_sidebar"/>
@@ -469,7 +468,7 @@
                                 t-att-data-product-type="order_line.product_id.type"
                                 t-att-data-selected-combo-items="json.dumps(order_line._get_selected_combo_items())"
                             >
-                                <i class="oi" data-icon="add_shopping_cart"/>
+                                <i class="oi">add_shopping_cart</i>
                             </button>
                         </div>
                     </div>
@@ -545,7 +544,7 @@
                                     t-att-data-product-type="product.type"
                                     t-att-data-show-quantity="is_view_active('website_sale.product_quantity')"
                                 >
-                                    <i class="oi d-md-none" data-icon="shopping_cart" role="presentation"/>
+                                    <i class="oi d-md-none" role="presentation">shopping_cart</i>
                                     <span class="d-none d-md-inline">Add to cart</span>
                                 </button>
                             </div>
@@ -583,7 +582,7 @@
                 title="Wishlist"
                 aria-label="Wishlist"
             >
-                <i class="oi oi-fw" data-icon="favorite"/>
+                <i class="oi oi-fw">favorite</i>
             </button>
         </xpath>
     </template>

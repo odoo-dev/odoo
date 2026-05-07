@@ -71,7 +71,7 @@
                 <span t-else="">Computed by Odoo AI using your data.</span>
                 <a role="button" class="ms-2 btn-link"
                     href="https://www.odoo.com/documentation/latest/applications/sales/crm/track_leads/lead_scoring.html#predictive-lead-scoring" target="_blank">
-                    <i class="oi pe-1" data-icon="info"/>Learn More
+                    <i class="oi pe-1">info</i>Learn More
                 </a>
             </div>
         </div>
@@ -80,7 +80,7 @@
     <t t-name="crm.PlsTooltipSectionContent">
         <div t-foreach="sectionEntries" t-as="group" t-key="group_index"
             t-attf-class="px-2 py-1 {{group.field === 'tag_id' ? 'd-flex align-items-center' : ''}}">
-            <span t-attf-class="{{iconClasses}} o_crm_pls_tooltip_icon me-1" t-attf-data-icon="{{iconName}}"/>
+            <span t-attf-class="{{iconClasses}} o_crm_pls_tooltip_icon me-1"><t t-out="iconName"/></span>
             <t t-if="group.field === 'stage_id'">
                 <span class="fw-bolder"><t t-out="group.value"/></span>
                 <span class="mx-1">stage</span>

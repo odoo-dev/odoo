@@ -331,7 +331,7 @@
                             </div>
                             <div class="text-muted">
                                 <field name="work_entry_type_id" display="full"/>
-                                <field name="date_from"/> <i class="oi" data-icon="east" title="to" /> <field name="date_to"/>
+                                <field name="date_from"/> <i class="oi" title="to">east</i> <field name="date_to"/>
                             </div>
                         </div>
                     </div>

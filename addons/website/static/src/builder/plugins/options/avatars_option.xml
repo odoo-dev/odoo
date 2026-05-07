@@ -57,13 +57,13 @@
 
 <t t-name="website.AvatarsHeaderMiddleButtons">
     <button class="btn btn-success-color-hover ms-0 py-0 px-1 me-1" aria-label="Add Avatar" t-on-click="this.addAvatar">
-        <span class="oi oi-fw" data-icon="add"/>
-        <span class="oi oi-filled" data-icon="person"/>
+        <span class="oi oi-fw">add</span>
+        <span class="oi oi-filled">person</span>
     </button>
     <button class="btn btn-danger-color-hover py-0 px-1 me-3" t-att-disabled="this.state.disableRemoveButton"
             aria-label="Remove Avatar" t-on-click="this.removeAvatar">
-        <span class="oi oi-fw" data-icon="remove"/>
-        <span class="oi oi-filled" data-icon="person"/>
+        <span class="oi oi-fw">remove</span>
+        <span class="oi oi-filled">person</span>
     </button>
 </t>
 

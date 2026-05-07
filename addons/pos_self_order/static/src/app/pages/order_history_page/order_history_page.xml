@@ -15,7 +15,7 @@
                                 </div>
                                 <div class="d-flex justify-content-around gap-1 align-items-center">
                                     <div t-if="this.selfOrder.showDownloadButton(order)" class=" cursor-pointer p-2" role="button" t-on-click="() => this.selfOrder.downloadReceipt(order)">
-                                        <i class="oi" data-icon="download" aria-hidden="true" />
+                                        <i class="oi" aria-hidden="true">download</i>
                                     </div>
                                     <span class="badge py-2 rounded-pill text-capitalize"
                                         t-att-class="{
@@ -48,11 +48,11 @@
                                             />
                                         <t t-set="comboParent" t-value="line.combo_parent_id" />
                                         <div t-if="comboParent" class="info ms-2 combo-parent-name">
-                                            <i class="oi me-2" data-icon="view_module" role="img" aria-label="Combo" title="Combo"/>
+                                            <i class="oi me-2" role="img" aria-label="Combo" title="Combo">view_module</i>
                                             <t t-out="line.combo_parent_id.product_id.name" />
                                         </div>
                                         <div t-if="line.customer_note" class="d-inline-block m-0 text-muted small break-line">
-                                            <i class="oi" data-icon="edit_square" aria-hidden="true" />
+                                            <i class="oi" aria-hidden="true">edit_square</i>
                                             <span t-out="line.customer_note" class="customer_note ms-1" />
                                         </div>
                                     </div>
@@ -89,7 +89,7 @@
             <div class="o_self_footer bg-white border-top py-3">
                 <div class="container o_self_container ">
                   <button  class="btn btn-lg btn-secondary" t-on-click="this.back">
-                      <i class="oi d-md-none" data-icon="chevron_backward" />
+                      <i class="oi d-md-none">chevron_backward</i>
                       <span class="d-none d-md-inline">Back</span>
                   </button>
                 </div>

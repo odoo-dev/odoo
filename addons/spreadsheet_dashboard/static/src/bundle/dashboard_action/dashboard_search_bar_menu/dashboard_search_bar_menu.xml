@@ -27,7 +27,7 @@
                     <button t-if="this.filterHasClearButton(item)"
                         class="btn btn-link px-2 text-danger fs-4"
                         t-on-click="() => this.clearFilter(item.globalFilter.id)">
-                        <i class="oi" data-icon="close"></i>
+                        <i class="oi">close</i>
                     </button>
                 </div>
             </div>

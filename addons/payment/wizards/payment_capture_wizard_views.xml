@@ -35,9 +35,8 @@
                                class="oe_inline"
                                readonly="support_partial_capture == 'full_only'"/>
                         <i class="oi oe_inline"
-                           data-icon="info"
                            invisible="support_partial_capture != 'full_only'"
-                           title="Some of the transactions you intend to capture can only be captured in full. Handle the transactions individually to capture a partial amount."/>
+                           title="Some of the transactions you intend to capture can only be captured in full. Handle the transactions individually to capture a partial amount.">info</i>
                     </div>
                     <field name="void_remaining_amount" readonly="not has_remaining_amount"/>
                 </group>

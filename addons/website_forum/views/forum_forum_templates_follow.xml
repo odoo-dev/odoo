@@ -10,38 +10,34 @@
             <div t-if="not env.user._is_public()" class="js_follow_icons_container">
                 <button t-attf-class="btn js_unfollow_btn #{btn_classes}">
                     <i t-attf-class="oi oi-fw #{icons_classes}"
-                        data-icon="remove_circle"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        title="Unfollow"/>
+                        title="Unfollow">remove_circle</i>
                     <t t-if="show_label">Unfollow</t>
                 </button>
                 <button t-attf-class="btn js_follow_btn #{btn_classes} #{follow_btn_classes}">
                     <i t-attf-class="oi oi-fw #{icons_classes}"
-                        data-icon="add_circle"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        title="Follow"/>
+                        title="Follow">add_circle</i>
                     <t t-if="show_label">Follow</t>
                 </button>
             </div>
             <span t-else="" class="js_follow_icons_container">
                 <button t-attf-class="btn js_unfollow_btn #{btn_classes}">
                     <i t-attf-class="oi oi-fw #{icons_classes}"
-                        data-icon="remove_circle"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        title="Unfollow"/>
+                        title="Unfollow">remove_circle</i>
                     <t t-if="show_label">Unfollow</t>
                 </button>
                 <button t-attf-class="btn follow_btn #{btn_classes}"
                     data-bs-toggle="modal"
                     t-attf-data-bs-target="#o_wmail_follow_modal_#{object.id}">
                     <i t-attf-class="oi oif-w #{icons_classes}"
-                        data-icon="add_circle"
                         data-bs-toggle="tooltip"
                         data-bs-placement="top"
-                        title="Follow"/>
+                        title="Follow">add_circle</i>
                     <t t-if="show_label">Follow</t>
                 </button>
             </span>
@@ -63,7 +59,7 @@
                                 Subscribe
                             </button>
                             <button href="#" t-attf-class="btn btn-secondary js_unfollow_btn">
-                                <i class="oi oi-fw me-1" data-icon="check"/>Following
+                                <i class="oi oi-fw me-1">check</i>Following
                             </button>
                         </form>
                     </div>

@@ -69,9 +69,8 @@
                             <button t-if="line.move_out and line.move_out.picking_id"
                                 class="o_priority o_priority_star oi me-1"
                                 t-att-class="{'oi-filled': line.move_out.picking_id.priority=='1'}"
-                                data-icon="star"
                                 t-on-click="() => this._onClickChangePriority('stock.picking', line.move_out.picking_id)"
-                                name="change_priority_link"/>
+                                name="change_priority_link">star</button>
                             <a t-if="line.document_out"
                                 href="#"
                                 t-attf-class="#{line.is_matched and 'fst-italic'}"

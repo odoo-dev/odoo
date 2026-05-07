@@ -5,7 +5,7 @@
                 t-if="this.hasOdooLink and !this.env.isDashboard()"
                 class="o-figure-menu-item o-chart-external-link"
                 t-custom-click="(ev, isMiddleClick) => this.navigateToOdooLink(isMiddleClick)">
-                <span class="oi" data-icon="open_in_new" />
+                <span class="oi">open_in_new</span>
             </div>
         </xpath>
     </div>

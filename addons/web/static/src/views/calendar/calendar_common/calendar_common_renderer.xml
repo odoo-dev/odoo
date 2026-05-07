@@ -11,7 +11,7 @@
                 <t> </t>
             </t>
             <div class="o_event_title">
-                <i area-hidden="true" t-if="titleIcon" class="oi me-2" t-att-data-icon="titleIcon"/>
+                <i area-hidden="true" t-if="titleIcon" class="oi me-2"><t t-out="titleIcon"/></i>
                 <t t-out="title"/>
             </div>
     </t>

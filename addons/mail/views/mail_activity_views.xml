@@ -84,8 +84,8 @@
                 <templates>
                     <t t-name="card">
                         <div class="fw-bold fs-5">
-                            <i t-if="record.icon.value" class="oi oi-fw" data-icon="record.icon.value"
-                               role="img" aria-label="Activity Type Name" title="Activity Type Name"/>
+                            <i t-if="record.icon.value" class="oi oi-fw"
+                               role="img" aria-label="Activity Type Name" title="Activity Type Name"><t t-out="record.icon.value"/></i>
                             <field name="name"/>
                         </div>
                         <field t-if="record.res_model.value" name="res_model"/>
@@ -335,7 +335,7 @@
                                 </span>
                                 <field name="summary" class="text-truncate" invisible="res_name"/>
                                 <span class="badge rounded-pill text-bg-300">
-                                    <i t-if="record.icon" t-att-title="record.activity_type_id.value" t-attf-class="oi me-1" t-att-data-icon="record.icon.raw_value"/>
+                                    <i t-if="record.icon" t-att-title="record.activity_type_id.value" t-attf-class="oi me-1"><t t-out="record.icon.raw_value"/></i>
                                     <field name="activity_type_id"/>
                                 </span>
                             </div>
@@ -344,7 +344,7 @@
                                 <field name="user_id" widget="many2one_avatar_user" />
                                 <field name="date_deadline" widget="remaining_days" class="ms-2"/>
                                 <button type="object" name="action_done" class="btn btn-link btn-sm ms-auto me-1" invisible="active == False">
-                                    <i class="oi" data-icon="check" /> Done
+                                    <i class="oi">check</i> Done
                                 </button>
                             </footer>
                         </main>

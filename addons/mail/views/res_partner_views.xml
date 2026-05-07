@@ -9,10 +9,10 @@
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='email']" position="before">
                     <field name="is_blacklisted" invisible="1"/>
-                    <button name="mail_action_blacklist_remove" class="oi text-danger" data-icon="block"
+                    <button name="mail_action_blacklist_remove" class="oi text-danger"
                         title="This email is blacklisted for mass mailings. Click to unblacklist."
                         type="object" context="{'default_email': email}" groups="base.group_user"
-                        invisible="not is_blacklisted"/>
+                        invisible="not is_blacklisted">block</button>
                 </xpath>
                 <xpath expr="//sheet" position="after">
                     <chatter/>

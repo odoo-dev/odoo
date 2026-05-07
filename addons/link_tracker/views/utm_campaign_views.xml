@@ -24,7 +24,7 @@
                     type="action" name="%(link_tracker_action_campaign)d"
                     class="btn-outline-primary rounded-pill me-1 order-4">
                     <span class="badge">
-                        <i class="oi oi-fw" data-icon="mouse"  aria-label="Clicks" role="img"/>
+                        <i class="oi oi-fw"  aria-label="Clicks" role="img">mouse</i>
                         <field name="click_count"/>
                     </span>
                 </a>

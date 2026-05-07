@@ -6,9 +6,7 @@
         <t t-if="['done', 'cancel'].includes(item.value) and item.isSelected">
             <i
                 class="oi oi-fw ms-1"
-                t-att-class="this.isLocked ? 'text-success' : 'text-warning'"
-                t-att-data-icon="this.isLocked ? 'lock' : 'lock_open'"
-            />
+                t-att-class="this.isLocked ? 'text-success' : 'text-warning'"><t t-out="this.isLocked ? 'lock' : 'lock_open'"/></i>
         </t>
     </t>
 

@@ -11,7 +11,7 @@
                 t-attf-class="btn btn-light btn-chatter todo_toggle_chatter #{this.state.displayChatter ? 'active' : '' }"
                 t-on-click="this.toggleChatter"
             >
-                <i class="oi oi-filled" data-icon="forum"/>
+                <i class="oi oi-filled">forum</i>
             </a>
         </xpath>
     </t>

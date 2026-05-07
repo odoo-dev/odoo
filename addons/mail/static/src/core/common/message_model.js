@@ -453,7 +453,7 @@ export class Message extends Record {
                 if (this.ended_poll_ids.length) {
                     text = this.poll.pollClosedText;
                 }
-                return markup`<i class="oi oi-fw o-me-0_5" data-icon="oi_view-cohort"></i>${text}`;
+                return markup`<i class="oi oi-fw o-me-0_5">oi_view-cohort</i>${text}`;
             }
             if (this.notificationType === "call") {
                 return _t("%(caller)s started a call", { caller: this.authorName });
@@ -492,7 +492,7 @@ export class Message extends Record {
     }
 
     get notificationIconClass() {
-        if(this.notificationType === "call") {
+        if (this.notificationType === "call") {
             return "oi-filled";
         }
         return null;
@@ -511,9 +511,9 @@ export class Message extends Record {
     get canToggleBookmark() {
         return Boolean(
             !this.is_transient &&
-            !this.isPending &&
-            this.store.self_user?.share === false &&
-            this.persistent
+                !this.isPending &&
+                this.store.self_user?.share === false &&
+                this.persistent
         );
     }
 
@@ -596,10 +596,10 @@ export class Message extends Record {
     canAddReaction(thread) {
         return Boolean(
             !this.is_transient &&
-            !this.isPending &&
-            this.thread?.can_react &&
-            !this.thread.isTransient &&
-            this.thread.has_mail_thread
+                !this.isPending &&
+                this.thread?.can_react &&
+                !this.thread.isTransient &&
+                this.thread.has_mail_thread
         );
     }
 

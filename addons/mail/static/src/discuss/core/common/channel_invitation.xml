@@ -21,8 +21,8 @@
                     </label>
                     <input id="o-discuss-ChannelInvitation-search" class="o-discuss-ChannelInvitation-search form-control lh-1 px-2 ps-4 bg-view" aria-describedby="o-discuss-ChannelInvitation-searchStatusIcon" t-att-value="this.searchStr" t-custom-ref="input" t-att-placeholder="this.searchPlaceholder" t-on-input="this.onInput"/>
                     <div t-if="this.props.channel?.allow_invite_by_email" class="o-discuss-ChannelInvitation-iconContainer position-absolute top-50 end-0 translate-middle-y me-2 smaller opacity-50" data-tooltip="Type email to invite">
-                        <i class="oi oi-lg" data-icon="mail"/>
-                        <i class="oi o-discuss-ChannelInvitation-iconPlus position-absolute bg-white rounded-circle" data-icon="add_circle"/>
+                        <i class="oi oi-lg">mail</i>
+                        <i class="oi o-discuss-ChannelInvitation-iconPlus position-absolute bg-white rounded-circle">add_circle</i>
                     </div>
                 </div>
                 <div class="d-flex flex-column pt-1">
@@ -52,12 +52,12 @@
                         <div class="o-discuss-ChannelInvitation-selectedList d-flex flex-wrap overflow-auto o-scrollbar-thin">
                             <t t-foreach="this.selectedPartners" t-as="selectedPartner" t-key="selectedPartner.id">
                                 <button class="btn btn-light o-fw-600 smaller pe-1" title="Unselect person" t-on-click="() => this.onClickSelectedPartner(selectedPartner)">
-                                    <t t-out="selectedPartner.name"/> <i class="oi border border-dark-subtle ms-1" t-attf-data-icon="{{ state.expanded ? 'keyboard_arrow_down' : 'chevron_forward' }}"/>
+                                    <t t-out="selectedPartner.name"/> <i class="oi border border-dark-subtle ms-1"><t t-out="state.expanded ? 'keyboard_arrow_down' : 'chevron_forward'"/></i>
                                 </button>
                             </t>
                             <t t-foreach="this.state.selectedEmails" t-as="selectedEmail" t-key="selectedEmail">
                                 <button class="btn btn-light o-fw-600 smaller pe-1" title="Unselect person" t-on-click="() => this.onClickSelectedEmail(selectedEmail)">
-                                    <t t-out="selectedEmail"/> <i class="oi border border-dark-subtle ms-1" t-attf-data-icon="{{ state.expanded ? 'keyboard_arrow_down' : 'chevron_forward' }}"/>
+                                    <t t-out="selectedEmail"/> <i class="oi border border-dark-subtle ms-1"><t t-out="state.expanded ? 'keyboard_arrow_down' : 'chevron_forward'"/></i>
                                 </button>
                             </t>
                         </div>
@@ -71,7 +71,7 @@
                     <div class="input-group">
                         <input class="border border-secondary form-control lh-1 rounded-start border-0 smaller" type="text" t-att-value="this.props.channel.invitationLink" readonly="" disabled="" t-on-focus="this.onFocusInvitationLinkInput"/>
                         <button class="btn btn-primary px-2 o-py-0_5" t-on-click="() => this.props.channel.copyInvitationLink()">
-                            <i class="oi" data-icon="content_copy"/>
+                            <i class="oi">content_copy</i>
                         </button>
                     </div>
                 </t>
@@ -83,7 +83,7 @@
                         class="btn btn-link btn-sm px-2 o-py-0_5 opacity-75 opacity-100-hover me-n2 d-flex align-items-center gap-1 align-self-start flex-shrink-0"
                         t-on-click="this.onClickGenerateNewLink"
                     >
-                        <i class="oi opacity-75" data-icon="refresh"/>
+                        <i class="oi opacity-75">refresh</i>
                         Generate new invite link
                     </button>
                 </div>
@@ -100,7 +100,7 @@
                 <div class="position-relative d-flex flex-shrink-0 bg-inherit">
                     <DiscussAvatar t-if="selectablePartner" persona="selectablePartner"/>
                     <div t-else="" class="w-100 h-100 d-flex align-items-center justify-content-center rounded-3 bg-primary text-white">
-                        <i class="oi oi-filled" data-icon="mail"/>
+                        <i class="oi oi-filled">mail</i>
                     </div>
                 </div>
             </div>

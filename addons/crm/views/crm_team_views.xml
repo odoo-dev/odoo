@@ -188,7 +188,7 @@
                     <field name="assignment_optout" widget="boolean_toggle" invisible="not assignment_auto_enabled"/>
                     <label for="lead_all_assigned_month_count" invisible="assignment_optout"/>
                     <div class="d-flex align-items-baseline gap-1" invisible="assignment_optout">
-                        <i class="oi" data-icon="warning" title="Exceeded" invisible="not lead_all_assigned_month_exceeded"/>
+                        <i class="oi" title="Exceeded" invisible="not lead_all_assigned_month_exceeded">warning</i>
                         <field name="lead_all_assigned_month_count" invisible="not assignment_enabled"/>
                     </div>
                     <field name="assignment_max" invisible="not assignment_enabled"/>
@@ -268,7 +268,7 @@
 
                     <xpath expr="//field[@name='name']" position="after">
                         <div class="ms-2" t-if="record.alias_name.value and record.alias_domain.value">
-                            <span t-translation="off"><i class="oi" data-icon="mail" aria-label="Leads" title="Leads" role="img"></i>&amp;nbsp; <field name="alias_id"/></span>
+                            <span t-translation="off"><i class="oi" aria-label="Leads" title="Leads" role="img">mail</i>&amp;nbsp; <field name="alias_id"/></span>
                         </div>
                     </xpath>
 

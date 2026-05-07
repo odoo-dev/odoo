@@ -68,10 +68,9 @@
                                     value="1"
                                     min="1"/>
                                 <button class="o_add_qty btn btn-primary oi"
-                                        data-icon="add"
                                         type="submit"
                                         t-on-click="this.onClickAddQty"
-                                        title="Add a quantity"/>
+                                        title="Add a quantity">add</button>
                             </div>
                             <div class="d-flex align-items-center w-50">
                                 <span class="o_badges_list d-flex">
@@ -79,9 +78,8 @@
                                         <span class="text-bg-300 o_remove_qty badge rounded-pill me-2 py-1 border " t-att-value="qty">
                                             <t class="me-2" t-out="qty"/>
                                             <i class="oi ms-1 opacity-50 opacity-100-hover text-900 cursor-pointer"
-                                            data-icon="close_small"
                                             title="Remove quantity"
-                                            t-on-click="this.onClickRemoveQty"/>
+                                            t-on-click="this.onClickRemoveQty">close_small</i>
                                         </span>
                                     </t>
                                 </span>
@@ -90,7 +88,7 @@
                     </form>
                     <div style="margin-left:100px;">
                         <button t-on-click="this.onClickAddProducts" string="All Products" class="btn btn-link">
-                            <i class="oi oi-filled" data-icon="edit"/>
+                            <i class="oi oi-filled">edit</i>
                             Add Products
                         </button>
                     </div>

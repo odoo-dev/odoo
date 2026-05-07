@@ -4,10 +4,8 @@
         <xpath expr="//*[@name='threadAvatar']" position="before">
             <i t-if="this.store.discuss.isSidebarCompact and this.props.channel.discussAppCategory.eq(this.store.discuss.livechatLookingForHelpCategory) and this.props.channel.matchesSelfExpertise"
                class="oi oi-filled o-mail-favorite position-absolute top-0 start-0 z-1"
-               data-icon="star"
                role="image"
-               title="Relevant to your expertise"
-            />
+               title="Relevant to your expertise">star</i>
             <t t-else="" t-call="im_livechat.LivechatStatusLabelOfThread">
                 <t t-set="templateParams" t-value="{ livechatThread: this.props.channel.thread, small: true }"/>
             </t>
@@ -24,9 +22,7 @@
             <i
                  t-if="btn.icon"
                  class="o-livechat-LivechatStatusLabel-icon oi"
-                 t-attf-class="{{ btn.iconClass }}"
-                 t-attf-data-icon="{{ btn.icon }}"
-            />
+                 t-attf-class="{{ btn.iconClass }}"><t t-out="btn.icon"/></i>
         </span>
     </t>
 
@@ -50,9 +46,7 @@
                 'o-white': livechatThread.livechat_end_dt,
                 'position-absolute start-0 top-0 z-1 o-inDiscussSidebar rounded-circle o-px-0_5': this.env.inDiscussSidebar,
                 'oi-fw': !this.env.inDiscussSidebar,
-                'o-xsmaller': small}"
-                t-attf-data-icon="{{ livechatThread.livechat_end_dt ? 'sports_score' : livechatStatusButton?.icon }}"
-            />
+                'o-xsmaller': small}"><t t-out="livechatThread.livechat_end_dt ? 'sports_score' : livechatStatusButton?.icon"/></i>
         </span>
     </t>
 

@@ -9,28 +9,28 @@ title stay editable after a save (see SOCIAL_MEDIA_TITLE_CONTENTEDITABLE).
     <div t-attf-class="s_social_media text-start o_not_editable #{_classes}" contenteditable="false">
         <h4 class="s_social_media_title d-none" contenteditable="true">Social Media</h4>
         <a href="#" class="s_social_media_facebook" target="_blank" aria-label="Facebook">
-            <i class="oi rounded shadow-sm o_editable_media small_social_icon" data-icon="oi_facebook"/>
+            <i class="oi rounded shadow-sm o_editable_media small_social_icon">oi_facebook</i>
         </a>
         <a href="#" class="s_social_media_twitter" target="_blank" aria-label="X">
-            <i class="oi rounded shadow-sm o_editable_media small_social_icon" data-icon="oi_twitter"/>
+            <i class="oi rounded shadow-sm o_editable_media small_social_icon">oi_twitter</i>
         </a>
         <a href="#" class="s_social_media_linkedin" target="_blank" aria-label="LinkedIn">
-            <i class="oi rounded shadow-sm o_editable_media small_social_icon" data-icon="oi_linkedin"/>
+            <i class="oi rounded shadow-sm o_editable_media small_social_icon">oi_linkedin</i>
         </a>
         <a href="#" class="s_social_media_youtube" target="_blank" aria-label="YouTube">
-            <i class="oi rounded shadow-sm o_editable_media small_social_icon" data-icon="oi_youtube-play"/>
+            <i class="oi rounded shadow-sm o_editable_media small_social_icon">oi_youtube-play</i>
         </a>
         <a href="#" class="s_social_media_instagram" target="_blank" aria-label="Instagram">
-            <i class="oi rounded shadow-sm o_editable_media small_social_icon" data-icon="oi_instagram"/>
+            <i class="oi rounded shadow-sm o_editable_media small_social_icon">oi_instagram</i>
         </a>
         <a href="#" class="s_social_media_github" target="_blank" aria-label="GitHub">
-            <i class="oi rounded shadow-sm o_editable_media small_social_icon" data-icon="oi_github"/>
+            <i class="oi rounded shadow-sm o_editable_media small_social_icon">oi_github</i>
         </a>
         <a href="#" class="s_social_media_tiktok" target="_blank" aria-label="TikTok">
-            <i class="oi rounded shadow-sm o_editable_media small_social_icon" data-icon="oi_tiktok"/>
+            <i class="oi rounded shadow-sm o_editable_media small_social_icon">oi_tiktok</i>
         </a>
         <a href="#" class="s_social_media_discord" target="_blank" aria-label="Discord">
-            <i class="oi rounded shadow-sm o_editable_media small_social_icon" data-icon="oi_discord"/>
+            <i class="oi rounded shadow-sm o_editable_media small_social_icon">oi_discord</i>
         </a>
     </div>
 </template>

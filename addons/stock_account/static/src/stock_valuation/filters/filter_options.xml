@@ -3,7 +3,7 @@
     <t t-name="stock_account.StockValuationReport.FilterOptions">
         <Dropdown>
             <button class="btn btn-secondary" disabled="true">
-                <i class="oi me-1" data-icon="tune"/>Options
+                <i class="oi me-1">tune</i>Options
             </button>
 
             <!-- <t t-set-slot="content">

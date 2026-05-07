@@ -18,8 +18,8 @@
                     </div>
                     <t t-if="this.props.visible">
                         <div class="position-absolute upload_badge pe-none">
-                            <i class="oi oi-stack-2x text-primary" data-icon="circle"/>
-                            <i class="oi oi-stack-1x" data-icon="upload"/>
+                            <i class="oi oi-stack-2x text-primary">circle</i>
+                            <i class="oi oi-stack-1x">upload</i>
                         </div>
                    </t>
                     <div class="h3 pe-none" t-att-class="{'text-primary': this.props.visible}">
@@ -43,8 +43,8 @@
                         style="height: auto; width: 120px;"
                     />
                     <span class="position-absolute oi-stack-2x mt-2">
-                        <i class="oi oi-stack-2x oi-filled text-primary" data-icon="circle"></i>
-                        <i class="oi oi-stack-1x" data-icon="upload"></i>
+                        <i class="oi oi-stack-2x oi-filled text-primary">circle</i>
+                        <i class="oi oi-stack-1x">upload</i>
                     </span>
                     <h2 class="mt-5 fw-bold text-primary text-center">
                         <t t-out="this.props.dropZoneTitle"/>
