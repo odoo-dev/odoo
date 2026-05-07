@@ -1121,6 +1121,7 @@ class PosSession(models.Model):
                 'balance': -line.amount_currency,
                 'display_type': line.display_type,
                 'tax_ids': [(6, 0, line.tax_ids.ids)],
+                'quantity': -line.quantity,
             }))
         return reverse_move_lines
 
