@@ -1,6 +1,6 @@
 {
     "name": "Printer",
-    "summary": "Base module to manage external printers (e.g. ePOS, ZPL)",
+    "summary": "Base module to manage external printers (e.g. ePOS, ZPL, Office)",
     "version": "0.1",
     "depends": ["base", "base_setup"],
     "author": "Odoo S.A.",

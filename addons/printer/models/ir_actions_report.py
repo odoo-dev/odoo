@@ -38,6 +38,9 @@ def thermal_printer_format(data) -> bytes:
     return (epos_template % (target_height, base64_image)).encode()
 
 
+report_handlers = [('qweb-text', 'zpl', lambda r: 'zpl' in r.name.lower()), ('qweb-pdf', 'pdf', lambda r: True)]
+
+
 class IrActionsReport(models.Model):
     _inherit = "ir.actions.report"
 
@@ -50,23 +53,16 @@ class IrActionsReport(models.Model):
         This method is meant to be overridden by modules adding support
         for specific printer types (e.g. ePOS, IoT).
 
-        By default, we render ZPL reports, PDF ones will be handled using
-        Odoo's default behavior.
+        By default, we render ZPL reports.
         """
         report = self._get_report(report_name)
-        if (
-            report.report_type == "qweb-text"
-            and "zpl" in report.name.lower()
-            and len(report.printer_ids.filtered(lambda p: p.type == "zpl").exists())
-        ):
-            return [
-                {
-                    "type": "zpl",
-                    "report": base64.b64encode(
-                        self._render(report_name, docids, data=data)[0]
-                    ),
-                }
-            ]
+        for report_type, printer_type, condition in report_handlers:
+            if report.report_type == report_type and report.printer_ids.filtered(lambda p: p.type == printer_type) and condition(report):
+                return [{
+                    'type': printer_type,
+                    'report': base64.b64encode(self._render(report_name, docids, data=data)[0]),
+                }]
+
         return []
 
     def _read_format(self, *args, **kwargs):
