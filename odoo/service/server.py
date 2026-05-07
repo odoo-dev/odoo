@@ -54,7 +54,7 @@ except ImportError:
         return None
 
 from odoo import api, sql_db
-from odoo.http.server import HTTPSocket
+from odoo.http.server import HTTPServer
 from odoo.modules.registry import Registry
 from odoo.release import nt_service_name
 from odoo.tools import OrderedSet, config, gc, osutil, profiler
@@ -417,7 +417,7 @@ class ThreadedServer(CommonServer):
             if config['test_enable']:
                 client.settimeout(5)
 
-            http_socket = HTTPSocket(client, address, prelude=prelude)
+            http_socket = HTTPServer(client, address, prelude=prelude)
             del prelude
             http_socket.process_request()
         except BaseException:  # noqa: BLE001
@@ -1309,7 +1309,7 @@ class WorkerHTTP(Worker):
         # Prevent fd inherientence close_on_exec
         flags = fcntl.fcntl(client, fcntl.F_GETFD) | fcntl.FD_CLOEXEC
         fcntl.fcntl(client, fcntl.F_SETFD, flags)
-        http_socket = HTTPSocket(client, addr)
+        http_socket = HTTPServer(client, addr)
         http_socket.process_request()
 
         self.request_count += 1

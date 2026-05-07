@@ -90,7 +90,7 @@ def _verify_target(target: bytes):
         raise h11.RemoteProtocolError(e) from exc
 
 
-class HTTPSocket:
+class HTTPServer:
     __slots__ = (
         'addr',
         'conn',
@@ -216,6 +216,8 @@ class HTTPSocket:
             environ['CONTENT_TYPE'] = content_type
         if content_length := environ.pop('HTTP_CONTENT_LENGTH', ''):
             environ['CONTENT_LENGTH'] = content_length
+        if not environ.get('HTTP_HOST'):  # possible in http/1.0
+            environ['HTTP_HOST'] = f'{config['http_interface']}:{config['http_port']}'
 
         if config['proxy_mode'] and environ.get('HTTP_X_FORWARDED_HOST'):
             pf = ProxyFix(lambda e, sr: (), x_for=1, x_proto=1, x_host=1)
