@@ -1,25 +1,25 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import datetime as dt
+import h11
+import io
 import logging
 import os
 import os.path
 import subprocess as sp
 import selectors
+import sys
 import threading
 import time
-import typing
 
-from collections.abc import Buffer, Generator, Collection
+from collections.abc import Buffer, Collection
 from contextlib import contextmanager
-from dataclasses import dataclass, field
 from email.utils import format_datetime
 from functools import cache, partial
 from io import DEFAULT_BUFFER_SIZE
-from typing import IO, BinaryIO
-from wsgiref.types import WSGIEnvironment
+from typing import BinaryIO
+from urllib.parse import unquote, urlsplit
 
-from werkzeug.test import create_environ, run_wsgi_app
 
 import odoo.release
 from odoo.http import request
@@ -30,19 +30,24 @@ __all__ = ['Server', 'which_paper_muncher']
 
 _logger = logging.getLogger(__name__)
 
-DEFAULT_READ_TIMEOUT = 15  # seconds
 DEFAULT_WRITE_TIMEOUT = 15  # seconds
 DEFAULT_SERVE_TIMEOUT = 15 * 60  # 15 minutes
 DEFAULT_CHUNK_SIZE = 8192  # 8kiB
+MAX_INCOMPLETE_EVENT_SIZE = 8192  # 8kiB
 FALLBACK_BIN_PATH = '/opt/paper-muncher/bin/paper-muncher'
 SERVER_SOFTWARE = f'{odoo.release.product_name}/{odoo.release.version}'
 
+
 class Server():
-    selector: typing.Any #add type and other vars
 
     def __init__(self, process):
         self.process = process
         self.deadline = None
+
+        self.conn = h11.Connection(
+            h11.SERVER,
+            max_incomplete_event_size=MAX_INCOMPLETE_EVENT_SIZE,
+        )
 
     def serve(self, documents: Collection[str], *, timeout: int = DEFAULT_SERVE_TIMEOUT):
         """Serve Paper Muncher requests until the rendered PDF is returned."""
@@ -51,24 +56,20 @@ class Server():
         self.documents = documents
         self.documents_served = set()
         self.pdf_received = False
-        self.stdout_buffer = bytearray()
+        self._current_request = None
+        self._body_chunks = []
         self.selector = selectors.DefaultSelector()
 
-
-        # We use a selector to monitor both stdout (requests) and stderr (logs)
         self.selector.register(self.process.stdout, selectors.EVENT_READ, data='stdout')
         self.selector.register(self.process.stderr, selectors.EVENT_READ, data='stderr')
 
         try:
             while not self.pdf_received:
-                #as long as the server is running (PUT not received and no errors)
                 events = self._poll_events()
 
                 for key, _mask in events:
-                    #answering the messages
                     if key.data == 'stderr':
                         self._handle_stderr_message()
-
                     elif key.data == 'stdout':
                         self._handle_stdout_message()
 
@@ -83,15 +84,12 @@ class Server():
             self.selector.close()
 
     def _poll_events(self):
-        # Check if process died
         if self.process.poll() is not None:
             e = "Paper Muncher exited before returning the rendered PDF"
             raise RuntimeError(e)
 
-        # Wait for data on either pipe.
         wait_timeout = min(1.0, _remaining_time(self.deadline))
         return self.selector.select(timeout=wait_timeout)
-
 
     def _handle_stderr_message(self):
         log_data = os.read(self.process.stderr.fileno(), 65536)
@@ -100,71 +98,108 @@ class Server():
         _logger.warning("paper-muncher (pid %s) wrote on stderr:\n%s",
                         self.process.pid, log_data.decode('utf-8', errors='replace'))
 
-
     def _handle_stdout_message(self):
-        # PROCESS REQUESTS: Read chunk from stdout
         chunk = os.read(self.process.stdout.fileno(), DEFAULT_CHUNK_SIZE)
-        if not chunk:  # EOF
+        if not chunk:
             return
 
-        self.stdout_buffer.extend(chunk)
+        self.conn.receive_data(chunk)
 
-        while (request := consume_headers(self.stdout_buffer)) != (None, None):
-            # while there is requests in the buffer
-            request_line, _headers = request
+        while True:
+            event = self.conn.next_event()
+            if event is h11.NEED_DATA or event is h11.PAUSED:
+                break
+            if isinstance(event, h11.Request):
+                self._current_request = event
+                self._body_chunks = []
+            elif isinstance(event, h11.Data):
+                self._body_chunks.append(event.data)
+            elif isinstance(event, h11.EndOfMessage):
+                body = b''.join(self._body_chunks)
+                self.route(
+                    self._current_request.method.decode(),
+                    self._current_request.target.decode(),
+                    body,
+                )
+                self.conn.start_next_cycle()
+            elif isinstance(event, h11.ConnectionClosed):
+                break
 
-            method, path = request_line.split(' ')# TODO use partition
-            self.route(method, path)
-
-    def _handle_get_asset(self, path):
-        """Serve one ``GET`` asset request from the worker."""
-
-        for chunk in _generate_odoo_http_response(path):
-            _safe_write(self.process, chunk)
-
-        self.process.stdin.flush()
-        _logger.info("Asset %s sent successfully", path)
-        return
+    def _send(self, event) -> None:
+        _safe_write(self.process, self.conn.send(event))
 
     def _handle_get_document(self, path):
         """Serve one ``GET`` document request from the worker."""
         index = int(path.split('.')[0]) if path != "." else 0
-        content = self.documents[index]
-        now = dt.datetime.now(dt.UTC)
-        response_headers = (
-            b"HTTP/1.1 200 OK\r\n"
-            b"Date: %(date)s\r\n"
-            b"Content-Length: %(length)d\r\n"
-            b"Content-Type: text/html\r\n"
-            b"Server: %(server)s\r\n"
-            b"\r\n"
-        ) % {
-            b'length': len(content.encode()),
-            b'date': format_datetime(now, usegmt=True).encode(),
-            b'server': SERVER_SOFTWARE.encode(),
-        }
-        _safe_write(self.process, response_headers)
-        _safe_write(self.process, content.encode())
-        self.process.stdin.flush() # flush should be handled by the router
+        content = self.documents[index].encode()
+
+        self._send(h11.Response(
+            status_code=200,
+            headers=[
+                ("Date", format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
+                ("Content-Length", str(len(content))),
+                ("Content-Type", "text/html"),
+                ("Server", SERVER_SOFTWARE),
+            ],
+        ))
+        self._send(h11.Data(data=content))
+        self._send(h11.EndOfMessage())
+        self.process.stdin.flush()
         _logger.info("Document %s sent successfully", path)
         self.documents_served.add(index)
-        return
 
-    def _handle_put(self, body):
-        self.pdf_received = len(self.documents_served) >= len(self.documents)
-        if not self.pdf_received:
-            e = "Paper Muncher returned before we sent everything"
-            raise RuntimeError(e)
+    def _handle_get_asset(self, path):
+        """Serve one ``GET`` asset request from the worker."""
+        with _preserve_thread_data():
+            body_iter, http_status, resp_headers = _call_wsgi(_make_environ(path))
+            status_code = int(http_status.split(' ', 1)[0])
 
-        self.pdf = _finalize_and_read(self.process, self.stdout_buffer)
+            if sendfile_path := resp_headers.get("X-Sendfile"):
+                self._send(h11.Response(status_code=status_code, headers=[
+                    ("Date", format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
+                    ("Server", SERVER_SOFTWARE),
+                    ("Content-Length", str(os.path.getsize(sendfile_path))),
+                    ("Content-Type", resp_headers["Content-Type"]),
+                ]))
+                with open(sendfile_path, "rb") as f:
+                    for chunk in iter(partial(f.read, DEFAULT_BUFFER_SIZE), b""):
+                        self._send(h11.Data(data=chunk))
+            else:
+                self._send(h11.Response(status_code=status_code, headers=[
+                    ("Date", format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
+                    ("Server", SERVER_SOFTWARE),
+                    ("Content-Length", resp_headers["Content-Length"]),
+                    ("Content-Type", resp_headers["Content-Type"]),
+                ]))
+                for chunk in body_iter:
+                    self._send(h11.Data(data=chunk))
 
+        self._send(h11.EndOfMessage())
+        self.process.stdin.flush()
+        _logger.info("Asset %s sent successfully", path)
 
-# TODO demande de juc: + spécifique en bas, pour le router faire une section
-# router(method, path, body)
-# petits utilitaires _private
-# * des que valeur par default
-    #-----------------------------------ROUTER--------------------------------------
-    def route(self, method: str, path: str):
+    def _handle_put(self, body: bytes):
+        if len(self.documents_served) < len(self.documents):
+            raise RuntimeError("Paper Muncher returned before we sent everything")
+
+        if not body.startswith(b'%PDF-'):
+            raise RuntimeError("Paper Muncher did not return valid PDF content")
+
+        self._send(h11.Response(
+            status_code=200,
+            headers=[
+                ("Date", format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
+                ("Server", SERVER_SOFTWARE),
+            ],
+        ))
+        self._send(h11.EndOfMessage())
+        self.process.stdin.flush()
+        self.process.stdin.close()
+
+        self.pdf = body
+        self.pdf_received = True
+
+    def route(self, method: str, path: str, body: bytes):
         components = path.lstrip('/').split('/')
 
         def is_document(file: str):
@@ -172,13 +207,11 @@ class Server():
 
         match (method, components):
             case ('GET', (file,)) if is_document(file):
-                # todo flush body
                 return self._handle_get_document(file)
             case ('GET', _):
                 return self._handle_get_asset(path)
-            case ('PUT', ()):
-                # retreive body
-                return self._handle_put()
+            case ('PUT', _):
+                return self._handle_put(body)
             case _:
                 e = f"Unsupported paper-muncher request: method={method!r}, path={path!r}"
                 raise RuntimeError(e)
@@ -194,39 +227,6 @@ def _remaining_time(deadline: float) -> float:
     if remaining <= 0:
         raise TimeoutError
     return remaining
-
-
-def _read_all(
-    file_object: IO[bytes],
-    *,
-    timeout: int = DEFAULT_READ_TIMEOUT,
-    chunk_size: int = DEFAULT_CHUNK_SIZE,
-) -> bytes:
-    """Read from a binary stream until EOF with a global timeout.
-
-    The timeout applies to the whole operation (single deadline), not per chunk.
-
-    :param file_object: Binary stream (must implement :meth:`fileno`).
-    :param timeout: Maximum number of seconds.
-    :param chunk_size: Maximum bytes per read.
-    :raises: When the deadline is reached before EOF.
-    """
-    fd = file_object.fileno()
-    data = bytearray()
-    deadline = time.monotonic() + timeout
-
-    with selectors.DefaultSelector() as selector:
-        selector.register(fd, selectors.EVENT_READ)
-        while selector.select(timeout=_remaining_time(deadline)):
-            chunk = os.read(fd, chunk_size)
-            if not chunk:
-                break
-            data.extend(chunk)
-        else:
-            e = "Timeout while reading data"
-            raise TimeoutError(e)
-    _logger.debug("elapsed time reading: %.3fs", time.monotonic() - (deadline - timeout))
-    return bytes(data)
 
 
 def _write_with_timeout(
@@ -300,147 +300,51 @@ def _preserve_thread_data():
                 delattr(current_thread, attr)
 
 
-def _generate_environ(path: str) -> WSGIEnvironment:
-    """Build a WSGI environ for an internal Odoo GET request."""
-    url, _, query_string = path.partition('?')
+def _make_environ(path: str) -> dict:
+    """Build a WSGI environ for an internal Odoo GET request as a public user.
+
+    Protected resources must carry an access token in the URL; this function
+    deliberately omits session cookies so the request is treated as public.
+    """
+    parsed = urlsplit(path)
+    path_info = unquote(parsed.path, 'latin-1')
+    query_string = parsed.query or ''
+    request_uri = f'{path_info}?{query_string}' if query_string else path_info
     current_environ = request.httprequest.environ
-    # By security, we forge a request with public user environment.
-    # For protected documents, Odoo should provide a URL with an access token.
-    return create_environ(
-        method='GET',
-        path=url,
-        query_string=query_string,
-        headers={
-            'Host': current_environ['HTTP_HOST'],
-            'User-Agent': SERVER_SOFTWARE,
-            'remote_addr': current_environ['REMOTE_ADDR'],
-        },
-    )
+    return {
+        'REQUEST_METHOD': 'GET',
+        'SCRIPT_NAME': '',
+        'PATH_INFO': path_info,
+        'QUERY_STRING': query_string,
+        'REQUEST_URI': request_uri,
+        'RAW_URI': request_uri,
+        'HTTP_HOST': current_environ['HTTP_HOST'],
+        'HTTP_USER_AGENT': SERVER_SOFTWARE,
+        'REMOTE_ADDR': current_environ['REMOTE_ADDR'],
+        'SERVER_NAME': current_environ['SERVER_NAME'],
+        'SERVER_PORT': current_environ['SERVER_PORT'],
+        'SERVER_PROTOCOL': 'HTTP/1.1',
+        'SERVER_SOFTWARE': SERVER_SOFTWARE,
+        'wsgi.version': (1, 0),
+        'wsgi.url_scheme': current_environ.get('wsgi.url_scheme', 'http'),
+        'wsgi.input': io.BytesIO(),
+        'wsgi.errors': sys.stderr,
+        'wsgi.multithread': True,
+        'wsgi.multiprocess': False,
+        'wsgi.run_once': False,
+    }
 
 
-def _generate_odoo_http_response(request_path: str) -> Generator[bytes, None, None]:
-    """Yield a raw HTTP response (headers then body) for an internal Odoo GET.
+def _call_wsgi(environ: dict) -> tuple:
+    """Call Odoo's WSGI root app; return (body_iter, status_str, headers_dict)."""
+    result = {}
 
-    If the response provides ``X-Sendfile``, the file is streamed from disk.
-    """
-    with _preserve_thread_data():
-        response_iterable, http_status, http_response_headers = run_wsgi_app(
-            root, _generate_environ(request_path),
-        )
+    def start_response(status, response_headers, exc_info=None):
+        result['status'] = status
+        result['headers'] = dict(response_headers)
 
-    if path := http_response_headers.get("X-Sendfile"):
-        with open(path, 'rb') as file:
-            yield (
-                f"HTTP/1.1 {http_status}\r\n"
-                f"Date: {format_datetime(dt.datetime.now(dt.UTC), usegmt=True)}\r\n"
-                f"Server: {SERVER_SOFTWARE}\r\n"
-                f"Content-Length: {os.path.getsize(path)}\r\n"
-                f"Content-Type: {http_response_headers['Content-Type']}\r\n"
-                "\r\n"
-            ).encode()
-            yield from iter(partial(file.read, DEFAULT_BUFFER_SIZE), b'')
-    else:
-        yield (
-            f"HTTP/1.1 {http_status}\r\n"
-            f"Date: {format_datetime(dt.datetime.now(dt.UTC), usegmt=True)}\r\n"
-            f"Server: {SERVER_SOFTWARE}\r\n"
-            f"Content-Length: {http_response_headers['Content-Length']}\r\n"
-            f"Content-Type: {http_response_headers['Content-Type']}\r\n"
-            "\r\n"
-        ).encode()
-        yield from response_iterable
-
-
-def consume_headers(buffer: bytearray) -> tuple[str | None, dict[str, str] | None]:
-    """Parse and remove an HTTP-like header block from a byte buffer.
-
-    Returns ``(None, None)`` if the full header block has not been received yet.
-    """
-    # Look for the end of the HTTP headers (double CRLF or double LF)
-    headers_end = buffer.find(b'\r\n\r\n')
-    sep_len = 4
-    if headers_end == -1:
-        headers_end = buffer.find(b'\n\n')
-        sep_len = 2
-        if headers_end == -1:
-            return None, None
-
-    headers_data = buffer[:headers_end]
-    lines = headers_data.split(b'\n')
-
-    # Strip \r and decode as text
-    decoded_lines = [line.strip(b'\r').decode('utf-8', errors='replace') for line in lines]
-
-    request_line = decoded_lines[0] if decoded_lines else ""
-    headers = {}
-
-    for line in decoded_lines[1:]:
-        if not line:
-            continue
-        parts = line.split(':', 1)
-        if len(parts) == 2:
-            headers[parts[0].strip().lower()] = parts[1].strip()
-
-    # Remove the headers and the separator from the buffer
-    del buffer[:headers_end + sep_len]
-
-    return request_line, headers
-
-
-def _consume_body(buffer: bytearray, headers: dict[str, str] | None) -> bytes | None:
-    """Consume an HTTP-like body from a byte buffer based on ``Content-Length``.
-
-    Returns ``None`` when the full body is not available yet.
-    """
-    content_length_header = (headers or {}).get('content-length')
-    if not content_length_header:
-        return b''
-
-    try:
-        content_length = int(content_length_header)
-    except (TypeError, ValueError) as exc:
-        e = f"Invalid Content-Length header value: {content_length_header!r}"
-        raise RuntimeError(e) from exc
-
-    if content_length < 0:
-        e = f"Invalid negative Content-Length header value: {content_length}"
-        raise RuntimeError(e)
-
-    if len(buffer) < content_length:
-        return None
-
-    body = bytes(buffer[:content_length])
-    del buffer[:content_length]
-    return body
-
-
-
-def _finalize_and_read(process, current_buffer):
-    """Send the final response, then read stdout/stderr and validate the PDF."""
-    final_response = (
-                         b"HTTP/1.1 200 OK\r\n"
-                         b"Date: %(date)s\r\n"
-                         b"Server: %(server)s\r\n"
-                         b"\r\n"
-                     ) % {
-                         b'date': format_datetime(dt.datetime.now(dt.UTC), usegmt=True).encode(),
-                         b'server': SERVER_SOFTWARE.encode(),
-                     }
-
-    _safe_write(process, final_response)
-    process.stdin.flush()
-    process.stdin.close()
-
-    if process.poll() is not None:
-        e = "Paper Muncher crashed before returning PDF"
-        raise RuntimeError(e)
-
-
-    if not body.startswith(b'%PDF-'):
-        e = "Paper Muncher did not return valid PDF content"
-        raise RuntimeError(e)
-
-    return rendered_content
+    body_iter = root(environ, start_response)
+    return body_iter, result['status'], result['headers']
 
 
 def _safe_write(process, data: bytes) -> None:
@@ -462,7 +366,6 @@ def _try_kill_proc(process) -> None:
         process.wait()
     except (OSError, sp.SubprocessError):
         _logger.debug("PID %s did not terminate", process.pid, exc_info=True)
-
 
 
 @cache

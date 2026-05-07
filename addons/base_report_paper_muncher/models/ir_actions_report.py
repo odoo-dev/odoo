@@ -8,9 +8,8 @@ from collections.abc import Sequence
 from typing import Literal
 
 from odoo import _, api, fields, models
-from odoo.exceptions import UserError
 
-from ..paper_muncher import serve_requests, which_paper_muncher
+from ..paper_muncher import Server, which_paper_muncher
 
 _logger = logging.getLogger(__name__)
 
@@ -99,20 +98,22 @@ class IrActionsReport(models.Model):
                 stderr=subprocess.PIPE,
                 env=env,
         ) as process:
-            return serve_requests(process, documents)
+            server = Server(process)
+            return server.serve(documents)
 
 
     def _run_pdf_engine_without_processing(
-        self,
-        engine_name: str,
-        bodies: Sequence[str],
-        report_ref: str | bool = False,
-        header=None,
-        footer=None,
-        landscape: bool = False,
-        specific_paperformat_args=None,
-        set_viewport_size=False,
-        scale: int = 72,
+            self,
+            engine_name,
+            bodies,
+            report_ref=False,
+            *,
+            header=None,
+            footer=None,
+            landscape=False,
+            specific_paperformat_args=None,
+            scale: int = 72,
+            **kwargs,
     ) -> bytes:
         if engine_name == 'paper-muncher':
             return self._run_paper_muncher(
