@@ -1,24 +1,35 @@
+// ── Configurator brand tokens ─────────────────────────────────────────────────
+$o-cfg-primary:   #875A7B;
+$o-cfg-text:      #1A222B;
+$o-cfg-bg:        #f4f6f8;  // configurator page background
+$o-cfg-muted-bg:  #f0f2f4;  // step-7 preview pane
+$o-cfg-font:      'Plus Jakarta Sans', system-ui, sans-serif;
+
 .o_configurator_container {
     @include o-position-absolute(0, 0, 0, 0);
-    background-color: if(
-        $o-webclient-color-scheme == dark,
-        $o-webclient-background-color,
-        #F4F4F4
-    );
-    $input-font-size: 40%;
+    // --o-cfg-palette-bg is set by JS on style-card hover (Step 3).
+    background-color: var(--o-cfg-palette-bg, #{$o-cfg-bg});
+    transition: background-color 0.35s ease;
+    font-family: $o-cfg-font;
+    color: $o-cfg-text;
 
-    // Animated Background
-    .o_configurator_background {
-        background-color: $o-webclient-background-color;
+    // The "Loading" bar extends across the viewport and prevents clicking cfg's ui.
+    // TODO: Should be fixed in /web
+    body:has(&) .o_loading_indicator_wrap {
+        pointer-events: none;
+    }
+
+    .o_cfg_background {
+        background-color: $o-cfg-bg;
         transition: background-color 0.35s ease;
-        background-image: radial-gradient(rgba($gray-900, 0.2) 1px, transparent 1px), radial-gradient(rgba($gray-900, 0.2) 1px, transparent 1px);
+        background-image: radial-gradient(rgba($o-cfg-text, 0.2) 1px, transparent 1px), radial-gradient(rgba($o-cfg-text, 0.2) 1px, transparent 1px);
         background-size: 12px 12px;
         background-position: 0 0, 12px 12px;
 
-        .o_configurator_background_inner {
+        .o_cfg_background_inner {
             @keyframes revealDots {
                 0% {
-                    background-position: 0% 0%;
+                    background-position: 25% 25%;
                 }
                 25% {
                     background-position: 70% 100%;
@@ -36,10 +47,215 @@
                     background-position: 0% 0%;
                 }
             }
-            background: radial-gradient(ellipse 50vh 50vw, transparent 0%, $o-webclient-background-color 90%);
+            background:radial-gradient(ellipse 50vh 50vw, transparent 0%, $o-cfg-bg 90%);
             background-size: 200% 200%;
             animation: revealDots 10s infinite ease-in-out;
+            pointer-events: none;
         }
+    }
+
+    .o_website_loader_odoo_logo {
+        background-image: url('/web/static/img/odoo_logo.svg');
+        background-repeat: no-repeat;
+        background-size: contain;
+        height: 1.6rem;
+        width: 4rem;
+        margin: 1rem;
+        filter: var(--ConfiguratorLogo-filter);
+        transition: filter 0.35s ease;
+    }
+
+    // ── Dropdown colour enforcement ───────────────────────────────────────────
+    // Prevent website CSS from inverting dropdown colours after bundle reload.
+    .dropdown-menu, .o_dropdown_menu {
+        --dropdown-color: #{$o-cfg-text};
+        --dropdown-bg:    #{$o-cfg-bg};
+
+        color: $o-cfg-text;
+        background-color: $o-cfg-bg;
+
+        .dropdown-item, .dropdown-item.active {
+            --dropdown-link-color: #{$o-cfg-text};
+            --dropdown-link-hover: #{$o-cfg-text};
+            --dropdown-link-active-color: #{$o-cfg-text};
+            --dropdown-link-active-bg: #EAEAEA;
+        }
+    }
+
+    // ── UI-chrome protection ──────────────────────────────────────────────────
+    .o_cfg_chrome {
+        font-family: $o-cfg-font !important;
+        color: $o-cfg-text !important;
+        background-color: $o-cfg-bg !important;
+        --body-font-size: 0.875rem !important;
+        font-size: var(--body-font-size);
+
+        h1, h2, h3, h4, h5, h6,
+        .h1, .h2, .h3, .h4, .h5, .h6,
+        .o_configurator_typing_text {
+            font-family: $o-cfg-font !important;
+            color: $o-cfg-text !important;
+        }
+
+        // Enforce primary colour on Bootstrap utility class too
+        .text-primary { color: $o-cfg-primary !important; }
+
+        .btn-primary {
+            background-color: $o-cfg-primary !important;
+            border-color: $o-cfg-primary !important;
+            color: #fff !important;
+            --btn-font-size: 0.875rem;
+            --btn-border-radius: 4px;
+            &:hover, &:focus {
+                background-color: darken($o-cfg-primary, 8%) !important;
+                border-color: darken($o-cfg-primary, 8%) !important;
+            }
+        }
+        .btn-secondary {
+            --btn-color: #111827;
+            --btn-bg: #e7e9ed;
+            --btn-border-color: #e7e9ed;
+            --btn-hover-color: #000;
+            --btn-hover-bg: #d8dadd;
+            --btn-hover-border-color: #d8dadd;
+            --btn-focus-shadow-rgb: 199, 202, 207;
+            --btn-active-color: #000;
+            --btn-active-bg: #e6f2f3;
+            --btn-active-border-color: #017e84;
+            --btn-active-shadow: 0;
+            --btn-disabled-color: #000;
+            --btn-disabled-bg: #e7e9ed;
+            --btn-disabled-border-color: #e7e9ed;
+            --btn-font-size: 0.875rem;
+            --btn-border-radius: 4px;
+        }
+
+        .form-check:hover, .form-check:hover .form-check-input:not(:disabled):not(.o_wysiwyg_loader) {
+            border-color: #017e84;
+        }
+
+        .form-check-input {
+            --form-check-bg: transparent;
+            border: 1px solid #d8dadd;
+
+            &:checked {
+                --form-check-bg-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23FFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+                background-color: #017e84;
+                border-color: #017e84;
+            }
+        }
+
+        .text-muted { color: rgba($o-cfg-text, .5) !important; }
+    }
+
+    // Category label in style screen
+    .o_cfg_label {
+        color: rgba($o-cfg-text, .45);
+        letter-spacing: .06em;
+    }
+
+    // ── Skip / back bar ───────────────────────────────────────────────────────
+    .o_cfg_skip_bar, .o_configurator_screen.o_style_selection_screen .o_cfg_chrome.o_cfg_skip_bar {
+        border-top: 1px solid rgba(#FFF, .5);
+        background-color: rgba(#FFF, .5) !important;
+        backdrop-filter: blur(3px);
+    }
+
+    .o_configurator_screen.o_vibe_selection_screen .o_cfg_chrome.o_cfg_skip_bar,
+    .o_configurator_screen.o_style_selection_screen .o_cfg_chrome.o_cfg_skip_bar {
+        background-color: color-mix(var(--o-cfg-palette-bg), transparent) !important;
+        border-top: 0;
+    }
+
+    .o_configurator_screen.o_description_screen .o_cfg_chrome.o_cfg_skip_bar,
+    .o_configurator_screen.o_welcome_screen .o_cfg_chrome.o_cfg_skip_bar {
+        background-color: transparent !important;
+        border-top: 0;
+        backdrop-filter: none;
+    }
+
+    // ── Style / Vibe dropdowns (shared by step 5 and step 7) ──────────────────
+    .o_preview_dd_trigger {
+        background: #e7e9ed;
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-family: $o-cfg-font;
+        font-size: 13px;
+        font-weight: 500;
+        color: $o-cfg-text;
+        transition: opacity 0.15s;
+
+        &:hover { opacity: 0.85; }
+    }
+
+    .o_preview_dd_label {
+        text-overflow: ellipsis;
+        max-width: 90px;
+    }
+
+    .o_preview_dd_caret {
+        opacity: 0.45;
+        font-size: 10px;
+    }
+
+    .o_preview_dd_menu {
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        padding: 10px;
+        z-index: 200;
+        animation: dropIn 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+        min-width: 100%;
+    }
+
+    .o_preview_style_menu {
+        max-height: 75vh;
+        min-width: 280px;
+    }
+
+    .o_preview_dd_cat_label {
+        font-family: $o-cfg-font;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        color: $o-cfg-text;
+        opacity: 0.35;
+        padding: 0 2px 4px;
+    }
+
+    // Mini style card (inside dropdown)
+    .o_preview_mini_style {
+        padding: 6px 8px;
+        border-radius: 6px;
+        border: 1.5px solid rgba(0, 0, 0, 0.08);
+        transition: box-shadow 0.15s, border-color 0.15s;
+
+        &:hover { border-color: rgba(0, 0, 0, 0.2); }
+        &.selected { box-shadow: 0 0 0 2px $o-cfg-primary; border-color: $o-cfg-primary; }
+    }
+
+    .o_preview_mini_style_name {
+        text-overflow: ellipsis;
+        font-size: 11px;
+        max-width: 72px;
+    }
+
+    // Mini vibe button (inside dropdown)
+    .o_preview_mini_vibe {
+        padding: 7px 12px;
+        border-radius: 6px;
+        border: 1.5px solid rgba(255, 255, 255, 0.3);
+        font-family: $o-cfg-font;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        transition: box-shadow 0.15s;
+        margin-bottom: 4px;
+
+        &:last-child { margin-bottom: 0; }
+        &:hover { box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); }
+        &.selected { box-shadow: 0 0 0 2.5px #fff; }
     }
 
     .o_configurator_screen {
@@ -49,58 +265,16 @@
             to {opacity: 1}
         }
 
-        @keyframes theme_iframe_preview_scroll {
-            to {
-                transform:
-                    translateY(calc(-1 * var(--o-configurator-iframe-scroll-distance, 0px)))
-                    scale(var(--o-configurator-iframe-scale, 1));
-            }
-        }
-
-        @keyframes textPulse {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.08);
-                opacity: 0.65;
-            }
-        }
-
-        @keyframes o-configurator-showcase-float {
-            0% {transform: translateZ(0)}
-            100% { transform: translate(0, 0) translateZ(0);}
-            50% {
-                transform: translate(var(--o-configurator-showcase-float-x, 0px), calc(var(--o-configurator-showcase-float-y, 12px) * -1) ) translateZ(0);
-            }
-        }
-
         // ==== General Components
         %o_configurator_titles_weight {
-            font-weight: 300;
-
             b {
-                font-weight: 500;
+                font-weight: 600;
             }
         }
 
         .o_configurator_typing_text {
             font-size: 28px;
             @extend %o_configurator_titles_weight;
-
-            @include media-breakpoint-up(md) {
-                font-size: 32px;
-            }
-
-            @include media-breakpoint-up(lg) {
-                font-size: 36px;
-            }
-
-            @include media-breakpoint-up(xl) {
-                font-size: 40px;
-            }
         }
 
         @for $i from 1 through 6 {
@@ -117,11 +291,19 @@
             animation: configuratorFadeIn .35s;
         }
 
-        // TODO review in master, this seems useless and had to be overridden
-        // in stable templates. All the templates can be improved.
-        .o_configurator_screen_content {
-            overflow-y: auto;
+        // ── Industry image showcase animations ────────────────────────────────
+        @keyframes o-cfg-showcase-float {
+            0%,
+            100% { transform: translate(0, 0); }
+            50% {
+                transform: translate(
+                    var(--o-cfg-float-x, 0px),
+                    calc(var(--o-cfg-float-y, 12px) * -1)
+                );
+            }
         }
+
+
 
         .o_configurator_logo_wrapper {
             img {
@@ -129,50 +311,10 @@
             }
         }
 
-        // ── Floating image showcase ───────────────────────────────────────
-        .o_configurator_industry_showcase {
-            transform: rotate3d(0, 1, 1, 1deg) scale(0.94) translateX(10%);
-        }
-
-        $o-configurator-showcase-slots: (
-                0: (5.5s, 0.55s, -2.5px, 6px),   1: (6.5s, .4s, 3px, 8px),
-                2: (6s, .8s, -2px, 5px),         3: (7s, .275s, 2.5px, 7px),
-                4: (5.75s, 1.2s, -3px, 9px),     5: (6.75s, .6s, 2px, 5.5px),
-                6: (6.25s, .3s, -3.5px, 7.5px),  7: (7.25s, 1s, 3px, 4.5px),
-                8: (6s, .5s, -2.5px, 8.5px),
-        );
-        @each $i, $v in $o-configurator-showcase-slots {
-            .o_configurator_showcase_slot_#{$i} {
-                --o-configurator-showcase-float-duration: #{nth($v, 1)};
-                --o-configurator-showcase-float-delay: #{nth($v, 2)};
-                --o-configurator-showcase-float-x: #{nth($v, 3)};
-                --o-configurator-showcase-float-y: #{nth($v, 4)};
-            }
-        }
-
-        .o_configurator_showcase_img {
-            animation:
-                    o-configurator-showcase-float
-                    var(--o-configurator-showcase-float-duration, 10s)
-                    var(--o-configurator-showcase-float-delay, 0s)
-                    ease-in-out
-                    infinite;
-            perspective: 800px;
-            will-change: transform;
-        }
-
-        .o_configurator_nav {
-            backdrop-filter: blur(2px);
-        }
-
         // ==== Screens
 
         &.o_description_screen {
-            &:before {
-                @include o-position-absolute(0, 0, 0, 0);
-                background: linear-gradient(to right, $o-webclient-background-color 50%, transparent);
-                content: '';
-            }
+            position: relative;  // contain the absolutely-positioned showcase panel
 
             .dropdown, .industry_selection, .custom-ui-autocomplete {
                 font-weight: 500;
@@ -191,38 +333,24 @@
                 position: relative;
                 display: inline-block;
                 height: $line-height-base * 1em;
-                min-width: 17ch;
-                cursor: pointer;
+                min-width: 14ch;
 
-                input, &::after {
+                input {
                     height: $line-height-base * 1em;
                     font-style: italic;
                     text-indent: 5px;
-                    padding: 0;
-                }
-
-                input {
+                    padding: 0!important;
                     position: absolute;
                     width: 100%;
                     border: none;
-                    border-bottom: 3px solid map-get($theme-colors, primary);
-                    color: map-get($theme-colors, primary);
+                    border-bottom: 2px solid $o-cfg-primary;
+                    color: $o-cfg-primary;
                     background-color: inherit;
 
                     &:focus {
                         color: inherit;
                         outline: none;
                     }
-                    &::placeholder {
-                        font-size: 50%;
-                    }
-                }
-
-                &::after {
-                    content: attr(data-value) '|';
-                    display: inline-block;
-                    overflow: hidden;
-                    opacity: 0;
                 }
             }
 
@@ -231,7 +359,7 @@
             }
 
             .dropdown {
-                box-shadow: inset 0 -3px 0 map-get($theme-colors, primary);
+                box-shadow: inset 0 -2px 0 $o-cfg-primary;
 
                 .dropdown-menu button:focus {
                     outline: unset;
@@ -275,7 +403,7 @@
             }
 
             .custom-ui-autocomplete {
-                max-height: 300px; // <- Fallback
+                max-height: 300px;
                 max-height: 35vh;
 
                 .ui-menu-item {
@@ -283,13 +411,13 @@
 
                     a {
                         padding: $dropdown-item-padding-y*2 $dropdown-item-padding-x;
-                        font-family: $font-family-base;
+                        font-family: $o-cfg-font;
                         text-decoration: none;
                         line-height: 1.2;
 
                         &.o_no_result, &.o_no_result:hover {
                             background-color: transparent !important;
-                            color: map-get($grays, '600') !important;
+                            color: rgba($o-cfg-text, .5) !important;
                             cursor: default;
                             padding: $dropdown-item-padding-y*4 $dropdown-item-padding-x;
                             font-style: italic;
@@ -305,240 +433,421 @@
                     color: $dropdown-link-color;
                 }
             }
+
+            // ── Floating image showcase ───────────────────────────────────────
+
+
+            // Right half of the screen, full height, behind the form
+            .o_cfg_industry_showcase {
+                bottom: 14vh;
+            }
+
+            .o_cfg_showcase_float {
+                // Float animation lives here, separate from any parent transforms
+                // so the two never conflict.
+                animation:
+                    o-cfg-showcase-float
+                    var(--o-cfg-float-dur, 10s)
+                    var(--o-cfg-float-delay, 0s)
+                    ease-in-out
+                    infinite;
+                perspective: 800px;
+            }
+
+            // Per-slot float timing (dur, delay, x, y), hardcoded here instead
+            // of the old JS randomisation. Shadows use the Bootstrap
+            // shadow/shadow-lg utilities on the <img> in the template.
+            $o-cfg-slots: (
+                0: (11s, 0.55s, -5px, 12px),     1: (13s, .8s, 6px, 16px),
+                2: (12s, 1.6s, -4px, 10px),   3: (14s, .55s, 5px, 14px),
+                4: (11.5s, 2.4s, -6px, 18px), 5: (13.5s, 1.2s, 4px, 11px),
+                6: (12.5s, .6s, -7px, 15px),  7: (14.5s, 2s, 6px, 9px),
+                8: (12s, 1s, -5px, 17px),
+            );
+            @each $i, $v in $o-cfg-slots {
+                .o_cfg_slot_#{$i} {
+                    --o-cfg-float-dur: #{nth($v, 1)};
+                    --o-cfg-float-delay: #{nth($v, 2)};
+                    --o-cfg-float-x: #{nth($v, 3)};
+                    --o-cfg-float-y: #{nth($v, 4)};
+                }
+            }
+
+            .o_cfg_showcase_img {
+                border-radius: 12px;
+                // Hidden until the slot's image has decoded; the
+                // o_cfg_slot_fetched class (toggled by JS) reveals it.
+                opacity: 0;
+                display: none;
+                transform: scale(0.88) translateY(8px) rotate3d(0, 1, 0, 90deg);
+                transition: opacity 0.55s ease-out, transform 0.55s ease-out;
+            }
+
+            .o_cfg_slot_fetched .o_cfg_showcase_img {
+                opacity: 1;
+                transform: scale(1) translateY(0) rotate3d(0, 1, 0, 0deg);
+            }
         }
 
-        &.o_palette_selection_screen {
-            --o-palette-selection-text-color: inherit;
+        // ── Style selection (Step 3) ──────────────────────────────────────────
+        &.o_style_selection_screen {
 
-            transition: background-color 0.55s ease;
+            // ── Palette-hover transitions ─────────────────────────────────────
+            // JS writes --o-cfg-palette-bg / --o-cfg-palette-text on style-card
+            // hover; the rules below propagate them through the chrome.
 
-            .o_palette_selection_main_panel {
-                @include media-breakpoint-up(xl) {
-                    max-width: 840px;
-                    width: 60%;
-                }
-            }
+            // Chrome bar — overrides o_cfg_chrome's $o-cfg-bg !important
+            .o_cfg_chrome {
+                background-color: var(--o-cfg-palette-bg, #{$o-cfg-bg}) !important;
+                color: var(--o-cfg-palette-text, #{$o-cfg-text}) !important;
+                transition: background-color 0.35s ease, color 0.35s ease !important;
 
-            .o_palette_selection_preview_panel {
-                background-color: if(
-                    $o-webclient-color-scheme == dark,
-                    $o-webclient-background-color,
-                    #F4F4F4
-                );
-            }
-
-            .o_palette_selection_intro {
-                & h1 , .text-muted {
-                    color: var(--o-palette-selection-text-color) !important;
+                h1, h2, h3, h4, h5, h6,
+                .h1, .h2, .h3, .h4, .h5, .h6,
+                .o_configurator_typing_text {
+                    color: var(--o-cfg-palette-text, #{$o-cfg-text}) !important;
                     transition: color 0.55s ease;
                 }
-
                 .text-muted {
-                    opacity: 0.75;
+                    // color-mix lets us express "50% of the adaptive text color"
+                    // without needing SASS to know the runtime value.
+                    color: color-mix(in srgb, var(--o-cfg-palette-text, #{$o-cfg-text}) 50%, transparent) !important;
+                    transition: color 0.55s ease !important;
                 }
             }
 
-            .o_palette_selection_logo {
-                max-height: 60px;
-                cursor: pointer;
-
-                // Handles dimension-less svgs
-                min-height: 60px;
+            // Category section labels
+            .o_cfg_label {
+                color: var(--o-cfg-palette-text, #{$o-cfg-text});
+                transition: color 0.55s ease;
             }
 
-            .o_palette_card_swatches {
-                height: 35px;
-            }
+            .o_style_card {
+                width: 240px;
+                border: 1.5px solid rgba($o-cfg-text, .12);
+                overflow: hidden;
+                background: transparent;
+                transition: transform .22s cubic-bezier(.22, 1, .36, 1), box-shadow .22s ease;
 
-            .o_palette_selection_divider {
-                border-bottom: 1px solid $border-color;
-                line-height: 0.1em;
-            }
-
-            .o_palette_selection_divider_label {
-                background-color: $o-view-background-color;
-            }
-
-            @include media-breakpoint-down(md) {
-                .o_palette_selection_main_panel {
-                    width: 100% !important;
+                &:hover, &:focus-visible {
+                    transform: translateY(-2px);
+                    box-shadow: 0 12px 36px rgba(0,0,0,.12);
+                    border-color: $o-cfg-primary !important;
                 }
 
-                .o_palette_selection_preview_panel {
-                    display: none !important;
+                &.o_style_card_selected {
+                    box-shadow: 0 0 0 2.5px $o-cfg-primary;
+                    border-color: $o-cfg-primary !important;
+                }
+
+                .o_style_card_body {
+                    padding: 18px 18px 14px;
+                }
+
+                .o_style_card_name {
+                    font-size: 17px;
+                    line-height: 1.15;
+                }
+
+                .o_style_card_desc {
+                    font-size: 12.5px;
+                    line-height: 1.5;
+                    opacity: .6;
+                    margin-top: 5px;
+                }
+
+                // Pure colour squares — no text inside
+                .o_style_card_swatch {
+                    aspect-ratio: 1;
+                    height: 28px;
+                }
+            }
+        }
+
+        // ── Vibe selection (Step 4) ───────────────────────────────────────────
+        &.o_vibe_selection_screen {
+            .o_vibe_blob_bl {
+                bottom: -50px;
+                left: -50px;
+                width: 160px;
+                height: 160px;
+                opacity: .45;
+            }
+            .o_vibe_blob_tr {
+                top: -38px;
+                right: -38px;
+                width: 120px;
+                height: 120px;
+                opacity: .38;
+            }
+
+            // Floating content panel
+            .o_vibe_content {
+                gap: 28px;
+                padding: 36px 48px;
+                border-radius: 16px;
+                width: fit-content;
+                max-width: MIN(600px, 88vw);
+                transition: background .4s ease, backdrop-filter .4s ease, border .4s ease;
+
+                @include media-breakpoint-down(md) {
+                    padding: 24px 24px;
+                    gap: 20px;
                 }
             }
 
-            @include media-breakpoint-up(lg) {
-                .o_palette_card_container {
-                    flex: 0 0 20%;
-                    max-width: 20%;
+            // Title
+            .o_vibe_title {
+                font-size: clamp(22px, 3vw, 40px);
+                line-height: 1.2;
+
+                em {
+                    font-style: italic;
                 }
             }
 
-            .palette_card {
-                cursor: pointer;
-                background-color: $card-bg;
-                border-color: $border-color !important;
-                box-shadow: 0 0 0 1px $border-color;
-                transition:
-                    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
-                    box-shadow 0.22s ease,
-                    border-color 0.22s ease,
-                    background-color 0.35s ease;
-                will-change: transform;
+            // 3 × 2 grid of vibe cards
+            .o_vibe_cards_row {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
 
-                > div > div {
-                    transition: background-color 0.35s ease;
+            // Individual vibe card (colour + font set via t-att-style)
+            .o_vibe_card {
+                padding: 16px 12px;
+                font-size: 14px;
+                font-weight: 700;
+                letter-spacing: .01em;
+                border: 2px solid;
+                min-height: 56px;
+                transition: transform .2s cubic-bezier(.22, 1, .36, 1), box-shadow .2s ease;
+
+                &:hover {
+                    transform: translateY(-2px);
+                }
+            }
+
+            // Label inside the vibe card — sits above the absolute decorators
+            .o_vibe_card_label {
+                z-index: 1;
+            }
+
+            // ── Illustrative card decorators ─────────────────────────────
+            .o_vibe_illus_decor {
+                width: 34px;
+
+                &.o_vibe_illus_decor_l {
+                    transform: translateX(-50%) scale(2);
+                    opacity: 0.5;
+                }
+                &.o_vibe_illus_decor_r {
+                    transform: translateX(20%) scale(1);
+                    opacity: 0.85;
                 }
 
-                &:hover, &:focus-visible, &.selected {
-                    box-shadow: 0 0 0 1px $card-bg, 0 0 0 3px map-get($theme-colors, "primary");
+                svg {
+                    width: 100%;
+                    height: auto;
+                    display: block;
+                }
+            }
+
+            // ── Illustrative background floating animations ───────────────
+            // Mirrors prototype animKeyframes / durations[] exactly.
+            @keyframes o_illus_float_0 {
+                0%,100% { transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+                50%     { transform: translate(-50%,-50%) scale(1.02) rotate(0.5deg); }
+            }
+            @keyframes o_illus_float_1 {
+                0%,100% { transform: translate(-50%,-50%) rotate(-4deg); }
+                50%     { transform: translate(-50%,-50%) rotate(-2deg) translateY(-6px); }
+            }
+            @keyframes o_illus_float_2 {
+                0%,100% { transform: translate(-50%,-50%) rotate(3deg); }
+                50%     { transform: translate(-50%,-50%) rotate(5deg) translateY(5px); }
+            }
+            @keyframes o_illus_float_3 {
+                0%,100% { transform: translate(-50%,-50%) scale(1); }
+                40%     { transform: translate(-50%,-50%) scale(1.04) rotate(-2deg); }
+            }
+            @keyframes o_illus_float_4 {
+                0%,100% { transform: translate(-50%,-50%) rotate(0deg); }
+                60%     { transform: translate(-50%,-50%) rotate(3deg) translateY(-4px); }
+            }
+            @keyframes o_illus_float_5 {
+                0%,100% { transform: translate(-50%,-50%) scale(1) rotate(0deg); }
+                50%     { transform: translate(-50%,-50%) scale(0.97) rotate(-2deg); }
+            }
+
+            // "I like it →" button (colours set via t-att-style)
+            .o_vibe_likeit_btn {
+                padding: 14px 36px;
+                font-size: 15px;
+                font-weight: 700;
+                letter-spacing: .01em;
+                transition: opacity .2s ease, transform .15s ease;
+
+                &:hover {
+                    opacity: .88;
                     transform: translateY(-1px);
                 }
             }
-
-            .o_palette_live_preview rect {
-                transition: fill 0.35s cubic-bezier(0.22, 1, 0.36, 1);
-            }
-
-            .pulsing-text {
-                animation: textPulse 1s infinite ease-in-out;
-            }
         }
 
-        &.o_feature_selection_screen {
-            @include media-breakpoint-down(lg) {
-                .o_feature_card_container {
-                    width: 50% !important;
+        &.o_layout_selection_screen {
+
+            // ── Step header ───────────────────────────────────────────────
+            .o_layout_step_header {
+                padding-top: 28px;
+                padding-bottom: 20px;
+                flex-shrink: 0;
+            }
+
+            // ── Layout grid (3-column, matching prototype step3-grid) ─────
+            .o_layout_grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 28px;
+
+                @include media-breakpoint-down(lg) {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 20px;
                 }
-            }
-
-            @include media-breakpoint-down(md) {
-                .o_feature_card_container {
-                    width: 100% !important;
-                }
-            }
-
-            .card {
-                cursor: pointer;
-
-                &.card_installed {
-                    cursor: default;
-                    opacity: 0.75;
-                }
-            }
-            .o_configurator_feature_status {
-                @include o-position-absolute($card-spacer-y * 0.5 , $card-spacer-x * 0.5);
-            }
-        }
-
-        &.o_theme_selection_screen {
-            .o_configurator_screen_content {
-                align-items: stretch !important;
-                padding: 0.75rem 0 1.5rem;
-            }
-
-            .o_configurator_screen_content > .m-auto {
-                width: 100%;
-                max-width: 1680px;
-                margin: 0 auto !important;
-            }
-
-            .o_theme_selection_col {
-                flex: 1 1 calc((100% - 4rem) / 3);
-                min-width: 300px;
-
                 @include media-breakpoint-down(sm) {
-                    flex-basis: 100%;
-                    min-width: 0;
+                    grid-template-columns: 1fr;
                 }
             }
 
-            .button_area,
-            .theme_svg_container {
-                @include o-position-absolute(0, 0, 0, 0);
-            }
-
-            .button_area {
-                cursor: pointer;
-                z-index: 2;
-            }
-
-            .theme_preview {
+            // ── Preview frame (aspect-ratio 1.3:1, matches prototype) ────
+            .o_layout_preview_wrap {
                 aspect-ratio: 1.3 / 1;
-                background: $card-bg;
-                transition:
-                    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
-                    box-shadow 0.22s,
-                    border-color 0.22s;
+                border-radius: 10px;
+                border: 1.5px solid rgba(0, 0, 0, 0.09);
+                background: $o-cfg-muted-bg;
+                transition: border-color .2s ease, box-shadow .2s ease;
+
+                &:hover {
+                    border-color: rgba($o-cfg-primary, .5);
+                    box-shadow: 0 8px 28px rgba(0, 0, 0, .1);
+                }
+
+                // Selection state: echoes prototype's `selected` class
+                &.selected {
+                    border-color: $o-cfg-primary;
+                    box-shadow: 0 0 0 1px $o-cfg-primary;
+                }
             }
 
-            .theme_preview_tip {
-                left: 50%;
-                bottom: 1rem;
-                z-index: 1;
-                margin: 0;
-                padding: 0.4rem 0.85rem;
-                font-size: 0.72rem;
+            // Purple selection ring (absolutely covers the preview frame)
+            .o_layout_selected_ring {
+                border: 2.5px solid $o-cfg-primary;
+                border-radius: 10px;
+                z-index: 10;
+            }
+
+            // ── Card label (below the preview frame) ─────────────────────
+            .o_layout_card_label {
+                padding: 10px 2px 0;
+            }
+            .o_layout_card_label_name {
+                font-family: $o-cfg-font;
+                font-size: 14px;
                 font-weight: 600;
-                color: adjust-color-to-background($text-muted, $card-bg, mute-color($color-contrast-light), mute-color($color-contrast-dark)) !important;
-                background: rgba($card-bg, $o-card-body-bg-opacity);
-                border-radius: 999px;
-                opacity: 0;
-                transform: translate3d(-50%, 12px, 0);
-                transition: opacity 0.2s ease, transform 0.22s ease;
+                color: $o-cfg-text;
+                line-height: 1.3;
+            }
+            .o_layout_card_label_desc {
+                font-family: $o-cfg-font;
+                font-size: 12px;
+                color: rgba($o-cfg-text, .5);
+                line-height: 1.5;
+                margin-top: 2px;
+            }
+        }
+
+        // ── Preview screen (Step 7) — mirrors prototype step 4 layout ──────────
+        &.o_preview_screen {
+            // ── [55%] Preview column ─────────────────────────────────────────
+            .o_preview_pane {
+                flex: 0 0 55%;
+                background-color: $o-cfg-muted-bg;
+                padding: 32px;
+                max-width: 75vh;
             }
 
-            .o_configurator_theme_preview_loader {
-                z-index: 1;
-                background: $card-bg;
-                color: adjust-color-to-background($text-muted, $card-bg, mute-color($color-contrast-light), mute-color($color-contrast-dark));
-                font-size: 1.5rem;
-                transition: opacity 0.2s ease;
+            // Preview box — aspect-ratio container, matches prototype previewRef
+            .o_preview_pane_wrapper {
+                animation: step4PreviewIn 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+                aspect-ratio: 2 / 2.5;
+                max-height: calc(100vh - 112px);
+                position: relative;
+                border-radius: 12px;
+                border: 1.5px solid rgba(0, 0, 0, 0.09);
+                box-shadow: 0 24px 80px rgba(0, 0, 0, 0.14);
+                transform: translateZ(1px); // promote to GPU layer
+                scrollbar-color: color-mix(var(--o-color-5), transparent ) var(--o-color-4);
+                scrollbar-width: thin;
             }
 
-            .o_configurator_theme_preview_loader .spinner-border {
-                width: 1.75rem;
-                height: 1.75rem;
-                border-width: 0.18em;
+            // Loading spinner overlay inside the preview box
+            .o_preview_loading {
+                z-index: 2;
+                background: rgba(255, 255, 255, 0.65);
             }
 
-            .o_configurator_theme_preview_iframe {
-                background: $card-bg;
-                transform-origin: top left;
-                transform: scale(var(--o-configurator-iframe-scale, 1));
-                visibility: hidden;
-                opacity: 0;
-            }
+            // ── [45%] Info / controls column ─────────────────────────────────
+            .o_preview_controls {
+                animation: fadeUp 0.5s 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
 
-            .theme_svg_container.o_preview_loaded {
-                .o_configurator_theme_preview_loader {
-                    opacity: 0;
-                    visibility: hidden;
-                }
-
-                .o_configurator_theme_preview_iframe {
-                    visibility: visible;
-                    opacity: 1;
-                }
-            }
-
-            .theme_preview:hover,
-            .theme_preview:focus-within {
-                --border-color: #{$primary};
-                box-shadow: 0 14px 40px rgba(0, 0, 0, 0.13);
-
-                .theme_preview_tip {
-                    opacity: 1;
-                    transform: translate3d(-50%, 0, 0);
-                }
-
-                .o_configurator_theme_preview_iframe {
-                    will-change: transform;
-                    animation: theme_iframe_preview_scroll 8s cubic-bezier(0.455, 0.03, 0.515, 0.955) 0.1s infinite alternate;
+                @include media-breakpoint-down(lg) {
+                    padding: 48px 40px;
                 }
             }
+
+            // Layout name (clamp matches prototype)
+            .o_preview_layout_name {
+                font-family: $o-cfg-font;
+                font-size: clamp(28px, 3vw, 44px);
+                font-weight: 800;
+                color: $o-cfg-text;
+                line-height: 1.1;
+                margin-bottom: 20px;
+            }
+
+            // Short description text
+            .o_preview_desc {
+                font-family: $o-cfg-font;
+                font-size: 16px;
+                color: $o-cfg-text;
+                opacity: 0.65;
+                line-height: 1.7;
+                margin-bottom: 32px;
+            }
+
+            .o_preview_selection_label {
+                font-family: $o-cfg-font;
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 0.12em;
+                color: $o-cfg-text;
+                opacity: 0.4;
+                margin-bottom: 10px;
+            }
+
+            // CTA button
+            .o_preview_cta_btn {
+                font-size: 15px;
+                padding: 13px 40px;
+            }
+        }
+
+        @keyframes step4PreviewIn {
+            from { opacity: 0; transform: translateX(-40px) scale(0.97); }
+            to   { opacity: 1; transform: translateX(0) scale(1); }
+        }
+
+        @keyframes dropIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
     }
 }

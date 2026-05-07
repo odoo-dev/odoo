@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+<!-- ============================================================
+     ConfiguratorHeader / ConfiguratorFooter attributes
+     ============================================================
+     ConfiguratorHeader:
+       data-template    header template xmlid suffix
+                        (default template_header_default)
+       data-color       color combination 1..5 (default 1)
+       data-overlay     "true" places header over content
+       data-full-width  "true" makes nav use container-fluid
+       data-bg          CSS background (solid OR gradient);
+                        hardcoded, takes precedence over data-color
+       data-border      CSS border shorthand
+                        (e.g. "1px solid #111", or "0" / "none")
+       data-shadow      raw CSS box-shadow value (e.g.
+                        "0 1rem 3rem rgba(0,0,0,.175)" or "none")
+       data-text-color  hardcoded header text color
+     ConfiguratorFooter:
+       data-template, data-color, data-bg only
+       (no overlay / full width / border / shadow / text color:
+        there is no site wide SCSS variable for footer
+        border or shadow, so they are unsupported by design)
+
+     A vibe template may override these by replacing the
+     ConfiguratorHeader / ConfiguratorFooter node via xpath; the
+     override is honoured in previews, the generated website and
+     the /website/demo/configurator-layouts debug page.
+     ============================================================ -->
+
+<!-- ════════════════════════════════════════════════════════════
+     LAYER 1 — Per-snippet layout variants (Clean baseline)
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_bento_s_bento_hero" inherit_id="website.s_bento_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pt80" remove="pt64" separator=" "/>
+    </xpath>
+    <xpath expr="//div[hasclass('o_grid_item')]" position="attributes">
+        <attribute name="class" add="d-flex align-items-end" remove="" separator=" "/>
+    </xpath>
+
+    <xpath expr="(//div[hasclass('o_grid_item')])[3]" position="attributes">
+        <attribute name="class" add="d-flex flex-column justify-content-between" separator=" "/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[3]//br" position="replace"/>
+
+    <xpath expr="(//div[hasclass('o_grid_item')])[4]" position="attributes">
+        <attribute name="class" add="d-flex flex-column align-items-end justify-content-between" separator=" "/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[4]/p[2]" position="replace"/>
+
+    <xpath expr="(//div[hasclass('o_grid_item')])[5]" position="attributes">
+        <attribute name="class" add="d-flex flex-column justify-content-between" separator=" "/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[5]/p" position="replace"/>
+
+    <xpath expr="(//div[hasclass('o_grid_item')])[6]" position="attributes">
+        <attribute name="class" add="d-flex flex-column justify-content-between" separator=" "/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[6]/p" position="replace"/>
+</template>
+
+<template id="configurator_layout_bento_s_cover" inherit_id="website.s_cover" primary="True"/>
+
+<template id="configurator_layout_bento_s_image_text_overlap" inherit_id="website.s_image_text_overlap" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc2" remove="o_cc2" separator=" "/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[2]" position="attributes">
+        <attribute name="class" remove="o_cc5" add="o_cc1" separator=" "/>
+    </xpath>
+    <xpath expr="//a" position="attributes">
+        <attribute name="class" add="btn-primary btn-lg" remove="btn-secondary" separator=" "/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_call_to_action" inherit_id="website.s_call_to_action" primary="True"/>
+
+<template id="configurator_layout_bento_s_masonry_block" inherit_id="website.s_masonry_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc2" remove="pt48" separator=" "/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_masonry_block_default_template" inherit_id="website.s_masonry_block_default_template" primary="True">
+    <xpath expr="//t" position="attributes">
+        <attribute name="t-snippet-call">website.configurator_layout_bento_s_masonry_block</attribute>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[2]" position="attributes">
+        <attribute name="class" remove="o_cc2" add="o_cc1" separator=" "/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[5]" position="attributes">
+        <attribute name="class" remove="o_cc2" add="o_cc1" separator=" "/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     LAYER 2 — Assembly template (= Clean vibe)
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_bento" name="Configurator Layout: Bento">
+    <ConfiguratorHeader data-template="template_header_hamburger" data-color="none" data-bg="transparent" data-shadow="none" data-overlay="true"/>
+    <ConfiguratorFooter data-template="template_footer_contact" data-color="2"/>
+    <t t-snippet-call="website.configurator_layout_bento_s_bento_hero"/>
+    <t t-snippet-call="website.configurator_layout_bento_s_cover"/>
+    <t t-snippet-call="website.configurator_layout_bento_s_image_text_overlap"/>
+    <t t-snippet-call="website.configurator_layout_bento_s_call_to_action"/>
+    <t t-snippet-call="website.configurator_layout_bento_s_masonry_block_default_template"/>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     DYNAMIC vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_bento_s_bento_hero_dynamic" inherit_id="website.configurator_layout_bento_s_bento_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Bold/14","colors":{"c1":"#ffdf59","c5":"#0a412f"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Bold_14"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_cover_dynamic" inherit_id="website.configurator_layout_bento_s_cover" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Bold/14","colors":{"c1":"#ffdf59","c5":"#0a412f"},"flip":["y"],"showOnMobile":true,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Bold_14" style="transform: scaleY(-1)"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_image_text_overlap_dynamic" inherit_id="website.configurator_layout_bento_s_image_text_overlap" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pt208 pb208" remove="pt64 pb64" separator=" "/>
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Bold/14","colors":{"c1":"#ffdf59","c5":"#0a412f"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Bold_14"/>
+    </xpath>
+</template>
+<template id="configurator_layout_bento_s_call_to_action_dynamic" inherit_id="website.configurator_layout_bento_s_call_to_action" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc4" remove="o_cc5" separator=" "/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_vibe_dynamic" name="Configurator Layout: Bento / Dynamic" inherit_id="website.configurator_layout_bento" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_bento_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_bento_hero_dynamic"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_cover']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_cover_dynamic"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_image_text_overlap']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_image_text_overlap_dynamic"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_call_to_action']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_call_to_action_dynamic"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     GRADIENT vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_bento_s_bento_hero_gradient" inherit_id="website.configurator_layout_bento_s_bento_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Blurry/04","colors":{"c1":"#ffdf59","c2":"#4db27f","c3":"#d6e9cc"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blurry_04"/>
+    </xpath>
+    <xpath expr="//div[hasclass('o_grid_item')]" position="attributes">
+        <attribute name="style" add="background: linear-gradient(45deg, var(--o-color-2), var(--o-color-1))" separator=";"/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[4]" position="attributes">
+        <attribute name="style" add="background: linear-gradient(-45deg, var(--o-color-1), var(--o-color-2))" separator=";"/>
+    </xpath>
+</template>
+<template id="configurator_layout_bento_s_cover_gradient" inherit_id="website.configurator_layout_bento_s_cover" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{{"shape":"html_builder/Blurry/05","colors":{"c1":"#ffdf59","c2":"#4db27f","c4":"#FFFFFF"},"flip":["y"],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blurry_05" style="transform: scaleY(-1)"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_vibe_gradient" name="Configurator Layout: Bento / Gradient" inherit_id="website.configurator_layout_bento" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_bento_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_bento_hero_gradient"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_cover']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_cover_gradient"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     GLOSSY vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_bento_vibe_glossy" name="Configurator Layout: Bento / Glossy" inherit_id="website.configurator_layout_bento" primary="True"/>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     ILLUSTRATIVE vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_bento_s_bento_hero_illustrative" inherit_id="website.configurator_layout_bento_s_bento_hero" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid" src="/website/static/src/img/configurator/vibe_illustrative/citta-abstract-friends-youth-talking-trendy-shapes-hipster-casual-realistic.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_image_text_overlap_illustrative" inherit_id="website.configurator_layout_bento_s_image_text_overlap" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid" style="object-position: top;" src="/website/static/src/img/configurator/vibe_illustrative/citta-abstract-walking-youth-happy-trendy-shapes-hipster-casual-realistic.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_image_text_overlap_illustrative_two" inherit_id="website.configurator_layout_bento_s_image_text_overlap" primary="True">
+    <xpath expr="//div[hasclass('o_grid_item')]" position="attributes">
+        <attribute name="style" add="grid-area: 1 / 6 / 10 / 13;" separator=";"/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[2]" position="attributes">
+        <attribute name="style" add="grid-area: 2 / 1 / 9 / 7;" separator=";"/>
+    </xpath>
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid" style="object-position: top; transform: scaleX(-1)" src="/website/static/src/img/configurator/vibe_illustrative/citta-abstract-standing-youth-greeting-trendy-shapes-hipster-casual-realistic.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_masonry_block_illustrative" inherit_id="website.configurator_layout_bento_s_masonry_block_default_template" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid" src="/website/static/src/img/configurator/vibe_illustrative/citta-abstract-friends-youth-talking-trendy-shapes-hipster-casual-realistic.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_vibe_illustrative" name="Configurator Layout: Bento / Illustrative" inherit_id="website.configurator_layout_bento" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_bento_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_bento_hero_illustrative"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_cover']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_image_text_overlap_illustrative_two"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_image_text_overlap']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_image_text_overlap_illustrative"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_masonry_block_default_template']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_masonry_block_illustrative"/>
+    </xpath>
+</template>
+
+<!-- ════════════════════════════════════════════════════════════
+     PLAYFUL vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_bento_s_bento_hero_playful" inherit_id="website.configurator_layout_bento_s_bento_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Blobs/02","colors":{"c1":"#ffdf59","c2":"#4db27f"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blobs_02"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_image_text_overlap_playful_two" inherit_id="website.configurator_layout_bento_s_image_text_overlap" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Blobs/03","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blobs_03"/>
+    </xpath>
+    <xpath expr="//div[hasclass('o_grid_item')]" position="attributes">
+        <attribute name="style" add="grid-area: 1 / 6 / 10 / 13;" separator=";"/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[2]" position="attributes">
+        <attribute name="style" add="grid-area: 2 / 1 / 9 / 7;" separator=";"/>
+    </xpath>
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid rounded" src="/web/image/website.s_image_text_default_image"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_image_text_overlap_playful" inherit_id="website.configurator_layout_bento_s_image_text_overlap" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Blobs/01_001","flip":["y"],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blobs_01_001" style="transform: scaleY(-1)"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_masonry_block_playful" inherit_id="website.s_masonry_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Blobs/01_001","flip":["y"],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div" position="before">
+        <div class="o_we_shape o_html_builder_Blobs_01_001"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_s_masonry_block_playful_default_template" inherit_id="website.s_masonry_block_default_template" primary="True">
+    <xpath expr="//t" position="attributes">
+        <attribute name="t-snippet-call">website.configurator_layout_bento_s_masonry_block_playful</attribute>
+    </xpath>
+</template>
+
+<template id="configurator_layout_bento_vibe_playful" name="Configurator Layout: Bento / Playful" inherit_id="website.configurator_layout_bento" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_bento_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_bento_hero_playful"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_cover']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_image_text_overlap_playful_two"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_image_text_overlap']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_image_text_overlap_playful"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_bento_s_masonry_block_default_template']" position="replace">
+        <t t-snippet-call="website.configurator_layout_bento_s_masonry_block_playful_default_template"/>
+    </xpath>
+</template>
+
+</odoo>

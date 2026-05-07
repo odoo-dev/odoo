@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+<!-- ============================================================
+     ConfiguratorHeader / ConfiguratorFooter attributes
+     ============================================================
+     ConfiguratorHeader:
+       data-template    header template xmlid suffix
+                        (default template_header_default)
+       data-color       color combination 1..5 (default 1)
+       data-overlay     "true" places header over content
+       data-full-width  "true" makes nav use container-fluid
+       data-bg          CSS background (solid OR gradient);
+                        hardcoded, takes precedence over data-color
+       data-border      CSS border shorthand
+                        (e.g. "1px solid #111", or "0" / "none")
+       data-shadow      raw CSS box-shadow value (e.g.
+                        "0 1rem 3rem rgba(0,0,0,.175)" or "none")
+       data-text-color  hardcoded header text color
+     ConfiguratorFooter:
+       data-template, data-color, data-bg only
+       (no overlay / full width / border / shadow / text color:
+        there is no site wide SCSS variable for footer
+        border or shadow, so they are unsupported by design)
+
+     A vibe template may override these by replacing the
+     ConfiguratorHeader / ConfiguratorFooter node via xpath; the
+     override is honoured in previews, the generated website and
+     the /website/demo/configurator-layouts debug page.
+     ============================================================ -->
+<!-- ============================================================
+     CREATIVE layout
+     Asymmetric, expressive, portrait-led.
+
+     Architecture:
+       Layer 1 — Per-snippet clean variants (primary inherits)
+       Layer 2 — Assembly (Clean vibe), t-snippet-call
+       Layer 3 — Vibe assemblies (primary inherits of Layer 2)
+       Layer 4 — Vibe per-snippet variants (primary inherits of Layer 1)
+     ============================================================ -->
+
+
+<!-- ════════════════════════════════════════════════════════════
+     LAYER 1 — Per-snippet layout variants (Clean baseline)
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_creative_s_cover" inherit_id="website.s_cover" primary="True">
+</template>
+
+<template id="configurator_layout_creative_s_masonry_block" inherit_id="website.s_masonry_block" primary="True">
+</template>
+
+<template id="configurator_layout_creative_s_announcement_scroll" inherit_id="website.s_announcement_scroll" primary="True">
+</template>
+
+<template id="configurator_layout_creative_s_title" inherit_id="website.s_title" primary="True">
+</template>
+
+<template id="configurator_layout_creative_s_call_to_action" inherit_id="website.s_call_to_action" primary="True">
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     LAYER 2 — Assembly template (= Clean vibe)
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_creative" name="Configurator Layout: Creative">
+    <ConfiguratorHeader data-template="template_header_vertical" data-color="5"/>
+    <ConfiguratorFooter data-template="template_footer_centered" data-color="2"/>
+
+    <t t-snippet-call="website.configurator_layout_creative_s_cover"/>
+    <t t-snippet-call="website.configurator_layout_creative_s_masonry_block"/>
+    <t t-snippet-call="website.configurator_layout_creative_s_announcement_scroll"/>
+    <t t-snippet-call="website.configurator_layout_creative_s_title"/>
+    <t t-snippet-call="website.configurator_layout_creative_s_call_to_action"/>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     LAYER 3 — Vibe assemblies
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_creative_vibe_dynamic"
+          name="Configurator Layout: Creative / Dynamic"
+          inherit_id="website.configurator_layout_creative" primary="True">
+</template>
+
+<template id="configurator_layout_creative_vibe_gradient"
+          name="Configurator Layout: Creative / Gradient"
+          inherit_id="website.configurator_layout_creative" primary="True">
+</template>
+
+<template id="configurator_layout_creative_vibe_glossy"
+          name="Configurator Layout: Creative / Glossy"
+          inherit_id="website.configurator_layout_creative" primary="True">
+</template>
+
+<template id="configurator_layout_creative_vibe_illustrative"
+          name="Configurator Layout: Creative / Illustrative"
+          inherit_id="website.configurator_layout_creative" primary="True">
+</template>
+
+<template id="configurator_layout_creative_vibe_playful"
+          name="Configurator Layout: Creative / Playful"
+          inherit_id="website.configurator_layout_creative" primary="True">
+</template>
+
+</odoo>

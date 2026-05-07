@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+<!-- ============================================================
+     ConfiguratorHeader / ConfiguratorFooter attributes
+     ============================================================
+     ConfiguratorHeader:
+       data-template    header template xmlid suffix
+                        (default template_header_default)
+       data-color       color combination 1..5 (default 1)
+       data-overlay     "true" places header over content
+       data-full-width  "true" makes nav use container-fluid
+       data-bg          CSS background (solid OR gradient);
+                        hardcoded, takes precedence over data-color
+       data-border      CSS border shorthand
+                        (e.g. "1px solid #111", or "0" / "none")
+       data-shadow      raw CSS box-shadow value (e.g.
+                        "0 1rem 3rem rgba(0,0,0,.175)" or "none")
+       data-text-color  hardcoded header text color
+     ConfiguratorFooter:
+       data-template, data-color, data-bg only
+       (no overlay / full width / border / shadow / text color:
+        there is no site wide SCSS variable for footer
+        border or shadow, so they are unsupported by design)
+
+     A vibe template may override these by replacing the
+     ConfiguratorHeader / ConfiguratorFooter node via xpath; the
+     override is honoured in previews, the generated website and
+     the /website/demo/configurator-layouts debug page.
+     ============================================================ -->
+
+
+<!-- ════════════════════════════════════════════════════════════
+     LAYER 1 — Per-snippet layout variants (Clean baseline)
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_minimalist_s_title" inherit_id="website.s_title" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pt144 pb56" remove="pt64 pb40" separator=" "/>
+    </xpath>
+    <xpath expr="//h2" position="replace">
+        <h1 style="text-align: center;" class="display-4">
+            <strong>EVERYTHING BEGINS WITH <span style="color: var(--o-color-1)">INTENTION</span></strong>
+        </h1>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_s_image_punchy" inherit_id="website.s_image_punchy" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc1" remove="o_cc2 pt64 pb64" separator=" "/>
+    </xpath>
+    <xpath expr="//div[hasclass('o_grid_mode')]" position="attributes">
+        <attribute name="data-row-count">9</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('o_grid_item')]" position="replace">
+        <div class="o_grid_item o_grid_item_image g-col-lg-12 o_colored_level g-height-8 col-lg-12 o_draggable" style="z-index: 1; grid-area: 1 / 1 / 9 / 13;">
+            <img src="/web/image/website.s_banner_default_image" class="figure-img img-fluid rounded" alt="" loading="lazy" data-mimetype="image/webp" style=""/>
+        </div>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_grid_item')])[2]" position="replace"/>
+</template>
+
+<template id="configurator_layout_minimalist_s_text_block" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" remove="pt40" add="pt24" separator=" "/>
+    </xpath>
+    <xpath expr="//div" position="attributes">
+        <attribute name="class" add="o_container_small" remove="container" separator=" "/>
+    </xpath>
+    <xpath expr="//p" position="replace">
+        <p  class="small" style="text-align: center;">
+            Great stories have a personality. Consider telling a great story that provides personality. Writing a story with personality for potential clients will assist with making a relationship connection.
+        </p>
+    </xpath>
+    <xpath expr="(//p)[2]" position="replace"/>
+</template>
+
+<template id="configurator_layout_minimalist_s_nav_minimal" inherit_id="website.s_nav_minimal" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pb184" remove="pb24" separator=" "/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_s_text_block_two" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" remove="pt40 pb40" add="" separator=" "/>
+    </xpath>
+    <xpath expr="//p" position="replace">
+        <h2 style="text-align: center;">
+            <strong>WE MAKE ORDINARY OBJECTS FEEL <span style="color: var(--o-color-1)">INEVITABLE</span></strong>
+        </h2>
+    </xpath>
+    <xpath expr="//p" position="replace">
+        <div class="row">
+            <div class="col-12 pt56 pb56">
+                <p>
+                    <img src="/web/image/website.s_company_team_image_6" width="140" class="img img-fluid mx-auto d-block" data-mimetype="image/webp" loading="lazy" />
+                </p>
+            </div>
+            <div class="offset-lg-2 col-lg-8">
+                <p class="small" style="text-align: center;">
+                    Great stories have a personality. Consider telling a great story that provides personality. Writing a story with personality for potential clients will assist with making a relationship connection.
+                </p>
+            </div>
+        </div>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_s_key_images" inherit_id="website.s_key_images" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc1 pt184" remove="o_cc2 pt72" separator=" "/>
+    </xpath>
+    <xpath expr="//h2" position="replace">
+        <h2 style="text-align: center;">
+            <strong>KEY POINTS TO HIGHLIGHT OUR OFFER</strong>
+        </h2>
+    </xpath>
+    <xpath expr="//p" position="attributes">
+        <attribute name="style" add="text-align:center" separator=";"/>
+    </xpath>
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid" src="/web/image/website.s_product_list_default_image_1"/>
+    </xpath>
+    <xpath expr="(//img)[2]" position="replace">
+        <img class="img-fluid" src="/web/image/website.s_product_list_default_image_2"/>
+    </xpath>
+    <xpath expr="(//img)[3]" position="replace">
+        <img class="img-fluid" src="/web/image/website.s_product_list_default_image_3"/>
+    </xpath>
+    <xpath expr="(//img)[4]" position="replace">
+        <img class="img-fluid" src="/web/image/website.s_product_list_default_image_4"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     LAYER 2 — Assembly template (= Clean vibe)
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_minimalist" name="Configurator Layout: Minimalist">
+    <ConfiguratorHeader data-template="template_header_boxed" data-color="5" data-shadow="none" data-overlay="true"/>
+    <ConfiguratorFooter data-template="template_footer_minimalist" data-color="5"/>
+
+    <t t-snippet-call="website.configurator_layout_minimalist_s_title"/>
+    <t t-snippet-call="website.configurator_layout_minimalist_s_image_punchy"/>
+    <t t-snippet-call="website.configurator_layout_minimalist_s_text_block"/>
+    <t t-snippet-call="website.configurator_layout_minimalist_s_nav_minimal"/>
+    <t t-snippet-call="website.configurator_layout_minimalist_s_text_block_two"/>
+    <t t-snippet-call="website.configurator_layout_minimalist_s_key_images"/>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     DYNAMIC vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_minimalist_vibe_dynamic_s_title" inherit_id="website.configurator_layout_minimalist_s_title" primary="True">
+    <xpath expr="//strong" position="replace" mode="inner">
+        <strong>EVERYTHING BEGINS WITH <span class="o_text_highlight o_text_highlight_freehand_1" style="--text-highlight-color: var(--o-color-1); --text-highlight-width: 2px;">
+                <svg fill="none" class="o_text_highlight_svg o_content_no_merge position-absolute overflow-visible pe-none" style="inset: 0px;" contenteditable="false">
+                    <path stroke-width="var(--text-highlight-width)" stroke="var(--text-highlight-color)" stroke-linecap="round" d="M 0,73.7 C 38.193748474121094,70.35000000000001 76.38749694824219,67 305.54998779296875,67"/>
+                </svg>
+                <span style="color: var(--o-color-1)">INTENTION</span>
+            </span>
+        </strong>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_dynamic_s_image_punchy" inherit_id="website.configurator_layout_minimalist_s_image_punchy" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Angular/10","colors":{"c5":"#121212"},"flip":[],"showOnMobile":true,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Angular_10" contenteditable="false"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_dynamic_s_nav_minimal" inherit_id="website.configurator_layout_minimalist_s_nav_minimal" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data" add='{"shape":"html_builder/Connections/01","flip":["x"],"showOnMobile":true,"shapeAnimationSpeed":"0","selectedColor":true, "colors":{"c5":"o-color-3"}}' separator=" "/>
+    </xpath>
+    <xpath expr="//div" position="before">
+        <div class="o_we_shape o_html_builder_Connections_01" style='background-image: url("/html_editor/shape/html_builder/Connections/01.svg?c5=o-color-3"); background-position: 50% 100%;' contenteditable="false" />
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_dynamic_s_text_block_two" inherit_id="website.configurator_layout_minimalist_s_text_block_two" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc2 pt56 pb56" remove="o_cc1" separator=" "/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_dynamic_s_key_images" inherit_id="website.configurator_layout_minimalist_s_key_images" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data" add='{"shape":"html_builder/Connections/01","colors":{"c5":"o-color-3"},"flip":["y"],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":true}' separator=" "/>
+    </xpath>
+    <xpath expr="//div" position="before">
+        <div class="o_we_shape o_html_builder_Connections_01" contenteditable="false" style="background-image: url('/html_editor/shape/html_builder/Connections/01.svg?c5=o-color-3&amp;flip=xy'); background-position: 50% 0%;"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_dynamic" name="Configurator Layout: Minimalist / Dynamic" inherit_id="website.configurator_layout_minimalist" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_title']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_dynamic_s_title"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_image_punchy']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_dynamic_s_image_punchy"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_nav_minimal']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_dynamic_s_nav_minimal"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_text_block_two']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_dynamic_s_text_block_two"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_key_images']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_dynamic_s_key_images"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     ILLUSTRATIVE vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_minimalist_vibe_illustrative_s_text_image" inherit_id="website.s_text_image" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" remove="pb80 pt80" add="pt152" separator=" "/>
+    </xpath>
+    <xpath expr="//h2" position="replace">
+        <h1 style="text-align: right" class="display-4">
+            <strong>EVERYTHING BEGINS WITH <span style="color: var(--o-color-1)">INTENTION</span></strong>
+        </h1>
+    </xpath>
+    <xpath expr="//p" position="attributes">
+        <attribute name="class" add="small" separator=" "/>
+        <attribute name="style" add="text-align:right" separator=";"/>
+    </xpath>
+    <xpath expr="(//p)[2]" position="replace">
+        <p><br/></p>
+    </xpath>
+    <xpath expr="(//p)[3]" position="attributes">
+        <attribute name="style" add="text-align:right" separator=";"/>
+    </xpath>
+    <xpath expr="//a" position="attributes">
+        <attribute name="class" add="btn-primary" remove="btn-secondary" separator=" "/>
+    </xpath>
+    <xpath expr="//img" position="replace">
+        <img src="/website/static/src/img/configurator/vibe_illustrative/illustrative_banner.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_illustrative_s_text_block_two" inherit_id="website.configurator_layout_minimalist_s_text_block_two" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="w-50 mx-auto" src="/website/static/src/img/configurator/vibe_illustrative/illustrative_3.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_illustrative_s_key_images" inherit_id="website.configurator_layout_minimalist_s_key_images" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid" src="/website/static/src/img/configurator/vibe_illustrative/illustrative_2.svg"/>
+    </xpath>
+    <xpath expr="(//img)[2]" position="replace">
+        <img class="img-fluid" src="/website/static/src/img/configurator/vibe_illustrative/illustrative_1.svg"/>
+    </xpath>
+    <xpath expr="(//img)[3]" position="replace">
+        <img class="img-fluid" src="/website/static/src/img/configurator/vibe_illustrative/illustrative_4.svg"/>
+    </xpath>
+    <xpath expr="(//img)[4]" position="replace">
+        <img class="img-fluid" src="/website/static/src/img/configurator/vibe_illustrative/illustrative_5.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_illustrative" name="Configurator Layout: Minimalist / Illustrative" inherit_id="website.configurator_layout_minimalist" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_title']" position="replace"/>
+
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_image_punchy']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_illustrative_s_text_image"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_text_block_two']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_illustrative_s_text_block_two"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_key_images']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_illustrative_s_key_images"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     PLAYFUL vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_minimalist_vibe_playful_s_image_punchy" inherit_id="website.configurator_layout_minimalist_s_image_punchy" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Floats/05","colors":{"c1":"#ffdf59","c2":"#4db27f","c3":"#d6e9cc","c5":"#0a412f"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Floats_05" contenteditable="false"/>
+    </xpath>
+    <xpath expr="//div[hasclass('o_grid_item_image')]" position="attributes">
+        <attribute name="style" add="grid-area: 1 / 2 / 9 / 12;" remove="grid-area: 1 / 1 / 9 / 13;" separator=";"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_playful_s_nav_minimal" inherit_id="website.configurator_layout_minimalist_s_nav_minimal" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" remove="pb184" add="pb24" separator=" "/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_playful_s_text_block_two" inherit_id="website.configurator_layout_minimalist_s_text_block_two" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pb184 pt184" separator=" "/>
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Floats/03","flip":[],"showOnMobile":true,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Floats_03" contenteditable="false"/>
+    </xpath>
+    <xpath expr="//img" position="attributes">
+        <attribute name="src">/html_editor/image_shape/website.s_company_team_image_6/html_builder/geometric_round/geo_round_star_7pin.svg</attribute>
+        <attribute name="data-shape">html_builder/geometric_round/geo_round_star_7pin</attribute>
+        <attribute name="data-format-mimetype">image/webp</attribute>
+        <attribute name="data-file-name">uiface_1.svg</attribute>
+        <attribute name="data-shape-colors">;;;;</attribute>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_playful_s_key_images" inherit_id="website.configurator_layout_minimalist_s_key_images" primary="True">
+   <xpath expr="//section" position="attributes">
+        <attribute name="class" remove="pt184" separator=" "/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_playful" name="Configurator Layout: Minimalist / Playful"  inherit_id="website.configurator_layout_minimalist" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_image_punchy']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_playful_s_image_punchy"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_nav_minimal']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_playful_s_nav_minimal"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_text_block_two']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_playful_s_text_block_two"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_key_images']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_playful_s_key_images"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     GRADIENT vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_minimalist_vibe_gradient_s_image_punchy" inherit_id="website.configurator_layout_minimalist_s_image_punchy" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="style" add="background-image: linear-gradient(2deg, transparent 20%, var(--o-color-2) 40%, var(--o-color-2) 50%, transparent 70%);" separator=";"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_gradient_s_nav_minimal" inherit_id="website.configurator_layout_minimalist_s_nav_minimal" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" remove="pt24 pb184" add="pb24" separator=" "/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_gradient_s_text_block_two" inherit_id="website.configurator_layout_minimalist_s_text_block_two" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pt256 pb200" separator=" "/>
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Wavy/27","colors":{"c1":"#000000","c2":"#fefe04"},"flip":[],"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Wavy_27" style="transform: scaleX(-1)" contenteditable="false"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_gradient_s_key_images" inherit_id="website.configurator_layout_minimalist_s_key_images" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pt80" remove="pt184" separator=" "/>
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Blurry/02","flip":[],"showOnMobile":true,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blurry_02 o_shape_show_mobile" contenteditable="false"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_minimalist_vibe_gradient" name="Configurator Layout: Minimalist / Gradient" inherit_id="website.configurator_layout_minimalist" primary="True">
+    <xpath expr="//ConfiguratorHeader" position="replace">
+        <ConfiguratorHeader data-template="template_header_boxed" data-color="1" data-shadow="0 0 100px var(--o-color-1)" data-overlay="true" data-border="0"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_image_punchy']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_gradient_s_image_punchy"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_nav_minimal']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_gradient_s_nav_minimal"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_text_block_two']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_gradient_s_text_block_two"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_minimalist_s_key_images']" position="replace">
+        <t t-snippet-call="website.configurator_layout_minimalist_vibe_gradient_s_key_images"/>
+    </xpath>
+</template>
+
+</odoo>

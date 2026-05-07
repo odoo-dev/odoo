@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+<!-- ============================================================
+     ConfiguratorHeader / ConfiguratorFooter attributes
+     ============================================================
+     ConfiguratorHeader:
+       data-template    header template xmlid suffix
+                        (default template_header_default)
+       data-color       color combination 1..5 (default 1)
+       data-overlay     "true" places header over content
+       data-full-width  "true" makes nav use container-fluid
+       data-bg          CSS background (solid OR gradient);
+                        hardcoded, takes precedence over data-color
+       data-border      CSS border shorthand
+                        (e.g. "1px solid #111", or "0" / "none")
+       data-shadow      raw CSS box-shadow value (e.g.
+                        "0 1rem 3rem rgba(0,0,0,.175)" or "none")
+       data-text-color  hardcoded header text color
+     ConfiguratorFooter:
+       data-template, data-color, data-bg only
+       (no overlay / full width / border / shadow / text color:
+        there is no site wide SCSS variable for footer
+        border or shadow, so they are unsupported by design)
+
+     A vibe template may override these by replacing the
+     ConfiguratorHeader / ConfiguratorFooter node via xpath; the
+     override is honoured in previews, the generated website and
+     the /website/demo/configurator-layouts debug page.
+     ============================================================ -->
+<!-- ============================================================
+     IMPACTFUL layout
+     Full-bleed visuals with editorial boldness.
+
+     Architecture:
+       Layer 1 — Per-snippet clean variants (primary inherits)
+       Layer 2 — Assembly (Clean vibe), t-snippet-call
+       Layer 3 — Vibe assemblies (primary inherits of Layer 2)
+       Layer 4 — Vibe per-snippet variants (primary inherits of Layer 1)
+     ============================================================ -->
+
+
+<!-- ════════════════════════════════════════════════════════════
+     LAYER 1 — Per-snippet layout variants (Clean baseline)
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_impactful_s_cover" inherit_id="website.s_cover" primary="True">
+</template>
+
+<template id="configurator_layout_impactful_s_title" inherit_id="website.s_title" primary="True">
+</template>
+
+<template id="configurator_layout_impactful_s_three_columns" inherit_id="website.s_three_columns" primary="True">
+</template>
+
+<template id="configurator_layout_impactful_s_image_text" inherit_id="website.s_image_text" primary="True">
+</template>
+
+<template id="configurator_layout_impactful_s_call_to_action" inherit_id="website.s_call_to_action" primary="True">
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     LAYER 2 — Assembly template (= Clean vibe)
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_impactful" name="Configurator Layout: Impactful">
+    <ConfiguratorHeader data-template="template_header_sales_one" data-color="2"/>
+    <ConfiguratorFooter data-template="template_footer_call_to_action" data-color="5"/>
+
+    <t t-snippet-call="website.configurator_layout_impactful_s_cover"/>
+    <t t-snippet-call="website.configurator_layout_impactful_s_title"/>
+    <t t-snippet-call="website.configurator_layout_impactful_s_three_columns"/>
+    <t t-snippet-call="website.configurator_layout_impactful_s_image_text"/>
+    <t t-snippet-call="website.configurator_layout_impactful_s_call_to_action"/>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     LAYER 3 — Vibe assemblies
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_impactful_vibe_dynamic"
+          name="Configurator Layout: Impactful / Dynamic"
+          inherit_id="website.configurator_layout_impactful" primary="True">
+</template>
+
+<template id="configurator_layout_impactful_vibe_gradient"
+          name="Configurator Layout: Impactful / Gradient"
+          inherit_id="website.configurator_layout_impactful" primary="True">
+</template>
+
+<template id="configurator_layout_impactful_vibe_glossy"
+          name="Configurator Layout: Impactful / Glossy"
+          inherit_id="website.configurator_layout_impactful" primary="True">
+</template>
+
+<template id="configurator_layout_impactful_vibe_illustrative"
+          name="Configurator Layout: Impactful / Illustrative"
+          inherit_id="website.configurator_layout_impactful" primary="True">
+</template>
+
+<template id="configurator_layout_impactful_vibe_playful"
+          name="Configurator Layout: Impactful / Playful"
+          inherit_id="website.configurator_layout_impactful" primary="True">
+</template>
+
+</odoo>

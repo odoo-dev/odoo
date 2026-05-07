@@ -33,6 +33,37 @@ from odoo.tools.image import image_process
 from odoo.tools.sql import SQL, escape_like_value
 from odoo.tools.translate import _
 
+# Maps header template xmlid suffixes to their SCSS 'header-template' variable values.
+HEADER_TEMPLATE_SCSS_MAP = {
+    'template_header_default': 'default',
+    'template_header_hamburger': 'hamburger',
+    'template_header_stretch': 'stretch',
+    'template_header_vertical': 'vertical',
+    'template_header_sidebar': 'sidebar',
+    'template_header_boxed': 'boxed',
+    'template_header_search': 'search',
+    'template_header_sales_one': 'sales_one',
+    'template_header_sales_two': 'sales_two',
+    'template_header_sales_three': 'sales_three',
+    'template_header_sales_four': 'sales_four',
+}
+
+# Maps footer template xmlid suffixes to their SCSS 'footer-template' variable values.
+FOOTER_TEMPLATE_SCSS_MAP = {
+    'footer_custom': 'default',
+    'template_footer_minimalist': 'minimalist',
+    'template_footer_links': 'links',
+    'template_footer_descriptive': 'descriptive',
+    'template_footer_centered': 'centered',
+    'template_footer_headline': 'headline',
+    'template_footer_call_to_action': 'call_to_action',
+    'template_footer_contact': 'contact',
+    'template_footer_mega': 'mega',
+    'template_footer_mega_columns': 'mega_columns',
+    'template_footer_mega_links': 'mega_links',
+    'template_footer_mega_cards': 'mega_cards',
+}
+
 logger = logging.getLogger(__name__)
 
 
@@ -463,10 +494,116 @@ class Website(models.CachedModel):
         return {}
 
     def _get_snippet_view_key(self, snippet, page_code):
+        """Return the generic page-scoped configurator template xmlid (for
+        non-homepage pages whose snippets are auto-generated)."""
         if '.' not in snippet:
             snippet = 'website.' + snippet
-        module, snippet = snippet.split('.')
-        return f'{module}.configurator_{page_code}_{snippet}'
+        module, snippet_name = snippet.split('.')
+        return f'{module}.configurator_{page_code}_{snippet_name}'
+
+    def _get_layout_homepage_snippets(self, layout, vibe=None):
+        """Return the ordered ``(template_key, base_snippet_name)`` pairs for
+        the homepage, derived from the layout assembly XML and with the
+        selected vibe's ``xpath position="replace"`` overrides applied.
+        ``base_snippet_name`` (the bare base Odoo snippet name, from the
+        primary template's ``inherit_id``) is written to ``data-snippet`` for
+        compatibility code. Returns [] when no assembly template exists."""
+        # ── 1. Load the clean (Layer 2) assembly ──────────────────────────────
+        clean_view = self.env.ref(
+            f'website.configurator_layout_{layout}', raise_if_not_found=False
+        )
+        if not clean_view or not clean_view.arch_db:
+            logger.warning(
+                '_get_layout_homepage_snippets: no assembly template found for layout %r'
+                ' (website.configurator_layout_%s). Homepage will be empty.',
+                layout, layout,
+            )
+            return []
+        try:
+            clean_tree = etree.fromstring(clean_view.arch_db)
+        except Exception:
+            logger.warning(
+                '_get_layout_homepage_snippets: failed to parse assembly for layout %r.',
+                layout,
+            )
+            return []
+
+        # Extract t-snippet-call references in document order.
+        # ConfiguratorHeader / ConfiguratorFooter meta-elements have no
+        # t-snippet-call attribute and are therefore naturally skipped.
+        snippet_keys = [
+            el.get('t-snippet-call')
+            for el in clean_tree.iter()
+            if el.get('t-snippet-call')
+        ]
+
+        # ── 2. Apply vibe overrides (Layer 3 → Layer 4) ───────────────────────
+        if vibe and vibe != 'clean':
+            vibe_view = self.env.ref(
+                f'website.configurator_layout_{layout}_vibe_{vibe}',
+                raise_if_not_found=False,
+            )
+            if vibe_view and vibe_view.arch_db:
+                try:
+                    vibe_tree = etree.fromstring(vibe_view.arch_db)
+                except Exception:
+                    vibe_tree = None
+                if vibe_tree is not None:
+                    for xpath_el in vibe_tree.findall('.//xpath'):
+                        pos  = xpath_el.get('position', '')
+                        expr = xpath_el.get('expr', '')
+                        m = re.search(r"t-snippet-call='([^']+)'", expr)
+                        if not m:
+                            continue
+                        ref_key = m.group(1)
+                        if ref_key not in snippet_keys:
+                            continue
+                        idx = snippet_keys.index(ref_key)
+                        new_keys = [
+                            child.get('t-snippet-call')
+                            for child in xpath_el
+                            if child.get('t-snippet-call')
+                        ]
+                        if pos == 'replace':
+                            if new_keys:
+                                snippet_keys[idx:idx + 1] = new_keys
+                            else:
+                                del snippet_keys[idx]           # empty → remove
+                        elif pos == 'before':
+                            for i, k in enumerate(new_keys):
+                                snippet_keys.insert(idx + i, k)
+                        elif pos == 'after':
+                            for i, k in enumerate(new_keys):
+                                snippet_keys.insert(idx + 1 + i, k)
+
+        # ── 3. Resolve base snippet name from inherit_id ──────────────────────
+        # Walk the primary-inherit chain until we reach a direct website.s_*
+        # snippet so that data-snippet always carries the canonical name
+        # (e.g. "s_text_block"), regardless of how many layers deep the
+        # vibe-variant nests.
+        def _base_snippet_name(tpl_key):
+            seen = set()
+            key = tpl_key
+            while key and key not in seen:
+                seen.add(key)
+                view = self.env.ref(key, raise_if_not_found=False)
+                if not view or not view.inherit_id or not view.inherit_id.key:
+                    break
+                parent_key = view.inherit_id.key
+                parent_suffix = parent_key.split('.')[-1]
+                # Stop as soon as we reach a canonical s_* snippet
+                if parent_suffix.startswith('s_'):
+                    return parent_suffix
+                key = parent_key
+            # Fallback: strip the layout prefix from the original key suffix
+            suffix = tpl_key.split('.')[-1]
+            prefix = f'configurator_layout_{layout}_'
+            return suffix[len(prefix):] if suffix.startswith(prefix) else suffix
+
+        result = []
+        for tpl_key in snippet_keys:
+            result.append((tpl_key, _base_snippet_name(tpl_key)))
+        return result
 
     def _preconfigure_snippet(self, snippet, el, customizations):
         """Apply default configuration values to a snippet element.
@@ -563,47 +700,6 @@ class Website(models.CachedModel):
 
         el.set('class', ' '.join(snippet_classes))
         el.set('style', ' '.join(snippet_style))
-
-    @api.model
-    def get_theme_configurator_snippets(self, theme_name):
-        """
-        Prepare and return configurator_snippets by fetching theme snippets and
-        inserting addon snippets at their intended positions.
-        """
-        configurator_snippets = {
-            **get_manifest('website')['configurator_snippets'],
-            **get_manifest(theme_name).get('configurator_snippets', {}),
-        }
-        configurator_snippets_addons = {
-            **get_manifest(theme_name).get('configurator_snippets_addons', {}),
-        }
-
-        if not configurator_snippets_addons:
-            return configurator_snippets
-
-        installed_modules = self.env['ir.module.module']._installed()
-
-        for module_name, module_addon in configurator_snippets_addons.items():
-            if module_name not in installed_modules:
-                continue
-            for page, snippets_to_insert in module_addon.items():
-                snippet_list = configurator_snippets.setdefault(page, [])
-                for snippet_name, position, target in snippets_to_insert:
-                    if snippet_name in snippet_list:
-                        continue
-                    try:
-                        snippet_idx = snippet_list.index(target)
-                        if position == 'replace':
-                            snippet_list[snippet_idx] = snippet_name
-                        else:
-                            snippet_list.insert(snippet_idx + (position == 'after'), snippet_name)
-                    except ValueError:
-                        logger.error(
-                            "Skipping snippet '%s' because the target snippet is misconfigured.",
-                            snippet_name,
-                        )
-
-        return configurator_snippets
 
     def configurator_set_menu_links(self, menu_company, module_data):
         menus = self.env['website.menu'].search([('url', 'in', list(module_data.keys())), ('website_id', '=', self.id)])
@@ -767,8 +863,8 @@ class Website(models.CachedModel):
     @api.model
     def configurator_apply(self, **kwargs):
         website = self.get_current_website(fallback=True)
-        skip_ai = kwargs.get('skip_ai')  # Used by design-themes tooling
-        theme_name = kwargs['theme_name']
+        # Always install theme_default; style/vibe/layout are applied separately.
+        theme_name = 'theme_default'
         theme = self.env['ir.module.module'].search([('name', '=', theme_name)])
         redirect_url = theme.button_choose_theme()
 
@@ -781,30 +877,237 @@ class Website(models.CachedModel):
         # Set logo from generated attachment or from company's logo
         logo_attachment_id = kwargs.get('logo_attachment_id')
         company = website.company_id
-        attachment = self.env['ir.attachment'].browse(logo_attachment_id).exists() if logo_attachment_id else False
-        if attachment:
+        if logo_attachment_id:
+            attachment = self.env['ir.attachment'].browse(logo_attachment_id)
             attachment.write({
                 'res_model': 'website',
                 'res_field': 'logo',
                 'res_id': website.id,
             })
-        elif not company.uses_default_logo:
+        elif not logo_attachment_id and not company.uses_default_logo:
             website.logo = BinaryBytes(company.logo.content)
 
-        # Configure the color palette
-        selected_palette = kwargs.get('selected_palette')
-        if selected_palette:
+        # Configure the color palette / style
+        # The SCSS customisation was already fired from JS (live preview), but we
+        # apply it again here for reliability (handles fast-click / skip scenarios).
+        selected_style = kwargs.get('selected_style') or kwargs.get('selected_palette')
+        is_named_palette = bool(selected_style) and isinstance(selected_style, str)
+        is_custom_palette = isinstance(selected_style, list) and bool(selected_style)
+        if is_named_palette or is_custom_palette:
             Assets = self.env['website.assets']
-            selected_palette_name = selected_palette if isinstance(selected_palette, str) else 'base-1'
+            # Fonts / Google-fonts / border-radius / display tokens apply to
+            # BOTH named premade styles and user-generated (logo) styles, so
+            # the chosen typography & roundness persist in every case.  Named
+            # styles set color-palettes-name directly; custom palettes ride on
+            # 'base-1' and write their colours to user_color_palette.scss.
+            scss_values = {
+                'color-palettes-name': "'%s'" % (
+                    selected_style if is_named_palette else 'base-1'
+                ),
+            }
+            headings_font = kwargs.get('selected_headings_font')
+            body_font = kwargs.get('selected_body_font')
+            btn_radius = kwargs.get('selected_btn_radius')
+            if headings_font:
+                scss_values['headings-font'] = "'%s'" % headings_font
+            if body_font:
+                scss_values['font'] = "'%s'" % body_font
+            if btn_radius:
+                scss_values['btn-border-radius'] = btn_radius
+            # Register the chosen fonts as Google fonts so the SCSS chain in
+            # secondary_variables.scss can resolve them (otherwise font-family
+            # lookups via o-get-font-info() return null and the bundle falls
+            # back to the theme default).  Mirrors what the theme/font UI does
+            # in builder/plugins/font/font_plugin.js.
+            fonts = list(dict.fromkeys(f for f in (headings_font, body_font) if f))
+            if fonts:
+                scss_values['google-fonts'] = "('%s')" % "', '".join(fonts)
+            # Display-N typography tokens (font-size + line-height).  The full
+            # dict — including the style's baseline defaults and any per-style
+            # overrides — is built client-side.  We accept only the well-formed
+            # keys to keep the SCSS write safe.  The theme builder UI writes to
+            # the same keys, so any post-creation edit transparently overrides
+            # the configurator's values.
+            display_tokens = kwargs.get('selected_display_tokens') or {}
+            for key, value in display_tokens.items():
+                if re.match(r'^display-[1-6]-(font-size|line-height)$', key):
+                    scss_values[key] = value
             Assets.make_scss_customization(
                 '/website/static/src/scss/options/user_values.scss',
-                {'color-palettes-name': "'%s'" % selected_palette_name}
+                scss_values
             )
-            if isinstance(selected_palette, list):
+            if is_custom_palette:
+                # User-generated (logo) palette: write the extracted colours.
                 Assets.make_scss_customization(
                     '/website/static/src/scss/options/colors/user_color_palette.scss',
-                    {f'o-color-{i}': color for i, color in enumerate(selected_palette, 1)}
+                    {f'o-color-{i}': color
+                     for i, color in enumerate(selected_style, 1)}
                 )
+
+        # Activate the chosen header/footer template views and persist the
+        # corresponding SCSS variables so the CSS pipeline compiles the right
+        # structural styles (e.g. sidebar header width, hamburger menu).
+        # Must use website_id context — same as _reset_default_config does —
+        # so that enable_view/disable_view operate on the correct COW copies.
+        selected_header = kwargs.get('selected_header_template', 'template_header_default')
+        selected_footer = kwargs.get('selected_footer_template', 'footer_custom')
+        ThemeUtils = self.env['theme.utils'].with_context(website_id=website.id)
+        # Only switch header/footer if a non-default template was selected;
+        # _reset_default_config (called by button_choose_theme above) already
+        # activated the defaults.
+        if selected_header != 'template_header_default':
+            ThemeUtils.enable_view(f'website.{selected_header}')
+        if selected_footer != 'footer_custom':
+            ThemeUtils.enable_view(f'website.{selected_footer}')
+
+        header_scss = HEADER_TEMPLATE_SCSS_MAP.get(selected_header, 'default')
+        footer_scss = FOOTER_TEMPLATE_SCSS_MAP.get(selected_footer, 'default')
+        Assets = self.env['website.assets']
+        if header_scss != 'default' or footer_scss != 'default':
+            Assets.make_scss_customization(
+                '/website/static/src/scss/options/user_values.scss',
+                {
+                    'header-template': "'%s'" % header_scss,
+                    'footer-template': "'%s'" % footer_scss,
+                }
+            )
+
+        # Apply CC (color combination) indices for the header (menu) and footer.
+        # These are defined in the layout XML via <ConfiguratorHeader data-color="N">
+        # and <ConfiguratorFooter data-color="N"> and passed here by the frontend.
+        # Writing 'menu': N / 'footer': N into $o-user-color-palette overrides the
+        # active palette's defaults (merged in secondary_variables.scss line ~141).
+        try:
+            header_cc = int(kwargs.get('selected_header_cc', 1))
+            footer_cc = int(kwargs.get('selected_footer_cc', 2))
+            if 1 <= header_cc <= 5 and 1 <= footer_cc <= 5:
+                Assets.make_scss_customization(
+                    '/website/static/src/scss/options/colors/user_color_palette.scss',
+                    {'menu': header_cc, 'footer': footer_cc}
+                )
+        except (ValueError, TypeError):
+            pass
+
+        # Hardcoded header/footer style overrides defined in the layout XML via
+        # <ConfiguratorHeader data-bg / data-border / data-shadow /
+        # data-text-color> and <ConfiguratorFooter data-bg>.  We persist them
+        # using the EXACT same SCSS user-value keys the post-creation theme
+        # editor uses, so the editor reflects them and any later edit there
+        # transparently overrides the configurator's choice.
+        #   - colours/border-colour  → user_color_palette.scss
+        #   - everything else        → user_values.scss
+        # Header colour splits into two editor subsystems:
+        #   System A (no overlay): site-wide navbar colour via the menu* SCSS
+        #     user-values (Header > Template > Background editor controls).
+        #   System B (overlay/"Over the content"): the static top header is
+        #     transparent and its colour comes from the per-page website.page
+        #     fields header_color / header_text_color (the two extra pickers
+        #     that appear in the page "Header Position" option).
+        # border/shadow and footer bg are always System A regardless of overlay.
+        def _is_gradient(v):
+            return 'gradient(' in (v or '').lower()
+
+        header_overlay = bool(kwargs.get('selected_header_overlay'))
+        palette_extra = {}   # → user_color_palette.scss
+        values_extra = {}    # → user_values.scss
+        page_vals = {}       # → website.page record (System B + overlay flag)
+        if header_overlay:
+            page_vals['header_overlay'] = True
+
+        header_bg = (kwargs.get('selected_header_bg') or '').strip()
+        if header_bg:
+            if header_overlay:
+                # System B: per-page static-header background.  Stored as a
+                # raw value rendered as inline `background-color` (or a
+                # `bg-o-color-N` class) on <header> by website_templates.xml.
+                # NOTE: that path only supports a solid colour — a gradient
+                # here won't render (same limitation as the editor's
+                # "Over the content" picker); author gradients without
+                # data-overlay so they go through menu-gradient instead.
+                page_vals['header_color'] = header_bg
+            elif _is_gradient(header_bg):
+                values_extra['menu-gradient'] = header_bg
+            else:
+                palette_extra['menu-custom'] = header_bg
+
+        footer_bg = (kwargs.get('selected_footer_bg') or '').strip()
+        if footer_bg:
+            if _is_gradient(footer_bg):
+                values_extra['footer-gradient'] = footer_bg
+            else:
+                palette_extra['footer-custom'] = footer_bg
+
+        header_border = (kwargs.get('selected_header_border') or '').strip()
+        if header_border:
+            low = header_border.lower()
+            if low in ('0', 'none'):
+                # Explicitly remove the template's border.
+                values_extra['menu-border-width'] = '0'
+                values_extra['menu-border-style'] = 'none'
+            else:
+                # "<width> <style> <color>" shorthand.  Colour is whatever is
+                # left after width+style (may itself contain spaces, e.g. rgb()).
+                parts = header_border.split(None, 2)
+                if len(parts) >= 1 and parts[0]:
+                    values_extra['menu-border-width'] = parts[0]
+                if len(parts) >= 2 and parts[1]:
+                    values_extra['menu-border-style'] = parts[1]
+                if len(parts) >= 3 and parts[2]:
+                    palette_extra['menu-border-color'] = parts[2]
+
+        header_shadow = (kwargs.get('selected_header_shadow') or '').strip()
+        if header_shadow:
+            # data-shadow is always a raw CSS box-shadow value → the editor's
+            # "custom shadow" path (o-shadow-custom + menu-box-shadow-style).
+            values_extra['menu-shadow-class'] = "'o-shadow-custom'"
+            values_extra['menu-box-shadow-style'] = header_shadow
+
+        header_text_color = (kwargs.get('selected_header_text_color') or '').strip()
+        if header_text_color:
+            if header_overlay:
+                # System B: per-page static-header text colour.
+                page_vals['header_text_color'] = header_text_color
+            else:
+                # System A: site-wide header text colour SCSS user-value.
+                values_extra['header-text-color'] = header_text_color
+
+        if palette_extra:
+            Assets.make_scss_customization(
+                '/website/static/src/scss/options/colors/user_color_palette.scss',
+                palette_extra,
+            )
+        if values_extra:
+            Assets.make_scss_customization(
+                '/website/static/src/scss/options/user_values.scss',
+                values_extra,
+            )
+
+        # Enable the full-width header nav if requested by the layout.
+        # <ConfiguratorHeader data-full-width="true"/> → activates
+        # website.header_width_full which sets header_content_width to
+        # container-fluid via an xpath on website.layout.
+        if kwargs.get('selected_header_full_width'):
+            ThemeUtils.enable_view('website.header_width_full')
+
+        # Persist the per-page header settings (overlay flag + System B static
+        # colours) on the homepage website.page record.  <ConfiguratorHeader
+        # data-overlay="true"/> floats the header over content (o_header_overlay
+        # on #wrapwrap); header_color/header_text_color colour the transparent
+        # top header exactly as the page "Header Position" pickers do.
+        if page_vals:
+            homepage_view = self.with_context(website_id=website.id).viewref(
+                'website.homepage', raise_if_not_found=False
+            )
+            if homepage_view:
+                homepage_page = self.env['website.page'].search(
+                    [('view_id', '=', homepage_view.id), ('website_id', '=', website.id)],
+                    limit=1,
+                )
+                if homepage_page:
+                    homepage_page.write({
+                        k: v for k, v in page_vals.items()
+                        if k in homepage_page._fields
+                    })
 
         # Update CTA
         cta_data = website.get_cta_data(kwargs.get('website_purpose'), kwargs.get('website_type'))
@@ -841,15 +1144,63 @@ class Website(models.CachedModel):
             except ValueError as e:
                 logger.warning(e)
 
-        # Extension hook: allows installed modules to perform additional setup
-        # steps on the generated website.
+        # Configure the features
+        features = self.env['website.configurator.feature'].browse(kwargs.get('selected_features'))
+
+        menu_company = self.env['website.menu']
+        if len(features.filtered('menu_sequence')) > 5 and len(features.filtered('menu_company')) > 1:
+            menu_company = self.env['website.menu'].create({
+                'name': _('Company'),
+                'parent_id': website.menu_id.id,
+                'website_id': website.id,
+                'sequence': 40,
+            })
+
+        pages_views = {}
+        modules = self.env['ir.module.module']
+        module_data = {}
+        for feature in features:
+            add_menu = bool(feature.menu_sequence)
+            if feature.module_id:
+                if feature.module_id.state != 'installed':
+                    modules += feature.module_id
+                if add_menu:
+                    if feature.module_id.name != 'website_blog':
+                        module_data[feature.feature_url] = {'sequence': feature.menu_sequence}
+                    else:
+                        blogs = module_data.setdefault('#blog', [])
+                        blogs.append({'name': feature.name, 'sequence': feature.menu_sequence})
+            elif feature.page_view_id:
+                result = self.env['website'].new_page(
+                    name=feature.name,
+                    add_menu=add_menu,
+                    page_values=dict(url=feature.feature_url, is_published=True),
+                    menu_values=add_menu and {
+                        'url': feature.feature_url,
+                        'sequence': feature.menu_sequence,
+                        'parent_id': feature.menu_company and menu_company.id or website.menu_id.id,
+                    },
+                    template=feature.page_view_id.key
+                )
+                pages_views[feature.iap_page_code] = result['view_id']
+
+        if modules:
+            modules.button_immediate_install()
+
+        self.env['website'].browse(website.id).configurator_set_menu_links(menu_company, module_data)
+
+        # Extension hook: allows installed modules (e.g. website_sale, website_blog, ...) to perform
+        # additional setup steps on the generated website. This acts as an entry point for modules to
+        # customize the website.
         self.env['website'].configurator_addons_apply(**kwargs)
 
-        # Refresh the environment of the website to use addon overrides.
+        # We need to refresh the environment of the website because we installed
+        # some new module and we need the overrides of these new menus e.g. for
+        # the call to `get_cta_data`.
         website = self.env['website'].browse(website.id)
 
-        # Update footers links after addon setup to go through module overrides
-        # of `configurator_get_footer_links`.
+        # Update footers links, needs to be done after "Features" addition to go
+        # through module overrides of `configurator_get_footer_links`.
         footer_links = website.configurator_get_footer_links()
         footer_ids = [
             'website.template_footer_contact', 'website.template_footer_headline',
@@ -876,16 +1227,22 @@ class Website(models.CachedModel):
                     el[0].attrib['t-value'] = json.dumps(footer_links)
                     view_id.with_context(website_id=website.id).write({'arch_db': etree.tostring(arch_string)})
 
-        # Load suggestions from IAP.
+        # Load suggestion from iap for selected pages
         industry_id = kwargs['industry_id']
-        images = {}
-        # Keep the theme visuals untouched for unknown industries.
-        if not skip_ai and industry_id > 0:
-            images = self.configurator_get_images(industry_id, theme_name)
+        custom_resources = self._website_api_rpc(
+            '/api/website/2/configurator/custom_resources/%s' % (industry_id if industry_id > 0 else ''),
+            {'theme': theme_name, 'layout': kwargs.get('selected_layout', 'minimalist')}
+        )
 
-        # Generate text for the homepage.
-        configurator_snippets = website.get_theme_configurator_snippets(theme_name)
-        snippet_list = configurator_snippets.get('homepage', [])
+        # Generate text for the pages
+        requested_pages = set(pages_views.keys()).union({'homepage'})
+        selected_layout = kwargs.get('selected_layout', 'minimalist')
+        selected_vibe   = kwargs.get('selected_vibe') or 'clean'
+        # Non-homepage pages (about_us, our_services, …) still use the
+        # manifest-driven configurator_snippets list.
+        # Homepage snippets are derived directly from the layout assembly XML
+        # by _get_layout_homepage_snippets(), so no homepage key is needed here.
+        configurator_snippets = dict(get_manifest('website')['configurator_snippets'])
         industry = kwargs['industry_name']
 
         IrQweb = self.env['ir.qweb'].with_context(website_id=website.id, lang=website.default_lang_id.code)
@@ -903,11 +1260,13 @@ class Website(models.CachedModel):
         )
         generated_content = {}
         translated_content = {}
-        for snippet in snippet_list:
-            snippet_key = website._get_snippet_view_key(snippet, 'homepage')
-            html_text_processor, snippet_generated_content, snippet_translated_content = html_text_processor._get_snippet_content(snippet_key)
-            generated_content.update(snippet_generated_content)
-            translated_content.update(snippet_translated_content)
+        for page_code in requested_pages - {'privacy_policy'}:
+            snippet_list = configurator_snippets.get(page_code, [])
+            for snippet in snippet_list:
+                snippet_key = website._get_snippet_view_key(snippet, page_code)
+                html_text_processor, snippet_generated_content, snippet_translated_content = html_text_processor._get_snippet_content(snippet_key)
+                generated_content.update(snippet_generated_content)
+                translated_content.update(snippet_translated_content)
 
         # Extract placeholders from footers
         for footer_id in footer_ids:
@@ -917,77 +1276,91 @@ class Website(models.CachedModel):
                 for placeholder in placeholders:
                     generated_content[placeholder] = ''
 
-        if not skip_ai:
-            translated_ratio = html_text_processor._calculate_translation_ratio(generated_content, translated_content)
-            if translated_ratio > 0.8:
-                try:
-                    database_id = self.env['ir.config_parameter'].sudo().get_str('database.uuid')
-                    response = self._OLG_api_rpc('/api/olg/1/generate_placeholder', {
-                        'placeholders': list(generated_content.keys()),
-                        'lang': website.default_lang_id.name,
-                        'industry': industry,
-                        'database_id': database_id,
-                    })
-                    name_replace_parser = re.compile(r"XXXX", re.MULTILINE)
-                    website_name = re.escape(website.name)
-                    for key in generated_content:
-                        if response.get(key):
-                            generated_content[key] = (name_replace_parser.sub(website_name, response[key], 0))
-                except RequestException:
-                    # If IAP is broken continue normally (without generating text)
-                    pass
-            else:
-                logger.info("Skip AI text generation because translation coverage is too low (%s%%)", translated_ratio * 100)
-
-        # Configure the homepage.
-        page_view_id = self.with_context(website_id=website.id).viewref('website.homepage')
-        rendered_snippets = []
-        nb_snippets = len(snippet_list)
-        for i, snippet in enumerate(snippet_list, start=1):
+        translated_ratio = html_text_processor._calculate_translation_ratio(generated_content, translated_content)
+        if translated_ratio > 0.8:
             try:
-                snippet_key = website._get_snippet_view_key(snippet, 'homepage')
-                el = html_text_processor._update_snippet_content(generated_content, snippet_key)
+                database_id = self.env['ir.config_parameter'].sudo().get_str('database.uuid')
+                response = self._OLG_api_rpc('/api/olg/1/generate_placeholder', {
+                    'placeholders': list(generated_content.keys()),
+                    'lang': website.default_lang_id.name,
+                    'industry': industry,
+                    'database_id': database_id,
+                })
+                name_replace_parser = re.compile(r"XXXX", re.MULTILINE)
+                website_name = re.escape(website.name)
+                for key in generated_content:
+                    if response.get(key):
+                        generated_content[key] = (name_replace_parser.sub(website_name, response[key], 0))
+            except RequestException:
+                # If IAP is broken continue normally (without generating text)
+                pass
+        else:
+            logger.info("Skip AI text generation because translation coverage is too low (%s%%)", translated_ratio * 100)
 
-                # Add the data-snippet attribute to identify the snippet
-                # for compatibility code
-                el.attrib['data-snippet'] = snippet
+        # Configure the pages
+        for index, page_code in enumerate(requested_pages):
+            if page_code == 'homepage':
+                page_view_id = self.with_context(website_id=website.id).viewref('website.homepage')
+                # Derive snippet list directly from the layout assembly XML so
+                # that per-layout xpaths (Layer 1) and vibe overrides (Layer 3)
+                # are both honoured.  snippet_pairs is a list of
+                # (template_key, base_snippet_name) tuples.
+                snippet_pairs = website._get_layout_homepage_snippets(
+                    selected_layout, selected_vibe
+                )
+            else:
+                page_view_id = self.env['ir.ui.view'].browse(pages_views[page_code])
+                # Non-homepage pages use the generic auto-generated templates.
+                snippet_pairs = [
+                    (website._get_snippet_view_key(s, page_code), s)
+                    for s in configurator_snippets.get(page_code, [])
+                ]
+            rendered_snippets = []
+            nb_snippets = len(snippet_pairs)
+            for i, (snippet_key, snippet) in enumerate(snippet_pairs, start=1):
+                try:
+                    el = html_text_processor._update_snippet_content(generated_content, snippet_key)
 
-                # Theme specific customizations for non-website snippets
-                theme_customizations = get_manifest(theme_name).get('theme_customizations', {})
-                customizations = theme_customizations.get(snippet, {})
+                    # data-snippet identifies the snippet for compatibility code
+                    el.attrib['data-snippet'] = snippet
 
-                # Configure non-website snippet with defaults and theme-level customizations.
-                website._preconfigure_snippet(snippet, el, customizations)
+                    # Theme specific customizations for non-website snippets
+                    theme_customizations = get_manifest(theme_name).get('theme_customizations', {})
+                    customizations = theme_customizations.get(snippet, {})
 
-                # Remove the previews needed for the snippets dialog
-                dialog_preview_els = el.find_class('s_dialog_preview')
-                for preview_el in dialog_preview_els:
-                    preview_el.getparent().remove(preview_el)
+                    # Configure non-website snippet with defaults and theme-level customizations.
+                    website._preconfigure_snippet(snippet, el, customizations)
 
-                # Tweak the shape of the first snippet to connect it
-                # properly with the header color in some themes
-                if i == 1:
-                    shape_el = el.xpath("//*[hasclass('o_we_shape')]")
-                    if shape_el:
-                        shape_el[0].attrib['class'] += ' o_header_extra_shape_mapping'
+                    # Remove the previews needed for the snippets dialog
+                    dialog_preview_els = el.find_class('s_dialog_preview')
+                    for preview_el in dialog_preview_els:
+                        preview_el.getparent().remove(preview_el)
 
-                # Tweak the shape of the last snippet to connect it
-                # properly with the footer color in some themes
-                if i == nb_snippets:
-                    shape_el = el.xpath("//*[hasclass('o_we_shape')]")
-                    if shape_el:
-                        shape_el[0].attrib['class'] += ' o_footer_extra_shape_mapping'
-                rendered_snippet = etree.tostring(el, encoding='unicode')
-                rendered_snippets.append(rendered_snippet)
-            except ValueError as e:
-                logger.warning(e)
-        page_view_id.save(value=f'<div class="oe_structure">{"".join(rendered_snippets)}</div>',
-                          xpath="(//div[hasclass('oe_structure')])[last()]")
-        # Copy the configurator homepage to preserve the original untouched
-        page_view_id.copy({
-            'key': f"0_{page_view_id.key}_configurator_pages_about_us",
-            'website_id': website.id,
-        })
+                    # Tweak the shape of the first snippet to connect it
+                    # properly with the header color in some themes
+                    if i == 1:
+                        shape_el = el.xpath("//*[hasclass('o_we_shape')]")
+                        if shape_el:
+                            shape_el[0].attrib['class'] += ' o_header_extra_shape_mapping'
+
+                    # Tweak the shape of the last snippet to connect it
+                    # properly with the footer color in some themes
+                    if i == nb_snippets:
+                        shape_el = el.xpath("//*[hasclass('o_we_shape')]")
+                        if shape_el:
+                            shape_el[0].attrib['class'] += ' o_footer_extra_shape_mapping'
+                    rendered_snippet = etree.tostring(el, encoding='unicode')
+                    rendered_snippets.append(rendered_snippet)
+                except ValueError as e:
+                    logger.warning(e)
+            page_view_id.save(value=f'<div class="oe_structure">{"".join(rendered_snippets)}</div>',
+                              xpath="(//div[hasclass('oe_structure')])[last()]")
+            # Copy the configurator pages to preserve the original untouched
+            # pages in the landing page category when creating a new page.
+            page_view_id.copy({
+                'key': f"{index}_{page_view_id.key}_configurator_pages_landing",
+                'website_id': website.id,
+            })
 
         # Configure the footers
         for key in footer_ids:
@@ -1004,6 +1377,7 @@ class Website(models.CachedModel):
                 generic_view.with_context(website_id=website.id).write({'arch_db': updated_view})
 
         # Configure the images
+        images = custom_resources.get('images', {})
         names = self.env['ir.model.data'].search([
             ('name', '=ilike', f'configurator\\_{website.id}\\_%'),
             ('module', '=', 'website'),
@@ -1036,9 +1410,7 @@ class Website(models.CachedModel):
                 })
 
         def fallback_create_missing_industry_image(image_name, fallback_img_name):
-            """ If an industry did not specify an image, this method allows that
-            specific image to be using the same image as another fallback one.
-            """
+            """Reuse another industry image as a fallback when one is missing."""
             image_name = f'website.{image_name}'
             if (
                 image_name not in images.keys()

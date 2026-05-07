@@ -18,7 +18,7 @@ import requests
 import werkzeug.urls
 import werkzeug.wrappers
 from lxml import etree, html
-from markupsafe import escape as markup_escape
+from markupsafe import escape as markup_escape, Markup
 from werkzeug.exceptions import NotFound
 
 from odoo import _, fields, http, models, release, tools
@@ -1654,6 +1654,360 @@ class Website(Home):
         return {
             'web.assets_frontend': request.env['ir.qweb']._get_asset_link_urls('web.assets_frontend', request.session.debug),
         }
+
+    @http.route(['/website/configurator/get_industry_banner'], type='jsonrpc', auth='user', website=True, readonly=True)
+    def configurator_get_industry_banner(self, industry_id=None):
+        """Return an industry-specific image URL for the vibe-selection background."""
+        default_url = '/web/image/website.s_banner_default_image'
+        if not industry_id:
+            return default_url
+        try:
+            safe_id = industry_id if isinstance(industry_id, int) and industry_id > 0 else ''
+            if not safe_id:
+                return default_url
+            custom_resources = request.env['website']._website_api_rpc(
+                f'/api/website/2/configurator/custom_resources/{safe_id}',
+                {'theme': 'theme_default'}
+            )
+            images = custom_resources.get('images') or {}
+            # Prefer s_banner_default_image: it's the key most consistently
+            # returned by IAP and it's what configurator_apply stores under
+            # website_id, so step-4 background and homepage hero stay in sync.
+            # Fall back through cover/banner variants, then any available image.
+            for preferred in (
+                'website.s_banner_default_image',
+                'website.s_cover_default_image',
+            ):
+                if preferred in images:
+                    return images[preferred]
+            for key, url in images.items():
+                if 'banner' in key or 'cover' in key:
+                    return url
+            if images:
+                return next(iter(images.values()))
+        except Exception:
+            pass
+        return default_url
+
+    @http.route(['/website/configurator/get_industry_images'], type='jsonrpc', auth='user', website=True, readonly=True)
+    def configurator_get_industry_images(self, industry_id=None):
+        """Return the IAP industry image map ({record_key: url}) used to swap
+        the description-screen showcase slots. Empty dict when unavailable."""
+        if not industry_id:
+            return {}
+        try:
+            safe_id = industry_id if isinstance(industry_id, int) and industry_id > 0 else ''
+            if not safe_id:
+                return {}
+            custom_resources = request.env['website']._website_api_rpc(
+                f'/api/website/2/configurator/custom_resources/{safe_id}',
+                {'theme': 'theme_default'}
+            )
+            return custom_resources.get('images') or {}
+        except Exception:
+            return {}
+
+    @http.route(['/website/configurator/get_layout_previews'], type='jsonrpc', auth='user', website=True, readonly=True)
+    def configurator_get_layout_previews(self, vibe='clean', industry_id=None):
+        """Server-render each configurator layout for `vibe`, returning
+        {layoutId: {html, headerTemplate, footerTemplate, headerCc, footerCc,
+        headerOverlay, headerFullWidth}}. Header/footer config comes from
+        <ConfiguratorHeader>/<ConfiguratorFooter> meta-elements (see
+        _read_layout_meta for the supported attributes)."""
+
+        LAYOUTS = ['minimalist', 'bento', 'typographic', 'professional', 'impactful', 'creative']
+
+        DEFAULT_HEADER_TEMPLATE = 'template_header_default'
+        DEFAULT_FOOTER_TEMPLATE = 'footer_custom'
+        DEFAULT_HEADER_CC = 1
+        DEFAULT_FOOTER_CC = 2
+
+        website = request.env['website'].get_current_website()
+        IrQweb = request.env['ir.qweb'].with_context(
+            website_id=website.id,
+            lang=website.default_lang_id.code,
+        )
+        View = request.env['ir.ui.view']
+
+        render_values = {
+            'website': website,
+            'res_company': request.env.company,
+            'cta_btn_href': '/contactus',
+            'cta_btn_text': _('Get started'),
+            'header_content_width': 'container',
+            'is_portal': False,
+            'no_header': False,
+            'no_footer': False,
+            'no_copyright': True,
+            'pageName': '',
+        }
+
+        def _layout_meta_defaults():
+            return {
+                'headerTemplate': DEFAULT_HEADER_TEMPLATE,
+                'footerTemplate': DEFAULT_FOOTER_TEMPLATE,
+                'headerCc': DEFAULT_HEADER_CC,
+                'footerCc': DEFAULT_FOOTER_CC,
+                'headerOverlay': False,
+                'headerFullWidth': False,
+                # Hardcoded style overrides (CSS strings); '' means "not set".
+                # Footer only supports a background override (no global SCSS
+                # variable exists for footer border/shadow).
+                'headerBg': '', 'headerBorder': '', 'headerShadow': '', 'headerTextColor': '',
+                'footerBg': '',
+            }
+
+        def _read_layout_meta(layout, vibe='clean'):
+            """Parse <ConfiguratorHeader>/<ConfiguratorFooter> meta for a
+            (layout, vibe) pair. Header attrs: data-template, data-color,
+            data-overlay, data-full-width, data-bg, data-border, data-shadow,
+            data-text-color. Footer attrs: data-template, data-color, data-bg.
+            Non-"clean" vibes read the inheritance-applied arch so the vibe's
+            xpath replacement of the meta-elements takes effect; falls back to
+            the base layout template."""
+            meta = _layout_meta_defaults()
+
+            tree = None
+            if vibe and vibe != 'clean':
+                vibe_view = request.env.ref(
+                    f'website.configurator_layout_{layout}_vibe_{vibe}',
+                    raise_if_not_found=False,
+                )
+                if vibe_view:
+                    try:
+                        tree = vibe_view.with_context(inherit_branding=False)._get_combined_arch()
+                    except Exception:
+                        tree = None
+            if tree is None:
+                base_view = request.env.ref(
+                    f'website.configurator_layout_{layout}', raise_if_not_found=False,
+                )
+                if not base_view or not base_view.arch_db:
+                    return meta
+                try:
+                    tree = etree.fromstring(base_view.arch_db)
+                except Exception:
+                    return meta
+
+            header_el = tree.find('.//ConfiguratorHeader')
+            footer_el = tree.find('.//ConfiguratorFooter')
+
+            if header_el is not None:
+                meta['headerTemplate'] = header_el.get('data-template', DEFAULT_HEADER_TEMPLATE)
+                try:
+                    meta['headerCc'] = int(header_el.get('data-color', DEFAULT_HEADER_CC))
+                except (ValueError, TypeError):
+                    meta['headerCc'] = DEFAULT_HEADER_CC
+                meta['headerOverlay']   = header_el.get('data-overlay', '').lower() == 'true'
+                meta['headerFullWidth'] = header_el.get('data-full-width', '').lower() == 'true'
+                meta['headerBg']        = (header_el.get('data-bg') or '').strip()
+                meta['headerBorder']    = (header_el.get('data-border') or '').strip()
+                meta['headerShadow']    = (header_el.get('data-shadow') or '').strip()
+                meta['headerTextColor'] = (header_el.get('data-text-color') or '').strip()
+
+            if footer_el is not None:
+                meta['footerTemplate'] = footer_el.get('data-template', DEFAULT_FOOTER_TEMPLATE)
+                try:
+                    meta['footerCc'] = int(footer_el.get('data-color', DEFAULT_FOOTER_CC))
+                except (ValueError, TypeError):
+                    meta['footerCc'] = DEFAULT_FOOTER_CC
+                meta['footerBg'] = (footer_el.get('data-bg') or '').strip()
+
+            return meta
+
+        def _decls(bg, border, shadow_value, text_color):
+            decls = []
+            if bg:
+                decls.append(f'background:{bg} !important')
+            if border:
+                decls.append(f'border:{border} !important')
+            if shadow_value:
+                decls.append(f'box-shadow:{shadow_value} !important')
+            if text_color:
+                decls.append(f'color:{text_color} !important')
+            return ';'.join(decls)
+
+        def _css_safe(v):
+            """Strip '<'/'>' so a data-* value can't close the <style> block."""
+            return (v or '').replace('<', '').replace('>', '')
+
+        def _build_shell(meta):
+            """Build the preview shell. Colour combination is NOT painted here
+            (PREVIEW_SHADOW_STYLES in configurator.js forces #top transparent
+            and neutralises navbar CC vars for every template). Only the
+            hardcoded <ConfiguratorHeader> overrides are injected, as a
+            per-preview scoped <style> block (a scoped style, not inline
+            attributes, is required because header templates xpath-replace
+            //header//nav and the navbar is produced by a t-call):
+
+            * System A — non-overlay, and all boxed: on the inner .navbar.
+            * System B — non-boxed overlay: bg/text on the transparent
+              <header> (mirrors website_templates.xml header_color/
+              header_text_color); border/shadow stay on .navbar.
+            """
+            # Per-preview unique scope class.  Every injected rule is prefixed
+            # with it so a layout/vibe's hardcoded styling cannot bleed into
+            # another preview if the configurator composes several in one
+            # DOM/shadow scope.
+            scope = 'o_cfg_' + os.urandom(4).hex()
+            wrapwrap_classes = f'oe_website_id {scope}'
+            overlay = meta['headerOverlay']
+            if overlay:
+                wrapwrap_classes += ' o_header_overlay'
+
+            ww = f'#wrapwrap.{scope}'
+            is_boxed = 'boxed' in (meta['headerTemplate'] or '')
+            shadow_value = _css_safe(meta['headerShadow'])
+            bg = _css_safe(meta['headerBg'])
+            border = _css_safe(meta['headerBorder'])
+            text_color = _css_safe(meta['headerTextColor'])
+
+            # Boxed is the editor's special case: the rounded pill carries
+            # the colour in BOTH static and scrolled states, so the System-B
+            # overlay split does not apply — treat boxed as System A.
+            use_system_b = overlay and not is_boxed
+
+            rules = []
+            if use_system_b:
+                # System B: hardcoded bg/text on the transparent <header>;
+                # border/shadow stay on the navbar.
+                head_decls = _decls(bg, '', '', text_color)
+                nav_decls = _decls('', border, shadow_value, '')
+                if head_decls:
+                    rules.append(f'{ww}.o_header_overlay > header#top{{{head_decls}}}')
+                if nav_decls:
+                    rules.append(f'{ww} > header#top .navbar{{{nav_decls}}}')
+            else:
+                # System A (incl. all boxed): every hardcoded override on
+                # the inner navbar.
+                nav_decls = _decls(bg, border, shadow_value, text_color)
+                if nav_decls:
+                    rules.append(f'{ww} > header#top .navbar{{{nav_decls}}}')
+
+            # Boxed positioning emulation.  The in-flow detached pill look is
+            # normally produced by the global header-template == 'boxed'
+            # SCSS, which the shared preview bundle cannot vary per layout —
+            # without this the boxed header floats as if always overlaid.
+            # (Header transparency is already handled by PREVIEW_SHADOW_STYLES.)
+            if is_boxed and not overlay:
+                rules.append(
+                    f'{ww}:not(.o_header_overlay) > header#top'
+                    '{position:relative !important;top:auto !important;'
+                    'inset:auto !important;z-index:auto !important}'
+                )
+
+            style_block = (
+                f'<style>{"".join(rules)}</style>' if rules else ''
+            )
+            header_cc_cls = '' if use_system_b else f' o_cc o_cc{meta["headerCc"]}'
+            footer_style = _decls(_css_safe(meta['footerBg']), '', '', '')
+            footer_style_attr = f' style="{escape(footer_style)}"' if footer_style else ''
+
+            shell_xml = (
+                '<t>'
+                f'  <div id="wrapwrap" class="{wrapwrap_classes}">'
+                f'    {style_block}'
+                f'    <header id="top" data-anchor="true" class="o_header_standard o_colored_level{header_cc_cls}">'
+                '        <nav class="navbar navbar-expand-lg navbar-light o_colored_level"/>'
+                '    </header>'
+                '    <main>'
+                '        <t t-out="body_html"/>'
+                '    </main>'
+                f'    <footer id="bottom" data-anchor="true" class="o_footer o_colored_level o_cc o_cc{meta["footerCc"]}"{footer_style_attr}>'
+                '        <div id="footer" class="oe_structure oe_structure_solo" t-ignore="true"/>'
+                '    </footer>'
+                '  </div>'
+                '</t>'
+            )
+            return etree.fromstring(shell_xml)
+
+        # Strip <ConfiguratorHeader>/<ConfiguratorFooter> from rendered HTML
+        # (QWeb lowercases them; lxml may serialise as open+close pairs).
+        _META_RE = re.compile(
+            r'<configurator(?:header|footer)[^>]*/?>(?:</configurator(?:header|footer)>)?',
+            re.IGNORECASE,
+        )
+
+        result = {}
+        for layout in LAYOUTS:
+            # 1. Extract header/footer meta for this (layout, vibe).  Vibe
+            #    xpaths that replace <ConfiguratorHeader/Footer> are honoured.
+            meta = _read_layout_meta(layout, vibe)
+
+            # 2. Render the body (layout snippets, possibly with a vibe variant).
+            #    When headerFullWidth is requested, override the content-width
+            #    render value so the nav container class is correct.
+            body_view_key = (
+                f'website.configurator_layout_{layout}'
+                if vibe == 'clean'
+                else f'website.configurator_layout_{layout}_vibe_{vibe}'
+            )
+            layout_render_values = dict(render_values)
+            if meta['headerFullWidth']:
+                layout_render_values['header_content_width'] = 'container-fluid'
+            try:
+                body_html = str(IrQweb._render(body_view_key, layout_render_values))
+                # Strip any <ConfiguratorHeader/Footer> elements that QWeb rendered.
+                body_html = _META_RE.sub('', body_html)
+            except Exception as e:
+                logger.warning(
+                    "configurator_get_layout_previews: failed to render body %s: %s", body_view_key, e
+                )
+                result[layout] = dict(meta, html='')
+                continue
+
+            # 3. Build the preview shell with CC classes + hardcoded style
+            #    overrides, then apply the real header/footer template xpaths.
+            try:
+                shell = _build_shell(meta)
+
+                header_view = request.env.ref(f'website.{meta["headerTemplate"]}', raise_if_not_found=False)
+                if header_view and header_view.arch_db:
+                    shell = View.apply_inheritance_specs(shell, etree.fromstring(header_view.arch_db))
+
+                footer_view = request.env.ref(f'website.{meta["footerTemplate"]}', raise_if_not_found=False)
+                if footer_view and footer_view.arch_db:
+                    shell = View.apply_inheritance_specs(shell, etree.fromstring(footer_view.arch_db))
+
+                # 4. Render the combined shell (header + body + footer).
+                rendered = IrQweb._render(shell, dict(layout_render_values, body_html=Markup(body_html)))
+                html = str(rendered) if rendered else ''
+            except Exception as e:
+                logger.warning(
+                    "configurator_get_layout_previews: failed to render header/footer for %s: %s", layout, e
+                )
+                html = body_html  # graceful fallback: body-only preview
+
+            result[layout] = dict(meta, html=html)
+
+        # Replace default image URLs with industry-specific ones from IAP.
+        image_mapping = {}
+        if industry_id is not None:
+            try:
+                safe_id = industry_id if isinstance(industry_id, int) and industry_id > 0 else ''
+                custom_resources = request.env['website']._website_api_rpc(
+                    f'/api/website/2/configurator/custom_resources/{safe_id}',
+                    {'theme': 'theme_default'}
+                )
+                for img_key, img_url in (custom_resources.get('images') or {}).items():
+                    odoo_url = f'/web/image/{img_key}'
+                    image_mapping[odoo_url] = img_url
+            except Exception as e:
+                logger.warning(
+                    "configurator_get_layout_previews: failed to fetch IAP images: %s", e
+                )
+
+        if image_mapping:
+            for layout_id, entry in result.items():
+                html_str = entry['html']
+                for odoo_url, industry_url in image_mapping.items():
+                    html_str = html_str.replace(f'"{odoo_url}"', f'"{industry_url}"')
+                    html_str = html_str.replace(f"'{odoo_url}'", f"'{industry_url}'")
+                    html_str = html_str.replace(f'&#39;{odoo_url}&#39;', industry_url)
+                result[layout_id]['html'] = html_str
+
+        return result
+
 
     @http.route(['/website/update_footer_template'], type='jsonrpc', auth='user', website=True)
     def update_footer_template(self, template_key, possible_values):

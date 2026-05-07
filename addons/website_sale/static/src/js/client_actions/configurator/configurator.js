@@ -3,8 +3,8 @@ import { patch } from '@web/core/utils/patch';
 import {
     ApplyConfiguratorScreen,
     Configurator,
+    PreviewScreen,
     ROUTES,
-    ThemeSelectionScreen,
 } from '@website/client_actions/configurator/configurator';
 import {
     ProductPageSelectionScreen,
@@ -31,11 +31,16 @@ patch(ApplyConfiguratorScreen.prototype, {
 
 })
 
-patch(ThemeSelectionScreen.prototype, {
-    async chooseTheme(themeName) {
-        this.state.selectedThemeName = themeName;
+patch(PreviewScreen.prototype, {
+
+    /**
+     * @override the final CTA: route through the eCommerce page-style
+     * screens before applying instead of applying immediately.
+     */
+    async confirm() {
         this.props.navigate(ROUTES.shopPageSelectionScreen);
     },
+
 });
 
 patch(Configurator, {
@@ -64,22 +69,10 @@ patch(Configurator.prototype, {
     },
 
     /**
-     * @override to allow the product page selection screen to apply the configurator.
-     */
-    get componentProps() {
-        const props = super.componentProps;
-        if (this.state.currentStep === ROUTES.productPageSelectionScreen) {
-            props.clearStorage = this.clearStorage.bind(this);
-        }
-        return props;
-    },
-
-    /**
      * @override to include eCommerce's initial page style values.
      */
     async getInitialState() {
         const initState = await super.getInitialState(...arguments);
-        initState.selectedThemeName = undefined;
         initState.selectedShopPageStyleOption = undefined;
         initState.selectedProductPageStyleOption = undefined;
         return initState;

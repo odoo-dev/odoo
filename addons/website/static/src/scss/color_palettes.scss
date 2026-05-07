@@ -46,7 +46,12 @@ $-palette-names-to-render: if(
                         $-bg: map-get($-palette, $-bg);
                     }
                 }
+                // Expose the resolved background hex colour (used by JS for swatches)
                 @include print-variable('o-palette-#{$-selected-palette-name}-#{$attr-name}-bg', $-bg);
+                // Also expose the effective CC index (1–5) so JS can read the
+                // colour-combination number directly (accounting for the default
+                // when the palette does not override the key explicitly).
+                @include print-variable('o-palette-#{$-selected-palette-name}-#{$attr-name}-cc', $-cc-idx);
             }
         }
     }

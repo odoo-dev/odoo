@@ -118,7 +118,7 @@ export class ThemeTabPlugin extends Plugin {
     ];
     grayParams = {};
     grays = proxy({});
-    grayscaleCustomMode = reactive({ value: false });
+    grayscaleCustomMode = proxy({ value: false });
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
