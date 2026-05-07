@@ -135,8 +135,8 @@ class Binary(Controller):
                     )
                     # check if the version matches. If not, redirect to the last version
                     if not debug_assets and unique != ANY_UNIQUE \
-                            and unique != bundle.get_version(extension if binary else asset_type):
-                        return request.redirect(bundle.get_link(asset_type))
+                            and unique != bundle.get_version(extension or asset_type):
+                        return request.redirect(bundle.get_link(extension or asset_type))
                     attachment = None
                     if css and bundle.stylesheets:
                         attachment = bundle.css()
