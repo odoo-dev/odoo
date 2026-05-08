@@ -47,8 +47,13 @@ const OI_ICONS = {
     ],
     Views: ["view-pivot", "view-cohort", "studio"],
     Misc: [
-        "odoo", "mars-double", "mars-stroke-h", "mars-stroke-v", "mars-stroke",
-        "venus-double", "venus-mars",
+        "odoo",
+        "mars-double",
+        "mars-stroke-h",
+        "mars-stroke-v",
+        "mars-stroke",
+        "venus-double",
+        "venus-mars",
     ],
 };
 
@@ -65,7 +70,6 @@ export class IconSelector extends Component {
 
     setup() {
         // Pre-populate filled state when editing an existing filled icon
-        const filled = this.props.media?.classList.contains("oi-filled") ?? false;
         this.state = useState({
             // `wishlistCategories` holds the MS-filtered set once the wishlist
             // has been fetched; every other source (OI, FA) is kept as-is.
@@ -73,7 +77,6 @@ export class IconSelector extends Component {
             categories: this.props.categories,
             needle: "",
             selectedCategory: "",
-            filled,
         });
 
         const iconService = useService("iconService");
@@ -81,14 +84,16 @@ export class IconSelector extends Component {
             try {
                 const wishlist = await iconService.getWishlist();
                 const wishlistSet = new Set(wishlist);
+                const iconsWithFill = await iconService.getIconsWithFill();
                 this.state.wishlistCategories = this.props.categories
                     .map((category) => {
                         if (category.source !== "ms") {
                             return category;
                         }
-                        const icons = category.icons.filter((icon) =>
-                            wishlistSet.has(icon.name)
-                        );
+                        const icons = category.icons.filter((icon) => wishlistSet.has(icon.name));
+                        icons.forEach((icon) => {
+                            icon.hasFill = iconsWithFill.has(icon.name);
+                        });
                         return { ...category, icons };
                     })
                     .filter((category) => category.icons.length > 0);
@@ -126,9 +131,7 @@ export class IconSelector extends Component {
                 // Partial match: filter icons individually by name and tags
                 return {
                     ...category,
-                    icons: category.icons.filter((icon) =>
-                        icon.searchTerms.includes(lower)
-                    ),
+                    icons: category.icons.filter((icon) => icon.searchTerms.includes(lower)),
                 };
             });
     }
@@ -160,15 +163,13 @@ export class IconSelector extends Component {
         }
         // Material Symbols and Odoo UI icons: compare data-icon and filled state
         const dataIconChanged = this.props.media.dataset.icon !== icon.dataIcon;
-        const filledChanged =
-            this.props.media.classList.contains("oi-filled") !== this.state.filled;
-        return dataIconChanged || filledChanged;
+        return dataIconChanged;
     }
 
-    async onClickIcon(category, icon) {
+    async onClickIcon(category, icon, filled) {
         this.props.selectMedia({
             ...icon,
-            filled: this.state.filled,
+            filled: icon.hasFill && filled,
             initialIconChanged: this.iconHasChanged(icon),
         });
         await this.props.save();

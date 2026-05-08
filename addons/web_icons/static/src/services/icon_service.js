@@ -11,15 +11,16 @@ import { registry } from "@web/core/registry";
 export const iconService = {
     async start() {
         let wishlist;
+        let withFill;
         return {
             /**
-             * Return the icon-name wishlist, fetched and cached on first call.
-             * @returns {Promise<string[]>}
+             * @returns {Promise<string[]>} the icon-name wishlist, fetched and
+             * cached on first call.
              */
             async getWishlist() {
                 if (!wishlist) {
                     const response = await fetch(
-                        "/web_icons/static/src/data/icons_wishlist.json"
+                        "/web_icons/static/src/data/icons.json"
                     );
                     if (!response.ok) {
                         console.warn(  // noqa: T201
@@ -29,10 +30,21 @@ export const iconService = {
                         return [];
                     }
                     const data = await response.json();
-                    wishlist = Array.isArray(data) ? data : (data.icons ?? []);
+                    wishlist = Object.keys(data);
+                    withFill = new Set(wishlist.filter((icon) => data[icon].has_fill));
                 }
                 return wishlist;
             },
+            /**
+             * @returns {Promise<Set<string>>} the set of icon names that have
+             * a fill variant.
+             */
+            async getIconsWithFill() {
+                if (!wishlist) {
+                    await this.getWishlist();
+                }
+                return withFill;
+            }
         };
     },
 };
