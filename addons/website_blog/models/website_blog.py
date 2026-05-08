@@ -261,7 +261,7 @@ class BlogPost(models.Model):
         # sufficient.
         if message.message_type == 'comment':
             return
-        return super(BlogPost, self)._notify_thread_by_inbox(message, recipients_data, **kwargs)
+        return super()._notify_thread_by_inbox(message, recipients_data, **kwargs)
 
     def _default_website_meta(self):
         res = super(BlogPost, self)._default_website_meta()

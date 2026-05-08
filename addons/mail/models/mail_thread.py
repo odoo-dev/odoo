@@ -4549,7 +4549,6 @@ class MailThread(models.AbstractModel):
             additional_users_su |= parent_msg.author_id.main_user_id
         return additional_users_su
 
-
     # Notify tools and helpers
     # ------------------------------------------------------------
 

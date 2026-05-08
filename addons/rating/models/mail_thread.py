@@ -190,13 +190,13 @@ class MailThread(models.AbstractModel):
                     rating_vals['message_id'] = message.id
                 self.env["rating.rating"].sudo().create(rating_vals)
             elif rating_id:
-                rating_su  =self.env["rating.rating"].sudo().browse(rating_id)
+                rating_su = self.env["rating.rating"].sudo().browse(rating_id)
                 # can link rating to message from same author and thread
                 if (
                     rating_su.partner_id and message.author_id == rating_su.partner_id and
                     rating_su.res_model == message.model and rating_su.res_id == message.res_id
                 ):
-                    rating_su.message_id  = message.id
+                    rating_su.message_id = message.id
         return messages
 
     def _get_allowed_message_params(self):

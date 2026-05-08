@@ -436,7 +436,7 @@ class EventRegistration(models.Model):
                 self.search([
                     ('partner_id', '=', False), email_domain, ('state', 'not in', ['cancel']),
                 ]).write({'partner_id': new_partner[0].id})
-        return super(EventRegistration, self)._message_post_after_hook(message)
+        return super()._message_post_after_hook(message)
 
     # ------------------------------------------------------------
     # TOOLS
