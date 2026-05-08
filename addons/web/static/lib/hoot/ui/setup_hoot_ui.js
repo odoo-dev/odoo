@@ -175,7 +175,9 @@ export async function setupHootUI() {
 
         container.shadowRoot.append(
             createStyleElement(colorStyleContent),
-            createLinkElement("/web/static/src/libs/materialsymbols/material_symbols_outlined.css"),
+            createLinkElement(
+                "/web_icons/static/src/materialsymbols/material_symbols_outlined.css"
+            ),
             prismStyleLink,
             // Hoot-specific style is loaded last to take priority over other stylesheets
             createLinkElement("/web/static/lib/hoot/ui/hoot_style.css")

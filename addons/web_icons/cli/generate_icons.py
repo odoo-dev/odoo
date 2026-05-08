@@ -47,17 +47,33 @@ Dependencies
 import json
 import logging
 import re
+import subprocess
 import sys
+import tempfile
 import urllib.request
+from copy import deepcopy
 from io import BytesIO
 from pathlib import Path
 
 from odoo.cli import Command
 from odoo.modules import get_module_path
 
-_logger = logging.getLogger(__name__)
+try:
+    from fontTools.misc.transform import Transform
+    from fontTools.pens.recordingPen import RecordingPen
+    from fontTools.pens.transformPen import TransformPen
+    from fontTools.pens.ttGlyphPen import TTGlyphPen
+    from fontTools.ttLib import TTFont
+    from fontTools.varLib import instancer as vl_instancer
+except ImportError as exc:
+    msg = "fontTools is required.\n"
+    raise SystemExit(
+        msg,
+        "Install with:  pip install fonttools brotli",
+    ) from exc
 
-PUA_OUTLINED_START = 0xE000
+
+_logger = logging.getLogger(__name__)
 
 GOOGLE_FONTS_API = "https://fonts.googleapis.com/css2"
 GOOGLE_USER_AGENT = (
@@ -119,7 +135,7 @@ def _fetch_google_font(style: str, icon_names: list[str]) -> bytes:
 
 
 # ---------------------------------------------------------------------------
-# Stage 2 — GSUB resolution + PUA font building
+# Stage 2 — GSUB resolution
 # ---------------------------------------------------------------------------
 
 def _detect_fill_variants(font0, font1, icon_to_glyph: dict, icon_names: list) -> set:
@@ -130,12 +146,6 @@ def _detect_fill_variants(font0, font1, icon_to_glyph: dict, icon_names: list) -
     outlines don't change with the FILL axis — we skip the filled glyph copy
     for those so we don't bloat the font with duplicate glyph data.
     """
-    try:
-        from fontTools.pens.recordingPen import RecordingPen
-    except ImportError:
-        # fontTools not fully available — assume all icons have fill
-        return set(icon_names)
-
     gs0 = font0.getGlyphSet()
     gs1 = font1.getGlyphSet()
     has_fill = set()
@@ -234,143 +244,182 @@ def _resolve_icons(font, icon_names: list[str]) -> dict[str, str]:
     return results
 
 
-def _build_pua_font(
-    font_bytes: bytes,
+def _add_suffix_to_symbols(font: TTFont, suffix: str) -> TTFont:
+    """
+    Appends `suffix` to the input string of every ligature in the font
+    (GSUB type-4, including Extension-wrapped type-6 lookups).
+
+    E.g. with suffix="_f", the ligature that fires on "home" will instead
+    fire on "home_f", leaving the result glyph name unchanged.
+
+    The font must already contain glyphs for every character in `suffix`
+    (e.g. glyphs named "underscore" and "f" for "_f").
+    """
+    # Map each character in the suffix to its glyph name.
+    # fontTools uses the glyph name, not the unicode character directly.
+    cmap = font.getBestCmap()  # codepoint → glyph name
+    suffix_glyphs = []
+    for ch in suffix:
+        cp = ord(ch)
+        glyph_name = cmap.get(cp)
+        if glyph_name is None:
+            raise ValueError(
+                f"No glyph found for character {ch!r} (U+{cp:04X}) in font. "
+                f"The font must contain all characters in the suffix."
+            )
+        suffix_glyphs.append(glyph_name)
+
+    def iter_lig_subtables(font):
+        gsub = font.get("GSUB")
+        if not gsub:
+            return
+        for lookup in gsub.table.LookupList.Lookup:
+            for subtable in lookup.SubTable:
+                real = getattr(subtable, "ExtSubTable", subtable)
+                if real.LookupType == 4:
+                    yield real
+
+    # Append suffix_glyphs to every ligature's Component list
+    for subtable in iter_lig_subtables(font):
+        for lig_set in subtable.ligatures.values():
+            for lig in lig_set:
+                lig.Component = lig.Component + suffix_glyphs
+
+    return font
+
+
+def _concat_fonts(font_a: TTFont, font_b: TTFont) -> TTFont:
+    """
+    Merge font_b into font_a and return font_a.
+
+    - All glyphs from font_b are copied into font_a (skipping duplicates).
+    - All GSUB LigatureSubst (type-4) lookups from font_b are appended
+        to font_a's GSUB LookupList.
+    - cmap entries from font_b are merged into font_a (font_a wins on conflict).
+    """
+    glyph_order_a = set(font_a.getGlyphOrder())
+
+    # 1. Copy glyphs from font_b that don't already exist in font_a
+    new_glyphs = [name for name in font_b.getGlyphOrder() if name not in glyph_order_a]
+
+    for name in new_glyphs:
+        font_a["glyf"].glyphs[name] = deepcopy(font_b["glyf"].glyphs[name])
+        font_a["hmtx"].metrics[name] = font_b["hmtx"].metrics[name]
+        if "gvar" in font_b and "gvar" in font_a and name in font_b["gvar"].variations:
+            font_a["gvar"].variations[name] = deepcopy(font_b["gvar"].variations[name])
+
+    font_a.setGlyphOrder(font_a.getGlyphOrder() + new_glyphs)
+
+    # 2. Append GSUB ligature lookups from font_b into font_a
+    gsub_a = font_a.get("GSUB")
+    gsub_b = font_b.get("GSUB")
+
+    if gsub_b and gsub_a:
+        lookups_a = gsub_a.table.LookupList.Lookup
+        lookups_b = gsub_b.table.LookupList.Lookup
+
+        # Collect type-4 lookup indices from font_b (unwrapping extensions)
+        for lookup in lookups_b:
+            for subtable in lookup.SubTable:
+                real = getattr(subtable, "ExtSubTable", subtable)
+                if real.LookupType == 4:
+                    lookups_a.append(deepcopy(lookup))
+                    break
+
+        # Add the new lookup indices to every FeatureRecord that uses ligatures
+        n_lookups_a_original = len(lookups_a) - sum(
+            1 for lk in lookups_b
+            if any(getattr(getattr(st, "ExtSubTable", st), "LookupType", None) == 4
+                    for st in lk.SubTable)
+        )
+        new_indices = list(range(n_lookups_a_original, len(lookups_a)))
+
+        for feature_record in gsub_a.table.FeatureList.FeatureRecord:
+            feature = feature_record.Feature
+            if any(i < n_lookups_a_original and
+                    any(getattr(getattr(st, "ExtSubTable", st), "LookupType", None) == 4
+                        for st in lookups_a[i].SubTable)
+                    for i in feature.LookupListIndex):
+                for idx in new_indices:
+                    if idx not in feature.LookupListIndex:
+                        feature.LookupListIndex.append(idx)
+
+    # 3. Reposition glyphs
+    scale_x, scale_y = 1.2, 1.2
+
+    glyf_table = font_a['glyf']
+    glyph_set = font_a.getGlyphSet()
+
+    for target_glyph in glyph_set:
+        glyph = glyf_table[target_glyph]
+        if glyph.numberOfContours == 0:
+            # Skip empty glyphs (like spaces)
+            continue
+
+        hmtx = font_a['hmtx']
+        current_width, lsb = hmtx[target_glyph]
+        visual_width = glyph.xMax - glyph.xMin
+        move_x = round(((current_width - visual_width)) * scale_x)
+
+        tt_pen = TTGlyphPen(glyf_table)
+        transform = Transform().translate(move_x, 0).scale(scale_x, scale_y)
+        transform_pen = TransformPen(tt_pen, transform)
+
+        glyph_set[target_glyph].draw(transform_pen)
+        glyf_table[target_glyph] = tt_pen.glyph()
+
+        new_width = round(current_width * scale_x)
+        new_lsb = int(lsb + move_x)
+        hmtx[target_glyph] = (new_width, new_lsb)
+
+    return font_a
+
+
+def _build_optimized_subset(
+    font: TTFont,
+    icons: list[str],
+):
+    input_path = Path(tempfile.gettempdir()) / 'temp_font.woff2'
+    output_path = input_path.with_suffix('.out.woff2')
+    font.save(input_path)
+
+    subprocess.call([
+        "npx", "fontext",
+        "-l", ",".join(icons),
+        "-i", str(input_path),
+        "-o", str(output_path.parent),
+        "-n", str(output_path.stem),
+        "-f", "woff2",
+    ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    res_font = TTFont(output_path)
+
+    input_path.unlink(missing_ok=True)
+    output_path.unlink(missing_ok=True)
+
+    return res_font
+
+
+def _build_splitted_font(
+    font: TTFont,
     dst_path: Path,
     icon_to_glyph: dict[str, str],
     resolved: list[str],
-) -> tuple[int, set]:
-    """Build a static PUA-mapped WOFF2 with outlined AND (where applicable) filled glyphs.
+) -> tuple[set, int]:
+    font_fill = vl_instancer.instantiateVariableFont(font, {'FILL': 1})
+    font_outline = vl_instancer.instantiateVariableFont(font, {'FILL': 0})
 
-    For N icons:
+    icons_with_fill = _detect_fill_variants(font_outline, font_fill, icon_to_glyph, resolved)
+    fill_suffix = "_f"
+    icons_suffixed = [i + fill_suffix for i in icons_with_fill]
+    font_fill = _add_suffix_to_symbols(font_fill, fill_suffix)
 
-    * U+E000 … U+E000+N-1     → outlined glyphs for all icons
-    * U+E000+N … U+E000+2N-1  → filled glyphs for icons that *actually differ*
-                                  between FILL=0 and FILL=1; the remaining icons
-                                  in this range map to their outlined glyph.
-
-    Returns ``(file_size_bytes, icons_with_fill_set)``.
-    """
-    try:
-        from fontTools.ttLib import TTFont
-        from fontTools import subset as ft_subset
-        from fontTools.varLib import instancer as vl_instancer
-    except ImportError as exc:
-        raise SystemExit(
-            "fontTools is required.\n"
-            "Install with:  pip install fonttools brotli"
-        ) from exc
-
-    N = len(resolved)
-    PUA_FILLED_START = PUA_OUTLINED_START + N
-
-    font0 = TTFont(BytesIO(font_bytes), recalcBBoxes=False, recalcTimestamp=False)
-    vl_instancer.instantiateVariableFont(font0, {'FILL': 0}, inplace=True)
-
-    font1 = TTFont(BytesIO(font_bytes), recalcBBoxes=False, recalcTimestamp=False)
-    vl_instancer.instantiateVariableFont(font1, {'FILL': 1}, inplace=True)
-
-    # Detect which icons actually differ between fill states
-    icons_with_fill = _detect_fill_variants(font0, font1, icon_to_glyph, resolved)
-
-    glyf0 = font0['glyf']
-    glyf1 = font1['glyf']
-    hmtx0 = font0['hmtx']
-    hmtx1 = font1['hmtx']
-
-    filled_names = []
-    for name in resolved:
-        if name in icons_with_fill:
-            g   = icon_to_glyph[name]
-            g_f = g + '_f'
-            glyf0[g_f]         = glyf1[g]
-            hmtx0.metrics[g_f] = hmtx1.metrics[g]
-            filled_names.append(g_f)
-
-    if filled_names:
-        font0.setGlyphOrder(font0.getGlyphOrder() + filled_names)
-        font0['maxp'].numGlyphs = len(font0.getGlyphOrder())
-
-    # Add PUA cmap entries:
-    #   outlined range → always the outlined glyph
-    #   filled range   → actual filled glyph if available, else reuse outlined
-    for table in font0['cmap'].tables:
-        if table.isUnicode():
-            for i, name in enumerate(resolved):
-                g = icon_to_glyph[name]
-                table.cmap[PUA_OUTLINED_START + i] = g
-                table.cmap[PUA_FILLED_START   + i] = (g + '_f') if name in icons_with_fill else g
-
-    buf = BytesIO()
-    font0.save(buf)
-    buf.seek(0)
-
-    all_pua = (
-        list(range(PUA_OUTLINED_START, PUA_OUTLINED_START + N)) +
-        list(range(PUA_FILLED_START,   PUA_FILLED_START   + N))
+    merged = _concat_fonts(
+        _build_optimized_subset(font_fill, icons_suffixed),
+        _build_optimized_subset(font_outline, resolved),
     )
+    merged.save(dst_path)
 
-    opts = ft_subset.Options()
-    opts.flavor          = 'woff2'
-    opts.layout_features = []
-    opts.hinting         = False
-    opts.desubroutinize  = True
-    opts.name_IDs        = [1, 2, 4]
-    opts.drop_tables     = ['DSIG', 'GPOS', 'kern', 'GSUB']
-
-    font2 = ft_subset.load_font(buf, opts)
-    sub   = ft_subset.Subsetter(options=opts)
-    sub.populate(unicodes=all_pua)
-    sub.subset(font2)
-
-    dst_path.parent.mkdir(parents=True, exist_ok=True)
-    font2.save(str(dst_path))
-    return dst_path.stat().st_size, icons_with_fill
-
-
-# ---------------------------------------------------------------------------
-# Output writers
-# ---------------------------------------------------------------------------
-
-def _write_scss(scss_path: Path, resolved: list[str], icons_with_fill: set) -> None:
-    """``icons_pua.scss`` — outlined rule for every icon; filled rule only where
-    FILL=0 and FILL=1 produce distinct glyphs."""
-    N = len(resolved)
-    lines = [
-        "// Generated by `odoo-bin generate_icons` — do not edit manually.",
-        "// outlined glyph: [data-icon=\"name\"]::before",
-        "// filled   glyph: [data-icon=\"name\"].oi-filled::before (only where fill differs)",
-        "",
-    ]
-    for i, name in enumerate(resolved):
-        cp_out  = PUA_OUTLINED_START + i
-        cp_fill = PUA_OUTLINED_START + N + i
-        lines.append(
-            f'[data-icon="{name}"]::before {{ content: "\\{cp_out:04X}"; }}'
-        )
-        if name in icons_with_fill:
-            lines.append(
-                f'[data-icon="{name}"].oi-filled::before {{ content: "\\{cp_fill:04X}"; }}'
-            )
-    scss_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
-
-
-
-def _write_json_map(json_path: Path, resolved: list[str], icons_with_fill: set) -> None:
-    """``icons_pua_map.json`` — JS consumer map."""
-    N = len(resolved)
-    mapping = {
-        name: {
-            "outlined": chr(PUA_OUTLINED_START + i),
-            "filled": chr(PUA_OUTLINED_START + N + i) if name in icons_with_fill
-                      else chr(PUA_OUTLINED_START + i),
-        }
-        for i, name in enumerate(resolved)
-    }
-    json_path.write_text(
-        json.dumps(mapping, ensure_ascii=False, indent=2) + '\n',
-        encoding='utf-8',
-    )
+    return icons_with_fill, dst_path.stat().st_size
 
 
 def _write_font_face_css(ms_dir: Path, style_lower: str, font_file: str) -> None:
@@ -421,10 +470,10 @@ class Generateicons(Command):
         if not module_path.exists():
             sys.exit("Could not locate the 'web_icons' module.")
 
-        fonts_dir  = module_path / 'static' / 'src' / 'fonts'
         static_dir = module_path / 'static' / 'src'
-        ms_dir     = module_path / 'static' / 'src' / 'materialsymbols'
-        data_dir   = module_path / 'static' / 'src' / 'data'
+        fonts_dir  = static_dir / 'fonts'
+        ms_dir     = static_dir / 'materialsymbols'
+        data_dir   = static_dir / 'data'
 
         wishlist_path = (
             Path(args.wishlist) if args.wishlist
@@ -452,12 +501,12 @@ class Generateicons(Command):
 
         # ── Stage 2a: Resolve icon names → glyph names via GSUB ────────────
         _logger.info("Resolving GSUB (outlined)…")
-        src_o = TTFont(BytesIO(font_bytes_o), recalcBBoxes=False, recalcTimestamp=False)
-        glyph_o = _resolve_icons(src_o, wishlist)
+        font_o = TTFont(BytesIO(font_bytes_o), recalcBBoxes=False, recalcTimestamp=False)
+        glyph_o = _resolve_icons(font_o, wishlist)
 
         _logger.info("Resolving GSUB (sharp)…")
-        src_s = TTFont(BytesIO(font_bytes_s), recalcBBoxes=False, recalcTimestamp=False)
-        glyph_s = _resolve_icons(src_s, wishlist)
+        font_s = TTFont(BytesIO(font_bytes_s), recalcBBoxes=False, recalcTimestamp=False)
+        glyph_s = _resolve_icons(font_s, wishlist)
 
         resolved = sorted(n for n in wishlist if n in glyph_o and n in glyph_s)
         skipped  = [n for n in wishlist if n not in resolved]
@@ -467,31 +516,30 @@ class Generateicons(Command):
         print(f"Resolved: {len(resolved)}/{len(wishlist)} icons")  # noqa: T201
 
         # ── Stage 2b: Build static PUA fonts ───────────────────────────────
-        _logger.info("Building PUA outlined font…")
-        s1, fill_o = _build_pua_font(font_bytes_o, fonts_dir / 'ms_pua_outlined.woff2', glyph_o, resolved)
+        _logger.info("Building outlined font…")
+        outline_path = fonts_dir / 'ms_outlined.woff2'
+        fill_o, s1 = _build_splitted_font(font_o, outline_path, glyph_o, resolved)
 
-        _logger.info("Building PUA sharp font…")
-        s2, fill_s = _build_pua_font(font_bytes_s, fonts_dir / 'ms_pua_sharp.woff2', glyph_s, resolved)
+        _logger.info("Building sharp font…")
+        sharp_path = fonts_dir / 'ms_sharp.woff2'
+        _, s2 = _build_splitted_font(font_s, sharp_path, glyph_s, resolved)
 
-        # An icon "has fill" only if BOTH variants produce a distinct filled glyph.
-        # (If one variant doesn't change with fill, we don't generate a .oi-filled rule.)
-        icons_with_fill = fill_o & fill_s
+        icons_with_fill = fill_o
         icons_no_fill   = set(resolved) - icons_with_fill
+
+        icons_data = {icon: {"has_fill": icon in icons_with_fill} for icon in resolved}
+        (data_dir / 'icons.json').write_text(json.dumps(icons_data), encoding='utf-8')
         print(  # noqa: T201
             f"  {len(icons_with_fill)} icons with fill variant, "
             f"{len(icons_no_fill)} icons without (outlined used for both states)"
         )
 
         # ── Stage 3: Write supporting files ────────────────────────────────
-        _write_scss(static_dir / 'icons_pua.scss', resolved, icons_with_fill)
-        _write_json_map(data_dir / 'icons_pua_map.json', resolved, icons_with_fill)
-        _write_font_face_css(ms_dir, 'outlined', 'ms_pua_outlined.woff2')
-        _write_font_face_css(ms_dir, 'sharp',    'ms_pua_sharp.woff2')
+        _write_font_face_css(ms_dir, 'outlined', outline_path.name)
+        _write_font_face_css(ms_dir, 'sharp',    sharp_path.name)
 
         print(  # noqa: T201
-            f"\n✓  Generated PUA fonts ({len(resolved)} icons × 2 fill states)\n"
-            f"   outlined  → {fonts_dir / 'ms_pua_outlined.woff2'}  ({s1 // 1024} kb)\n"
-            f"   sharp     → {fonts_dir / 'ms_pua_sharp.woff2'}  ({s2 // 1024} kb)\n"
-            f"   scss      → {static_dir / 'icons_pua.scss'}\n"
-            f"   map       → {data_dir / 'icons_pua_map.json'}\n"
+            f"\n✓  Generated fonts ({len(resolved)} icons × 2 fill states)\n"
+            f"   outlined  → {outline_path}  ({s1 // 1024} kb)\n"
+            f"   sharp     → {sharp_path}  ({s2 // 1024} kb)\n"
         )
