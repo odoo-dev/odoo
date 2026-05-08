@@ -32,10 +32,22 @@ class PosCategory(models.Model):
     hour_until = fields.Float(string='Availability Until', default=24.0, help="The product will be available until this hour for online order and self order.")
     hour_after = fields.Float(string='Availability After', default=0.0, help="The product will be available after this hour for online order and self order.")
     pos_config_ids = fields.Many2many('pos.config', string='Linked PoS Configurations')
-
+    product_count = fields.Integer(string='Products Count', compute='_compute_product_count')
     # During loading of data, the image is not loaded so we expose a lighter
     # field to determine whether a pos.category has an image or not.
     has_image = fields.Boolean(compute='_compute_has_image')
+
+    def _compute_product_count(self):
+        grouped_data = self.env['product.template']._read_group(
+            domain=[('pos_categ_ids', 'in', self.ids)],
+            groupby=['pos_categ_ids'],
+            aggregates=['__count'],
+        )
+        count_data = {
+            categ.id: count for categ, count in grouped_data if categ
+        }
+        for category in self:
+            category.product_count = count_data.get(category.id, 0)
 
     @api.model
     def _load_pos_data_domain(self, data, config):

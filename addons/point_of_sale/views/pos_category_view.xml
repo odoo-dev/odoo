@@ -6,6 +6,18 @@
         <field name="arch" type="xml">
             <form string="Pos Product Categories">
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button"
+                            name="%(product.product_template_action_all)d"
+                            icon="fa-th-list"
+                            type="action"
+                            context="{'search_default_pos_categ_ids': [id], 'default_pos_categ_ids': [id], 'tree_view_ref': 'product.product_template_tree_view'}">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value"><field name="product_count"/></span>
+                                <span class="o_stat_text">Products</span>
+                            </div>
+                        </button>
+                    </div>
                     <field name="image_512" widget="image" class="oe_avatar"/>
                     <div class="oe_title row">
                         <h1>
