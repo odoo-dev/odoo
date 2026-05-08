@@ -1806,33 +1806,29 @@ class Field[T]:
 
         elif self.compute:
             # non-stored field or new record without origin: compute
-            if env.is_protected(self, record):
-                value = self.convert_to_cache(False, record, validate=False)
-                self._update_cache(record, value)
-            else:
-                recs = record if self.recursive else self._to_prefetch(record)
-                try:
-                    self.compute_value(recs)
-                    fallback_single = False
-                except (AccessError, MissingError):
-                    fallback_single = True
-                if fallback_single:
-                    self.compute_value(record)
-                    recs = record
+            recs = record if self.recursive else self._to_prefetch(record)
+            try:
+                self.compute_value(recs)
+                fallback_single = False
+            except (AccessError, MissingError):
+                fallback_single = True
+            if fallback_single:
+                self.compute_value(record)
+                recs = record
 
-                missing_recs_ids = tuple(self._cache_missing_ids(recs))
-                if missing_recs_ids:
-                    missing_recs = record.browse(missing_recs_ids)
-                    if self.readonly and not self.store:
-                        raise ValueError(f"Compute method failed to assign {missing_recs}.{self.name}")
-                    # fallback to null value if compute gives nothing, do it for every unset record
-                    false_value = self.convert_to_cache(False, record, validate=False)
-                    self._update_cache(missing_recs, false_value)
+            missing_recs_ids = tuple(self._cache_missing_ids(recs))
+            if missing_recs_ids:
+                missing_recs = record.browse(missing_recs_ids)
+                if self.readonly and not self.store:
+                    raise ValueError(f"Compute method failed to assign {missing_recs}.{self.name}")
+                # fallback to null value if compute gives nothing, do it for every unset record
+                false_value = self.convert_to_cache(False, record, validate=False)
+                self._update_cache(missing_recs, false_value)
 
-                # cache could have been entirely invalidated by compute
-                # as some compute methods call indirectly env.invalidate_all()
-                field_cache = self._get_cache(env)
-                value = field_cache[record_id]
+            # cache could have been entirely invalidated by compute
+            # as some compute methods call indirectly env.invalidate_all()
+            field_cache = self._get_cache(env)
+            value = field_cache[record_id]
 
         elif self.type == 'many2one' and self.delegate and not record_id:
             # parent record of a new record: new record, with the same
@@ -1983,6 +1979,7 @@ class Field[T]:
 
         try:
             with records.env.protecting(fields, records):
+                records._update_cache(dict.fromkeys((f.name for f in fields), False))
                 records._compute_field_value(self)
         except Exception:
             for field in fields:
