@@ -323,9 +323,7 @@ class PaymentProvider(models.Model):
             "minor_amount": (
                 amount
                 and payment_utils.to_minor_currency_units(
-                    amount,
-                    currency,
-                    arbitrary_decimal_number=const.CURRENCY_DECIMALS.get(currency.name),
+                    amount, currency, arbitrary_decimal_number=self._get_amount_precision(currency)
                 )
             ),
             "capture_method": "manual" if self.capture_manually else "automatic",
@@ -362,6 +360,20 @@ class PaymentProvider(models.Model):
         :rtype: str
         """
         return const.COUNTRY_MAPPING.get(country_code, country_code)
+
+    def _get_amount_precision(self, currency, **kwargs):
+        """Override of `payment` to return the amount precision for Stripe.
+
+        :param recordset currency: The currency of the transaction, as a `res.currency` record.
+        :return: The number of decimal places.
+        :rtype: int
+        """
+        if self.code != "stripe":
+            return super()._get_amount_precision(currency, **kwargs)
+
+        return const.CURRENCY_DECIMALS.get(
+            currency.name, super()._get_amount_precision(currency, **kwargs)
+        )
 
     # === BUSINESS METHODS - STRIPE CONNECT ONBOARDING === #
 

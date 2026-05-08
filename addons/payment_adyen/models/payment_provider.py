@@ -127,7 +127,7 @@ class PaymentProvider(models.Model):
             amount
             and currency_code
             and payment_utils.to_minor_currency_units(
-                amount, currency, const.CURRENCY_DECIMALS.get(currency_code)
+                amount, currency, self._get_amount_precision(currency)
             )
         )
         return {"value": converted_amount, "currency": currency_code}
@@ -143,6 +143,20 @@ class PaymentProvider(models.Model):
         :rtype: str
         """
         return f"ODOO_PARTNER_{partner_id}"
+
+    def _get_amount_precision(self, currency, **kwargs):
+        """Override of `payment` to return the amount precision for Adyen.
+
+        :param recordset currency: The currency of the transaction, as a `res.currency` record.
+        :return: The number of decimal places.
+        :rtype: int
+        """
+        if self.code != "adyen":
+            return super()._get_amount_precision(currency, **kwargs)
+
+        return const.CURRENCY_DECIMALS.get(
+            currency.name, super()._get_amount_precision(currency, **kwargs)
+        )
 
     # === REQUEST HELPERS === #
 
