@@ -393,6 +393,33 @@ GMAIL_1_IN = [
 ]
 GMAIL_1_OUT = []
 
+GMAIL_2 = u"""<p>This is the main email content that should be kept.</p>
+<p>Some more important content here.</p>
+<div id="Signature">
+<p>John Smith</p>
+<p>Software Developer</p>
+</div>"""
+GMAIL_2_IN = [
+    '<div id="Signature" data-o-mail-quote-container="1" data-o-mail-quote="1">',
+    '<p data-o-mail-quote="1">John Smith</p>',
+    '<p data-o-mail-quote="1">Software Developer</p>',
+]
+GMAIL_2_OUT = []
+
+GMAIL_3 = u"""<p>This is the main email content that should be kept.</p>
+<p>Some more important content here.</p>
+<span>--</span>
+<div data-smartmail="gmail_signature">
+<p>John Doe</p>
+<p>Software Engineer</p>
+</div>"""
+GMAIL_3_IN = [
+    '<div data-smartmail="gmail_signature" data-o-mail-quote-container="1" data-o-mail-quote="1">',
+    '<p data-o-mail-quote="1">John Doe</p>',
+    '<p data-o-mail-quote="1">Software Engineer</p>',
+]
+GMAIL_3_OUT = []
+
 HOTMAIL_1 = u"""<div>
     <div dir="ltr"><br>
         I have an amazing company, i'm learning OpenERP, it is a small company yet, but plannig to grow up quickly.
