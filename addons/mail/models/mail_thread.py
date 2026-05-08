@@ -4293,7 +4293,7 @@ class MailThread(models.AbstractModel):
                 lambda pdata: pdata['type'] == 'user',
                 {
                     'active': True,
-                    'has_button_access': message._is_thread_message(thread=self),
+                    'has_button_access': message._is_thread_message(),
                 }
             ], [
                 'portal',
@@ -4330,14 +4330,14 @@ class MailThread(models.AbstractModel):
 
         :return: updated groups;
         """
-        access_link = self._notify_get_action_link('view')
+        access_link = self._notify_get_action_link('view', model=message.model, res_id=message.res_id)
 
         if model_description:
             view_title = _('View %s', model_description)
         else:
             view_title = _('View')
 
-        is_thread_message = message._is_thread_message(thread=self)
+        is_thread_message = message._is_thread_message()
 
         # fill group_data with default_values if they are not complete
         for group_name, _group_func, group_data in groups:
