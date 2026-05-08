@@ -360,7 +360,7 @@ class TestSanitizer(BaseCase):
             for ext in exp_in:
                 self.assertIn(ext, html)
             for ext in exp_out:
-                self.assertIn(u'<span data-o-mail-quote="1">%s</span>' % misc.html_escape(ext), html)
+                self.assertIn('<span data-o-mail-quote="1">%s</span>' % misc.html_escape(ext), html)
 
     def test_quote_text(self):
         html = html_sanitize(mail_examples.TEXT_1)

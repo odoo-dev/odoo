@@ -393,7 +393,7 @@ GMAIL_1_IN = [
 ]
 GMAIL_1_OUT = []
 
-GMAIL_2 = u"""<p>This is the main email content that should be kept.</p>
+GMAIL_2 = """<p>This is the main email content that should be kept.</p>
 <p>Some more important content here.</p>
 <div id="Signature">
 <p>John Smith</p>
@@ -406,7 +406,7 @@ GMAIL_2_IN = [
 ]
 GMAIL_2_OUT = []
 
-GMAIL_3 = u"""<p>This is the main email content that should be kept.</p>
+GMAIL_3 = """<p>This is the main email content that should be kept.</p>
 <p>Some more important content here.</p>
 <span>--</span>
 <div data-smartmail="gmail_signature">
