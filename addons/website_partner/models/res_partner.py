@@ -101,7 +101,7 @@ class ResPartner(models.Model):
             }) for index, partner in enumerate(self)
         ]
         main_entity_schema = JsonLd("ItemList").add_nested({
-            "item_list_element": item_lists,
+            "itemListElement": item_lists,
         })
         return JsonLd("CollectionPage", schema_data).add_nested({"main_entity": main_entity_schema})
 
