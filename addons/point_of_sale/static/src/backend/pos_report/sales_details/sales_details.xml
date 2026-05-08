@@ -1,0 +1,32 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.PosSalesDetailsReport" owl="1">
+        <div class="o_action">
+            <ControlPanel>
+                <t t-set-slot="control-panel-buttons">
+                    <button class="btn btn-primary" t-on-click="export_pdf">
+                        PDF
+                    </button>
+                </t>
+
+                <t t-set-slot="control-panel-actions">
+                   <div class="d-flex gap-1 flex-wrap">
+                       <PosReportFilters />
+                   </div>
+                </t>
+            </ControlPanel>
+
+            <div class="overflow-hidden d-flex flex-row h-100">
+                <div class="o_content d-flex flex-column w-100">
+                    <div class="mx-auto fit-content w-print-100">
+                        <div class="p-4 border" style="width:793px; min-height:1122px;">
+                            <t t-foreach="this.store.getRendered(this.props.actionId)" t-as="template" t-key="template_index">
+                                <t t-out="template"/>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </t>
+</templates>

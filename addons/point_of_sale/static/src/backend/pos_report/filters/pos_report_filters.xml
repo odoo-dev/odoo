@@ -1,0 +1,94 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.PosReportFilters">
+        <t t-if="hasDateFilter">
+            <Dropdown menuClass="'pos_report_filter date'">
+                <button class="btn btn-secondary">
+                    <i class="fa fa-calendar me-1"/>
+                    <t t-if="dateFilter.mode === 'month'">
+                        <t t-out="monthName"/>
+                    </t>
+                    <t t-else="">
+                        <t>Custom Dates</t>
+                    </t>
+                </button>
+
+                <t t-set-slot="content">
+                    <DropdownItem
+                        tag="'div'"
+                        class="{
+                            'd-flex justify-content-between date_filter': true,
+                            'selected': dateFilter.mode === 'month',
+                        }"
+                        onSelected="() => this.selectMode('month')"
+                        closingMode="'none'"
+                    >
+                        <div class="filter_name pe-3">Month</div>
+                        <div class="d-flex justify-content-between">
+                            <button
+                                class="btn_previous_date fa fa-caret-left"
+                                t-on-click="() => this.selectPreviousMonth()"
+                            />
+                            <input
+                                class="o_input input_current_date"
+                                type="text"
+                                t-att-value="monthName"
+                                readonly="readonly"
+                            />
+                            <button
+                                class="btn_next_date fa fa-caret-right"
+                                t-on-click="() => this.selectNextMonth()"
+                            />
+                        </div>
+                    </DropdownItem>
+
+                    <div class="dropdown-divider"/>
+
+                    <DropdownItem
+                        tag="'div'"
+                        class="{
+                            'date d-flex justify-content-between': true,
+                            'selected': dateFilter.mode === 'custom',
+                        }"
+                        onSelected="() => this.selectMode('custom')"
+                        closingMode="'none'"
+                    >
+                        <div class="d-flex align-items-center">Custom Dates</div>
+                        <div class="d-flex flex-row" t-if="dateFilter.mode === 'custom'">
+                            <DateTimeInput
+                                type="'datetime'"
+                                class="'o-navigable'"
+                                value="dateFilter.date_start"
+                                onChange="(date) => this.setDateFrom(date)"
+                            />
+                            <span class="d-flex align-items-center mx-1">to</span>
+                            <DateTimeInput
+                                type="'datetime'"
+                                class="'o-navigable'"
+                                value="dateFilter.date_stop"
+                                onChange="(date) => this.setDateTo(date)"
+                            />
+                        </div>
+                    </DropdownItem>
+                </t>
+            </Dropdown>
+        </t>
+
+        <t id="multi_selector">
+            <t t-foreach="multiSelector" t-as="ms" t-key="ms.field">
+                <Dropdown menuClass="'pos_report_filter multiselect'">
+                    <button class="btn btn-secondary">
+                        <i class="fa fa-store me-1" />
+                        <t t-out="ms.label or 'Select'"/>
+                    </button>
+
+                    <t t-set-slot="content">
+                        <div class="dropdown-item gap-4 align-items-center">
+                            <label><t t-out="ms.label"/></label>
+                            <MultiRecordSelector t-props="getMultiRecordSelectorProps(ms.model, ms.field)" />
+                        </div>
+                    </t>
+                </Dropdown>
+            </t>
+        </t>
+    </t>
+</templates>

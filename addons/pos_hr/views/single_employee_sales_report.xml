@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="pos_hr.single_employee_sales_report" inherit_id="point_of_sale.pos_session_sales_details" primary="True">
+    <template id="pos_hr.single_employee_sales_report" inherit_id="point_of_sale.pos_session_sales_details_header" primary="True">
         <xpath expr="//h2[@id='daily_report_title']" position="after">
             <t t-if="employee_name">
                 <h5>Employee: <span t-out="employee_name">Abigal Peterson</span></h5>
@@ -10,7 +10,9 @@
         <xpath expr="//h2[@id='daily_report_title']" position="replace">
             <h2>Employee Sales Report</h2>
         </xpath>
+    </template>
 
+    <template id="pos_hr.single_employee_sales_report_session_control" inherit_id="point_of_sale.pos_session_sales_details_session_control" primary="True">
         <xpath expr="//t[@id='closing_session']" position="replace"/>
     </template>
 

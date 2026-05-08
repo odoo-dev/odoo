@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import datetime
 
-from odoo import api, fields, models, _
+from odoo import _, api, fields, models
 from odoo.fields import Domain
 from odoo.tools import SQL
 
@@ -87,6 +87,7 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
             'base_amount': 0.0,
             'taxes': {},
         }
+
         for order in orders:
             if user_currency != order.pricelist_id.currency_id:
                 total += order.pricelist_id.currency_id._convert(
@@ -103,10 +104,18 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
                 else:
                     refund_done, refund_taxes = self._get_products_and_taxes_dict(line, refund_done, refund_taxes, currency)
 
-        taxes_info = self._get_taxes_info(taxes)
-        refund_taxes_info = self._get_taxes_info(refund_taxes)
+        taxes_info = self._get_taxes_info(taxes, user_currency)
+        refund_taxes_info = self._get_taxes_info(refund_taxes, user_currency)
         taxes = taxes['taxes']
         refund_taxes = refund_taxes['taxes']
+
+        # Format tax amounts
+        for tax in taxes.values():
+            tax['tax_amount'] = user_currency.round(tax['tax_amount'])
+            tax['base_amount'] = user_currency.round(tax['base_amount'])
+        for tax in refund_taxes.values():
+            tax['tax_amount'] = user_currency.round(tax['tax_amount'])
+            tax['base_amount'] = user_currency.round(tax['base_amount'])
 
         payment_ids = self.env["pos.payment"].search([('pos_order_id', 'in', orders.ids)]).ids
         if payment_ids:
@@ -152,14 +161,15 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
 
         for payment in payments:
             payment['count'] = False
+            payment['total'] = user_currency.round(payment['total'])
 
         for session in sessions:
             cash_counted = 0
             if session.cash_register_balance_end_real:
                 cash_counted = session.cash_register_balance_end_real
             is_cash_method = False
+            account_payments = self.env['account.payment'].search([('pos_session_id', '=', session.id)])
             for payment in payments:
-                account_payments = self.env['account.payment'].search([('pos_session_id', '=', session.id)])
                 if payment['session'] == session.id:
                     if not payment['cash']:
                         ref_value = "Closing difference in %s (%s)" % (payment['name'], session.name)
@@ -168,35 +178,35 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
                             payment_method = self.env['pos.payment.method'].browse(payment['id'])
                             is_loss = any(l.account_id == payment_method.journal_id.loss_account_id for l in account_move.line_ids)
                             is_profit = any(l.account_id == payment_method.journal_id.profit_account_id for l in account_move.line_ids)
-                            payment['final_count'] = payment['total']
-                            payment['money_difference'] = -account_move.amount_total if is_loss else account_move.amount_total
-                            payment['money_counted'] = payment['final_count'] + payment['money_difference']
+                            payment['final_count'] = user_currency.round(payment['total'])
+                            payment['money_difference'] = user_currency.round(-account_move.amount_total if is_loss else account_move.amount_total)
+                            payment['money_counted'] = user_currency.round(payment['total'] + (-account_move.amount_total if is_loss else account_move.amount_total))
                             payment['cash_moves'] = []
                             if is_profit:
                                 move_name = 'Difference observed during the counting (Profit)'
-                                payment['cash_moves'] = [{'name': move_name, 'amount': payment['money_difference']}]
+                                payment['cash_moves'] = [{'name': move_name, 'amount': user_currency.round(-account_move.amount_total if is_loss else account_move.amount_total)}]
                             elif is_loss:
                                 move_name = 'Difference observed during the counting (Loss)'
-                                payment['cash_moves'] = [{'name': move_name, 'amount': payment['money_difference']}]
+                                payment['cash_moves'] = [{'name': move_name, 'amount': user_currency.round(-account_move.amount_total if is_loss else account_move.amount_total)}]
                             payment['count'] = True
                         elif payment['id'] in account_payments.mapped('pos_payment_method_id.id'):
                             account_payment = account_payments.filtered(lambda p: p.pos_payment_method_id.id == payment['id'])
-                            payment['final_count'] = payment['total']
-                            payment['money_counted'] = sum(account_payment.mapped('amount_signed'))
-                            payment['money_difference'] = payment['money_counted'] - payment['final_count']
+                            payment['final_count'] = user_currency.round(payment['total'])
+                            payment['money_counted'] = user_currency.round(sum(account_payment.mapped('amount_signed')))
+                            payment['money_difference'] = user_currency.round(sum(account_payment.mapped('amount_signed')) - payment['total'])
                             payment['cash_moves'] = []
-                            if payment['money_difference'] > 0:
+                            if sum(account_payment.mapped('amount_signed')) - payment['total'] > 0:
                                 move_name = 'Difference observed during the counting (Profit)'
-                                payment['cash_moves'] = [{'name': move_name, 'amount': payment['money_difference']}]
-                            elif payment['money_difference'] < 0:
+                                payment['cash_moves'] = [{'name': move_name, 'amount': user_currency.round(sum(account_payment.mapped('amount_signed')) - payment['total'])}]
+                            elif sum(account_payment.mapped('amount_signed')) - payment['total'] < 0:
                                 move_name = 'Difference observed during the counting (Loss)'
-                                payment['cash_moves'] = [{'name': move_name, 'amount': payment['money_difference']}]
+                                payment['cash_moves'] = [{'name': move_name, 'amount': user_currency.round(sum(account_payment.mapped('amount_signed')) - payment['total'])}]
                             payment['count'] = True
                     else:
                         is_cash_method = True
-                        payment['final_count'] = payment['total'] + session.cash_register_balance_start + session.cash_real_transaction
-                        payment['money_counted'] = cash_counted
-                        payment['money_difference'] = payment['money_counted'] - payment['final_count']
+                        payment['final_count'] = user_currency.round(payment['total'] + session.cash_register_balance_start + session.cash_real_transaction)
+                        payment['money_counted'] = user_currency.round(cash_counted)
+                        payment['money_difference'] = user_currency.round(cash_counted - (payment['total'] + session.cash_register_balance_start + session.cash_real_transaction))
                         cash_moves = self.env['account.bank.statement.line'].search([('pos_session_id', '=', session.id)])
                         cash_in_out_list = []
                         cash_in_count = 0
@@ -204,8 +214,9 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
                         if session.cash_register_balance_start > 0:
                             cash_in_out_list.append({
                                 'name': _('Cash Opening'),
-                                'amount': session.cash_register_balance_start,
+                                'amount': user_currency.round(session.cash_register_balance_start),
                             })
+
                         for cash_move in cash_moves:
                             if cash_move.amount > 0:
                                 cash_in_count += 1
@@ -216,22 +227,22 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
                             if cash_move.move_id.journal_id.id == payment['journal_id']:
                                 cash_in_out_list.append({
                                     'name': cash_move.payment_ref if cash_move.payment_ref else name,
-                                    'amount': cash_move.amount
+                                    'amount': user_currency.round(cash_move.amount)
                                 })
                         payment['cash_moves'] = cash_in_out_list
                         payment['count'] = True
             if not is_cash_method:
                 cash_name = _('Cash %(session_name)s', session_name=session.name)
                 previous_session = self.env['pos.session'].search([('id', '<', session.id), ('state', '=', 'closed'), ('config_id', '=', session.config_id.id)], limit=1)
-                final_count = previous_session.cash_register_balance_end_real + session.cash_real_transaction
-                cash_difference = session.cash_register_balance_end_real - final_count
+                final_count = user_currency.round(previous_session.cash_register_balance_end_real + session.cash_real_transaction)
+                cash_difference = user_currency.round(session.cash_register_balance_end_real - (previous_session.cash_register_balance_end_real + session.cash_real_transaction))
                 cash_moves = self.env['account.bank.statement.line'].search([('pos_session_id', '=', session.id)], order='date asc')
                 cash_in_out_list = []
 
                 if previous_session.cash_register_balance_end_real > 0:
                     cash_in_out_list.append({
                         'name': _('Cash Opening'),
-                        'amount': previous_session.cash_register_balance_end_real,
+                        'amount': user_currency.round(previous_session.cash_register_balance_end_real),
                     })
 
                 # If there is a cash difference, we remove the last cash move which is the cash difference
@@ -241,18 +252,19 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
                 for cash_move in cash_moves:
                     cash_in_out_list.append({
                         'name': cash_move.payment_ref,
-                        'amount': cash_move.amount
+                        'amount': user_currency.round(cash_move.amount)
                     })
                 payments.insert(0, {
                     'name': cash_name,
                     'total': 0,
                     'final_count': final_count,
-                    'money_counted': session.cash_register_balance_end_real,
+                    'money_counted': user_currency.round(session.cash_register_balance_end_real),
                     'money_difference': cash_difference,
                     'cash_moves': cash_in_out_list,
                     'count': True,
                     'session': session.id,
                 })
+
         products = []
         refund_products = []
         for category_name, product_list in products_sold.items():
@@ -267,7 +279,7 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
                     'discount': discount,
                     'uom': product.uom_id.name,
                     'total_paid': product_total,
-                    'base_amount': base_amount,
+                    'base_amount': user_currency.round(base_amount),
                     'combo_products_label': combo_products_label,
                 } for (product, price_unit, discount), (qty, product_total, base_amount, combo_products_label) in product_list.items()], key=lambda l: l['product_name']),
             }
@@ -286,15 +298,15 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
                     'discount': discount,
                     'uom': product.uom_id.name,
                     'total_paid': product_total,
-                    'base_amount': base_amount,
+                    'base_amount': user_currency.round(base_amount),
                     'combo_products_label': combo_products_label,
                 } for (product, price_unit, discount), (qty, product_total, base_amount, combo_products_label) in product_list.items()], key=lambda l: l['product_name']),
             }
             refund_products.append(category_dictionnary)
         refund_products = sorted(refund_products, key=lambda l: str(l['name']))
 
-        products, products_info = self.with_context(config_id=configs[0].id if len(configs) > 0 else False)._get_total_and_qty_per_category(products)
-        refund_products, refund_info = self.with_context(config_id=configs[0].id if len(configs) > 0 else False)._get_total_and_qty_per_category(refund_products)
+        products, products_info = self.with_context(config_id=configs[0].id if len(configs) > 0 else False)._get_total_and_qty_per_category(products, user_currency)
+        refund_products, refund_info = self.with_context(config_id=configs[0].id if len(configs) > 0 else False)._get_total_and_qty_per_category(refund_products, user_currency)
 
         currency = {
             'symbol': user_currency.symbol,
@@ -319,19 +331,25 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
             config_names.append(config.name)
 
         discount_number = len(orders.filtered(lambda o: o.lines.filtered(lambda l: l.discount > 0)))
-        discount_amount = sum(l._get_discount_amount() for l in orders.lines.filtered(lambda l: l.discount > 0))
+        discount_amount = user_currency.round(sum(l._get_discount_amount() for l in orders.lines.filtered(lambda l: l.discount > 0)))
 
         invoiceList = []
         invoiceTotal = 0
         totalPaymentsAmount = 0
 
         for session in sessions:
+            invoice_list = session._get_invoice_total_list()
+            for invoice in invoice_list:
+                invoice['total'] = user_currency.round(invoice['total'])
             invoiceList.append({
                 'name': session.name,
-                'invoices': session._get_invoice_total_list(),
+                'invoices': invoice_list,
             })
             invoiceTotal += session._get_total_invoice()
             totalPaymentsAmount += session.total_payments_amount
+
+        invoiceTotal = user_currency.round(invoiceTotal)
+        totalPaymentsAmount = user_currency.round(totalPaymentsAmount)
         payments_per_method = {}
         for payment in payments:
             if payment.get('id'):
@@ -345,6 +363,10 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
                         'total': payment['total'],
                     }
 
+        # Format payments_per_method totals
+        for ppm in payments_per_method.values():
+            ppm['total'] = user_currency.round(ppm['total'])
+
         return {
             'opening_note': sessions[0].opening_notes if len(sessions) == 1 else False,
             'closing_note': sessions[0].closing_notes if len(sessions) == 1 else False,
@@ -354,25 +376,27 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
             'date_start': date_start,
             'date_stop': date_stop,
             'session_name': session_name or False,
-            'config_names': config_names,
-            'payments': payments,
+            'config_names': config_names or [],
+            'payments': payments or [],
             'company_name': self.env.company.name,
-            'taxes': list(taxes.values()),
+            'company_address': self.env.company.partner_id._display_address(),
+            'taxes': list(taxes.values()) or [],
             'taxes_info': taxes_info,
-            'products': products,
+            'products': products or [],
             'products_info': products_info,
-            'refund_taxes': list(refund_taxes.values()),
+            'refund_taxes': list(refund_taxes.values()) or [],
             'refund_taxes_info': refund_taxes_info,
             'refund_info': refund_info,
-            'refund_products': refund_products,
+            'refund_products': refund_products or [],
             'discount_number': discount_number,
             'discount_amount': discount_amount,
-            'invoiceList': invoiceList,
+            'invoiceList': invoiceList or [],
             'invoiceTotal': invoiceTotal,
             'total_paid': totalPaymentsAmount,
-            'payments_per_method': payments_per_method.values(),
+            'payments_per_method': list(payments_per_method.values()) or [],
             'show_payment_per_method': not session_ids,
             'cash_rounding_total': cash_rounding_total,
+            'current_timestamp': fields.Date.today(),
         }
 
     def _get_product_total_amount(self, line):
@@ -411,25 +435,24 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
         taxes['base_amount'] += line.price_subtotal * refund_sign
         return products, taxes
 
-    def _get_total_and_qty_per_category(self, categories):
+    def _get_total_and_qty_per_category(self, categories, currency):
         all_qty = 0
         all_total = 0
         qty_precision = self.env['decimal.precision'].precision_get('Product Unit of Measure')
-        price_precision = self.env['decimal.precision'].precision_get('Product Price')
         for category_dict in categories:
             qty_cat = 0
             total_cat = 0
             for product in category_dict['products']:
                 qty_cat += product['quantity']
                 total_cat += product['base_amount']
-            category_dict['total'] = round(total_cat, price_precision)
+            category_dict['total'] = currency.round(total_cat)
             category_dict['qty'] = round(qty_cat, qty_precision)
         # IMPROVEMENT: It would be better if the `products` are grouped by pos.order.line.id.
         unique_products = list({tuple(sorted(product.items())): product for category in categories for product in category['products']}.values())
         all_qty = sum([product['quantity'] for product in unique_products])
         all_total = sum([product['base_amount'] for product in unique_products])
 
-        return categories, {'total': all_total, 'qty': all_qty}
+        return categories, {'total': currency.round(all_total), 'qty': all_qty}
 
     def _prepare_get_sale_details_args_kwargs(self, data):
         configs = self.env['pos.config'].browse(data['config_ids'])
@@ -452,9 +475,27 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
         data.update(self.get_sale_details(*args, **kwargs))
         return data
 
-    def _get_taxes_info(self, taxes):
+    def _get_taxes_info(self, taxes, currency):
         total_tax_amount = 0
         total_base_amount = taxes['base_amount']
         for tax in taxes['taxes'].values():
             total_tax_amount += tax['tax_amount']
-        return {'tax_amount': total_tax_amount, 'base_amount': total_base_amount}
+        return {'tax_amount': currency.round(total_tax_amount), 'base_amount': currency.round(total_base_amount)}
+
+    @api.model
+    def get_report_templates(self):
+        templates = [
+            'point_of_sale.pos_session_sales_details_header',
+            'point_of_sale.pos_session_sales_details_bar',
+            'point_of_sale.pos_session_sales_details_sales_section',
+            'point_of_sale.pos_session_sales_details_taxes_section',
+            'point_of_sale.pos_session_sales_details_refunds_section',
+            'point_of_sale.pos_session_sales_details_refunds_taxes_section',
+            'point_of_sale.pos_session_sales_details_payments_section',
+            'point_of_sale.pos_session_sales_details_discounts_section',
+            'point_of_sale.pos_session_sales_details_invoices_section',
+            'point_of_sale.pos_session_sales_details_session_control',
+            'point_of_sale.format_currency',
+        ]
+
+        return [[name, self.env['ir.qweb']._get_template(name)[1]] for name in templates]
