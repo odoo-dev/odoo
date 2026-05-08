@@ -99,7 +99,7 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
         return super().sale_product_configurator_get_optional_products(*args, **kwargs)
 
     def _get_basic_product_information(
-        self, product_or_template, pricelist, combination, currency=None, date=None, **kwargs
+        self, product_or_template, pricelist, combination, currency=None, date=None, uom=None, **kwargs
     ):
         """ Override of `sale` to append website data and apply taxes.
 
@@ -128,6 +128,7 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
             combination,
             currency=currency,
             date=date,
+            uom=uom,
             **kwargs,
         )
 
@@ -148,6 +149,7 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
                 date,
                 basic_product_information['price'],
                 basic_product_information['pricelist_rule_id'],
+                uom=uom,
             ) if 'price_info' not in basic_product_information else None
             if strikethrough_price:
                 basic_product_information['strikethrough_price'] = strikethrough_price
@@ -170,7 +172,7 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
             return self._apply_taxes_to_price(price_extra, product_or_template, currency)
         return price_extra
 
-    def _get_strikethrough_price(self, product_or_template, currency, date, price, pricelist_rule_id=None):
+    def _get_strikethrough_price(self, product_or_template, currency, date, price, pricelist_rule_id=None, uom=None):
         """ Return the strikethrough price of the product, if there is one.
 
         :param product.product|product.template product_or_template: The product for which to
@@ -190,7 +192,7 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
                 pricelist_rule._compute_price_before_discount(
                     product=product_or_template,
                     quantity=1.0,
-                    uom=product_or_template.uom_id,
+                    uom=uom or product_or_template.uom_id,
                     date=date,
                     currency=currency,
                 ),

@@ -287,8 +287,15 @@ export class ProductConfiguratorDialog extends Component {
         if (product.uom.id === uomId) {
             return false;
         }
-        const { price } = await this._updateCombination(product, product.quantity, uomId);
+        const { price, strikethrough_price } = await this._updateCombination(
+            product,
+            product.quantity,
+            uomId
+        );
         product.price = parseFloat(price);
+        product.strikethrough_price = strikethrough_price
+            ? parseFloat(strikethrough_price)
+            : undefined;
         product.uom = product.available_uoms.find((uom) => uom.id === uomId);
 
         return true;
