@@ -181,7 +181,7 @@ export class ImageSelector extends FileSelector {
                 abortFn = abort;
             }
         );
-        this.props.setAbortUploadsCallback(() => abortFn?.());
+        this.props.setAbortUploadsCallback?.(() => abortFn?.());
         await uploadPromise;
     }
 
