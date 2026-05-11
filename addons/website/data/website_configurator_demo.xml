@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- =====================================================================
+             Configurator Layouts Debug View
+             URL: /website/demo/configurator-layouts
+                  ?vibe=clean&amp;layout=minimalist&amp;style=soft-04
+
+             A full-viewport iframe shows the selected layout+vibe combination
+             rendered through the same get_layout_previews endpoint used by the
+             configurator (header, body snippets, footer — ConfiguratorHeader/
+             Footer metadata stripped server-side, real header/footer templates
+             applied by the endpoint).
+             ==================================================================== -->
+
+        <record id="configurator_layouts_debug_view" model="ir.ui.view">
+            <field name="name">Configurator Layouts Debug</field>
+            <field name="type">qweb</field>
+            <field name="key">website.configurator_layouts_debug_view</field>
+            <field name="arch" type="xml">
+                <t t-name="website.configurator_layouts_debug_view">
+                    <t t-call="website.layout">
+                        <!-- Suppress the default website header and footer -->
+                        <t t-set="no_header" t-value="True"/>
+                        <t t-set="no_footer" t-value="True"/>
+
+                        <style>
+                            body, #wrapwrap, main { margin: 0 !important; padding: 0 !important; overflow: hidden; }
+                            #wrapwrap > header, #wrapwrap > footer { display: none !important; }
+
+                            /* ── Control bar (bottom) ───────────────────────────────────── */
+                            #cfg_bar {
+                                position: fixed;
+                                bottom: 0; left: 0; right: 0;
+                                height: 48px;
+                                z-index: 10000;
+                                background: rgba(15, 15, 15, 0.88);
+                                backdrop-filter: blur(8px);
+                                -webkit-backdrop-filter: blur(8px);
+                                display: flex;
+                                align-items: center;
+                                gap: 10px;
+                                padding: 0 16px;
+                                font-family: system-ui, sans-serif;
+                                font-size: 12px;
+                                color: #ccc;
+                                box-shadow: 0 -2px 12px rgba(0,0,0,.6);
+                            }
+                            #cfg_bar label {
+                                display: flex;
+                                align-items: center;
+                                gap: 5px;
+                                color: #aaa;
+                                letter-spacing: .04em;
+                                text-transform: uppercase;
+                                font-size: 10px;
+                                font-weight: 600;
+                            }
+                            #cfg_bar select {
+                                background: #2a2a2a;
+                                color: #eee;
+                                border: 1px solid #444;
+                                border-radius: 4px;
+                                padding: 3px 6px;
+                                font-size: 12px;
+                                cursor: pointer;
+                                outline: none;
+                            }
+                            #cfg_home_btn {
+                                background: #3a3a3a;
+                                color: #eee;
+                                border: 1px solid #555;
+                                border-radius: 4px;
+                                padding: 4px 10px;
+                                font-size: 12px;
+                                cursor: pointer;
+                                white-space: nowrap;
+                                text-decoration: none;
+                                display: inline-flex;
+                                align-items: center;
+                                gap: 5px;
+                                margin-right: 6px;
+                            }
+                            #cfg_home_btn:hover { background: #4a4a4a; border-color: #888; }
+                            #cfg_bar_title {
+                                font-size: 10px;
+                                font-weight: 700;
+                                letter-spacing: .08em;
+                                color: #666;
+                                text-transform: uppercase;
+                                margin-right: 4px;
+                                white-space: nowrap;
+                            }
+                            #cfg_status {
+                                margin-left: auto;
+                                font-size: 11px;
+                                color: #f59e0b;
+                                white-space: nowrap;
+                            }
+
+                            /* ── Preview iframe ──────────────────────────────────────────── */
+                            #cfg_frame {
+                                position: fixed;
+                                top: 0; left: 0;
+                                width: 100%; height: calc(100% - 48px);
+                                border: none;
+                                z-index: 1;
+                                background: #fff;
+                            }
+
+                            /* ── Loading overlay ──────────────────────────────────────────── */
+                            #cfg_loading {
+                                position: fixed;
+                                inset: 0;
+                                z-index: 9999;
+                                background: rgba(0, 0, 0, 0.55);
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                color: #fff;
+                                font-family: system-ui, sans-serif;
+                                font-size: 15px;
+                                letter-spacing: .04em;
+                            }
+                            #cfg_loading_spinner {
+                                width: 28px; height: 28px;
+                                border: 3px solid rgba(255,255,255,.25);
+                                border-top-color: #fff;
+                                border-radius: 50%;
+                                animation: cfg_spin .7s linear infinite;
+                                margin-right: 12px;
+                            }
+                            @keyframes cfg_spin { to { transform: rotate(360deg); } }
+                        </style>
+
+                        <!-- ── Full-viewport preview iframe ── -->
+                        <iframe id="cfg_frame" title="Configurator layout preview"/>
+
+                        <!-- ── Control bar (always visible, fixed to bottom) ── -->
+                        <div id="cfg_bar">
+                            <a id="cfg_home_btn" href="/">&#8592; Home</a>
+                            <span id="cfg_bar_title">Configurator Debug</span>
+
+                            <label>
+                                Style
+                                <!-- Per-style design tokens are duplicated here as
+                                     data-* attributes to keep this debug tool
+                                     self-contained.  Canonical source: the
+                                     CURATED_STYLES array in
+                                     /addons/website/static/src/client_actions/configurator/configurator.js -->
+                                <select id="cfg_style">
+                                    <option value="">— current palette —</option>
+                                    <optgroup label="Soft &amp; Pastel">
+                                        <option value="soft-04" data-font-head="Cormorant Garamond" data-font-body="Jost"              data-radius="0.375rem">Golden Hour</option>
+                                        <option value="soft-07" data-font-head="Libre Baskerville"  data-font-body="Lato"              data-radius="0.5rem">Forest Mist</option>
+                                        <option value="soft-11" data-font-head="Plus Jakarta Sans"  data-font-body="DM Sans"           data-radius="0.375rem">Cloud Nine</option>
+                                        <option value="soft-14" data-font-head="Fraunces"           data-font-body="Nunito"            data-radius="1rem">Rose Petal</option>
+                                    </optgroup>
+                                    <optgroup label="Elegant &amp; Professional">
+                                        <option value="elegant-01" data-font-head="Instrument Serif" data-font-body="Work Sans"        data-radius="0.25rem">Warm Stone</option>
+                                        <option value="elegant-02" data-font-head="Manrope"          data-font-body="Barlow"           data-radius="0.25rem">Steel Blue</option>
+                                        <option value="elegant-06" data-font-head="Bebas Neue"       data-font-body="DM Mono"          data-radius="0">Obsidian Flash</option>
+                                        <option value="elegant-08" data-font-head="Cascadia Code"    data-font-body="Work Sans"        data-radius="0">Monochrome</option>
+                                    </optgroup>
+                                    <optgroup label="Vibrant">
+                                        <option value="vibrant-01" data-font-head="Syne"             data-font-body="Barlow"           data-radius="0.125rem">Signal Red</option>
+                                        <option value="vibrant-02" data-font-head="Space Grotesk"    data-font-body="Plus Jakarta Sans" data-radius="1.25rem">Tropical Punch</option>
+                                        <option value="vibrant-05" data-font-head="Space Grotesk"    data-font-body="DM Mono"          data-radius="0">Acid Lab</option>
+                                        <option value="vibrant-07" data-font-head="Josefin Sans"     data-font-body="Manrope"          data-radius="0.375rem">Ocean Drive</option>
+                                    </optgroup>
+                                    <optgroup label="Earthy &amp; Nature">
+                                        <option value="earthy-02" data-font-head="Bitter"            data-font-body="Lato"             data-radius="0.375rem">Terra Cotta</option>
+                                        <option value="earthy-06" data-font-head="Cormorant Garamond" data-font-body="Work Sans"       data-radius="0.625rem">Linen &amp; Clay</option>
+                                        <option value="earthy-07" data-font-head="Nunito"            data-font-body="Lato"             data-radius="1.5rem">Garden Fresh</option>
+                                        <option value="earthy-10" data-font-head="Raleway"           data-font-body="Barlow"           data-radius="0.25rem">Deep Sea</option>
+                                    </optgroup>
+                                    <optgroup label="Dark">
+                                        <option value="inverted-01" data-font-head="Fraunces"        data-font-body="DM Sans"          data-radius="0.625rem">Ember</option>
+                                        <option value="inverted-03" data-font-head="Bebas Neue"      data-font-body="Barlow"           data-radius="0">Neon Chalk</option>
+                                        <option value="inverted-05" data-font-head="Space Grotesk"   data-font-body="DM Mono"          data-radius="0">Cyber</option>
+                                        <option value="inverted-06" data-font-head="Playfair Display" data-font-body="Lato"            data-radius="0.75rem">Night Sky</option>
+                                    </optgroup>
+                                </select>
+                            </label>
+
+                            <label>
+                                Vibe
+                                <select id="cfg_vibe">
+                                    <option value="clean">Clean</option>
+                                    <option value="dynamic">Dynamic</option>
+                                    <option value="gradient">Gradient</option>
+                                    <option value="glossy">Glossy</option>
+                                    <option value="illustrative">Illustrative</option>
+                                    <option value="playful">Playful</option>
+                                </select>
+                            </label>
+
+                            <label>
+                                Layout
+                                <select id="cfg_layout">
+                                    <option value="minimalist">Minimalist</option>
+                                    <option value="bento">Bento</option>
+                                    <option value="typographic">Typographic</option>
+                                    <option value="professional">Professional</option>
+                                    <option value="impactful">Impactful</option>
+                                    <option value="creative">Creative</option>
+                                </select>
+                            </label>
+
+                            <span id="cfg_status"/>
+                        </div>
+
+
+                        <!-- ── Loading overlay (shown while fetching / compiling) ── -->
+                        <div id="cfg_loading" style="display:none">
+                            <div id="cfg_loading_spinner"/>
+                            <span id="cfg_loading_msg">Loading…</span>
+                        </div>
+
+                        <script>//<![CDATA[
+(function () {
+    'use strict';
+
+    // ── DOM refs ──────────────────────────────────────────────────────────────────
+    var bar         = document.getElementById('cfg_bar');
+    var frame       = document.getElementById('cfg_frame');
+    var loading     = document.getElementById('cfg_loading');
+    var loadingMsg  = document.getElementById('cfg_loading_msg');
+    var statusEl    = document.getElementById('cfg_status');
+    var styleCtrl   = document.getElementById('cfg_style');
+    var vibeCtrl    = document.getElementById('cfg_vibe');
+    var layoutCtrl  = document.getElementById('cfg_layout');
+
+    // ── Current selection (from URL params) ──────────────────────────────────────
+    var p = new URLSearchParams(location.search);
+    var curVibe   = p.get('vibe')   || 'clean';
+    var curLayout = p.get('layout') || 'minimalist';
+    var curStyle  = p.get('style')  || '';
+
+    // Pre-select controls to match URL state.
+    if (curStyle)  styleCtrl.value  = curStyle;
+    vibeCtrl.value   = curVibe;
+    layoutCtrl.value = curLayout;
+
+
+    // ── JSON-RPC helper (CSRF not required for Content-Type: application/json) ────
+    function jsonRpc(url, params) {
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ jsonrpc: '2.0', method: 'call', id: 1, params: params }),
+        }).then(function (r) { return r.json(); }).then(function (d) { return d.result; });
+    }
+
+    // ── Read per-style design tokens from the <option> element's dataset ─────────
+    // Mirrors CURATED_STYLES in configurator.js.  Falls back to safe defaults
+    // when an unknown style id is passed (defensive).
+    function readStyleTokens(styleId) {
+        var opt = styleCtrl.querySelector('option[value="' + styleId + '"]');
+        var d = (opt && opt.dataset) || {};
+        return {
+            fontHead : d.fontHead || 'Inter Tight',
+            fontBody : d.fontBody || 'Inter',
+            radius   : d.radius   || '0.5rem',
+        };
+    }
+
+    // ── Build iframe srcdoc ───────────────────────────────────────────────────────
+    // Copies every stylesheet <link> from the current document into the iframe so
+    // the preview uses the exact same compiled CSS bundle (including the current
+    // palette's custom properties).  A small inline style suppresses any residual
+    // <configuratorheader>/<configuratorfooter> elements that might slip through.
+    function buildSrcdoc(html) {
+        var links = Array.prototype.slice
+            .call(document.querySelectorAll('link[rel="stylesheet"]'))
+            .map(function (l) { return '<link rel="stylesheet" href="' + l.href + '">'; })
+            .join('\n');
+        return '<!DOCTYPE html><html lang="en"><head>' +
+            '<meta charset="utf-8">' +
+            '<style>body{margin:0}' +
+            'configuratorheader,configuratorfooter{display:none!important}' +
+            /* Prevent navigation: neutralise every link and button in the preview. */
+            'a[href],button,input[type="submit"],input[type="button"],[role="button"]{pointer-events:none!important}' +
+            'header#top{background:transparent!important}' +
+            'header#top .navbar,header#top nav{--o-cc-bg:inherit;--o-cc-text:inherit;--nav-link-color:var(--o-cc-text);--navbar-color:inherit}' +
+            '</style>' +
+            links +
+            '</head><body class="website o_cc1">' + html + '</body></html>';
+    }
+
+    // ── Status helpers ────────────────────────────────────────────────────────────
+    function setLoading(msg) {
+        loadingMsg.textContent = msg || 'Loading…';
+        loading.style.display  = 'flex';
+        statusEl.textContent   = '';
+    }
+    function clearLoading(statusMsg) {
+        loading.style.display = 'none';
+        statusEl.textContent  = statusMsg || '';
+    }
+
+    // ── Load and render the current vibe + layout preview ─────────────────────────
+    // Calls get_layout_previews (same endpoint as the configurator) with the
+    // selected vibe and no industry (default images).  The endpoint returns an
+    // object keyed by layoutId; we pick the one we need and inject it as srcdoc.
+    function loadPreview() {
+        setLoading('Loading…');
+        jsonRpc('/website/configurator/get_layout_previews', {
+            vibe: curVibe,
+            industry_id: null,
+        }).then(function (results) {
+            var entry = results && results[curLayout];
+            var html  = entry  && entry.html;
+            if (html) {
+                frame.srcdoc = buildSrcdoc(html);
+                clearLoading('');
+            } else {
+                // Gracefully handle missing combinations (e.g. minimalist + glossy).
+                frame.srcdoc = buildSrcdoc(
+                    '<div style="display:flex;height:100vh;align-items:center;' +
+                    'justify-content:center;font-family:system-ui,sans-serif;color:#888;' +
+                    'flex-direction:column;gap:8px;">' +
+                    '<strong style="font-size:18px">Not available</strong>' +
+                    '<span style="font-size:13px">' +
+                    ' XML error OR ' +
+                    curLayout + ' &#xd7; ' + curVibe +
+                    ' does not have a dedicated template.</span></div>'
+                );
+                clearLoading(curLayout + ' \u00d7 ' + curVibe + ' not available');
+            }
+        }).catch(function (e) {
+            clearLoading('Error: ' + e.message);
+        });
+    }
+
+    // ── Style change ───────────────────────────────────────────────────────────────
+    // Compiles the SCSS palette server-side (same RPC as SelectStyle in the
+    // configurator) then reloads the page so the new CSS bundle is picked up.
+    // The selected style id is preserved in the URL so the dropdown stays in sync.
+    function applyStyleChange(styleId) {
+        setLoading('Compiling palette ' + styleId + '…');
+        var tokens = readStyleTokens(styleId);
+        // Build the SCSS payload.  Mirrors buildStyleScssValues() in
+        // configurator.js — must include 'google-fonts' so o-get-font-info()
+        // can resolve the chosen typefaces and 'display-N-line-height: 1' for
+        // the heading baseline.
+        var scssValues = {
+            'color-palettes-name' : "'" + styleId + "'",
+            'headings-font'       : "'" + tokens.fontHead + "'",
+            'font'                : "'" + tokens.fontBody + "'",
+            'btn-border-radius'   : tokens.radius,
+            'google-fonts'        : "('" + tokens.fontHead + "', '" + tokens.fontBody + "')",
+        };
+        for (var n = 1; n <= 6; n++) {
+            scssValues['display-' + n + '-line-height'] = '1';
+        }
+        jsonRpc('/web/dataset/call_kw', {
+            model  : 'website.assets',
+            method : 'make_scss_customization',
+            args   : [
+                '/website/static/src/scss/options/user_values.scss',
+                scssValues,
+            ],
+            kwargs : {},
+        }).then(function () {
+            // Reload the page after SCSS compilation so the new CSS bundle is served.
+            var params = new URLSearchParams(location.search);
+            params.set('style',  styleId);
+            params.set('vibe',   curVibe);
+            params.set('layout', curLayout);
+            location.search = params.toString();
+        }).catch(function (e) {
+            clearLoading('Style error: ' + e.message);
+        });
+    }
+
+    // ── Update URL without reloading (for vibe / layout changes) ──────────────────
+    function updateUrl(extraParams) {
+        var params = new URLSearchParams(location.search);
+        Object.keys(extraParams).forEach(function (k) { params.set(k, extraParams[k]); });
+        history.replaceState(null, '', '?' + params.toString());
+    }
+
+    // ── Event listeners ───────────────────────────────────────────────────────────
+    styleCtrl.addEventListener('change', function () {
+        var v = styleCtrl.value;
+        if (v) { applyStyleChange(v); }
+    });
+
+    vibeCtrl.addEventListener('change', function () {
+        curVibe = vibeCtrl.value;
+        updateUrl({ vibe: curVibe });
+        loadPreview();
+    });
+
+    layoutCtrl.addEventListener('change', function () {
+        curLayout = layoutCtrl.value;
+        updateUrl({ layout: curLayout });
+        loadPreview();
+    });
+
+    // ── Initial load ─────────────────────────────────────────────────────────────
+    loadPreview();
+
+}());
+//]]></script>
+                    </t>
+                </t>
+            </field>
+        </record>
+
+    </data>
+
+    <data>
+
+        <record id="configurator_layouts_debug_page" model="website.page">
+            <field name="url">/website/demo/configurator-layouts</field>
+            <field name="is_published">False</field>
+            <field name="view_id" ref="configurator_layouts_debug_view"/>
+        </record>
+
+    </data>
+</odoo>
+
