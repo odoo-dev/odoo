@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-import { markup, proxy, signal, types as t } from "@odoo/owl";
+import { markup, signal, types as t } from "@odoo/owl";
 import { HootError, stringify } from "../hoot_utils";
 import { Job } from "./job";
 import { Tag } from "./tag";
@@ -48,10 +48,10 @@ export class Test extends Job {
     static ABORTED = 3;
 
     formatted = false;
-    logs = proxy({
+    logs = {
         error: 0,
         warn: 0,
-    });
+    };
     // FIXME: cannot import on CaseResult for proper validation
     /** @type {import("@odoo/owl").Signal<import("./expect").CaseResult[]>} */
     results = signal.Array([], { type: t.object() });

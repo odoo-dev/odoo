@@ -1,7 +1,7 @@
 /** @odoo-module */
 
 import { on, queryAll } from "@odoo/hoot-dom";
-import { App, proxy, types as t, useEffect, useListener, validateType } from "@odoo/owl";
+import { App, types as t, useEffect, useListener, validateType } from "@odoo/owl";
 import { isNode } from "@web/../lib/hoot-dom/helpers/dom";
 import {
     isInstanceOf,
@@ -726,13 +726,6 @@ export function copyAndBind(object) {
         $defineProperty(copy, key, desc);
     }
     return copy;
-}
-
-/**
- * @param {TestReporting} [parentReporting]
- */
-export function createReporting(parentReporting) {
-    return proxy(new TestReporting(parentReporting));
 }
 
 /**
