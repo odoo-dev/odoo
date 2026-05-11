@@ -14,8 +14,8 @@ import {
     Markup,
     STORAGE,
     T_NULL,
+    TestReporting,
     batch,
-    createReporting,
     destroy,
     ensureArray,
     ensureError,
@@ -326,7 +326,7 @@ export class Runner {
         keyType: t.string(),
         valueType: T_PRESET,
     });
-    reporting = createReporting();
+    reporting = new TestReporting();
     /** @type {Suite[]} */
     rootSuites = [];
     /** @type {Map<string, Suite>} */
@@ -440,6 +440,7 @@ export class Runner {
         if (!this.headless) {
             this.globalErrors = proxy(this.globalErrors);
             this.globalWarnings = proxy(this.globalWarnings);
+            this.reporting = proxy(this.reporting);
             for (const [key, value] of $entries(this.includeSpecs)) {
                 this.includeSpecs[key] = proxy(value);
             }
@@ -537,10 +538,13 @@ export class Runner {
             this.suites.set(suite.id, suite);
             if (parentSuite) {
                 parentSuite.addJob(suite);
-                suite.reporting = createReporting(parentSuite.reporting);
+                suite.reporting = new TestReporting(parentSuite.reporting);
             } else {
                 this.rootSuites.push(suite);
-                suite.reporting = createReporting(this.reporting);
+                suite.reporting = new TestReporting(this.reporting);
+            }
+            if (!this.headless) {
+                suite.reporting = proxy(suite.reporting);
             }
         }
         this.suiteStack.push(suite);
@@ -602,6 +606,9 @@ export class Runner {
         }
         const runFn = this.dry ? null : fn;
         let test = new Test(parentSuite, name, config);
+        if (!this.headless) {
+            test.logs = proxy(test.logs);
+        }
         const originalTest = this.tests.get(test.id);
         if (originalTest && !originalTest.isMinimized) {
             if (this.dry || originalTest.run) {
