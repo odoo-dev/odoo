@@ -1499,7 +1499,7 @@ export class TablePlugin extends Plugin {
                     this._isTripleClickInTable = true;
                 }
             } else {
-                this.editable.addEventListener("mousemove", this.onMousemove);
+                this.editable.addEventListener("pointermove", this.onMousemove);
                 const currentSelection = this.dependencies.selection.getEditableSelection();
                 // disable dragging on table
                 if (closestElement(ev.target, "td.o_selected_td")) {
@@ -1507,13 +1507,17 @@ export class TablePlugin extends Plugin {
                 }
                 this.deselectTable();
             }
+            if (this.services.ui.isSmall && ev.detail === 2) {
+                this._selectMobileCells = true;
+            }
         }
     }
 
     onMouseup(ev) {
+        delete this._selectMobileCells;
         delete this._mouseMovePositionWhenAllContentsSelected;
         this._currentMouseState = ev.type;
-        this.editable.removeEventListener("mousemove", this.onMousemove);
+        this.editable.removeEventListener("pointermove", this.onMousemove);
     }
 
     /**
@@ -1579,6 +1583,15 @@ export class TablePlugin extends Plugin {
             ) {
                 // Handle selecting an empty cell.
                 this.selectTableCells(selection);
+            }
+        }
+        if (this._selectMobileCells && this.isPointerInsideCell(ev)) {
+            const { anchorNode, anchorOffset } = selection;
+            const td = closestElement(ev.target, isTableCell);
+            if (td && !td.classList.contains(".o_selected_td")) {
+                this.dependencies.selection.setSelection({
+                    anchorNode, anchorOffset, focusNode: td, focusOffset: nodeSize(td),
+                });
             }
         }
     }
