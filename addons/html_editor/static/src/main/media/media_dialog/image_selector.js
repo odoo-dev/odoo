@@ -349,25 +349,27 @@ export class ImageSelector extends FileSelector {
             return;
         }
         this.isProcessingClick = true;
-        if (attachment.unselectable) {
+        try {
+            if (attachment.unselectable) {
+                this.notificationService.add(
+                    _t(
+                        "You can not replace a field by this image. If you want to use this image, first save it on your computer and then upload it here."
+                    ),
+                    {
+                        type: "danger",
+                        sticky: true,
+                    }
+                );
+                return;
+            }
+            this.selectAttachment(attachment);
+            if (!this.props.multiSelect) {
+                await this.props.save();
+                return;
+            }
+        } finally {
             this.isProcessingClick = false;
-            this.notificationService.add(
-                _t(
-                    "You can not replace a field by this image. If you want to use this image, first save it on your computer and then upload it here."
-                ),
-                {
-                    type: "danger",
-                    sticky: true,
-                }
-            );
-            return;
         }
-        this.selectAttachment(attachment);
-        if (!this.props.multiSelect) {
-            await this.props.save();
-            return;
-        }
-        this.isProcessingClick = false;
     }
 
     async onClickMedia(media) {
