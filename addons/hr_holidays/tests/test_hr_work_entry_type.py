@@ -232,3 +232,19 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_compute_leaves_search(self):
+        """
+        Just execute the search on remaining leaves to prevent any break here
+        Those break are triggered by RPC and might pass silently
+        """
+
+        work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Test Time Off',
+            'code': 'TEST110',
+            'requires_allocation': True,
+        })
+
+        rpc_search = self.env['hr.work.entry.type'].search([
+            ('virtual_remaining_leaves', ">", "0")
+        ])
