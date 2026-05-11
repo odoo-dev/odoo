@@ -108,12 +108,6 @@ class StockMoveLine(models.Model):
             res['context'] = context
         return res
 
-    def _post_put_in_pack_hook(self, package):
-        weight = self.env.context.get('weight')
-        if weight:
-            package.shipping_weight = weight
-        return super()._post_put_in_pack_hook(package)
-
     def _get_package_carrier_type_for_pack(self):
         if len(self.carrier_id) > 1 or any(not ml.carrier_id for ml in self):
             # avoid (duplicate) costs for products

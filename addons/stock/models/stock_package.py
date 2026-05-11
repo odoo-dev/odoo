@@ -342,6 +342,9 @@ class StockPackage(models.Model):
 
     def _post_put_in_pack_hook(self):
         self.ensure_one()
+        weight = self.env.context.get('weight')
+        if weight:
+            self.shipping_weight = weight
         return self
 
     def action_put_in_pack(self, *, package_id=False, package_type_id=False, package_name=False):
@@ -432,7 +435,7 @@ class StockPackage(models.Model):
         return all(float_is_zero(grouped_quants.get(key, 0) - grouped_ops.get(key, 0), precision_digits=precision_digits) for key in grouped_quants) \
            and all(float_is_zero(grouped_ops.get(key, 0) - grouped_quants.get(key, 0), precision_digits=precision_digits) for key in grouped_ops)
 
-    def _get_weight(self, picking_id=False):
+    def _get_weight(self, picking_id=False, include_quants=False):
         res = {}
         if picking_id:
             package_weights = defaultdict(float)
@@ -458,15 +461,16 @@ class StockPackage(models.Model):
         for package in self:
             weight = package.package_type_id.base_weight or 0.0
             if picking_id:
-                res[package] = weight + package_weights[package.id]
+                weight += package_weights[package.id]
                 for child_id in children_by_dest_pack.get(package, []):
-                    res[package] += base_weight_per_package.get(child_id, 0) + package_weights.get(child_id, 0)
-            else:
+                    weight += base_weight_per_package.get(child_id, 0) + package_weights.get(child_id, 0)
+
+            if include_quants or not picking_id:
                 # Take the base_weight of every contained package, so we include package only containing packages
                 weight += sum(package.all_children_package_ids.mapped(lambda p: p.package_type_id.base_weight))
                 for quant in package.contained_quant_ids:
                     weight += quant.quantity * quant.product_id.weight
-                res[package] = weight
+            res[package] = weight
         return res
 
     def _has_issues(self):
