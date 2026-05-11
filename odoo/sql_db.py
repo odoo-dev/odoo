@@ -16,7 +16,7 @@ import time
 import typing
 import uuid
 import warnings
-from contextlib import contextmanager, nullcontext
+from contextlib import closing, contextmanager, nullcontext
 from datetime import datetime, timedelta
 from inspect import currentframe
 
@@ -626,6 +626,36 @@ class PsycoConnection(psycopg2.extensions.connection):
     def give_back(self, keep_in_pool=True):
         raise RuntimeError('not bound to a pool')
 
+    @functools.cached_property
+    def has_high_db_privileges(self) -> bool:
+        """
+        Whether this connection's PostgreSQL login role has, or can acquire
+        via SET ROLE, an elevated attribute (SUPERUSER, REPLICATION, BYPASSRLS).
+        """
+        if config['test_enable']:
+            return False
+
+        with closing(self.cursor()) as cr:
+            cr.execute("""
+                SELECT EXISTS (
+                    SELECT 1 FROM pg_roles
+                    WHERE (rolsuper OR rolreplication OR rolbypassrls)
+                        AND (rolname = %(role)s OR pg_has_role(%(role)s, oid, 'SET'))
+                )
+            """, {'role': self.info.user})
+            has_high_privileges = bool(cr.fetchone()[0])
+
+        if has_high_privileges:
+            _logger.warning("Database uses a PostgreSQL role %r with elevated privileges.", self.info.user)
+
+        # If a transaction is already open, the probe's SELECT merely joins it
+        # and we must not touch it. Otherwise the probe opens one that we roll
+        # back, so the caller can run ``set_session`` on this fresh connection.
+        if self.info.transaction_status != psycopg2.extensions.TRANSACTION_STATUS_IDLE:
+            self.rollback()
+
+        return has_high_privileges
+
 
 class ConnectionPool:
     """ The pool of connections to database(s)
@@ -711,6 +741,7 @@ class ConnectionPool:
             raise
         if result.server_version < MIN_PG_VERSION * 10000:
             warnings.warn(f"Postgres version is {result.server_version}, lower than minimum required {MIN_PG_VERSION * 10000}")
+        result.has_high_db_privileges
         self._used_connections.add(result)
         self._debug('Create new connection backend PID %d', result.get_backend_pid())
 
