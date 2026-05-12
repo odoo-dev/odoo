@@ -3888,10 +3888,14 @@ class BaseModel(metaclass=MetaModel):
             protected = self.env._protected.get(self._fields[fname], ())
             unprotected_real_recs = real_recs.browse(id_ for id_ in real_recs._ids if id_ not in protected)
             unprotected_real_recs.invalidate_recordset([fname])
-        real_recs.modified([
+        modified_fnames = [
             fname for fname in recompute_fnames
             if any(r[fname] != val_before for r, val_before in zip(real_recs, recompute_vals_before[fname], strict=True))
-        ])
+        ]
+        related_fnames = [fname for fname in modified_fnames if (field := self._fields[fname]) and field.related and field.type != 'binary']
+        if related_fnames:
+            _logger.warning('Write related field changes: <%s> %s', self._name, related_fnames, stack_info=True)
+        real_recs.modified(modified_fnames)
 
         # invalidate the cache
         if real_recs and (cache_name := self._clear_cache_name) and (
@@ -4143,10 +4147,14 @@ class BaseModel(metaclass=MetaModel):
             # new created records shouldn't be protected
             inv_records.invalidate_recordset(field_names)
         for inv_records, field_names in to_recompute:
-            inv_records.modified([
+            modified_fnames = [
                 fname for fname in field_names
                 if any(r[fname] != val_before for r, val_before in zip(inv_records, recompute_vals_before[fname], strict=True))
-            ])
+            ]
+            related_fnames = [fname for fname in modified_fnames if (field := self._fields[fname]) and field.related and field.type != 'binary']
+            if related_fnames:
+                _logger.warning('Create related field changes: <%s> %s', self._name, related_fnames, stack_info=True)
+            inv_records.modified(modified_fnames)
 
         # invalidate the cache
         if cache_name := self._clear_cache_name:
