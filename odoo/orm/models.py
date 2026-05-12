@@ -42,6 +42,8 @@ import psycopg2.errors
 import psycopg2.extensions
 from psycopg2.extras import Json
 
+import odoo.modules
+
 from odoo.exceptions import AccessError, LockError, MissingError, ValidationError, UserError
 from odoo.tools import (
     clean_context, format_list,
@@ -117,6 +119,10 @@ SQL_DEFAULT = psycopg2.extensions.AsIs("DEFAULT")
 # hacky-ish way to prevent access to a field through the ORM (except for sudo mode)
 NO_ACCESS = '.'
 
+WRITE_READONLY_FIELDS_CHECKED = set()
+CREATE_READONLY_FIELDS_CHECKED = set()
+WRITE_READONLY_FIELDS_CHECKED_TEST = set()
+CREATE_READONLY_FIELDS_CHECKED_TEST = set()
 
 def parse_read_group_spec(spec: str) -> tuple:
     """ Return a triplet corresponding to the given field/property_name/aggregate specification. """
@@ -3760,6 +3766,12 @@ class BaseModel(metaclass=MetaModel):
                 self.check_field_access(self._fields[field_name], 'write')
             except KeyError as e:
                 raise ValueError(f"Invalid field {field_name!r} in {self._name!r}") from e
+            field = self._fields[field_name]
+            in_test = bool(odoo.modules.module.current_test)
+            checked = WRITE_READONLY_FIELDS_CHECKED_TEST if in_test else CREATE_READONLY_FIELDS_CHECKED
+            if field.readonly and not field.store and str(field) not in checked:
+                checked.add(str(field))
+                _logger.warning("%s Write to readonly field %s", "[TEST]" if in_test else "", field, stack_info=True)
         env = self.env
 
         bad_names = {'id', 'parent_path'}
@@ -4046,6 +4058,8 @@ class BaseModel(metaclass=MetaModel):
         data_list = []
         determine_inverses = defaultdict(OrderedSet)       # {inverse: fields}
 
+        in_test = bool(odoo.modules.module.current_test)
+        checked = CREATE_READONLY_FIELDS_CHECKED_TEST if in_test else CREATE_READONLY_FIELDS_CHECKED
         for vals in new_vals_list:
             precomputed = vals.pop('__precomputed__', ())
 
@@ -4060,6 +4074,11 @@ class BaseModel(metaclass=MetaModel):
                 field = self._fields.get(key)
                 if not field:
                     raise ValueError("Invalid field %r on model %r" % (key, self._name))
+                
+                if field.readonly and not field.store and str(field) not in checked:
+                    checked.add(str(field))
+                    _logger.warning("%s Create to readonly field %s", "[TEST]" if in_test else "", field, stack_info=True)
+
                 if field.store:
                     stored[key] = val
                 if field.inherited:
