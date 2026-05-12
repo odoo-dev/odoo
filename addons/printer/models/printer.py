@@ -25,3 +25,9 @@ class Printer(models.Model):
         ),
     )
     use_lna = fields.Boolean(string="Use Local Network Access")
+
+    client_device_id = fields.Many2one(
+        "printer.client.device",
+        string="Proxy Device",
+        ondelete="cascade",
+    )

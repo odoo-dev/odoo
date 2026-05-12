@@ -39,23 +39,71 @@
         <field name="arch" type="xml">
             <list>
                 <field name="name"/>
+                <field name="proxy_id"/>
+                <field name="ip_address"/>
+                <field name="port"/>
+                <field name="proxy_status"/>
             </list>
         </field>
     </record>
 
-    <!-- <record id="printer_client_device_view_form" model="ir.ui.view">
+   <record id="printer_client_device_view_form" model="ir.ui.view">
         <field name="name">printer.client.device.form</field>
         <field name="model">printer.client.device</field>
         <field name="arch" type="xml">
-            <form>
+            <form string="Printer Client Device">
+
+                <header>
+                    <button
+                        name="%(action_proxy_discovery)d"
+                        type="action"
+                        string="Refresh"
+                        class="btn-primary"
+                        icon="fa-refresh"
+                    />
+                </header>
+
                 <sheet>
                     <group>
-                        <field name="name"/>
+                        <group>
+                            <field name="name"/>
+                            <field name="proxy_id"/>
+                            <field name="device_uuid" readonly="1"/>
+                            <field name="proxy_status"/>
+                        </group>
+
+                        <group>
+                            <field name="ip_address"/>
+                            <field name="port"/>
+                            <field string="Last Status Updated" name="write_date" readonly="1"/>
+                        </group>
                     </group>
+
+                    <notebook>
+                        <page string="Printers">
+                            <field name="printer_list">
+                                <list editable="bottom" create="false">
+                                    <field name="name"/>
+                                    <field name="ip_address"/>
+                                    <field name="report_ids" widget="many2many_tags"/>
+                                    <field name="type"/>
+                                    <field name="use_lna"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Technical Information">
+                            <group>
+                                <field name="host_name"/>
+                                <field name="os"/>
+                                <field name="os_version"/>
+                                <field name="proxy_version"/>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
-    </record> -->
+    </record>
 
     <record id="manage_printers_action" model="ir.actions.act_window">
         <field name="name">Printers</field>
@@ -89,4 +137,26 @@
         <field name="path">reset-printers</field>
         <field name="tag">reset_linked_printers</field>
     </record>
+
+
+    <record id="action_proxy_discovery" model="ir.actions.client">
+        <field name="name">proxy.discovery</field>
+        <field name="path">proxy-discovery</field>
+        <field name="tag">proxy_discovery</field>
+    </record>
+
+    <menuitem
+        id="menu_printer_root"
+        name="Printer"
+        action="manage_printer_client_device_action"
+        sequence="90"
+    />
+
+    <menuitem
+        id="menu_discover_printer_proxy"
+        name="Discover Printer Proxy"
+        parent="menu_printer_root"
+        action="action_proxy_discovery"
+        sequence="10"
+    />
 </odoo>
