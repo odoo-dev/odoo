@@ -31,6 +31,7 @@ class TestOrmMixed(models.Model):
     # Relational Fields
     many2one_id = fields.Many2one('test_orm.mixed_relations')
     one2many_ids = fields.One2many('test_orm.mixed_relations', 'many2one_id')
+    one2many_related_ids = fields.One2many('test_orm.mixed_relations', 'many2one_related_id')
     many2many_ids = fields.Many2many('test_orm.mixed_relations')
 
     # Selection Fields
@@ -74,6 +75,7 @@ class TestOrmMixedRelations(models.Model):
     many2one_id = fields.Many2one('test_orm.mixed')
     one2many_ids = fields.One2many('test_orm.mixed', 'many2one_id')
     many2many_ids = fields.Many2many('test_orm.mixed')
+    many2one_related_id = fields.Many2one(related='many2one_id')
 
 
 class TestOrmMixedComputes(models.Model):

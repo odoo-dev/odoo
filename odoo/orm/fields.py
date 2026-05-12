@@ -743,6 +743,7 @@ class Field[T]:
         # traverse_related
         assert self.related and not self.store
         assert model is table._model
+        _logger.warning('compute_sql_related is called: %s', self.related, stack_info=True)
 
         env = table._model.env
         if self.compute_sudo and not env.su:
