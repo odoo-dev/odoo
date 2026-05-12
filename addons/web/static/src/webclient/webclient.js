@@ -80,9 +80,7 @@ export class WebClient extends Component {
 
             if (matchingMenus.length > 0) {
                 // Use sessionStorage context to determine the correct menu
-                menuId = matchingMenus.find(m => 
-                    m.appID === storedMenuId
-                )?.appID;
+                menuId = matchingMenus.find((m) => m.appID === storedMenuId)?.appID;
                 if (!menuId) {
                     menuId = matchingMenus[0]?.appID;
                 }
@@ -190,6 +188,14 @@ export class WebClient extends Component {
                             rpcBus.trigger("CLEAR-CACHES");
                         }
                     });
+                    this.serviceWorkerActivationResolvers.promise.then(() =>
+                        registration.showNotification("Call from RES", {
+                            actions: [
+                                { action: "answer", title: "👍 Answer" },
+                                { action: "decline", title: "⤻ Decline" },
+                            ],
+                        })
+                    );
                 })
                 .catch((error) => {
                     console.error("Service worker registration failed, error:", error);

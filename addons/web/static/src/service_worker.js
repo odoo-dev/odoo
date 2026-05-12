@@ -167,3 +167,8 @@ self.addEventListener("message", (event) => {
         sessionInfo = null;
     }
 });
+
+self.addEventListener("notificationclick", function (event) {
+    event.notification.close();
+    self.clients.openWindow(homepageURL + "?action=" + event.action);
+});
