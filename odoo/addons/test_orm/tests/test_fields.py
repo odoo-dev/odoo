@@ -1,9 +1,11 @@
+import ast
 import base64
 import io
 import inspect
 import logging
 from collections import OrderedDict
 from datetime import date, datetime
+from pathlib import Path
 from unittest.mock import patch
 from contextlib import contextmanager
 
@@ -13,6 +15,7 @@ from PIL import Image
 from odoo import Command, fields, models
 from odoo.exceptions import AccessError, MissingError, UserError, ValidationError
 from odoo.fields import Domain
+from odoo.modules import Manifest
 from odoo.tests import TransactionCase, tagged, users
 from odoo.tools import BinaryBytes, float_repr, mute_logger
 from odoo.tools.image import binary_to_image, image_data_uri
@@ -5444,3 +5447,94 @@ class TestWriteOverrideTranslatedFields(TransactionCase):
         if checked_field_names:
             _logger.warning("Some checked fields maybe not be used in the write anymore %s", checked_field_names)
         self.assertFalse(len(violations), "Override `write`(maybe also `create`) for translated fields \n" + '\n'.join(violations))
+
+
+@tagged('at_install', '-post_install')
+class TestConstrainsAttributeAssignment(TransactionCase):
+    def test_no_self_attribute_assignment_in_constrains(self):
+        def iter_assignment_targets(target):
+            if isinstance(target, (ast.Tuple, ast.List)):
+                for sub_target in target.elts:
+                    yield from iter_assignment_targets(sub_target)
+                return
+            yield target
+
+        def get_root_name(node):
+            while isinstance(node, (ast.Attribute, ast.Subscript)):
+                node = node.value
+            if isinstance(node, ast.Name):
+                return node.id
+            return None
+
+        def is_constrains_decorator(decorator):
+            if isinstance(decorator, ast.Call):
+                decorator = decorator.func
+            if isinstance(decorator, ast.Attribute):
+                return isinstance(decorator.value, ast.Name) and decorator.value.id == 'api' and decorator.attr == 'constrains'
+            return isinstance(decorator, ast.Name) and decorator.id == 'constrains'
+
+        def find_forbidden_assignments(function_node, self_iterators):
+            violations = []
+            for node in ast.walk(function_node):
+                targets = []
+                if isinstance(node, ast.Assign):
+                    for target in node.targets:
+                        targets.extend(iter_assignment_targets(target))
+                elif isinstance(node, ast.AnnAssign):
+                    targets.extend(iter_assignment_targets(node.target))
+                elif isinstance(node, ast.AugAssign):
+                    targets.extend(iter_assignment_targets(node.target))
+
+                for target in targets:
+                    if not isinstance(target, ast.Attribute):
+                        continue
+                    root_name = get_root_name(target)
+                    if root_name == 'self' or root_name in self_iterators:
+                        violations.append((function_node.name, getattr(node, 'lineno', -1)))
+            return violations
+
+        def check_file_for_constrains_violations(tree):
+            violations = []
+            for node in ast.walk(tree):
+                if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    continue
+                if not any(is_constrains_decorator(decorator) for decorator in node.decorator_list):
+                    continue
+                self_iterators = {
+                    for_node.target.id
+                    for for_node in ast.walk(node)
+                    if isinstance(for_node, ast.For)
+                    and isinstance(for_node.iter, ast.Name)
+                    and for_node.iter.id == 'self'
+                    and isinstance(for_node.target, ast.Name)
+                }
+                violations.extend(find_forbidden_assignments(node, self_iterators))
+            return violations
+
+        module_roots = sorted({
+            Path(manifest.path).resolve()
+            for manifest in Manifest.all_addon_manifests()
+        })
+        violations = []
+        for module_root in module_roots:
+            module_name = module_root.name
+            for python_file in module_root.rglob('*.py'):
+                if 'tests' in python_file.parts:
+                    continue
+                source = python_file.read_text(encoding='utf-8')
+                if 'constrains' not in source:
+                    continue
+                tree = ast.parse(source, filename=str(python_file))
+                violations.extend(
+                    (module_name, python_file.relative_to(module_root), function_name, line_number)
+                    for function_name, line_number in check_file_for_constrains_violations(tree)
+                )
+
+        violations.sort(key=lambda entry: (entry[0], str(entry[1]), entry[3], entry[2]))
+        self.assertFalse(
+            violations,
+            "Forbidden attribute assignment in @api.constrains methods:\n%s" % "\n".join(
+                f"- {module_name}/{path}:{line} ({function_name})"
+                for module_name, path, function_name, line in violations
+            ),
+        )
