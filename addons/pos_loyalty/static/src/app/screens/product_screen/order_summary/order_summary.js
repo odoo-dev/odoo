@@ -74,6 +74,10 @@ patch(OrderSummary.prototype, {
         if (!selectedLine) {
             return;
         }
+        const isEditableEwalletRewardPrice =
+            selectedLine.is_reward_line &&
+            this.pos.numpadMode === "price" &&
+            selectedLine.coupon_id?.program_id?.program_type === "ewallet";
         if (selectedLine.is_reward_line && val === "remove") {
             this.currentOrder.uiState.disabledRewards.add(selectedLine.reward_id.id);
             const coupon = selectedLine.coupon_id;
@@ -88,8 +92,31 @@ patch(OrderSummary.prototype, {
         if (
             !selectedLine ||
             !selectedLine.is_reward_line ||
+            isEditableEwalletRewardPrice ||
             (selectedLine.is_reward_line && ["", "remove"].includes(val))
         ) {
+            if (isEditableEwalletRewardPrice && val !== "remove" && val !== "") {
+                const enteredAmount = parseFloat(val);
+                if (!Number.isNaN(enteredAmount)) {
+                    const availableCredit = Math.abs(selectedLine.coupon_id?.points || 0);
+                    const cappedAmount = Math.min(Math.abs(enteredAmount), availableCredit);
+                    if (Math.abs(enteredAmount) > availableCredit) {
+                        this.notification.add(
+                            _t("Redeem amount cannot exceed available eWallet balance."),
+                            4000
+                        );
+                    }
+                    const reward = selectedLine.reward_id;
+                    if (reward?.discount_mode === "per_point" && reward.discount) {
+                        selectedLine.points_cost = cappedAmount / reward.discount;
+                    } else {
+                        selectedLine.points_cost = cappedAmount;
+                    }
+                    // Reward lines must stay negative (amount redeemed by the customer).
+                    super._setValue(-cappedAmount);
+                    return;
+                }
+            }
             super._setValue(val);
         }
         if (!selectedLine.is_reward_line || (selectedLine.is_reward_line && val === "remove")) {
