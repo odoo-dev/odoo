@@ -163,7 +163,7 @@ export class TourService {
         if (options.mode === "manual") {
             const tour = await this.orm.call("web_tour.tour", "get_tour_json_by_name", [name]);
             if (!tour) {
-                throw new Error(`Tour '${name}' is not found in the database.`);
+                return;
             }
             if (!tour.steps.length && tourRegistry.contains(tour.name)) {
                 tour.steps = tourRegistry.get(tour.name).steps;

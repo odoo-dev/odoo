@@ -43,6 +43,8 @@ class Web_TourTour(models.Model):
     @api.model
     def get_tour_json_by_name(self, tour_name):
         tour_id = self.search([("name", "=", tour_name)])
+        if not tour_id:
+            return False
         return tour_id._get_tour_json()
 
     def _get_tour_json(self):
