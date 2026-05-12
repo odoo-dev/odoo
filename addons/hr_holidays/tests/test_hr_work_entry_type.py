@@ -232,3 +232,62 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_search_with_virtual_remaining_leaves_rule(self):
+        work_entry_type_1 = self.env['hr.work.entry.type'].create({
+            'name': 'Test Time Off',
+            'code': 'Test Time Off 5',
+            'requires_allocation': True,
+            'unit_of_measure': 'day',
+        })
+        work_entry_type_2 = self.env['hr.work.entry.type'].create({
+            'name': 'Test Time Off',
+            'code': 'Test Time Off 6',
+            'requires_allocation': True,
+            'unit_of_measure': 'day',
+        })
+        work_entry_type_3 = self.env['hr.work.entry.type'].create({
+            'name': 'Test Time Off',
+            'code': 'Test Time Off 7',
+            'requires_allocation': True,
+            'unit_of_measure': 'day',
+        })
+
+        employee = self.env['hr.employee'].create({'name': 'Test Employee'})
+        allocation_1 = self.env['hr.leave.allocation'].create({
+            'name': 'Test Allocation',
+            'employee_id': employee.id,
+            'work_entry_type_id': work_entry_type_1.id,
+            'number_of_days': 6,
+        })
+        allocation_2 = self.env['hr.leave.allocation'].create({
+            'name': 'Test Allocation',
+            'employee_id': employee.id,
+            'work_entry_type_id': work_entry_type_2.id,
+            'number_of_days': 4,
+        })
+        allocation_1._action_validate()
+        allocation_2._action_validate()
+
+        type_env = self.env['hr.work.entry.type'].with_context(employee_id=employee.id)
+
+        results = type_env.search([('virtual_remaining_leaves', '=', 0)])
+        self.assertNotIn(work_entry_type_1, results)
+        self.assertNotIn(work_entry_type_2, results)
+        self.assertIn(work_entry_type_3, results)
+
+        results = type_env.search([('virtual_remaining_leaves', '<', 5)])
+        self.assertNotIn(work_entry_type_1, results)
+        self.assertIn(work_entry_type_2, results)
+        self.assertIn(work_entry_type_3, results)
+
+        results = type_env.search([('virtual_remaining_leaves', '>', 3)])
+        self.assertIn(work_entry_type_1, results)
+        self.assertIn(work_entry_type_2, results)
+        self.assertNotIn(work_entry_type_3, results)
+
+        results = type_env.search([('virtual_remaining_leaves', '=', 6)])
+        self.assertIn(work_entry_type_1, results)
+
+        results = type_env.search([('virtual_remaining_leaves', '=', 4)])
+        self.assertIn(work_entry_type_2, results)
