@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template name="Minimal Navigation" id="s_nav_minimal">
+    <section class="s_nav_minimal o_cc o_cc1 pt24 pb24" data-name="Minimal Navigation">
+        <div class="o_container_small">
+            <div class="row">
+                <div class="col">
+                    <a href="#" class="small" title="">
+                        FIRST ENTRY
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="#" class="small" title="">
+                        SECOND ENTRY
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="#" class="small" title="">
+                        THIRD ENTRY
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="#" class="small" title="">
+                        FOURTH ENTRY
+                    </a>
+                </div>
+                <div class="col">
+                    <a href="#" class="small" title="">
+                        FIFTH ENTRY
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+<asset id="website.s_nav_minimal_000_scss" name="Minimal Navigation 000 SCSS">
+    <bundle>web.assets_frontend</bundle>
+    <path>website/static/src/snippets/s_nav_minimal/000.scss</path>
+</asset>
+
+</odoo>
+

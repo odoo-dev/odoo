@@ -156,6 +156,7 @@
         'views/snippets/s_progress_bar.xml',
         'views/snippets/s_blockquote.xml',
         'views/snippets/s_badge.xml',
+        'views/snippets/s_nav_minimal.xml',
         'views/snippets/s_color_blocks_2.xml',
         'views/snippets/s_attributes_horizontal.xml',
         'views/snippets/s_attributes_vertical.xml',

@@ -1,0 +1,8 @@
+.s_nav_minimal {
+    text-align: center;
+
+    .col + .col {
+        border-left: $border-width solid currentColor;
+    }
+}
+
