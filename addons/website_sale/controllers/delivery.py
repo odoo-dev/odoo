@@ -31,12 +31,14 @@ class Delivery(WebsiteSale):
         return {}
 
     @route("/shop/set_delivery_method", type="jsonrpc", auth="public", website=True)
-    def shop_set_delivery_method(self, dm_id=None, **kwargs):
+    def shop_set_delivery_method(self, dm_id=None, rate_token=None, **kwargs):
         """Set the delivery method on the current order and return the order summary values.
 
-        If the delivery method is already set, the order summary values are returned immediately.
+        If the delivery method is already set with the same rate token, the order summary values
+        are returned immediately.
 
         :param str dm_id: The delivery method to set, as a `delivery.carrier` id.
+        :param str rate_token: The rate-shop variant token, when applicable.
         :param dict kwargs: The keyword arguments forwarded to `_order_summary_values`.
         :return: The order summary values, if any.
         :rtype: dict
@@ -45,7 +47,11 @@ class Delivery(WebsiteSale):
             return {}
 
         dm_id = int(dm_id)
-        if dm_id in order_sudo._get_delivery_methods().ids and dm_id != order_sudo.carrier_id.id:
+        already_set = (
+            dm_id == order_sudo.carrier_id.id
+            and rate_token == (order_sudo.delivery_rate_token or None)
+        )
+        if dm_id in order_sudo._get_delivery_methods().ids and not already_set:
             for tx_sudo in order_sudo.transaction_ids:
                 if tx_sudo.state not in {"draft", "cancel", "error"}:
                     raise UserError(
@@ -56,7 +62,7 @@ class Delivery(WebsiteSale):
                     )
 
             delivery_method_sudo = request.env["delivery.carrier"].sudo().browse(dm_id).exists()
-            order_sudo._set_delivery_method(delivery_method_sudo)
+            order_sudo._set_delivery_method(delivery_method_sudo, rate_token=rate_token)
         return self._order_summary_values(order_sudo, **kwargs)
 
     def _order_summary_values(self, order, **_kwargs):
@@ -121,6 +127,49 @@ class Delivery(WebsiteSale):
                 0.0, {"display_currency": order_sudo.currency_id}
             )
         return rate
+
+    @route("/shop/get_delivery_rate_variants", type="jsonrpc", auth="public", methods=["POST"], website=True)
+    def shop_get_delivery_rate_variants(self, dm_id):
+        """Expand a rate-shopping carrier into its concrete service variants.
+
+        :param str dm_id: The rate-shopping `delivery.carrier` id.
+        :return: ``{success, variants: [{token, label, amount_delivery, price, is_free_delivery,
+            delivery_eta}], error_message}``
+        :rtype: dict
+        """
+        if not (order_sudo := request.cart):
+            raise ValidationError(self.env._("Your cart is empty."))
+        if int(dm_id) not in order_sudo._get_delivery_methods().ids:
+            raise UserError(self.env._(
+                "It seems that a delivery method is not compatible with your address. Please"
+                " refresh the page and try again."
+            ))
+        Monetary = request.env["ir.qweb.field.monetary"]
+        delivery_method = request.env["delivery.carrier"].sudo().browse(int(dm_id)).exists()
+        if not delivery_method.is_rate_shopping:
+            return {"success": False, "error_message": self.env._("This carrier does not support rate shopping.")}
+        rows = delivery_method._rate_shop(order_sudo)
+        variants = []
+        for row in rows:
+            if not row.get("success"):
+                continue
+            variants.append({
+                "token": row.get("token") or "",
+                "label": row.get("label") or delivery_method.name,
+                "price": row["price"],
+                "amount_delivery": Monetary.value_to_html(
+                    row["price"], {"display_currency": order_sudo.currency_id}
+                ),
+                "is_free_delivery": not bool(row["price"]),
+                "delivery_eta": row.get("delivery_eta") or "",
+            })
+        if not variants:
+            first_failure = next((r for r in rows if not r.get("success")), {})
+            return {
+                "success": False,
+                "error_message": first_failure.get("error_message") or self.env._("No rates available."),
+            }
+        return {"success": True, "variants": variants}
 
     @route(_express_checkout_delivery_route, type="jsonrpc", auth="public", website=True)
     def express_checkout_process_delivery_address(self, partial_delivery_address):

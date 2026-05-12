@@ -140,6 +140,12 @@ export class Checkout extends Interaction {
             return; // Failing delivery methods cannot be selected.
         }
 
+        if (checkedRadio.dataset.isRateShopping === '1') {
+            this._disableMainButton();
+            await this.waitFor(this._expandRateShoppingRow(checkedRadio));
+            return; // Variants replace the row; user must click an expanded variant to select.
+        }
+
         // Disable the main button while fetching delivery rates.
         this._disableMainButton();
 
@@ -148,6 +154,91 @@ export class Checkout extends Interaction {
 
         // Re-enable the main button after delivery rates have been fetched.
         this._enableMainButton();
+    }
+
+    /**
+     * Replace a rate-shopping carrier row with one row per available service variant.
+     *
+     * @private
+     * @param {HTMLInputElement} radio - The radio button of the rate-shopping carrier.
+     * @return {void}
+     */
+    async _expandRateShoppingRow(radio) {
+        this._showLoadingBadge(radio);
+        const dmId = radio.dataset.dmId;
+        const result = await this.waitFor(
+            rpc('/shop/get_delivery_rate_variants', { dm_id: dmId })
+        );
+        if (!result.success) {
+            const badge = this._getDeliveryPriceBadge(radio);
+            badge.textContent = result.error_message || _t('No rates available.');
+            radio.disabled = true;
+            return;
+        }
+        const originalLi = radio.closest('li[name="o_delivery_method"]');
+        const insertAfter = originalLi;
+        const newRows = [];
+        for (const variant of result.variants) {
+            newRows.push(this._buildVariantRow(originalLi, dmId, variant));
+        }
+        insertAfter.replaceWith(...newRows);
+    }
+
+    /**
+     * Build a `<li>` row for a single rate-shop variant by cloning the placeholder row.
+     *
+     * @private
+     * @param {Element} originalLi - The original rate-shopping `<li>` to clone.
+     * @param {String} dmId - The delivery method id.
+     * @param {Object} variant - The variant data: {token, label, amount_delivery, is_free_delivery}.
+     * @return {Element} The variant `<li>` row.
+     */
+    _buildVariantRow(originalLi, dmId, variant) {
+        const newLi = originalLi.cloneNode(true);
+        newLi.dataset.dmId = dmId;
+        newLi.dataset.rateToken = variant.token;
+
+        const radio = newLi.querySelector('input[name="o_delivery_radio"]');
+        const radioId = `o_delivery_${dmId}_${variant.token.replace(/[^A-Za-z0-9_-]/g, '_')}`;
+        radio.id = radioId;
+        radio.dataset.dmId = dmId;
+        radio.dataset.rateToken = variant.token;
+        radio.dataset.isRateShopping = '0';
+        radio.checked = false;
+        radio.disabled = false;
+
+        const label = newLi.querySelector('label[name="o_delivery_method_label"]');
+        if (label) {
+            label.htmlFor = radioId;
+        }
+
+        const nameSpan = newLi.querySelector('span[name="o_delivery_method_name"]');
+        if (nameSpan) {
+            nameSpan.textContent = variant.label;
+        }
+
+        const badge = newLi.querySelector('.o_wsale_delivery_price_badge');
+        if (badge) {
+            this._clearElement(badge);
+            if (variant.is_free_delivery) {
+                badge.textContent = _t('Free');
+            } else {
+                badge.innerHTML = variant.amount_delivery;
+            }
+        }
+
+        if (variant.delivery_eta) {
+            const dateCol = newLi.querySelector('.o_delivery_date_col');
+            if (dateCol) {
+                this._clearElement(dateCol);
+                const etaSpan = document.createElement('span');
+                etaSpan.classList.add('text-muted', 'small');
+                etaSpan.textContent = variant.delivery_eta;
+                dateCol.appendChild(etaSpan);
+            }
+        }
+
+        return newLi;
     }
 
     // #=== DOM MANIPULATION ===#
@@ -217,7 +308,10 @@ export class Checkout extends Interaction {
      */
     async _updateDeliveryMethod(radio) {
         this._showLoadingBadge(radio);
-        const result = await this.waitFor(this._setDeliveryMethod(radio.dataset.dmId));
+        const result = await this.waitFor(this._setDeliveryMethod(
+            radio.dataset.dmId,
+            radio.dataset.rateToken,
+        ));
         this._updateAmountBadge(radio, result);
         this._updateCartSummaries(result);
     }
@@ -434,8 +528,12 @@ export class Checkout extends Interaction {
      * @param {Integer} dmId - The id of selected delivery method.
      * @return {Object} The result values.
      */
-    async _setDeliveryMethod(dmId) {
-        return await rpc('/shop/set_delivery_method', {'dm_id': dmId});
+    async _setDeliveryMethod(dmId, rateToken) {
+        const payload = { 'dm_id': dmId };
+        if (rateToken) {
+            payload.rate_token = rateToken;
+        }
+        return await rpc('/shop/set_delivery_method', payload);
     }
 
     // #=== GETTERS & SETTERS ===#

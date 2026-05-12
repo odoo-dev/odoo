@@ -14,11 +14,12 @@
                             <field name="weight_uom_name"/>
                         </div>
                         <field name="delivery_type" invisible="1"/>
+                        <field name="is_rate_shopping" invisible="1"/>
                         <field name="currency_id" invisible="1"/>
                         <field name="order_id" invisible="1"/>
                         <field name='delivery_price' invisible="1"/>
-                        <label for="display_price"/>
-                        <div class="o_row" name="price_container">
+                        <label for="display_price" invisible="is_rate_shopping"/>
+                        <div class="o_row" name="price_container" invisible="is_rate_shopping">
                             <field name='display_price' widget="monetary" options="{'currency_field': 'currency_id'}" invisible="not carrier_id"/>
                             <button name="update_price" type="object" invisible="delivery_type in ('fixed', 'base_on_rule')">
                                 <i class="oi oi-arrow-right me-1"/>Get rate
@@ -26,6 +27,26 @@
                         </div>
                     </group>
                 </group>
+                <div invisible="not is_rate_shopping">
+                    <div class="o_row mb-2">
+                        <button name="update_price" type="object" class="btn-secondary" invisible="rate_choice_ids">
+                            <i class="oi oi-arrow-right me-1"/>Get rates
+                        </button>
+                        <button name="update_price" type="object" class="btn-link" invisible="not rate_choice_ids">
+                            <i class="fa fa-refresh me-1"/>Refresh rates
+                        </button>
+                    </div>
+                    <field name="selected_rate_id" invisible="1"/>
+                    <field name="rate_choice_ids" nolabel="1" readonly="1" invisible="not rate_choice_ids">
+                        <list create="false" delete="false" edit="false" no_open="1">
+                            <field name="label" string="Service"/>
+                            <field name="delivery_eta" string="Estimated Delivery" optional="show"/>
+                            <field name="display_price" widget="monetary" options="{'currency_field': 'currency_id'}" string="Cost"/>
+                            <field name="currency_id" column_invisible="1"/>
+                            <button name="action_select" type="object" string="Select" class="btn-primary"/>
+                        </list>
+                    </field>
+                </div>
                 <div role="alert" class="alert alert-warning" invisible="invoicing_message == ''">
                     <field name="invoicing_message" nolabel="1"/>
                 </div>
@@ -47,7 +68,7 @@
                     <button
                         name="button_confirm"
                         type="object"
-                        invisible="context.get('carrier_recompute') or display_price or delivery_type in ('fixed', 'base_on_rule')"
+                        invisible="context.get('carrier_recompute') or display_price or delivery_type in ('fixed', 'base_on_rule') or is_rate_shopping"
                         confirm="Are you sure you want the delivery to be free for this order? You might have forgotten to compute the rates."
                         string="Add"
                         class="btn-primary"

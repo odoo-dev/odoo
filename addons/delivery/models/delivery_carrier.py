@@ -166,6 +166,11 @@ class DeliveryCarrier(models.Model):
     )
 
     supports_shipping_insurance = fields.Boolean(compute="_compute_supports_shipping_insurance")
+    is_rate_shopping = fields.Boolean(
+        compute="_compute_is_rate_shopping",
+        help="When set, the carrier returns multiple service variants (rates) for a given order"
+        " through `_rate_shop`. The wizard and website let the customer pick one.",
+    )
     shipping_insurance = fields.Integer(
         string="Insurance Percentage",
         help="Shipping insurance is a service which may reimburse senders whose parcels are lost,"
@@ -224,6 +229,11 @@ class DeliveryCarrier(models.Model):
     def _compute_supports_shipping_insurance(self):
         for carrier in self:
             carrier.supports_shipping_insurance = False
+
+    @api.depends("delivery_type")
+    def _compute_is_rate_shopping(self):
+        for carrier in self:
+            carrier.is_rate_shopping = False
 
     def toggle_prod_environment(self):
         for c in self:
@@ -414,41 +424,66 @@ class DeliveryCarrier(models.Model):
         self.ensure_one()
         if hasattr(self, "%s_rate_shipment" % self.delivery_type):
             res = getattr(self, "%s_rate_shipment" % self.delivery_type)(order)
-            # apply fiscal position
-            company = self.company_id or order.company_id or self.env.company
-            res["price"] = self.product_id._get_tax_included_unit_price(
-                company,
-                company.currency_id,
-                order.date_order,
-                "sale",
-                fiscal_position=order.fiscal_position_id,
-                product_price_unit=res["price"],
-                product_currency=company.currency_id,
-            )
-            # apply margin on computed price
-            res["price"] = self._apply_margins(res["price"], order)
-            # save the real price in case a free_over rule overide it to 0
-            res["carrier_price"] = res["price"]
-            # free when order is large enough
-            amount_without_delivery = order._compute_amount_total_without_delivery()
-            if (
-                res["success"]
-                and self.free_over
-                and self.delivery_type != "base_on_rule"
-                and self._compute_currency(order, amount_without_delivery, "pricelist_to_company")
-                >= self.amount
-            ):
-                res["warning_message"] = self.env._(
-                    "The shipping is free since the order amount exceeds %.2f.", self.amount
-                )
-                res["price"] = 0.0
-            return res
+            return self._apply_rate_decorations(res, order)
         return {
             "success": False,
             "price": 0.0,
             "error_message": self.env._("Error: this delivery method is not available."),
             "warning_message": False,
         }
+
+    def _apply_rate_decorations(self, res, order):
+        """Shared post-processing for rates: fiscal position, margin, free-over.
+
+        Mutates `res` in place so `rate_shipment` and `_rate_shop` produce identically shaped
+        results. Snapshots the post-margin price as `carrier_price` before any free-over override
+        zeroes `price`.
+        """
+        self.ensure_one()
+        company = self.company_id or order.company_id or self.env.company
+        res["price"] = self.product_id._get_tax_included_unit_price(
+            company,
+            company.currency_id,
+            order.date_order,
+            "sale",
+            fiscal_position=order.fiscal_position_id,
+            product_price_unit=res["price"],
+            product_currency=company.currency_id,
+        )
+        res["price"] = self._apply_margins(res["price"], order)
+        res["carrier_price"] = res["price"]
+        amount_without_delivery = order._compute_amount_total_without_delivery()
+        if (
+            res.get("success")
+            and self.free_over
+            and self.delivery_type != "base_on_rule"
+            and self._compute_currency(order, amount_without_delivery, "pricelist_to_company")
+            >= self.amount
+        ):
+            res["warning_message"] = self.env._(
+                "The shipping is free since the order amount exceeds %.2f.", self.amount
+            )
+            res["price"] = 0.0
+        return res
+
+    def _rate_shop(self, order):
+        """Return all rate variants for this carrier, so callers can offer rate shopping.
+
+        :param order: record of sale.order
+        :returns: list of dicts, each with the same shape as `rate_shipment` plus
+          ::
+
+            {'token': opaque provider token (empty string when not rate-shopping),
+             'label': human-readable variant name for display}
+
+        Single-variant carriers get a one-element list so the interface is uniform; providers
+        that support real rate shopping override to issue one bulk request and return many rows.
+        """
+        self.ensure_one()
+        res = self.rate_shipment(order)
+        res.setdefault("token", "")
+        res.setdefault("label", self.name)
+        return [res]
 
     def log_xml(self, xml_string, func):
         self.ensure_one()

@@ -42,7 +42,8 @@ class StockMove(models.Model):
         vals = super(StockMove, self)._get_new_picking_values()
         if not any(rule.propagate_carrier for rule in self.rule_id):
             return vals
-        carrier_id = self.reference_ids.sale_ids.carrier_id.id
+        sale_order = self.reference_ids.sale_ids
+        carrier_id = sale_order.carrier_id.id
         carrier_tracking_ref = self.move_orig_ids.picking_id.filtered('carrier_tracking_ref')[:1].carrier_tracking_ref
         # check if the previous picking have a carrier_id, then take carrier from that
         # earlier we were taking carrier from sale but since carrier can be changed or updated in next steps so now we take carrier from prev picking
@@ -52,6 +53,10 @@ class StockMove(models.Model):
             vals['carrier_id'] = carrier_id
         if carrier_tracking_ref:
             vals['carrier_tracking_ref'] = carrier_tracking_ref
+        if sale_order.delivery_rate_token:
+            vals['delivery_rate_token'] = sale_order.delivery_rate_token
+        if sale_order.delivery_rate_label:
+            vals['delivery_rate_label'] = sale_order.delivery_rate_label
         return vals
 
     def _key_assign_picking(self):

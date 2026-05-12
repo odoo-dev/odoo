@@ -24,6 +24,15 @@ class StockPicking(models.Model):
     carrier_id = fields.Many2one("delivery.carrier", string="Carrier", domain="[('id', 'in', allowed_carrier_ids)]", check_company=True, index='btree_not_null', tracking=True)
     weight = fields.Float(compute='_cal_weight', digits='Stock Weight', store=True, help="Total weight of the products in the picking.", compute_sudo=True)
     carrier_tracking_ref = fields.Char(string='Tracking Reference', copy=False)
+    delivery_rate_token = fields.Char(
+        copy=False,
+        help="Opaque provider token for the chosen rate variant (rate shopping). Used by"
+        " `_send_shipping` to ship the exact service the customer picked.",
+    )
+    delivery_rate_label = fields.Char(
+        copy=False,
+        help="Human-readable label for the chosen rate variant.",
+    )
     carrier_tracking_url = fields.Char(string='Tracking URL', compute='_compute_carrier_tracking_url')
     weight_uom_name = fields.Char(string='Weight unit of measure label', compute='_compute_weight_uom_name', readonly=True, default=_get_default_weight_uom)
     is_return_picking = fields.Boolean(compute='_compute_return_picking')

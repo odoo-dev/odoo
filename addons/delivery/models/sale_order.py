@@ -21,6 +21,15 @@ class SaleOrder(models.Model):
         string="Service Product", compute="_compute_is_service_products"
     )
     shipping_weight = fields.Float(compute="_compute_shipping_weight", store=True, readonly=False)
+    delivery_rate_token = fields.Char(
+        copy=False,
+        help="Opaque provider-issued token for the chosen rate variant (rate shopping). Replayed"
+        " when the picking is shipped.",
+    )
+    delivery_rate_label = fields.Char(
+        copy=False,
+        help="Human-readable label for the chosen rate variant (e.g. 'USPS Priority Mail').",
+    )
 
     @api.depends("order_line")
     def _compute_is_service_products(self):
@@ -79,10 +88,12 @@ class SaleOrder(models.Model):
             )
         to_delete.unlink()
 
-    def set_delivery_line(self, carrier, amount):
+    def set_delivery_line(self, carrier, amount, rate_token=None, rate_label=None):
         self._remove_delivery_line()
         for order in self:
             order.carrier_id = carrier.id
+            order.delivery_rate_token = rate_token or False
+            order.delivery_rate_label = rate_label or False
             order._create_delivery_line(carrier, amount)
         return True
 
@@ -133,6 +144,8 @@ class SaleOrder(models.Model):
             so_description = "%s: %s" % (carrier.name, carrier.product_id.description_sale)
         else:
             so_description = carrier.name
+        if self.delivery_rate_label:
+            so_description = "%s - %s" % (so_description, self.delivery_rate_label)
         values = {
             "order_id": self.id,
             "name": so_description,

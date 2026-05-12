@@ -36,6 +36,7 @@
             </xpath>
             <field name="incoterm_location" position="after">
                 <field name="shipping_weight" readonly="True"/>
+                <field name="delivery_rate_label" readonly="1" invisible="not delivery_rate_label"/>
             </field>
         </field>
     </record>

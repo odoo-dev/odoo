@@ -6,8 +6,8 @@ from odoo import _, models
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    def set_delivery_line(self, carrier, amount):
-        res = super().set_delivery_line(carrier, amount)
+    def set_delivery_line(self, carrier, amount, rate_token=None, rate_label=None):
+        res = super().set_delivery_line(carrier, amount, rate_token=rate_token, rate_label=rate_label)
         for order in self:
             if order.state != 'sale':
                 continue
@@ -15,7 +15,11 @@ class SaleOrder(models.Model):
                 lambda p: p.state not in ('done', 'cancel')
                           and not any(m.origin_returned_move_id for m in p.move_ids)
             )
-            pending_deliveries.carrier_id = carrier.id
+            pending_deliveries.write({
+                'carrier_id': carrier.id,
+                'delivery_rate_token': rate_token or False,
+                'delivery_rate_label': rate_label or False,
+            })
         return res
 
     def _create_delivery_line(self, carrier, price_unit):

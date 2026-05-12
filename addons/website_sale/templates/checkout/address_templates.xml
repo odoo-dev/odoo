@@ -25,12 +25,13 @@
         <!-- Parameters description:
             - delivery_methods: The delivery methods to display, as a `delivery.carrier` recordset.
             - selected_dm_id: The selected delivery method id.
+            - selected_rate_token: The selected rate-shop variant token, when applicable.
         -->
         <form id="o_delivery_form" class="o_delivery_form">
             <h4 class="mb-3">Delivery method</h4>
             <ul t-if="delivery_methods" id="o_delivery_methods" class="list-group">
                 <t t-foreach="delivery_methods" t-as="dm">
-                    <li name="o_delivery_method" class="list-group-item">
+                    <li name="o_delivery_method" class="list-group-item" t-att-data-dm-id="dm.id">
                         <t t-call="website_sale.delivery_method" is_selected="dm.id == selected_dm_id"/>
                     </li>
                 </t>
@@ -58,6 +59,7 @@
                     class="form-check-input position-absolute"
                     t-att-data-dm-id="dm.id"
                     t-att-data-delivery-type="dm.delivery_type"
+                    t-att-data-is-rate-shopping="dm.is_rate_shopping and '1' or '0'"
                 />
                 <!-- === Delivery method label === -->
                 <label

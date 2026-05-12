@@ -959,12 +959,14 @@ class SaleOrder(models.Model):
                 delivery_method = available_delivery_methods[0]
         return delivery_method
 
-    def _set_delivery_method(self, delivery_method, rate=None):
+    def _set_delivery_method(self, delivery_method, rate=None, rate_token=None):
         """Set the delivery method on the order and create a delivery line if the shipment rate can
          be retrieved.
 
         :param delivery.carrier delivery_method: The delivery_method to set on the order.
-        :param dict rate: The rate of the delivery method.
+        :param dict rate: A pre-fetched rate dict to use as-is (skips the rate lookup).
+        :param str rate_token: For rate-shopping carriers, the variant token to select. When both
+            `rate` and `rate_token` are omitted, the cheapest variant is picked (express checkout).
         :return: None
         """
         self.ensure_one()
@@ -973,9 +975,20 @@ class SaleOrder(models.Model):
         if not delivery_method or not self._has_deliverable_products():
             return
 
+        if rate is None and delivery_method.is_rate_shopping:
+            successful = [v for v in delivery_method._rate_shop(self) if v.get("success")]
+            if rate_token:
+                rate = next((v for v in successful if v.get("token") == rate_token), None)
+            if rate is None and successful:
+                rate = min(successful, key=lambda v: v["price"])
         rate = rate or delivery_method.rate_shipment(self)
         if rate.get("success"):
-            self.set_delivery_line(delivery_method, rate["price"])
+            self.set_delivery_line(
+                delivery_method,
+                rate["price"],
+                rate_token=rate.get("token"),
+                rate_label=rate.get("label"),
+            )
 
             if delivery_method.enable_delivery_estimate and (
                 estimated_delivery_date := delivery_method._get_estimate_delivery_days()

@@ -22,6 +22,7 @@ class ChooseDeliveryCarrier(models.TransientModel):
         required=True,
     )
     delivery_type = fields.Selection(related="carrier_id.delivery_type")
+    is_rate_shopping = fields.Boolean(related="carrier_id.is_rate_shopping")
     delivery_price = fields.Float()
     display_price = fields.Float(string="Cost", readonly=True)
     currency_id = fields.Many2one(comodel_name="res.currency", related="order_id.currency_id")
@@ -37,10 +38,22 @@ class ChooseDeliveryCarrier(models.TransientModel):
         string="Total Order Weight", related="order_id.shipping_weight", readonly=False
     )
     weight_uom_name = fields.Char(default=_get_default_weight_uom, readonly=True)
+    rate_choice_ids = fields.One2many(
+        comodel_name="delivery.rate.choice",
+        inverse_name="wizard_id",
+        string="Available Rates",
+    )
+    selected_rate_id = fields.Many2one(
+        comodel_name="delivery.rate.choice",
+        string="Selected Rate",
+        domain="[('wizard_id', '=', id)]",
+    )
 
     @api.onchange("carrier_id", "total_weight")
     def _onchange_carrier_id(self):
         self.delivery_message = False
+        self.rate_choice_ids = [fields.Command.clear()]
+        self.selected_rate_id = False
         if self.delivery_type in ("fixed", "base_on_rule"):
             vals = self._get_delivery_rate()
             if vals.get("error_message"):
@@ -95,8 +108,33 @@ class ChooseDeliveryCarrier(models.TransientModel):
             return {"no_rate": vals.get("no_rate", False)}
         return {"error_message": vals["error_message"]}
 
+    def _fetch_rate_choices(self):
+        self.ensure_one()
+        rates = self.carrier_id.with_context(order_weight=self.total_weight)._rate_shop(
+            self.order_id
+        )
+        if rates and not any(r.get("success") for r in rates):
+            return {"error_message": rates[0].get("error_message") or self.env._(
+                "No rates available for the selected carrier."
+            )}
+        self.rate_choice_ids = [fields.Command.clear()] + [
+            fields.Command.create({
+                "token": r.get("token") or "",
+                "label": r.get("label") or self.carrier_id.name,
+                "price": r["price"],
+                "display_price": r.get("carrier_price", r["price"]),
+                "delivery_eta": r.get("delivery_eta") or False,
+                "warning_message": r.get("warning_message") or False,
+            })
+            for r in rates if r.get("success")
+        ]
+        return {}
+
     def update_price(self):
-        vals = self._get_delivery_rate()
+        if self.is_rate_shopping:
+            vals = self._fetch_rate_choices()
+        else:
+            vals = self._get_delivery_rate()
         if vals.get("error_message"):
             raise UserError(vals.get("error_message"))
         return {
@@ -110,7 +148,16 @@ class ChooseDeliveryCarrier(models.TransientModel):
         }
 
     def button_confirm(self):
-        self.order_id.set_delivery_line(self.carrier_id, self.delivery_price)
+        if self.is_rate_shopping and not self.selected_rate_id:
+            raise UserError(self.env._("Please select a shipping rate before confirming."))
+        rate_token = self.selected_rate_id.token if self.is_rate_shopping else None
+        rate_label = self.selected_rate_id.label if self.is_rate_shopping else None
+        self.order_id.set_delivery_line(
+            self.carrier_id,
+            self.delivery_price,
+            rate_token=rate_token,
+            rate_label=rate_label,
+        )
         self.order_id.write({
             "recompute_delivery_price": False,
             "delivery_message": self.delivery_message,
