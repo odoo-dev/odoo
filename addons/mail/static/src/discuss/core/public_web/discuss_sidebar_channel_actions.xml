@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="mail.DiscussSidebarChannelActions">
-        <t t-set="partitionedActions" t-value="threadActions.partition"/>
-        <ActionList actions="[partitionedActions.quick, partitionedActions.other, ...partitionedActions.group]" dropdown="true" thread="thread"/>
+        <t t-if="thread.exists()">
+            <!-- FIXME: local partition to keep slot rendering synced with action conditions in Owl 2. -->
+            <t t-set="partitionedActions" t-value="threadActions.partition"/>
+            <ActionList actions="[partitionedActions.quick, partitionedActions.other, ...partitionedActions.group]" dropdown="true" thread="thread"/>
+        </t>
     </t>
 </templates>

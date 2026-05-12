@@ -130,6 +130,19 @@ export class ThreadAction extends Action {
         return Object.assign(super.params, { thread: this.threadFn() });
     }
 
+    get exists() {
+        return this.definition.isMoreAction || Boolean(this.threadFn()?.exists());
+    }
+
+    _condition({ thread }) {
+        if (this.definition.isMoreAction) {
+            return true;
+        }
+        if (!thread || !thread.exists()) {
+            return false;
+        }
+    }
+
     /** Optional component that is used as action panel of this component, i.e. when action is active. */
     get actionPanelComponent() {
         return this.definition.actionPanelComponent;

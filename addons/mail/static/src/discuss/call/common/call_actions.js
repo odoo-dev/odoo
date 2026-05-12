@@ -348,6 +348,19 @@ export class CallAction extends Action {
         return Object.assign(super.params, { thread: this.threadFn() });
     }
 
+    get exists() {
+        return this.definition.isMoreAction || Boolean(this.threadFn()?.exists());
+    }
+
+    _condition({ thread }) {
+        if (this.definition.isMoreAction) {
+            return true;
+        }
+        if (!thread || !thread.exists()) {
+            return false;
+        }
+    }
+
     get isTracked() {
         return this.definition.isTracked;
     }

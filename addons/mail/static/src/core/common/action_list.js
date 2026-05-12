@@ -106,6 +106,11 @@ export class ActionList extends Component {
         } else {
             groups = [this.props.actions];
         }
+        groups = groups.map((group) =>
+            group.filter((action) =>
+                action.definition ? action.exists : action.condition ?? true
+            )
+        );
         return groups.filter((group) => group.length); // don't show empty groups
     }
 

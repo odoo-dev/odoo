@@ -13,7 +13,9 @@
                 <Dropdown t-if="(chatHub.showConversations and !chatHub.compact) or position.dragged" state="options" position="'top-end'" menuClass="'m-0 mb-1 ' + store.discussDropdownMenuClass(this)">
                     <button class="o-mail-ChatHub-bubbleBtn btn o-mail-ChatHub-optionsBtn bg-100 mt-1" t-att-class="{ 'opacity-0': !bubblesHover.isHover and !position.dragged and !options.isOpen and !isMobileOS, 'o-bubblesHover': (bubblesHover.isHover or position.dragged) and !isMobileOS, 'o-active': bubblesHover.isHover or options.isOpen }" title="Chat Options"><i class="oi oi-ellipsis-h"/></button>
                     <t t-set-slot="content">
-                        <ActionList actions="optionActions" dropdown="true"/>
+                        <!-- FIXME: local actions to keep slot rendering synced with action conditions in Owl 2. -->
+                        <t t-set="optionActions2" t-value="optionActions"/>
+                        <ActionList actions="optionActions2" dropdown="true"/>
                     </t>
                 </Dropdown>
                 <t t-if="store.chatHub.compact and chatHub.showConversations" t-call="mail.ChatHub.compactButton"/>

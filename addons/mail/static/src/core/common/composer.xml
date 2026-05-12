@@ -61,7 +61,11 @@
                         <Dropdown t-if="partitionedActions.other.length > 0" position="'top-start'" menuClass="store.discussDropdownMenuClass(this)">
                             <t t-call="mail.Composer.moreActions"/>
                             <t t-set-slot="content">
-                                <ActionList actions="partitionedActions.other" dropdown="true"/>
+                                <t t-if="props.composer.exists()">
+                                    <!-- FIXME: local partition to keep slot rendering synced with action conditions in Owl 2. -->
+                                    <t t-set="partitionedActions2" t-value="composerActions.partition"/>
+                                    <ActionList actions="partitionedActions2.other" dropdown="true"/>
+                                </t>
                             </t>
                         </Dropdown>
                     </div>

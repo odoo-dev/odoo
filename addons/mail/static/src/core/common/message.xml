@@ -3,7 +3,6 @@
 
     <t t-name="mail.Message">
         <ActionSwiper onRightSwipe="hasTouch() and props.thread?.eq(store.inbox) ? { action: () => this.message.setDone(), bgColor: 'bg-success', icon: 'fa-check-circle' } : undefined">
-            <t t-set="dummy" t-value="computeActions()"/>
             <div class="o-mail-Message position-relative rounded-0 bg-inherit"
                 t-att-data-starred="message.starred"
                 t-att-data-persistent="message.persistent"
@@ -16,6 +15,7 @@
                 t-ref="root"
                 t-if="message.exists()"
             >
+                <t t-set="dummy" t-value="computeActions()"/>
                 <div class="o-mail-Message-jumpTarget position-absolute top-0 pe-none"/>
                 <div t-if="props.asCard and isMobileOS" class="position-absolute end-0 z-1 m-n2"><t t-call="mail.Message.actions"/></div>
                 <div class="o-mail-Message-core position-relative d-flex flex-shrink-0 bg-inherit">
@@ -168,7 +168,11 @@
             <Dropdown state="optionsDropdown" menuClass="store.discussDropdownMenuClass(this)">
                 <button class="d-none"/>
                 <t t-set-slot="content">
-                    <ActionList actions="messageActions.actions" dropdown="true"/>
+                    <t t-if="message.exists()">
+                        <!-- FIXME: local actions to keep slot rendering synced with action conditions in Owl 2. -->
+                        <t t-set="messageActions2" t-value="messageActions.actions"/>
+                        <ActionList actions="messageActions2" dropdown="true"/>
+                    </t>
                 </t>
             </Dropdown>
         </t>

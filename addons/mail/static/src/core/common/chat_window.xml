@@ -24,8 +24,12 @@
                             <i t-if="!state.editingName" class="fa fa-fw fa-caret-down"/>
                         </button>
                         <t t-set-slot="content">
-                            <t t-set="quickActionsInDropdown" t-value="partitionedActions.quick.slice(ui.isSmall ? 2 : 4)"/>
-                            <ActionList actions="[quickActionsInDropdown, partitionedActions.other, ...partitionedActions.group]" dropdown="true" thread="thread"/>
+                            <t t-if="this.props.chatWindow.exists()">
+                                <!-- FIXME: local partition to keep slot rendering synced with action conditions in Owl 2. -->
+                                <t t-set="partitionedActions2" t-value="threadActions.partition"/>
+                                <t t-set="quickActionsInDropdown" t-value="partitionedActions2.quick.slice(ui.isSmall ? 2 : 4)"/>
+                                <ActionList actions="[quickActionsInDropdown, partitionedActions2.other, ...partitionedActions2.group]" dropdown="true" thread="thread"/>
+                            </t>
                         </t>
                     </Dropdown>
                 </div>

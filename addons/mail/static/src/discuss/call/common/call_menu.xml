@@ -19,7 +19,11 @@
                             <i class="oi oi-chevron-down o-xsmaller"/>
                         </button>
                         <t t-set-slot="content">
-                            <ActionList actions="callActions.actions" dropdown="true"/>
+                            <t t-if="rtc.channel?.exists()">
+                                <!-- FIXME: local actions to keep slot rendering synced with action conditions in Owl 2. -->
+                                <t t-set="callActions2" t-value="callActions.actions"/>
+                                <ActionList actions="callActions2" dropdown="true"/>
+                            </t>
                         </t>
                     </Dropdown>
                 </div>

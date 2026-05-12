@@ -80,6 +80,12 @@ export class Action {
         return { action: this, store: this.store, owner: this.owner };
     }
 
+    get exists() {
+        return Object.values(this.params).every(
+            (value) => value === this || typeof value?.exists !== "function" || value.exists()
+        );
+    }
+
     /** @param {Action} action @returns {boolean|undefined} */
     _badge(action) {}
     /** Condition for showing badge on this action */
@@ -171,6 +177,9 @@ export class Action {
     _condition(action) {}
     /** Condition for availability of this action */
     get condition() {
+        if (!this.exists) {
+            return false;
+        }
         return (
             this._condition(this.params) ??
             (typeof this.definition.condition === "function"
