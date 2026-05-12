@@ -777,6 +777,8 @@ class Field[T]:
             # both new (see `test_base_objects.py`, `test_basic`)
             if target and bool(target.id) == bool(record.id):
                 target[field.name] = record_value[record]
+            if record_value and bool(target.id) == bool(record.id) and not target:
+                _logger.warning('field %s inverse to non-existing record', self, stack_info=True)
 
     def _search_related(self, records: BaseModel, operator: str, value) -> DomainType:
         """ Determine the domain to search on field ``self``. """
