@@ -95,9 +95,9 @@ export function renderStaticFileBox(filename, mimetype, downloadUrl, id) {
     rootSpan.classList.add("o_file_box", "o-contenteditable-false");
     rootSpan.contentEditable = false;
     rootSpan.dataset.attachmentId = id;
-    const bannerElement = renderToElement("html_editor.StaticFileBox", {
+    const fileElement = renderToElement("html_editor.StaticFileBox", {
         fileModel: { filename, mimetype, downloadUrl },
     });
-    rootSpan.append(bannerElement);
+    rootSpan.append(fileElement);
     return rootSpan;
 }
