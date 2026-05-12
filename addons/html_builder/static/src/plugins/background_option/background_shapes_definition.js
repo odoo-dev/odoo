@@ -76,6 +76,7 @@ export const backgroundShapesDefinition = {
                     "html_builder/Angular/08": { selectLabel: _t("Angular 08") },
                     "html_builder/Angular/09": { selectLabel: _t("Angular 09") },
                     "html_builder/Floats/07": { selectLabel: _t("Angular 10"), animated: true },
+                    "html_builder/Angular/10": { selectLabel: _t("Angular 11") },
                 },
             },
             blobs: {
