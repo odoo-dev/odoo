@@ -327,20 +327,20 @@
                                 <group>
                                     <group string="Production Information" name="capacity">
                                         <label for="time_efficiency"/>
-                                        <div>
-                                            <field name="time_efficiency" class="oe_inline"/>%
+                                        <div class="d-flex justify-content-between">
+                                            <field name="time_efficiency" class="w-auto flex-grow-1"/>%
                                         </div>
                                         <label for="oee_target"/>
-                                        <div>
-                                            <field name="oee_target" class="oe_inline"/>%
+                                        <div class="d-flex justify-content-between">
+                                            <field name="oee_target" class="w-auto flex-grow-1"/>%
                                         </div>
                                         <field name="time_start" widget="float_time" options="{'unit': 'minutes', 'show_seconds': True}"/>
                                         <field name="time_stop" widget="float_time" options="{'unit': 'minutes', 'show_seconds': True}"/>
                                     </group>
                                     <group string="Costing Information" name="costing">
                                         <label for="costs_hour"/>
-                                        <div id="costs_hour">
-                                            <field name="costs_hour" class="oe_inline" widget="monetary"/>per workcenter
+                                        <div id="costs_hour" class="d-flex justify-content-between">
+                                            <field name="costs_hour" class="w-auto flex-grow-1" widget="monetary"/>per workcenter
                                         </div>
                                     </group>
                                 </group>
