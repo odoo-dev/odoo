@@ -11,3 +11,6 @@ class ResConfigSettings(models.TransientModel):
 
     def open_reset_printer(self):
         return self.env['ir.actions.actions']._for_xml_id('printer.action_reset_linked_printers')
+
+    def open_client_devices(self):
+        return self.env['ir.actions.actions']._for_xml_id('printer.manage_printer_client_device_action')

@@ -22,6 +22,12 @@
                                     type="object"
                                     string="Reset Linked Printer"
                                     class="oe_link p-0"/>
+                            <br/>
+                            <button name="open_client_devices"
+                                    icon="oi-arrow-right"
+                                    type="object"
+                                    string="Client Devices"
+                                    class="oe_link"/>
                         </div>
                     </setting>
                 </xpath>
