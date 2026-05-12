@@ -252,11 +252,18 @@ export function makeHighlightSvgs(highlightEl, highlightID) {
     const numberOfCharPerWidth = memoize((width) => Math.round(width / sizePerChar()));
 
     const containerRect = highlightEl.getBoundingClientRect();
-    // Note: We cannot use `getClientRects()` as we want to be able to draw
-    // text highlights in the snippet/page dialogs where iframe is scaled.
-    const inPreviewIframe =
-        highlightEl.ownerDocument.documentElement.classList.contains("o_add_snippets_preview");
-    const scale = inPreviewIframe ? highlightEl.offsetWidth / containerRect.width : 1;
+    // Correct for any CSS transform applied to an ancestor (e.g. configurator
+    // preview thumbnails scaled with transform:scale(), or snippet-picker
+    // dialogs where the iframe is CSS-scaled).  getClientRects() / Range
+    // .getClientRects() always return viewport (screen-space) coordinates, so
+    // when there is a scale transform on an ancestor the returned widths are
+    // smaller than the layout widths used to draw the SVG path.
+    //
+    // offsetWidth is unaffected by CSS transforms on ancestors, so
+    // offsetWidth / containerRect.width gives the inverse of the accumulated
+    // scale factor.  In an unscaled context the two values are equal and
+    // scale === 1.
+    const scale = containerRect.width > 0 ? highlightEl.offsetWidth / containerRect.width : 1;
     const rtl = window.getComputedStyle(highlightEl).direction === "rtl";
     const firstRect = highlightEl.getClientRects()[0];
     const svgs = [];
