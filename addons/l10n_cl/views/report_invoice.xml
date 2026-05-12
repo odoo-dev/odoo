@@ -179,7 +179,7 @@
             <attribute name="t-out">', '.join(map(lambda x: (x.description or x.name), line.tax_lines))</attribute>
         </xpath>
 
-        <span t-field="line.price_subtotal" position="attributes">
+        <span t-field="line.price_total" position="attributes">
             <attribute name="t-field"/>
             <attribute name="t-out">line_amounts['price_line_document']</attribute>
             <attribute name="t-options">{"widget": "monetary", "display_currency": line_amounts['main_currency']}</attribute>
