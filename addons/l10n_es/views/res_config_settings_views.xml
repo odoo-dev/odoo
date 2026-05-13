@@ -16,7 +16,7 @@
                 </block>
             </xpath>
             <xpath expr="//block[@name='fiscal_localization_setting_container']" position="inside">
-                <setting title="Canary General Chart Type" name="canary_general_chart_type">
+                <setting title="Canary General Chart Type" name="canary_general_chart_type" invisible="'es_canary' not in (chart_template or '')">
                     <field name="canary_general_chart_type" widget="radio"/>
                 </setting>
             </xpath>

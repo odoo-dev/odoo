@@ -17,7 +17,6 @@ class ResCompany(models.Model):
             ('abbreviated', 'Abreviado')
         ],
         string="Accounting plan type",
-        default='smes',
         help="Select which accounting plan you wish to stablish"
     )
 
