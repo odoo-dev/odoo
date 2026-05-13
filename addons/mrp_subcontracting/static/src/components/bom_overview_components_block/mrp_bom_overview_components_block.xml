@@ -2,6 +2,12 @@
 <templates xml:space="preserve">
 
     <t t-name="mrp_subcontracting.BomOverviewComponentsBlock" t-inherit="mrp.BomOverviewComponentsBlock" t-inherit-mode="extension">
+        <xpath expr="//BomOverviewLine" position="attributes">
+            <attribute name="hasSubcontractCol">this.props.hasSubcontractCol</attribute>
+        </xpath>
+        <xpath expr="//BomOverviewComponentsBlock" position="attributes">
+            <attribute name="hasSubcontractCol">this.props.hasSubcontractCol</attribute>
+        </xpath>
         <xpath expr="//t[@name='byproducts']" position="after">
             <t t-if="this.data.subcontracting">
                 <BomOverviewSpecialLine
@@ -9,6 +15,7 @@
                     showOptions="this.props.showOptions"
                     data="this.props.data"
                     precision="this.props.precision"
+                    hasSubcontractCol="this.props.hasSubcontractCol"
                     />
             </t>
         </xpath>

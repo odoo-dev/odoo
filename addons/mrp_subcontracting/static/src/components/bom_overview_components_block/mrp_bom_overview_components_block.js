@@ -4,4 +4,8 @@ import { BomOverviewSpecialLine } from "@mrp/components/bom_overview_special_lin
 
 patch(BomOverviewComponentsBlock, {
     components: { ...BomOverviewComponentsBlock.components, BomOverviewSpecialLine },
+    props: {
+        ...BomOverviewComponentsBlock.props,
+        hasSubcontractCol: { type: Boolean, optional: true },
+    },
 });

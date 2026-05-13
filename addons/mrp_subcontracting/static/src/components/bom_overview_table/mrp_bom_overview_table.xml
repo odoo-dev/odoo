@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-inherit="mrp.BomOverviewTable" t-inherit-mode="extension">
+        <xpath expr="//BomOverviewLine" position="attributes">
+            <attribute name="hasSubcontractCol">this.isSubcontract</attribute>
+        </xpath>
+        <xpath expr="//BomOverviewComponentsBlock" position="attributes">
+            <attribute name="hasSubcontractCol">this.isSubcontract</attribute>
+        </xpath>
+        <xpath expr="//th[@title='Availabilities on products.']" position="after">
+            <th t-if="this.forecastMode and this.isSubcontract" class="text-center"
+                title="Availabilities on subcontract location.">
+                Free to Use / On Hand (Subcontract)
+            </th>
+        </xpath>
+        <xpath expr="//td[@name='free_to_use']" position="after">
+            <td name="free_to_use_subcontract" t-if="this.forecastMode and this.isSubcontract"/>
+        </xpath>
+    </t>
+
+</templates>

@@ -2,6 +2,13 @@ import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { BomOverviewSpecialLine } from "@mrp/components/bom_overview_special_line/mrp_bom_overview_special_line";
 
+patch(BomOverviewSpecialLine, {
+    props: {
+        ...BomOverviewSpecialLine.props,
+        hasSubcontractCol: { type: Boolean, optional: true },
+    },
+});
+
 patch(BomOverviewSpecialLine.prototype, {
     setup() {
         super.setup();
@@ -27,5 +34,9 @@ patch(BomOverviewSpecialLine.prototype, {
 
     get subcontracting() {
         return this.props.data.subcontracting || {};
+    },
+
+    get hasSubcontractCol() {
+        return this.props.hasSubcontractCol ?? true;
     },
 });

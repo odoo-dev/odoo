@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-inherit="mrp.BomOverviewLine" t-inherit-mode="extension">
+        <xpath expr="//td[@t-if='this.forecastMode'][1]" position="after">
+            <td t-if="this.forecastMode and this.hasSubcontractCol" class="text-center">
+                <t t-if="this.isSubcontract">
+                    <t t-out="this.formatFloat(this.data.subcontract_qty_available, {'digits': [false, this.precision]})"/> /
+                    <t t-out="this.formatFloat(this.data.subcontract_qty_on_hand, {'digits': [false, this.precision]})"/>
+                </t>
+            </td>
+        </xpath>
+    </t>
+
+</templates>
