@@ -42,9 +42,11 @@ class ProductProduct(models.Model):
                 url = f"{url}?attribute_values={','.join(pav_ids)}"
             product.website_url = url
 
-    def _set_image_1920(self):
-        super()._set_image_1920()
-        self.is_main_image_manually_set = True
+    def _get_image_1920(self):
+        images = self._get_images()
+        if images:
+            return images[0].image_1920
+        return super()._get_image_1920()
 
     # === CRUD METHODS === #
 
@@ -64,9 +66,6 @@ class ProductProduct(models.Model):
                 ("order_id", "any", [("website_id", "!=", False)]),
             ]).unlink()
         res = super().write(vals)
-        if "image_1920" in vals and not vals["image_1920"] and self.is_main_image_manually_set:
-            self.is_main_image_manually_set = False
-            self.product_tmpl_id._set_main_image_from_extra_images(self)
         return res
 
     # === BUSINESS METHODS ===#
@@ -92,19 +91,11 @@ class ProductProduct(models.Model):
         This returns a list and not a recordset because the records might be
         from different models (template, variant and image).
 
-        It contains in this order: the main image of the variant (which will fall back on the main
-        image of the template, if unset), the Variant Extra Images, and the Template Extra Images.
+        It contains in this order: the main image of the variant (which will fall back on the first
+        extra image of variant, if unset), the Variant Extra Images.
         """
         self.ensure_one()
-        extra_images = list(self._get_extra_images())
-
-        if (
-            extra_images
-            and not self.is_main_image_manually_set
-            and extra_images[0].image_1920.content == self.image_1920.content
-        ):
-            extra_images = extra_images[1:]
-        return [self] + extra_images
+        return list({self} | set(self._get_extra_media()))
 
     def _get_combination_info_variant(self, **kwargs):
         """Return the variant info based on its combination.
@@ -210,15 +201,13 @@ class ProductProduct(models.Model):
         self.ensure_one()
         return [
             self.env["website"].image_url(extra_image, "image_1920")
-            for extra_image in self._get_extra_images()
+            for extra_image in self._get_extra_media()
             if extra_image.image_128  # only images, no video urls
         ]
 
-    def _get_extra_images(self):
+    def _get_extra_media(self):
         self.ensure_one()
-        return self.product_template_image_ids.filtered(
-            lambda img: self in img.product_variant_ids
-        ).sorted(key=lambda img: (not img.has_attribute_value, img.sequence))
+        return self.product_template_image_ids.filtered(lambda img: self in img.product_variant_ids)
 
     def _is_in_wishlist(self):
         if not self:
@@ -316,11 +305,8 @@ class ProductProduct(models.Model):
 
     def _get_extra_tracking_values(self, **kwargs):
         extra_tracking_values = {}
-        if (
-            kwargs.get('res_model') == self._name
-            and (res_id := kwargs.get('res_id'))
-        ):
-            extra_tracking_values['product_id'] = res_id
+        if kwargs.get("res_model") == self._name and (res_id := kwargs.get("res_id")):
+            extra_tracking_values["product_id"] = res_id
         return extra_tracking_values
 
     def _is_sold_out(self):

@@ -175,6 +175,7 @@ class ProductTemplate(models.Model):
     available_threshold = fields.Float(string="Show Threshold", default=5.0)
     show_availability = fields.Boolean(string="Show availability Qty", default=False)
     out_of_stock_message = fields.Html(string="Out-of-Stock Message", translate=html_translate)
+    image_1920 = fields.Image(compute="_compute_image_1920", inverse="_inverse_image_1920", store=True)
 
     # === INDEXES === #
 
@@ -271,6 +272,30 @@ class ProductTemplate(models.Model):
                 template.product_variant_ids.filtered("default_code").mapped("default_code")
             )
 
+    @api.depends("product_template_image_ids")
+    def _compute_image_1920(self):
+        for template in self:
+            template_images = template.product_template_image_ids
+            if (
+                not template.image_1920
+                or template.image_1920 in template_images.mapped("image_1920")
+            ):
+                template.image_1920 = template_images.filtered(
+                    lambda image: not image.attribute_value_ids
+                )[:1].image_1920
+
+    def _inverse_image_1920(self):
+        # If user remove the main image, and has extra images with no variant, compute a new main
+        # image from those extra images.
+        templates_with_no_image = self.filtered(
+            lambda template: not template.image_1920 and template.product_template_image_ids.filtered(
+                lambda image: not image.attribute_value_ids
+            )
+        )
+        templates_with_no_image.flush_recordset(["image_1920"])
+        templates_with_no_image._compute_image_1920()
+
+
     # === CRUD METHODS ===#
 
     @api.model_create_multi
@@ -287,9 +312,6 @@ class ProductTemplate(models.Model):
                 "suggest_accessory_products": not vals.get("accessory_product_ids"),
                 "suggest_alternative_products": not vals.get("alternative_product_ids"),
             }
-
-            if record.product_template_image_ids and not record.is_main_image_manually_set:
-                update_vals["image_1920"] = record.product_template_image_ids.sorted("sequence")[0].image_1920
 
             record.write(update_vals)
         return records
@@ -308,15 +330,6 @@ class ProductTemplate(models.Model):
                 ),
             )
         res = super().write(vals)
-
-        if "image_1920" in vals:
-            if vals["image_1920"] and not self.env.context.get("from_extra_image"):
-                self.is_main_image_manually_set = True
-
-            elif not vals["image_1920"] and self.is_main_image_manually_set:
-                self.is_main_image_manually_set = False
-                if self.product_template_image_ids:
-                    self._set_main_image_from_extra_images()
 
         return res
 
@@ -966,9 +979,9 @@ class ProductTemplate(models.Model):
             has_stock_notification = product_sudo._has_stock_notification(
                 self.env.user.partner_id
             ) or (
-                    request
-                    and product_sudo.id
-                    in request.session.get("product_with_stock_notification_enabled", set())
+                request
+                and product_sudo.id
+                in request.session.get("product_with_stock_notification_enabled", set())
             )
             stock_notification_email = request and request.session.get(
                 "stock_notification_email", ""
@@ -979,7 +992,7 @@ class ProductTemplate(models.Model):
                     request.cart._get_cart_qty(product_sudo.id), to_unit=uom
                 )
             digits = self.env["decimal.precision"].precision_get("Product Unit")
-            rounding = 10 ** -digits
+            rounding = 10**-digits
             combination_info.update({
                 "free_qty": free_qty,
                 "cart_qty": cart_quantity,
@@ -1215,7 +1228,7 @@ class ProductTemplate(models.Model):
         Template Extra Images.
         """
         self.ensure_one()
-        return [self] + list(self.product_template_image_ids)
+        return list({self} | set(self.product_template_image_ids))
 
     def _get_attribute_value_domain(self, attribute_value_dict):  # noqa: PLR6301
         return [
@@ -1266,12 +1279,31 @@ class ProductTemplate(models.Model):
         mapping = {
             "name": {"name": "name", "type": "text", "match": True},
             "website_url": {"name": "website_url", "type": "text", "truncate": False},
-            "search_item_metadata": {"name": "price", "type": "html", "display_currency": options["display_currency"]},
+            "search_item_metadata": {
+                "name": "price",
+                "type": "html",
+                "display_currency": options["display_currency"],
+            },
             "image_url": {"name": "image_url", "type": "html"},
-            "description": {"name": "description_ecommerce", "type": "text", "html": True, "match": True},
+            "description": {
+                "name": "description_ecommerce",
+                "type": "text",
+                "html": True,
+                "match": True,
+            },
             "tags": {"name": "product_tag_ids", "type": "tags", "match": True},
-            "attribute_value_ids": {"name": "attribute_value_ids", "type": "tags", "match": True, "force_show": True},
-            "description_sale": {"name": "description_sale", "type": "text", "html": True, "match": True},
+            "attribute_value_ids": {
+                "name": "attribute_value_ids",
+                "type": "tags",
+                "match": True,
+                "force_show": True,
+            },
+            "description_sale": {
+                "name": "description_sale",
+                "type": "text",
+                "html": True,
+                "match": True,
+            },
         }
         return {
             "model": "product.template",
@@ -1291,9 +1323,7 @@ class ProductTemplate(models.Model):
             values = product.mapped("attribute_line_ids.value_ids")
             data["attribute_value_ids"] = values.read(["id", "name"])
             data["product_tag_ids"] = product.product_tag_ids.read(["name"])
-            price = self._search_render_results_prices(
-                mapping, combination_info
-            )
+            price = self._search_render_results_prices(mapping, combination_info)
             if price:
                 data["price"] = price
             data["image_url"] = "/web/image/product.template/%s/image_128" % data["id"]
@@ -1508,58 +1538,6 @@ class ProductTemplate(models.Model):
             if line.attribute_id.create_variant != "no_variant"
         ]
 
-    def _set_main_image_from_extra_images(self, variants=None):
-        """
-        Set the main image for product templates and their variants based on extra images.
-
-        For each template:
-        - If `variants` is provided, update each related variant's main image using
-        the first extra image that has attribute values.
-        - Skip updates if the variant's image was manually set.
-        - Update the template's main image using the first extra image without
-        attribute values. If none exists, fall back to the first variant's image.
-        - Skip updates if the template's main image was manually set.
-
-        :param variants: optional recordset of `product.product` to restrict updates
-                        to specific variants.
-        :return: None
-        """
-        if self.env.context.get("install_mode"):
-            return  # skipped on demo data
-        for template in self:
-            if variants:
-                product_variants = variants.filtered(lambda v: v.product_tmpl_id == template)
-                for variant in product_variants:
-                    if variant.is_main_image_manually_set:
-                        continue
-
-                    image = next(
-                        (img for img in variant._get_extra_images() if img.attribute_value_ids),
-                        None,
-                    )
-                    variant.image_variant_1920 = image.image_1920 if image else False
-
-            if template.is_main_image_manually_set:
-                continue
-
-            template_image = next(
-                (
-                    img
-                    for img in template.product_template_image_ids.sorted("sequence")
-                    if not img.attribute_value_ids
-                ),
-                None,
-            )
-
-            new_image = (
-                template_image.image_1920
-                if template_image
-                else template._create_first_product_variant().image_variant_1920
-            )
-
-            if template.image_1920 != new_image:
-                template.with_context(from_extra_image=True).image_1920 = new_image
-
     def _has_multiple_uoms(self) -> bool:
         """Check if the product has multiple available uoms for the current website.
 
@@ -1619,7 +1597,7 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _get_additional_configurator_data(
-            self, product_or_template, date, currency, pricelist, *, uom=None, **kwargs
+        self, product_or_template, date, currency, pricelist, *, uom=None, **kwargs
     ):
         """Override of `sale` to append basic stock data.
 

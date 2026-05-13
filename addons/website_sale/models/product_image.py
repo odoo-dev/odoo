@@ -119,17 +119,6 @@ class ProductImage(models.Model):
         res = super().write(vals)
         if "attribute_value_ids" in vals:
             self._sync_variant_images()
-        elif "sequence" in vals or "image_1920" in vals:
-            templates = self.mapped("product_tmpl_id")
-            variants = self.mapped("product_variant_ids")
-            templates._set_main_image_from_extra_images(variants)
-        return res
-
-    def unlink(self):
-        templates = self.mapped("product_tmpl_id")
-        variants = self.mapped("product_variant_ids")
-        res = super().unlink()
-        templates._set_main_image_from_extra_images(variants)
         return res
 
     # === BUSINESS METHODS === #
@@ -155,10 +144,6 @@ class ProductImage(models.Model):
             image.product_variant_ids = [Command.set(new_variants.ids)]
 
             impacted_variants |= old_variants | new_variants
-
-        impacted_variants.mapped("product_tmpl_id")._set_main_image_from_extra_images(
-            impacted_variants
-        )
 
     def _is_applicable_to_variant(self, variant):
         """Check whether this image applies to the given product variant.
