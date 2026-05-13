@@ -191,7 +191,7 @@ class MicrosoftCalendarSync(models.AbstractModel):
                 if recurrent_event.type == 'occurrence':
                     value = self.env['calendar.event']._microsoft_to_odoo_recurrence_values(recurrent_event, base_values)
                 else:
-                    value = self.env['calendar.event']._microsoft_to_odoo_values(recurrent_event, default_values)
+                    value = self.env['calendar.event']._microsoft_to_odoo_values(recurrent_event, default_values, with_ids=True)
 
                 to_create_values += [dict(value, need_sync_m=False)]
 
