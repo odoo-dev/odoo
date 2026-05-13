@@ -202,9 +202,8 @@ class HrEmployee(models.Model):
     visa_no = fields.Char('Visa No', groups="hr.group_hr_user", tracking=True)
     visa_expire = fields.Date('Visa Expiration Date', groups="hr.group_hr_user", tracking=True)
     work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user", tracking=True)
-    has_work_permit = fields.Binary(string="Work Permit", groups="hr.group_hr_user")
+    has_work_permit = fields.Binary(string="Work Permit", compute='_compute_work_permit_name', inverse='_inverse_has_work_permit_name', store=True, groups="hr.group_hr_user")
     work_permit_scheduled_activity = fields.Boolean(default=False, groups="hr.group_hr_user")
-    work_permit_name = fields.Char('work_permit_name', compute='_compute_work_permit_name', groups="hr.group_hr_user")
     certificate = fields.Selection(selection='_get_certificate_selection', string='Certificate Level', groups="hr.group_hr_user", tracking=True)
     study_field = fields.Char("Field of Study", groups="hr.group_hr_user", tracking=True)
     emergency_contact = fields.Char(groups="hr.group_hr_user", tracking=True)
@@ -272,7 +271,6 @@ class HrEmployee(models.Model):
     id_card = fields.Binary(string="ID Card Copy", groups="hr.group_hr_user")
     driving_license = fields.Binary(string="Driving License", groups="hr.group_hr_user")
     id_card_name = fields.Char(groups="hr.group_hr_user")
-    driving_license_name = fields.Char(groups="hr.group_hr_user")
     currency_id = fields.Many2one('res.currency', related='company_id.currency_id', readonly=True, groups="hr.group_hr_user")
     related_partners_count = fields.Integer(compute="_compute_related_partners_count", groups="hr.group_hr_user")
     # properties
@@ -1130,7 +1128,12 @@ class HrEmployee(models.Model):
         for employee in self:
             name = employee.name.replace(' ', '_') + '_' if employee.name else ''
             permit_no = '_' + employee.permit_no if employee.permit_no else ''
-            employee.work_permit_name = "%swork_permit%s" % (name, permit_no)
+            employee.has_work_permit = {
+                "file_name": "%swork_permit%s" % (name, permit_no)
+            }
+
+    def _inverse_has_work_permit_name(self):
+        self._compute_work_permit_name()
 
     def _get_partner_count_depends(self):
         return ['user_id']

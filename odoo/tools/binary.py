@@ -61,6 +61,34 @@ class BinaryValue(Buffer):
         return self.content.decode(encoding, errors)
 
 
+class RenamedBinaryValue(BinaryValue):
+    """ Wraps an existing BinaryValue to override its file_name without loading content. """
+    __slots__ = ('_new_name', '_original')
+
+    def __init__(self, original: BinaryValue, new_name: str):
+        self._original = original
+        self._new_name = str(new_name or '')
+
+    @property
+    def content(self) -> bytes:
+        return self._original.content
+
+    @property
+    def file_name(self) -> str:
+        return self._new_name
+
+    @property
+    def mimetype(self) -> str:
+        return self._original.mimetype
+
+    @property
+    def size(self) -> int:
+        return self._original.size
+
+    def __bool__(self):
+        return bool(self._original)
+
+
 class BinaryBytes(BinaryValue):
     """Static binary value."""
     __slots__ = ('__data', '__file_name')
