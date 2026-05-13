@@ -24,7 +24,8 @@ class ResCompany(models.Model):
         res = super().write(vals)
         if 'canary_general_chart_type' in vals:
             for company in self:
-                self.env['account.chart.template'].with_company(company)._l10n_es_canary_reload_and_clean_accounts(company)
+                if 'es_canary' in (company.chart_template or ''):
+                    self.env['account.chart.template'].with_company(company)._l10n_es_canary_reload_and_clean_accounts(company)
         
         return res
 
