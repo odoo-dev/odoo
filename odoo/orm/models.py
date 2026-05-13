@@ -52,7 +52,7 @@ from odoo.tools import (
 from odoo.tools.constants import PREFETCH_MAX
 from odoo.tools.func import deprecated
 from odoo.tools.lru import LRU
-from odoo.tools.misc import ReversedIterable, exception_to_unicode, unquote
+from odoo.tools.misc import FrozenOrderedSet, ReversedIterable, exception_to_unicode, unquote
 from odoo.tools.safe_eval import _UNSAFE_ATTRIBUTES, safe_checker
 from odoo.tools.translate import _, LazyTranslate
 
@@ -67,7 +67,7 @@ from .fields_textual import Char, StoredTranslations
 from .identifiers import NewId
 from .query import Query, TableSQL
 from .utils import (
-    OriginIds, Prefetch, check_object_name, parse_field_expr,
+    OriginIds, Prefetch, ReversibleComparator, check_object_name, parse_field_expr,
     COLLECTION_TYPES, SQL_OPERATORS,
     SUPERUSER_ID,
 )
@@ -4771,7 +4771,7 @@ class BaseModel(metaclass=MetaModel):
         ):
             # try to create the domain close to what it will look like after optimization
             # to avoid reoptimizing it
-            domain = Domain(self._active_name, 'in', OrderedSet((True,))) & domain
+            domain = Domain(self._active_name, 'in', FrozenOrderedSet((True,))) & domain
 
         # build the query
         domain = domain.optimize_full(self)
@@ -6523,38 +6523,6 @@ class Model(AbstractModel):
     _auto: bool = True          # automatically create database backend
     _register: bool = False     # not visible in ORM registry, meant to be python-inherited only
     _abstract: typing.Literal[False] = False  # not abstract
-
-
-@functools.total_ordering
-class ReversibleComparator:
-    __slots__ = ('__item', '__none_first', '__reverse')
-
-    def __init__(self, item, reverse: bool, none_first: bool):
-        self.__item = item
-        self.__reverse = reverse
-        self.__none_first = none_first
-
-    def __lt__(self, other: ReversibleComparator) -> bool:
-        item = self.__item
-        item_cmp = other.__item
-        if item == item_cmp:
-            return False
-        if item is None:
-            return self.__none_first
-        if item_cmp is None:
-            return not self.__none_first
-        if self.__reverse:
-            item, item_cmp = item_cmp, item
-        return item < item_cmp
-
-    def __eq__(self, other: ReversibleComparator) -> bool:
-        return self.__item == other.__item
-
-    def __hash__(self):
-        return hash(self.__item)
-
-    def __repr__(self):
-        return f"<ReversibleComparator {self.__item!r}{' reverse' if self.__reverse else ''}>"
 
 
 def itemgetter_tuple(items):

@@ -57,6 +57,7 @@ __all__ = [
     'NON_BREAKING_SPACE',
     'SKIPPED_ELEMENT_TYPES',
     'DotDict',
+    'FrozenOrderedSet',
     'LastOrderedSet',
     'OrderedSet',
     'Reverse',
@@ -1033,6 +1034,57 @@ class OrderedSet[T](MutableSet[T]):
         return self.__class__(self)
 
 
+class FrozenOrderedSet[T](frozenset[T]):
+    __slots__ = ['_tuple']
+
+    def __new__(cls, elems: Iterable[T] = ()):
+        elems = tuple(dict.fromkeys(elems))
+        s = super().__new__(cls, elems)
+        object.__setattr__(s, '_tuple', elems)
+        return s
+
+    def __delattr__(self, name):
+        raise NotImplementedError("immutable")
+
+    def __setattr__(self, name, value):
+        raise NotImplementedError("immutable")
+
+    def __iter__(self):
+        return iter(self._tuple)
+
+    def __reversed__(self):
+        return reversed(self._tuple)
+
+    def difference(self, *others):
+        return reduce(self.__class_.__sub__, others, self)
+
+    def intersection(self, *others):
+        return reduce(self.__class__.__and__, others, self)
+
+    def symmetric_difference(self, other):
+        return self ^ set(other)
+
+    def union(self, *others):
+        return reduce(self.__class__.__or__, others, self)
+
+    def __and__(self, value):
+        value = set(value)
+        return FrozenOrderedSet(v for v in self._tuple if v in value)
+
+    def __or__(self, value):
+        return FrozenOrderedSet([*self._tuple, *value])
+
+    def __sub__(self, value):
+        value = set(value)
+        return FrozenOrderedSet(v for v in self._tuple if v not in value)
+
+    def __xor__(self, value):
+        return (self | value) - (self & value)
+
+    def copy(self):
+        return self  # immutable
+
+
 class LastOrderedSet[T](OrderedSet[T]):
     """ A set collection that remembers the elements last insertion order. """
     def add(self, elem):
@@ -1625,6 +1677,10 @@ class frozendict[K, V]:
 
     def __subclasscheck__(self, subclass):
         assert False, "cannot subclass frozendict"  # not a real class
+
+    @classmethod
+    def fromkeys(cls, iterable, value=None):
+        return MappingProxyType(_HashDict.fromkeys(iterable, value))
 
 
 def ReadonlyDict(mapping=(), /, **kw) -> MappingProxyType:
