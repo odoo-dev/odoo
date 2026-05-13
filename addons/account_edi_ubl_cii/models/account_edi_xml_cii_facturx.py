@@ -1060,3 +1060,13 @@ class AccountEdiXmlCII(models.AbstractModel):
             'ram:TotalPrepaidAmount': {'_text': self._cii_format_monetary(vals[f'total_prepaid_amount{currency_suffix}'], 2)},
             'ram:DuePayableAmount': {'_text': self._cii_format_monetary(vals[f'due_payable_amount{currency_suffix}'], 2)},
         }
+
+    # -------------------------------------------------------------------------
+    # NEW IMPORT : helpers
+    # -------------------------------------------------------------------------
+
+    def _import_invoice_ubl_cii(self, invoice, file_data, new=False):
+        """
+        :param account.move invoice:
+        """
+        return self._cii_import_invoice(invoice, file_data, new=new)
