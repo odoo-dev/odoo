@@ -785,8 +785,11 @@ class Field[T]:
                 target = target[name][:1]
             # update 'target' only if 'record' and 'target' are both real or
             # both new (see `test_base_objects.py`, `test_basic`)
-            if target and bool(target.id) == bool(record.id):
-                target[field.name] = record_value[record]
+            if target.id is False or bool(target.id) == bool(record.id):
+                if target:
+                    target[field.name] = record_value[record]
+                if not self.store:
+                    self.write(record, target[field.name])
 
     def _search_related(self, records: BaseModel, operator: str, value) -> DomainType:
         """ Determine the domain to search on field ``self``. """

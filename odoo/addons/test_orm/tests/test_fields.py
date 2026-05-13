@@ -1385,6 +1385,37 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         discussion_field = discussion.fields_get(['name'])['name']
         self.assertEqual(message_field['help'], discussion_field['help'])
 
+    def test_25_related_missing_relation(self):
+        """Related inverse keeps falsy value when relation is missing."""
+        # new(): setting a related value without relation should not reset the value
+        message = self.env['test_orm.message'].new({})
+        self.assertFalse(message.discussion)
+        self.assertFalse(message.discussion_name)
+        message = self.env['test_orm.message'].new({'discussion_name': 'Foo'})
+        self.assertEqual(message.discussion_name, 'Foo')
+
+        # create(): same behavior on persisted records
+        message = self.env['test_orm.message'].create({'discussion_name': 'Foo'})
+        self.assertFalse(message.discussion)
+        self.assertFalse(message.discussion_name)
+
+        # write(): update related target when relation exists
+        discussion = self.env['test_orm.discussion'].create({
+            'name': 'Bar',
+            'participants': [Command.link(self.env.user.id)],
+        })
+        message = self.env['test_orm.message'].create({'discussion': discussion.id})
+        self.assertEqual(message.discussion_name, 'Bar')
+        message.write({'discussion_name': 'Qux'})
+        self.assertEqual(discussion.name, 'Qux')
+        self.assertEqual(message.discussion_name, 'Qux')
+
+        # write(): once relation is gone, related value should remain falsy
+        message.write({'discussion': False})
+        self.assertFalse(message.discussion_name)
+        message.write({'discussion_name': 'Baz'})
+        self.assertFalse(message.discussion_name)
+
     def test_25_related_attributes(self):
         """ test the attributes of related fields """
         text = self.registry['test_orm.foo'].text

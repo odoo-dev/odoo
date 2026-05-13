@@ -52,6 +52,16 @@ class TestRelatedTranslation(odoo.tests.TransactionCase):
         self.assertEqual(self.test3.with_context(lang='en_US').name, 'Knife')
         self.assertEqual(self.test3.with_context(lang='fr_FR').name, 'Couteau')
 
+    def test_write_related_without_relation(self):
+        """Translated related inverse keeps falsy value when relation is missing."""
+
+        child = self.env['test_orm.related_translation_2'].create({'name': 'Foo'})
+        self.assertFalse(child.related_id)
+        self.assertFalse(child.name)
+
+        child.write({'name': 'Bar'})
+        self.assertFalse(child.name)
+
     def test_write_from_ori(self):
         self.test1.with_context(lang='en_US').name = 'New knife'
         self.assertEqual(self.test1.with_context(lang='en_US').name, 'New knife')

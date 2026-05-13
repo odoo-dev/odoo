@@ -103,6 +103,7 @@ class TestOnchange(SavepointCaseWithUserDemo):
         result = self.Message.onchange(values, ['discussion'], fields_spec)
         self.assertEqual(result['value'], {
             'name': f"[{discussion.name}] {USER.name}",
+            'discussion_name': discussion.name,
         })
 
         # changing 'body' should recompute 'size'
@@ -610,6 +611,7 @@ class TestOnchange(SavepointCaseWithUserDemo):
         fields_spec = self.Message._get_fields_spec()
         self.assertEqual(fields_spec, {
             'discussion': {'fields': {'display_name': {}}},
+            'discussion_name': {},
             'name': {},
             'author': {'fields': {'display_name': {}}},
             'size': {},
@@ -1469,3 +1471,16 @@ class TestEveryModel(TransactionCase):
             ), contextlib.suppress(UserError):
                 # Test to open the Form view to check first onchange
                 Form(model)
+
+    def test_related_missing_relation_form(self):
+        """Form keeps related value when relation is missing."""
+        message_form = Form(self.env['test_orm.message'])
+        self.assertFalse(message_form.discussion)
+        self.assertFalse(message_form.discussion_name)
+        # field discussion_name is editable in the form view
+        message_form.discussion_name = 'Foo'
+        self.assertEqual(message_form.discussion_name, 'Foo')
+        message = message_form.save()
+        # the value should be reset after save
+        self.assertFalse(message.discussion)
+        self.assertFalse(message.discussion_name)

@@ -212,6 +212,7 @@
                     <sheet>
                         <group>
                             <field name="discussion"/>
+                            <field name="discussion_name"/>
                             <field name="name"/>
                             <field name="author"/>
                             <field name="size"/>
