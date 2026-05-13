@@ -348,10 +348,8 @@
                                         <field name="study_field" placeholder="e.g. Engineering, Commerce, Business Administration, ..."/>
                                     </group>
                                     <group string="Documents" name="hr_document_group">
-                                        <field name="id_card_name" invisible="1"/>
-                                        <field name="driving_license_name" invisible="1"/>
-                                        <field name="id_card" filename="id_card_name"/>
-                                        <field name="driving_license" filename="driving_license_name"/>
+                                        <field name="id_card"/>
+                                        <field name="driving_license"/>
                                     </group>
                                 </group>
                             </page>
@@ -781,7 +779,7 @@
             <field name="res_model">hr.employee</field>
             <field name="view_mode">kanban,list,form,activity,graph,pivot</field>
             <field name="domain">[('company_id', 'in', allowed_company_ids)]</field>
-            <field name="context">{'chat_icon': True, 'searchpanel_default_company_id': allowed_company_ids[0]}</field>
+            <field name="context">{'chat_icon': True, 'searchpanel_default_company_id': allowed_company_ids[0], 'bin_read_info': True}</field>
             <field name="view_id" eval="False"/>
             <field name="search_view_id" ref="view_employee_filter"/>
             <field name="help" type="html">

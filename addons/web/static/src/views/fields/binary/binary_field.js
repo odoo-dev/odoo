@@ -34,6 +34,11 @@ export class BinaryField extends Component {
 
     get fileName() {
         let value = this.props.record.data[this.props.name];
+
+        if (value && typeof value === "object" && "file_name" in value) {
+            value = value.file_name || "";
+        }
+
         value =
             value && typeof value === "string"
                 ? this.props.useReplaceButton
@@ -48,14 +53,33 @@ export class BinaryField extends Component {
 
     update({ data, name }) {
         const { fileNameField, record } = this.props;
-        const changes = { [this.props.name]: data || false };
-        if (fileNameField in record.fields && record.data[fileNameField] !== name) {
-            changes[fileNameField] = name || "";
+        let payload = data || false;
+        if (data) {
+            payload = {
+                content: data,
+                file_name: name || "",
+            };
         }
+        const changes = { [this.props.name]: payload };
+
+        if (fileNameField in record.fields) {
+            if (record.fields[fileNameField].readonly) {
+                if (payload && record.data[fileNameField]) {
+                    payload.file_name = record.data[fileNameField];
+                }
+            } else if (record.data[fileNameField] !== name) {
+                changes[fileNameField] = name || "";
+            }
+        }
+
         return this.props.record.update(changes);
     }
 
     getDownloadData() {
+        let fieldData = this.props.record.data[this.props.name];
+        if (fieldData && typeof fieldData === "object") {
+            fieldData = fieldData.content || fieldData.size || fieldData;
+        }
         return {
             model: this.props.record.resModel,
             id: this.props.record.resId,
@@ -63,9 +87,7 @@ export class BinaryField extends Component {
             filename_field: this.fileName,
             filename: this.fileName || "",
             download: true,
-            data: isBinarySize(this.props.record.data[this.props.name])
-                ? null
-                : this.props.record.data[this.props.name],
+            data: isBinarySize(fieldData) ? null : fieldData,
         };
     }
 

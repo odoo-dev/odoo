@@ -80,8 +80,8 @@ class Binary(Field[BinaryValue]):
             # {file_name, content}
             if 'content' not in value:
                 raise ValueError(f"{self}: missing 'content' when writing")
-            value = self.convert_to_cache(value['content'], record).content
-            return BinaryBytes(value, file_name=value.get('file_name', ''))
+            parsed_content = self.convert_to_cache(value['content'], record).content
+            return BinaryBytes(parsed_content, file_name=value.get('file_name', ''))
         # Error needed because we used to write base64 encoded data and we
         # cannot distinguish whether bytes are encoded or not in base64.
         if isinstance(value, bytes) and (self.related_field or self).name == 'raw':
@@ -110,20 +110,21 @@ class Binary(Field[BinaryValue]):
         if not value:
             return False
         value = self.convert_to_cache(value, record, validate=False)
-        if record.env.context.get('bin_read_info'):
+        is_bin_size = record.env.context.get('bin_size') or record.env.context.get('bin_size_' + self.name)
+        if record.env.context.get('bin_read_info') and self.__class__.__name__ != 'Image':  # TODO properly handle Image(Binary)
             file_name = value.file_name
             if file_name == self.name:
                 file_name = None
-            return {
-                'file_name': file_name,
-                'content': value.content,
-            }
-        if (
-            record.env.context.get('bin_size')
-            or record.env.context.get('bin_size_' + self.name)
-        ):
-            # TODO js detects that value looks like a size otherwise it
-            # supposes that this is base64 encoded and requests the image
+
+            payload = {'file_name': file_name}
+
+            if is_bin_size:
+                payload['size'] = human_size(value.size)
+            else:
+                payload['content'] = value.to_base64()
+            return payload
+
+        if is_bin_size:
             return human_size(value.size)
         # we read bytes in base64 format for RPC
         return value.to_base64()
@@ -189,9 +190,9 @@ class Binary(Field[BinaryValue]):
                     ('res_field', '=', self.name),
                     ('res_id', 'in', real_records.ids),
                 ])
-            if value:
-                # update the existing attachments
-                atts.write({'raw': value})
+            if cache_value:
+                atts.write({'raw': cache_value})
+
                 atts_records = records.browse(atts.mapped('res_id'))
                 # create the missing attachments
                 missing = (real_records - atts_records)
@@ -201,7 +202,7 @@ class Binary(Field[BinaryValue]):
                             'res_field': self.name,
                             'res_id': record.id,
                             'type': 'binary',
-                            'raw': value,
+                            'raw': cache_value,
                         }
                         for record in missing
                     ])
