@@ -5532,3 +5532,61 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         self.assertEqual(invoice_line.matching_number, payment_line.matching_number)
         self.assertEqual(payment_line.matching_number, currency_exchange_line.matching_number)
         self.assertEqual(currency_exchange_line.amount_residual, 0)
+
+    def test_partial_reconcile_amounts_of_several_matching_lines(self):
+        """ Test that the amounts of the partial reconcile records are matched by partner in priority. """
+        comp_curr = self.company_data['currency']
+        partner_c = self.partner_a.copy()
+        line_1 = self.create_line_for_reconciliation(1000.0, 1000.0, comp_curr, '2016-01-01', partner=self.partner_a)
+        line_2 = self.create_line_for_reconciliation(1001.0, 1001.0, comp_curr, '2016-01-01', partner=self.partner_b)
+        line_3 = self.create_line_for_reconciliation(1002.0, 1002.0, comp_curr, '2016-01-01', partner=partner_c)
+        line_4 = self.create_line_for_reconciliation(-1002.0, -1002.0, comp_curr, '2016-01-01', partner=partner_c)
+        line_5 = self.create_line_for_reconciliation(-1001.0, -1001.0, comp_curr, '2016-01-01', partner=self.partner_b)
+        line_6 = self.create_line_for_reconciliation(-1000.0, -1000.0, comp_curr, '2016-01-01', partner=self.partner_a)
+        lines = line_1 + line_2 + line_3 + line_4 + line_5 + line_6
+        lines.reconcile()
+        reconciliation_lines = lines.full_reconcile_id.partial_reconcile_ids.sorted('amount')
+        self.assertRecordValues(reconciliation_lines, [
+            {'amount': 1000.0, 'debit_move_id': line_1.id, 'credit_move_id': line_6.id},
+            {'amount': 1001.0, 'debit_move_id': line_2.id, 'credit_move_id': line_5.id},
+            {'amount': 1002.0, 'debit_move_id': line_3.id, 'credit_move_id': line_4.id},
+        ])
+
+    def test_caba_transition_account_exchange_diff(self):
+        self.env.company.tax_exigibility = True
+        transition_account = self.env['account.account'].create({
+            'name': 'Alt CABA Transition',
+            'code': '200001',
+            'account_type': 'asset_current',
+            'reconcile': True,
+        })
+
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'Product line',
+                    'price_unit': 100.0,
+                    'tax_ids': [Command.set(self.cash_basis_tax_a_third_amount.ids)],
+                }),
+            ],
+        })
+
+        tax_line = invoice.line_ids.filtered(lambda l: l.tax_line_id == self.cash_basis_tax_a_third_amount)
+        tax_line.account_id = transition_account
+        invoice.action_post()
+
+        self.env['account.payment.register'].with_context(
+            active_model='account.move', active_ids=invoice.ids
+        ).create({})._create_payments()
+
+        tax_cash_basis_moves = self._get_caba_moves(invoice)
+
+        transition_account_lines = self.env['account.move.line'].search([
+            ('account_id', '=', transition_account.id)
+        ])
+
+        self.assertEqual(transition_account_lines.move_id, (invoice | tax_cash_basis_moves),
+            "Only the invoice line and the CABA entry should be generated."
+        )

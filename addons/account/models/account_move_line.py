@@ -2693,6 +2693,8 @@ class AccountMoveLine(models.Model):
                         exchange_lines_to_fix += aml
                         amounts_list.append({'amount_residual_currency': aml.amount_residual_currency})
                     exchange_max_date = max(exchange_max_date, aml.date)
+                if not exchange_lines_to_fix:
+                    continue
                 exchange_diff_values = exchange_lines_to_fix._prepare_exchange_difference_move_vals(
                     amounts_list,
                     company=involved_amls.company_id,
