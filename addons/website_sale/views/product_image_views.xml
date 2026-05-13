@@ -48,14 +48,15 @@
                 <!-- Needed in attribute_value_selector.js -->
                 <field name="image_type"/>
                 <field name="product_tmpl_id"/>
-                <field name="product_variant_ids"/>
                 <templates>
                     <t t-name="card" class="p-0 border-0">
                         <t t-set="currentVariant" t-value="context.default_product_variant_ids?.[0]"/>
-                        <t t-set="variants" t-value="record.product_variant_ids.raw_value or []"/>
                         <t
                             t-set="isApplicable"
-                            t-value="!currentVariant or variants.includes(currentVariant)"
+                            t-value="(
+                                !record.attribute_value_ids.raw_value.length
+                                || (!currentVariant || currentVariant?.variant_image_ids?.includes(record.raw_value))
+                            )"
                         />
                         <div t-attf-class="card flex-row h-100 border rounded-0 #{!isApplicable ? 'opacity-50' : ''}">
                             <div class="o_website_sale_image_list_card_image ratio ratio-1x1">

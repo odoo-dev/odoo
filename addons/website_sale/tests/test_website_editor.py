@@ -39,9 +39,7 @@ class TestProductPictureController(HttpCase):
             "standard_price": 70.0,
             "list_price": 79.0,
             "website_published": True,
-            "is_main_image_manually_set": True,
         })
-        cls.product.product_tmpl_id.write({"is_main_image_manually_set": True})
 
         cls.attachments = cls.env["ir.attachment"].create([
             {"raw": ATTACHMENT_DATA[i], "name": f"image0{i}.gif", "public": True}

@@ -118,7 +118,9 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
         }, {
             'name': 'Variant image',
             'image_1920': red_image,
-            'product_variant_ids': [Command.link(cls.productC.id)],
+            'attribute_value_ids': [
+                Command.link(value) for value in cls.productC.product_template_variant_value_ids.ids
+            ],
             'product_tmpl_id': cls.productC.product_tmpl_id.id,
         }])
 
@@ -151,7 +153,9 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
                 images.append({
                     'name': 'Variant image',
                     'image_1920': red_image,
-                    'product_variant_ids': [Command.link(variant.id)],
+                    'attribute_value_ids': [
+                        Command.link(value) for value in variant.product_template_variant_value_ids.ids
+                    ],
                     'product_tmpl_id': template.id,
                 })
             cls.env['product.image'].create(images)

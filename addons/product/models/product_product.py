@@ -260,7 +260,11 @@ class ProductProduct(models.Model):
     def _compute_image_1920(self):
         """Get the image from the template if no image is set on the variant."""
         for record in self:
-            record.image_1920 = record.image_variant_1920 or record.product_tmpl_id.image_1920
+            record.image_1920 = record.image_variant_1920 or record._get_image_1920()
+
+    def _get_image_1920(self):
+        self.ensure_one()
+        return self.product_tmpl_id.image_1920
 
     def _set_image_1920(self):
         return self._set_template_field('image_1920', 'image_variant_1920')

@@ -142,9 +142,9 @@ class TestWebsiteSaleImage(HttpCaseWithWebsiteUser):
         self.assertFalse(template.product_template_image_ids[0].can_image_1024_be_zoomed)
         self.assertFalse(template.product_template_image_ids[1].can_image_1024_be_zoomed)
         self.assertFalse(product_red.can_image_1024_be_zoomed)
-        self.assertFalse(product_red._get_extra_images()[0].can_image_1024_be_zoomed)
+        self.assertFalse(product_red.variant_image_ids()[0].can_image_1024_be_zoomed)
         self.assertTrue(product_green.can_image_1024_be_zoomed)
-        self.assertTrue(product_green._get_extra_images()[0].can_image_1024_be_zoomed)
+        self.assertTrue(product_green.variant_image_ids()[0].can_image_1024_be_zoomed)
 
         # jpeg encoding is changing the color a bit
         jpeg_blue = (65, 105, 227)

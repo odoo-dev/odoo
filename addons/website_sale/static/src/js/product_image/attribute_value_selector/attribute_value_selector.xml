@@ -19,7 +19,6 @@
                     </div>
                     <div class="d-flex align-items-center gap-1">
                         <span
-                            t-if="this.badgeLabel"
                             t-out="this.badgeLabel"
                             class="badge rounded-1 bg-warning-subtle text-warning-emphasis"
                         />

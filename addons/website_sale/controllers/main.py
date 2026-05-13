@@ -757,7 +757,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 except Exception:  # noqa: BLE001
                     thumbnail = None
             else:
-                raise ValidationError(_("Invalid video URL provided."))
+                raise ValidationError(self.env._("Invalid video URL provided."))
             media_create_data = [
                 Command.create({
                     "name": video_data.get("name", "Odoo Video"),
@@ -803,14 +803,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
             product_template = image_to_resequence
             product = product_template.product_variant_id
         else:
-            product = (
-                image_to_resequence.product_variant_ids.filtered(
-                    lambda p: p.id == int(product_variant_id)
-                )
-                if image_to_resequence.attribute_value_ids
-                else False
-            )
             product_template = image_to_resequence.product_tmpl_id
+            product = product_template.product_variant_ids.filtered(
+                lambda p: p.product_template_attribute_value_ids in image_to_resequence.attribute_value_ids
+            )
 
         if not product and not product_template:
             raise ValidationError(self.env._("Product not found"))
