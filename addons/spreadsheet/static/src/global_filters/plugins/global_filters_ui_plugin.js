@@ -18,14 +18,6 @@ export class GlobalFiltersUIPlugin extends OdooUIPlugin {
      */
     handle(cmd) {
         switch (cmd.type) {
-            case "SET_MANY_GLOBAL_FILTER_VALUE":
-                for (const filter of cmd.filters) {
-                    this.dispatch("SET_GLOBAL_FILTER_VALUE", {
-                        id: filter.filterId,
-                        value: filter.value,
-                    });
-                }
-                break;
             case "SET_DATASOURCE_FIELD_MATCHING": {
                 const matcher = globalFieldMatchingRegistry.get(cmd.dataSourceType);
                 /**

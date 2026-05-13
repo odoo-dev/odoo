@@ -17,7 +17,7 @@ import { EvaluationError, helpers } from "@odoo/o-spreadsheet";
 import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
 
 import {
-    checkFilterValueIsValid,
+    checkFilterAndValue,
     getDateDomain,
     getDateRange,
 } from "@spreadsheet/global_filters/helpers";
@@ -25,7 +25,6 @@ import { OdooCoreViewPlugin } from "@spreadsheet/plugins";
 import { getItemId } from "../../helpers/model";
 import { serializeDate } from "@web/core/l10n/dates";
 import { getFilterCellValue, getFilterValueDomain } from "../helpers";
-import { deepEqual } from "@web/core/utils/objects";
 
 const { DateTime } = luxon;
 
@@ -57,17 +56,14 @@ export class GlobalFiltersCoreViewPlugin extends OdooCoreViewPlugin {
     allowDispatch(cmd) {
         switch (cmd.type) {
             case "SET_GLOBAL_FILTER_VALUE": {
-                const filter = this.getters.getGlobalFilter(cmd.id);
-                if (!filter) {
-                    return CommandResult.FilterNotFound;
-                }
-                if (!checkFilterValueIsValid(filter, cmd.value)) {
-                    return CommandResult.InvalidValueTypeCombination;
-                }
-
-                const currentFilterValue = this.getters.getGlobalFilterValue(cmd.id);
-                if (deepEqual(currentFilterValue, cmd.value)) {
-                    return CommandResult.NoChanges;
+                return checkFilterAndValue(this.getters, cmd.id, cmd.value);
+            }
+            case "SET_MANY_GLOBAL_FILTER_VALUE": {
+                for (const { filterId, value } of cmd.filters) {
+                    const result = checkFilterAndValue(this.getters, filterId, value);
+                    if (result !== CommandResult.Success) {
+                        return result;
+                    }
                 }
                 break;
             }
@@ -83,10 +79,11 @@ export class GlobalFiltersCoreViewPlugin extends OdooCoreViewPlugin {
     handle(cmd) {
         switch (cmd.type) {
             case "SET_GLOBAL_FILTER_VALUE":
-                if (cmd.value === undefined) {
-                    this._clearGlobalFilterValue(cmd.id);
-                } else {
-                    this._setGlobalFilterValue(cmd.id, cmd.value);
+                this._setGlobalFilterValue(cmd.id, cmd.value);
+                break;
+            case "SET_MANY_GLOBAL_FILTER_VALUE":
+                for (const filter of cmd.filters) {
+                    this._setGlobalFilterValue(filter.filterId, filter.value);
                 }
                 break;
             case "REMOVE_GLOBAL_FILTER":
@@ -263,25 +260,20 @@ export class GlobalFiltersCoreViewPlugin extends OdooCoreViewPlugin {
      * Set the current value of a global filter
      *
      * @param {string} id Id of the filter
-     * @param {string|Array<string>|Object} value Current value to set
+     * @param {string|Array<string>|Object|undefined} value Current value to set
      */
     _setGlobalFilterValue(id, value) {
-        this.values[id] = {
-            preventDefaultValue: false,
-            value,
-        };
-    }
-
-    /**
-     * Set the current value to empty values which functionally deactivate the filter
-     *
-     * @param {string} id Id of the filter
-     */
-    _clearGlobalFilterValue(id) {
-        this.values[id] = {
-            preventDefaultValue: true,
-            value: undefined,
-        };
+        if (value === undefined) {
+            this.values[id] = {
+                preventDefaultValue: true,
+                value: undefined,
+            };
+        } else {
+            this.values[id] = {
+                preventDefaultValue: false,
+                value,
+            };
+        }
     }
 
     // -------------------------------------------------------------------------

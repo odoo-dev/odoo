@@ -7,6 +7,7 @@ import {
     getEmptyFilterValue,
     getFilterTypeOperators,
 } from "@spreadsheet/global_filters/helpers";
+import { SET_MANY_GLOBAL_FILTER_VALUE } from "@spreadsheet/global_filters/global_filters_actions";
 import { useService } from "@web/core/utils/hooks";
 import { isEmptyFilterValue } from "../../helpers";
 import { deepEqual } from "@web/core/utils/objects";
@@ -107,18 +108,24 @@ export class FilterValuesList extends Component {
     }
 
     onConfirm() {
+        const filters = [];
         for (const node of this.state.filtersAndValues) {
             const { globalFilter, value } = node;
             const originalValue = this.props.model.getters.getGlobalFilterValue(globalFilter.id);
+            const currentValue = isEmptyFilterValue(globalFilter, value) ? undefined : value;
 
-            if (deepEqual(originalValue, value)) {
+            if (deepEqual(originalValue, currentValue)) {
                 continue;
             }
-            this.props.model.dispatch("SET_GLOBAL_FILTER_VALUE", {
-                id: globalFilter.id,
-                value: isEmptyFilterValue(globalFilter, value) ? undefined : value,
+            filters.push({
+                filterId: globalFilter.id,
+                value: currentValue,
             });
         }
+        if (!filters.length) {
+            return;
+        }
+        SET_MANY_GLOBAL_FILTER_VALUE(this.props.model, filters);
         this.props.close();
     }
 

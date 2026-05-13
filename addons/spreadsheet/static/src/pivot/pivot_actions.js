@@ -2,6 +2,7 @@
 
 import { navigateTo } from "../actions/helpers";
 import { helpers } from "@odoo/o-spreadsheet";
+import { SET_MANY_GLOBAL_FILTER_VALUE } from "@spreadsheet/global_filters/global_filters_actions";
 const { getNumberOfPivotFunctions } = helpers;
 
 /**
@@ -90,5 +91,5 @@ export function SET_FILTER_MATCHING(position, env) {
     const pivotId = env.model.getters.getPivotIdFromPosition(position);
     const domain = env.model.getters.getPivotCellFromPosition(position).domain;
     const filters = env.model.getters.getFiltersMatchingPivotArgs(pivotId, domain);
-    env.model.dispatch("SET_MANY_GLOBAL_FILTER_VALUE", { filters });
+    SET_MANY_GLOBAL_FILTER_VALUE(env.model, filters);
 }

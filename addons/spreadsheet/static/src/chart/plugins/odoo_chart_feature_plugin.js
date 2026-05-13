@@ -16,6 +16,14 @@ export class OdooChartFeaturePlugin extends OdooUIPlugin {
                 }
                 break;
             }
+            case "SET_MANY_GLOBAL_FILTER_VALUE": {
+                if (this.getters.isDashboard()) {
+                    for (const filter of cmd.filters) {
+                        this._onGlobalFilterChange({ ...filter, id: filter.filterId });
+                    }
+                }
+                break;
+            }
             case "UPDATE_CHART_GRANULARITY": {
                 this._updateChartGranularity(cmd.chartId, cmd.granularity);
                 this.overwrittenGranularities[cmd.chartId] = cmd.granularity;

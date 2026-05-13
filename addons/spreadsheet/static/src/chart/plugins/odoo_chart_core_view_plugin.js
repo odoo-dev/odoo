@@ -70,6 +70,7 @@ export class OdooChartCoreViewPlugin extends OdooUIPlugin {
             case "EDIT_GLOBAL_FILTER":
             case "REMOVE_GLOBAL_FILTER":
             case "SET_GLOBAL_FILTER_VALUE":
+            case "SET_MANY_GLOBAL_FILTER_VALUE":
                 this._addDomains();
                 break;
             case "UNDO":
