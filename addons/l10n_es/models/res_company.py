@@ -9,3 +9,16 @@ class ResCompany(models.Model):
         help="Over this amount is not legally possible to create a simplified invoice",
         default=400,
     )
+
+    canary_general_chart_type = fields.Selection(
+        selection=[
+            ('smes', 'PYMES'),
+            ('full', 'Completo'),
+            ('abbreviated', 'Abreviado')
+        ]
+        string="Accounting plan type",
+        default='smes',
+        help="Select which accounting plan you wish to stablish"
+    )
+
+

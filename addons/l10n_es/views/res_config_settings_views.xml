@@ -15,6 +15,11 @@
                     </setting>
                 </block>
             </xpath>
+            <xpath expr="//block[@name='fiscal_localization_setting_container']" position="inside">
+                <setting title="Spanish General Chaert Type" name="spanish_general_chart_type">
+                    <field name="spanish_general_chart_type" widget="radio"/>
+                </setting>
+            </xpath>
         </field>
     </record>
 </odoo>
