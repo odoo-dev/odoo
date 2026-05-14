@@ -204,6 +204,9 @@
             <t t-snippet="website.s_nav_minimal" string="Minimal Navigation" group="content">
                 <keywords>navigation, nav, links, menu, entries, bar, minimal, row</keywords>
             </t>
+            <t t-snippet="website.s_bento_hero" string="Bento Hero" group="content">
+                <keywords>bento, hero, grid, layout, banner, headline</keywords>
+            </t>
             <t t-snippet="website.s_countdown" string="Countdown" group="content">
                 <keywords>celebration, launch</keywords>
             </t>

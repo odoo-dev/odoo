@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<template name="Bento Hero" id="s_bento_hero">
+    <section class="s_bento_hero o_cc pt64 pb64 o_cc2" data-name="Bento Hero">
+        <div class="container">
+            <div class="row o_grid_mode" data-row-count="12" style="gap: 16px;">
+                <div class="o_grid_item rounded o_cc o_cc3 g-col-lg-3 col-13 g-height-5 col-lg-3 order-lg-0" style="z-index: 9; grid-area: 1 / 10 / 6 / 13; --grid-item-padding-y: 24px; --grid-item-padding-x: 24px; order: 2;">
+                    <h2><span class="h2-fs">Start Now</span></h2>
+                </div>
+                <div class="o_grid_item o_grid_item_image rounded overflow-hidden g-col-lg-6 g-height-7 col-lg-6 order-lg-0" style="border-radius: 6.4px !important; --grid-item-padding-y: 0px; grid-area: 6 / 1 / 13 / 7; --grid-item-padding-x: 0px; z-index: 10; order: 1;">
+                    <img src="/web/image/website.s_text_image_default_image" class="img img-fluid mx-auto rounded" alt="" loading="lazy" data-mimetype="image/webp"/>
+                </div>
+                <div class="o_grid_item rounded o_cc o_cc1 g-col-lg-9 g-height-5 col-lg-9 order-lg-0" style="z-index: 11; grid-area: 1 / 1 / 6 / 10; --grid-item-padding-y: 24px; --grid-item-padding-x: 24px; order: 0;">
+                    <p class="small">EST. 2020 - WORLDWIDE<br/></p>
+                    <h1 class="display-2">Make ordinary<br/>feel <strong>inevitable</strong></h1>
+                </div>
+                <div class="o_grid_item rounded o_cc g-col-lg-3 o_cc4 g-height-4 col-lg-3 order-lg-0" style="z-index: 6; grid-area: 6 / 10 / 10 / 13; --grid-item-padding-y: 24px; --grid-item-padding-x: 24px; order: 4;">
+                    <p><span class="h4-fs"><strong>"Quite conviction, every detail"</strong></span></p>
+                    <p><br/></p>
+                    <p>- Sasha Linde</p>
+                </div>
+                <div class="o_grid_item rounded o_cc g-col-lg-3 o_cc1 g-height-4 col-lg-3 order-lg-0" style="z-index: 7; grid-area: 6 / 7 / 10 / 10; --grid-item-padding-y: 24px; --grid-item-padding-x: 24px; order: 3;">
+                    <h2><span style="font-size: 20px;"><strong>Projects</strong></span></h2>
+                    <p><br/></p>
+                    <p><span style="font-size: clamp(8px, 1em + 5.0901vw, 400px);" class="o_rfs"><strong>157</strong></span></p>
+                </div>
+                <div class="o_grid_item rounded o_cc g-col-lg-6 o_cc1 g-height-3 col-lg-6 order-lg-0" style="z-index: 8; --grid-item-padding-y: 24px; --grid-item-padding-x: 24px; grid-area: 10 / 7 / 13 / 13; order: 5;">
+                    <h2><span style="font-size: 20px;"><strong>Discover our offer</strong></span></h2>
+                    <p><br/></p>
+                    <p>An independent practice working across offer, identity and space. We partner with people who care about the details.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
+
+</odoo>
