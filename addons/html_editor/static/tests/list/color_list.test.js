@@ -180,7 +180,7 @@ test("remove color from list item", async () => {
     await testEditor({
         contentBefore:
             '<ul><li style="color: rgb(255, 0, 0);">abc</li><li style="color: rgb(255, 0, 0);">[ghi]</li></ul>',
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter: '<ul><li style="color: rgb(255, 0, 0);">abc</li><li>[ghi]</li></ul>',
     });
 });
@@ -188,7 +188,7 @@ test("remove color from list item", async () => {
 test("should remove color from partially selected list item", async () => {
     await testEditor({
         contentBefore: '<ol><li style="color: rgb(255, 0, 0);">ab[cd]ef</li></ol>',
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter:
             '<ol><li style="color: rgb(255, 0, 0);">ab<font class="o_default_color">[cd]</font>ef</li></ol>',
     });
@@ -207,7 +207,7 @@ test("should remove color from fully selected list item with nested list", async
                 <li class="text-o-color-1">ghi]</li>
             </ol>
         `),
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfterEdit: unformat(`
             <ol>
                 <li>
@@ -234,7 +234,7 @@ test("should remove color from partially selected text inside list item", async 
                 </li>
             </ol>
         `),
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfterEdit: unformat(`
             <ol>
                 <li class="text-o-color-1">

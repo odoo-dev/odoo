@@ -26,7 +26,7 @@ test("should remove the fontFamily from a few characters (set default)", async (
 test("should remove the fontFamily from a few characters (remove format)", async () => {
     await testEditor({
         contentBefore: `<p><span style="font-family: testFont;">ab[cde]fg</span></p>`,
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter: `<p><span style="font-family: testFont;">ab</span>[cde]<span style="font-family: testFont;">fg</span></p>`,
     });
 });

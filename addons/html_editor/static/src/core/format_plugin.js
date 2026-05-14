@@ -82,7 +82,6 @@ export class FormatPlugin extends Plugin {
         "insertAndSelectZws",
         "mergeAdjacentInlines",
         "formatSelection",
-        "removeFormats",
     ];
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -134,7 +133,7 @@ export class FormatPlugin extends Plugin {
                 isAvailable: this.canFormatContent.bind(this),
             },
             {
-                id: "removeFormat",
+                id: "removeAllFormats",
                 description: (sel, nodes) =>
                     nodes && this.hasAnyFormat(nodes)
                         ? _t("Remove Format")
@@ -149,7 +148,7 @@ export class FormatPlugin extends Plugin {
             { hotkey: "control+i", commandId: "formatItalic" },
             { hotkey: "control+u", commandId: "formatUnderline" },
             { hotkey: "control+5", commandId: "formatStrikethrough" },
-            { hotkey: "control+space", commandId: "removeFormat" },
+            { hotkey: "control+space", commandId: "removeAllFormats" },
         ],
         toolbar_groups: withSequence(20, { id: "decoration" }),
         toolbar_items: [
@@ -191,7 +190,7 @@ export class FormatPlugin extends Plugin {
             withSequence(20, {
                 id: "remove_format",
                 groupId: "decoration",
-                commandId: "removeFormat",
+                commandId: "removeAllFormats",
                 isDisabled: (sel, nodes) =>
                     !this.hasAnyFormat(nodes) || nodes.some((node) => !isStylable(node)),
             }),
@@ -214,25 +213,6 @@ export class FormatPlugin extends Plugin {
         },
     };
 
-    /**
-     * @param {string[]} formats
-     * @param {Node[]} targetedNodes
-     */
-    removeFormats(formats, targetedNodes) {
-        const editableTargetedNodes = targetedNodes.filter(
-            this.dependencies.selection.isNodeEditable
-        );
-        for (const format of formats) {
-            if (
-                !formatsSpecs[format].removeStyle ||
-                !this.hasSelectionFormat(format, editableTargetedNodes)
-            ) {
-                continue;
-            }
-            this.formatSelection(format, { applyStyle: false, removeFormat: true });
-        }
-    }
-
     unwrapEmptyFormat(insertedNode) {
         const anchorNode = this.dependencies.selection.getEditableSelection().anchorNode;
         if (!allWhitespaceRegex.test(insertedNode.textContent)) {
@@ -254,14 +234,26 @@ export class FormatPlugin extends Plugin {
     }
 
     removeAllFormats() {
-        const targetedNodes = this.dependencies.selection.getTargetedNodes();
-        this.removeFormats(Object.keys(formatsSpecs), targetedNodes);
+        const targetedNodes = this.dependencies.selection
+            .getTargetedNodes()
+            .filter(this.dependencies.selection.isNodeEditable);
+        for (const format of Object.keys(formatsSpecs)) {
+            if (
+                formatsSpecs[format].removeStyle &&
+                this.hasSelectionFormat(format, targetedNodes)
+            ) {
+                this._formatSelection(format, { applyStyle: false });
+            }
+        }
         this.trigger("on_all_formats_removed_handlers");
         this.dependencies.history.addStep();
     }
 
     removeFontSizeFormat(el) {
-        this.removeFormats(["fontSize", "setFontSizeClassName"], [el, ...descendants(el)]);
+        for (const node of [el, ...descendants(el)]) {
+            clearFormat(node, formatsSpecs.fontSize);
+            clearFormat(node, formatsSpecs.setFontSizeClassName);
+        }
     }
 
     /**
@@ -329,7 +321,7 @@ export class FormatPlugin extends Plugin {
     }
 
     formatSelection(formatName, options) {
-        if (this._formatSelection(formatName, options) && !options?.removeFormat) {
+        if (this._formatSelection(formatName, options)) {
             this.dependencies.history.addStep();
         }
     }
@@ -443,7 +435,7 @@ export class FormatPlugin extends Plugin {
                         currentNode,
                         parentNode
                     );
-                    removeFormat(newLastAncestorInlineFormat, formatSpec);
+                    clearFormat(newLastAncestorInlineFormat, formatSpec);
                     if (["setFontSizeClassName", "fontSize"].includes(formatName) && applyStyle) {
                         removeClass(newLastAncestorInlineFormat, "o_default_font_size");
                     }
@@ -466,7 +458,7 @@ export class FormatPlugin extends Plugin {
                     formatName === "setFontSizeClassName"
                 ) {
                     for (const node of [parentNode, ...descendants(parentNode).filter(isElement)]) {
-                        removeFormat(node, formatSpec);
+                        clearFormat(node, formatSpec);
                     }
                 } else {
                     formatSpec.addNeutralStyle &&
@@ -826,7 +818,7 @@ function getOrCreateSpan(node, ancestors) {
         return span;
     }
 }
-function removeFormat(node, formatSpec) {
+function clearFormat(node, formatSpec) {
     const document = node.ownerDocument;
     node = closestElement(node);
     if (formatSpec.hasStyle(node)) {

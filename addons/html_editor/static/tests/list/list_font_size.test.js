@@ -248,7 +248,7 @@ test("should remove font-size from list item", async () => {
     await testEditor({
         styleContent: "ol { font: 14px Roboto }",
         contentBefore: `<ol><li style="font-size: 56px;">[a]</li></ol>`,
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter: `<ol><li>[a]</li></ol>`,
     });
 });
@@ -257,7 +257,7 @@ test("should remove font-size class from list item", async () => {
     await testEditor({
         styleContent: "ol { font: 14px Roboto }",
         contentBefore: `<ol><li class="h2-fs">[a]</li></ol>`,
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter: `<ol><li>[a]</li></ol>`,
     });
 });
@@ -266,7 +266,7 @@ test("should remove font-size from list item containing sublist", async () => {
     await testEditor({
         styleContent: "ol { font: 14px Roboto }",
         contentBefore: `<ol><li>a</li><li style="font-size: 56px;"><p>[b]</p><ol class="o_default_font_size"><li>c</li></ol></li></ol>`,
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter: `<ol><li>a</li><li><p>[b]</p><ol><li>c</li></ol></li></ol>`,
     });
 });
@@ -275,7 +275,7 @@ test("should remove font-size class from list item containing sublist", async ()
     await testEditor({
         styleContent: "ol { font: 14px Roboto }",
         contentBefore: `<ol><li>a</li><li class="h2-fs"><p>[b]</p><ol class="o_default_font_size"><li>c</li></ol></li></ol>`,
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter: `<ol><li>a</li><li><p>[b]</p><ol><li>c</li></ol></li></ol>`,
     });
 });
@@ -284,7 +284,7 @@ test("should remove font-size and its classes from partially selected list item 
     await testEditor({
         styleContent: "ol { font: 14px Roboto }",
         contentBefore: `<ol><li>a</li><li style="font-size: 56px;">b[c]d</li><li>e</li></ol>`,
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter: `<ol style="padding-inline-start: 60px;"><li>a</li><li style="font-size: 56px;">b<span class="o_default_font_size">[c]</span>d</li><li>e</li></ol>`,
     });
 });
@@ -293,7 +293,7 @@ test("should remove font-size and its classes from partially selected list item 
     await testEditor({
         styleContent: "ol { font: 14px Roboto }",
         contentBefore: `<ol><li>a</li><li class="h2-fs">b[c]d</li><li>e</li></ol>`,
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter: `<ol><li>a</li><li class="h2-fs">b<span class="o_default_font_size">[c]</span>d</li><li>e</li></ol>`,
     });
 });
@@ -302,7 +302,7 @@ test("should remove font-size and its classes from partially selected list item 
     await testEditor({
         styleContent: "ol { font: 14px Roboto }",
         contentBefore: `<ol><li style="font-size: 56px;">a[bc</li><li style="font-size: 56px;">def</li><li style="font-size: 56px;">gh]i</li></ol>`,
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter: `<ol style="padding-inline-start: 60px;"><li style="font-size: 56px;">a<span class="o_default_font_size">[bc</span></li><li>def</li><li style="font-size: 56px;"><span class="o_default_font_size">gh]</span>i</li></ol>`,
     });
 });
@@ -311,7 +311,7 @@ test("should remove font-size and its classes from partially selected list item 
     await testEditor({
         styleContent: "ol { font: 14px Roboto }",
         contentBefore: `<ol><li class="h2-fs">a[bc</li><li class="h2-fs">def</li><li class="h2-fs">gh]i</li></ol>`,
-        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        stepFunction: (editor) => execCommand(editor, "removeAllFormats"),
         contentAfter: `<ol><li class="h2-fs">a<span class="o_default_font_size">[bc</span></li><li>def</li><li class="h2-fs"><span class="o_default_font_size">gh]</span>i</li></ol>`,
     });
 });
