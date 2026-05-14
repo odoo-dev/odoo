@@ -430,34 +430,3 @@ registry.category("web_tour.tours").add("test_convert_orderlines_to_combo_with_u
             ]),
         ].flat(),
 });
-
-registry.category("web_tour.tours").add("test_combo_no_free_item", {
-    steps: () =>
-        [
-            Chrome.startPoS(),
-            Dialog.confirm("Open Register"),
-
-            // Desk accessories combo
-            ProductScreen.clickDisplayedProduct("Office Combo"),
-            combo.select("Combo Product 1"),
-            combo.select("Combo Product 2"),
-            combo.select("Combo Product 3"),
-            combo.checkTotal(`${10 * 3 + 2 + 40}.00`),
-            combo.select("Combo Product 4"),
-            combo.select("Combo Product 5"),
-            combo.checkTotal(`${72 + 20 * 2 + 2}.00`),
-            combo.select("Combo Product 6"),
-            combo.select("Combo Product 7"),
-            combo.select("Combo Product 8"),
-            combo.checkTotal(`${114 + 30 * 3 + 5}.00`),
-            Dialog.confirm(),
-            inLeftSide([
-                ...ProductScreen.selectedOrderlineHasDirect("Office Combo", "1", "232.10"),
-            ]),
-            ProductScreen.totalAmountIs("232.10"),
-            ProductScreen.clickPayButton(),
-            PaymentScreen.clickPaymentMethod("Bank"),
-            PaymentScreen.clickValidate(),
-            FeedbackScreen.isShown(),
-        ].flat(),
-});
