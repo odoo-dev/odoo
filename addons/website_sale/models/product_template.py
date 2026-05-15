@@ -320,20 +320,19 @@ class ProductTemplate(models.Model):
             Domain("suggested_products_last_update", "<", "-12H")
             | Domain("suggested_products_last_update", "=", False)
         )
+        remaining = self.search_count(cron_domain)
+        if not remaining:
+            return
+        self.env['ir.cron']._commit_progress(remaining=remaining)
+
         # Order by last update (desc) to ensure the cron processes all products over time,
         # starting with those that haven't been updated recently
-        products_to_update = self.search(
+        while products_to_update := self.search(
             cron_domain, order="suggested_products_last_update", limit=batch_size
-        )
-
-        remaining = (
-            len(products_to_update)
-            if len(products_to_update) < batch_size
-            else self.search_count(cron_domain)
-        )
-        self.env["ir.cron"]._commit_progress(remaining=remaining)
-        products_to_update._update_suggested_products()
-        self.env["ir.cron"]._commit_progress(processed=len(products_to_update))
+        ):
+            products_to_update._update_suggested_products()
+            if not self.env["ir.cron"]._commit_progress(processed=len(products_to_update)):
+                break
 
     def action_update_suggested_products(self):
         # If called from the server action, reset the suggest_ fields
