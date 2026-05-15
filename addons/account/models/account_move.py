@@ -6540,34 +6540,34 @@ class AccountMove(models.Model):
         It is used to post entries such as those created by the module
         account_asset and recurring entries created in _post().
         '''
-        domain = [
+        domain = Domain([
             ('state', '=', 'draft'),
-            ('date', '<=', fields.Date.context_today(self)),
+            ('date', '<=', 'today'),
             ('auto_post', '!=', 'no'),
-        ]
-        moves = self.search(domain, limit=batch_size)
-        remaining = len(moves) if len(moves) < batch_size else self.search_count(domain)
+        ]).optimize_full(self)
+        remaining = self.search_count(domain)
         self.env['ir.cron']._commit_progress(remaining=remaining)
 
-        try:  # try posting in batch
-            moves._post()
-            self.env['ir.cron']._commit_progress(len(moves))
-            return
-        except UserError:  # if at least one move cannot be posted, handle moves one by one
-            self.env['ir.cron']._rollback_progress()
-
-        for move in moves:
-            try:
-                move = move.try_lock_for_update().filtered_domain(domain)
-                if not move:
-                    continue
-                move._post()
-                self.env['ir.cron']._commit_progress(1)
-            except UserError as e:
+        while moves := self.search(domain, limit=batch_size).try_lock_for_update():
+            try:  # try posting in batch
+                moves._post()
+                self.env['ir.cron']._commit_progress(len(moves))
+                continue
+            except UserError:  # if at least one move cannot be posted, handle moves one by one
                 self.env['ir.cron']._rollback_progress()
-                msg = _('The move could not be posted for the following reason: %(error_message)s', error_message=e)
-                move.message_post(body=msg, message_type='comment')
-                self.env['ir.cron']._commit_progress()
+
+            for move in moves:
+                try:
+                    move = move.try_lock_for_update().filtered_domain(domain)
+                    if not move:
+                        continue
+                    move._post()
+                    self.env['ir.cron']._commit_progress(1)
+                except UserError as e:
+                    self.env['ir.cron']._rollback_progress()
+                    msg = _('The move could not be posted for the following reason: %(error_message)s', error_message=e)
+                    move.message_post(body=msg, message_type='comment')
+                    self.env['ir.cron']._commit_progress()
 
     @api.model
     def _cron_account_move_send(self, job_count=10):
