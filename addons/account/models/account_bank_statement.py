@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
-from odoo import api, fields, models, _, Command
+from odoo import SUPERUSER_ID, Command, _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Domain
 from odoo.tools.misc import formatLang
@@ -140,22 +140,23 @@ class AccountBankStatement(models.Model):
     @api.depends('create_date')
     def _compute_balance_start(self):
         for stmt in self.sorted(lambda x: x.first_line_index or '0'):
-            journal_id = stmt.journal_id.id or stmt.line_ids.journal_id.id
-            previous_line_with_statement = self.env['account.bank.statement.line'].search([
-                ('internal_index', '<', stmt.first_line_index),
-                ('journal_id', '=', journal_id),
-                ('state', '=', 'posted'),
-                ('statement_id', '!=', False),
-            ], limit=1)
+            journal = stmt.journal_id or stmt.line_ids.journal_id
+            company = journal.company_id or self.env.company
+            previous_lines_domain = (
+                Domain('internal_index', '<', stmt.first_line_index)
+                & Domain('journal_id', '=', journal.id)
+                & Domain('company_id', 'in', company.with_user(SUPERUSER_ID)._accessible_branches().ids)
+                & Domain('state', '=', 'posted')
+            )
+            previous_line_with_statement = self.env['account.bank.statement.line'].search(
+                previous_lines_domain & Domain('statement_id', '!=', False),
+                limit=1,
+            )
             balance_start = previous_line_with_statement.statement_id.balance_end_real
 
-            lines_in_between_domain = [
-                ('internal_index', '<', stmt.first_line_index),
-                ('journal_id', '=', journal_id),
-                ('state', '=', 'posted'),
-            ]
+            lines_in_between_domain = previous_lines_domain
             if previous_line_with_statement:
-                lines_in_between_domain.append(('internal_index', '>', previous_line_with_statement.internal_index))
+                lines_in_between_domain &= Domain('internal_index', '>', previous_line_with_statement.internal_index)
                 # remove lines from previous statement (when multi-editing a line already in another statement)
                 previous_st_lines = previous_line_with_statement.statement_id.line_ids
                 lines_in_common = previous_st_lines.filtered(lambda l: l.id in stmt.line_ids._origin.ids)
