@@ -267,12 +267,11 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
         """
         result_exception = None
         servers = self.with_context(fetchmail_cron_running=True)
-        total_remaining = len(servers)  # number of unseen messages + number of unchecked servers
-        self.env['ir.cron']._commit_progress(remaining=total_remaining)
+        total_remaining = 0  # number of unseen messages
+        self.env['ir.cron']._commit_progress()
         _logger.info("Fetchmail servers (in order) to be processed %s", servers.mapped('name'))
 
         for server in servers:
-            total_remaining -= 1  # the server is checked
             if not server.try_lock_for_update(allow_referencing=True).filtered_domain(MAIL_SERVER_DOMAIN):
                 _logger.info('Skip checking for new mails on mail server id %d (unavailable)', server.id)
                 continue
