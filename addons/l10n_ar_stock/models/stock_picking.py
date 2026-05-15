@@ -1,5 +1,6 @@
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.fields import Domain
 
 
 class StockPicking(models.Model):
@@ -221,45 +222,46 @@ class StockPicking(models.Model):
 
     def _cron_l10n_ar_send_delivery_guide(self, batch_size=50):
         """ Cron method: process queued delivery guide sends in batches. """
-        domain = [
-            ('l10n_ar_delivery_guide_cron_user_id', '!=', False),
-        ]
-        records = self.search(domain, order='id asc', limit=batch_size).try_lock_for_update()
-        records_len = len(records)
-        if not records:
-            return
-
-        # Re-validate: fields may have changed since queueing.
-        errors = records._l10n_ar_validate_send_delivery_guide(do_async=True)
-        if errors.get('all_errors'):
-            self._l10n_ar_handle_cron_failures(errors)
-            records -= errors['all_errors']
-
-        if not records:
-            remaining = self.search_count(domain)
-            self.env['ir.cron']._commit_progress(records_len, remaining=remaining)
-            return
-
-        pickings_by_user = records.grouped('l10n_ar_delivery_guide_cron_user_id')
-        for user, user_pickings in pickings_by_user.items():
-            user_pickings.with_user(user)._l10n_ar_send_delivery_guide()
-
-        for user, user_pickings in pickings_by_user.items():
-            user._bus_send(
-                'account_notification',
-                {
-                    'type': 'success',
-                    'title': self.env._('Delivery Guides Sent'),
-                    'message': self.env._('The following Delivery Guide emails have been sent successfully.'),
-                    'action_button': {
-                        'name': self.env._('Open'),
-                        'action_name': self.env._('Sent Delivery Guides'),
-                        'model': 'stock.picking',
-                        'res_ids': user_pickings.ids,
-                    },
-                },
-            )
-        records.write({'l10n_ar_delivery_guide_cron_user_id': False})
-
+        domain = Domain('l10n_ar_delivery_guide_cron_user_id', '!=', False)
         remaining = self.search_count(domain)
-        self.env['ir.cron']._commit_progress(records_len, remaining=remaining)
+        if not remaining:
+            return
+        self.env['ir.cron']._commit_progress(remaining=remaining)
+
+        last_id = 0
+        while records := self.search(domain & Domain('id', '>', last_id), order='id asc', limit=batch_size).try_lock_for_update():
+            if not records:
+                break
+            last_id = max(records.ids)
+
+            # Re-validate: fields may have changed since queueing.
+            errors = records._l10n_ar_validate_send_delivery_guide(do_async=True)
+            if errors.get('all_errors'):
+                self._l10n_ar_handle_cron_failures(errors)
+                records -= errors['all_errors']
+
+            if not records:
+                continue
+
+            pickings_by_user = records.grouped('l10n_ar_delivery_guide_cron_user_id')
+            for user, user_pickings in pickings_by_user.items():
+                user_pickings.with_user(user)._l10n_ar_send_delivery_guide()
+
+            for user, user_pickings in pickings_by_user.items():
+                user._bus_send(
+                    'account_notification',
+                    {
+                        'type': 'success',
+                        'title': self.env._('Delivery Guides Sent'),
+                        'message': self.env._('The following Delivery Guide emails have been sent successfully.'),
+                        'action_button': {
+                            'name': self.env._('Open'),
+                            'action_name': self.env._('Sent Delivery Guides'),
+                            'model': 'stock.picking',
+                            'res_ids': user_pickings.ids,
+                        },
+                    },
+                )
+            records.write({'l10n_ar_delivery_guide_cron_user_id': False})
+            if not self.env['ir.cron']._commit_progress(len(records)):
+                break
