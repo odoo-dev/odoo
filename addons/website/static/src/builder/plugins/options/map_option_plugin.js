@@ -41,6 +41,9 @@ export class MapOptionPlugin extends Plugin {
 
 export class MapUpdateSrcAction extends BuilderAction {
     static id = "mapUpdateSrc";
+    setup() {
+        this.preview = false;
+    }
     apply({ editingElement }) {
         const embedded = editingElement.querySelector(".s_map_embedded");
 

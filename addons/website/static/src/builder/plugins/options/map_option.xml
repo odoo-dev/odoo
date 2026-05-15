@@ -8,7 +8,7 @@
 </t>
 
 <t t-name="website.mapOption">
-    <BuilderRow label.translate="Address" action="'mapUpdateSrc'" preview="false">
+    <BuilderRow label.translate="Address" action="'mapUpdateSrc'">
         <BuilderTextInput
             dataAttributeAction="'mapAddress'"
             placeholder.translate="e.g. Grand Place, Brussels"
@@ -16,13 +16,13 @@
         />
     </BuilderRow>
     <BuilderRow label.translate="Type">
-        <BuilderSelect dataAttributeAction="'mapType'" action="'mapUpdateSrc'" preview="false">
+        <BuilderSelect dataAttributeAction="'mapType'" action="'mapUpdateSrc'">
             <BuilderSelectItem dataAttributeActionValue="'m'" title.translate="Road">Road</BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'k'" title.translate="Satellite">Satellite</BuilderSelectItem>
         </BuilderSelect>
     </BuilderRow>
     <BuilderRow label.translate="Zoom">
-        <BuilderSelect dataAttributeAction="'mapZoom'" action="'mapUpdateSrc'" preview="false">
+        <BuilderSelect dataAttributeAction="'mapZoom'" action="'mapUpdateSrc'">
             <BuilderSelectItem dataAttributeActionValue="'21'">2.5 m</BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'20'">5 m</BuilderSelectItem>
             <BuilderSelectItem dataAttributeActionValue="'19'">10 m</BuilderSelectItem>
