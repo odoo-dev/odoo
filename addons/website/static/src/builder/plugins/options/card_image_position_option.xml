@@ -5,7 +5,6 @@
     <BuilderRow label="this.props.label" level="this.props.level" t-if="this.state.show">
         <BuilderButton
             icon="'fa-crosshairs'"
-            preview="false"
             action="'coverImagePositionOverlay'"/>
     </BuilderRow>
 </t>

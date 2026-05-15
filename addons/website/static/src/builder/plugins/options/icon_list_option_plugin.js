@@ -15,7 +15,9 @@ class IconListOptionPlugin extends Plugin {
 export class ReplaceListIconAction extends BuilderAction {
     static id = "replaceListIcon";
     static dependencies = ["media"];
-
+    setup() {
+        this.preview = false;
+    }
     load() {
         return new Promise((resolve) => {
             const onClose = this.dependencies.media.openMediaDialog({

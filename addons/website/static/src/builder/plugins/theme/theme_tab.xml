@@ -53,7 +53,6 @@
                 action="'toggleBodyBgImage'"
                 id="'body_bg_image_opt'"
                 title.translate="Image"
-                preview="false"
                 className="'ms-auto fa fa-fw fa-camera px-2'"
             />
         </BuilderRow>
@@ -63,7 +62,7 @@
                 actionParam="'body'"/>
         </BuilderRow>
         <BuilderRow label.translate="Image" level="1" t-if="this.isActiveItem('body_bg_image_opt')">
-            <BuilderButton action="'replaceBodyBgImage'" title.translate="Replace Image" preview="false" type="'global'">
+            <BuilderButton action="'replaceBodyBgImage'" title.translate="Replace Image" type="'global'">
                 Replace
             </BuilderButton>
             <BuilderButton action="'removeBodyBgImage'" preview="false" icon="'oi-close'" className="'btn-danger-color-hover'"/>
@@ -74,7 +73,7 @@
                 <BuilderSelectItem actionValue="'image'">Cover</BuilderSelectItem>
                 <BuilderSelectItem actionValue="'pattern'" id="'body_bg_repeat_opt'">Repeat pattern</BuilderSelectItem>
             </BuilderSelect>
-            <BuilderButton icon="'fa-crosshairs'" title.translate="Background Position" preview="false" action="'bodyBgPositionOverlay'"/>
+            <BuilderButton icon="'fa-crosshairs'" title.translate="Background Position" action="'bodyBgPositionOverlay'"/>
         </BuilderRow>
         <BuilderContext t-if="this.isActiveItem('body_bg_repeat_opt')" action="'customizeWebsiteVariable'">
             <BuilderRow label.translate="Width" level="2">

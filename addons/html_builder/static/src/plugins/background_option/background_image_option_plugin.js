@@ -224,6 +224,7 @@ export class ToggleBgImageAction extends BuilderAction {
     static id = "toggleBgImage";
     static dependencies = ["backgroundImageOption", "media"];
     setup() {
+        this.preview = false;
         this.canTimeout = false;
     }
     async apply(context) {
@@ -261,6 +262,7 @@ export class ReplaceBgImageAction extends BuilderAction {
     static id = "replaceBgImage";
     static dependencies = ["backgroundImageOption", "media"];
     setup() {
+        this.preview = false;
         this.canTimeout = false;
     }
     async apply(context) {

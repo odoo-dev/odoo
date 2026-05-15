@@ -118,6 +118,7 @@ export class BackgroundPositionOverlayAction extends BuilderAction {
     static id = "backgroundPositionOverlay";
     static dependencies = ["overlayButtons", "history", "backgroundPositionOption"];
     setup() {
+        this.preview = false;
         this.withLoadingEffect = false;
     }
     async load({ editingElement }) {

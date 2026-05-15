@@ -32,6 +32,9 @@ export class SetIconsAction extends BuilderAction {
 export class CustomIconAction extends BuilderAction {
     static id = "customIcon";
     static dependencies = ["media"];
+    setup() {
+        this.preview = false;
+    }
     async load({ editingElement, params: { mainParam: customParam } }) {
         return new Promise((resolve) => {
             const isCustomActive = customParam === "customActiveIcon";

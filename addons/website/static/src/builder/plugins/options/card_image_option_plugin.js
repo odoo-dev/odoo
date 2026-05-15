@@ -125,6 +125,7 @@ export class CoverImagePositionOverlayAction extends BuilderAction {
     static id = "coverImagePositionOverlay";
     static dependencies = ["overlayButtons", "history", "cardImageOption"];
     setup() {
+        this.preview = false;
         this.withLoadingEffect = false;
     }
     async load({ editingElement }) {

@@ -149,6 +149,7 @@ export class ReplaceMediaAction extends BuilderAction {
     static dependencies = ["media_website"];
 
     setup() {
+        this.preview = false;
         this.canTimeout = false;
     }
 

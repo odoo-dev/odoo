@@ -487,6 +487,7 @@ export class ToggleBodyBgImageAction extends BuilderAction {
     static id = "toggleBodyBgImage";
     static dependencies = ["builderActions", "history", "customizeWebsite", "media"];
     setup() {
+        this.preview = false;
         this.canTimeout = false;
     }
     isApplied() {
@@ -558,6 +559,9 @@ export class ToggleBodyBgImageAction extends BuilderAction {
 export class ReplaceBodyBgImageAction extends BuilderAction {
     static id = "replaceBodyBgImage";
     static dependencies = ["builderActions"];
+    setup() {
+        this.preview = false;
+    }
     apply(context) {
         return this.dependencies.builderActions.getAction("toggleBodyBgImage").apply(context);
     }
@@ -580,6 +584,7 @@ export class BodyBgPositionOverlayAction extends BuilderAction {
         "customizeWebsite",
     ];
     setup() {
+        this.preview = false;
         this.withLoadingEffect = false;
         this.canTimeout = false;
     }

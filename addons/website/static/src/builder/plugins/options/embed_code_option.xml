@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 <t t-name="website.EmbedCodeOption">
     <BuilderRow label.translate="Code">
-        <BuilderButton action="'editCode'" preview="false"
+        <BuilderButton action="'editCode'"
                 type="'success'"
                 className="'o_we_edit_code o_we_no_toggle'"
                 title.translate="Edit embedded code">

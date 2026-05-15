@@ -11,7 +11,6 @@
                 action="'toggleBgImage'"
                 title.translate="Add a background image"
                 titleActive.translate="Remove the background image"
-                preview="false"
                 className="'ms-auto fa fa-fw fa-camera px-2'"
                 id="'toggle_bg_image_id'"
             />

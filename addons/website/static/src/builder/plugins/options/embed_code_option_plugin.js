@@ -33,6 +33,9 @@ export class EmbedCodeOptionPlugin extends Plugin {
 
 export class EditCodeAction extends BuilderAction {
     static id = "editCode";
+    setup() {
+        this.preview = false;
+    }
     async load({ editingElement }) {
         let newContent;
         await new Promise((resolve) => {

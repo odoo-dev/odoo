@@ -20,6 +20,9 @@ export class accordionOptionPlugin extends Plugin {
 export class DefineCustomIconAction extends BuilderAction {
     static id = "defineCustomIcon";
     static dependencies = ["media"];
+    setup() {
+        this.preview = false;
+    }
     async load() {
         let selectedIconClass;
         await new Promise((resolve) => {
