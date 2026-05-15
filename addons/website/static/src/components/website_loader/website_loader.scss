@@ -1,26 +1,59 @@
+// ── Website Loader brand tokens ───────────────────────────────────────────────
+// Same values as the configurator — keep them in sync.
+$o-cfg-primary:  #875A7B;
+$o-cfg-text:     #1A222B;
+$o-cfg-bg:       #f4f6f8;
+$o-cfg-font:     'Plus Jakarta Sans', system-ui, sans-serif;
+
 .o_website_loader_container {
     $-accent-color: #BB86FC; // dark mode primary color
     background-color: $o-view-background-color;
     pointer-events: all;
     z-index: $zindex-modal - 1;
 
-    .o_website_loader_odoo_logo {
-        background-image: url('/web/static/img/odoo_logo.svg');
-        background-repeat: no-repeat;
-        background-size: contain;
-        filter: var(--website-loader-logo-filter);
-    }
+    // ── UI-chrome protection ──────────────────────────────────────────────────
+    // Prevent website CSS / theme customisation from leaking into the loader
+    // chrome panel, mirroring the same approach used in .o_cfg_chrome.
     .o_website_loader_container_content {
-        color: var(--website-loader-color);
-        background-color: $gray-100;
+        font-family: $o-cfg-font !important;
+        color: $o-cfg-text !important;
+        background-color: $o-cfg-bg !important;
         width: 100%;
 
         @include media-breakpoint-up(lg) {
             max-width: 30rem;
         }
+
+        h1, h2, h3, h4, h5, h6,
+        .h1, .h2, .h3, .h4, .h5, .h6 {
+            font-family: $o-cfg-font !important;
+            color: $o-cfg-text !important;
+        }
+
+        .text-muted { color: rgba($o-cfg-text, .5) !important; }
+
+        .btn-primary {
+            background-color: $o-cfg-primary !important;
+            border-color:     $o-cfg-primary !important;
+            color: #fff !important;
+            &:hover, &:focus {
+                background-color: darken($o-cfg-primary, 8%) !important;
+                border-color:     darken($o-cfg-primary, 8%) !important;
+            }
+        }
+
+        .progress-bar { background-color: $o-cfg-primary !important; }
+    }
+
+    .o_website_loader_odoo_logo {
+        background-image: url('/web/static/img/odoo_logo.svg');
+        background-repeat: no-repeat;
+        background-size: contain;
+        // bg is always light ($o-cfg-bg), so no filter needed
+        filter: none;
     }
     .o_website_loader_tip {
-        color: var(--website-loader-color);
+        color: $o-cfg-text !important;
 
         .o_tour_pointer {
             --TourPointer__height: 1em;

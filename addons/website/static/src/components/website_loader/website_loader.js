@@ -4,6 +4,24 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { clamp } from "@web/core/utils/numbers";
 import { Component, EventBus, proxy } from "@odoo/owl";
 
+// ── Website Loader UI font ────────────────────────────────────────────────────
+const LOADER_UI_FONT_URL =
+    "https://fonts.googleapis.com/css2" +
+    "?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400" +
+    "&display=swap";
+
+let _loaderFontLoaded = false;
+function loadLoaderUIFont() {
+    if (_loaderFontLoaded) {
+        return;
+    }
+    _loaderFontLoaded = true;
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = LOADER_UI_FONT_URL;
+    document.head.appendChild(link);
+}
+
 export class WebsiteLoader extends Component {
     static props = {
         bus: EventBus,
@@ -52,6 +70,7 @@ export class WebsiteLoader extends Component {
 
         useBus(this.props.bus, "SHOW-WEBSITE-LOADER", (ev) => {
             const payload = ev.detail;
+            loadLoaderUIFont();
             this.state.isVisible = true;
             for (const key of [
                 "title",
