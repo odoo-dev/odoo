@@ -2,82 +2,66 @@
 
 import logging
 
+
 origin_logger_get_logger = logging.getLogger
 origin_logger_set_level = logging.Logger.setLevel
 origin_logger_init = logging.Logger.__init__
 
+LEVELS = ('INFO', 'WARNING', 'ERROR', 'CRITICAL')
+LEVEL_BY_NAME = {name: getattr(logging, name, logging.INFO) for name in LEVELS}
 
-class PleaseShowImportantLogsDearGodoo(logging.Filter):
+"""
+    PATCH PURPOSE
+    -------------
+
+    Adds a `PleaseShowImportantLogsDearGodooFilter` filter to each newly created logger (constructor)
+    The filter is initialized with `min_log_level` set to the level of its related logger, and the level of the logger is
+    set back to the `logging.INFO` level if its level is higher (the logger first inspect the level of the log, then apply
+    his filters using `Filter.filter` method, which explains why we have to set it back)
+
+    Filtering: if the filter `min_log_level` is 0, this filter will iterate through the loggers hierarchy until it find a
+    logger with a non zero `min_log_level` filter (see `PleaseShowImportantLogsDearGodooFilter.filter`)
+
+    - If `--log-level` is specified, it will display all the logs which level is higher or equal to the specified minimum log level,
+    plus the important logs
+    - If `--log-level` is not specified, it will keep pooping all the logs
+
+    If you want it to display other logs, feel free to toy with the `PleaseShowImportantLogsDearGodooFilter.filter` method
+
+    WARNING: this patch may break depending on the logging library version (standard python library only tested in 3.12)
+"""
+
+IMPORTANT_RECORD_NAME = ('odoo.service.server', 'odoo.tests.stats', 'odoo.tests.result', 'odoo', 'odoo.service.server.ThreadedServer')
+
+
+class PleaseShowImportantLogsDearGodooFilter(logging.Filter):
     def __init__(self, min_log_level, logger):
         super().__init__()
         self.min_log_level = min_log_level
-        levels = ('INFO', 'WARNING', 'ERROR', 'CRITICAL')
-        self.level_by_name = {name: getattr(logging, name, logging.INFO) for name in levels}
         self.logger = logger
 
-    def filter(self, record):        # %(asctime)s %(process)s %(levelname)s %(dbname)s %(name)s: %(message)s %(perf_info)s
-        if record.name == 'odoo.modules.loading':
-            print(f'{record.process} {record.levelname} {record.dbname} {record.name}: {record.msg} {record.perf_info}')
-        return ((record.levelname not in self.level_by_name or self.level_by_name[record.levelname] >= self.min_log_level)
-            or record.name in ('odoo.service.server', 'odoo.tests.stats', 'odoo.tests.result')
-            or (record.name == 'odoo.modules.loading' and record.message.find('modules loaded in') != -1)
-            or (record.name == 'odoo.modules.loading' and record.message.find('Loading module') != -1))
+    def filter(self, record):
+        filter = self
+        while not filter.min_log_level and filter.logger.parent:
+            filter = filter.logger.parent.please_filter
+        min_log_level = filter.min_log_level
+        return ((record.levelname not in LEVEL_BY_NAME or LEVEL_BY_NAME[record.levelname] >= min_log_level)
+            or record.name in IMPORTANT_RECORD_NAME
+            or (record.name == 'odoo.modules.loading' and (record.msg.startswith('%s modules loaded in ')
+                or record.msg.startswith('Loading module %s'))))
 
+# This root logger is created by default when loading the logging library, we have to give him the custom filter like the other future loggers !
+logger = logging.getLogger('root')
+logger.please_filter = PleaseShowImportantLogsDearGodooFilter(logger.level, logger)
+logger.addFilter(logger.please_filter)
 
 info_level = getattr(logging, 'INFO', logging.INFO)
 
 
-# def my_get_logger(name=None):
-#     logger = origin_logger_get_logger(name)
-#     first_iteration = True
-#     i_logger = logger
-
-#     # Set parents loggers in "normal" state
-#     # while i_logger.root and i_logger.root != i_logger:
-#     #     i_logger = i_logger.root
-
-#     #     please_filters = list(filter(lambda filter: isinstance(filter, PleaseShowImportantLogsDearGodoo), i_logger.filters))
-#     #     if not please_filters:
-#     #         i_logger.addFilter(PleaseShowImportantLogsDearGodoo(i_logger.level))
-#     #     else:
-#     #         if len(please_filters) == 1:
-#     #             please_filters[0].min_log_level = i_logger.level
-#     #         else:
-#     #             raise RuntimeError('Found way too many filters !')
-#     #     if i_logger.level > info_level:
-#     #         i_logger.setLevel(info_level)
-
-#     # Set current logger in "normal" state
-#     while True:
-#         if i_logger.filters:
-#             please_filters = list(filter(lambda filter: isinstance(filter, PleaseShowImportantLogsDearGodoo), i_logger.filters))
-#             if please_filters:
-#                 if len(please_filters) == 1:
-#                     if not first_iteration:
-#                         logger.addFilter(PleaseShowImportantLogsDearGodoo(please_filters[0].min_log_level, logger))
-#                     break
-#                 raise RuntimeError('Found way too many filters !')
-#         if i_logger.parent and i_logger.parent != i_logger:
-#             i_logger = i_logger.parent
-#         else:
-#             if not first_iteration:
-#                 pass
-#                 # raise RuntimeError('Should only add filter based on effective level for root loggers !')
-#             logger.addFilter(PleaseShowImportantLogsDearGodoo(i_logger.getEffectiveLevel(), logger))
-#             break
-#         first_iteration = False
-#     if logger.level > info_level:
-#         logger.level = info_level
-#     return logger
-
-
 def my_set_level(self: logging.Logger, level):
-    please_filters = list(filter(lambda filter: isinstance(filter, PleaseShowImportantLogsDearGodoo), self.filters))
+    please_filters = list(filter(lambda filter: isinstance(filter, PleaseShowImportantLogsDearGodooFilter), self.filters))
     if not please_filters:
-        if self.name in ('', 'root'):
-            self.addFilter(PleaseShowImportantLogsDearGodoo(level, self))
-        else:
-            raise RuntimeError('Could not find any custom filter, is there a problem with the init of the logger ?')
+        raise RuntimeError('Could not find any custom filter, is there a problem with the initialization of the logger ?')
     if len(please_filters) > 1:
         raise RuntimeError('Found way too many filters !')
     if please_filters:
@@ -87,36 +71,16 @@ def my_set_level(self: logging.Logger, level):
 
 def my_logger_init(self: logging.Logger, name, level=logging.NOTSET):
     origin_logger_init(self, name, level)
-    if level:
-        self.addFilter(PleaseShowImportantLogsDearGodoo(level, self))
-    else:
-        i_logger = self
-        while True:
-            if i_logger.filters:
-                please_filters = list(filter(lambda filter: isinstance(filter, PleaseShowImportantLogsDearGodoo), i_logger.filters))
-                if please_filters:
-                    if len(please_filters) == 1:
-                        self.please_filter = PleaseShowImportantLogsDearGodoo(please_filters[0].min_log_level, self)
-                        self.addFilter(self.please_filter)
-                        break
-                    raise RuntimeError('Found way too many filters !')
-            if not i_logger.parent or i_logger.parent == i_logger:
-                target_level = i_logger.parent.level if not level and i_logger.parent else level
-                self.please_filter = PleaseShowImportantLogsDearGodoo(target_level, self)
-                self.addFilter(self.please_filter)
-                break
-            i_logger = i_logger.parent
-
+    self.please_filter = PleaseShowImportantLogsDearGodooFilter(level, self)
+    self.addFilter(self.please_filter)
     origin_logger_set_level(self, min(level, info_level))
 
 
-# logging.getLogger = my_get_logger
 logging.Logger.setLevel = my_set_level
 logging.Logger.__init__ = my_logger_init
 
 
 import odoo.cli
-
 
 if __name__ == "__main__":
     odoo.cli.main()
