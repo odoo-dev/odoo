@@ -304,3 +304,17 @@ class ChannelController(http.Controller):
             )
         # sudo: discuss.channel.member - writing channel role of a member is considered allowed
         channel_member.sudo().channel_role = channel_role
+
+    @mail_route("/discuss/channel/lazy_fetch", methods=["POST"], type="jsonrpc", auth="public", readonly=True)
+    def lazy_fetch_channels(self, sort_by="name", known_ids=None, limit=5):
+        order = {
+            "name": "name",
+            "last_interest": "last_interest_dt desc, id desc",
+        }.get(sort_by)
+        if not order:
+            raise NotFound()
+        domain = [("id", "not in", known_ids or []), ("channel_type", "=", s)]
+        channels = request.env["discuss.channel"].search(domain, limit=limit, order=order)
+        store = Store()
+        store.add(channels, "_store_channel_fields")
+        return {"store_data": store, "channel_ids": channels.ids}
