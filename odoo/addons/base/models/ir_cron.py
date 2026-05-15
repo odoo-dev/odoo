@@ -554,6 +554,10 @@ class IrCron(models.Model):
                             # all records. Loop.
                             pass
 
+                    if success and remaining > 10 and time.monotonic() < env.context['cron_end_time'] and (done // 2 < remaining and remaining > 10):
+                        # XXX meh, records could be locked, adding last condition
+                        _logger.warning('Job %r (%s) stopped with remaining records while having time to continue')
+
                     loop_count += 1
                     progress.timed_out_counter = 0
                     timed_out_counter = 0
