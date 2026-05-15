@@ -37,8 +37,9 @@ from psycopg2.extras import Json
 import odoo
 from odoo.exceptions import UserError, ValidationError
 from .config import config
+from .collections import frozendict, split_every, OrderedSet
 from .i18n import format_list
-from .misc import file_open, file_path, frozendict, get_iso_codes, split_every, OrderedSet, SKIPPED_ELEMENT_TYPES
+from .misc import file_open, file_path, get_iso_codes, SKIPPED_ELEMENT_TYPES
 
 if typing.TYPE_CHECKING:
     import types

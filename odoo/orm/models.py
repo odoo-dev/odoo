@@ -49,10 +49,11 @@ from odoo.tools import (
     ormcache, partition, split_every, unique,
     SQL, sql, groupby,
 )
+from odoo.tools.collections import ReversedIterable
 from odoo.tools.constants import PREFETCH_MAX
 from odoo.tools.func import deprecated
 from odoo.tools.lru import LRU
-from odoo.tools.misc import ReversedIterable, exception_to_unicode, unquote
+from odoo.tools.misc import exception_to_unicode, unquote
 from odoo.tools.safe_eval import _UNSAFE_ATTRIBUTES, safe_checker
 from odoo.tools.translate import _, LazyTranslate
 

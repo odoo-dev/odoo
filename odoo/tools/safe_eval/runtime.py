@@ -39,9 +39,9 @@ from types import (
 )
 from weakref import WeakKeyDictionary
 
+from ..collections import OrderedSet
 from ..config import config
 from ..func import lazy
-from ..misc import OrderedSet
 
 __all__ = [
     'safe_checker',

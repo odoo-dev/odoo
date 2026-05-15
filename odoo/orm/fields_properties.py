@@ -10,8 +10,8 @@ from collections import abc, defaultdict
 from operator import attrgetter
 
 from odoo.exceptions import AccessError, UserError, MissingError
-from odoo.tools import SQL, OrderedSet, is_list_of, html_sanitize, sql
-from odoo.tools.misc import frozendict, has_list_types
+from odoo.tools import SQL, html_sanitize, sql
+from odoo.tools.collections import OrderedSet, frozendict, is_list_of, has_list_types
 
 from .domains import Domain
 from .fields import Field, _logger

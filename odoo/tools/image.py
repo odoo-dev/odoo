@@ -17,7 +17,7 @@ from collections.abc import Buffer
 from random import randrange
 
 from odoo.exceptions import UserError
-from odoo.tools.misc import DotDict
+from odoo.tools.collections import DotDict
 from odoo.tools.translate import LazyTranslate
 
 

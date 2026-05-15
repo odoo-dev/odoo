@@ -46,8 +46,9 @@ from odoo.http.session import (
     session_store,
 )
 from odoo.modules.registry import Registry
+from odoo.tools.collections import submap
 from odoo.tools.json import json_default
-from odoo.tools.misc import get_lang, submap
+from odoo.tools.misc import get_lang
 from odoo.tools.translate import code_translations
 
 _logger = logging.getLogger(__name__)

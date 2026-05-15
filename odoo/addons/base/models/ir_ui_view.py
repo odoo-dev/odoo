@@ -10,7 +10,6 @@ import re
 import uuid
 
 from lxml import etree
-from lxml.etree import LxmlError
 from lxml.builder import E
 from markupsafe import Markup
 from contextlib import suppress
@@ -22,8 +21,9 @@ from odoo.fields import Domain
 from odoo.http import request
 from odoo.modules.module import get_resource_from_path
 from odoo.tools import _, config, frozendict, partition, unique, SQL
+from odoo.tools.collections import ConstantMapping
 from odoo.tools.convert import _fix_multiple_roots
-from odoo.tools.misc import file_path, get_diff, ConstantMapping
+from odoo.tools.misc import file_path, get_diff
 from odoo.tools.template_inheritance import apply_inheritance_specs, locate_node
 from odoo.tools.translate import xml_translate, TRANSLATED_ATTRS
 from odoo.tools.view_validation import valid_view, get_domain_value_names, get_expression_field_names, get_dict_asts

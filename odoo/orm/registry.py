@@ -24,16 +24,16 @@ import psycopg2.sql
 from odoo import sql_db
 from odoo.tools import (
     SQL,
-    OrderedSet,
     config,
     gc,
     lazy_classproperty,
     remove_accents,
     sql,
 )
+from odoo.tools.collections import Collector, OrderedSet
 from odoo.tools.func import locked, reset_cached_properties
 from odoo.tools.lru import LRU
-from odoo.tools.misc import Collector, format_frame
+from odoo.tools.misc import format_frame
 
 from .utils import SUPERUSER_ID
 from . import model_classes

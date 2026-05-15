@@ -35,8 +35,9 @@ import odoo
 from . import tools
 from .release import MIN_PG_VERSION
 from .tools import SQL, config
+from .tools.collections import Callbacks
 from .tools.func import frame_codeinfo, locked
-from .tools.misc import Callbacks, real_time
+from .tools.misc import real_time
 
 if typing.TYPE_CHECKING:
     from odoo.orm.environments import Transaction

@@ -15,8 +15,7 @@ from psycopg2.pool import PoolError
 import odoo
 from odoo import api, fields, models
 from odoo.service.server import CommonServer
-from odoo.tools import config, json_default, SQL
-from odoo.tools.misc import OrderedSet
+from odoo.tools import OrderedSet, config, json_default, SQL
 
 from ..tools import orjson
 

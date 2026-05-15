@@ -21,12 +21,14 @@ if typing.TYPE_CHECKING:
     from collections.abc import Callable, Collection, Sequence
 
 __all__ = [
+    'ConstantMapping',
     'DotDict',
     'LastOrderedSet',
     'OrderedSet',
     'exception_to_unicode',
     'frozendict',
     'groupby',
+    'has_list_types',
     'is_list_of',
     'merge_sequences',
     'partition',

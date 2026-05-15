@@ -38,7 +38,7 @@ from odoo.modules.module import (
 )
 from odoo.modules.registry import Registry
 from odoo.tools import config, file_open, file_path, profiler, real_time
-from odoo.tools.misc import submap
+from odoo.tools.collections import submap
 
 if typing.TYPE_CHECKING:
     from collections.abc import Iterable, Mapping

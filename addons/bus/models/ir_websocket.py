@@ -3,7 +3,7 @@
 from odoo import models
 from odoo.http import request
 from odoo.http.session import check
-from odoo.tools.misc import OrderedSet
+from odoo.tools.collections import OrderedSet
 from ..models.bus import dispatch
 from ..websocket import wsrequest
 

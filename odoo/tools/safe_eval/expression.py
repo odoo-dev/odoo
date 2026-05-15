@@ -9,7 +9,7 @@ import operator
 from types import NoneType
 from typing import Any
 
-from odoo.tools.misc import OrderedSet
+from odoo.tools.collections import OrderedSet
 
 MAX_INT_POW_EXP = 1024
 

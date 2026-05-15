@@ -21,7 +21,7 @@ from odoo.modules.module import MANIFEST_NAMES, Manifest
 from odoo.release import major_version
 from odoo.tools import BinaryBytes, SQL, convert_file
 from odoo.tools import file_open, file_path, file_open_temporary_directory, ormcache
-from odoo.tools.misc import OrderedSet, topological_sort
+from odoo.tools.collections import OrderedSet, topological_sort
 from odoo.tools.translate import JAVASCRIPT_TRANSLATION_COMMENT, CodeTranslations, TranslationImporter, get_base_langs
 
 from odoo.addons.base.models.ir_asset import is_wildcard_glob

@@ -18,8 +18,9 @@ from psycopg2.extras import Json as PsycopgJson
 
 from odoo.exceptions import AccessError, MissingError
 from odoo.tools import SQL, reset_cached_properties, sql
+from odoo.tools.collections import frozendict, unique
 from odoo.tools.constants import PREFETCH_MAX
-from odoo.tools.misc import frozendict, SENTINEL, Sentinel, unique
+from odoo.tools.misc import SENTINEL, Sentinel
 
 from .domains import Domain
 from .query import Query

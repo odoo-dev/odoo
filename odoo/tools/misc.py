@@ -1474,3 +1474,6 @@ class _PrintfArgs:
     def __getitem__(self, key):
         self.values.append(self.mapping[key])
         return "%s"
+
+# Expose everything that we had in here...
+from .collections import *
