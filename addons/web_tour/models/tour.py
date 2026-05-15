@@ -37,7 +37,7 @@ class Web_TourTour(models.Model):
     @api.model
     def get_current_tour(self):
         if self.env.user and self.env.user.tour_enabled and self.env.user._is_internal():
-            tours_to_run = self.search([("custom", "=", False), ("user_consumed_ids", "not in", self.env.user.id)])
+            tours_to_run = self.search([("custom", "=", False), ("user_consumed_ids", "not in", self.env.user.ids)])
             return bool(tours_to_run[:1]) and tours_to_run[:1]._get_tour_json()
 
     @api.model

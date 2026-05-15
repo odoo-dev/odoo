@@ -321,7 +321,7 @@ class TestExpression(SavepointCaseWithUserDemo, TransactionExpressionCase):
         self.assertEqual(one, res_3)
         res_4 = self._search(Partner, ['!', ('id', 'in', others.ids)])
         self.assertEqual(one, res_4)
-        res_5 = self._search(Partner, [('id', 'in', one.id)])
+        res_5 = self._search(Partner, [('id', 'in', one.id)])  # XXX mute warning
         self.assertEqual(one, res_5)
         res_6 = self._search(Partner, [('id', 'in', [one.id])])
         self.assertEqual(one, res_6)

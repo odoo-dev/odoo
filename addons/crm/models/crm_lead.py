@@ -1189,7 +1189,7 @@ class CrmLead(models.Model):
         # to only account for valid stage movements
         elif len(stage_ids := [int(stage_id) for stage_id, duration in self.duration_tracking.items() if stage_id.isdigit() and duration >= 60]) == 1:
             first_stage = self.env['crm.stage'].search([
-                '|', ('team_ids', 'in', False), ('team_ids', 'in', self.team_id.id),
+                '|', ('team_ids', 'in', False), ('team_ids', 'in', self.team_id.ids),
             ], order='sequence ASC', limit=1)
             if first_stage.id == stage_ids[0]:
                 return _('No detours, no delays - from %(stage_name)s straight to the win! 🚀', stage_name=first_stage.name)

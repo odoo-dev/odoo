@@ -91,9 +91,9 @@ class ResPartner(models.Model):
         channel = self.env["discuss.channel"]
         if channel_id:
             channel = self.env["discuss.channel"].search([("id", "=", int(channel_id))])
-            domain &= Domain("channel_ids", "not in", channel.id)
+            domain &= Domain("channel_ids", "not in", channel.ids)
             if channel.group_public_id:
-                domain &= Domain("user_ids.all_group_ids", "in", channel.group_public_id.id)
+                domain &= Domain("user_ids.all_group_ids", "=", channel.group_public_id.id)
         selectable_partners = self.search(domain, limit=limit + 1, order="name, id")
         store.add(
             selectable_partners,
@@ -126,7 +126,7 @@ class ResPartner(models.Model):
         ])
         allowed_group = (channel.parent_channel_id or channel).group_public_id
         if allowed_group:
-            extra_domain &= Domain("user_ids.all_group_ids", "in", allowed_group.id)
+            extra_domain &= Domain("user_ids.all_group_ids", "=", allowed_group.id)
         partners = self._search_mention_suggestions(domain, limit, extra_domain)
         members_domain = [
             ("channel_id", "in", (channel.parent_channel_id | channel).ids),

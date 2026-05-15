@@ -7,7 +7,7 @@
         <field name="model_id" ref="survey.model_survey_user_input"/>
         <field name="domain_force">[('survey_id.certification', '=', True),
             ('survey_id.survey_type', 'in', ('survey', 'live_session', 'assessment', 'custom')),
-            '|', ('survey_id.restrict_user_ids', '=', False), ('survey_id.restrict_user_ids', 'in', user.id)]</field>
+            '|', ('survey_id.restrict_user_ids', '=', False), ('survey_id.restrict_user_ids', 'in', user.ids)]</field>
         <field name="groups" eval="[(4, ref('website_slides.group_website_slides_officer'))]"/>
         <field name="perm_unlink" eval="0"/>
         <field name="perm_write" eval="0"/>
@@ -20,7 +20,7 @@
         <field name="model_id" ref="survey.model_survey_user_input_line"/>
         <field name="domain_force">[('survey_id.certification', '=', True),
             ('survey_id.survey_type', 'in', ('survey', 'live_session', 'assessment', 'custom')),
-            '|', ('survey_id.restrict_user_ids', '=', False), ('survey_id.restrict_user_ids', 'in', user.id)]</field>
+            '|', ('survey_id.restrict_user_ids', '=', False), ('survey_id.restrict_user_ids', 'in', user.ids)]</field>
         <field name="groups" eval="[(4, ref('website_slides.group_website_slides_officer'))]"/>
         <field name="perm_unlink" eval="0"/>
         <field name="perm_write" eval="0"/>
@@ -35,10 +35,10 @@
             '|',
                 '&amp;',
                     '&amp;', ('question_id.survey_id.certification', '=', True), ('question_id.survey_id.survey_type', 'in', ('survey', 'live_session', 'assessment', 'custom')),
-                    '|', ('question_id.survey_id.restrict_user_ids', '=', False), ('question_id.survey_id.restrict_user_ids', 'in', user.id),
+                    '|', ('question_id.survey_id.restrict_user_ids', '=', False), ('question_id.survey_id.restrict_user_ids', 'in', user.ids),
                 '&amp;',
                     '&amp;', ('matrix_question_id.survey_id.certification', '=', True), ('matrix_question_id.survey_id.survey_type', 'in', ('survey', 'live_session', 'assessment', 'custom')),
-                    '|', ('matrix_question_id.survey_id.restrict_user_ids', '=', False), ('matrix_question_id.survey_id.restrict_user_ids', 'in', user.id),
+                    '|', ('matrix_question_id.survey_id.restrict_user_ids', '=', False), ('matrix_question_id.survey_id.restrict_user_ids', 'in', user.ids),
         ]</field>
         <field name="groups" eval="[(4, ref('website_slides.group_website_slides_officer'))]"/>
         <field name="perm_unlink" eval="0"/>
@@ -52,7 +52,7 @@
         <field name="model_id" ref="survey.model_survey_question"/>
         <field name="domain_force">[('survey_id.certification', '=', True),
             ('survey_id.survey_type', 'in', ('survey', 'live_session', 'assessment', 'custom')),
-            '|', ('survey_id.restrict_user_ids', '=', False),('survey_id.restrict_user_ids', 'in', user.id)]</field>
+            '|', ('survey_id.restrict_user_ids', '=', False),('survey_id.restrict_user_ids', 'in', user.ids)]</field>
         <field name="groups" eval="[(4, ref('website_slides.group_website_slides_officer'))]"/>
         <field name="perm_unlink" eval="0"/>
         <field name="perm_write" eval="0"/>
@@ -65,7 +65,7 @@
         <field name="model_id" ref="survey.model_survey_survey"/>
         <field name="domain_force">[('certification', '=', True),
             ('survey_type', 'in', ('survey', 'live_session', 'assessment', 'custom')),
-            '|', ('restrict_user_ids', '=', False),('restrict_user_ids', 'in', user.id)]</field>
+            '|', ('restrict_user_ids', '=', False),('restrict_user_ids', 'in', user.ids)]</field>
         <field name="groups" eval="[(4, ref('website_slides.group_website_slides_officer'))]"/>
         <field name="perm_unlink" eval="0"/>
         <field name="perm_write" eval="0"/>

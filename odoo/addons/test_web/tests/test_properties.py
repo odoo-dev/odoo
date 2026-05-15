@@ -882,7 +882,7 @@ class PropertiesGroupByCase(TestPropertiesMixin):
             self.assertEqual(partner.display_name, line['attributes.mypartners'][1])
             self.assertEqual(
                 line['__extra_domain'],
-                [('attributes.mypartners', 'in', partner.id)],
+                [('attributes.mypartners', 'in', partner.ids)],
             )
             # only the fourth partner is in 2 messages
             self.assertEqual(line['__count'], 2 if partner == partners[3] else 1)

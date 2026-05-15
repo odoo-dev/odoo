@@ -171,7 +171,7 @@ class LoyaltyReward(models.Model):
             product_category_ids.append(self.discount_product_category_id.id)
             constrains.append([("categ_id", "in", product_category_ids)])
         if self.discount_product_tag_id:
-            constrains.append([("all_product_tag_ids", "in", self.discount_product_tag_id.id)])
+            constrains.append([("all_product_tag_ids", "in", self.discount_product_tag_id.ids)])
         domain = Domain.OR(constrains) if constrains else Domain.TRUE
         if self.discount_product_domain and self.discount_product_domain != "[]":
             domain &= Domain(ast.literal_eval(self.discount_product_domain))

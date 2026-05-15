@@ -286,7 +286,7 @@ class ProductProduct(models.Model):
         ])
         if lot:
             moves_domain &= Domain([
-                ('move_line_ids.lot_id', 'in', lot.id),
+                ('move_line_ids.lot_id', 'in', lot.ids),
             ])
         if at_date:
             moves_domain &= Domain([
@@ -442,7 +442,7 @@ class ProductProduct(models.Model):
             ('company_id', '=', self.env.company.id)
         ])
         if lot:
-            moves_domain &= Domain([('move_line_ids.lot_id', 'in', lot.id)])
+            moves_domain &= Domain([('move_line_ids.lot_id', 'in', lot.ids)])
         if at_date:
             moves_domain &= Domain([('date', '<=', at_date)])
         if location:

@@ -141,7 +141,7 @@ class ResUsers(models.Model):
             operator_group = self.env.ref("im_livechat.im_livechat_group_user")
             if operator_group in self.all_group_ids:
                 result = super().write(vals)
-                lost_operators = self.filtered_domain([("all_group_ids", "not in", operator_group.id)])
+                lost_operators = self.filtered_domain([("all_group_ids", "!=", operator_group.id)])
                 # sudo - im_livechat.channel: user manager can remove user from livechat channels
                 self.env["im_livechat.channel"].sudo() \
                     .search([("user_ids", "in", lost_operators.ids)]) \

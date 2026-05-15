@@ -4970,7 +4970,7 @@ class MailThread(models.AbstractModel):
     ):
         def followers_by_thread(thread):
             # Not batched by simplicity as it is always called on a single thread.
-            domain = Domain("res_id", "in", thread.id)
+            domain = Domain("res_id", "in", thread.ids)
             domain &= Domain("res_model", "=", thread._name)
             domain &= Domain("partner_id", "!=", thread.env.user.partner_id.id)
             if filter_recipients:

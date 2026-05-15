@@ -21,7 +21,7 @@ patch(MessagingMenu.prototype, {
     async openEmployeeView(thread) {
         const employeeId = await this.orm.searchRead("hr.employee.public",
                 [["user_id", "=", user.userId],
-                ["company_id", "in", user.activeCompany.id]],
+                ["company_id", "=", user.activeCompany.id]],
                 ["id"]
             )
 

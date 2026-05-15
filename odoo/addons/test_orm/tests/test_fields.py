@@ -2738,12 +2738,12 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
         # makes sure that line.move_id is flushed before search
         line = self.env['test_orm.move_line'].create({'move_id': move1.id})
-        moves = self.env['test_orm.move'].search([('line_ids', 'in', line.id)])
+        moves = self.env['test_orm.move'].search([('line_ids', 'in', line.ids)])
         self.assertEqual(moves, move1)
 
         # makes sure that line.move_id is flushed before search
         line.move_id = move2
-        moves = self.env['test_orm.move'].search([('line_ids', 'in', line.id)])
+        moves = self.env['test_orm.move'].search([('line_ids', 'in', line.ids)])
         self.assertEqual(moves, move2)
 
     def test_73_relational_inverse(self):

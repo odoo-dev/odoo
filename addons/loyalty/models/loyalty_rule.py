@@ -150,7 +150,7 @@ class LoyaltyRule(models.Model):
         if self.product_category_id:
             constrains.append([("categ_id", "child_of", self.product_category_id.id)])
         if self.product_tag_id:
-            constrains.append([("all_product_tag_ids", "in", self.product_tag_id.id)])
+            constrains.append([("all_product_tag_ids", "in", self.product_tag_id.ids)])
         domain = Domain.OR(constrains) if constrains else Domain.TRUE
         if self.product_domain and self.product_domain != "[]":
             domain &= Domain(ast.literal_eval(self.product_domain))

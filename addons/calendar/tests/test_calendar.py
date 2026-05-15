@@ -140,7 +140,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
             # check that every attendee receive a (single) mail for the event
             for partner in partners:
                 mail = self.env['mail.message'].sudo().search([
-                    ('notified_partner_ids', 'in', partner.id),
+                    ('notified_partner_ids', 'in', partner.ids),
                     ])
                 self.assertEqual(len(mail), target, "This attendee has an unexpected amount of mails")
 
@@ -148,7 +148,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
             # check that every email has specified extra attachments
             for partner in partners:
                 mail = self.env['mail.message'].sudo().search([
-                    ('notified_partner_ids', 'in', partner.id),
+                    ('notified_partner_ids', 'in', partner.ids),
                 ])
                 extra_attachments = mail.attachment_ids.filtered(lambda attachment: attachment.name in attachments_names)
                 self.assertEqual(len(extra_attachments), len(attachments_names))

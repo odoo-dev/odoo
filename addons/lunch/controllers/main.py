@@ -130,7 +130,7 @@ class LunchController(http.Controller):
 
         alert_domain = Domain.AND([
             Domain('available_today', '=', True),
-            Domain('location_ids', 'in', user_location.id),
+            Domain('location_ids', 'in', user_location.ids),
             Domain('mode', '=', 'alert'),
         ])
 

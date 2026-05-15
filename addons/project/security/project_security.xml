@@ -89,7 +89,7 @@
                 '|',
                     ('message_partner_ids', 'in', [user.partner_id.id]),
                     # to subscribe check access to the record, follower is not enough at creation
-                    ('user_ids', 'in', user.id)
+                    ('user_ids', 'in', user.ids)
         ]</field>
         <field name="groups" eval="[(4,ref('base.group_user'))]"/>
     </record>
@@ -101,7 +101,7 @@
             '|',
                 '|',
                     ('project_id', '!=', False),
-                    ('user_ids', 'in', user.id),
+                    ('user_ids', 'in', user.ids),
                 ('is_template', '=', True)
         ]</field>
         <field name="groups" eval="[(4,ref('project.group_project_manager'))]"/>
@@ -153,7 +153,7 @@
                 '|',
                     ('message_partner_ids', 'in', [user.partner_id.id]),
                     # to subscribe check access to the record, follower is not enough at creation
-                    ('user_ids', 'in', user.id)
+                    ('user_ids', 'in', user.ids)
         ]</field>
         <field name="groups" eval="[(4,ref('project.group_project_user'))]"/>
     </record>
@@ -293,7 +293,7 @@
             ('project_id.privacy_visibility', 'in', ['employees', 'portal']),
             '|',
                 ('project_id.message_partner_ids', 'in', [user.partner_id.id]),
-                ('user_ids', 'in', user.id),
+                ('user_ids', 'in', user.ids),
         ]</field>
         <field name="groups" eval="[(4,ref('project.group_project_user'))]"/>
     </record>

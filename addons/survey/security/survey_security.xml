@@ -39,7 +39,7 @@
             <field name="name">Survey: officer: unrestricted survey or in restricted users</field>
             <field name="model_id" ref="survey.model_survey_survey"/>
             <field name="domain_force">[
-                '|', ('restrict_user_ids', 'in', user.id), ('restrict_user_ids', '=', False)]</field>
+                '|', ('restrict_user_ids', 'in', user.ids), ('restrict_user_ids', '=', False)]</field>
             <field name="groups" eval="[(4, ref('group_survey_user'))]"/>
             <field name="perm_unlink" eval="1"/>
             <field name="perm_write" eval="1"/>
@@ -62,7 +62,7 @@
             <field name="name">Survey question: officer: unrestricted survey or in restricted users</field>
             <field name="model_id" ref="survey.model_survey_question"/>
             <field name="domain_force">[
-                '|', ('survey_id.restrict_user_ids', 'in', user.id), ('survey_id.restrict_user_ids', '=', False)]</field>
+                '|', ('survey_id.restrict_user_ids', 'in', user.ids), ('survey_id.restrict_user_ids', '=', False)]</field>
             <field name="groups" eval="[(4, ref('group_survey_user'))]"/>
             <field name="perm_unlink" eval="1"/>
             <field name="perm_write" eval="1"/>
@@ -86,7 +86,7 @@
             <field name="model_id" ref="survey.model_survey_question_answer"/>
             <field name="domain_force">[
                 '|',
-                    '|', ('question_id.survey_id.restrict_user_ids', 'in', user.id), ('matrix_question_id.survey_id.restrict_user_ids', 'in', user.id),
+                    '|', ('question_id.survey_id.restrict_user_ids', 'in', user.ids), ('matrix_question_id.survey_id.restrict_user_ids', 'in', user.ids),
                     '|', ('question_id.survey_id.restrict_user_ids', '=', False), ('matrix_question_id.survey_id.restrict_user_ids', '=', False)]
             </field>
             <field name="groups" eval="[(4, ref('group_survey_user'))]"/>
@@ -124,7 +124,7 @@
             <field name="model_id" ref="survey.model_survey_user_input"/>
             <field name="domain_force">[
                 '&amp;', ('survey_id.survey_type', 'in', ('assessment', 'custom', 'live_session', 'survey')),
-                '|', ('survey_id.restrict_user_ids', 'in', user.id),
+                '|', ('survey_id.restrict_user_ids', 'in', user.ids),
                      ('survey_id.restrict_user_ids', '=', False)]</field>
             <field name="groups" eval="[(4, ref('group_survey_user'))]"/>
             <field name="perm_unlink" eval="1"/>
@@ -138,7 +138,7 @@
             <field name="model_id" ref="survey.model_survey_user_input_line"/>
             <field name="domain_force">[
                 '&amp;', ('survey_id.survey_type', 'in', ('assessment', 'custom', 'live_session', 'survey')),
-                '|', ('survey_id.restrict_user_ids', 'in', user.id),
+                '|', ('survey_id.restrict_user_ids', 'in', user.ids),
                      ('survey_id.restrict_user_ids', '=', False)]</field>
             <field name="groups" eval="[(4, ref('group_survey_user'))]"/>
             <field name="perm_unlink" eval="1"/>
@@ -151,7 +151,7 @@
         <record id="survey_invite_survey_user" model="ir.rule">
             <field name="name">Survey invite: officer: unrestricted or in restricted users</field>
             <field name="model_id" ref="survey.model_survey_invite"/>
-            <field name="domain_force">['|',  ('survey_id.restrict_user_ids', 'in', user.id),
+            <field name="domain_force">['|',  ('survey_id.restrict_user_ids', 'in', user.ids),
                 ('survey_id.restrict_user_ids', '=', False)]</field>
             <field name="groups" eval="[(4, ref('group_survey_user'))]"/>
             <field name="perm_unlink" eval="0"/>

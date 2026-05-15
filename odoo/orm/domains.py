@@ -1368,7 +1368,7 @@ def _optimize_in_set(condition, _model):
         return _FALSE_DOMAIN if condition.operator == 'in' else _TRUE_DOMAIN
     if not isinstance(value, COLLECTION_TYPES):
         # TODO show warning, note that condition.field_expr in ('group_ids', 'user_ids') gives a lot of them
-        _logger.debug("The domain condition %r should have a list value.", condition)
+        _logger.warning("The domain condition %r should have a list value.", condition)
         value = [value]
     return DomainCondition(condition.field_expr, condition.operator, OrderedSet(value))
 
