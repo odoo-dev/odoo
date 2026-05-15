@@ -3,7 +3,7 @@
 
 <t t-name="website.TimelineImagesOption">
     <BuilderRow label.translate="Milestones" applyTo="':scope > :has(.s_timeline_images_row)'">
-        <BuilderButton type="'success'" action="'addItem'" actionParam="'.s_timeline_images_row:last-child'" preview="false">Add Milestone</BuilderButton>
+        <BuilderButton type="'success'" action="'addItem'" actionParam="'.s_timeline_images_row:last-child'">Add Milestone</BuilderButton>
     </BuilderRow>
 </t>
 

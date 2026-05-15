@@ -6,8 +6,7 @@
         <BuilderButton
             type="'success'"
             action="'addItem'"
-            actionParam="'.accordion > .accordion-item:last-of-type'"
-            preview="false">
+            actionParam="'.accordion > .accordion-item:last-of-type'">
             Add New
         </BuilderButton>
     </BuilderRow>

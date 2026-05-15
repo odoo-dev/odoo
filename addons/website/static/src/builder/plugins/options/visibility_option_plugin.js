@@ -176,7 +176,9 @@ export class ForceVisibleAction extends BuilderAction {
 export class ToggleDeviceVisibilityAction extends BuilderAction {
     static id = "toggleDeviceVisibility";
     static dependencies = ["visibility", "history"];
-
+    setup() {
+        this.preview = false;
+    }
     apply({ editingElement, params: { mainParam: visibility } }) {
         // Clean first as the widget is not part of a group
         this.clean({ editingElement });

@@ -7,7 +7,6 @@
             type="'success'"
             action="'addItem'"
             actionParam="`${this.props.productSelector}:last-of-type`"
-            preview="false"
             applyTo="this.props.buttonApplyTo">
             <t t-out="this.props.buttonLabel"/>
         </BuilderButton>

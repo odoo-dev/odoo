@@ -79,6 +79,9 @@ export class PopupOptionPlugin extends Plugin {
 // current page only.
 export class MoveBlockAction extends BuilderAction {
     static id = "moveBlock";
+    setup() {
+        this.preview = false;
+    }
     isApplied({ editingElement, value }) {
         return editingElement.closest("#o_shared_blocks")
             ? value === "allPages"

@@ -108,6 +108,9 @@ export class ClonePlugin extends Plugin {
 export class CloneItemAction extends BuilderAction {
     static id = "addItem";
     static dependencies = ["clone", "history"];
+    setup() {
+        this.preview = false;
+    }
     async apply({ editingElement, params: { mainParam: itemSelector }, value: position }) {
         const itemEl = editingElement.querySelector(itemSelector);
         if (itemEl) {
