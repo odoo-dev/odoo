@@ -1201,6 +1201,8 @@ class MailingMailing(models.Model):
         mass_mailings = self.search([('state', 'in', ('in_queue', 'sending')), '|', ('schedule_date', '<', fields.Datetime.now()), ('schedule_date', '=', False)])
         self.env['ir.cron']._commit_progress(remaining=len(mass_mailings))
         for mass_mailing in mass_mailings:
+            if not mass_mailing.try_lock_for_update():  # skip locked
+                continue
             context_user = mass_mailing.user_id or mass_mailing.write_uid or self.env.user
             mass_mailing = mass_mailing.with_context(
                 **self.env['res.users'].with_user(context_user).context_get()
