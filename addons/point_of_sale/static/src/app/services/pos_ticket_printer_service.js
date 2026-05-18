@@ -92,6 +92,10 @@ export class PosTicketPrinterService {
         }
 
         iframe.contentWindow.focus();
+        this._printWeb(iframe);
+    }
+
+    _printWeb(iframe) {
         iframe.contentWindow.print();
     }
 
