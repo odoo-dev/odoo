@@ -1,7 +1,18 @@
 import { Editor } from "@html_editor/editor";
 import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
+import { isVisible } from "@html_editor/utils/dom_info";
 import { loadIframe, loadIframeBundles } from "@mail/convert_inline/iframe_utils";
-import { Component, onMounted, onWillDestroy, onWillUnmount, props, status, proxy, t } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillDestroy,
+    onWillUnmount,
+    props,
+    status,
+    proxy,
+    t,
+    useEffect,
+} from "@odoo/owl";
 import { LazyComponent } from "@web/core/lazy_component";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { localization } from "@web/core/l10n/localization";
@@ -13,6 +24,7 @@ import { closestScrollableY } from "@web/core/utils/scrolling";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
 import { useLayoutEffect, useRef, useSubEnv } from "@web/owl2/utils";
 import { loadGoogleFonts } from "./mass_mailing_iframe_utils";
+import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 
 const IFRAME_VALUE_SELECTOR = ".o_mass_mailing_value";
 
@@ -26,6 +38,9 @@ export class MassMailingIframe extends Component {
         config: t.object(),
         iframeRef: t.function(),
         iframeWrapperRef: t.function(),
+        saveRecord: t.function(),
+        discardRecord: t.function(),
+        showFullscreen: t.boolean().optional(),
         showThemeSelector: t.boolean().optional(),
         showCodeView: t.boolean().optional(),
         toggleCodeView: t.function().optional(),
@@ -46,11 +61,20 @@ export class MassMailingIframe extends Component {
             localOverlayContainerKey: uniqueId("mass_mailing_iframe"),
         });
         this.state = proxy({
-            showFullscreen: false,
+            showFullscreen: this.props.showFullscreen,
             isMobile: false,
             ready: false,
+            editorReady: false,
+            emptyBody: false,
+            fullscreenButtonLabel: "",
+        });
+        useEffect(() => {
+            this.state.fullscreenButtonLabel = this.state.emptyBody
+                ? _t("Start Designing")
+                : _t("Edit Design");
         });
         this.iframeLoaded = Promise.withResolvers();
+        useHotkey("escape", () => this.closeFullscreen());
         onMounted(() => {
             this.setupIframe();
         });
@@ -295,11 +319,19 @@ export class MassMailingIframe extends Component {
     }
 
     getBuilderProps() {
+        const onEditorReady = this.props.config.onEditorReady;
         return {
             overlayRef: this.overlayRef,
             iframeLoaded: this.iframeLoaded.promise,
             snippetsName: "mass_mailing.email_designer_snippets",
-            config: this.props.config,
+            config: {
+                ...this.props.config,
+                onEditorReady: () => {
+                    onEditorReady?.();
+                    this.state.editorReady = true;
+                    this.state.emptyBody = !isVisible(this.editor.editable);
+                },
+            },
             isMobile: this.state.isMobile,
             toggleMobile: () => {
                 this.iframeRef.el.contentDocument.body.scrollTop = 0;
@@ -331,6 +363,27 @@ export class MassMailingIframe extends Component {
     retargetLink(link) {
         link.setAttribute("target", "_blank");
         link.setAttribute("rel", "noreferrer");
+    }
+
+    async saveAndClose() {
+        this.closeFullscreen();
+        await this.props.saveRecord();
+    }
+
+    async discardAndClose() {
+        await this.props.discardRecord();
+        this.closeFullscreen();
+    }
+
+    closeFullscreen() {
+        if (this.state.showFullscreen) {
+            this.state.emptyBody = !isVisible(this.editor.editable);
+            // trigger pointerdown event on iframe to reset any selection overlays
+            this.iframeRef.el.contentDocument?.dispatchEvent(new PointerEvent("pointerdown"), {
+                bubbles: true,
+            });
+            this.toggleFullScreen();
+        }
     }
 
     toggleFullScreen() {

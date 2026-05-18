@@ -18,6 +18,11 @@ registry.category("web_tour.tours").add('snippets_mailing_menu_tabs', {
         trigger: ':iframe .o_mailing_template_preview_wrapper [data-name="empty"]',
         run: "click",
     },
+        {
+            content: "Open the mailing in full-screen mode",
+            trigger: ":iframe .o_mail_wrapper",
+            run: "click",
+        },
     {
         content: "Click on the 'Design' tab.",
         trigger: 'button[data-name="theme"]',

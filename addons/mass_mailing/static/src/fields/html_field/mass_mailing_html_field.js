@@ -13,6 +13,7 @@ import { registry } from "@web/core/registry";
 import { useChildRef, useService } from "@web/core/utils/hooks";
 import { useEmailHtmlConverter } from "@mail/convert_inline/hooks";
 import { fixInvalidHTML } from "@html_editor/utils/sanitize";
+import { useRecordObserver } from "@web/model/relational_model/utils";
 
 export class MassMailingHtmlField extends HtmlField {
     static template = "mass_mailing.HtmlField";
@@ -48,6 +49,7 @@ export class MassMailingHtmlField extends HtmlField {
         Object.assign(this.state, {
             showThemeSelector: this.props.record.isNew,
             activeTheme: undefined,
+            newlySelectedTheme: false,
         });
 
         if (this.state.showThemeSelector) {
@@ -56,6 +58,13 @@ export class MassMailingHtmlField extends HtmlField {
             // Theme Selector, no need to wait for the user selection.
             loadBundle("mass_mailing.assets_builder");
         }
+        let resId = this.props.record.resId;
+        useRecordObserver((record) => {
+            if (record.resId !== resId) {
+                this.state.newlySelectedTheme = false;
+                resId = record.resId;
+            }
+        });
 
         // useRecordObserver's callback now runs during setup() (via Owl's
         // reactive effect), before this component's setup() continues. This
@@ -171,7 +180,10 @@ export class MassMailingHtmlField extends HtmlField {
             readonly: this.props.readonly,
             showThemeSelector: this.state.showThemeSelector,
             showCodeView: this.state.showCodeView,
+            showFullscreen: this.state.newlySelectedTheme && this.withBuilder,
             withBuilder: this.withBuilder,
+            saveRecord: this.saveRecord.bind(this),
+            discardRecord: this.discardRecord.bind(this),
         };
         if (this.env.debug) {
             Object.assign(props, {
@@ -179,6 +191,16 @@ export class MassMailingHtmlField extends HtmlField {
             });
         }
         return props;
+    }
+
+    async saveRecord() {
+        await this.props.record.save();
+    }
+
+    async discardRecord() {
+        if (this.isDirty) {
+            await this.props.record.discard();
+        }
     }
 
     /**
@@ -280,6 +302,7 @@ export class MassMailingHtmlField extends HtmlField {
                                     "FIELD_IS_DIRTY",
                                     this.lastChangeId !== changeId
                                 );
+                                this.state.newlySelectedTheme = true;
                             },
                             () => {}
                         );
