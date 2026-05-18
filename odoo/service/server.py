@@ -91,6 +91,44 @@ def empty_pipe(fd):
             raise
 
 
+def create_server_socket(interface, port=0, *, backlog=128, reuse=True):
+    # UNIX socket?
+    if interface[:1] == '/':
+        if port:
+            raise ValueError("Cannot set port for unix socket")
+        family = socket.AF_UNIX
+        if reuse:
+            try:  # noqa: SIM105
+                os.unlink(interface)
+            except FileNotFoundError:
+                pass
+        sock = socket.socket(family, socket.SOCK_STREAM)
+        sock.bind(interface)
+        sock.listen(backlog)
+        _logger.info("HTTP service running on unix:%s", interface)
+        return sock
+
+    # INET
+    sock = socket.create_server(
+        (interface, port),
+        family=socket.AF_INET6 if ':' in interface else socket.AF_INET,
+        backlog=backlog,
+        reuse_port=reuse,
+        dualstack_ipv6=interface == '::',
+    )
+    try:
+        host, port, *_ = sock.getsockname()
+        if interface == '::':
+            host = '*'
+        elif ':' in host:
+            host = f'[{host}]'
+        _logger.info("HTTP service running on %s:%s", host, port)
+        return sock
+    except OSError:
+        sock.close()
+        raise
+
+
 def cron_database_list():
     from odoo.modules.db import list_dbs  # noqa: PLC0415
     return config['db_name'] or list_dbs(force=True)
@@ -427,27 +465,12 @@ class ThreadedServer(CommonServer):
 
             if config.http_socket_activation:
                 SD_LISTEN_FDS_START = 3
-                server = socket.fromfd(
-                    SD_LISTEN_FDS_START,
-                    socket.AF_INET,
-                    socket.SOCK_STREAM,
-                )
+                server = socket.fromfd(SD_LISTEN_FDS_START, socket.AF_INET, socket.SOCK_STREAM)
                 _logger.info("HTTP service running through socket activation")
             else:
-                server = socket.create_server(
-                    (self.interface, self.port),
-                    family=socket.AF_INET6 if ':' in config['http_interface'] else socket.AF_INET,
-                    backlog=max(128, config.max_http_threads),
-                    dualstack_ipv6=self.interface == '::',
-                )
-                host, port, *_ = server.getsockname()
-                if host == '::':
-                    host = '*'  # dual stack
-                elif ':' in host:
-                    host = f'[{host}]'
-                if self.port == 0:
-                    self.port = config['http_port'] = port
-                _logger.info("HTTP service running on %s:%s", host, port)
+                server = create_server_socket(self.interface, self.port, backlog=max(128, config.max_http_threads))
+            if self.port == 0 and server.family in (socket.AF_INET, socket.AF_INET6):
+                self.port = config['http_port'] = server.getsockname()[1]
 
             server.settimeout(1)  # it uses poll(2) under the hood
             with thread_pool, server:
@@ -613,6 +636,12 @@ class GeventServer(CommonServer):
         super().__init__(app)
         self.port = config['gevent_port']
         self.httpd = None
+        if str(self.port)[:1] == '/':
+            self.interface = self.port
+            self.port = 0
+        elif self.interface[:1] == '/':
+            self.interface += '_gevent'
+            self.port = 0
 
     def sigint_handler(self, sig, frame):
         if self.httpd:
@@ -703,23 +732,11 @@ class GeventServer(CommonServer):
             signal.signal(signal.SIGUSR2, log_ormcache_stats)
             gevent.spawn(self.watchdog)
 
-        sock = socket.create_server(
-            (self.interface, self.port),
-            family=socket.AF_INET6 if ':' in self.interface else socket.AF_INET,
-            backlog=128,
-            dualstack_ipv6=self.interface == '::',
-        )
-        if hasattr(socket, 'SO_REUSEPORT'):
-            sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+        sock = create_server_socket(self.interface, self.port)
         sock.setblocking(0)
 
-        host, port, *_ = sock.getsockname()
-        if host == '::':
-            host = '*'  # dual stack
-        elif ':' in host:
-            host = f'[{host}]'
-        if self.port == 0:
-            self.port = config['gevent_port'] = port
+        if self.port == 0 and sock.family in (socket.AF_INET, socket.AF_INET6):
+            self.port = config['gevent_port'] = sock.getsockname()[1]
 
         self.httpd = WSGIServer(
             sock, self.app,
@@ -740,7 +757,7 @@ class GeventServer(CommonServer):
 
         self.httpd.close = httpd_close_override
 
-        self.logger.info("Evented/WebSocket service running on %s:%s", host, port)
+        self.logger.info("Evented/WebSocket service ready")
         try:
             self.httpd.serve_forever(stop_timeout=GEVENT_STOP_TIMEOUT)
         except SystemExit:
@@ -980,32 +997,18 @@ class PreforkServer(CommonServer):
         if config['http_enable']:
             if os.environ.get('ODOO_HTTP_SOCKET_FD'):
                 # reload
-                self.socket = socket.socket(fileno=int(os.environ.pop('ODOO_HTTP_SOCKET_FD')))
+                server = socket.socket(fileno=int(os.environ.pop('ODOO_HTTP_SOCKET_FD')))
+                _logger.info("HTTP service running through reload file descriptor")
             elif config.http_socket_activation:
                 # socket activation
                 SD_LISTEN_FDS_START = 3
-                self.socket = socket.fromfd(SD_LISTEN_FDS_START, socket.AF_INET, socket.SOCK_STREAM)
-            else:
-                # default
-                self.socket = socket.create_server(
-                    (self.interface, self.port),
-                    family=socket.AF_INET6 if ':' in self.interface else socket.AF_INET,
-                    backlog=8 * self.population,
-                    dualstack_ipv6=self.interface == '::',
-                )
-                self.socket.setblocking(0)
-                if self.port == 0:
-                    self.port = config['http_port'] = self.socket.getsockname()[1]
-
-            if config.http_socket_activation:
+                server = socket.fromfd(SD_LISTEN_FDS_START, socket.AF_INET, socket.SOCK_STREAM)
                 _logger.info("HTTP service running through socket activation")
             else:
-                host, port, *_ = self.socket.getsockname()
-                if host == '::':
-                    host = '*'  # dual stack
-                elif ':' in host:
-                    host = f'[{host}]'
-                _logger.info("HTTP service running on %s:%s", host, port)
+                server = create_server_socket(self.interface, self.port, backlog=max(128, 8 * self.population))
+            self.socket = server
+            if self.port == 0 and server.family in (socket.AF_INET, socket.AF_INET6):
+                self.port = config['http_port'] = server.getsockname()[1]
 
     def fork_and_reload(self):
         self.logger.info("Reloading server")
