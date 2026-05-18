@@ -60,11 +60,15 @@ export const getOrderChanges = (order, orderPreparationCategories) => {
             orderline.combo_line_ids?.some((line) => hasPreparationCategory(line.getProduct())) ||
             false;
 
-        if (hasPrepaCategory) {
+        const quantity = orderline.getQuantity();
+
+        if (
+            hasPrepaCategory &&
+            order.last_order_preparation_change[lineKey]?.ignoreQty !== quantity
+        ) {
             const key = Object.keys(order.last_order_preparation_change.lines).find((k) =>
                 k.startsWith(orderline.uuid)
             ); // find old data but note changed
-            const quantity = orderline.getQuantity();
 
             const relatedKey = key !== lineKey ? key : lineKey; // if note update key would be different
             const quantityDiff =

@@ -2964,6 +2964,23 @@ export class PosStore extends WithLazyGetterTrap {
     canEditPayment(order) {
         return order.nb_print === 0;
     }
+
+    handlePreparationHistory(srcPrep, destPrep, srcLine, destLine, qty) {
+        const srcKey = srcLine.preparationKey;
+        const destKey = destLine.preparationKey;
+        const srcQty = srcPrep[srcKey]?.quantity;
+
+        if (srcQty) {
+            if (srcQty <= qty) {
+                const newPrep = { ...srcPrep[srcKey], uuid: destLine.uuid };
+                destPrep[destKey] = newPrep;
+                delete srcPrep[srcKey];
+            } else {
+                srcPrep[srcKey].quantity = srcQty - qty;
+                destPrep[destKey] = { ...srcPrep[srcKey], uuid: destLine.uuid, quantity: qty };
+            }
+        }
+    }
 }
 
 PosStore.prototype.electronic_payment_interfaces = {};
