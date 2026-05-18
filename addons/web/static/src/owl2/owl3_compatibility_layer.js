@@ -37,11 +37,6 @@
 // @ts-ignore
 const owl = globalThis.owl;
 
-/**
- * @type {any}
- */
-let currentNode = null;
-
 class Component extends owl.Component {
     static template = "";
     static props = {};
@@ -55,7 +50,6 @@ class Component extends owl.Component {
         this.props = owl.props(null, this.constructor.defaultProps);
         this.env = useChildEnv();
         this.__owl__ = node;
-        currentNode = node;
     }
 
     setup() {}
@@ -69,13 +63,6 @@ class Component extends owl.Component {
 }
 owl.Component = Component;
 
-function getCurrentNode() {
-    if (!currentNode) {
-        throw new Error("No current node");
-    }
-    return currentNode;
-}
-
 /**
  * @param {any} value
  * @param {any} descr
@@ -88,7 +75,7 @@ owl.validate = function validate(value, descr) {
  * @param {() => void} cb
  */
 owl.onWillRender = function onWillRender(cb) {
-    const node = getCurrentNode();
+    const node = owl.useScope();
     const renderFn = node.renderFn;
     node.renderFn = () => {
         cb.call(node.component);
@@ -100,7 +87,7 @@ owl.onWillRender = function onWillRender(cb) {
  * @param {() => void} cb
  */
 owl.onRendered = function onRendered(cb) {
-    const node = getCurrentNode();
+    const node = owl.useScope();
     const renderFn = node.renderFn;
     node.renderFn = () => {
         const result = renderFn();
@@ -113,7 +100,7 @@ owl.onRendered = function onRendered(cb) {
  * @param {string} name
  */
 owl.useRef = function useRef(name) {
-    const node = getCurrentNode();
+    const node = owl.useScope();
     if (!node.__refs__) {
         node.__refs__ = {};
     }
@@ -134,7 +121,7 @@ owl.useRef = function useRef(name) {
 /**
  */
 owl.useComponent = function useComponent() {
-    return getCurrentNode().component;
+    return owl.useScope().component;
 };
 
 /**
@@ -144,7 +131,7 @@ owl.useComponent = function useComponent() {
  * @param {any} eventParams
  */
 owl.useExternalListener = function useExternalListener(target, eventName, handler, eventParams) {
-    const node = getCurrentNode();
+    const node = owl.useScope();
     const boundHandler = handler.bind(node.component);
     owl.onMounted(() => target.addEventListener(eventName, boundHandler, eventParams));
     owl.onWillUnmount(() => target.removeEventListener(eventName, boundHandler, eventParams));
@@ -212,7 +199,7 @@ class EnvPlugin extends owl.Plugin {
 }
 
 owl.useEnv = function useEnv() {
-    return getCurrentNode().component.env;
+    return owl.useScope().component.env;
 };
 
 function useChildEnv() {
@@ -243,7 +230,7 @@ function extendEnv(extension) {
  * @param {object} extension
  */
 owl.useSubEnv = function useSubEnv(extension) {
-    const component = getCurrentNode().component;
+    const component = owl.useScope().component;
     component.env = extendEnv(extension);
 };
 
