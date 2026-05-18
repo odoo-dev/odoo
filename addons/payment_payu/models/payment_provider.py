@@ -1,15 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from typing import Literal
-from urllib.parse import urlencode
 
-from odoo import _, api, fields, models, tools
-from odoo.exceptions import RedirectWarning, ValidationError
-from odoo.http import request
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
-from odoo.addons.payment_payu import const as payu_const
-from odoo.addons.payment_payu.controllers.onboarding import PayUController
 from odoo.addons.payment.logging import get_payment_logger
+from odoo.addons.payment_payu import const as payu_const
 
 _logger = get_payment_logger(__name__)
 
@@ -27,7 +24,7 @@ class PaymentProvider(models.Model):
     )
     payu_merchant_salt = fields.Char(
         string='Salt',
-        help='The Salt used to generate a hash.',
+        help='The salt used to generate a hash.',
         copy=False,
     )
 
@@ -118,49 +115,3 @@ class PaymentProvider(models.Model):
         except ValueError:
             raise ValidationError(_('Error occurred while parsing message from Payu.'))
         return response_msg
-
-    def action_start_onboarding(self, menu_id=None):
-        """ Override of `payment` to redirect to the PayU OAuth URL.
-
-        Note: `self.ensure_one()`
-
-        :param int menu_id: The menu from which the onboarding is started, as an `ir.ui.menu` id.
-        :return: An URL action to redirect to the PayU OAuth URL.
-        :rtype: dict
-        :raise RedirectWarning: If the company's currency is not supported.
-        """
-        self.ensure_one()
-
-        if self.code != 'payu':
-            return super().action_start_onboarding(menu_id=menu_id)
-
-        if self.company_id.currency_id.name not in payu_const.SUPPORTED_CURRENCIES:
-            raise RedirectWarning(
-                _("PayU is not available in your country; please use another payment provider."),
-                self.env.ref('payment.action_payment_provider').id,
-                _("Other Payment Providers"),
-            )
-
-        params = {
-            'return_url': tools.urls.urljoin(self.get_base_url(), PayUController.OAUTH_RETURN_URL),
-            'provider_id': self.id,
-            'csrf_token': request.csrf_token(),
-        }
-
-        authorization_url = f'{payu_const.OAUTH_URL}/authorize?{urlencode(params)}'
-        return {
-            'type': 'ir.actions.act_url',
-            'url': authorization_url,
-            'target': 'self',
-        }
-
-    def _get_reset_values(self):
-        """Override of `payment` to supply the provider-specific credential values to reset."""
-        if self.code != 'payu':
-            return super()._get_reset_values()
-
-        # Reset the merchant credentials
-        return {
-            'payu_merchant_key': None,
-            'payu_merchant_salt': None,
-        }

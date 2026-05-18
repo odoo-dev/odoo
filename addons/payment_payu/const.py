@@ -2,7 +2,9 @@
 
 PROD_BASE_URL = 'info.payu.in'
 TEST_BASE_URL = 'test.payu.in'
-OAUTH_URL = 'https://ampa-odoo-ampa-internal-staging-29118269.dev.odoo.com/api/payu/1' #replace with IAP URL
+OAUTH_URL = 'https://ampa-odoo-ampa-internal-staging-29118269.dev.odoo.com/api/payu/1'  # replace with IAP URL
+RETURN_URL = '/payment/payu/return'
+WEBHOOK_URL = '/payment/payu/webhook'
 
 # The currencies supported by PayU, in ISO 4217 format.
 

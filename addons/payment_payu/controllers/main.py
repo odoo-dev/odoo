@@ -6,19 +6,16 @@ from werkzeug.exceptions import Forbidden
 
 from odoo.http import Controller, request, route
 
+from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_payu import const as payu_consts
 from odoo.addons.payment_payu import utils as payu_utils
-from odoo.addons.payment.logging import get_payment_logger
 
 _logger = get_payment_logger(__name__)
 
 
 class PayUController(Controller):
 
-    RETURN_URL = '/payment/payu/return'
-    WEBHOOK_URL = '/payment/payu/webhook'
-
-    @route(RETURN_URL, type='http', auth='public', methods=['GET'])
+    @route(payu_consts.RETURN_URL, type='http', auth='public', methods=['GET'])
     def payu_return_from_checkout(self, **payload):
         """Handle PayU redirect after checkout completion.
 
@@ -36,7 +33,7 @@ class PayUController(Controller):
         # No processing needed — main payload is received via the webhook
         return request.redirect('/payment/status')
 
-    @route(WEBHOOK_URL, type='http', auth='public', methods=['POST'], csrf=False)
+    @route(payu_consts.WEBHOOK_URL, type='http', auth='public', methods=['POST'], csrf=False)
     def payu_webhook(self, **payload):
         """Process a PayU webhook notification and update the corresponding payment transaction.
 

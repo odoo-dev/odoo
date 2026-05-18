@@ -7,7 +7,6 @@ from odoo.exceptions import UserError, ValidationError
 
 from odoo.addons.payment_payu import const as payu_consts
 from odoo.addons.payment_payu import utils as payu_utils
-from odoo.addons.payment_payu.controllers.main import PayUController
 
 _logger = logging.getLogger(__name__)
 
@@ -39,8 +38,8 @@ class PaymentTransaction(models.Model):
         :return: The request payload.
         :rtype: dict
         """
-        return_url = f'{self.provider_id.get_base_url()}{PayUController.RETURN_URL}'
-        webhook_url = f'{self.provider_id.get_base_url()}{PayUController.WEBHOOK_URL}'
+        return_url = f'{self.provider_id.get_base_url()}{payu_consts.RETURN_URL}'
+        webhook_url = f'{self.provider_id.get_base_url()}{payu_consts.WEBHOOK_URL}'
         pm_code = (self.payment_method_id.primary_payment_method_id or self.payment_method_id).code
         payu_pm_code = payu_consts.PAYMENT_METHODS_MAPPING[pm_code]
         showPaymentMode = '|'.join(payu_pm_code)

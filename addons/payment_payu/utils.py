@@ -3,11 +3,6 @@
 import hashlib
 
 
-def sha512(message: str):
-    """Return SHA512 hex digest in lowercase."""
-    return hashlib.sha512(message.encode('utf-8')).hexdigest().lower()
-
-
 def generate_payu_hash(payload, hash_sequence):
     """
     Generate SHA512 hash for PayU transaction request.
@@ -16,4 +11,4 @@ def generate_payu_hash(payload, hash_sequence):
     """
     hash_keys = hash_sequence.split("|")
     hash_string = '|'.join(str(payload.get(key, '')) for key in hash_keys)
-    return sha512(hash_string)
+    return hashlib.sha512(hash_string.encode('utf-8')).hexdigest().lower()

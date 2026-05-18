@@ -6,7 +6,6 @@
         <field name="code">payu</field>
         <field name="image_128" type="base64" file="payment_payu/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_payu" />
-        <!-- Todo: For remaining Payment mode codes -->
         <field name="payment_method_ids"
                eval="[Command.set([
                         ref('payment.payment_method_netbanking'),

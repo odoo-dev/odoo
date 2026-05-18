@@ -6,25 +6,8 @@
         <field name="model">payment.provider</field>
         <field name="inherit_id" ref="payment.payment_provider_form"/>
         <field name="arch" type="xml">
-            <sheet position="before">
-                <header invisible="code != 'payu'">
-                    <button string="Reset Your PayU Account"
-                        type="object"
-                        name="action_reset_credentials"
-                        class="btn-secondary ms-2"
-                        invisible="not payu_merchant_key"
-                    />
-
-                    <button string="Connect"
-                        type="object"
-                        name="action_start_onboarding"
-                        class="btn-primary"
-                        invisible="payu_merchant_key"
-                    />
-                </header>
-            </sheet>
             <group name="provider_credentials" position='inside'>
-                <group invisible="code != 'payu'" name="payu_credentials_group_no_one" groups="base.group_no_one">
+                <group invisible="code != 'payu'" name="payu_credentials">
                     <field name="payu_merchant_key"/>
                     <field name="payu_merchant_salt" password="1"/>
                 </group>
