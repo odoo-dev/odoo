@@ -284,7 +284,8 @@ export const hotkeyService = {
                 .split("+")
                 .filter((key) => !overlayModParts.includes(key))
                 .join("+");
-            const elems = getVisibleElements(activeElement, `[data-hotkey='${cleanHotkey}' i]`);
+            const elems = getVisibleElements(activeElement, `[data-hotkey='${cleanHotkey}' i]`)
+                .filter((el) => !el.closest("[data-no-hotkeys]"));
             return elems.map((el) => ({
                 hotkey,
                 activeElement,
@@ -304,7 +305,9 @@ export const hotkeyService = {
          * @param {HTMLElement} activeElement
          */
         function addHotkeyOverlays(activeElement) {
-            for (const el of getVisibleElements(activeElement, "[data-hotkey]:not(:disabled)")) {
+            const hotKeyEls = getVisibleElements(activeElement, "[data-hotkey]:not(:disabled)")
+                .filter((el) => !el.closest("[data-no-hotkeys]"));
+            for (const el of hotKeyEls) {
                 const hotkey = el.dataset.hotkey;
                 const overlay = document.createElement("div");
                 overlay.classList.add(
