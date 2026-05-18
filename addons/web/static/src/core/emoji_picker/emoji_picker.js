@@ -243,6 +243,10 @@ export class EmojiPicker extends Component {
             () => [this.state.categoryId, this.state.searchTerm]
         );
         useEffect(
+            () => this.adaptNavbar(),
+            () => [this.recentEmojis.length > 0]
+        );
+        useEffect(
             (el) => {
                 const gridEl = this.gridRef?.el;
                 const activeEl = gridEl?.querySelector(".o-Emoji.o-active");
