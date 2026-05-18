@@ -16,11 +16,20 @@ class StockRule(models.Model):
         if not buy_rule or not seller:
             return super()._get_lead_days(product, **values)
         seller = seller[0]
-        bom = self.env['mrp.bom'].sudo()._bom_subcontract_find(
-            product,
-            company_id=buy_rule.picking_type_id.company_id.id,
-            bom_type='subcontract',
-            subcontractor=seller.partner_id)
+        subcont_boms = self.env.context.get('subcont_boms', {})
+        bom = None
+        company_id = buy_rule.picking_type_id.company_id.id
+        bom_id = subcont_boms.get((product.id, company_id, seller.partner_id.id))
+        if bom_id is None:
+            bom_id = subcont_boms.get((product.id, False, seller.partner_id.id))
+        if bom_id:
+            bom = self.env['mrp.bom'].browse(bom_id)
+        if not bom and bom_id is None:
+            bom = self.env['mrp.bom'].sudo()._bom_subcontract_find(
+                product,
+                company_id=company_id,
+                bom_type='subcontract',
+                subcontractor=seller.partner_id)
         if not bom:
             return super()._get_lead_days(product, **values)
 
