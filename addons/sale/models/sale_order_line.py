@@ -744,6 +744,8 @@ class SaleOrderLine(models.Model):
 
         # Compute the combo product's price.
         combo_line = self._get_linked_line()
+        if not combo_line:
+            return 0.0
         combo_product_price = combo_line._get_display_price_ignore_combo()
         # Compute the combos' base prices.
         combo_base_prices = {
