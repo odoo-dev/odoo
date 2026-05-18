@@ -136,8 +136,9 @@ export const tooltipService = {
          * after a delay.
          *
          * @param {HTMLElement} el
+         * @param {?HTMLElement} elChildTooltip
          */
-        function openElementsTooltip(el) {
+        function openElementsTooltip(el, elChildTooltip) {
             // Fix weird behavior in Firefox where MouseEvent can be dispatched
             // from TEXT_NODE, even if they shouldn't...
             if (el.nodeType === Node.TEXT_NODE) {
@@ -147,10 +148,17 @@ export const tooltipService = {
             if (element && element === target) {
                 return;
             }
-            if (elementsWithTooltips.has(el)) {
-                openTooltip(el, elementsWithTooltips.get(el));
-            } else if (element) {
-                const dataset = element.dataset;
+            if (elChildTooltip) {
+                const childTooltip = elChildTooltip.closest(
+                    "[data-tooltip], [data-tooltip-template]"
+                );
+                if (childTooltip === target) {
+                    return;
+                }
+            }
+
+            function spawnTooltip(elementTooltip) {
+                const dataset = elementTooltip.dataset;
                 const params = {
                     tooltip: dataset.tooltip,
                     template: dataset.tooltipTemplate,
@@ -162,7 +170,18 @@ export const tooltipService = {
                 if (dataset.tooltipDelay) {
                     params.delay = parseInt(dataset.tooltipDelay, 10);
                 }
-                openTooltip(element, params);
+                openTooltip(elementTooltip, params);
+            }
+
+            // cache items
+            if (elementsWithTooltips.has(el)) {
+                openTooltip(el, elementsWithTooltips.get(el));
+                // current node is tooltip
+            } else if (element) {
+                spawnTooltip(element);
+                // is parent node of tooltip
+            } else if (elChildTooltip) {
+                spawnTooltip(elChildTooltip);
             }
         }
 
@@ -190,10 +209,15 @@ export const tooltipService = {
         }
 
         function cleanupTooltip(ev) {
-            if (target == ev.target) {
+            if (target === ev.target) {
                 cleanup();
             }
         }
+
+        function directChildTooltip(el) {
+            return el.querySelector(":scope > [data-tooltip-info]");
+        }
+
         /**
          * Checks whether there is a tooltip registered on the event target, and
          * if there is, creates a timeout to open the corresponding tooltip
@@ -203,9 +227,10 @@ export const tooltipService = {
          */
         function onTouchStart(ev) {
             cleanup();
-            const timeoutDelay = isHelpNode(ev.target) ? 0 : SHOW_AFTER_DELAY;
+            const childTooltip = directChildTooltip(ev.target);
+            const timeoutDelay = isHelpNode(ev.target) || childTooltip ? 0 : SHOW_AFTER_DELAY;
             showTimer = browser.setTimeout(() => {
-                openElementsTooltip(ev.target);
+                openElementsTooltip(ev.target, childTooltip);
             }, timeoutDelay);
         }
 
