@@ -44,8 +44,8 @@ export const CLOSE_DELAY = 200;
 export const SHOW_AFTER_DELAY = 250;
 
 export const tooltipService = {
-    dependencies: ["popover"],
-    start(env, { popover }) {
+    dependencies: ["popover", "ui"],
+    start(env, { popover, ui }) {
         let openTooltipTimeout;
         let closeTooltip;
         let showTimer;
@@ -156,7 +156,12 @@ export const tooltipService = {
                     return;
                 }
             }
-
+            if (
+                ui.isSmall &&
+                el.closest(".o_list_renderer > .o_list_table > tbody.ui-sortable td")
+            ) {
+                return;
+            }
             function spawnTooltip(elementTooltip) {
                 const dataset = elementTooltip.dataset;
                 const params = {
@@ -203,6 +208,10 @@ export const tooltipService = {
          */
         function onClick(ev) {
             if (isHelpNode(ev.target)) {
+                ev.preventDefault();
+            }
+            const childTooltip = directChildTooltip(ev.target);
+            if (childTooltip) {
                 ev.preventDefault();
             }
             cleanupTooltip(ev);
