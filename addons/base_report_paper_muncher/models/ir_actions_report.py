@@ -123,12 +123,13 @@ class IrActionsReport(models.Model):
                 footer=footer,
                 landscape=landscape,
                 specific_paperformat_args=specific_paperformat_args,
-                set_viewport_size=set_viewport_size,
                 scale=scale,
             )
         return super()._run_pdf_engine_without_processing(
-            engine_name, bodies, report_ref, header, footer, landscape,
-            specific_paperformat_args, set_viewport_size)
+            engine_name, bodies, report_ref,
+            header=header, footer=footer, landscape=landscape,
+            specific_paperformat_args=specific_paperformat_args,
+            scale=scale, **kwargs)
 
     def _run_pdf_engine(
         self,
