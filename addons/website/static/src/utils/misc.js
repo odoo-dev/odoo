@@ -1,4 +1,5 @@
 import { cookie as cookieManager } from "@web/core/browser/cookie";
+// import { clamp } from "@web/core/utils/numbers";
 
 export class EventBus extends EventTarget {
     trigger(name, payload) {
@@ -81,25 +82,26 @@ export function verifyHttpsUrl(link) {
 }
 
 /**
- * Calculate the carousel slide index needed to center the target item
- * @param {HTMLElement} carouselTargetEl - The carousel item to center
+ * Calculates the carousel slide index needed to center the target item.
+ *
+ * @param {HTMLElement} targetItemEl - The carousel item to center
  * @returns {number|null} Index to scroll to, or null if centering unnecessary
  */
-export function getCarouselCenteringIndex(carouselTargetEl) {
-    const carouselEl = carouselTargetEl.closest(".carousel");
-    const slidesEls = carouselEl.querySelectorAll(".carousel-item");
-    const visibleSlides = Number(
-        getComputedStyle(carouselEl).getPropertyValue("--o-carousel-multiple-items")
+export function getCarouselCenteringIndex(targetItemEl) {
+    const carouselEl = targetItemEl.closest(".carousel");
+    const itemEls = carouselEl.querySelectorAll(".carousel-item");
+    const nbDisplayedSlides = Number(
+        getComputedStyle(carouselEl).getPropertyValue("--carousel-multiple-items-per-slide")
     );
 
     // No centering needed if all slides visible
-    if (visibleSlides >= slidesEls.length) {
+    if (nbDisplayedSlides >= itemEls.length) {
         return null;
     }
 
-    const targetIndex = Array.from(slidesEls).indexOf(carouselTargetEl);
-    const maxScrollIndex = slidesEls.length - visibleSlides;
-    const centerOffset = Math.floor(visibleSlides / 2);
+    const targetIndex = Array.from(itemEls).indexOf(targetItemEl);
+    const maxScrollIndex = itemEls.length - nbDisplayedSlides;
+    const centerOffset = Math.floor(nbDisplayedSlides / 2);
 
     return Math.min(Math.max(targetIndex - centerOffset, 0), maxScrollIndex);
 }
