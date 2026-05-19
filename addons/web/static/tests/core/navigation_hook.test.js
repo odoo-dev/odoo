@@ -451,9 +451,9 @@ test("browser default navigation is not captured", async () => {
 test("focus not stolen from search input during typing, hovering, and clearing", async () => {
     class FakeSearchList extends Component {
         static template = xml`
-            <div t-ref="container">
+            <div t-custom-ref="container">
                 <input
-                    t-ref="inputRef"
+                    t-custom-ref="inputRef"
                     class="o-navigable"
                     type="text"
                     t-on-input="this.onSearch"
