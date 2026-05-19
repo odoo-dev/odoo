@@ -3773,18 +3773,44 @@ class BaseModel(metaclass=MetaModel):
         This method is aimed at being overridden by models, instead of overriding
         :meth:`unlink`.
         """
-        # Removing the ir_model_data reference if the record being deleted
-        # is a record created by xml/csv file, as these are not connected
+        # TODO remove skip_res_field_check needed for ir.attachment
+        env = self.with_context(skip_res_field_check=True).env
+        assert env.su and not env.context['active_test']
+        ids = self._ids
+        # Removing the many2one_reference as these are not connected
         # with real database foreign keys, and would be dangling references.
-        yield self.env['ir.model.data'].with_context({}).search(
-            [('model', '=', self._name), ('res_id', 'in', self._ids)], order='id')
+        for ref_field in env.registry.many2one_references:
+            if ref_field.ondelete is None:
+                # ondelete not specified on the field
+                continue
+            if ref_field._module in self.pool.uninstalling_modules:
+                # the module of the field is being uninstalled, skip it
+                continue
+            model = env[ref_field.model_name]
+            model_check = getattr(model, '_res_model_check_model', lambda _: True)
+            if model_check is not None and not model_check(self._name):
+                # the model check is skipped, the model should not reference self
+                continue
+            records = model.search(
+                [(ref_field.model_field, '=', self._name), (ref_field.name, 'in', ids)], order='id')
+            if not records:
+                continue
+            match ref_field.ondelete:
+                case 'cascade':
+                    yield records
+                case 'set null':
+                    records.write({
+                        ref_field.name: False,
+                        ref_field.model_field: False,
+                    })
+                case 'restrict':
+                    raise ValidationError(self.env._("Cannot remove %s referenced by %s", self, records))
+
         # Simulate discard_records behavior.
-        yield self.env['ir.default'].search([
+        yield env['ir.default'].search([
             ('field_id.ttype', '=', 'many2one'), ('field_id.relation', '=', self._name),
-            ('json_value', 'in', tuple(json.dumps(id_) for id_ in self._ids)),
+            ('json_value', 'in', tuple(map(json.dumps, ids))),
         ], order='id')
-        yield self.env['ir.attachment'].with_context(skip_res_field_check=True).search(
-            [('res_model', '=', self._name), ('res_id', 'in', self._ids)], order='id')
 
     @typing.final
     def _get_records_linked_by(self, field: Field) -> BaseModel:
