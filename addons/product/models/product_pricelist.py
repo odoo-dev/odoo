@@ -59,11 +59,25 @@ class ProductPricelist(models.Model):
         domain=lambda self: self._domain_item_ids(),
         copy=True)
 
+    has_rules = fields.Boolean(
+        store=True,
+        compute="_compute_has_rules",
+    )
+
+    # === COMPUTE METHODS ===#
+
+    @api.depends('item_ids')
+    def _compute_has_rules(self):
+        for pricelist in self:
+            pricelist.has_rules = bool(pricelist.item_ids)
+
     @api.depends('currency_id')
     def _compute_display_name(self):
         for pricelist in self:
             pricelist_name = pricelist.name and pricelist.name or pricelist.env._('New')
             pricelist.display_name = f'{pricelist_name} ({pricelist.currency_id.name})'
+
+    # === CRUD METHODS === #
 
     def write(self, vals):
         res = super().write(vals)
@@ -266,7 +280,7 @@ class ProductPricelist(models.Model):
     # Split methods to ease (community) overrides
     def _get_applicable_rules(self, products, quantity, date, *, uom=None, **kwargs):
         self and self.ensure_one()  # self is at most one record
-        if not self:
+        if not self.has_rules:
             return self.env['product.pricelist.item']
 
         return self.env['product.pricelist.item'].search(

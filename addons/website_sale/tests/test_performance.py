@@ -203,8 +203,6 @@ class TestWebsiteSalePerformanceWithPricelistNoRules(TestWebsiteSalePerformanceN
     def _get_shop_page_queries(self):
         res = super()._get_shop_page_queries()
         res["product_pricelist"] += 3
-        res["product_category"] += 1
-        res["product_pricelist_item"] += 1
         return res
 
     def test_shop_page_generation(self):
@@ -216,8 +214,6 @@ class TestWebsiteSalePerformanceWithPricelistNoRules(TestWebsiteSalePerformanceN
     def _get_product_page_queries(self):
         res = super()._get_product_page_queries()
         res["product_pricelist"] += 3
-        res["product_category"] += 1
-        res["product_pricelist_item"] += 10
         return res
 
     def test_product_page_generation(self):
@@ -249,7 +245,8 @@ class TestWebsiteSalePerformanceWithPricelist(TestWebsiteSalePerformanceWithPric
 
     def _get_shop_page_queries(self):
         res = super()._get_shop_page_queries()
-        res["product_pricelist_item"] += 1
+        res["product_pricelist_item"] += 2
+        res["product_category"] += 1
         if "website_sale_renting" not in self.installed_modules:
             # FIXME VFE find where this one is coming from
             res["product_product"] += 1
@@ -263,7 +260,8 @@ class TestWebsiteSalePerformanceWithPricelist(TestWebsiteSalePerformanceWithPric
 
     def _get_product_page_queries(self):
         res = super()._get_product_page_queries()
-        res["product_pricelist_item"] += 9
+        res["product_pricelist_item"] += 19
+        res["product_category"] += 1
         if "website_sale_subscription" not in self.installed_modules:
             # FIXME VFE magic comeback when sub is installed makes no **** sense
             # Seems to come from the `website_sale` template, not the sub override strangely
