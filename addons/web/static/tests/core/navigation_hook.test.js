@@ -456,10 +456,10 @@ test("focus not stolen from search input during typing, hovering, and clearing",
                     t-ref="inputRef"
                     class="o-navigable"
                     type="text"
-                    t-on-input="onSearch"
+                    t-on-input="this.onSearch"
                     placeholder="Search..."
                 />
-                <t t-foreach="visibleItems" t-as="item" t-key="item">
+                <t t-foreach="this.visibleItems" t-as="item" t-key="item">
                     <div class="o-navigable fake-item" tabindex="0" t-esc="item"/>
                 </t>
             </div>

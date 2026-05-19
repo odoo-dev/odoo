@@ -1,6 +1,6 @@
 <templates xml:space="preserve">
     <t t-name="html_editor.ImageToolbarDropdown">
-        <Dropdown state="dropdown" menuClass="`${this.props.name}_selector`" menuRef="this.menuRef" focusToggleOnClosed="false">
+        <Dropdown state="this.dropdown" menuClass="`${this.props.name}_selector`" menuRef="this.menuRef" focusToggleOnClosed="false">
             <button t-ref="imageToolbarBtn" t-att-title="this.props.title" class="btn btn-light">
                 <i t-if="this.props.icon.startsWith('fa')" class="fa fa-fw" t-att-class="this.props.icon"/>
                 <t t-else="" t-call="{{ this.props.icon }}"/>
