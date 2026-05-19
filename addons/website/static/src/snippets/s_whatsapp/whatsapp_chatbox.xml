@@ -7,8 +7,8 @@
                     <img class="wa-agent-img rounded-circle" t-att-src="this.agentAvatarSrc" alt="agent"/>
                 </div>
                 <div class="ms-2 me-auto flex-grow-1 d-flex flex-column lh-1">
-                    <p class="wa-agent-name text-break mb-1 fw-bold" t-esc="this.agentName"/>
-                    <p class="wa-agent-description m-0 text-break" t-esc="this.agentDescription"/>
+                    <p class="wa-agent-name text-break mb-1 fw-bold" t-out="this.agentName"/>
+                    <p class="wa-agent-description m-0 text-break" t-out="this.agentDescription"/>
                 </div>
                 <div class="o_not_editable">
                     <button class="btn wa-close-btn p-2 text-white" aria-label="Close chat">
@@ -17,7 +17,7 @@
                 </div>
             </div>
             <div class="wa-messages p-2">
-                <p class="wa-agent-msg text-break w-75 bg-white rounded-3 p-2 m-0 fs-6" t-esc="this.agentMessage"/>
+                <p class="wa-agent-msg text-break w-75 bg-white rounded-3 p-2 m-0 fs-6" t-out="this.agentMessage"/>
             </div>
             <div class="wa-user-input">
                 <!-- Regular input box -->
@@ -37,7 +37,7 @@
                         <div class="o_not_editable">
                             <i class="fa fa-whatsapp"></i>
                         </div>
-                        <p class="m-0" t-esc="this.ctaLabel"/>
+                        <p class="m-0" t-out="this.ctaLabel"/>
                     </button>
                 </div>
             </div>
