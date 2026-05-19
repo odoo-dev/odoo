@@ -1,5 +1,5 @@
-import { useState } from "@web/owl2/utils";
-import { Component, useEffect } from "@odoo/owl";
+import { useLayoutEffect, useState } from "@web/owl2/utils";
+import { Component } from "@odoo/owl";
 import { useAutofocus, useForwardRefToParent } from "@web/core/utils/hooks";
 
 let nextId = 0;
@@ -45,7 +45,7 @@ export class SearchInput extends Component {
         super.setup();
         this.uniqueId = `mail.SearchInput.${nextId++}`;
         this.spinner = useState({ visible: false });
-        useEffect(
+        useLayoutEffect(
             () => {
                 if (!this.props.search.loading) {
                     this.spinner.visible = false;
