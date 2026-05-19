@@ -3636,7 +3636,10 @@ ${issueStrings}`);
       remove2 = ref2.delete.bind(ref2);
     } else if (ref2.set) {
       add = ref2.set.bind(ref2);
-      remove2 = () => ref2.set(null);
+      const atom = ref2[atomSymbol];
+      remove2 = atom ? (prevEl) => {
+        if (atom.value === prevEl) ref2.set(null);
+      } : () => ref2.set(null);
     } else {
       throw new OwlError(
         `Ref should implement either a 'set' function or 'add' and 'delete' functions`
@@ -4411,8 +4414,8 @@ ${issueStrings}`);
   };
   var __info__ = {
     version: App.version,
-    date: "2026-05-18T12:47:45.249Z",
-    hash: "af0e1a30",
+    date: "2026-05-19T07:45:07.034Z",
+    hash: "adcfd6de",
     url: "https://github.com/odoo/owl"
   };
 
