@@ -33,7 +33,7 @@ class TestWebsiteControllerPage(HttpCase):
                     </label>
                     <input type="radio" class="btn-check" name="wstudio_layout" id="o_wstudio_apply_list" t-att-checked="'checked' if layout_mode == 'list' else None" value="list"/>
                     <label t-attf-class="btn btn-light #{_activeClasses if layout_mode == 'list' else None} o_wstudio_apply_list" title="List" for="o_wstudio_apply_list">
-                        <i class="oi" data-icon="view_list"view_list/>
+                        <i class="oi" data-icon="view_list"/>
                     </label>
                 </div>
 
