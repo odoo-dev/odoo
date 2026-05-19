@@ -1,4 +1,5 @@
-import { Component, useEffect, useState } from "@odoo/owl";
+import { useState } from "@web/owl2/utils";
+import { Component, useEffect } from "@odoo/owl";
 import { useAutofocus, useForwardRefToParent } from "@web/core/utils/hooks";
 
 let nextId = 0;
