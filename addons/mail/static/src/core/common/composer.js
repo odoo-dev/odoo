@@ -507,7 +507,7 @@ export class Composer extends Component {
     }
 
     get navigableListProps() {
-        void this.suggestion.state.count;
+        const { loading, searchTerm, results } = this.suggestion.search;
         const props = {
             anchorRef: this.inputContainerRef.el,
             position: this.env.inChatter ? "bottom-fit" : "top-fit",
@@ -515,7 +515,7 @@ export class Composer extends Component {
                 this.suggestion.insert(option);
                 markEventHandled(ev, "composer.selectSuggestion");
             },
-            isLoading: !!this.suggestion.search.searchTerm && this.suggestion.search.loading,
+            isLoading: !!searchTerm && loading,
             options: [],
         };
         if (!this.hasSuggestions) {
@@ -523,11 +523,9 @@ export class Composer extends Component {
         }
         return {
             ...props,
-            ...mapSuggestionsToOptions(
-                this.suggestion.search.results.type,
-                this.suggestion.search.results.suggestions,
-                { thread: this.thread }
-            ),
+            ...mapSuggestionsToOptions(results.type, results.suggestions, {
+                thread: this.thread,
+            }),
         };
     }
 

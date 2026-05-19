@@ -766,6 +766,7 @@ test(`don't duplicate a useRecordObserver effect when switching back and forth b
                     fields: { foo: { name: "foo", type: "char" } },
                     activeFields: { foo: {} },
                     isMonoRecord: true,
+                    mode: "edit",
                 },
                 hooks: {
                     onRecordSaved: () => {},

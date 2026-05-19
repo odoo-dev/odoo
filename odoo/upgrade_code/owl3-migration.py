@@ -17,6 +17,14 @@ EXCLUDED_PATH = (
     'test_assetsbundle/static/accessible.xml',
 )
 
+
+CHECKSUM_FILES = (
+    'pos_blackbox_be/static/src/pos/overrides/navbar/navbar.xml',
+    'l10n_eu_iot_scale_cert',
+    'iot_drivers/iot_handlers/drivers/serial_scale_driver.py',
+)
+
+
 # Templates that are called by:
 # - this.renderAt   (Interaction)
 # - renderToString
@@ -655,13 +663,7 @@ def upgrade_use_external_listener(file_manager, log_info, log_error):
 
 def upgrade_tportal(file_manager, log_info, log_error):
     """Sub-task: Migrate t-portal, ignoring comments."""
-    path_pattern = re.compile('|'.join(EXCLUDED_PATH))
-    files = [
-        file for file in file_manager
-        if '/static/src/' in file.path._str
-        and file.path.suffix in ['.xml', '.js']
-        and not re.search(path_pattern, file.path._str)
-    ]
+    files = JSTooling.get_template_files(file_manager)
     if not files:
         return
 
@@ -688,11 +690,7 @@ def upgrade_tportal(file_manager, log_info, log_error):
 
 def upgrade_t_esc(file_manager, log_info, log_error):
     """Replaces the t-esc directive in xml templates with the t-out directive"""
-    excluded_path_pattern = re.compile('|'.join(EXCLUDED_PATH))
-    files = [
-        file for file in file_manager
-        if file.path.suffix in ['.xml', '.js'] and not re.search(excluded_path_pattern, file.path._str)
-    ]
+    files = JSTooling.get_template_files(file_manager)
     if not files:
         return
 
