@@ -577,6 +577,7 @@ export class Thread extends Component {
             this.props.thread.loadNewer = false;
             this.state.showJumpPresent = false;
         }
+        this.lastSetValue = undefined;
         this.props.thread.scrollTop = immediate ? "bottom" : "bottom-smooth";
         if (!this.ui.isSmall) {
             this.props.thread.composer.autofocus++;
@@ -717,7 +718,10 @@ export class Thread extends Component {
                 this.smoothScrollingTimeout = setTimeout(onSmoothScrollingEnd, 250);
             }
         }
-        this.scrollableRef.el.scrollTo({ behavior: smooth ? "smooth" : undefined, top: value });
+        (this.viewportEl ?? this.scrollableRef.el).scrollTo({
+            behavior: smooth ? "smooth" : undefined,
+            top: value,
+        });
         this.lastSetValue = value;
         this.messageHighlight?.resolveStartup?.();
         this.saveScroll();
