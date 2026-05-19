@@ -34,7 +34,6 @@ DEFAULT_PAYMENT_METHOD_CODES = {
     'rupay',
     'amex',
     'diners',
-
 }
 
 PAYU_HASH_SEQUENCE = {

@@ -159,12 +159,14 @@ class PaymentTransaction(models.Model):
         """
         if self.provider_code != 'payu':
             return super()._send_refund_request()
+        webhook_url = f'{self.provider_id.get_base_url()}{payu_consts.WEBHOOK_URL}'
         payload = {
             'key': self.provider_id.payu_merchant_key,
             'command': 'cancel_refund_transaction',
             'var1': self.source_transaction_id.provider_reference,
             'var2': self.reference,
             'var3': -(self.amount),
+            'var5': webhook_url,
             'salt': self.provider_id.payu_merchant_salt,
         }
 
