@@ -13,7 +13,7 @@ const discussCategoryPatch = {
                 return {
                     canView: false,
                     extraClass: "o-mail-DiscussSidebarCategory-discussCategory",
-                    hideWhenEmpty: true,
+                    hideWhenEmpty: false,
                     icon: "fa fa-hashtag",
                     id: `discuss_category_${this.id}`,
                 };

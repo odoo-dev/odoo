@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.SidebarCategoryNav">
+        <div class="o-mail-SidebarCategoryNav d-flex overflow-hidden h-100">
+            <div class="o-mail-SidebarCategoryNav-tabs d-flex flex-column align-items-center gap-2 px-2 py-2">
+                <button class="btn o-mail-DiscussSidebar-item rounded-3 d-flex align-items-center justify-content-center p-2 border-0 text-muted" style="aspect-ratio: 1;"
+                        t-att-title="state.isPanelOpen ? 'Collapse panel' : 'Expand panel'"
+                        t-on-click="() => this.togglePanel()">
+                    <i class="fa-fw fa-lg fa" t-att-class="state.isPanelOpen ? 'fa-chevron-left' : 'fa-chevron-right'"/>
+                </button>
+                <button class="btn btn-primary rounded-3 d-flex align-items-center justify-content-center p-2 shadow-sm" style="aspect-ratio: 1;"
+                        title="Search conversations"
+                        t-on-click="() => this.onClickSearch()">
+                    <i class="oi oi-search fa-fw"/>
+                </button>
+                <button t-if="store.self_user?.share === false"
+                        class="btn btn-primary rounded-3 d-flex align-items-center justify-content-center p-2 shadow-sm" style="aspect-ratio: 1;"
+                        title="New Meeting"
+                        t-on-click="() => this.onClickNewMeeting()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="17" height="13" fill="none" aria-hidden="true">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M11 0a2 2 0 0 1 2 2v4l4-4v9l-4-3v3a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h9ZM6 6H3v1h3v3h1V7h3V6H7V3H6v3Z" fill="currentColor"/>
+                    </svg>
+                </button>
+                <hr class="my-1 w-50 opacity-25"/>
+                <button t-foreach="mailboxes" t-as="mailbox" t-key="mailbox.id"
+                        class="btn o-mail-DiscussSidebar-item rounded-3 d-flex align-items-center justify-content-center p-2 border-0" style="aspect-ratio: 1;"
+                        t-att-class="{ 'o-active': store.discuss.thread?.eq(mailbox) }"
+                        t-att-title="mailbox.display_name"
+                        t-on-click="() => this.onClickMailbox(mailbox)">
+                    <i class="fa-fw fa-lg" t-att-class="mailboxIcon(mailbox)"/>
+                </button>
+                <hr class="my-1 w-50 opacity-25"/>
+                <button t-foreach="categories" t-as="category" t-key="category.localId"
+                        class="btn o-mail-DiscussSidebar-item rounded-3 d-flex align-items-center justify-content-center p-2 border-0" style="aspect-ratio: 1;"
+                        t-att-class="{ 'o-active': category === activeCategory }"
+                        t-att-title="category.name"
+                        t-on-click="() => this.onClickCategory(category)">
+                    <i class="fa-fw fa-lg" t-att-class="category.icon ?? 'fa fa-user'"/>
+                </button>
+                <button t-if="store.has_unpinned_channels"
+                        class="btn o-mail-DiscussSidebar-item rounded-3 d-flex align-items-center justify-content-center p-2 border-0 mt-auto opacity-75" style="aspect-ratio: 1;"
+                        title="View hidden conversations"
+                        t-on-click="() => this.onClickViewHiddenConversations()">
+                    <i class="fa-fw fa-lg fa fa-eye-slash"/>
+                </button>
+            </div>
+            <div t-if="state.isPanelOpen" class="flex-grow-1 overflow-hidden h-100 border-start" style="width: 350px;">
+                <ChannelLazyLoad t-if="activeCategory" category="activeCategory" t-key="activeCategory.localId"/>
+            </div>
+        </div>
+    </t>
+</templates>

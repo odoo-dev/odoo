@@ -6,7 +6,7 @@ import { patch } from "@web/core/utils/patch";
 patch(DiscussApp.prototype, {
     computeChatCategory() {
         const res = super.computeChatCategory(...arguments);
-        res.hideWhenEmpty = true;
+        res.hideWhenEmpty = false;
         return res;
     },
 });

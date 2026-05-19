@@ -8,13 +8,10 @@ import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { useService } from "@web/core/utils/hooks";
 import { DiscussContent } from "@mail/core/public_web/discuss_content";
 import { MessagingMenu } from "@mail/core/public_web/messaging_menu";
-import { ChannelLazyLoad } from "@mail/discuss/core/common/channel_lazy_load";
-
 export class Discuss extends Component {
     static components = {
         DiscussContent,
         DiscussSidebar,
-        ChannelLazyLoad,
         MessagingMenu,
     };
     static props = {

@@ -12,6 +12,8 @@
 
 .o-mail-ActionPanel-header {
     z-index: $o-mail-NavigableList-zIndex - 1;
+    padding-top: 13px !important;
+    padding-bottom: 13px !important;
 }
 
 .popover:has(.o-mail-ActionPanel-content) {

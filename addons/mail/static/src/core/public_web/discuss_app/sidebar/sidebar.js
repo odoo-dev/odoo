@@ -2,10 +2,9 @@ import { useSubEnv } from "@web/owl2/utils";
 import { ActionList } from "@mail/core/common/action_list";
 import { DiscussSearch } from "@mail/core/public_web/discuss_search";
 
-import { Component, onMounted } from "@odoo/owl";
+import { Component } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
-import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";
 import { useService } from "@web/core/utils/hooks";
 
 export const discussSidebarItemsRegistry = registry.category("mail.discuss_sidebar_items");
@@ -17,16 +16,13 @@ export const discussSidebarItemsRegistry = registry.category("mail.discuss_sideb
 export class DiscussSidebar extends Component {
     static template = "mail.DiscussSidebar";
     static props = {};
-    static components = { ActionList, DiscussSearch, ResizablePanel };
+    static components = { ActionList, DiscussSearch };
 
     setup() {
         super.setup();
         this.store = useService("mail.store");
         this.ui = useService("ui");
         useSubEnv({ inDiscussSidebar: true });
-        onMounted(() => {
-            this.mounted = true;
-        });
     }
 
     get discussSidebarItems() {
@@ -35,17 +31,5 @@ export class DiscussSidebar extends Component {
 
     onClickViewHiddenConversations() {
         this.env.services.action.doAction("mail.discuss_my_conversations_action");
-    }
-
-    onResize(width) {
-        if (!this.mounted) {
-            return; // ignore resize from mount not triggered by user
-        }
-        this.store.discuss.isSidebarCompact = width <= 100;
-
-        // Save sidebar width
-        if (!this.store.discuss.isSidebarCompact) {
-            this.store.discuss.sidebarWidth = width;
-        }
     }
 }

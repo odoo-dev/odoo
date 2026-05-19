@@ -44,6 +44,8 @@ export class DiscussAppCategory extends Record {
     hidden = fields.Attr(undefined, { localStorage: true, eager: true });
     hideWhenEmpty = false;
     canView = false;
+    searchDomain = [];
+    searchOrder = "name";
     app = fields.One("DiscussApp", {
         compute() {
             return this.store.discuss;

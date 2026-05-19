@@ -56,11 +56,23 @@ patch(DiscussApp.prototype, {
             compute() {
                 return {
                     extraClass: "o-mail-DiscussSidebarCategory-livechat",
-                    hideWhenEmpty: true,
+                    hideWhenEmpty: false,
                     icon: "fa fa-commenting-o",
                     id: `im_livechat.category_default`,
                     name: _t("Live Chat"),
                     sequence: 17,
+                    searchDomain: [
+                        ["channel_type", "=", "livechat"],
+                        [
+                            "channel_member_ids",
+                            "any",
+                            [
+                                ["is_self", "=", true],
+                                ["is_pinned", "=", true],
+                            ],
+                        ],
+                    ],
+                    searchOrder: "last_interest_dt desc, id desc",
                 };
             },
             eager: true,
@@ -76,6 +88,11 @@ patch(DiscussApp.prototype, {
                     id: `im_livechat.category_need_help`,
                     name: _t("Looking for help"),
                     sequence: 15,
+                    searchDomain: [
+                        ["channel_type", "=", "livechat"],
+                        ["livechat_status", "=", "need_help"],
+                    ],
+                    searchOrder: "last_interest_dt desc, id desc",
                 };
             },
             eager: true,

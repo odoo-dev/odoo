@@ -39,6 +39,18 @@ const discussAppPatch = {
                     id: "channels",
                     name: _t("Channels"),
                     sequence: 10,
+                    searchDomain: [
+                        ["channel_type", "=", "channel"],
+                        [
+                            "channel_member_ids",
+                            "any",
+                            [
+                                ["is_self", "=", true],
+                                ["is_pinned", "=", true],
+                            ],
+                        ],
+                    ],
+                    searchOrder: "name",
                 };
             },
             eager: true,
@@ -53,13 +65,26 @@ const discussAppPatch = {
             compute() {
                 return {
                     extraClass: "o-mail-DiscussSidebarCategory-favorite",
-                    hideWhenEmpty: true,
+                    hideWhenEmpty: false,
                     icon: "fa fa-star",
                     id: "favorites",
                     name: _t("Favorites"),
                     sequence: 5,
+                    searchDomain: [
+                        [
+                            "channel_member_ids",
+                            "any",
+                            [
+                                ["is_self", "=", true],
+                                ["is_favorite", "=", true],
+                                ["is_pinned", "=", true],
+                            ],
+                        ],
+                    ],
+                    searchOrder: "name",
                 };
             },
+            eager: true,
         });
         this.unreadChannels = fields.Many("discuss.channel", { inverse: "appAsUnreadChannels" });
     },
@@ -72,6 +97,18 @@ const discussAppPatch = {
             id: "chats",
             name: _t("Direct Messages"),
             sequence: 30,
+            searchDomain: [
+                ["channel_type", "=", "chat"],
+                [
+                    "channel_member_ids",
+                    "any",
+                    [
+                        ["is_self", "=", true],
+                        ["is_pinned", "=", true],
+                    ],
+                ],
+            ],
+            searchOrder: "last_interest_dt desc, id desc",
         };
     },
 };
