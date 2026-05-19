@@ -102,8 +102,6 @@ class PaymentTransaction(models.Model):
                 self.env.ref('payment.cron_post_process_payment_tx')._trigger()
         elif entity_status in STATUS_MAPPING.get('pending', ''):
             self._set_pending()
-        elif entity_status in STATUS_MAPPING.get('cancel', ''):
-            self._set_canceled()
         elif entity_status in STATUS_MAPPING['error']:
             _logger.warning(
                 'The transaction with reference %s underwent an error. Reason: %s',

@@ -6,7 +6,6 @@
     'category': 'Accounting/Payment Providers',
     'sequence': 350,
     'summary': "A payment provider covering India.",
-    'website': "https://www.odoo.com/",
     'description': " ",  # Non-empty string to avoid loading the README file.,
     'depends': ['payment'],
     'data': [

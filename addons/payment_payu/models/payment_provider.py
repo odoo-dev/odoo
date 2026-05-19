@@ -70,35 +70,29 @@ class PaymentProvider(models.Model):
 
     # === REQUEST HELPERS === #
 
-    def _build_request_url(self, endpoint, *, mode: Literal['payment', 'refund'] = 'payment', is_proxy_request=False, **kwargs):
+    def _build_request_url(self, endpoint, *, mode: Literal['payment', 'refund'] = 'payment', **kwargs):
         """ Override of `payment` to build the request URl. """
         if self.code != 'payu':
-            return super()._build_request_url(endpoint, mode=mode, is_proxy_request=is_proxy_request, **kwargs)
-        if is_proxy_request:
-            return f'{payu_const.OAUTH_URL}{endpoint}'
+            return super()._build_request_url(endpoint, mode=mode, **kwargs)
 
         url_host = payu_const.TEST_BASE_URL if self.state == 'test' else payu_const.PROD_BASE_URL
         return f'https://{url_host}{endpoint}'
 
-    def _build_request_headers(self, *args, mode: Literal['payment', 'refund'] = 'payment', is_proxy_request=False, **kwargs):
+    def _build_request_headers(self, *args, mode: Literal['payment', 'refund'] = 'payment', **kwargs):
         """ Override of `payment` to build the request headers. """
         if self.code != 'payu':
-            return super()._build_request_headers(*args, mode=mode, is_proxy_request=is_proxy_request, **kwargs)
+            return super()._build_request_headers(*args, mode=mode, **kwargs)
 
-        return {'Content-Type': 'application/x-www-form-urlencoded' if mode == 'refund' or is_proxy_request else 'application/json'}
+        return {'Content-Type': 'application/x-www-form-urlencoded' if mode == 'refund' else 'application/json'}
 
-    def _parse_response_content(self, response, *, mode: Literal['payment', 'refund'] = 'payment', is_proxy_request=False, **kwargs):
+    def _parse_response_content(self, response, *, mode: Literal['payment', 'refund'] = 'payment', **kwargs):
         """ Override of `payment` to parse response content. """
         if self.code != 'payu':
-            return super()._parse_response_content(response, mode=mode, is_proxy_request=is_proxy_request, **kwargs)
+            return super()._parse_response_content(response, mode=mode, **kwargs)
         try:
             response_content = response.json()
         except ValueError:
             raise ValidationError(_('Invalid response from Payu.'))
-
-        # Return the response in case of onboarding
-        if is_proxy_request:
-            return response_content
 
         if response_content.get('status') == 0:
             # status: (0: API failure, 1: API Success)
