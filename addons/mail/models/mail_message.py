@@ -928,10 +928,10 @@ class MailMessage(models.Model):
         if not notifications:
             return
         notifications.write({"is_read": False, "read_date": False})
-        Store(
+        Store.to(
             self.env.user,
             notification_type="mail.message/mark_as_unread",
-            notification_payload={"message_ids": notifications.mail_message_id.ids},
+            payload={"message_ids": notifications.mail_message_id.ids},
         ).add(notifications.mail_message_id, "_store_message_fields")
 
     @api.model
@@ -1039,7 +1039,7 @@ class MailMessage(models.Model):
         self._bus_send_reaction_group(content)
 
     def _bus_send_reaction_group(self, content):
-        store = Store(bus_channel=self)
+        store = Store.to(self)
         store.add(self, "_store_reaction_group_fields", fields_params={"content": content})
 
     def _store_reaction_group_fields(self, res: Store.FieldList, *, content=None):
@@ -1407,9 +1407,8 @@ class MailMessage(models.Model):
                 messages_per_partner[message.author_id] |= message
         for partner, messages in messages_per_partner.items():
             if user := partner.main_user_id:
-                store = Store(bus_channel=user)
                 user_messages = messages.with_user(user)._filtered_access('read')
-                store.add(user_messages, "_store_notification_fields")
+                Store.to(user).add(user_messages, "_store_notification_fields")
 
     def _bus_channels(self):
         return self.env.user._bus_channels()

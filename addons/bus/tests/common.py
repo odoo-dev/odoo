@@ -133,6 +133,7 @@ class BusResult:
 class BusCase(BaseCase):
     def _reset_bus(self):
         self.env.cr.precommit.data.get("bus.bus.values", []).clear()
+        self.env.cr.cache.pop("store_factory__stores", None)
         self.env["bus.bus"].sudo().search([]).unlink()
 
     @contextlib.contextmanager
@@ -166,11 +167,11 @@ class BusCase(BaseCase):
         Expected notifications must appear in order.
         """
         self.maxDiff = None
+        self.env.cr.precommit.run()  # trigger the creation of bus.bus records
         notifications = notifications() if callable(notifications) else notifications
         if isinstance(notifications, BusResult):
             notifications = [notifications]
         notifications = notifications or []
-        self.env.cr.precommit.run()  # trigger the creation of bus.bus records
         expected_list = []
         for notif in notifications:
             if not isinstance(notif, BusResult):

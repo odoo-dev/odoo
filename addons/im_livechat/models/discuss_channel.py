@@ -252,7 +252,7 @@ class DiscussChannel(models.Model):
         result = super().write(vals)
         need_help_after = self.filtered(lambda c: c.livechat_status == "need_help")
         group_livechat_user = self.env.ref("im_livechat.im_livechat_group_user")
-        store = Store(bus_channel=group_livechat_user, bus_subchannel="LOOKING_FOR_HELP")
+        store = Store.to(group_livechat_user, "LOOKING_FOR_HELP")
         store.add(need_help_after - need_help_before, "_store_channel_fields")
         store.add(need_help_before - need_help_after, ["livechat_status"])
         if "livechat_expertise_ids" in vals:
@@ -768,10 +768,10 @@ class DiscussChannel(models.Model):
             subtype_xmlid="mail.mt_comment",
         )
         if rated_partner not in self.channel_member_ids.partner_id:
-            store = Store(
+            store = Store.to(
                 rated_partner.sudo().user_ids,
                 notification_type="livechat_rating_notification",
-                notification_payload={
+                payload={
                     "guest_id": guest.id,
                     "user_id": user.id,
                     "feedback": reason,
@@ -868,7 +868,7 @@ class DiscussChannel(models.Model):
                     store.add(message, "_store_message_fields")
                     store.add(question_msg.mail_message_id, "_store_message_fields")
                 user, guest = self.env["res.users"]._get_current_persona()
-                Store(bus_channel=user or guest).add_model_values(
+                Store.to(user or guest).add_model_values(
                     "ChatbotStep",
                     {
                         "id": (self.chatbot_current_step_id.id, question_msg.mail_message_id.id),
@@ -1062,7 +1062,7 @@ class DiscussChannel(models.Model):
                 if m.script_step_id == chatbot_script_step
                 and m.mail_message_id.author_id == chatbot_script_step.chatbot_script_id.operator_partner_id
             ), self.env["mail.message"])
-            Store(bus_channel=self).add_model_values(
+            Store.to(self).add_model_values(
                 "ChatbotStep",
                 {
                     "id": (chatbot_script_step.id, step_message.id),

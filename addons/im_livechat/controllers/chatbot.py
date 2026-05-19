@@ -62,7 +62,7 @@ class LivechatChatbotScriptController(http.Controller):
             if chatbot.exists():
                 next_step = chatbot.script_step_ids[:1]
         user, guest = self.env["res.users"]._get_current_persona()
-        store = Store(bus_channel=user or guest)
+        store = Store.to(user or guest)
         store.data_id = data_id
         if not next_step:
             # sudo - discuss.channel: marking the channel as closed as part of the chat bot flow
