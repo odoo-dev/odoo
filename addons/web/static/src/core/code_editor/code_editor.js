@@ -1,6 +1,14 @@
-import { useLayoutEffect, useRef, useState } from "@web/owl2/utils";
-import { Component, onMounted, onWillStart, status } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillDestroy,
+    onWillStart,
+    props,
+    signal,
+    types as t,
+} from "@odoo/owl";
 import { loadBundle } from "@web/core/assets";
+import { useLayoutEffect } from "@web/owl2/utils";
 
 export class CodeEditor extends Component {
     static template = "web.CodeEditor";
