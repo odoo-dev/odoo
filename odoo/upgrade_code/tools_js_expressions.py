@@ -300,11 +300,8 @@ class ExpressionCompiler:
                     and next_tok.type == "COLON"
                 )
             ):
-                if tok.value in self.outer_vars:
-                    i += 1
-                    continue
-                elif tok.value in self.warning_vars:
-                    self.warnings.append(f"WARNING in template '{self.template_name}' : variable '{tok.value}' also defined in a far parent.")
+                # if tok.value in self.warning_vars:
+                # self.warnings.append(f"WARNING in template '{self.template_name}' : variable '{tok.value}' also defined in a far parent.")
 
                 if (
                     group_type == "LEFT_BRACE"
@@ -690,8 +687,10 @@ class TemplateCompiler:
                 if self._should_skip_template(self.current_template):
                     continue
 
+                # Bound vars are variables that are valid for the entire template
                 bound_variables = self._collect_bound_variables(template)
                 bound_variables |= set(self.t_call_vars.get(self.current_template, {}))
+                bound_variables |= set(self.t_call_outer_vars.get(self.current_template, {}))  # We initially separated outer t-call vars and vars inside a t-call
                 bound_variables |= set(self.all_vars.get(self.current_template, {}))
 
                 self.fix_template(template, bound_variables)
@@ -832,7 +831,7 @@ class TemplateCompiler:
         # Now set warning vars
         if self.full_inherit_and_call_map.get(self.current_template):
             for parent in self.full_inherit_and_call_map.get(self.current_template):
-                self.warning_vars |= self.all_vars.get(parent, set())
+                self.node_vars |= self.all_vars.get(parent, set())
 
         self.expr_compiler.set_context(
             template_name=self.current_template,
@@ -2606,10 +2605,18 @@ test_exclude_templates = [
 
 def run_test_vars(test):
     aggregator = VariableAggregator(is_testing=True)
-    aggregator.all_vars = test["all_vars"]
-    aggregator.t_call_vars = test["outside_vars"]
-    if "t_call_outer_vars" in test:
-        aggregator.t_call_outer_vars = test["t_call_outer_vars"]
+    if "all_vars" in test or "outside_vars" in test:
+        aggregator.all_vars = test.get("all_vars", {})
+        aggregator.t_call_vars = test.get("outside_vars", defaultdict(set))
+        aggregator.full_inherit_and_call_map = test.get("full_inherit_and_call_map", defaultdict(str))
+    else:
+        # If vars not specified replicate the real process of using aggregator to map
+        def agg_callback(tree):
+            aggregator.aggregate_inside_vars(tree)
+            aggregator.aggregate_call_vars(tree)
+            aggregator.link_templates(tree)
+        update_etree(test["content"], agg_callback)
+        aggregator.map_inherits_and_calls()
 
     res, _ = update_template("", test["content"], False, aggregator, {})
     return res
@@ -2790,6 +2797,66 @@ test_vars = [
                 </t>
             </templates>
         """,
+    },
+    {
+        "name": "t-set before t-call inside component",
+        "content": """
+<templates>
+    <t t-name="web.Caller">
+        <Dialog>
+            <t t-set="passedVar" t-value="compVar"/>
+            <t t-call="web.Callee"/>
+        </Dialog>
+    </t>
+    <t t-name="web.Callee">
+        <div t-att-class="passedVar"/>
+    </t>
+</templates>
+""",
+        "expected": """
+<templates>
+    <t t-name="web.Caller">
+        <Dialog>
+            <t t-set="passedVar" t-value="this.compVar"/>
+            <t t-call="web.Callee"/>
+        </Dialog>
+    </t>
+    <t t-name="web.Callee">
+        <div t-att-class="passedVar"/>
+    </t>
+</templates>
+""",
+    },
+    {
+        "name": "inherited vars from parent not prefixed with this.",
+        "content": """
+<templates>
+    <t t-name="web.Parent">
+        <t t-set="parentVar" t-value="someValue"/>
+        <t t-out="parentVar"/>
+    </t>
+    <t t-name="web.Child" t-inherit="web.Parent" t-inherit-mode="primary">
+        <xpath expr="//t[@t-set='parentVar']" position="after">
+            <t t-out="parentVar"/>
+            <t t-out="otherVar"/>
+        </xpath>
+    </t>
+</templates>
+""",
+        "expected": """
+<templates>
+    <t t-name="web.Parent">
+        <t t-set="parentVar" t-value="this.someValue"/>
+        <t t-out="parentVar"/>
+    </t>
+    <t t-name="web.Child" t-inherit="web.Parent" t-inherit-mode="primary">
+        <xpath expr="//t[@t-set='parentVar']" position="after">
+            <t t-out="parentVar"/>
+            <t t-out="this.otherVar"/>
+        </xpath>
+    </t>
+</templates>
+""",
     },
 ]
 
@@ -2975,13 +3042,14 @@ test_warning_vars = [
         "content": '<t t-name="web.xyz" t-inherit="web.a" t-inherit-mode="primary"> <t t-out="b"/> </t>',
         "expected": [],
     },
-    {
-        "name": "Far away parent warning",
-        "all_vars": {'web.a': {"b"}},
-        "full_inherit_and_call_map": {'web.xyz': {'web.a', 'web.b', 'web.c'}},
-        "content": '<t t-name="web.xyz"> <t t-out="b"/> </t>',
-        "expected": ["WARNING in template 'web.xyz' : variable 'b' also defined in a far parent."]
-    },
+    #  Deprecated because we now automatically use full inherit chain to set `this`
+    # {
+    #     "name": "Far away parent warning",
+    #     "all_vars": {'web.a': {"b"}},
+    #     "full_inherit_and_call_map": {'web.xyz': {'web.a', 'web.b', 'web.c'}},
+    #     "content": '<t t-name="web.xyz"> <t t-out="b"/> </t>',
+    #     "expected": ["WARNING in template 'web.xyz' : variable 'b' also defined in a far parent."]
+    # },
     #  Deprecated because we now automatically discard outer t-call varsY
     # {
     #     "name": "Outer t-call warning",

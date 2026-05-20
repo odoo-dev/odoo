@@ -427,7 +427,6 @@ class JSTooling:
     def get_js_files(file_manager, include_test_files=False):
         """Gets all static js files. Include .test.js files if include_test_files is True."""
         path_pattern = re.compile('|'.join(EXCLUDED_PATH + CHECKSUM_FILES))
-        target_dir = '/static/' if include_test_files else '/static/src'
 
         return [
             f for f in file_manager
@@ -940,10 +939,8 @@ MISC_WHITELIST = {
     "stock_barcode.LineQuantity": {'lowerButtons'},  # dynamic t-call
     "stock_barcode.LineTitle": {'upperButtons'},  # dynamic t-call
     "views.ViewButtonTooltip": {'debug', 'button', 'model'},  # JSON stringify context
-    "web_map.MapRenderer.PinListContainer": {'rendered'},  # t-set before t-call
     "website.dialog.addFont.singlePreview": {'previewFontName'},  # Nested t-call
     'website.dialog.addFont.preview': {'previewFontName'},  # Recursive t-call
-    "website.form_checkbox": {'record_index'},  # dynamic t-calls from loops
     "website.form_field": {'fieldTypeClasses', 'form_checkbox'},  # dynamic t-call
     "website.form_radio": {'record_index', 'record'},  # dynamic t-calls from loops
     "website.form_checkbox": {'record_index', 'record'},  # dynamic t-calls from loops
@@ -1046,6 +1043,9 @@ def upgrade_this_in_js(file_manager, log_info, log_error, targets=[]):
                 prefix = match.group(1)   # The "xml`" part
                 raw_xml = match.group(2)  # The content inside backticks
                 suffix = match.group(3)   # The closing "`"
+
+                if re.search(r'\$\{', raw_xml):
+                    return match.group(0)  # Just skip test with dynamic JS interpolation
 
                 wrapped_xml = f"<t t-name='xyz'>{raw_xml}</t>"
 
