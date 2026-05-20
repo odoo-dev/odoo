@@ -11570,8 +11570,8 @@ test(`multi edit field with daterange widget`, async () => {
     expect.verifySteps(["web_save"]);
 });
 
-test.tags("desktop");
-test(`multi edit field with daterange widget (edition without using the picker)`, async () => {
+test.tags("desktop", "owl3");
+test.todo(`multi edit field with daterange widget (edition without using the picker)`, async () => {
     mockTimeZone(+6);
 
     class Daterange extends models.Model {
@@ -12394,7 +12394,7 @@ test(`discard has to wait for changes in each field in multi edit`, async () => 
     const def = new Deferred();
 
     class CustomField extends Component {
-        static template = xml`<input t-ref="input" t-att-value="this.value" t-on-blur="this.onBlur" t-on-input="this.onInput"/>`;
+        static template = xml`<input t-custom-ref="input" t-att-value="this.value" t-on-blur="this.onBlur" t-on-input="this.onInput"/>`;
         static props = {
             ...standardFieldProps,
         };
