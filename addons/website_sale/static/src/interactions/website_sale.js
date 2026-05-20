@@ -260,6 +260,7 @@ export class WebsiteSale extends Interaction {
 
             if (images.id === 'o-carousel-product') {
                 window.Carousel.getOrCreateInstance(images).to(0);
+                this.services["public.interactions"].startInteractions(images);
             }
             this._startZoom();
         }
