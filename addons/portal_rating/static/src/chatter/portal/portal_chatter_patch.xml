@@ -6,7 +6,7 @@
                 <t t-call="portal_rating.rating_card"
                     two_columns="this.props.twoColumns"
                     rating_stats="this.ratingStats"
-                    selected_rating="this.state.thread?.selectedRating"/>
+                    selected_rating="this.state.akuThread?.selectedRating"/>
             </div>
         </xpath>
     </t>

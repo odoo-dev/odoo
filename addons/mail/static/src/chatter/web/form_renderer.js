@@ -39,6 +39,7 @@ patch(FormRenderer.prototype, {
         if (!this.mailStore || !this.props.record.resId) {
             return false;
         }
+        // return false;
         this.messagingState.thread = this.mailStore["mail.thread"].insert({
             id: this.props.record.resId,
             model: this.props.record.resModel,

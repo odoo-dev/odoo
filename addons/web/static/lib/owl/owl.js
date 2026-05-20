@@ -162,6 +162,11 @@ var owl = (() => {
     return currentComputation;
   }
   function setComputation(computation) {
+    if (window.aku10 && window.aku10 === computation && currentComputation !== computation) {
+      console.count("AKU - setComputation of Chatter - do:in");
+    } else if (window.aku10 && currentComputation === window.aku10 && currentComputation !== computation) {
+      console.count("AKU - setComputation of Chatter - do:out");
+    }
     currentComputation = computation;
   }
   function updateComputation(computation) {
@@ -421,9 +426,26 @@ var owl = (() => {
     return atom;
   }
   function onReadTargetKey(target, key, atom) {
+    if (window.aku1 && key === "messages") {
+      window.aku50 ??= 0;
+      window.aku50++;
+      if (window.aku50 === 5) {
+        debugger;
+        // window.aku2 = window.aku.__owl__;
+      }
+      console.count("AKU - messages -- onReadTargetKey")
+    }
     onReadAtom(atom ?? getTargetKeyAtom(target, key));
   }
   function onWriteTargetKey(target, key, atom) {
+    if (window.aku100) {
+      window.aku101 ??= {};
+      const oldValue = window.aku101[key] ?? 0;
+      window.aku101[key] = oldValue + 1;
+    }
+    if (window.aku1 && key === "messages") {
+      console.count("AKU - messages -- onWriteTargetKey")
+    }
     if (!atom) {
       const keyToAtomItem = targetToKeysToAtomItem.get(target);
       if (!keyToAtomItem) {
@@ -738,6 +760,12 @@ var owl = (() => {
   function unsubscribeEffect(effect2) {
     removeSources(effect2);
     cleanupEffect(effect2);
+    if (window.aku0) {
+      // console.count("AKU - unsubscribeEffect");
+    }
+    if (window.aku10) {
+      // console.count("AKU - unsubscribeEffect of Chatter")
+    }
     for (const childEffect of effect2.observers) {
       childEffect.state = 0;
       removeSources(childEffect);
@@ -1345,6 +1373,9 @@ ${issueStrings}`);
     if (fiber) {
       let current = fiber;
       do {
+        if (window.aku2 && window.aku2 === current.node) {
+          debugger;
+        }
         current.node.fiber = current;
         fibersInError.set(current, error);
         current = current.parent;
@@ -3012,6 +3043,9 @@ ${issueStrings}`);
       if (node.status === STATUS.NEW) {
         node.cancel();
       }
+      if (window.aku2 && window.aku2 === node) {
+        debugger;
+      }
       node.fiber = null;
       if (fiber.bdom) {
         node.forceNextRender = true;
@@ -3077,6 +3111,9 @@ ${issueStrings}`);
         } catch (e) {
           handleError({ node, error: e });
         } finally {
+          if (window.aku10 && window.aku10 === c) {
+            console.count("AKU - render - setComputation of Chatter");
+          }
           setComputation(c);
         }
         const newCounter = root.counter - 1;
@@ -3197,6 +3234,9 @@ ${issueStrings}`);
             mount(node.bdom, this.target, firstChild);
           }
         }
+        if (window.aku2 && window.aku2 === node) {
+          debugger;
+        }
         node.fiber = null;
         node.status = STATUS.MOUNTED;
         this.appliedToDom = true;
@@ -3243,6 +3283,9 @@ ${issueStrings}`);
         false,
         ComputationState.EXECUTED
       );
+      if (C.name === "Chatter") {
+        window.aku10 = this.signalComputation;
+      }
       this.props = props2;
       const previousComputation = getCurrentComputation();
       setComputation(void 0);
@@ -3272,6 +3315,9 @@ ${issueStrings}`);
       return f.bind(component, scope);
     }
     async initiateRender(fiber) {
+      if (window.aku2 && window.aku2 === this) {
+        debugger;
+      }
       this.fiber = fiber;
       if (this.mounted.length) {
         fiber.root.mounted.push(fiber);
@@ -3279,6 +3325,9 @@ ${issueStrings}`);
       const component = this.component;
       let prev = getCurrentComputation();
       setComputation(void 0);
+      if (component.constructor.name === "Chatter") {
+        console.count("AKU - initiateRender of Chatter");
+      }
       try {
         let promises = this.willStart.map((f) => f.call(component));
         setComputation(prev);
@@ -3316,6 +3365,9 @@ ${issueStrings}`);
       }
       const fiber = makeRootFiber(this);
       fiber.deep = deep;
+      if (window.aku2 && window.aku2 === this) {
+        debugger;
+      }
       this.fiber = fiber;
       this.app.scheduler.addFiber(fiber);
       await Promise.resolve();
@@ -3323,6 +3375,11 @@ ${issueStrings}`);
         return;
       }
       if (this.fiber === fiber && (current || !fiber.parent)) {
+        if (fiber?.node?.component.constructor.name === "Chatter") {
+          window.aku100 ??= 0;
+          window.aku100++;
+          console.count("AKU - ComponentNode render of Chatter")
+        }
         fiber.render();
       }
     }
@@ -3356,6 +3413,9 @@ ${issueStrings}`);
         this.children[childKey]._destroy();
       }
       this.finalize((e) => handleError({ error: e, node: this }));
+      if (component.constructor.name === "Chatter") {
+        console.count("AKU - CHATTER_DESTROY");
+      }
       disposeComputation(this.signalComputation);
     }
     /**
@@ -3375,6 +3435,9 @@ ${issueStrings}`);
       } else {
         this.bdom.patch(this.fiber.bdom, false);
         this.fiber.appliedToDom = true;
+        if (window.aku2 && window.aku2 === this) {
+          debugger;
+        }
         this.fiber = null;
       }
     }
@@ -3392,6 +3455,9 @@ ${issueStrings}`);
       this.status = STATUS.MOUNTED;
       this.fiber.appliedToDom = true;
       this.children = this.fiber.childrenMap;
+      if (window.aku2 && window.aku2 === this) {
+        debugger;
+      }
       this.fiber = null;
     }
     moveBeforeDOMNode(node, parent) {
@@ -3415,6 +3481,9 @@ ${issueStrings}`);
       this.children = fiber.childrenMap;
       this.bdom.patch(fiber.bdom, hasChildren);
       fiber.appliedToDom = true;
+      if (window.aku2 && window.aku2 === this) {
+        debugger;
+      }
       this.fiber = null;
     }
     beforeRemove() {
@@ -3727,6 +3796,9 @@ ${issueStrings}`);
           node.forceNextRender = false;
           const hooks = node.willUpdateProps;
           const fiber = makeChildFiber(node, parentFiber);
+          if (window.aku2 && window.aku2 === node) {
+            debugger;
+          }
           node.fiber = fiber;
           const parentRoot = parentFiber.root;
           if (node.willPatch.length) parentRoot.willPatch.push(fiber);
@@ -3760,6 +3832,9 @@ ${issueStrings}`);
               () => {
                 if (fiber !== node.fiber) return;
                 node.props = props2;
+                if (node?.component.constructor.name === "Chatter") {
+                  console.count("AKU - createComponent - Chatter");
+                }
                 fiber.render();
               },
               (error) => {
@@ -3794,6 +3869,9 @@ ${issueStrings}`);
         if (node.willStart.length) {
           initiateRender.call(node, fiber);
         } else {
+          if (window.aku2 && window.aku2 === node) {
+            debugger;
+          }
           node.fiber = fiber;
           if (node.mounted.length) {
             fiber.root.mounted.push(fiber);
@@ -4017,6 +4095,9 @@ ${issueStrings}`);
         if (node.willStart.length) {
           node.initiateRender(fiber);
         } else {
+          if (window.aku2 && window.aku2 === node) {
+            debugger;
+          }
           node.fiber = fiber;
           if (node.mounted.length) {
             fiber.root.mounted.push(fiber);

@@ -21,6 +21,7 @@ import { _t } from "@web/core/l10n/translation";
 import { Transition } from "@web/core/transition";
 import { useBus, useRefListener, useService } from "@web/core/utils/hooks";
 import { escape } from "@web/core/utils/strings";
+import { onWillRender } from "@odoo/owl";
 
 export const PRESENT_VIEWPORT_THRESHOLD = 1;
 /**
@@ -100,6 +101,10 @@ export class Thread extends Component {
         this.root = useRef("messages");
         this.visibleState = useVisible("messages", () => {
             this.updateShowJumpPresent();
+        });
+        onWillRender(() => {
+            console.log(this.props.thread.localId);
+            console.count("AKU - onWillRender of Thread");
         });
         /**
          * This is the reference element with the scrollbar. The reference can

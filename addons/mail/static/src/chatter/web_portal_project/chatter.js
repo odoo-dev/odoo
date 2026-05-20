@@ -1,4 +1,4 @@
-import { useChildSubEnv, useRef, useState, useSubEnv } from "@web/owl2/utils";
+import { onWillRender, useChildSubEnv, useRef, useState, useSubEnv } from "@web/owl2/utils";
 import { Composer } from "@mail/core/common/composer";
 import { Thread } from "@mail/core/common/thread";
 import { useMessageScrolling } from "@mail/utils/common/hooks";
@@ -21,16 +21,17 @@ export class Chatter extends Component {
     static defaultProps = { composer: true, threadId: false, twoColumns: false };
 
     setup() {
+        window.aku = this;
         this.store = useService("mail.store");
         this.state = useState({
             jumpThreadPresent: 0,
             /** @type {import("models").Thread} */
-            thread: undefined,
+            akuThread: undefined,
             aside: false,
             disabled: !this.props.threadId,
         });
         this.messageHighlight = useMessageScrolling({
-            thread: () => this.state.thread,
+            thread: () => this.state.akuThread,
             messageFetchRouteParams: () => this.messageFetchRouteParams,
         });
         this.highlightMessage = router.current.highlight_message_id;
@@ -38,6 +39,10 @@ export class Chatter extends Component {
         this.onScrollDebounced = useThrottleForAnimation(this.onScroll);
         useChildSubEnv(this.childSubEnv);
         useSubEnv(this.subEnv);
+        onWillRender(() => {
+            console.log(this.state.akuThread?.localId);
+            console.count("AKU - onWillRender of Chatter");
+        });
 
         onMounted(this._onMounted);
         onWillUpdateProps((nextProps) => {
@@ -52,7 +57,7 @@ export class Chatter extends Component {
                 if (this.env.chatter) {
                     this.env.chatter.fetchThreadData = false;
                 }
-                this.load(this.state.thread, this.requestList);
+                this.load(this.state.akuThread, this.requestList);
             }
         });
     }
@@ -96,15 +101,16 @@ export class Chatter extends Component {
         if (this.highlightMessage) {
             data.highlightMessage = this.highlightMessage;
         }
-        this.state.thread = this.store["mail.thread"].insert(data);
+        console.count("CHANGE_THREAD");
+        this.state.akuThread = this.store["mail.thread"].insert(data);
         if (threadId === false) {
-            if (this.state.thread.messages.length === 0) {
-                this.state.thread.messages.push({
+            if (this.state.akuThread.messages.length === 0) {
+                this.state.akuThread.messages.push({
                     id: this.store.getNextTemporaryId(),
-                    author_id: this.state.thread.effectiveSelf,
+                    author_id: this.state.akuThread.effectiveSelf,
                     body: _t("Creating a new record..."),
                     message_type: "notification",
-                    thread: this.state.thread,
+                    thread: this.state.akuThread,
                     res_id: threadId,
                     model: threadModel,
                 });
@@ -118,7 +124,7 @@ export class Chatter extends Component {
      * @param {string[]} requestList
      */
     async load(thread, requestList) {
-        if (!thread.id || !this.state.thread?.eq(thread)) {
+        if (!thread.id || !this.state.akuThread?.eq(thread)) {
             return;
         }
         await thread.fetchThreadData(requestList, {
@@ -127,7 +133,7 @@ export class Chatter extends Component {
     }
 
     onCloseFullComposerCallback() {
-        this.load(this.state.thread, this.onCloseFullComposerRequestList);
+        this.load(this.state.akuThread, this.onCloseFullComposerRequestList);
     }
 
     _onMounted() {
@@ -136,14 +142,14 @@ export class Chatter extends Component {
             if (this.env.chatter) {
                 this.env.chatter.fetchThreadData = false;
             }
-            this.load(this.state.thread, this.requestList);
+            this.load(this.state.akuThread, this.requestList);
         }
     }
 
     onPostCallback() {
         this.state.jumpThreadPresent++;
         // Load new messages to fetch potential new messages from other users (useful due to lack of auto-sync in chatter).
-        this.load(this.state.thread, this.afterPostRequestList);
+        this.load(this.state.akuThread, this.afterPostRequestList);
     }
 
     onScroll() {

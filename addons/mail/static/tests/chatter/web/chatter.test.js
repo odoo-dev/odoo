@@ -564,18 +564,24 @@ test("should not display subject when subject is the same as the thread name wit
     });
 });
 
-test("chatter updating", async () => {
+test.debug("chatter updating", async () => {
     const pyEnv = await startServer();
     const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([
         { display_name: "first partner" },
         { display_name: "second partner" },
     ]);
     pyEnv["mail.message"].create({
+        body: "test",
+        model: "res.partner",
+        res_id: partnerId_1,
+    });
+    pyEnv["mail.message"].create({
         body: "not empty",
         model: "res.partner",
         res_id: partnerId_2,
     });
     await start();
+    window.aku0 = 1;
     await openFormView("res.partner", partnerId_1, {
         arch: `
             <form string="Partners">
@@ -586,8 +592,11 @@ test("chatter updating", async () => {
             </form>`,
         resIds: [partnerId_1, partnerId_2],
     });
+    await contains(".o-mail-Message:has(:text('test'))");
+    window.aku1 = 1;
     await click(".o_pager_next");
-    await contains(".o-mail-Message");
+    // await contains(".o-mail-Message:has(:text('not empty'))");
+    // await contains(".o-mail-Message");
 });
 
 test("chatter message actions appear only after saving the form", async () => {

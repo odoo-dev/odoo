@@ -115,7 +115,7 @@ const chatterPatch = {
                     }
                     if (isDragSourceExternalFile(ev.dataTransfer)) {
                         const files = [...ev.dataTransfer.files];
-                        if (!this.state.thread.id) {
+                        if (!this.state.akuThread.id) {
                             const saved = await this.props.saveRecord?.();
                             if (!saved) {
                                 return;
@@ -134,15 +134,15 @@ const chatterPatch = {
             },
             () =>
                 (!this.store.meetingViewOpened || this.env.inMeetingView) &&
-                (this.state.thread?.isTransient || this.state.thread?.canPostMessage)
+                (this.state.akuThread?.isTransient || this.state.akuThread?.canPostMessage)
         );
         useLayoutEffect(
             () => {
-                if (!this.state.thread) {
+                if (!this.state.akuThread) {
                     return;
                 }
                 browser.clearTimeout(this.loadingAttachmentTimeout);
-                if (this.state.thread?.isLoadingAttachments) {
+                if (this.state.akuThread?.isLoadingAttachments) {
                     this.loadingAttachmentTimeout = browser.setTimeout(
                         () => (this.state.showAttachmentLoading = true),
                         DELAY_FOR_SPINNER
@@ -155,7 +155,7 @@ const chatterPatch = {
                 }
                 return () => browser.clearTimeout(this.loadingAttachmentTimeout);
             },
-            () => [this.state.thread, this.state.thread?.isLoadingAttachments]
+            () => [this.state.akuThread, this.state.akuThread?.isLoadingAttachments]
         );
         useLayoutEffect(
             (status, attachmentsLength) => {
@@ -163,7 +163,7 @@ const chatterPatch = {
                     this.state.isAttachmentBoxOpened = false;
                 }
             },
-            () => [this.state.thread?.status, this.attachments.length]
+            () => [this.state.akuThread?.status, this.attachments.length]
         );
         useLayoutEffect(
             () => {
@@ -181,13 +181,13 @@ const chatterPatch = {
         Object.keys(record.data).forEach((field) => record.data[field]);
         const partnerIds = []; // Ensure that we don't have duplicates
         let email;
-        (this.state.thread?.partner_fields ?? []).forEach((field) => {
+        (this.state.akuThread?.partner_fields ?? []).forEach((field) => {
             const value = record._changes[field];
             if (record.data[field] !== undefined && value) {
                 partnerIds.push(value.id);
             }
         });
-        const field = this.state.thread?.primary_email_field;
+        const field = this.state.akuThread?.primary_email_field;
         if (field) {
             const value = record._changes[field];
             if (record.data[field] !== undefined && value) {
@@ -205,29 +205,29 @@ const chatterPatch = {
                 main_email: email,
             })
         );
-        if (status(this) === "destroyed" && !this.state.thread) {
+        if (status(this) === "destroyed" && !this.state.akuThread) {
             return;
         }
-        this.state.thread.suggestedRecipients = recipients.map((result) => ({
+        this.state.akuThread.suggestedRecipients = recipients.map((result) => ({
             display_name: result.display_name,
             email: result.email,
             partner_id: result.partner_id,
             name: result.name || result.email,
         }));
-        this.state.thread.additionalRecipients = this.state.thread.additionalRecipients.filter(
-            (additionalRecipient) =>
-                this.state.thread.suggestedRecipients.every(
+        this.state.akuThread.additionalRecipients =
+            this.state.akuThread.additionalRecipients.filter((additionalRecipient) =>
+                this.state.akuThread.suggestedRecipients.every(
                     (suggestedRecipient) =>
                         suggestedRecipient.partner_id !== additionalRecipient.partner_id
                 )
-        );
+            );
     },
 
     /**
      * @returns {import("models").Activity[]}
      */
     get activities() {
-        return this.state.thread?.activities ?? [];
+        return this.state.akuThread?.activities ?? [];
     },
 
     get afterPostRequestList() {
@@ -241,7 +241,7 @@ const chatterPatch = {
     },
 
     get attachments() {
-        return this.state.thread?.attachments ?? [];
+        return this.state.akuThread?.attachments ?? [];
     },
 
     get childSubEnv() {
@@ -260,14 +260,15 @@ const chatterPatch = {
     },
     get hasPinnedMessages() {
         return (
-            this.state.thread?.has_pinned_messages || this.state.thread?.pinnedMessages?.length > 0
+            this.state.akuThread?.has_pinned_messages ||
+            this.state.akuThread?.pinnedMessages?.length > 0
         );
     },
     /**
      * @returns {boolean}
      */
     get isDisabled() {
-        return !this.state.thread.id || !this.state.thread?.hasReadAccess;
+        return !this.state.akuThread.id || !this.state.akuThread?.hasReadAccess;
     },
 
     get onCloseFullComposerRequestList() {
@@ -291,7 +292,7 @@ const chatterPatch = {
     },
 
     get scheduledMessages() {
-        return this.state.thread?.scheduledMessages ?? [];
+        return this.state.akuThread?.scheduledMessages ?? [];
     },
 
     get unfollowText() {
@@ -300,13 +301,13 @@ const chatterPatch = {
 
     changeThread(threadModel, threadId) {
         super.changeThread(...arguments);
-        this.attachmentUploader.thread = this.state.thread;
+        this.attachmentUploader.thread = this.state.akuThread;
         if (threadId === false) {
             this.state.composerType = false;
         } else {
-            this.onThreadCreated?.(this.state.thread);
+            this.onThreadCreated?.(this.state.akuThread);
             this.onThreadCreated = null;
-            this.messageSearch.thread = this.state.thread;
+            this.messageSearch.thread = this.state.akuThread;
             this.closeSearch();
         }
     },
@@ -319,7 +320,7 @@ const chatterPatch = {
     /** @override */
     async load(thread, requestList) {
         await super.load(...arguments);
-        if (!thread.id || !this.state.thread?.eq(thread)) {
+        if (!thread.id || !this.state.akuThread?.eq(thread)) {
             return;
         }
         this.updateRecipients(this.props.record);
@@ -333,7 +334,7 @@ const chatterPatch = {
     },
 
     onAddFollowers() {
-        this.load(this.state.thread, ["followers", "suggestedRecipients"]);
+        this.load(this.state.akuThread, ["followers", "suggestedRecipients"]);
         if (this.props.hasParentReloadOnFollowersUpdate) {
             this.reloadParentView();
         }
@@ -346,12 +347,12 @@ const chatterPatch = {
         this.state.isAttachmentBoxOpened = !this.state.isAttachmentBoxOpened;
         if (this.state.isAttachmentBoxOpened) {
             this.rootRef.el.scrollTop = 0;
-            this.state.thread.scrollTop = "bottom";
+            this.state.akuThread.scrollTop = "bottom";
         }
     },
 
     async onClickAttachFile(ev) {
-        if (this.state.thread.id) {
+        if (this.state.akuThread.id) {
             return;
         }
         const saved = await this.props.saveRecord?.();
@@ -362,7 +363,7 @@ const chatterPatch = {
     onClickPinnedMessages() {
         this.state.showPinnedMessages = !this.state.showPinnedMessages;
         if (this.state.showPinnedMessages) {
-            this.state.thread?.fetchPinnedMessages();
+            this.state.akuThread?.fetchPinnedMessages();
         }
     },
     onClickSearch() {
@@ -410,7 +411,7 @@ const chatterPatch = {
             this.uploadHandlers.set(threadLocalId, async function handleUpload(data) {
                 try {
                     await self.attachmentUploader.uploadData(data, { thread });
-                    if (!thread.eq(self.state.thread)) {
+                    if (!thread.eq(self.state.akuThread)) {
                         return;
                     }
                     if (self.props.hasParentReloadOnAttachmentsChanged) {
@@ -420,7 +421,7 @@ const chatterPatch = {
                     if (self.rootRef.el) {
                         self.rootRef.el.scrollTop = 0;
                     }
-                    self.state.thread.scrollTop = "bottom";
+                    self.state.akuThread.scrollTop = "bottom";
                 } finally {
                     self.uploadHandlers.delete(threadLocalId);
                 }
@@ -445,8 +446,8 @@ const chatterPatch = {
                 await this.reloadParentView();
             }
         };
-        if (this.state.thread.id) {
-            schedule(this.state.thread);
+        if (this.state.akuThread.id) {
+            schedule(this.state.akuThread);
         } else {
             this.onThreadCreated = schedule;
             this.props.saveRecord?.();
@@ -469,7 +470,7 @@ const chatterPatch = {
                 this.state.composerType = mode;
             }
         };
-        if (this.state.thread.id) {
+        if (this.state.akuThread.id) {
             toggle();
         } else {
             this.onThreadCreated = toggle;
