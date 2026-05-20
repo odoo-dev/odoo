@@ -3,13 +3,13 @@ export const defaultCarouselStyleSnippet = (bsRide, bsInterval) => `
         <div id="slideshow_sample" class="s_carousel s_carousel_default carousel slide o_colored_level" data-bs-ride="${bsRide}" data-bs-interval="${bsInterval}">
             <div class="carousel-inner">
                 <div class="carousel-item active">
-                    <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.library_image_08" data-name="Image" data-index="0" alt=""/>
+                    <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.landscape_md_5" data-name="Image" data-index="0" alt=""/>
                 </div>
                 <div class="carousel-item">
-                    <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.library_image_03" data-name="Image" data-index="1" alt=""/>
+                    <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.set_2_square_md_1" data-name="Image" data-index="1" alt=""/>
                 </div>
                 <div class="carousel-item">
-                    <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.library_image_02" data-name="Image" data-index="2" alt=""/>
+                    <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.landscape_md_1" data-name="Image" data-index="2" alt=""/>
                 </div>
             </div>
             <div class="o_carousel_controllers">
@@ -20,15 +20,15 @@ export const defaultCarouselStyleSnippet = (bsRide, bsInterval) => `
                 <div class="carousel-indicators">
                     <button type="button" data-bs-target="#slideshow_sample" data-bs-slide-to="0" class="o_not_editable active">
                         <span class="visually-hidden">Carousel indicator</span>
-                        <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.library_image_08"/>
+                        <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.landscape_md_5"/>
                     </button>
                     <button type="button" data-bs-target="#slideshow_sample" data-bs-slide-to="1" class="o_not_editable">
                         <span class="visually-hidden">Carousel indicator</span>
-                        <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.library_image_03"/>
+                        <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.set_2_square_md_1"/>
                     </button>
                     <button type="button" data-bs-target="#slideshow_sample" data-bs-slide-to="2" class="o_not_editable">
                         <span class="visually-hidden">Carousel indicator</span>
-                        <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.library_image_02"/>
+                        <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.landscape_md_1"/>
                     </button>
                 </div>
                 <button class="carousel-control-next o_not_editable" contenteditable="false" data-bs-target="#slideshow_sample" data-bs-slide="next" aria-label="Next" title="Next">
@@ -45,13 +45,13 @@ export const imageGalleryCarouselStyleSnippet = (bsRide, bsInterval) => `
             <div id="slideshow_sample" class="carousel carousel-dark slide" data-bs-ride="${bsRide}" data-bs-interval="${bsInterval}">
                 <div class="carousel-inner">
                     <div class="carousel-item active">
-                        <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.library_image_08" data-name="Image" data-index="0" alt=""/>
+                        <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.landscape_md_5" data-name="Image" data-index="0" alt=""/>
                     </div>
                     <div class="carousel-item">
-                        <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.library_image_03" data-name="Image" data-index="1" alt=""/>
+                        <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.set_2_square_md_1" data-name="Image" data-index="1" alt=""/>
                     </div>
                     <div class="carousel-item">
-                        <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.library_image_02" data-name="Image" data-index="2" alt=""/>
+                        <img class="img img-fluid d-block mh-100 mw-100 mx-auto rounded object-fit-cover" src="/web/image/website.landscape_md_1" data-name="Image" data-index="2" alt=""/>
                     </div>
                 </div>
                 <div class="o_carousel_controllers">
@@ -62,15 +62,15 @@ export const imageGalleryCarouselStyleSnippet = (bsRide, bsInterval) => `
                     <div class="carousel-indicators">
                         <button type="button" data-bs-target="#slideshow_sample" data-bs-slide-to="0" class="o_not_editable active">
                             <span class="visually-hidden">Carousel indicator</span>
-                            <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.library_image_08"/>
+                            <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.landscape_md_5"/>
                         </button>
                         <button type="button" data-bs-target="#slideshow_sample" data-bs-slide-to="1" class="o_not_editable">
                             <span class="visually-hidden">Carousel indicator</span>
-                            <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.library_image_03"/>
+                            <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.set_2_square_md_1"/>
                         </button>
                         <button type="button" data-bs-target="#slideshow_sample" data-bs-slide-to="2" class="o_not_editable">
                             <span class="visually-hidden">Carousel indicator</span>
-                            <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.library_image_02"/>
+                            <img class="object-fit-cover w-100 h-100" aria-hidden="true" src="/web/image/website.landscape_md_1"/>
                         </button>
                     </div>
                     <button class="carousel-control-next o_not_editable" contenteditable="false" data-bs-target="#slideshow_sample" data-bs-slide="next" aria-label="Next" title="Next">
