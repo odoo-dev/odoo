@@ -3,13 +3,13 @@
 import logging
 import lxml
 import os
-import subprocess
+import re
 from collections.abc import Sequence
 from typing import Literal
 
 from odoo import _, api, fields, models
 
-from ..paper_muncher import Server, which_paper_muncher
+from ..paper_muncher import PaperMuncherServer, _paper_muncher
 
 _logger = logging.getLogger(__name__)
 
@@ -24,18 +24,12 @@ class IrActionsReport(models.Model):
     )
 
     @api.model
-    def get_pdf_engine_state(self, engine_name=None):
+    def get_pdf_engine_state(self, engine_name):
         if engine_name is None:
-            if self.report_type.startswith('qweb-pdf-paper-muncher'):
-                engine_name = 'paper-muncher'
-        if engine_name == 'paper-muncher':
-            try:
-                which_paper_muncher()
-            except RuntimeError:
-                return 'install'
-            else:
-                return 'ok'
-        return super().get_pdf_engine_state(engine_name)
+            engine_name = self._get_pdf_engine(self)
+        if engine_name != 'paper-muncher':
+            return super().get_pdf_engine_state(engine_name)
+        return _paper_muncher().state
 
     @api.model
     def _run_paper_muncher(
@@ -45,6 +39,7 @@ class IrActionsReport(models.Model):
         header: str = '',
         footer: str = '',
         landscape: bool = False,
+        specific_paperformat_args: dict | None = None,
         scale: int = 72,
     ) -> bytes:
         """Render a PDF from HTML content using Paper Muncher subprocess.
@@ -58,7 +53,16 @@ class IrActionsReport(models.Model):
         :returns: PDF bytes returned by Paper Muncher.
         :raises RuntimeError: If Paper Muncher fails during any phase.
         """
+        if specific_paperformat_args:
+            if not landscape and specific_paperformat_args.get('data-report-landscape'):
+                landscape = specific_paperformat_args['data-report-landscape']
+            if specific_paperformat_args.get('data-report-dpi'):
+                scale = int(specific_paperformat_args['data-report-dpi'])
+
         paperformat = self._get_report(report_ref).get_paperformat() if report_ref else self.get_paperformat()
+
+        header = header or ''
+        footer = footer or ''
 
         if not isinstance(bodies, (list, tuple)):
             bodies = list(bodies)
@@ -91,14 +95,10 @@ class IrActionsReport(models.Model):
         # Disable ANSI color codes in subprocess logs to prevent parsing errors.
         env['NO_COLOR'] = '1'
 
-        with subprocess.Popen(
-                [which_paper_muncher(), *names, '-o', 'pipe:', *extra_args],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                env=env,
-        ) as process:
-            server = Server(process)
+        with PaperMuncherServer(
+            args=[_paper_muncher().bin, *names, '-o', 'pipe:', *extra_args],
+            env=env,
+        ) as server:
             return server.serve(documents)
 
 
@@ -142,7 +142,7 @@ class IrActionsReport(models.Model):
         if engine_name == 'paper-muncher':
             report_sudo = self._get_report(report_ref).with_context(debug=False)
             bodies, html_ids, header, footer, specific_paperformat_args = (
-                report_sudo._prepare_wkhtmltopdf_html(html, report_model=report_sudo.model))
+                report_sudo._prepare_html(html, report_model=report_sudo.model))
             content = self._run_paper_muncher(
                 bodies,
                 report_ref=report_ref,
@@ -156,33 +156,38 @@ class IrActionsReport(models.Model):
         return super()._run_pdf_engine(engine_name, html, report_ref, landscape, **kwargs)
 
 
+_BODY_TAG_RE = re.compile(r'<body(?:\s[^>]*)?>',  re.IGNORECASE)
+
+
 def partition_on_body(html: str) -> tuple[str, str, str]:
     """
     Get what's before the body, the body and what's after the body.
     When no ``<body>`` was found, it returns ``(html, "", "")``.
     """
-    pre_body, body_tag, body = html.partition('<body>')
-    if not body_tag:
+    m = _BODY_TAG_RE.search(html)
+    if not m:
         return html, '', ''
-    body, body_end_tag, post_body = body.rpartition('</body>')
-    return pre_body + body_tag, body, body_end_tag + post_body
+    pre_body = html[:m.end()]
+    rest = html[m.end():]
+    body, sep, post_body = rest.rpartition('</body>')
+    if not sep:
+        return html, '', ''
+    return pre_body, body, sep + post_body
 
 
 def make_multi_docs_html(bodies: Sequence[str], header: str = '', footer: str = '') -> Sequence[str]:
     """Inject per-page header/footer fragments into each body HTML document."""
 
+    footer_body = partition_on_body(footer)[1]
     footers = [
-        lxml.etree.tostring(footer, encoding='unicode')
-        for footer in lxml.html.fromstring(
-            partition_on_body(footer)[1],
-        ).findall('./div')
+        lxml.etree.tostring(f, encoding='unicode')
+        for f in (lxml.html.fromstring(footer_body).findall('./div') if footer_body else [])
     ]
 
+    header_body = partition_on_body(header)[1]
     headers = [
-        lxml.etree.tostring(header, encoding='unicode')
-        for header in lxml.html.fromstring(
-            partition_on_body(header)[1],
-        ).findall('./div')
+        lxml.etree.tostring(h, encoding='unicode')
+        for h in (lxml.html.fromstring(header_body).findall('./div') if header_body else [])
     ]
 
     is_same_length_header = (len(headers) == len(bodies))

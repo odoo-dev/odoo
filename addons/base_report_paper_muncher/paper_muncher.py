@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import contextvars
 import datetime as dt
 import h11
 import io
@@ -17,7 +18,7 @@ from contextlib import contextmanager
 from email.utils import format_datetime
 from functools import cache, partial
 from io import DEFAULT_BUFFER_SIZE
-from typing import BinaryIO
+from typing import BinaryIO, NamedTuple
 from urllib.parse import unquote, urlsplit
 
 
@@ -26,7 +27,7 @@ from odoo.http import request
 from odoo.http.router import root
 from odoo.tools.misc import find_in_path
 
-__all__ = ['Server', 'which_paper_muncher']
+__all__ = ['PaperMuncherServer', '_paper_muncher']
 
 _logger = logging.getLogger(__name__)
 
@@ -38,16 +39,29 @@ FALLBACK_BIN_PATH = '/opt/paper-muncher/bin/paper-muncher'
 SERVER_SOFTWARE = f'{odoo.release.product_name}/{odoo.release.version}'
 
 
-class Server():
+class PaperMuncherServer:
 
-    def __init__(self, process):
-        self.process = process
-        self.deadline = None
+    def __init__(self, args, env=None):
+        self._args = args
+        self._env = env
 
+    def __enter__(self):
+        self.process = sp.Popen(
+            self._args,
+            stdin=sp.PIPE,
+            stdout=sp.PIPE,
+            stderr=sp.PIPE,
+            env=self._env,
+        )
         self.conn = h11.Connection(
             h11.SERVER,
             max_incomplete_event_size=MAX_INCOMPLETE_EVENT_SIZE,
         )
+        self.deadline = None
+        return self
+
+    def __exit__(self, *_):
+        _try_kill_proc(self.process)
 
     def serve(self, documents: Collection[str], *, timeout: int = DEFAULT_SERVE_TIMEOUT):
         """Serve Paper Muncher requests until the rendered PDF is returned."""
@@ -83,18 +97,46 @@ class Server():
         finally:
             self.selector.close()
 
+        return self.pdf
+
     def _poll_events(self):
-        if self.process.poll() is not None:
-            e = "Paper Muncher exited before returning the rendered PDF"
-            raise RuntimeError(e)
+        exit_code = self.process.poll()
+        if exit_code is not None:
+            self._drain_stderr()
+            raise RuntimeError(
+                f"Paper Muncher exited with code {exit_code} before returning the rendered PDF"
+            )
 
         wait_timeout = min(1.0, _remaining_time(self.deadline))
-        return self.selector.select(timeout=wait_timeout)
+        events = self.selector.select(timeout=wait_timeout)
+
+        # Process has may have exited during select; drain stderr before returning
+        # so the caller can see the error output on the next _poll_events call.
+        if self.process.poll() is not None:
+            self._drain_stderr()
+
+        return events
+
+    def _drain_stderr(self):
+        """Read and log any remaining stderr from the paper-muncher process."""
+        chunks = []
+        fd = self.process.stderr.fileno()
+        try:
+            while chunk := os.read(fd, 65536):
+                chunks.append(chunk)
+        except OSError:
+            pass
+        if chunks:
+            _logger.error(
+                "paper-muncher (pid %s) stderr:\n%s",
+                self.process.pid, b''.join(chunks).decode('utf-8', errors='replace'),
+            )
 
     def _handle_stderr_message(self):
         log_data = os.read(self.process.stderr.fileno(), 65536)
         if not log_data:
             self.selector.unregister(self.process.stderr)
+            return
         _logger.warning("paper-muncher (pid %s) wrote on stderr:\n%s",
                         self.process.pid, log_data.decode('utf-8', errors='replace'))
 
@@ -121,6 +163,10 @@ class Server():
                     self._current_request.target.decode(),
                     body,
                 )
+                if self.pdf_received:
+                    # PDF has been read in _handle_put; stop h11 processing here
+                    # so it doesn't try to parse the raw PDF bytes as HTTP.
+                    break
                 self.conn.start_next_cycle()
             elif isinstance(event, h11.ConnectionClosed):
                 break
@@ -150,8 +196,9 @@ class Server():
 
     def _handle_get_asset(self, path):
         """Serve one ``GET`` asset request from the worker."""
+        ctx = contextvars.copy_context()
         with _preserve_thread_data():
-            body_iter, http_status, resp_headers = _call_wsgi(_make_environ(path))
+            body_iter, http_status, resp_headers = ctx.run(_call_wsgi, _make_environ(path))
             status_code = int(http_status.split(' ', 1)[0])
 
             if sendfile_path := resp_headers.get("X-Sendfile"):
@@ -182,9 +229,8 @@ class Server():
         if len(self.documents_served) < len(self.documents):
             raise RuntimeError("Paper Muncher returned before we sent everything")
 
-        if not body.startswith(b'%PDF-'):
-            raise RuntimeError("Paper Muncher did not return valid PDF content")
-
+        # The PUT is a signal that the PDF is ready; acknowledge it so paper-muncher
+        # starts streaming the PDF as raw bytes on stdout right after the exchange.
         self._send(h11.Response(
             status_code=200,
             headers=[
@@ -196,8 +242,46 @@ class Server():
         self.process.stdin.flush()
         self.process.stdin.close()
 
-        self.pdf = body
+        # Collect: body (older protocol variants), bytes h11 buffered from the same
+        # read as the PUT headers, then whatever is still incoming on stdout.
+        pdf_chunks = [body] if body else []
+        leftover = bytes(self.conn._receive_buffer)
+        if leftover:
+            pdf_chunks.append(leftover)
+        pdf_chunks.extend(self._drain_stdout())
+
+        pdf = b''.join(pdf_chunks)
+        if not pdf.startswith(b'%PDF-'):
+            preview = pdf[:256].decode('utf-8', errors='replace')
+            _logger.error(
+                "Paper Muncher (pid %s) returned %d bytes of non-PDF content: %r",
+                self.process.pid, len(pdf), preview,
+            )
+            raise RuntimeError("Paper Muncher did not return valid PDF content")
+
+        self.pdf = pdf
         self.pdf_received = True
+
+    def _drain_stdout(self) -> list[bytes]:
+        """Read all remaining bytes from stdout until EOF."""
+        chunks = []
+        fd = self.process.stdout.fileno()
+        while True:
+            remaining = self.deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            got_stdout = False
+            for key, _mask in self.selector.select(timeout=min(1.0, remaining)):
+                if key.data != 'stdout':
+                    continue
+                got_stdout = True
+                chunk = os.read(fd, DEFAULT_CHUNK_SIZE)
+                if not chunk:
+                    return chunks
+                chunks.append(chunk)
+            if not got_stdout and self.process.poll() is not None:
+                break
+        return chunks
 
     def route(self, method: str, path: str, body: bytes):
         components = path.lstrip('/').split('/')
@@ -368,36 +452,32 @@ def _try_kill_proc(process) -> None:
         _logger.debug("PID %s did not terminate", process.pid, exc_info=True)
 
 
+class PaperMuncherInfo(NamedTuple):
+    state: str  # 'ok' | 'install'
+    bin: str
+    version: str
+
+
 @cache
-def which_paper_muncher() -> os.PathLike:
-    f""" Look for the paper-muncher binary in PATH or at {FALLBACK_BIN_PATH}. """
+def _paper_muncher() -> PaperMuncherInfo:
+    bin_path = ''
+    version = ''
     try:
-        bin_path = find_in_path('paper-muncher')
-    except OSError as exc:
-        if not os.path.isfile(FALLBACK_BIN_PATH):
-            e = "paper-muncher binary not found in PATH"
-            raise RuntimeError(e) from exc
-        bin_path = FALLBACK_BIN_PATH
+        try:
+            bin_path = find_in_path('paper-muncher')
+        except OSError as exc:
+            if not os.path.isfile(FALLBACK_BIN_PATH):
+                raise RuntimeError("paper-muncher binary not found in PATH") from exc
+            bin_path = FALLBACK_BIN_PATH
 
-    try:
-        sp.run(
-            [bin_path, '--version'],
-            stdout=sp.PIPE,
-            stderr=sp.DEVNULL,
-            check=True,
-        )
-    except (OSError, sp.CalledProcessError) as exc:
-        e = f"bad paper-muncher found at {bin_path}"
-        raise RuntimeError(e) from exc
+        result = sp.run([bin_path, '--version'], stdout=sp.PIPE, stderr=sp.DEVNULL)
+        if result.returncode != 0:
+            raise RuntimeError(f"bad paper-muncher found at {bin_path}")
+        version = result.stdout.decode('utf-8', errors='replace').strip()
+    except RuntimeError:
+        _logger.info('You need paper-muncher to print a pdf version of the reports.',
+                     exc_info=_logger.isEnabledFor(logging.DEBUG))
+        return PaperMuncherInfo(state='install', bin=bin_path, version=version)
 
-    return bin_path
-
-
-try:
-    _bin_path = which_paper_muncher()
-except RuntimeError:
-    _logger.error("Error finding the paper-muncher binary.",
-        exc_info=_logger.isEnabledFor(logging.DEBUG))
-else:
-    _logger.info("Found paper-muncher binary at %s", _bin_path)
-    del _bin_path
+    _logger.info('Will use the paper-muncher binary at %s', bin_path)
+    return PaperMuncherInfo(state='ok', bin=bin_path, version=version)
