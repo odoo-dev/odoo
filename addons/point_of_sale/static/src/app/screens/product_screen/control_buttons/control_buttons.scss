@@ -27,6 +27,7 @@
     // Handle button layout and size based on the number of buttons and screen orientation
     @include media-breakpoint-up(md) {
         --controlButton-aspectRatio: 1.1;
+        --oi-font-size: 2rem;
         
         @media (orientation: portrait) {
             --grid-columns: 3;
@@ -58,6 +59,7 @@
         
         // When there are 10 or 13 buttons, the last button is alone on the last row (and should always be the Cancel button)
         // so we make it take up the whole width of the grid, adapt the aspect ratio and place the icon next to the text
+        &:has(.control-button:nth-child(5)):not(:has(.control-button:nth-child(6))), 
         &:has(.control-button:nth-child(10)):not(:has(.control-button:nth-child(11))), 
         &:has(.control-button:nth-child(13)):not(:has(.control-button:nth-child(14))) {
             .control-button:last-child {
