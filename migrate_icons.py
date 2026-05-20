@@ -164,6 +164,7 @@ FA_TO_MATERIAL: dict[str, tuple[str, bool]] = {
     "bold": ("format_bold", False),
     "bolt": ("bolt", False),
     "flash": ("bolt", False),
+    "glass": ("local_bar", False),
     "bomb": ("bomb", False),
     "book": ("book", False),
     "bookmark": ("bookmark", True),
@@ -253,6 +254,7 @@ FA_TO_MATERIAL: dict[str, tuple[str, bool]] = {
     "copy": ("content_copy", False),
     "copyright": ("copyright", False),
     "credit-card": ("credit_card", False),
+    "credit-card-alt": ("credit_card", False),
     "crop": ("crop", False),
     "crosshairs": ("my_location", False),
     "cube": ("view_in_ar", False),
@@ -428,6 +430,8 @@ FA_TO_MATERIAL: dict[str, tuple[str, bool]] = {
     "list-ul": ("format_list_bulleted", False),
     "location-arrow": ("near_me", False),
     "lock": ("lock", False),
+    "unlock": ("lock_open", False),
+    "unlock-alt": ("lock_open", False),
     "long-arrow-down": ("arrow_downward", False),
     "long-arrow-left": ("arrow_back", False),
     "long-arrow-right": ("arrow_forward", False),
@@ -505,6 +509,7 @@ FA_TO_MATERIAL: dict[str, tuple[str, bool]] = {
     "reddit-alien": ("oi_reddit", False),
     "reddit-square": ("oi_reddit", False),
     "refresh": ("refresh", False),
+    "repeat": ("redo", False),
     "reply": ("reply", False),
     "reply-all": ("reply_all", False),
     "retweet": ("repeat", False),
@@ -514,6 +519,7 @@ FA_TO_MATERIAL: dict[str, tuple[str, bool]] = {
     "rss-square": ("rss_feed", False),
     "safari": ("oi_safari", False),
     "save": ("save", False),
+    "scissors": ("content_cut", False),
     "search": ("search", False),
     "search-minus": ("zoom_out", False),
     "search-plus": ("zoom_in", False),
@@ -585,6 +591,7 @@ FA_TO_MATERIAL: dict[str, tuple[str, bool]] = {
     "sun-o": ("light_mode", False),
     "superscript": ("superscript", False),
     "table": ("table_chart", False),
+    "tachometer": ("speed", False),
     "tablet": ("tablet", False),
     "tag": ("label", False),
     "tags": ("sell", False),
@@ -657,8 +664,11 @@ FA_TO_MATERIAL: dict[str, tuple[str, bool]] = {
     "wheelchair": ("accessible", False),
     "wheelchair-alt": ("accessible_forward", False),
     "wifi": ("wifi", False),
+    "window-maximize": ("fullscreen", False),
+    "window-minimize": ("minimize", False),
     "windows": ("oi_windows", False),
     "wordpress": ("oi_wordpress", False),
+    "wrench": ("build", False),
     "xing": ("oi_xing", False),
     "xing-square": ("oi_xing", False),
     "yahoo": ("oi_yahoo", False),
@@ -888,47 +898,303 @@ def _new_class_and_icon_oi(class_val: str) -> tuple[str, str] | None:
 # Tags that commonly carry icon classes
 _TAG_NAMES = r"(?:i|span|button|a|div|em|b|t)"
 
-# Matches a single tag (possibly multi-line inside the tag)
-# Group 1: everything up to and including the closing >
-_TAG_RE = re.compile(
-    r"<(?:" + _TAG_NAMES + r")\b[^>]*>",
-    re.DOTALL,
-)
-
-# Looser variant for multi-line tags (t-name and OWL templates can span lines)
+# Matches a single tag (possibly multi-line inside the tag).
+# Uses alternation to skip over quoted attribute values so that '>' characters
+# inside quoted values (e.g. arrow functions: t-on-click="() => ...") do not
+# terminate the match prematurely.
 _TAG_ML_RE = re.compile(
-    r"<(?:" + _TAG_NAMES + r")\b(?:[^>]|\n)*?>",
+    r'<(?:' + _TAG_NAMES + r')\b(?:[^>"\'\\]|"[^"]*"|\'[^\']*\')*>',
     re.DOTALL,
 )
 
 _CLASS_ATTR_RE = re.compile(r'\bclass=(["\'])(.*?)\1', re.DOTALL)
-_DATA_ICON_RE = re.compile(r'\bdata-icon\s*=')
+_DATA_ICON_RE = re.compile(r'\b(?:data-icon|t-att-data-icon|t-attf-data-icon)\s*=')
+_T_ATT_CLASS_RE = re.compile(r'\bt-att-class=(["\'])(.*?)\1', re.DOTALL)
+_T_ATTF_CLASS_RE = re.compile(r'\bt-attf-class=(["\'])(.*?)\1', re.DOTALL)
+
+
+def _convert_static_fa_classes_to_oi(class_val: str) -> str | None:
+    """
+    Convert a static FA class string to OI utilities (for tags where the icon
+    itself is provided via t-att-class / t-attf-class rather than a static class).
+    Replaces 'fa' base class with 'oi', converts fa-fw/fa-lg etc. to oi-fw/oi-lg,
+    and drops standalone fa-ICON entries (they will come from data-icon instead).
+    Returns None if the class string does not contain the 'fa' base class.
+    """
+    classes = class_val.split()
+    if "fa" not in classes:
+        return None
+    new_classes = ["oi"]
+    for cls in classes:
+        if cls == "fa":
+            continue
+        elif cls.startswith("fa-"):
+            name = cls[3:]
+            if name in FA_UTIL_TO_OI:
+                new_classes.append(FA_UTIL_TO_OI[name])
+            elif name in FA_TO_MATERIAL:
+                pass  # icon handled via data-icon; drop from class
+            else:
+                new_classes.append(cls)
+        else:
+            new_classes.append(cls)
+    return " ".join(new_classes)
+
+
+def _map_quoted_icon_class(class_str: str) -> str | None:
+    """
+    Given a class string that may appear as a quoted literal inside a dynamic
+    expression (e.g. 'fa-eye text-danger'), return the material icon name if it
+    contains exactly one mappable fa-xxx or oi-xxx icon.  Returns None otherwise.
+    """
+    classes = class_str.split()
+    icon = None
+    for cls in classes:
+        if cls in ("fa", "oi"):
+            continue
+        if cls.startswith("fa-"):
+            name = cls[3:]
+            if name in FA_TO_MATERIAL and icon is None:
+                icon = FA_TO_MATERIAL[name][0]
+        elif cls.startswith("oi-"):
+            name = cls[3:]
+            if name in OI_CLASS_TO_DATAICON and icon is None:
+                icon = OI_CLASS_TO_DATAICON[name][0]
+    return icon
+
+
+def _rewrite_tatt_class_in_tag(tag: str) -> str:
+    """
+    Convert t-att-class="expr" to t-att-data-icon="mapped-expr" when the
+    expression consists solely of quoted fa-xxx / oi-xxx icon class references.
+
+    Handles ternary expressions like:
+      t-att-class="x ? 'fa-eye' : 'fa-eye-slash'"
+        → t-att-data-icon="x ? 'visibility' : 'visibility_off'"
+
+    Also updates the static class= attribute (fa fa-fw → oi oi-fw) when the
+    tag carries fa base classes whose icon comes from t-att-class.
+    """
+    # Skip if dynamic icon attr already present
+    if re.search(r'\bt-att-data-icon\s*=', tag):
+        return tag
+
+    m = _T_ATT_CLASS_RE.search(tag)
+    if not m:
+        return tag
+
+    quote = m.group(1)
+    val = m.group(2)
+
+    # Find all single-quoted string literals in the value and map them
+    quoted_re = re.compile(r"'([^']*)'")
+    quoted_strings = quoted_re.findall(val)
+    if not quoted_strings:
+        return tag
+
+    mappings: dict[str, str] = {}
+    for qs in quoted_strings:
+        icon = _map_quoted_icon_class(qs)
+        if icon is None:
+            return tag  # at least one quoted string can't be mapped; bail out
+        mappings[qs] = icon
+
+    def replace_qs(rm: re.Match) -> str:
+        original = rm.group(1)
+        return f"'{mappings[original]}'" if original in mappings else rm.group(0)
+
+    new_val = quoted_re.sub(replace_qs, val)
+    new_attr = f"t-att-data-icon={quote}{new_val}{quote}"
+    tag = tag[: m.start()] + new_attr + tag[m.end():]
+
+    # Update static class= attribute: fa fa-fw → oi oi-fw
+    cm = _CLASS_ATTR_RE.search(tag)
+    if cm and "{" not in cm.group(2):
+        converted = _convert_static_fa_classes_to_oi(cm.group(2))
+        if converted is not None:
+            cq = cm.group(1)
+            tag = tag[: cm.start()] + f"class={cq}{converted}{cq}" + tag[cm.end():]
+
+    return tag
+
+
+def _rewrite_tattf_class_in_tag(tag: str) -> str:
+    """
+    Handle t-attf-class="..." attributes:
+
+    1. Convert the static prefix from FA to OI utility classes.
+       e.g. "fa fa-fw text-muted #{expr}" → "oi oi-fw text-muted #{expr}"
+
+    2. When the dynamic #{...} / {{...}} parts contain quoted 'fa-xxx' icon
+       references, extract them and add a t-attf-data-icon attribute.
+       e.g. "oi oi-fw #{x ? 'fa-lock text-success' : 'fa-unlock text-warning'}"
+         → static part unchanged (already oi-fw),
+            t-attf-data-icon="{{x ? 'lock' : 'lock_open'}}"
+       The icon reference is removed from the class expression; non-icon classes
+       remain.
+    """
+    # Skip if dynamic icon attr already present
+    if re.search(r'\bt-attf-data-icon\s*=', tag):
+        return tag
+
+    m = _T_ATTF_CLASS_RE.search(tag)
+    if not m:
+        return tag
+
+    quote = m.group(1)
+    val = m.group(2)
+
+    # Step 1: convert the static part (everything before the first #{ or {{)
+    dyn_re = re.compile(r'(#\{.*?\}|\{\{.*?\}\})', re.DOTALL)
+    dyn_matches = list(dyn_re.finditer(val))
+    static_prefix_end = dyn_matches[0].start() if dyn_matches else len(val)
+    static_part = val[:static_prefix_end]
+    rest_part = val[static_prefix_end:]
+
+    new_static = static_part
+    if "fa" in static_part.split():
+        converted = _convert_static_fa_classes_to_oi(static_part.strip())
+        if converted is not None:
+            # Preserve trailing whitespace
+            trailing = static_part[len(static_part.rstrip()):]
+            new_static = converted + trailing
+
+    new_val = new_static + rest_part
+
+    # Step 2: if dynamic parts contain quoted 'fa-xxx' icon references, extract them
+    if dyn_matches:
+        quoted_re = re.compile(r"'([^']*)'")
+        icon_expressions = []  # collected per dynamic block
+        new_dynamic_parts = []
+
+        for dm in dyn_matches:
+            dyn_content = dm.group(0)
+            # delimiters: #{...} or {{...}}
+            if dyn_content.startswith("#{"):
+                inner = dyn_content[2:-1]
+                open_d, close_d = "#{", "}"
+            else:
+                inner = dyn_content[2:-2]
+                open_d, close_d = "{{", "}}"
+
+            quoted_strs = quoted_re.findall(inner)
+            if not quoted_strs:
+                icon_expressions.append(None)
+                new_dynamic_parts.append((dm, dyn_content))
+                continue
+
+            # Try to map each quoted string: split into icon + non-icon residual
+            icon_map: dict[str, str] = {}  # original → material icon name
+            residuals: dict[str, str] = {}  # original → residual class string without icon
+            all_mapped = True
+            for qs in quoted_strs:
+                classes = qs.split()
+                icon_cls = None
+                other_cls = []
+                for cls in classes:
+                    if cls in ("fa", "oi"):
+                        continue
+                    if cls.startswith("fa-"):
+                        name = cls[3:]
+                        if name in FA_TO_MATERIAL and icon_cls is None:
+                            icon_cls = FA_TO_MATERIAL[name][0]
+                            continue
+                    elif cls.startswith("oi-"):
+                        name = cls[3:]
+                        if name in OI_CLASS_TO_DATAICON and icon_cls is None:
+                            icon_cls = OI_CLASS_TO_DATAICON[name][0]
+                            continue
+                    other_cls.append(cls)
+                if icon_cls is None:
+                    all_mapped = False
+                    break
+                icon_map[qs] = icon_cls
+                residuals[qs] = " ".join(other_cls)
+
+            if not all_mapped:
+                icon_expressions.append(None)
+                new_dynamic_parts.append((dm, dyn_content))
+                continue
+
+            # Build the icon expression (replace quoted strings with icon names)
+            def _icon_sub(rm: re.Match, _imap: dict = icon_map) -> str:
+                orig = rm.group(1)
+                return f"'{_imap[orig]}'" if orig in _imap else rm.group(0)
+
+            icon_inner = quoted_re.sub(_icon_sub, inner)
+            icon_expressions.append(f"{open_d}{icon_inner}{close_d}")
+
+            # Build the residual class expression (remove icon tokens from quoted strings)
+            def _class_sub(rm: re.Match, _res: dict = residuals) -> str:
+                orig = rm.group(1)
+                if orig in _res:
+                    residual = _res[orig]
+                    return f"'{residual}'" if residual else "''"
+                return rm.group(0)
+
+            new_dyn_inner = quoted_re.sub(_class_sub, inner)
+            new_dynamic_parts.append((dm, f"{open_d}{new_dyn_inner}{close_d}"))
+
+        # If we got icon expressions for ALL dynamic blocks, create t-attf-data-icon
+        valid_icons = [e for e in icon_expressions if e is not None]
+        if valid_icons and len(valid_icons) == len(dyn_matches):
+            # Reconstruct the t-attf-class value with residual class content
+            reconstructed = new_static
+            last_end = static_prefix_end
+            for (dm, new_dyn), icon_expr in zip(new_dynamic_parts, icon_expressions):
+                reconstructed += val[last_end:dm.start()] + new_dyn
+                last_end = dm.end()
+            reconstructed += val[last_end:]
+            new_val = reconstructed
+
+            # Combine multiple icon exprs if more than one dynamic block (rare)
+            icon_attr_val = valid_icons[0] if len(valid_icons) == 1 else " ".join(valid_icons)
+            new_tag = tag[: m.start()] + f"t-attf-class={quote}{new_val}{quote}" + tag[m.end():]
+            # Insert t-attf-data-icon BEFORE the closing > of the tag
+            if new_tag.endswith("/>"):
+                new_tag = new_tag[:-2] + f' t-attf-data-icon="{icon_attr_val}"/>'
+            elif new_tag.endswith(">"):
+                new_tag = new_tag[:-1] + f' t-attf-data-icon="{icon_attr_val}">'
+            return new_tag
+
+    # If no icon extraction, just update the static prefix
+    new_tag = tag
+    if new_val != val:
+        new_tag = tag[: m.start()] + f"t-attf-class={quote}{new_val}{quote}" + tag[m.end():]
+
+    # Also update the static class= attribute (fa fa-fw → oi oi-fw)
+    cm = _CLASS_ATTR_RE.search(new_tag)
+    if cm and "{" not in cm.group(2):
+        converted = _convert_static_fa_classes_to_oi(cm.group(2))
+        if converted is not None:
+            cq = cm.group(1)
+            new_tag = new_tag[: cm.start()] + f"class={cq}{converted}{cq}" + new_tag[cm.end():]
+
+    return new_tag
 
 
 def _rewrite_tag(tag: str) -> str:
     """Rewrite a single HTML/XML tag, converting fa/oi icon classes."""
-    # Skip if it already has data-icon
-    if _DATA_ICON_RE.search(tag):
-        return tag
+    # Handle static class= (skip if data-icon already present)
+    if not _DATA_ICON_RE.search(tag):
+        cm = _CLASS_ATTR_RE.search(tag)
+        if cm:
+            quote = cm.group(1)
+            class_val = cm.group(2)
+            if "{" not in class_val:
+                result = _new_class_and_icon_fa(class_val) or _new_class_and_icon_oi(class_val)
+                if result:
+                    new_class, data_icon = result
+                    new_class_attr = f'class={quote}{new_class}{quote} data-icon={quote}{data_icon}{quote}'
+                    tag = tag[: cm.start()] + new_class_attr + tag[cm.end():]
 
-    cm = _CLASS_ATTR_RE.search(tag)
-    if not cm:
-        return tag
+    # Handle t-att-class= (dynamic icon class expressions)
+    tag = _rewrite_tatt_class_in_tag(tag)
 
-    quote = cm.group(1)
-    class_val = cm.group(2)
+    # Handle t-attf-class= (QWeb interpolated class attributes)
+    tag = _rewrite_tattf_class_in_tag(tag)
 
-    # Skip dynamic template expressions inside class attr (QWeb interpolation)
-    if "{" in class_val:
-        return tag
-
-    result = _new_class_and_icon_fa(class_val) or _new_class_and_icon_oi(class_val)
-    if not result:
-        return tag
-
-    new_class, data_icon = result
-    new_class_attr = f'class={quote}{new_class}{quote} data-icon={quote}{data_icon}{quote}'
-    return tag[: cm.start()] + new_class_attr + tag[cm.end() :]
+    return tag
 
 
 def _rewrite_tags(content: str) -> str:
@@ -940,47 +1206,93 @@ def _rewrite_tags(content: str) -> str:
 # icon= ATTRIBUTE (XML buttons, stat buttons, fields)
 # ---------------------------------------------------------------------------
 
+_FA_SIZE_TO_OI = {
+    "fa-lg": "oi-lg", "fa-sm": "oi-sm", "fa-xs": "oi-xs",
+    "fa-2x": "oi-2x", "fa-3x": "oi-3x", "fa-4x": "oi-4x",
+    "fa-5x": "oi-5x", "fa-6x": "oi-6x",
+}
+
+
+def _icon_attr_rewrite_classes(parts: list[str]) -> tuple[str | None, list[str]]:
+    """Given a list of class tokens from an icon= value, return (material_name, extra_classes).
+
+    extra_classes contains non-icon utility tokens (text-*, oi-*, size modifiers etc.).
+    Returns (None, []) if no mappable FA icon found.
+    """
+    material: str | None = None
+    needs_filled = False
+    extra: list[str] = []
+    for tok in parts:
+        if tok in ("fa", "oi"):
+            continue  # base prefix class — drop
+        if tok.startswith("fa-") and tok[3:] in FA_TO_MATERIAL:
+            material, needs_filled = FA_TO_MATERIAL[tok[3:]]
+        elif tok in _FA_SIZE_TO_OI:
+            extra.append(_FA_SIZE_TO_OI[tok])
+        elif tok == "fa-fw":
+            extra.append("oi-fw")
+        elif tok.startswith("fa-"):
+            pass  # unknown fa-xxx modifier — drop (e.g. fa-solid, fa-icon)
+        elif tok.startswith("oi-"):
+            # keep oi- utility tokens that aren't icon names
+            if tok[3:] not in OI_CLASS_TO_DATAICON:
+                extra.append(tok)
+        else:
+            extra.append(tok)  # preserve other tokens (e.g. text-danger, pe-1)
+    if material and needs_filled:
+        extra = ["oi-filled"] + extra
+    return material, extra
+
+
 def _icon_attr_sub(m: re.Match) -> str:
-    """Rewrite a single icon= attribute match."""
-    # m.group(1) = whitespace before 'icon'
-    # m.group(2) = 'icon'
-    # m.group(3) = '=' + optional whitespace
-    # m.group(4) = quote char
-    # m.group(5) = value
-    # m.group(6) = closing quote
-    # m.group(7) = content after (for icon_class lookahead)
+    """Rewrite a single icon= attribute match.
+
+    Handles both plain XML format (icon="fa-xxx text-danger") and OWL prop
+    format with inner single-quotes (icon="'fa-xxx'" or icon="'fa fa-fw fa-xxx'").
+    """
     before_eq = m.group(1) + m.group(2) + m.group(3)
-    quote = m.group(4)
+    outer_quote = m.group(4)
     val = m.group(5)
-    rest = m.group(6)  # just the closing quote
+    # m.group(6) is the closing quote — we reconstruct it ourselves
     after = m.group(7) or ""
 
-    # Already has icon_class nearby → just update icon value, skip adding icon_class
-    has_icon_class = "icon_class" in after[:120]
+    # Already has icon_class or className nearby → skip adding icon_class
+    has_icon_class = bool(re.search(r'\b(?:icon_class|className)\s*=', after[:160]))
 
-    # fa-ICON
-    if val.startswith("fa-"):
-        fa_name = val[3:]
-        if fa_name in FA_TO_MATERIAL:
-            material, needs_filled = FA_TO_MATERIAL[fa_name]
-            base = f'{before_eq}{quote}{material}{rest}'
-            if needs_filled and not has_icon_class:
-                return base + ' icon_class="oi-filled"' + after
-            return base + after
+    # Detect OWL inner-single-quote format: icon="'fa-xxx ...'"
+    owl_format = val.startswith("'") and val.endswith("'")
+    inner = val[1:-1] if owl_format else val
+
+    parts = inner.split()
+    if not parts:
         return m.group(0)
 
-    # oi oi-ICON  or  oi oi-fw oi-ICON  or  just oi-ICON
-    parts = val.split()
-    for p in parts:
-        if p.startswith("oi-") and p[3:] in OI_CLASS_TO_DATAICON:
-            data_icon, _ = OI_CLASS_TO_DATAICON[p[3:]]
-            return f'{before_eq}{quote}{data_icon}{rest}{after}'
+    # Check if it's a plain material/oi name already (starts with oi- icon name)
+    if not owl_format:
+        for p in parts:
+            if p.startswith("oi-") and p[3:] in OI_CLASS_TO_DATAICON:
+                data_icon, _ = OI_CLASS_TO_DATAICON[p[3:]]
+                return f'{before_eq}{outer_quote}{data_icon}{outer_quote}{after}'
 
-    return m.group(0)
+    material, extra = _icon_attr_rewrite_classes(parts)
+    if material is None:
+        return m.group(0)
+
+    if owl_format:
+        new_icon_val = f"'{material}'"
+        icon_class_val = f"'{ ' '.join(extra) }'" if extra else None
+    else:
+        new_icon_val = material
+        icon_class_val = " ".join(extra) if extra else None
+
+    result = f'{before_eq}{outer_quote}{new_icon_val}{outer_quote}'
+    if icon_class_val and not has_icon_class:
+        result += f' icon_class="{icon_class_val}"'
+    return result + after
 
 
 _ICON_ATTR_RE = re.compile(
-    r'(\s+)(icon)(=\s*)(["\'])([\w\s_-]+)(["\'])((?:[^>"\'](?!icon))*)',
+    r"(\s+)(icon)(=\s*)(\")((?:'[^']*'|[\w\s_-]+))(\")((?:[^>\"']*(?!icon))*)",
     re.DOTALL,
 )
 
@@ -1036,14 +1348,19 @@ def _js_icon_sub(m: re.Match) -> str:
 
 
 # CSS selector .fa-ICON (in test files: await contains(".fa-close").click())
-_CSS_SEL_FA_RE = re.compile(r'(?<=[.(\'"`\s])\.fa-([\w-]+)(?=[.\s\'"`()\[\]:,>~+]|$)')
-_CSS_SEL_OI_RE = re.compile(r'(?<=[.(\'"`\s])\.oi-([\w-]+)(?=[.\s\'"`()\[\]:,>~+]|$)')
+# Lookbehind allows: punctuation, quotes, whitespace, or word chars (for span.fa-glass style selectors)
+_CSS_SEL_FA_RE = re.compile(r'(?<=[.(\'"`\s\w])\.fa-([\w-]+)(?=[.\s\'"`()\[\]:,>~+]|$)')
+_CSS_SEL_OI_RE = re.compile(r'(?<=[.(\'"`\s\w])\.oi-([\w-]+)(?=[.\s\'"`()\[\]:,>~+]|$)')
+# Combined .fa.fa-xxx pattern (e.g. i.fa.fa-check) - replaces the .fa.fa-xxx part with [data-icon='xxx']
+_CSS_SEL_FA_FA_RE = re.compile(r'\.fa\.fa-([\w-]+)')
 
 
 def _css_sel_fa_sub(m: re.Match) -> str:
     name = m.group(1)
     if name in FA_TO_MATERIAL:
         return f"[data-icon='{FA_TO_MATERIAL[name][0]}']"
+    if name in FA_UTIL_TO_OI:
+        return f".{FA_UTIL_TO_OI[name]}"
     return m.group(0)
 
 
@@ -1051,6 +1368,14 @@ def _css_sel_oi_sub(m: re.Match) -> str:
     name = m.group(1)
     if name in OI_CLASS_TO_DATAICON:
         return f"[data-icon='{OI_CLASS_TO_DATAICON[name][0]}']"
+    return m.group(0)
+
+
+def _css_sel_fa_fa_sub(m: re.Match) -> str:
+    """Replace .fa.fa-xxx with [data-icon='material'] (used in chained selectors)."""
+    name = m.group(1)
+    if name in FA_TO_MATERIAL:
+        return f"[data-icon='{FA_TO_MATERIAL[name][0]}']"
     return m.group(0)
 
 
@@ -1139,10 +1464,101 @@ def _scss_sel_oi(m: re.Match) -> str:
 # PER-FILE-TYPE TRANSFORMERS
 # ---------------------------------------------------------------------------
 
+# data-icon="fa-xxx" on s_rating elements → data-rating-icon="xxx" (strip fa- prefix)
+_S_RATING_DATA_ICON_SIMPLE_RE = re.compile(
+    r'(<[^>]*\bclass="[^"]*s_rating[^"]*"[^>]*)\bdata-icon="fa-([a-z][a-z0-9-]*)"'
+)
+
+
 def transform_xml(content: str) -> str:
     content = _rewrite_tags(content)
     content = _rewrite_icon_attrs(content)
+    content = _S_RATING_DATA_ICON_SIMPLE_RE.sub(
+        lambda m: m.group(1) + f'data-rating-icon="{m.group(2)}"', content
+    )
     return content
+
+
+def _rewrite_css_selectors_in_js(content: str) -> str:
+    """Apply CSS selector rewrites to JS content, using quote style opposite to the enclosing string.
+
+    When a CSS selector like [data-icon='edit'] is inserted inside a single-quoted
+    JS string, it breaks the syntax. This function processes each string section
+    separately so the inner CSS attribute quotes don't conflict with the outer JS string.
+    """
+    # We'll build the result by scanning char by char for string delimiters.
+    # This is simple enough for our use case since we don't need full JS parsing.
+    result = []
+    i = 0
+    n = len(content)
+
+    while i < n:
+        # Look for the start of a quoted string or the end of content
+        m = re.search(r'[\'"`]', content[i:])
+        if not m:
+            # No more quoted strings — apply substitutions directly
+            chunk = content[i:]
+            chunk = _CSS_SEL_FA_FA_RE.sub(_css_sel_fa_fa_sub, chunk)
+            chunk = _CSS_SEL_FA_RE.sub(_css_sel_fa_sub, chunk)
+            chunk = _CSS_SEL_OI_RE.sub(_css_sel_oi_sub, chunk)
+            result.append(chunk)
+            break
+
+        # Content before this string — apply substitutions
+        before = content[i:i + m.start()]
+        before = _CSS_SEL_FA_FA_RE.sub(_css_sel_fa_fa_sub, before)
+        before = _CSS_SEL_FA_RE.sub(_css_sel_fa_sub, before)
+        before = _CSS_SEL_OI_RE.sub(_css_sel_oi_sub, before)
+        result.append(before)
+        i += m.start()
+
+        delim = content[i]
+        # Find end of this quoted string (handle escape sequences)
+        j = i + 1
+        while j < n:
+            c = content[j]
+            if c == '\\':
+                j += 2
+                continue
+            if c == delim:
+                j += 1
+                break
+            if delim != '`' and c == '\n':
+                # Unterminated single/double-quoted string (newline) - bail out
+                break
+            j += 1
+
+        str_content = content[i:j]
+        # Use the opposite quote style for data-icon CSS attribute selectors
+        attr_q = '"' if delim == "'" else "'"
+
+        def _fa_fa_sub_q(m2: re.Match) -> str:
+            name = m2.group(1)
+            if name in FA_TO_MATERIAL:
+                return f"[data-icon={attr_q}{FA_TO_MATERIAL[name][0]}{attr_q}]"
+            return m2.group(0)
+
+        def _fa_sub_q(m2: re.Match) -> str:
+            name = m2.group(1)
+            if name in FA_TO_MATERIAL:
+                return f"[data-icon={attr_q}{FA_TO_MATERIAL[name][0]}{attr_q}]"
+            if name in FA_UTIL_TO_OI:
+                return f".{FA_UTIL_TO_OI[name]}"
+            return m2.group(0)
+
+        def _oi_sub_q(m2: re.Match) -> str:
+            name = m2.group(1)
+            if name in OI_CLASS_TO_DATAICON:
+                return f"[data-icon={attr_q}{OI_CLASS_TO_DATAICON[name][0]}{attr_q}]"
+            return m2.group(0)
+
+        str_content = _CSS_SEL_FA_FA_RE.sub(_fa_fa_sub_q, str_content)
+        str_content = _CSS_SEL_FA_RE.sub(_fa_sub_q, str_content)
+        str_content = _CSS_SEL_OI_RE.sub(_oi_sub_q, str_content)
+        result.append(str_content)
+        i = j
+
+    return ''.join(result)
 
 
 def transform_js(content: str) -> str:
@@ -1153,8 +1569,8 @@ def transform_js(content: str) -> str:
     content = _JS_ICON_FIELD_RE.sub(_js_icon_sub, content)
     content = _JS_ICON_ASSIGN_RE.sub(_js_icon_sub, content)
     # CSS selectors in test helpers (contains(".fa-close"), etc.)
-    content = _CSS_SEL_FA_RE.sub(_css_sel_fa_sub, content)
-    content = _CSS_SEL_OI_RE.sub(_css_sel_oi_sub, content)
+    # Context-aware to avoid quote conflicts inside single/double quoted strings
+    content = _rewrite_css_selectors_in_js(content)
     return content
 
 
@@ -1317,7 +1733,15 @@ def main() -> None:
         return
 
     changed = 0
+    blacklist = (
+        # Get stuck at that file for some reason
+        'addons/base_setup/tests/test_res_config_doc_links.py',
+    )
+    print(f"Processing {len(files)} files...\n")
     for f in sorted(set(files)):
+        if str(f).endswith(blacklist):
+            print(f"Skipping blacklisted file {f}...")
+            continue
         if process_file(f, check_only=args.check):
             changed += 1
 
