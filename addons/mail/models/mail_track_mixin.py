@@ -204,9 +204,13 @@ class MailTrackMixin(models.AbstractModel):
         return model_fields and set(self.fields_get(model_fields, attributes=()))
 
     def _track_get_fields_info(self, tracked_fields: Iterable[str]) -> ValuesType:
+        attributes = ['string', 'type', 'selection', 'currency_field']
+        if self.env['res.company'].search_count([], limit=2) > 1:
+            attributes.append('company_dependent')
+
         tracked_fields_get = self.fields_get(
             tracked_fields,
-            attributes=('company_dependent', 'string', 'type', 'selection', 'currency_field')
+            attributes=attributes,
         )
         if set(tracked_fields_get.keys()) < set(tracked_fields):
             current_fields_info = self.env.cr.precommit.data.get(f'mail.tracking.fields_info.{self._name}', {})
