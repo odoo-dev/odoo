@@ -105,15 +105,15 @@ owl.useRef = function useRef(name) {
         node.__refs__ = {};
     }
     if (!node.__refs__[name]) {
-        node.__refs__[name] = { lastSetId: null, values: {} };
+        node.__refs__[name] = owl.signal(null);
     }
     return {
         get el() {
-            const info = node.__refs__[name];
-            if (!info.lastSetId) {
-                return null;
-            }
-            return info.values[info.lastSetId];
+            const signal = node.__refs__[name];
+            // untrack all the time to do what owl2 did
+            // while having an actual signal under the hood
+            // fully recognizable by owl3
+            return owl.untrack(signal);
         },
     };
 };
@@ -370,19 +370,9 @@ const globalValues = {
             node.__refs__ = {};
         }
         if (!node.__refs__[refName]) {
-            node.__refs__[refName] = { lastSetId: null, values: {} };
+            node.__refs__[refName] = owl.signal(null);
         }
-        const refInfo = node.__refs__[refName];
-
-        return {
-            /** @param {HTMLElement | null} value */
-            set(value) {
-                if (value) {
-                    refInfo.lastSetId = refId;
-                }
-                refInfo.values[refId] = value;
-            },
-        };
+        return node.__refs__[refName];
     },
     /**
      * @param {Function} getter
