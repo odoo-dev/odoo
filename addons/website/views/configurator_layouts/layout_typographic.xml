@@ -29,7 +29,7 @@
      ============================================================ -->
 <!-- ============================================================
      TYPOGRAPHIC layout
-     Bold text as the primary design element.
+     Editorial, oversized display type, asymmetric grids.
 
      Architecture:
        Layer 1 — Per-snippet clean variants (primary inherits)
@@ -43,22 +43,95 @@
      LAYER 1 — Per-snippet layout variants (Clean baseline)
      ════════════════════════════════════════════════════════════ -->
 
-<template id="configurator_layout_typographic_s_text_cover" inherit_id="website.s_text_cover" primary="True">
+<!-- Hero: small description card + oversized display title -->
+<template id="configurator_layout_typographic_hero" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc1 pt96 pb24" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Hero</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container">
+            <div class="row align-items-start g-4 g-lg-5">
+                <div class="col-lg-3">
+                    <div class="o_cc o_cc2 rounded-4 p-4 h-100">
+                        <p class="small fw-bold text-uppercase mb-3 text=">Discover <i class="oi oi-arrow-up-right"/></p>
+                        <p class="mb-4">Our collection helps you build a confident presence rooted in quality, design and timeless craftsmanship.</p>
+                    </div>
+                </div>
+                <div class="col-lg-9">
+                    <h1 class="fw-bold d-inline text-uppercase m-0 display-1" style="font-size: clamp(3.5rem, 7vw, 8.5rem);">
+                        Make it matter.
+                    </h1>
+                </div>
+            </div>
+        </div>
+    </xpath>
 </template>
 
+<!-- Caption row: four micro labels -->
+<template id="configurator_layout_typographic_captions" inherit_id="website.s_nav_minimal" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pt8 pb40" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Captions</attribute>
+    </xpath>
+    <xpath expr="//div" position="attributes">
+        <attribute name="class" add="container" remove="o_container_small" separator=" "/>
+    </xpath>
+</template>
+
+<!-- Showcase: full-width image with a floating info card -->
+<template id="configurator_layout_typographic_showcase" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pt8 pb96" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Showcase</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container">
+            <div class="position-relative">
+                <img src="/web/image/website.s_carousel_default_image_2" class="img-fluid rounded-4 w-100" style="height: 460px; object-fit: cover;" alt=""/>
+                <div class="o_cc o_cc1 position-absolute bottom-0 start-0 m-4 p-4 rounded-4 border" style="max-width: 260px;">
+                    <p class="small mb-3">We provide a comprehensive edit that helps our clients reach their full potential.</p>
+                    <p class="small fw-bold text-uppercase m-0" style="letter-spacing: .08em; color: var(--o-color-1);">● Latest collection 2025</p>
+                </div>
+            </div>
+        </div>
+    </xpath>
+</template>
+
+<!-- Marquee strip -->
 <template id="configurator_layout_typographic_s_announcement_scroll" inherit_id="website.s_announcement_scroll" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc4 pt56 pb56" remove="pt24 pb24" separator=" "/>
+        <attribute name="style">--marquee-animation-speed: 8s; --marquee-item-font-size: 120;</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('s_announcement_scroll_marquee_item')]" position="replace">
+        <div class="o_not_editable s_announcement_scroll_marquee_item lh-1 text-uppercase">Design • Create • Refine • Deliver • Repeat</div>
+    </xpath>
 </template>
 
-<template id="configurator_layout_typographic_s_features" inherit_id="website.s_features" primary="True">
-</template>
-
-<template id="configurator_layout_typographic_s_numbers" inherit_id="website.s_numbers" primary="True">
-</template>
-
-<template id="configurator_layout_typographic_s_quotes_carousel" inherit_id="website.s_quotes_carousel" primary="True">
-</template>
-
-<template id="configurator_layout_typographic_s_call_to_action" inherit_id="website.s_call_to_action" primary="True">
+<!-- Editorial: text / portrait image / text -->
+<template id="configurator_layout_typographic_editorial" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pt96 pb96" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Editorial</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-4">
+                    <p class="lead">Our work stands out because <span class="text-muted">it combines careful planning with skilled execution and a commitment to delivering on every promise.</span> Every detail is considered to create an experience that feels effortless and intentional.</p>
+                    <p class="lead"><span class="text-muted">A well-crafted experience is more than aesthetics — it is a promise to your audience.</span> We help brands communicate with clarity and confidence, turning casual visitors into loyal customers.</p>
+                </div>
+                <div class="col-lg-4 text-center">
+                    <img src="/web/image/website.s_picture_default_image" class="img-fluid rounded-4" alt=""/>
+                </div>
+                <div class="col-lg-4">
+                    <p class="lead"><span class="text-muted">A well-crafted experience is more than aesthetics — it is a promise to your audience.</span> We help brands communicate with clarity and confidence, turning casual visitors into loyal customers.</p>
+                    <p class="lead">Our work stands out because <span class="text-muted">it combines careful planning with skilled execution and a commitment to delivering on every promise.</span> Every detail is considered to create an experience that feels effortless and intentional.</p>
+                </div>
+            </div>
+        </div>
+    </xpath>
 </template>
 
 
@@ -67,45 +140,203 @@
      ════════════════════════════════════════════════════════════ -->
 
 <template id="configurator_layout_typographic" name="Configurator Layout: Typographic">
-    <ConfiguratorHeader data-template="template_header_stretch" data-color="1"/>
+    <ConfiguratorHeader data-template="template_header_stretch" data-color="1" data-shadow="0"/>
     <ConfiguratorFooter data-template="template_footer_headline" data-color="5"/>
 
-    <t t-snippet-call="website.configurator_layout_typographic_s_text_cover"/>
+    <t t-snippet-call="website.configurator_layout_typographic_hero"/>
+    <t t-snippet-call="website.configurator_layout_typographic_captions"/>
+    <t t-snippet-call="website.configurator_layout_typographic_showcase"/>
     <t t-snippet-call="website.configurator_layout_typographic_s_announcement_scroll"/>
-    <t t-snippet-call="website.configurator_layout_typographic_s_features"/>
-    <t t-snippet-call="website.configurator_layout_typographic_s_numbers"/>
-    <t t-snippet-call="website.configurator_layout_typographic_s_quotes_carousel"/>
-    <t t-snippet-call="website.configurator_layout_typographic_s_call_to_action"/>
+    <t t-snippet-call="website.configurator_layout_typographic_editorial"/>
 </template>
 
 
 <!-- ════════════════════════════════════════════════════════════
-     LAYER 3 — Vibe assemblies
+     DYNAMIC vibe — angular connector shapes
      ════════════════════════════════════════════════════════════ -->
 
-<template id="configurator_layout_typographic_vibe_dynamic"
-          name="Configurator Layout: Typographic / Dynamic"
-          inherit_id="website.configurator_layout_typographic" primary="True">
+<template id="configurator_layout_typographic_hero_dynamic" inherit_id="website.configurator_layout_typographic_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Connections/01","flip":["x"],"showOnMobile":true,"shapeAnimationSpeed":"0","selectedColor":true,"colors":{"c5":"o-color-1"}}</attribute>
+        <attribute name="class" add="pb80" remove="pb24" separator=" "/>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Connections_01" style='background-image: url("/html_editor/shape/html_builder/Connections/01.svg?c5=o-color-1"); background-position: 50% 100%;' contenteditable="false"/>
+    </xpath>
 </template>
 
-<template id="configurator_layout_typographic_vibe_gradient"
-          name="Configurator Layout: Typographic / Gradient"
-          inherit_id="website.configurator_layout_typographic" primary="True">
+<template id="configurator_layout_typographic_captions_dynamic" inherit_id="website.configurator_layout_typographic_captions" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc4" separator=" "/>
+    </xpath>
 </template>
+
+<template id="configurator_layout_typographic_showcase_dynamic" inherit_id="website.configurator_layout_typographic_showcase" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Connections/01","colors":{"c5":"o-color-1"},"flip":["y"],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":true}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Connections_01" contenteditable="false" style="background-image: url('/html_editor/shape/html_builder/Connections/01.svg?c5=o-color-1&amp;flip=xy'); background-position: 50% 0%;"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_typographic_s_announcement_scroll_dynamic" inherit_id="website.configurator_layout_typographic_s_announcement_scroll" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc2" remove="o_cc4" separator=" "/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_typographic_vibe_dynamic" name="Configurator Layout: Typographic / Dynamic" inherit_id="website.configurator_layout_typographic" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_hero_dynamic"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_captions']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_captions_dynamic"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_showcase']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_showcase_dynamic"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_s_announcement_scroll']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_s_announcement_scroll_dynamic"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     GRADIENT vibe — soft colour washes
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_typographic_hero_gradient" inherit_id="website.configurator_layout_typographic_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="style" add="background-image: linear-gradient(135deg, var(--o-color-1) -20%, transparent 45%), linear-gradient(-135deg, var(--o-color-2) -20%, transparent 45%);" separator=";"/>
+    </xpath>
+    <xpath expr="//div[hasclass('o_cc2')]" position="attributes">
+        <attribute name="style" add="background-image: linear-gradient(135deg, color-mix(in srgb, var(--o-color-1) 18%, transparent), color-mix(in srgb, var(--o-color-2) 22%, transparent));" separator=";"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_typographic_captions_gradient" inherit_id="website.configurator_layout_typographic_captions" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pb24 o_cc o_cc4" remove="pb40" separator=" "/>
+        <attribute name="style" add="background-image: linear-gradient(135deg, var(--o-color-2) -25%, transparent 40%);" separator=";"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_typographic_showcase_gradient" inherit_id="website.configurator_layout_typographic_showcase" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="pt24" remove="pt8" separator=" "/>
+        <attribute name="style" add="background-image: linear-gradient(90deg, var(--o-color-1) -20%, transparent 45%), linear-gradient(-135deg, var(--o-color-2) -20%, transparent 45%)" separator=";"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_typographic_editorial_gradient" inherit_id="website.configurator_layout_typographic_editorial" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="style" add="background-image: linear-gradient(135deg, var(--o-color-2) -25%, transparent 40%);" separator=";"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_typographic_vibe_gradient" name="Configurator Layout: Typographic / Gradient" inherit_id="website.configurator_layout_typographic" primary="True">
+    <xpath expr="//ConfiguratorHeader" position="replace">
+        <ConfiguratorHeader data-template="template_header_stretch" data-color="1" data-shadow="0 0 100px var(--o-color-1)" data-border="0"/>
+    </xpath>
+
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_hero_gradient"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_captions']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_captions_gradient"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_showcase']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_showcase_gradient"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_editorial']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_editorial_gradient"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     GLOSSY vibe — handled later
+     ════════════════════════════════════════════════════════════ -->
 
 <template id="configurator_layout_typographic_vibe_glossy"
           name="Configurator Layout: Typographic / Glossy"
-          inherit_id="website.configurator_layout_typographic" primary="True">
+          inherit_id="website.configurator_layout_typographic" primary="True"/>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     ILLUSTRATIVE vibe — reuses the shared configurator SVGs
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_typographic_hero_illustrative" inherit_id="website.configurator_layout_typographic_hero" primary="True">
+    <xpath expr="//div[hasclass('col-lg-3')]/div" position="replace">
+        <img class="img-fluid position-absolute h-100 translate-middle-x" src="/website/static/src/img/configurator/vibe_illustrative/amigos-avatar-profile-earring-colourful-classy-design-happy-smiling-staring.svg"/>
+    </xpath>
+    <xpath expr="//div[hasclass('col-lg-3')]" position="attributes">
+        <attribute name="class" add="position-relative text-center"  separator=" "/>
+    </xpath>
+    <xpath expr="//div[hasclass('row')]" position="attributes">
+        <attribute name="class" remove="align-items-start"  separator=" "/>
+    </xpath>
 </template>
 
-<template id="configurator_layout_typographic_vibe_illustrative"
-          name="Configurator Layout: Typographic / Illustrative"
-          inherit_id="website.configurator_layout_typographic" primary="True">
+<template id="configurator_layout_typographic_showcase_illustrative" inherit_id="website.configurator_layout_typographic_showcase" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid w-100" style="height: 460px; object-fit: contain;" src="/website/static/src/img/configurator/vibe_illustrative/amigos-organizing-working-social-media-positive-satisfaction-happy-office-schedule.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_typographic_editorial_illustrative" inherit_id="website.configurator_layout_typographic_editorial" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid" src="/website/static/src/img/configurator/vibe_illustrative/illustrative_3.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_typographic_vibe_illustrative" name="Configurator Layout: Typographic / Illustrative" inherit_id="website.configurator_layout_typographic" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_hero_illustrative"/>
+    </xpath>
+
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_showcase']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_showcase_illustrative"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_editorial']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_editorial_illustrative"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     PLAYFUL vibe — organic blob shapes
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_typographic_hero_playful" inherit_id="website.configurator_layout_typographic_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Blobs/02","colors":{"c1":"#ffdf59","c2":"#4db27f"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blobs_02" contenteditable="false"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_typographic_showcase_playful" inherit_id="website.configurator_layout_typographic_showcase" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Blobs/03","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blobs_03" contenteditable="false"/>
+    </xpath>
 </template>
 
 <template id="configurator_layout_typographic_vibe_playful"
           name="Configurator Layout: Typographic / Playful"
           inherit_id="website.configurator_layout_typographic" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_hero_playful"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_typographic_showcase']" position="replace">
+        <t t-snippet-call="website.configurator_layout_typographic_showcase_playful"/>
+    </xpath>
 </template>
 
 </odoo>

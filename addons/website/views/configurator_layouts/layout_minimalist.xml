@@ -76,7 +76,7 @@
 
 <template id="configurator_layout_minimalist_s_nav_minimal" inherit_id="website.s_nav_minimal" primary="True">
     <xpath expr="//section" position="attributes">
-        <attribute name="class" add="pb184" remove="pb24" separator=" "/>
+        <attribute name="class" add="pb104" remove="pb24" separator=" "/>
     </xpath>
 </template>
 
@@ -177,6 +177,7 @@
 <template id="configurator_layout_minimalist_vibe_dynamic_s_nav_minimal" inherit_id="website.configurator_layout_minimalist_s_nav_minimal" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-oe-shape-data" add='{"shape":"html_builder/Connections/01","flip":["x"],"showOnMobile":true,"shapeAnimationSpeed":"0","selectedColor":true, "colors":{"c5":"o-color-3"}}' separator=" "/>
+        <attribute name="class" add="pb104" remove="pb104" separator=" "/>
     </xpath>
     <xpath expr="//div" position="before">
         <div class="o_we_shape o_html_builder_Connections_01" style='background-image: url("/html_editor/shape/html_builder/Connections/01.svg?c5=o-color-3"); background-position: 50% 100%;' contenteditable="false" />
@@ -288,6 +289,13 @@
      PLAYFUL vibe
      ════════════════════════════════════════════════════════════ -->
 
+<template id="configurator_layout_minimalist_vibe_glossy" name="Configurator Layout: Minimalist / Glossy" inherit_id="website.configurator_layout_minimalist" primary="True"/>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     PLAYFUL vibe
+     ════════════════════════════════════════════════════════════ -->
+
 <template id="configurator_layout_minimalist_vibe_playful_s_image_punchy" inherit_id="website.configurator_layout_minimalist_s_image_punchy" primary="True">
     <xpath expr="//section" position="attributes">
         <attribute name="data-oe-shape-data">{"shape":"html_builder/Floats/05","colors":{"c1":"#ffdf59","c2":"#4db27f","c3":"#d6e9cc","c5":"#0a412f"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
@@ -302,7 +310,7 @@
 
 <template id="configurator_layout_minimalist_vibe_playful_s_nav_minimal" inherit_id="website.configurator_layout_minimalist_s_nav_minimal" primary="True">
     <xpath expr="//section" position="attributes">
-        <attribute name="class" remove="pb184" add="pb24" separator=" "/>
+        <attribute name="class" remove="pb104" add="pb24" separator=" "/>
     </xpath>
 </template>
 
@@ -357,7 +365,7 @@
 
 <template id="configurator_layout_minimalist_vibe_gradient_s_nav_minimal" inherit_id="website.configurator_layout_minimalist_s_nav_minimal" primary="True">
     <xpath expr="//section" position="attributes">
-        <attribute name="class" remove="pt24 pb184" add="pb24" separator=" "/>
+        <attribute name="class" remove="pt24 pb104" add="pb24" separator=" "/>
     </xpath>
 </template>
 

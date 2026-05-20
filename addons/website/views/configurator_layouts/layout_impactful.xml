@@ -29,7 +29,7 @@
      ============================================================ -->
 <!-- ============================================================
      IMPACTFUL layout
-     Full-bleed visuals with editorial boldness.
+     Oversized headline, editorial card grid.
 
      Architecture:
        Layer 1 — Per-snippet clean variants (primary inherits)
@@ -43,19 +43,148 @@
      LAYER 1 — Per-snippet layout variants (Clean baseline)
      ════════════════════════════════════════════════════════════ -->
 
-<template id="configurator_layout_impactful_s_cover" inherit_id="website.s_cover" primary="True">
+<!-- Thin announcement bar -->
+<template id="configurator_layout_impactful_topbar" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc5 pt8 pb8" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Top bar</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container text-center">
+            <p class="small m-0 opacity-75">Get weekly drops with our newsletter</p>
+        </div>
+    </xpath>
 </template>
 
-<template id="configurator_layout_impactful_s_title" inherit_id="website.s_title" primary="True">
+<!-- Giant centered title -->
+<template id="configurator_layout_impactful_hero" inherit_id="website.s_banner_categories" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="style" add="background-image: url('/web/image/website.s_cover_default_image');" remove="background-image: url('/web/image/website.s_banner_categories_default_image_1');" separator=";"/>
+        <attribute name="data-name">Hero</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('o_bg_img_center')]" position="attributes">
+        <attribute name="style" add="background-image: url('/web/image/website.s_product_list_default_image_1');" remove="background-image: url('/web/image/website.shop_category_1_1x1');" separator=";"/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_bg_img_center')])[2]" position="attributes">
+        <attribute name="style" add="background-image: url('/web/image/website.s_product_list_default_image_2');" remove="background-image: url('/web/image/website.shop_category_2_1x1');" separator=";"/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_bg_img_center')])[3]" position="attributes">
+        <attribute name="style" add="background-image: url('/web/image/website.s_product_list_default_image_3');" remove="background-image: url('/web/image/website.shop_category_3_1x1');" separator=";"/>
+    </xpath>
 </template>
 
-<template id="configurator_layout_impactful_s_three_columns" inherit_id="website.s_three_columns" primary="True">
+<!-- Hero image with floating card -->
+<template id="configurator_layout_impactful_showcase" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc1 pt24 pb40" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Showcase</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container">
+            <div class="position-relative">
+                <img src="/web/image/website.s_banner_default_image" class="img-fluid rounded-4 w-100" style="height: 360px; object-fit: cover;" alt=""/>
+                <div class="o_cc o_cc4 position-absolute top-0 start-0 m-4 p-4 rounded-3 shadow" style="max-width: 300px;">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <span class="badge rounded-pill text-bg-light text-uppercase">Lifestyle</span>
+                        <span class="small opacity-50">Oct 25, 2024</span>
+                    </div>
+                    <h2 class="fw-bold m-0" style="font-size: 1.4rem; line-height: 1.2;">Simplify your wardrobe for greater confidence</h2>
+                    <div class="d-flex align-items-center justify-content-between mt-3 pt-3 border-top">
+                        <span class="small opacity-75">Read article</span>
+                        <span class="rounded-circle border d-inline-flex align-items-center justify-content-center" style="width: 24px; height: 24px;">→</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </xpath>
 </template>
 
-<template id="configurator_layout_impactful_s_image_text" inherit_id="website.s_image_text" primary="True">
+<!-- Category pills -->
+<template id="configurator_layout_impactful_pills" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc4 pt8 pb40" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Categories</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container">
+            <div class="row row-cols-2 row-cols-lg-5 g-3 text-center">
+                <div class="col"><div class="border rounded-pill py-2">Lifestyle</div></div>
+                <div class="col"><div class="border rounded-pill py-2">Trends</div></div>
+                <div class="col"><div class="border rounded-pill py-2">Fashion</div></div>
+                <div class="col"><div class="border rounded-pill py-2">Beauty</div></div>
+                <div class="col"><div class="border rounded-pill py-2">Wellness</div></div>
+            </div>
+        </div>
+    </xpath>
 </template>
 
-<template id="configurator_layout_impactful_s_call_to_action" inherit_id="website.s_call_to_action" primary="True">
+<!-- Editorial header + three article cards + view all -->
+<template id="configurator_layout_impactful_cards" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc4 pt64 pb64" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Articles</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container">
+            <div class="row align-items-end g-4 mb-5">
+                <div class="col-lg-7">
+                    <h2 class="fw-bold text-uppercase m-0" style="font-size: clamp(2.25rem, 5vw, 3.5rem); line-height: 1.05; letter-spacing: -.02em;">Fresh off<br/>the rack</h2>
+                </div>
+                <div class="col-lg-5">
+                    <p class="m-0 opacity-75">For readers who want to stay ahead of the curve in their personal style.</p>
+                </div>
+            </div>
+            <div class="row row-cols-1 row-cols-lg-3 g-4">
+                <div class="col">
+                    <div class="position-relative rounded-4 overflow-hidden" style="aspect-ratio: 4 / 3;">
+                        <img src="/web/image/website.s_image_text_default_image" class="w-100 h-100" style="object-fit: cover;" alt=""/>
+                        <span class="badge text-bg-dark position-absolute top-0 start-0 m-3">Outerwear</span>
+                    </div>
+                    <p class="small opacity-50 mt-3 mb-1">6 min read · Apr 12, 2024</p>
+                    <h3 class="fw-bold m-0" style="font-size: 1.15rem;">Building a capsule coat wardrobe</h3>
+                </div>
+                <div class="col">
+                    <div class="position-relative rounded-4 overflow-hidden" style="aspect-ratio: 4 / 3;">
+                        <img src="/web/image/website.s_picture_default_image" class="w-100 h-100" style="object-fit: cover;" alt=""/>
+                        <span class="badge text-bg-dark position-absolute top-0 start-0 m-3">Travel</span>
+                    </div>
+                    <p class="small opacity-50 mt-3 mb-1">5 min read · Jun 17, 2024</p>
+                    <h3 class="fw-bold m-0" style="font-size: 1.15rem;">Packing light: style on the move</h3>
+                </div>
+                <div class="col">
+                    <div class="position-relative rounded-4 overflow-hidden" style="aspect-ratio: 4 / 3;">
+                        <img src="/web/image/website.s_cover_default_image" class="w-100 h-100" style="object-fit: cover;" alt=""/>
+                        <span class="badge text-bg-dark position-absolute top-0 start-0 m-3">Fashion</span>
+                    </div>
+                    <p class="small opacity-50 mt-3 mb-1">3 min read · Apr 16, 2024</p>
+                    <h3 class="fw-bold m-0" style="font-size: 1.15rem;">Layering basics for transitional weather</h3>
+                </div>
+            </div>
+            <div class="border rounded-pill text-center py-3 mt-4">View all articles</div>
+        </div>
+    </xpath>
+</template>
+
+<!-- Bottom split: image + CTA panel -->
+<template id="configurator_layout_impactful_cta" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc4 pt0 pb96" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Call to action</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container">
+            <div class="row g-0 rounded-4 overflow-hidden">
+                <div class="col-lg-6">
+                    <img src="/web/image/website.s_picture_default_image" class="w-100 h-100" style="object-fit: cover; min-height: 320px;" alt=""/>
+                </div>
+                <div class="col-lg-6 o_cc o_cc3 p-5 d-flex flex-column justify-content-center">
+                    <span class="badge rounded-pill text-bg-dark align-self-start mb-3">Subscribe</span>
+                    <h2 class="fw-bold text-uppercase m-0" style="font-size: clamp(1.75rem, 4vw, 2.75rem); line-height: 1.05;">Stay updated<br/>each week</h2>
+                    <p class="mt-3 mb-0 opacity-75">Regular updates ensure subscribers have access to fresh trends, making us a must-read.</p>
+                </div>
+            </div>
+        </div>
+    </xpath>
 </template>
 
 
@@ -64,44 +193,175 @@
      ════════════════════════════════════════════════════════════ -->
 
 <template id="configurator_layout_impactful" name="Configurator Layout: Impactful">
-    <ConfiguratorHeader data-template="template_header_sales_one" data-color="2"/>
+    <ConfiguratorHeader data-template="template_header_default" data-color="1"/>
     <ConfiguratorFooter data-template="template_footer_call_to_action" data-color="5"/>
 
-    <t t-snippet-call="website.configurator_layout_impactful_s_cover"/>
-    <t t-snippet-call="website.configurator_layout_impactful_s_title"/>
-    <t t-snippet-call="website.configurator_layout_impactful_s_three_columns"/>
-    <t t-snippet-call="website.configurator_layout_impactful_s_image_text"/>
-    <t t-snippet-call="website.configurator_layout_impactful_s_call_to_action"/>
+    <t t-snippet-call="website.configurator_layout_impactful_topbar"/>
+    <t t-snippet-call="website.configurator_layout_impactful_hero"/>
+    <t t-snippet-call="website.configurator_layout_impactful_showcase"/>
+    <t t-snippet-call="website.configurator_layout_impactful_pills"/>
+    <t t-snippet-call="website.configurator_layout_impactful_cards"/>
+    <t t-snippet-call="website.configurator_layout_impactful_cta"/>
 </template>
 
 
 <!-- ════════════════════════════════════════════════════════════
-     LAYER 3 — Vibe assemblies
+     DYNAMIC vibe
      ════════════════════════════════════════════════════════════ -->
 
-<template id="configurator_layout_impactful_vibe_dynamic"
-          name="Configurator Layout: Impactful / Dynamic"
-          inherit_id="website.configurator_layout_impactful" primary="True">
+<template id="configurator_layout_impactful_cards_dynamic" inherit_id="website.configurator_layout_impactful_cards" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc2" remove="o_cc4" separator=" "/>
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Connections/01","colors":{"c5":"o-color-3"},"flip":["y"],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":true}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Connections_01" contenteditable="false" style="background-image: url('/html_editor/shape/html_builder/Connections/01.svg?c5=o-color-3&amp;flip=xy'); background-position: 50% 0%;"/>
+    </xpath>
 </template>
 
-<template id="configurator_layout_impactful_vibe_gradient"
-          name="Configurator Layout: Impactful / Gradient"
-          inherit_id="website.configurator_layout_impactful" primary="True">
+<template id="configurator_layout_impactful_vibe_dynamic" name="Configurator Layout: Impactful / Dynamic" inherit_id="website.configurator_layout_impactful" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_impactful_cards']" position="replace">
+        <t t-snippet-call="website.configurator_layout_impactful_cards_dynamic"/>
+    </xpath>
 </template>
 
-<template id="configurator_layout_impactful_vibe_glossy"
-          name="Configurator Layout: Impactful / Glossy"
-          inherit_id="website.configurator_layout_impactful" primary="True">
+
+<!-- ════════════════════════════════════════════════════════════
+     GRADIENT vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_impactful_hero_gradient" inherit_id="website.configurator_layout_impactful_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-shape-data">{"shape":"html_builder/Blurry/02","colors":{"c1":"#5B6D82"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blurry_02" contenteditable="false" style="background-image: url('/html_editor/shape/html_builder/Blurry/02.svg?c1=%235B6D82'); background-position: 50% 50%;"/>
+    </xpath>
 </template>
 
-<template id="configurator_layout_impactful_vibe_illustrative"
-          name="Configurator Layout: Impactful / Illustrative"
-          inherit_id="website.configurator_layout_impactful" primary="True">
+<template id="configurator_layout_impactful_cta_gradient" inherit_id="website.configurator_layout_impactful_cta" primary="True">
+    <xpath expr="//div[hasclass('o_cc3')]" position="attributes">
+        <attribute name="style" add="background-image: linear-gradient(135deg, color-mix(in srgb, var(--o-color-1) 22%, transparent), color-mix(in srgb, var(--o-color-2) 28%, transparent));" separator=";"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_impactful_vibe_gradient" name="Configurator Layout: Impactful / Gradient" inherit_id="website.configurator_layout_impactful" primary="True">
+    <xpath expr="//ConfiguratorHeader" position="replace">
+        <ConfiguratorHeader data-template="template_header_default" data-color="2" data-shadow="0 0 100px var(--o-color-1)" data-border="0"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_impactful_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_impactful_hero_gradient"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_impactful_cta']" position="replace">
+        <t t-snippet-call="website.configurator_layout_impactful_cta_gradient"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     GLOSSY vibe — handled later
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_impactful_vibe_glossy" name="Configurator Layout: Impactful / Glossy" inherit_id="website.configurator_layout_impactful" primary="True"/>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     ILLUSTRATIVE vibe — reuses the shared configurator SVGs
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_impactful_hero_illustrative" inherit_id="website.configurator_layout_impactful_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc1" remove="o_cc5" separator=" "/>
+        <attribute name="style" add="background-image: url('/website/static/src/img/configurator/vibe_illustrative/croods-garden-outdoors-balloon-park-landscape-plants-abstract-shapes-simple-3.svg');" remove="background-image: url('/web/image/website.s_banner_categories_default_image_1');" separator=";"/>
+    </xpath>
+    <xpath expr="//div[hasclass('o_we_bg_filter')]" position="replace"/>
+
+    <xpath expr="(//div[hasclass('o_bg_img_center')])[1]" position="attributes">
+        <attribute name="class" remove="" add="rounded-5" separator=" "/>
+        <attribute name="style" remove="background-image: url('/web/image/website.s_product_list_default_image_2');" add="background-color: #FFF; background-position: center -13%; background-image: url('/website/static/src/img/configurator/vibe_illustrative/bigshoes-sitting-rock-stylised-design-simple-hand-leisure-nature-casual.svg');" separator=";"/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_bg_img_center')])[2]" position="attributes">
+        <attribute name="class" remove="" add="rounded-5" separator=" "/>
+        <attribute name="style" remove="background-image: url('/web/image/website.s_product_list_default_image_2');" add="background-color: #FFF; background-position: center -13%; background-image: url('/website/static/src/img/configurator/vibe_illustrative/bigshoes-standing-laughing-stylised-design-simple-hand-casual-happy-satisfied.svg');" separator=";"/>
+    </xpath>
+    <xpath expr="(//div[hasclass('o_bg_img_center')])[3]" position="attributes">
+        <attribute name="class" remove="" add="rounded-5" separator=" "/>
+        <attribute name="style" remove="background-image: url('/web/image/website.s_product_list_default_image_2');" add="background-color: #FFF; background-position: center -60%; background-image: url('/website/static/src/img/configurator/vibe_illustrative/bigshoes-sitting-rock-stylised-design-simple-outdoors-leisure-casual-nature.svg');" separator=";"/>
+    </xpath>
+</template>
+
+
+<template id="configurator_layout_impactful_showcase_illustrative" inherit_id="website.configurator_layout_impactful_showcase" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid w-100" style="height: 360px; object-fit: contain;" src="/website/static/src/img/configurator/vibe_illustrative/croods-garden-outdoors-balloon-park-landscape-plants-abstract-shapes-simple-3.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_impactful_cards_illustrative" inherit_id="website.configurator_layout_impactful_cards" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="w-100 h-100" style="object-fit: contain;" src="/website/static/src/img/configurator/vibe_illustrative/illustrative_1.svg"/>
+    </xpath>
+    <xpath expr="(//img)[2]" position="replace">
+        <img class="w-100 h-100" style="object-fit: contain;" src="/website/static/src/img/configurator/vibe_illustrative/illustrative_2.svg"/>
+    </xpath>
+    <xpath expr="(//img)[3]" position="replace">
+        <img class="w-100 h-100" style="object-fit: contain;" src="/website/static/src/img/configurator/vibe_illustrative/illustrative_4.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_impactful_cta_illustrative" inherit_id="website.configurator_layout_impactful_cta" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="w-100 h-100" style="object-fit: contain; min-height: 320px;" src="/website/static/src/img/configurator/vibe_illustrative/illustrative_5.svg"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_impactful_vibe_illustrative" name="Configurator Layout: Impactful / Illustrative" inherit_id="website.configurator_layout_impactful" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_impactful_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_impactful_hero_illustrative"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_impactful_showcase']" position="replace">
+        <t t-snippet-call="website.configurator_layout_impactful_showcase_illustrative"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_impactful_cards']" position="replace">
+        <t t-snippet-call="website.configurator_layout_impactful_cards_illustrative"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_impactful_cta']" position="replace">
+        <t t-snippet-call="website.configurator_layout_impactful_cta_illustrative"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     PLAYFUL vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_impactful_hero_playful" inherit_id="website.configurator_layout_impactful_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Floats/03","colors":{"c1":"#5B6D82","c2":"#C4CBD2","c3":"#E6E9EC","c5":"#f4f6f8"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_we_shape o_html_builder_Floats_03" contenteditable="false"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_impactful_cta_playful" inherit_id="website.configurator_layout_impactful_cta" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Blobs/03","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blobs_03" contenteditable="false"/>
+    </xpath>
 </template>
 
 <template id="configurator_layout_impactful_vibe_playful"
           name="Configurator Layout: Impactful / Playful"
           inherit_id="website.configurator_layout_impactful" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_impactful_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_impactful_hero_playful"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_impactful_cta']" position="replace">
+        <t t-snippet-call="website.configurator_layout_impactful_cta_playful"/>
+    </xpath>
 </template>
 
 </odoo>

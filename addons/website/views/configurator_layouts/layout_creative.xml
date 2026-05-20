@@ -43,19 +43,131 @@
      LAYER 1 — Per-snippet layout variants (Clean baseline)
      ════════════════════════════════════════════════════════════ -->
 
-<template id="configurator_layout_creative_s_cover" inherit_id="website.s_cover" primary="True">
+<!-- Centered hero: title + subtitle + two CTAs + floating card -->
+<template id="configurator_layout_creative_hero" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc1 pt96 pb64" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Hero</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container position-relative text-center">
+            <h1 class="fw-bold m-0" style="font-size: clamp(2.75rem, 6vw, 4.5rem); line-height: 1.1; letter-spacing: -.02em;">
+                Refresh your vision<br/>in just a few moves
+            </h1>
+            <p class="lead mx-auto mt-3 mb-0 opacity-75" style="max-width: 600px;">
+                Elevate your everyday with a curated, easy-to-live-with collection built around you.
+            </p>
+            <div class="d-flex justify-content-center gap-3 mt-4">
+                <a t-att-href="cta_btn_href" class="btn btn-primary btn-lg rounded-pill">Explore collection</a>
+                <a href="#" class="btn btn-outline-secondary btn-lg rounded-pill">Learn more</a>
+            </div>
+            <div class="o_cc o_cc2 position-absolute top-0 end-0 d-none d-lg-block text-start p-3 rounded-4" style="width: 150px;">
+                <div class="rounded-circle d-flex align-items-center justify-content-center mb-2" style="width: 26px; height: 26px; background: var(--o-color-4);">◆</div>
+                <p class="small fw-bold text-uppercase mb-1" style="line-height: 1.25;">Best in class platform</p>
+                <p class="mb-0" style="font-size: 11px; opacity: .75;">Since 2010</p>
+            </div>
+        </div>
+    </xpath>
 </template>
 
-<template id="configurator_layout_creative_s_masonry_block" inherit_id="website.s_masonry_block" primary="True">
+<!-- Three portrait images, centre one lifted -->
+<template id="configurator_layout_creative_portraits" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc1 pt24 pb40" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Portraits</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container">
+            <div class="row justify-content-center align-items-center g-4">
+                <div class="col-6 col-lg-3">
+                    <img src="/web/image/website.s_cover_default_image" class="img-fluid rounded-circle w-100" style="aspect-ratio: 1 / 1; object-fit: cover;" alt=""/>
+                </div>
+                <div class="col-6 col-lg-3" style="transform: translateY(-24px);">
+                    <img src="/web/image/website.s_picture_default_image" class="img-fluid rounded-circle w-100" style="aspect-ratio: 1 / 1; object-fit: cover;" alt=""/>
+                </div>
+                <div class="col-6 col-lg-3">
+                    <img src="/web/image/website.s_banner_default_image" class="img-fluid rounded-circle w-100" style="aspect-ratio: 1 / 1; object-fit: cover;" alt=""/>
+                </div>
+            </div>
+        </div>
+    </xpath>
 </template>
 
+<!-- Marquee strip -->
 <template id="configurator_layout_creative_s_announcement_scroll" inherit_id="website.s_announcement_scroll" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc1 pt40 pb40" remove="pt24 pb24" separator=" "/>
+        <attribute name="style">--marquee-animation-speed: 6s; --marquee-item-font-size: 64;</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('s_announcement_scroll_marquee_item')]" position="replace">
+        <div class="o_not_editable s_announcement_scroll_marquee_item lh-1">Create today. &#160;&#160; Stand tomorrow. &#160;&#160; Create today. &#160;&#160; Stand tomorrow.</div>
+    </xpath>
 </template>
 
-<template id="configurator_layout_creative_s_title" inherit_id="website.s_title" primary="True">
-</template>
-
-<template id="configurator_layout_creative_s_call_to_action" inherit_id="website.s_call_to_action" primary="True">
+<!-- Browse categories: heading + four cards (no rotation) -->
+<template id="configurator_layout_creative_categories" inherit_id="website.s_text_block" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc o_cc3 pt96 pb96" remove="pt40 pb40" separator=" "/>
+        <attribute name="data-name">Categories</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="replace">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold m-0" style="font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -.02em;">Browse our categories</h2>
+                <p class="mt-2 mb-0 opacity-75">Choose from expertly curated edits built for the real world.</p>
+            </div>
+            <div class="row row-cols-2 row-cols-lg-4 g-4">
+                <div class="col">
+                    <div class="o_cc o_cc1 rounded-4 p-4 h-100 d-flex flex-column justify-content-between" style="min-height: 200px;">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="font-size: 1.25rem;">Essentials</h3>
+                            <p class="small opacity-50 m-0">56 items</p>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <span class="badge rounded-pill text-bg-light">Vintage</span>
+                            <span class="badge rounded-pill text-bg-light">Classic</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="o_cc o_cc1 rounded-4 p-4 h-100 d-flex flex-column justify-content-between" style="min-height: 200px;">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="font-size: 1.25rem;">Outerwear</h3>
+                            <p class="small opacity-50 m-0">18 items</p>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <span class="badge rounded-pill text-bg-light">Coats</span>
+                            <span class="badge rounded-pill text-bg-light">Jackets</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="o_cc o_cc1 rounded-4 p-4 h-100 d-flex flex-column justify-content-between" style="min-height: 200px;">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="font-size: 1.25rem;">Dresses</h3>
+                            <p class="small opacity-50 m-0">76 items</p>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <span class="badge rounded-pill text-bg-light">Midi</span>
+                            <span class="badge rounded-pill text-bg-light">Mini</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="o_cc o_cc1 rounded-4 p-4 h-100 d-flex flex-column justify-content-between" style="min-height: 200px;">
+                        <div>
+                            <h3 class="fw-bold mb-1" style="font-size: 1.25rem;">Accessories</h3>
+                            <p class="small opacity-50 m-0">51 items</p>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <span class="badge rounded-pill text-bg-light">Bags</span>
+                            <span class="badge rounded-pill text-bg-light">Shoes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </xpath>
 </template>
 
 
@@ -67,41 +179,177 @@
     <ConfiguratorHeader data-template="template_header_vertical" data-color="5"/>
     <ConfiguratorFooter data-template="template_footer_centered" data-color="2"/>
 
-    <t t-snippet-call="website.configurator_layout_creative_s_cover"/>
-    <t t-snippet-call="website.configurator_layout_creative_s_masonry_block"/>
+    <t t-snippet-call="website.configurator_layout_creative_hero"/>
+    <t t-snippet-call="website.configurator_layout_creative_portraits"/>
     <t t-snippet-call="website.configurator_layout_creative_s_announcement_scroll"/>
-    <t t-snippet-call="website.configurator_layout_creative_s_title"/>
-    <t t-snippet-call="website.configurator_layout_creative_s_call_to_action"/>
+    <t t-snippet-call="website.configurator_layout_creative_categories"/>
 </template>
 
 
 <!-- ════════════════════════════════════════════════════════════
-     LAYER 3 — Vibe assemblies
+     DYNAMIC vibe
      ════════════════════════════════════════════════════════════ -->
 
-<template id="configurator_layout_creative_vibe_dynamic"
-          name="Configurator Layout: Creative / Dynamic"
-          inherit_id="website.configurator_layout_creative" primary="True">
+<template id="configurator_layout_creative_hero_dynamic" inherit_id="website.configurator_layout_creative_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Connections/01","flip":["x"],"showOnMobile":true,"shapeAnimationSpeed":"0","selectedColor":true,"colors":{"c5":"o-color-3"}}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Connections_01" style='background-image: url("/html_editor/shape/html_builder/Connections/01.svg?c5=o-color-3"); background-position: 50% 100%;' contenteditable="false"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_creative_categories_dynamic" inherit_id="website.configurator_layout_creative_categories" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Connections/01","colors":{"c5":"o-color-3"},"flip":["y"],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":true}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Connections_01" contenteditable="false" style="background-image: url('/html_editor/shape/html_builder/Connections/01.svg?c5=o-color-3&amp;flip=xy'); background-position: 50% 0%;"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_creative_portraits_dynamic" inherit_id="website.configurator_layout_creative_portraits" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="class" add="o_cc2" separator=" "/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_creative_vibe_dynamic" name="Configurator Layout: Creative / Dynamic" inherit_id="website.configurator_layout_creative" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_creative_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_creative_hero_dynamic"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_creative_portraits']" position="replace">
+        <t t-snippet-call="website.configurator_layout_creative_portraits_dynamic"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_creative_categories']" position="replace">
+        <t t-snippet-call="website.configurator_layout_creative_categories_dynamic"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     GRADIENT vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_creative_hero_gradient" inherit_id="website.configurator_layout_creative_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="style" add="background-image: radial-gradient(ellipse at 15% 20%, var(--o-color-2) -30%, transparent 50%), radial-gradient(ellipse at 85% 25%, var(--o-color-1) -30%, transparent 55%);" separator=";"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_creative_categories_gradient" inherit_id="website.configurator_layout_creative_categories" primary="True">
+    <xpath expr="//div[hasclass('o_cc1')]" position="attributes">
+        <attribute name="style" add="background-image: linear-gradient(135deg, color-mix(in srgb, var(--o-color-1) 22%, transparent), color-mix(in srgb, var(--o-color-2) 28%, transparent));" separator=";"/>
+    </xpath>
 </template>
 
 <template id="configurator_layout_creative_vibe_gradient"
           name="Configurator Layout: Creative / Gradient"
           inherit_id="website.configurator_layout_creative" primary="True">
+    <xpath expr="//ConfiguratorHeader" position="replace">
+        <ConfiguratorHeader data-template="template_header_default" data-shadow="0" data-border="0" data-color="none" data-bg="transparent" data-overlay="true"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_creative_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_creative_hero_gradient"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_creative_categories']" position="replace">
+        <t t-snippet-call="website.configurator_layout_creative_categories_gradient"/>
+    </xpath>
 </template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     GLOSSY vibe — handled later
+     ════════════════════════════════════════════════════════════ -->
 
 <template id="configurator_layout_creative_vibe_glossy"
           name="Configurator Layout: Creative / Glossy"
-          inherit_id="website.configurator_layout_creative" primary="True">
+          inherit_id="website.configurator_layout_creative" primary="True"/>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     ILLUSTRATIVE vibe — reuses the shared configurator SVGs
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_creative_portraits_illustrative" inherit_id="website.configurator_layout_creative_portraits" primary="True">
+    <xpath expr="//img" position="replace">
+        <img class="img-fluid w-100" src="/website/static/src/img/configurator/vibe_illustrative/lifesavers-avatar-dotted-classy-casual-colorful-simple-profile-face-geometric.svg"/>
+    </xpath>
+    <xpath expr="(//img)[2]" position="replace">
+        <img class="img-fluid w-100" src="/website/static/src/img/configurator/vibe_illustrative/lifesavers-avatar-doctor-health-medical-care-healthcare-profile-face-geometric.svg"/>
+    </xpath>
+    <xpath expr="(//img)[3]" position="replace">
+        <img class="img-fluid w-100" src="/website/static/src/img/configurator/vibe_illustrative/lifesavers-avatar-person-health-medical-care-healthcare-profile-face-geometric.svg"/>
+    </xpath>
 </template>
 
 <template id="configurator_layout_creative_vibe_illustrative"
           name="Configurator Layout: Creative / Illustrative"
           inherit_id="website.configurator_layout_creative" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_creative_portraits']" position="replace">
+        <t t-snippet-call="website.configurator_layout_creative_portraits_illustrative"/>
+    </xpath>
+</template>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     PLAYFUL vibe
+     ════════════════════════════════════════════════════════════ -->
+
+<template id="configurator_layout_creative_hero_playful" inherit_id="website.configurator_layout_creative_hero" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Floats/04","colors":{"c1":"#5B6D82","c2":"#C4CBD2","c4":"#F4F6F8","c5":"#f4f6f8"},"flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Floats_04" contenteditable="false"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_creative_categories_playful" inherit_id="website.configurator_layout_creative_categories" primary="True">
+    <xpath expr="//section" position="attributes">
+        <attribute name="data-oe-shape-data">{"shape":"html_builder/Blobs/03","flip":[],"showOnMobile":false,"shapeAnimationSpeed":"0","selectedColor":false}</attribute>
+    </xpath>
+    <xpath expr="//div[hasclass('container')]" position="before">
+        <div class="o_we_shape o_html_builder_Blobs_03" contenteditable="false"/>
+    </xpath>
+</template>
+
+<template id="configurator_layout_creative_vibe_playful_portraits" inherit_id="website.configurator_layout_creative_portraits" primary="True">
+    <xpath expr="//img" position="attributes">
+        <attribute name="src">/html_editor/image_shape/website.s_company_team_image_1/html_builder/geometric_round/geo_round_star_7pin.svg</attribute>
+        <attribute name="data-shape">html_builder/geometric_round/geo_round_star_7pin</attribute>
+        <attribute name="data-format-mimetype">image/webp</attribute>
+        <attribute name="data-file-name">uiface_1.svg</attribute>
+        <attribute name="data-shape-colors">;;;;</attribute>
+    </xpath>
+    <xpath expr="(//img)[2]" position="attributes">
+        <attribute name="src">/html_editor/image_shape/website.s_company_team_image_2/html_builder/geometric_round/geo_round_star_7pin.svg</attribute>
+        <attribute name="data-shape">html_builder/geometric_round/geo_round_star_7pin</attribute>
+        <attribute name="data-format-mimetype">image/webp</attribute>
+        <attribute name="data-file-name">uiface_1.svg</attribute>
+        <attribute name="data-shape-colors">;;;;</attribute>
+    </xpath>
+    <xpath expr="(//img)[3]" position="attributes">
+        <attribute name="src">/html_editor/image_shape/website.s_company_team_image_3/html_builder/geometric_round/geo_round_star_7pin.svg</attribute>
+        <attribute name="data-shape">html_builder/geometric_round/geo_round_star_7pin</attribute>
+        <attribute name="data-format-mimetype">image/webp</attribute>
+        <attribute name="data-file-name">uiface_1.svg</attribute>
+        <attribute name="data-shape-colors">;;;;</attribute>
+    </xpath>
 </template>
 
 <template id="configurator_layout_creative_vibe_playful"
           name="Configurator Layout: Creative / Playful"
           inherit_id="website.configurator_layout_creative" primary="True">
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_creative_hero']" position="replace">
+        <t t-snippet-call="website.configurator_layout_creative_hero_playful"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_creative_categories']" position="replace">
+        <t t-snippet-call="website.configurator_layout_creative_categories_playful"/>
+    </xpath>
+    <xpath expr="//t[@t-snippet-call='website.configurator_layout_creative_portraits']" position="replace">
+        <t t-snippet-call="website.configurator_layout_creative_vibe_playful_portraits"/>
+    </xpath>
 </template>
 
 </odoo>
