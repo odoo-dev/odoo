@@ -65,16 +65,16 @@ class AccountMove(models.Model):
     l10n_it_edi_state = fields.Selection(
         string="SDI State",
         selection=[
-            ('being_sent', 'Being Sent To SdI'),
-            ('requires_user_signature', 'Requires user signature'),  # TODO: remove in master
-            ('processing', 'SdI Processing'),
-            ('rejected', 'SdI Rejected'),
-            ('forwarded', 'SdI Accepted, Forwarded to Partner'),
-            ('forward_failed', 'SdI Accepted, Forward to Partner Failed'),
-            ('forward_attempt', 'SdI Accepted, Forwarding to Partner'),
-            ('accepted_by_pa_partner', 'SdI Accepted, Accepted by the PA Partner'),
-            ('rejected_by_pa_partner', 'SdI Accepted, Rejected by the PA Partner'),
-            ('accepted_by_pa_partner_after_expiry', 'SdI Accepted, PA Partner Expired Terms'),
+            ('being_sent', 'Sending'),
+            ('requires_user_signature', 'Signature Required'),  # TODO: remove in master
+            ('processing', 'Processing'),
+            ('rejected', 'Rejected'),
+            ('forwarded', 'Forwarded to Partner'),
+            ('forward_failed', 'Forwarding Failed'),
+            ('forward_attempt', 'Forwarding to Partner'),
+            ('accepted_by_pa_partner', 'Accepted by Partner'),
+            ('rejected_by_pa_partner', 'Rejected by Partner'),
+            ('accepted_by_pa_partner_after_expiry', 'Accepted'),
         ],
         copy=False, tracking=True,
         inverse="_inverse_l10n_it_edi_state",

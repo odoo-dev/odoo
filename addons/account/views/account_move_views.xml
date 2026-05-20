@@ -517,6 +517,7 @@
                       decoration-info="state == 'draft'"
                       decoration-muted="state == 'cancel'"
                       expand="context.get('expand', False)"
+                      multi_edit="1"
                       sample="1">
                     <header>
                         <button name="action_force_register_payment" type="object" string="Pay"
@@ -915,7 +916,7 @@
                             </button>
                         </div>
 
-                        <widget name="web_ribbon" title="Sent"
+                        <widget name="web_ribbon" title="Sent A"
                                 bg_color="gray_ribbon"
                                 invisible="not is_move_sent or payment_state != 'not_paid' or move_type not in ('out_invoice', 'out_refund', 'out_receipt')"/>
                         <!-- Payment status for invoices / receipts -->
