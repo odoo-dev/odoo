@@ -440,43 +440,49 @@ class IrModuleModule(models.Model):
     @api.model
     def _get_modules_from_apps(self, fields, module_type, module_name, domain=None, limit=None, offset=None):
         if 'name' not in fields:
-            fields = fields + ['name']
+            fields.append('name')
+        fields_to_ask = list(set(fields) | {dom[0] for dom in (domain or []) if len(dom) == 3})
         payload = {
             'params': {
                 'series': major_version,
-                'module_fields': fields,
+                'module_fields': fields_to_ask,
                 'module_type': module_type,
                 'module_name': module_name,
                 'domain': domain,
                 'limit': limit,
                 'offset': offset,
-            }
+            },
         }
         import requests  # noqa: PLC0415
         try:
             resp = self._call_apps(json.dumps(payload))
             resp.raise_for_status()
-            modules_list = resp.json().get('result', [])
-            for mod in modules_list:
-                module_name = mod['name']
-                existing_mod = self.search([('name', '=', module_name), ('state', '=', 'installed')])
-                mod['id'] = existing_mod.id if existing_mod else -1
-                if 'icon' in fields:
-                    mod['icon'] = f"{APPS_URL}{mod['icon']}"
-                if 'state' in fields:
-                    if existing_mod:
-                        mod['state'] = 'installed'
-                    else:
-                        mod['state'] = 'uninstalled'
-                if 'module_type' in fields:
-                    mod['module_type'] = module_type
-                if 'website' in fields:
-                    mod['website'] = f"{APPS_URL}/apps/modules/{major_version}/{module_name}/"
-            return modules_list
         except requests.exceptions.HTTPError:
             raise UserError(_('The list of industry applications cannot be fetched. Please try again later'))
         except requests.exceptions.ConnectionError:
             raise UserError(_('Connection to %s failed The list of industry modules cannot be fetched') % APPS_URL)
+
+        modules_list = resp.json().get('result', [])
+        existing_modules = self.search([('name', '=', [m['name'] for m in modules_list])])
+        existing_module_per_name = existing_modules.grouped('name')
+        modules_to_read = existing_modules
+        for mod in modules_list:
+            module_name = mod['name']
+            module = existing_module_per_name.get(module_name)
+            if module is None:
+                mod['icon'] = f"{APPS_URL}{mod['icon']}"
+                mod['state'] = 'uninstalled'
+                mod['module_type'] = module_type
+                mod['website'] = f"{APPS_URL}/apps/modules/{major_version}/{module_name}"
+                mod['application'] = True  # TODO: VAVA/BIB this is something that should be returned by the appstore directly
+                module = self.env['ir.module.module'].new(mod)
+            if module not in modules_to_read:
+                modules_to_read += module
+
+        to_return = modules_to_read.filtered_domain(domain).read(fields)
+        for mod in to_return:
+            mod['id'] = module.id if module.id else -1
+        return to_return
 
     @api.model
     @ormcache('payload')
