@@ -45,7 +45,7 @@ export class SearchInput extends Component {
         super.setup();
         this.uniqueId = `mail.SearchInput.${nextId++}`;
         this.spinner = useState({ visible: false });
-        useEffect(
+        useLayoutEffect(
             () => {
                 if (!this.props.search.loading) {
                     this.spinner.visible = false;
