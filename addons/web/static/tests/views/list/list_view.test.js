@@ -11570,8 +11570,8 @@ test(`multi edit field with daterange widget`, async () => {
     expect.verifySteps(["web_save"]);
 });
 
-test.tags("desktop", "owl3");
-test.todo(`multi edit field with daterange widget (edition without using the picker)`, async () => {
+test.tags("desktop");
+test(`multi edit field with daterange widget (edition without using the picker)`, async () => {
     mockTimeZone(+6);
 
     class Daterange extends models.Model {
@@ -20534,7 +20534,7 @@ test(`multi edition: edit date with operation`, async () => {
     async function checkOperation(operation) {
         await contains(`tr:eq(1) .o_data_cell[name=datetime]`).click();
         await contains(`tr:eq(1) .o_data_cell[name=datetime] input`).edit(operation.op);
-        await animationFrame();
+        await waitFor(".modal");
         expect(`.modal .o_modal_changes [name=datetime]`).toHaveText(`Datetime ${operation.text}`);
         expect(`.modal .alert`).toHaveCount(1);
         await contains(`.modal-dialog button:contains(Discard)`).click();
