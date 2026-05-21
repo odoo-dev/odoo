@@ -13,6 +13,8 @@ class IrAttachment(models.Model):
 
     thumbnail = fields.Image()
     has_thumbnail = fields.Boolean(compute="_compute_has_thumbnail")
+    mail_message_ids = fields.Many2many('mail.message', 'message_attachment_rel',
+                                        'attachment_id', 'message_id', string='Mail Messages', copy=False)
 
     @api.depends("thumbnail")
     def _compute_has_thumbnail(self):
@@ -70,6 +72,10 @@ class IrAttachment(models.Model):
                 with contextlib.suppress(AccessError):
                     related_record._message_set_main_attachment_id(attachment, force=force)
 
+    def _remove(self):
+        """Unlink or remove the link of the attachments from their records. Meant to be overridden."""
+        self.unlink()
+
     def _delete_and_notify(self, message=None):
         if message:
             # sudo: mail.message - safe write just updating the date, because guests don't have the rights
@@ -84,7 +90,7 @@ class IrAttachment(models.Model):
                     ),
                 },
             )
-        self.unlink()
+        self._remove()
 
     def _store_ownership_fields(self, res: Store.FieldList):
         res.attr("ownership_token", lambda a: a._get_ownership_token())
