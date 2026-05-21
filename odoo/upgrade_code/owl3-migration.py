@@ -20,7 +20,6 @@ EXCLUDED_PATH = (
 
 CHECKSUM_FILES = (
     'pos_blackbox_be/static/src/pos/overrides/navbar/navbar.xml',
-    'l10n_eu_iot_scale_cert',
     'iot_drivers/iot_handlers/drivers/serial_scale_driver.py',
 )
 
@@ -913,6 +912,7 @@ MISC_WHITELIST = {
     'l10n_in_reports.missing_pan_tds_tcs_warning': {'warningParams'},  # dynamic t-call
     'l10n_lu_reports.annual_tax_report_warning_checks': {'warningParams'},  # dynamic t-call
     'l10n_ng_reports.tax_report_period_check': {'warningParams'},  # dynamic t-call
+    'l10n_ph_reports.warning_partner_without_vat': {'warningParams'},  # dynamic t-call
     'l10n_tr_reports.waiting_nilvera_status_warning': {'warningParams'},  # dynamic t-call
     'l10n_uk_reports_cis.warning_cis_unregistered_partner': {'warningParams'},  # dynamic t-call
     "mrp_workorder.ProductCatalogKanbanRenderer": {'groupOrRecord'},  # Nested t-call or inherit
