@@ -1663,7 +1663,12 @@ class AccountMove(models.Model):
             # The move is not stored yet so the only thing we have is the invoice lines.
             base_lines += self._prepare_epd_base_lines_for_taxes_computation_from_base_lines(base_amls)
             AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-            AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+
+            # Extract tax lines during onchange to protect manual overrides
+            tax_amls = self.line_ids.filtered('tax_repartition_line_id')
+            tax_lines = [self._prepare_tax_line_for_taxes_computation(tax_line) for tax_line in tax_amls]
+
+            AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines if round_from_tax_lines else [])
         return base_lines, tax_lines
 
     @api.depends_context('lang')
@@ -3052,9 +3057,16 @@ class AccountMove(models.Model):
                 round_from_tax_lines = any_field_has_changed(move_tax_lines_values_before, tax_lines)
             elif changed_lines := list(get_changed_lines(move_base_lines_values_before, base_lines)):
                 # A base line has been modified.
+                only_analytics_changed = all(
+                    not any(field_has_changed(move_base_lines_values_before, line, f)
+                            for f in get_base_line_tracked_fields(line) if f != 'analytic_distribution')
+                    for line in changed_lines
+                )
+
                 round_from_tax_lines = (
+                    only_analytics_changed
                     # The changed lines don't affect the taxes.
-                    all(
+                    or all(
                         not line.tax_ids and not move_base_lines_values_before.get(line, {}).get('tax_ids')
                         for line in changed_lines
                     )
@@ -3073,6 +3085,7 @@ class AccountMove(models.Model):
                 # base lines, we don't need to recompute anything.
                 if (
                     round_from_tax_lines
+                    and not only_analytics_changed
                     and any(line[field] for line in changed_lines for field in ('amount_currency', 'balance'))
                 ):
                     continue
