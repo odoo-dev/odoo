@@ -339,7 +339,7 @@ def _write_with_timeout(
         while total_written < len(data):
             events = selector.select(timeout=_remaining_time(deadline))
             if not events:
-                e = "Timeout exceeded while writing to subprocess" #TODO isnt it possible to flatten this fuction
+                e = "Timeout exceeded while writing to subprocess"
                 raise TimeoutError(e)
 
             written = os.write(fd, memview[total_written:])

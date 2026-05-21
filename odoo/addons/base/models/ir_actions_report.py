@@ -773,6 +773,7 @@ class IrActionsReport(models.Model):
         methods and still use account reports.
         """
         report_type = (getattr(report, 'report_type', '') or '').lower()
+        print("ABBBBBB",report_type)
         engine_name = (
             report_type.removeprefix('qweb-pdf-')
             if report_type.startswith('qweb-pdf-')
