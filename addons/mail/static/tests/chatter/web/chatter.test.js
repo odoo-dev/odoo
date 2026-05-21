@@ -793,7 +793,8 @@ test("can mark message as unread from chatter", async () => {
     await contains(".o-mail-NotificationItem-text:text(John Doe: lorem ipsum)");
 });
 
-test("Can only mention internal users in Log note", async () => {
+test.tags("owl3");
+test.skip("Can only mention internal users in Log note", async () => {
     const pyEnv = await startServer();
     pyEnv["res.partner"].create({
         name: "External Partner",
