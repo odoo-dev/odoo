@@ -93,7 +93,6 @@ export class BuilderList extends Component {
             itemShape: { value: "text" },
             sortable: true,
             hiddenProperties: [],
-            mode: "button",
             defaultNewValue: {},
             columnWidth: {},
             forbidLastItemRemoval: false,
