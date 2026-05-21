@@ -1006,10 +1006,10 @@ class DomainCondition(Domain):
             field = self._field(model)
 
         if level == OptimizationLevel.FULL:
-            # resolve inherited fields
+            # resolve inherited fields unless they are denormalized
             # inherits implies both Field.delegate=True and Field.bypass_search_access=True
             # so no additional permissions will be added by the 'any' operator below
-            if field.inherited:
+            if field.inherited and not field.store:
                 assert field.related
                 parent_fname = field.related.split('.')[0]
                 parent_domain = DomainCondition(self.field_expr, self.operator, self.value)
