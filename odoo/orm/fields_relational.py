@@ -785,7 +785,7 @@ class _RelationalMulti(_Relational):
         # check the value and execute the query
         if isinstance(value, COLLECTION_TYPES):
             value = OrderedSet(value)
-            comodel = comodel.sudo().with_context(active_test=False)
+            comodel = comodel.sudo()
             if False in value:
                 #  [not]in (False, 1) => split conditions
                 #  We want records that have a record such as condition or

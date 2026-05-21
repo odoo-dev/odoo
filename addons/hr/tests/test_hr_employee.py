@@ -720,6 +720,78 @@ class TestHrEmployee(TestHrCommon):
         self.assertNotEqual(partner.email, second_employee.work_email)
         self.assertNotEqual(partner.email, first_employee.work_email)
 
+    def test_one2many_condition_respects_active_test_in_comodel_subquery(self):
+        """
+        Test that searching with a One2many '!= False' condition excludes
+        records whose all related co-records are archived.
+
+        Example 1 - res.users with ('employee_ids', '!=', False):
+            - Only users with at least one *active* employee should be returned
+              by default (active_test=True).
+            - Archiving all employees of a user should exclude that user from
+              results, since no active co-records remain.
+            - Passing active_test=False in context should include users whose
+              employees are all archived, since the active filter is suppressed
+              on the co-model subquery.
+
+        Example 2 - hr.employee with ('child_ids', '!=', False):
+            - Only managers with at least one *active* subordinate should be
+              returned by default (active_test=True).
+            - Archiving the only subordinate of a manager should exclude that
+              manager from results, since no active co-records remain.
+            - Passing active_test=False in context should include managers whose
+              subordinates are all archived, since the active filter is suppressed
+              on the co-model subquery.
+        """
+        # Example 1
+        self.env['hr.employee'].search([]).unlink()
+        employee_1, employee_2 = self.env['hr.employee'].create([
+            {'name': 'first employee'},
+            {'name': 'second employee'}
+        ])
+        user_1, user_2 = self.env['res.users'].create([
+            {
+                'name': 'Test User1',
+                'login': 'user_1',
+                'employee_ids': [Command.set(employee_1.ids)]
+            },
+            {
+                'name': 'Test User2',
+                'login': 'user_2',
+                'employee_ids': [Command.set(employee_2.ids)],
+            }
+        ])
+
+        result = self.env['res.users'].search([('employee_ids', '!=', False)])
+        self.assertEqual(len(result), 2)
+
+        employee_1.active = False
+        # result should be 1 because we didn't include archived records
+        result = self.env['res.users'].search([('employee_ids', '!=', False)])
+        self.assertEqual(len(result), 1)
+
+        # result should be 2 because we include archived records
+        result = self.env['res.users'].with_context(active_test=False).search([('employee_ids', '!=', False)])
+        self.assertEqual(len(result), 2)
+
+        # Example 2
+        sub_employee = self.env['hr.employee'].create({
+            'name': 'Test subordinate employee',
+            'parent_id': employee_2.id
+        })
+        # should be 1 since one direct subordinate relation exists(sub_employee --> employee_1(manager))
+        result = self.env['hr.employee'].search([('child_ids', '!=', False)])
+        self.assertEqual(len(result), 1)
+
+        sub_employee.active = False
+        # should be 0 since subordinate is archived
+        result = self.env['hr.employee'].search([('child_ids', '!=', False)])
+        self.assertEqual(len(result), 0)
+
+        # should be 1 since we incuded archived records too
+        result = self.env['hr.employee'].with_context(active_test=False).search([('child_ids', '!=', False)])
+        self.assertEqual(len(result), 1)
+
 
 @tagged('-at_install', 'post_install')
 class TestHrEmployeeLinks(HttpCase):

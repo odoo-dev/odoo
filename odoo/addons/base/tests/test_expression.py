@@ -2257,6 +2257,15 @@ class TestOne2many(TransactionCase):
                 Command.create({'acc_number': '789', 'acc_type': 'bank'}),
             ],
         })
+        self.Partner1 = self.env['res.partner']
+        self.partner1 = self.Partner.create({
+            'name': 'partner',
+            'bank_ids': [
+                Command.create({'acc_number': '111', 'acc_type': 'bank'}),
+                Command.create({'acc_number': '222', 'acc_type': 'bank'}),
+                Command.create({'acc_number': '333', 'acc_type': 'bank'}),
+            ],
+        })
 
     def test_regular(self):
         self.Partner.search([('bank_ids', 'in', self.partner.bank_ids.ids)])
@@ -2474,6 +2483,21 @@ class TestOne2many(TransactionCase):
             ORDER BY "res_partner"."id"
         ''']):
             self.Partner.search([('bank_ids', '=', False)], order='id')
+
+        with self.assertQueries(['''
+            SELECT "res_partner"."id"
+              FROM "res_partner"
+             WHERE (
+                "res_partner"."active" IS TRUE
+                AND EXISTS(SELECT FROM (
+                    SELECT "res_partner_bank"."partner_id" AS __inverse
+                      FROM "res_partner_bank"
+                     WHERE "res_partner_bank"."active" IS TRUE
+                ) AS __sub WHERE __inverse = "res_partner"."id")
+            )
+            ORDER BY "res_partner"."id"
+        ''']):
+            self.Partner1.search([('bank_ids', '!=', False)], order='id')
 
 
 @tagged('res_partner')
