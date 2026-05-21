@@ -61,3 +61,30 @@ class ResCompany(models.Model):
             order='date_end desc',
             limit=1,
         )
+
+    def write(self, vals):
+        # EXTENDS 'base'
+        newly_required = self.env['res.company']
+        if vals.get('l10n_es_edi_verifactu_required'):
+            newly_required = self.filtered(lambda c: not c.l10n_es_edi_verifactu_required)
+        res = super().write(vals)
+        if newly_required:
+            newly_required._l10n_es_edi_verifactu_backfill_recargo_regime_codes()
+        return res
+
+    def _l10n_es_edi_verifactu_backfill_recargo_regime_codes(self):
+        """VeriFactu's ClaveRegimen catalog is the only one that tags "Recargo de equivalencia"
+        operations via '18_iva'/'18_igic' (see l10n_es_edi_verifactu/const.py); the shared core
+        catalog in l10n_es doesn't set anything on these taxes, since it's meaningless without
+        VeriFactu. Backfill it here, once, for the taxes that already existed when a company turns
+        VeriFactu on. Recargo taxes created afterwards aren't auto-filled — same as any other
+        VAT Regime Code, the user picks one from the (now VeriFactu-aware) dropdown.
+        """
+        recargo_taxes = self.env['account.tax'].search([
+            ('company_id', 'in', self.ids),
+            ('type_tax_use', '=', 'sale'),
+            ('l10n_es_type', '=', 'recargo'),
+            ('l10n_es_regime_code', '=', False),
+        ])
+        for tax in recargo_taxes:
+            tax.l10n_es_regime_code = '18_igic' if tax.l10n_es_applicability == '03' else '18_iva'

@@ -297,7 +297,7 @@ class TestEdiXmls(TestEsEdiCommon):
                 {'price_unit': 100.0, 'tax_ids': [(6, 0, self._get_tax_by_xml_id('s_iva10b').ids)]},
                 {'price_unit': 200.0, 'tax_ids': [(6, 0, self._get_tax_by_xml_id('s_iva21s').ids)]},
             ],
-            l10n_es_sii_refund_reason='R1'
+            l10n_es_sii_refund_reason='R4'
         )
         with patch(
             'odoo.addons.l10n_es_edi_sii.models.l10n_es_edi_sii_document.L10nEsEdiSiiDocument._post_to_agency',
@@ -313,7 +313,7 @@ class TestEdiXmls(TestEsEdiCommon):
             },
             'PeriodoLiquidacion': {'Ejercicio': '2019', 'Periodo': '01'},
             'FacturaExpedida': {
-                'TipoFactura': 'R1',
+                'TipoFactura': 'R4',
                 'TipoRectificativa': 'I',
                 'ClaveRegimenEspecialOTrascendencia': '01',
                 'DescripcionOperacion': 'manual',
@@ -425,7 +425,7 @@ class TestEdiXmls(TestEsEdiCommon):
                 {'price_unit': 100.0, 'tax_ids': [(6, 0, self._get_tax_by_xml_id('s_iva0_sp_i').ids)]},
                 {'price_unit': 200.0, 'tax_ids': [(6, 0, self._get_tax_by_xml_id('s_iva0_g_i').ids)]},
             ],
-            l10n_es_sii_refund_reason='R1'
+            l10n_es_sii_refund_reason='R4'
         )
         with patch(
             'odoo.addons.l10n_es_edi_sii.models.l10n_es_edi_sii_document.L10nEsEdiSiiDocument._post_to_agency',
@@ -441,7 +441,7 @@ class TestEdiXmls(TestEsEdiCommon):
             },
             'PeriodoLiquidacion': {'Ejercicio': '2019', 'Periodo': '01'},
             'FacturaExpedida': {
-            'TipoFactura': 'R1',
+            'TipoFactura': 'R4',
             'TipoRectificativa': 'I',
             'ClaveRegimenEspecialOTrascendencia': '01',
                 'DescripcionOperacion': 'manual',
@@ -554,7 +554,7 @@ class TestEdiXmls(TestEsEdiCommon):
             },
             'PeriodoLiquidacion': {'Ejercicio': '2019', 'Periodo': '01'},
             'FacturaExpedida': {
-                'TipoFactura': 'R1',
+                'TipoFactura': 'R4',
                 'TipoRectificativa': 'I',
                 'ClaveRegimenEspecialOTrascendencia': '01',
                 'DescripcionOperacion': 'manual',
@@ -613,7 +613,7 @@ class TestEdiXmls(TestEsEdiCommon):
             },
             'PeriodoLiquidacion': {'Ejercicio': '2019', 'Periodo': '01'},
             'FacturaExpedida': {
-                'TipoFactura': 'R1',
+                'TipoFactura': 'R4',
                 'TipoRectificativa': 'I',
                 'ClaveRegimenEspecialOTrascendencia': '01',
                 'DescripcionOperacion': 'manual',
@@ -1143,6 +1143,7 @@ class TestEdiXmls(TestEsEdiCommon):
             ref='sup0001',
             partner_id=self.partner_a.id,
             l10n_es_registration_date='2019-01-02',
+            l10n_es_vat_regime_code_id = '09',
             invoice_line_ids=[
                 {
                     'price_unit': 100.0,
@@ -1193,6 +1194,7 @@ class TestEdiXmls(TestEsEdiCommon):
             ref='sup0001',
             partner_id=self.partner_a.id,
             l10n_es_registration_date='2019-01-02',
+            l10n_es_vat_regime_code_id = '09',
             invoice_line_ids=[
                 {
                     'price_unit': 100.0,
@@ -1245,6 +1247,7 @@ class TestEdiXmls(TestEsEdiCommon):
             ref='sup0001',
             partner_id=self.partner_b.id,
             l10n_es_registration_date='2019-01-02',
+            l10n_es_vat_regime_code_id = '02',
             invoice_line_ids=[
                 {
                     'price_unit': 200.0,

@@ -16,6 +16,126 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "01 - General regime operation"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "02 - Export"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "02 - REAGYP compensations on purchases"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "03 - Used goods, art, antiques and collectors' items"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "04 - Investment gold"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "05 - Travel agencies"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "06 - VAT group of entities (Advanced level)"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "07 - Cash basis criterion"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "08 - IPSI / IGIC"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "09 - Intermediary agencies (4th Additional Provision, RD 1619/2012)"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "09 - Intra-Community acquisitions"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "10 - Collections on behalf of third parties"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "11 - Lease subject to withholding"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "12 - Business premises lease"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "12 - Business premises lease not subject to withholding"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "13 - Business premises lease subject and not subject to withholding"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "13 - Import without customs declaration (DUA)"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "14 - Pending VAT — public works certifications (public administrations)"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "15 - Pending VAT — continuous supply contracts"
+msgstr ""
+
+#. module: l10n_es
+#. odoo-python
+#: code:addons/l10n_es/models/account_tax.py:0
+msgid "17 - OSS and IOSS"
+msgstr ""
+
+#. module: l10n_es
 #: model_terms:ir.ui.view,arch_db:l10n_es.res_config_settings_view_form
 msgid "Above this limit the simplified invoice won't be made"
 msgstr ""

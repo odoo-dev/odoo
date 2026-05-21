@@ -338,18 +338,15 @@ class AccountMove(models.Model):
             'invoice_date': self.invoice_date,
             **self._l10n_es_tbai_get_vendor_bill_tax_values(),
         }
-        # Check if intracom
-        mod_303_10 = self.env.ref('l10n_es.mod_303_casilla_10_balance')._get_matching_tags()
-        mod_303_11 = self.env.ref('l10n_es.mod_303_casilla_11_balance')._get_matching_tags()
-        tax_tags = self.invoice_line_ids.tax_ids.flatten_taxes_hierarchy().repartition_line_ids.tag_ids
-        intracom = bool(tax_tags & (mod_303_10 + mod_303_11))
+
         reagyp = self.invoice_line_ids.tax_ids.filtered(lambda t: t.l10n_es_type == 'sujeto_agricultura')
-        if intracom:
-            values['regime_key'] = ['09']
-        elif reagyp:
-            values['regime_key'] = ['02']
+
+        if self.l10n_es_regime_code:
+            values['regime_key'] = self.l10n_es_regime_code[:2]
         else:
-            values['regime_key'] = ['01']
+            values['regime_key'] = '01'
+
+        values['regime_key'] = '01'
         # Credit notes (factura rectificativa)
         if values['is_refund']:
             values['refund_reason'] = self.l10n_es_tbai_refund_reason

@@ -342,7 +342,13 @@ class AccountMove(models.Model):
             else:
                 invoice_node['DescripcionOperacion'] = 'manual'
 
-            reagyp = move.invoice_line_ids.tax_ids.filtered(lambda t: t.l10n_es_type == 'sujeto_agricultura')
+            if move.l10n_es_regime_code:
+                regime_code = move.l10n_es_regime_code[:2]
+            else:
+                regime_code = '01'
+
+            if move.l10n_es_regime_code_additional:
+                regime_code_additional = move.l10n_es_regime_code_additional[:2]
 
             if move.is_sale_document():
                 if move.company_id.vat and move.company_id.vat.startswith('ES'):
@@ -359,7 +365,8 @@ class AccountMove(models.Model):
                         'NombreRazon': com_partner.name[:120]
                     }
 
-                invoice_node['ClaveRegimenEspecialOTrascendencia'] = move.invoice_line_ids.tax_ids._l10n_es_get_regime_code()
+                invoice_node['ClaveRegimenEspecialOTrascendencia'] = regime_code
+                invoice_node['ClaveRegimenEspecialOTrascendenciaAdicional1'] = regime_code_additional
 
             else:
                 if move._l10n_es_is_dua():
@@ -376,31 +383,11 @@ class AccountMove(models.Model):
                     }
 
                 invoice_node['FechaRegContable'] = move.l10n_es_registration_date.strftime('%d-%m-%Y')
+                invoice_node['ClaveRegimenEspecialOTrascendencia'] = regime_code
 
-                mod_303_10 = move.env.ref('l10n_es.mod_303_casilla_10_balance')._get_matching_tags()
-                mod_303_11 = move.env.ref('l10n_es.mod_303_casilla_11_balance')._get_matching_tags()
-                tax_tags = move.invoice_line_ids.tax_ids.repartition_line_ids.tag_ids
-                intracom = bool(tax_tags & (mod_303_10 + mod_303_11))
-
-                if intracom:
-                    invoice_node['ClaveRegimenEspecialOTrascendencia'] = '09'
-                elif reagyp:
-                    invoice_node['ClaveRegimenEspecialOTrascendencia'] = '02'
-                else:
-                    invoice_node['ClaveRegimenEspecialOTrascendencia'] = '01'
-
-            if move.move_type == 'out_invoice':
-                invoice_node['TipoFactura'] = 'F2' if is_simplified else 'F1'
-            elif move.is_refund():
-                invoice_node['TipoFactura'] = move.l10n_es_sii_refund_reason
+            invoice_node['TipoFactura'] = move.l10n_es_invoice_type
+            if move.is_refund():
                 invoice_node['TipoRectificativa'] = 'I'
-            elif move.move_type == 'in_invoice':
-                if reagyp:
-                    invoice_node['TipoFactura'] = 'F6'
-                elif move._l10n_es_is_dua():
-                    invoice_node['TipoFactura'] = 'F5'
-                else:
-                    invoice_node['TipoFactura'] = 'F1'
 
             sign = -1 if move.is_refund() else 1
 

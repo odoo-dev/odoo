@@ -12,6 +12,7 @@ from werkzeug.urls import url_quote_plus, url_encode
 
 from odoo import _, api, fields, models
 from odoo.addons.certificate.tools import CertificateAdapter
+from odoo.addons.l10n_es_edi_verifactu.const import VERIFACTU_REGIME_CODES_IGIC, VERIFACTU_REGIME_CODES_IVA
 from odoo.exceptions import UserError
 from odoo.tools import float_repr, float_round, frozendict, zeep, BinaryBytes
 
@@ -26,6 +27,16 @@ EUSKADI_CIPHERS = "DEFAULT:!DH"
 VERIFACTU_VERSION = "1.0"
 
 BATCH_LIMIT = 1000
+
+
+def _verifactu_valid_clave_regimen(applicability):
+    """The "clave de régimen" (ClaveRegimen) values accepted by VeriFactu for a given tax
+    applicability ('l10n_es_applicability': '01'=VAT, '02'=IPSI, '03'=IGIC, '05'=Other), derived
+    from VERIFACTU_REGIME_CODES_IVA/_IGIC by stripping the disambiguation suffix (e.g. '11_vf' -> '11').
+    IPSI and unset/"Other" fall back to the IVA list — the AEAT spec doesn't define a separate one.
+    """
+    codes = VERIFACTU_REGIME_CODES_IGIC if applicability == '03' else VERIFACTU_REGIME_CODES_IVA
+    return {code.split('_', 1)[0] for code in codes}
 
 
 def _sha256(string):
@@ -369,14 +380,14 @@ class L10nEsEdiVerifactuDocument(models.Model):
             errors.append(_("There is no Veri*Factu document for the refunded record."))
 
         need_refund_reason = vals['verifactu_move_type'] in ('correction_incremental', 'correction_substitution')
-        if need_refund_reason and not vals['refund_reason']:
+        if need_refund_reason and not vals['invoice_type']:
             errors.append(_("The refund reason is not specified."))
 
         simplified_partner = self.env.ref('l10n_es.partner_simplified', raise_if_not_found=False)
         partner_specified = vals['partner'] and vals['partner'] != simplified_partner
-        if need_refund_reason and vals['refund_reason'] != 'R5' and vals['is_simplified']:
+        if need_refund_reason and vals['invoice_type'] != 'R5' and vals['is_simplified']:
             errors.append(_("A refund with Refund Reason %(refund_reason)s is not simplified (it needs a partner).",
-                            refund_reason=vals['refund_reason']))
+                            refund_reason=vals['invoice_type']))
 
         if vals['verifactu_move_type'] == 'invoice' and not partner_specified and not vals['is_simplified']:
             errors.append(_("A non-simplified invoice needs a partner."))
@@ -386,6 +397,10 @@ class L10nEsEdiVerifactuDocument(models.Model):
 
         if vals['l10n_es_applicability'] in ('01', '03') and not vals['clave_regimen']:
             errors.append(_("Missing Veri*Factu Regime Key (ClaveRegimen)."))
+
+        clave = vals['clave_regimen']
+        if clave and clave not in _verifactu_valid_clave_regimen(vals['l10n_es_applicability']):
+            errors.append(_("La clave de régimen '%s' no es válida para VeriFactu.", clave))
 
         sujeto_tax_types = self.env['account.tax']._l10n_es_get_sujeto_tax_types()
         ignored_tax_types = ['ignore', 'retencion']
@@ -626,27 +641,29 @@ class L10nEsEdiVerifactuDocument(models.Model):
         rectified_document = vals['refunded_document'] or vals['substituted_document']
         if vals['verifactu_move_type'] == 'invoice':
             tipo_rectificativa = None
-            tipo_factura = 'F2' if vals['is_simplified'] else 'F3' if vals.get('was_simplified_invoice') else 'F1'
+            tipo_factura = vals['invoice_type']
             delivery_date = self._format_date_type(vals['delivery_date'])
             fecha_operacion = delivery_date if delivery_date and delivery_date != invoice_date else None
         elif vals['verifactu_move_type'] == 'reversal_for_substitution':
+            # The AEAT requires this intermediate cancellation step to always be reported as a
+            # regular invoice (F1/F2), regardless of the (refund-reason) 'invoice_type'.
             tipo_rectificativa = None
             tipo_factura = 'F2' if vals['is_simplified'] else 'F1'
             fecha_operacion = None
         elif vals['verifactu_move_type'] == 'correction_substitution':
             tipo_rectificativa = 'S'
-            tipo_factura = vals['refund_reason']
+            tipo_factura = vals['invoice_type']
             rectified = rectified_document._get_record_identifier()
             fecha_operacion = rectified['FechaOperacion'] or rectified['FechaExpedicionFactura']
         else:
             # vals['verifactu_move_type'] == 'correction_incremental':
             tipo_rectificativa = 'I'
-            tipo_factura = vals['refund_reason']
+            tipo_factura = vals['invoice_type']
             rectified = rectified_document._get_record_identifier()
             fecha_operacion = rectified['FechaOperacion'] or rectified['FechaExpedicionFactura']
 
         # Note: Error [1189]
-        # Si TipoFactura es F1 o F3 o R1 o R2 o R3 o R4 el bloque Destinatarios tiene que estar cumplimentado.
+        # If TipoFactura in [F1, F3, R1, R2, R3, R4] block Destinatarios must be filled.
 
         if not vals['is_simplified']:
             if not vals.get('is_self_billing'):
@@ -731,7 +748,9 @@ class L10nEsEdiVerifactuDocument(models.Model):
     @api.model
     def _render_vals_monetary_amounts(self, vals):
         # Note: We only support a single verifactu tax applicabilty, clave regimen pair per record.
-        # For moves the clave regime is stored on each move in field `l10n_es_edi_verifactu_clave_regimen`
+        # For moves the clave regime is stored on each move in field `l10n_es_regime_code`
+        # (see account.tax._l10n_es_regime_code_labels), stripped of its disambiguation suffix
+        # (e.g. '11_vf' -> '11').
         if vals['cancellation']:
             return {}
 
