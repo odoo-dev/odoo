@@ -467,16 +467,16 @@ class ResCompany(models.CachedModel):
 
         accessible_branch_ids = []
         accessible = self.env.companies
+        if self.env.uid == SUPERUSER_ID:
+            # Accessible companies will always be the same for super user when called in a cron.
+            # The super user anyway always has access to all companies (as it bypasses the record rules),
+            # so we return the current company and all its children in that case.
+            accessible = self.env['res.company'].search([])
+
         current = self.sudo()
         while current:
             accessible_branch_ids.extend((current & accessible).ids)
             current = current.child_ids
-
-        if not accessible_branch_ids and self.env.uid == SUPERUSER_ID:
-            # Accessible companies will always be the same for super user when called in a cron.
-            # Because of that, the intersection between them and self might be empty. The super user anyway always has
-            # access to all companies (as it bypasses the record rules), so we return the current company in this case.
-            return self.ids
 
         return accessible_branch_ids
 
