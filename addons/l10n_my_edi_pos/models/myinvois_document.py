@@ -228,6 +228,57 @@ class MyInvoisDocument(models.Model):
 
         return where_string, param
 
+    def _get_month_split_range(self, ref_date):
+        """
+            Return the date range of the current month split based on the
+            company's fiscal cutoff day.
+
+            Unlike date_utils.get_month(), which always returns the full
+            calendar month, this method divides the month into 2 ranges using
+            company's fiscal last-day.
+            e.g.;
+            If fiscalyear_last_day = 21 May, 2026
+            2026/05/10 returns -> (2026/05/01, 2026/05/21)
+            2026/05/25 returns -> (2026/05/22, 2026/05/31)
+
+            :param date ref_date: Reference date used to determine the range.
+            :return: Tuple containing start and end date of the split month range.
+            :rtype: tuple(date, date)
+        """
+        company = self.company_id
+        fiscal_day = company.fiscalyear_last_day
+        month_start = ref_date.replace(day=1)
+
+        # last day of current month
+        next_month = month_start + datetime.timedelta(days=32)
+        next_month_start = next_month.replace(day=1)
+        month_end = next_month_start - datetime.timedelta(days=1)
+
+        cutoff_date = ref_date.replace(day=fiscal_day)
+
+        if ref_date.day <= fiscal_day:
+            # First part of month
+            date_start, date_end = month_start, cutoff_date
+        else:
+            # Second part of month
+            date_start, date_end = cutoff_date + datetime.timedelta(days=1), month_end
+        return (date_start, date_end)
+
+    def _get_sequence_date_range(self, reset):
+        """ Make sure that the sequence date range follows the company's fiscal year """
+        company = self.company_id
+        if reset in ('year_range', 'year_range_month'):
+            date_start, date_end = date_utils.get_fiscal_year(
+                self.myinvois_issuance_date,
+                day=company.fiscalyear_last_day,
+                month=int(company.fiscalyear_last_month),
+            )
+            return (date_start, date_end) + (None, None)
+        elif reset == 'month' and self.myinvois_issuance_date.month == int(company.fiscalyear_last_month):
+            date_start, date_end = self._get_month_split_range(self.myinvois_issuance_date)
+            return (date_start, date_end) + (None, None)
+        return super()._get_sequence_date_range(reset)
+
     def _get_sequence_date_range(self, reset):
         """ Make sure that the sequence date range follows the company's fiscal year """
         if reset == 'year_range':
