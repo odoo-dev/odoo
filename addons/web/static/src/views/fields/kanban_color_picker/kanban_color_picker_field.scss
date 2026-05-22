@@ -5,8 +5,24 @@
     grid-template-columns: repeat(auto-fit, minmax($o-bubble-color-size-xl, 1fr));
     padding: var(--dropdown-item-padding-y) var(--dropdown-item-padding-x);
 
-    [class*="col-"]:has(&) {
-        min-width: 150px;
+    @for $i from 1 through 12 {
+        .col-#{$i}, .g-col-#{$i} {
+            &:has(&) {
+                min-width: 150px;
+            }
+        }
+        @each $breakpoint, $size in $grid-breakpoints {
+            .col-#{$breakpoint}-#{$i}, .g-col-#{$breakpoint}-#{$i} {
+                &:has(&) {
+                    min-width: 150px;
+                }
+            }
+        }
+    }
+    .col-auto, .g-col-auto {
+        &:has(&) {
+            min-width: 150px;
+        }
     }
 
     .o_field_kanban_color_picker:has(> &) {
