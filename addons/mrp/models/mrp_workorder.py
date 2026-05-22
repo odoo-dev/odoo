@@ -176,27 +176,36 @@ class MrpWorkorder(models.Model):
                 workorder.state = 'blocked'
 
     def set_state(self, state):
-        ids_to_update, ids_by_state = [], defaultdict(list)
+        if state in ('done', 'progress'):
+            to_check = self.filtered(lambda wo: wo.state != state and wo.production_state != 'done')
+            if any(wo.working_state == 'blocked' for wo in to_check):
+                message = (
+                    self.env._("Please unblock the work center to validate the work order.")
+                    if state == 'done'
+                    else self.env._("Please unblock the work center to start the work order.")
+                )
+                return to_check._action_open_unblock_workcenter_wizard(message)
+
+        ids_to_update = []
         for wo in self:
             if wo.state == state or wo.production_state == 'done':
                 continue
+            if wo.state == 'progress':
+                wo.button_pending()
+            elif wo.state in ('done', 'cancel') and state == 'progress':
+                wo.write({'state': 'ready'})  # Middle step to solve further conflict
             ids_to_update.append(wo.id)
-            ids_by_state[wo.state].append(wo.id)
+
         wo_to_update = self.browse(ids_to_update)
-        self.browse(ids_by_state.get('progress')).button_pending()
+        if wo.state == 'done' and state != 'done':
+            wo_to_update.qty_produced = 0
+
         if state == 'cancel':
             wo_to_update.action_cancel()
         elif state == 'done':
-            wo_to_done = set()
-            for wo in wo_to_update:
-                if float_is_zero(wo.qty_produced, precision_digits=0):
-                    wo.qty_produced = wo.qty_producing or wo.qty_to_produce
-                wo_to_done.add(wo.id)
-            wo_to_done = self.env['mrp.workorder'].browse(wo_to_done)
-            return wo_to_done.with_context(check_create_backorder=True).action_mark_as_done()
+            return wo_to_update.action_mark_as_done()
         elif state == 'progress':
-            self.browse(ids_by_state['cancel'] + ids_by_state['done']).write({'state': 'ready'})  # Middle step to solve further conflict
-            wo_to_update.button_start()
+            return wo_to_update.button_start()
         else:
             wo_to_update.write({'state': state})
 
@@ -677,9 +686,23 @@ class MrpWorkorder(models.Model):
             total += duration * (workorder.costs_hour or workorder.workcenter_id.costs_hour)
         return total
 
+    def _action_open_unblock_workcenter_wizard(self, message):
+        workcenters = self.workcenter_id.filtered(lambda wc: wc.working_state == 'blocked')
+        return {
+            'name': _('Invalid Operation'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'mrp.workcenter.unblock',
+            'views': [(False, 'form')],
+            'target': 'new',
+            'context': {
+                'default_workcenter_ids': workcenters.ids,
+                'default_message': message,
+            },
+        }
+
     def button_start(self, raise_on_invalid_state=False):
         if any(wo.working_state == 'blocked' for wo in self):
-            raise UserError(_('Please unblock the work center to start the work order.'))
+            return self._action_open_unblock_workcenter_wizard(self.env._('Please unblock the work center to start the work order.'))
         for wo in self:
             if any(not time.date_end for time in wo.time_ids.filtered(lambda t: t.user_id.id == self.env.user.id)):
                 continue
@@ -971,6 +994,12 @@ class MrpWorkorder(models.Model):
         return duration
 
     def action_mark_as_done(self):
+        if any(wo.working_state == 'blocked' for wo in self):
+            return self._action_open_unblock_workcenter_wizard(self.env._('Please unblock the work center to validate the work order.'))
+        self.button_finish()
+        self._set_default_time_log()
+
+    def _set_default_time_log(self):
         for wo in self:
             if wo.working_state == 'blocked':
                 raise UserError(_('Please unblock the work center to validate the work order'))

@@ -1,4 +1,4 @@
-import { useProps, t } from "@odoo/owl";
+import { props, t } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
@@ -14,7 +14,7 @@ export class MOListViewDropdown extends BadgeField {
         DropdownItem,
     };
 
-    props = useProps({
+    props = props({
         ...standardFieldProps,
         display: t.string(),
     });
@@ -61,18 +61,14 @@ export class MOListViewDropdown extends BadgeField {
         if (!ids || ids.length == 0) {
             ids = [this.props.record.resId];
         }
-        let result;
-        if (args !== undefined) {
-            result = await this.orm.call("mrp.workorder", functionName, [ids, ...args]);
-        } else {
-            result = await this.orm.call("mrp.workorder", functionName, [ids]);
-        }
-        if (result && typeof result === "object") {
-            return this.action.doAction(result, {
-                onClose: async () => {
-                    await this.reload();
-                },
+        const result = args !== undefined
+            ? await this.orm.call("mrp.workorder", functionName, [ids, ...args])
+            : await this.orm.call("mrp.workorder", functionName, [ids]);
+        if (result && typeof result === "object" && result.type) {
+            await this.action.doAction(result, {
+                onClose: () => this.reload(),
             });
+            return;
         }
         await this.reload();
     }
