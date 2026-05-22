@@ -139,13 +139,16 @@
             "website.set_1_landscape_sm_2": "website.set_2_square_md_3"
         },
         "s_freegrid.xml": {
-            "website.set_2_square_md_5": "website.set_1_landscape_sm_1",
+            "website.set_2_square_md_5": "website.landscape_md_7",
             "website.set_2_square_md_6": "website.portrait_lg_3"
         },
         "s_image_gallery.xml": {
             "s_image_gallery": {
                 "website.set_2_square_md_1": "website.landscape_md_4",
                 "website.landscape_md_1": "website.landscape_md_7"
+            }
+            "s_images_wall": {
+                "website.set_1_landscape_sm_2": "website.landscape_md_7",
             }
         },
         "s_cards_grid.xml": {
