@@ -1,4 +1,4 @@
-import { useProps, t } from "@odoo/owl";
+import { useProps, props, t } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
@@ -15,6 +15,7 @@ export class MOListViewDropdown extends BadgeField {
     };
 
     props = useProps({
+    props = props({
         ...standardFieldProps,
         display: t.string(),
     });
