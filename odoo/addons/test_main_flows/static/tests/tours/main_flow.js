@@ -5,7 +5,6 @@ import { stepUtils } from "@web_tour/tour_utils";
 import { markup } from "@odoo/owl";
 
 registry.category("web_tour.tours").add('main_flow_tour', {
-    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
     steps: () => [
 ...stepUtils.toggleHomeMenu().map(step => {
     step.isActive = ["community", "mobile"];
@@ -57,13 +56,6 @@ registry.category("web_tour.tours").add('main_flow_tour', {
     content: _t("Let's enter the name."),
     tooltipPosition: 'left',
     run: "edit the_flow.product",
-}, {
-    trigger: ".o_field_widget[name=tracking] input",
-    content: _t("Un-set product tracking"),
-    tooltipPosition: 'right',
-    run: function({ anchor }) {
-        anchor.value = "";
-    },
 }, {
     trigger: '.o_notebook .nav-link:contains("Inventory")',
     content: _t('Go to inventory tab'),
@@ -278,6 +270,10 @@ stepUtils.autoExpandMoreButtons(),
 },
 {
     isActive: ["mobile"],
+    trigger: ".modal:not(.o_inactive_modal) .o_field_widget[name=uom_id] input:value(Units)",
+},
+{
+    isActive: ["mobile"],
     trigger: ".modal:not(.o_inactive_modal) .modal-footer .btn-primary:contains(Save & Close):enabled",
     content: _t('Save & Close'),
     tooltipPosition: 'right',
@@ -296,6 +292,10 @@ stepUtils.autoExpandMoreButtons(),
 },
 {
     trigger: "body:not(:has(.modal))",
+},
+{
+    isActive: ["mobile"],
+    trigger: ".o_form_editable",
 },
 {
     isActive: ["mobile"],
@@ -421,7 +421,7 @@ stepUtils.autoExpandMoreButtons(),
     run: "edit the_flow.vendor",
 }, {
     isActive: ["auto", "desktop"],
-    trigger: ".ui-menu-item > a:contains('the_flow.vendor')",
+    trigger: ".ui-menu-item:first > a:contains('the_flow.vendor')",
     run: "click",
 },
 {
@@ -445,7 +445,7 @@ stepUtils.autoExpandMoreButtons(),
 },
 {
     isActive: ["mobile"],
-    trigger: ".modal:not(.o_inactive_modal) .modal-title:contains('Vendor')",
+    trigger: ".modal:not(.o_inactive_modal) .o_field_widget[name=uom_id] input:value(Units)",
 },
 {
     isActive: ["mobile"],
@@ -467,6 +467,10 @@ stepUtils.autoExpandMoreButtons(),
 },
 {
     trigger: "body:not(:has(.modal))",
+},
+{
+    isActive: ["mobile"],
+    trigger: ".o_form_editable",
 },
 {
     isActive: ["mobile"],
@@ -666,7 +670,7 @@ stepUtils.autoExpandMoreButtons(),
     run: "edit the_flow.customer",
 }, {
     isActive: ["auto", "desktop"],
-    trigger: ".ui-menu-item > a:contains('the_flow.customer')",
+    trigger: ".ui-menu-item:first > a:contains('the_flow.customer')",
     run: "click",
 },
 {
@@ -749,8 +753,16 @@ stepUtils.autoExpandMoreButtons(),
     run: "edit the_flow.product",
 }, {
     isActive: ["desktop"],
-    trigger: ".ui-menu-item > a:contains('the_flow.product')",
+    trigger: ".ui-menu-item:first > a:contains('the_flow.product')",
     run: "click",
+},
+{
+    isActive: ["auto", "desktop"],
+    trigger: `body:not(:has(.o_popover)) .o_data_row:eq(0) [name=product_template_id] input:value(the_flow.product)`,
+},
+{
+    isActive: ["auto", "desktop"],
+    trigger: "[name=tax_totals] .o_list_monetary:contains($ 1.15)",
 },
 {
     isActive: ["mobile"],
@@ -766,7 +778,7 @@ stepUtils.autoExpandMoreButtons(),
 ...stepUtils.mobileKanbanSearchMany2X('Product', 'the_flow.product'),
 {
     isActive: ["desktop"],
-    trigger: ".o_field_widget[name=order_line] .o_field_x2many_list_row_add > button",
+    trigger: ".o_field_widget[name=order_line] button:contains(add a product)",
     content: _t("Click here to add some lines to your quotations."),
     tooltipPosition: "bottom",
     run: "click",
@@ -795,7 +807,7 @@ stepUtils.autoExpandMoreButtons(),
 },
 {
     isActive: ["desktop"],
-    trigger: '.o_field_widget[name=order_line] .o_data_row:nth-child(2).o_selected_row',
+    trigger: ".o_field_widget[name=order_line] .o_data_row:nth-child(2).o_selected_row",
 },
 {
     /**
@@ -810,9 +822,18 @@ stepUtils.autoExpandMoreButtons(),
     run: "edit the_flow.service",
 }, {
     isActive: ["desktop"],
-    trigger: ".ui-menu-item > a:contains('the_flow.service')",
+    trigger: ".ui-menu-item:first > a:contains('the_flow.service')",
     run: "click",
-}, {
+}, 
+{
+    isActive: ["auto", "desktop"],
+    trigger: `body:not(:has(.o_popover)) .o_data_row:eq(1) [name=product_template_id] input:value(the_flow.service)`,
+},
+{
+    isActive: ["auto", "desktop"],
+    trigger: "[name=tax_totals] .o_list_monetary:contains($ 2.30)",
+},
+{
     isActive: ["desktop"],
     content: "click somewhere else to exit cell focus",
     trigger: "body",
@@ -908,7 +929,12 @@ stepUtils.autoExpandMoreButtons(),
     isActive: ["mobile"],
     trigger: ".o_control_panel_navigation .btn .fa-search",
     run: "click",
-}, {
+},
+{
+    isActive: ["desktop"],
+    trigger: ".o_breadcrumb .active:contains('Replenishment')",
+},
+{
     isActive: ["desktop"],
     trigger: "td:contains('the_flow.component2')",
     run: "click",
@@ -938,6 +964,36 @@ stepUtils.autoExpandMoreButtons(),
     trigger: ".o_form_button_save",
     content: markup(_t("<p>Save this reordering rule</p>")),
     tooltipPosition: "bottom",
+    run: "click",
+},
+{
+    isActive: ["mobile"],
+    trigger: ".o_form_saved",
+},
+{
+    isActive: ["mobile"],
+    trigger: ".o_back_button",
+    run: "click",
+},
+{
+    // Wait for the view to load before checking which view type is active
+    isActive: ["mobile"],
+    trigger: ".o_list_view, .o_kanban_view",
+},
+{
+    // Switch from kanban to list view on mobile if needed (Order button only in list view)
+    isActive: ["mobile", ".o_kanban_view"],
+    trigger: ".o_cp_switch_buttons .dropdown-toggle",
+    run: "click",
+},
+{
+    isActive: ["mobile", ".o_kanban_view"],
+    trigger: ".dropdown-item:has(.oi-view-list)",
+    run: "click",
+},
+{
+    isActive: ["mobile"],
+    trigger: ".o_list_view .o_replenish_buttons",
     run: "click",
 },
 //Go to purchase:
@@ -1060,6 +1116,10 @@ stepUtils.autoExpandMoreButtons(),
 {
     isActive: ["mobile"],
     trigger: '.o_navbar_breadcrumbs .o_breadcrumb:contains("S0")',
+},
+{
+    isActive: ["desktop"],
+    trigger: '.o_breadcrumb .active:contains("S0")',
 },
 stepUtils.autoExpandMoreButtons(true),
 {
@@ -1241,7 +1301,7 @@ stepUtils.autoExpandMoreButtons(true),
     run: "edit the_flow.customer",
 }, {
     isActive: ["auto", "desktop", "enterprise"],
-    trigger: ".ui-menu-item > a:contains('the_flow.customer')",
+    trigger: ".ui-menu-item:first > a:contains('the_flow.customer')",
     run: "click",
 },
 {

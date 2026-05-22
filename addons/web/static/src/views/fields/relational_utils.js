@@ -260,6 +260,9 @@ export class Many2XAutocomplete extends Component {
                 },
                 fieldString,
                 onClose: () => {
+                    if (!this.autoCompleteContainer.el) {
+                        return;
+                    }
                     const autoCompleteInput = this.autoCompleteContainer.el.querySelector("input");
 
                     // There are two cases:
