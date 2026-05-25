@@ -79,10 +79,6 @@ class HrLeave(models.Model):
             )
 
     def _l10n_in_is_working(self, on_date, public_holiday_dates, resource_calendar):
-        if self.work_entry_type_id.l10n_in_sandwich_policy == "public_holiday":
-            return on_date not in public_holiday_dates
-        elif self.work_entry_type_id.l10n_in_sandwich_policy == "weekend":
-            return resource_calendar._works_on_date(on_date)
         return on_date not in public_holiday_dates and resource_calendar._works_on_date(on_date)
 
     def _l10n_in_count_adjacent_non_working(self, start_date, public_holiday_dates, resource_calendar, reverse=False, include_start=False):
