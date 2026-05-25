@@ -941,6 +941,18 @@ class ProductTemplate(models.Model):
             )
         }
 
+    def action_open_packaging_barcodes(self):
+        self.ensure_one()
+        allowed_uoms = self.sudo()._get_packaging_barcode_uoms()
+        action = self.uom_id.action_open_packaging_barcodes()
+        action['domain'] = [('product_id', 'in', self.product_variant_ids.ids)]
+        action['context'] = {
+            'default_product_id': self.product_variant_id.id,
+            'product_ids': self.product_variant_ids.ids,
+            'uom_ids': allowed_uoms.ids,
+        }
+        return action
+
     #=== BUSINESS METHODS ===#
 
     def _get_product_price_context(self, combination):
@@ -1750,6 +1762,9 @@ class ProductTemplate(models.Model):
         :rtype: `uom.uom` recordset
         """
         return self.uom_id
+
+    def _get_packaging_barcode_uoms(self):
+        return self.product_variant_ids._get_packaging_barcode_uoms()
 
     ###################
     # DEMO DATA SETUP #

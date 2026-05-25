@@ -112,6 +112,9 @@ class ProductTemplate(models.Model):
             }
         return res
 
+    def _get_packaging_barcode_uoms(self):
+        return self.product_variant_ids._get_packaging_barcode_uoms()
+
     def _get_backend_root_menu_ids(self):
         return super()._get_backend_root_menu_ids() + [self.env.ref('mrp.menu_mrp_root').id]
 
@@ -384,6 +387,16 @@ class ProductProduct(models.Model):
         if bom_kits:
             res['context'].pop('default_product_tmpl_id', None)
         return res
+
+    def _get_packaging_barcode_uoms(self):
+        allowed_uoms = super()._get_packaging_barcode_uoms()
+        boms = self.bom_ids
+        if boms and 'display_attribute_name' in self.env.context:
+            boms = boms.filtered(lambda b: not b.product_id or b.product_id == self)
+        allowed_uoms |= boms.uom_id
+        if self.env.user.has_group('mrp.group_mrp_byproducts'):
+            allowed_uoms |= self.env['mrp.bom.byproduct'].search([('product_id', 'in', self.ids)]).uom_id
+        return allowed_uoms
 
     def _match_all_variant_values(self, product_template_attribute_value_ids):
         """ It currently checks that all variant values (`product_template_attribute_value_ids`)

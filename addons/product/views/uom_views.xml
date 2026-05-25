@@ -5,9 +5,21 @@
         <field name="model">product.uom</field>
         <field name="arch" type="xml">
             <list string="Packaging Barcodes" editable="bottom">
-                <field name="product_id"/>
+                <field name="product_id" column_invisible="context.get('product_ids')"/>
+                <field
+                    name="product_id"
+                    column_invisible="not context.get('product_ids')"
+                    domain="[('id', 'in', context.get('product_ids'))]"
+                    options="{'no_create': True}"
+                />
                 <field name="barcode"/>
-                <field name="uom_id" readonly="context.get('default_uom_id')" optional="hide"/>
+                <field
+                    name="uom_id"
+                    widget="many2one_uom"
+                    readonly="context.get('default_uom_id')"
+                    domain="[('id', 'in', context.get('uom_ids'))]"
+                    options="{'no_create': True}"
+                />
             </list>
         </field>
     </record>
@@ -23,12 +35,20 @@
                         class="oe_stat_button"
                         icon="fa-barcode"
                         type="object"
-                        context="{'default_uom_id': id}"
                         name="action_open_packaging_barcodes">
                         <div class="o_field_widget o_stat_info">
                             <span class="o_stat_text">Packaging Barcodes</span>
                         </div>
                     </button>
+                </div>
+                <div invisible="not context.get('has_variants')">
+                    Barcodes can be configured on
+                    <button
+                        string="each variant"
+                        name="action_open_packaging_barcodes"
+                        type="object"
+                        class="oe_link p-0 align-baseline"
+                    />.
                 </div>
             </xpath>
         </field>

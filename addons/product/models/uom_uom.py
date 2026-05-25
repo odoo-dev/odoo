@@ -20,11 +20,18 @@ class UomUom(models.Model):
 
     def action_open_packaging_barcodes(self):
         self.ensure_one()
+        domain = Domain('uom_id', '=', self.id)
+        if product_ids := self.env.context.get('product_ids'):
+            domain &= Domain('product_id', 'in', product_ids)
         return {
             'type': 'ir.actions.act_window',
             'name': _('Packaging Barcodes'),
             'res_model': 'product.uom',
             'view_mode': 'list',
             'view_id': self.env.ref('product.product_uom_list_view').id,
-            'domain': [('uom_id', '=', self.id)],
+            'domain': domain,
+            'context': {
+                **self.env.context,
+                'default_uom_id': self.id,
+            },
         }
