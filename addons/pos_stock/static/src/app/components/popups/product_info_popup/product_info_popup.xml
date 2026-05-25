@@ -1,32 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="pos_stock.ProductInfoPopup" t-inherit="point_of_sale.ProductInfoPopup" t-inherit-mode="extension">
-        <xpath expr="//div[hasclass('section-inventory')]//h3" position="inside">
-            <t t-if="this.pos.session.update_stock_at_closing"> (as of opening)</t>
-        </xpath>
-        <div class="section-inventory-body" position="replace">
-            <div class="section-inventory-body">
-                <t t-foreach="this.props.info.productInfo.warehouses" t-as="warehouse" t-key="warehouse.name">
-                    <div class="d-flex flex-column flex-md-row gap-2">
-                        <div>
-                            <t t-out="warehouse.name" class="table-name"/>
-                            :
+        <xpath expr="//div[hasclass('section-inventory')]" position="replace">
+            <div class="section-inventory mt-3 mb-4 pb-4 border-bottom text-start">
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-center justify-content-between gap-2">
+                        <h3 class="section-title align-items-center">Inventory</h3>
+                        <button class="snooze-btn btn btn-lg lh-lg text-nowrap" t-on-click="this.openSnoozeDialog" t-attf-class="{{this.state.activeSnooze ? 'btn-warning' : 'btn-secondary'}}">
+                            <i class="fa fa-clock-o me-1" t-if="!(this.state.activeSnooze and this.ui.isSmall)" aria-hidden="true"></i>
+                            <span t-if="!this.state.activeSnooze and !this.ui.isSmall">Snooze</span>
+                            <span class="m-0" t-if="this.state.activeSnooze" style="font-variant-numeric: tabular-nums;">
+                                <t t-out="this.state.countdown" />
+                            </span>
+                        </button>
+                    </div>
+                    <div class="section-inventory-body">
+                        <div t-if="!this.ui.isSmall" class="w-100">
+                            <t t-foreach="this.props.info.productInfo.warehouses" t-as="warehouse" t-key="warehouse.name">
+                                <div class="row align-items-center mb-2">
+                                    <div class="col-4 py-2 pe-3 text-start text-break">
+                                        <t t-out="warehouse.name"/> :
+                                    </div>
+                                    <div class="col py-2 pe-3 text-nowrap text-start">
+                                        <i t-attf-class="fa fa-circle text-{{ warehouse.available_quantity &gt; 0 ? 'success' : 'danger' }} me-2"></i>
+                                        <span class="fw-bolder"><t t-out="warehouse.available_quantity"/></span>
+                                        <span class="ms-1"><t t-out="warehouse.uom"/> on hand</span>
+                                    </div>
+                                    <div class="col py-2 px-3 text-nowrap text-start border-start border-end">
+                                        <span class="fw-bolder"><t t-out="warehouse.free_qty"/></span>
+                                        <span class="ms-1"><t t-out="warehouse.uom"/> available</span>
+                                    </div>
+                                    <div class="col py-2 ps-3 text-nowrap text-start">
+                                        <span class="fw-bolder"><t t-out="warehouse.forecasted_quantity"/></span>
+                                        <span class="ms-1"><t t-out="warehouse.uom"/> forecasted</span>
+                                    </div>
+                                </div>
+                            </t>
                         </div>
-                        <div>
-                            <span class="me-1 fw-bolder"><t t-out="warehouse.free_qty" class="table-name"/></span>
-                            <t t-out="warehouse.uom"/> available,
-                        </div>
-                        <div>
-                            <span class="me-1 fw-bolder"><t t-out="warehouse.forecasted_quantity"/></span>
-                            forecasted
+                        <div t-else="" class="w-100">
+                            <t t-foreach="this.props.info.productInfo.warehouses" t-as="warehouse" t-key="warehouse.name">
+                                <div class="warehouse-mobile-view mb-4 w-100">
+                                    <div class="fw-bolder fs-5 mb-3"><t t-out="warehouse.name"/></div>
+                                    <div class="d-flex w-100 justify-content-between text-align-items-center">
+                                        <div class="flex-fill d-flex flex-column text-start">
+                                            <span class="mb-2">Available</span>
+                                            <span class="fs-5">
+                                                <span class="fw-bolder"><t t-out="warehouse.free_qty"/></span>
+                                                <span class="ms-1"><t t-out="warehouse.uom"/></span>
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill d-flex flex-column text-center border-start border-end">
+                                            <span class="mb-2">On hand</span>
+                                            <span class="fs-5 d-flex align-items-center justify-content-center">
+                                                <i t-attf-class="fa fa-circle fs-6 text-{{ warehouse.available_quantity &gt; 0 ? 'success' : 'danger' }} me-2"></i>
+                                                <span class="fw-bolder"><t t-out="warehouse.available_quantity"/></span>
+                                                <span class="ms-1"><t t-out="warehouse.uom"/></span>
+                                            </span>
+                                        </div>
+                                        <div class="flex-fill d-flex flex-column text-end">
+                                            <span class="mb-2">Forecasted</span>
+                                            <span class="fs-5">
+                                                <span class="fw-bolder"><t t-out="warehouse.forecasted_quantity"/></span>
+                                                <span class="ms-1"><t t-out="warehouse.uom"/></span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
                         </div>
                     </div>
-                    <div>
-                        On hand: <span class="me-1 fw-bolder"><t t-out="warehouse.available_quantity"/></span>
-                        <t t-out="warehouse.uom"/>
-                    </div>
-                </t>
+                </div>
             </div>
-        </div>
+        </xpath>
     </t>
 </templates>

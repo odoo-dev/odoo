@@ -18,11 +18,12 @@
                 <t t-out="this.props.productTemplate.productDescriptionMarkup" />
             </div>
             <div class="section-inventory mt-3 mb-4 pb-4 border-bottom text-start">
-                <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-between gap-2">
                     <div class="d-flex flex-column">
                         <h3 class="section-title">Inventory</h3>
                         <div class="section-inventory-body">
                             <div>
+                                <i t-attf-class="fa fa-circle text-{{ this.props.info.productInfo.free_qty &gt; 0 ? 'success' : 'danger' }} me-2" style="font-size: 0.6rem;"></i>
                                 On hand: <span class="me-1 fw-bolder"><t t-out="this.props.info.productInfo.free_qty"/></span>
                                 <t t-out="this.props.info.productInfo.uom"/>
                             </div>
