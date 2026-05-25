@@ -1134,6 +1134,25 @@ class ProductProduct(models.Model):
                             ('res_id', '=', self.product_tmpl_id.id)]
         return res
 
+    def _get_packaging_barcode_uoms(self):
+        allowed_uoms = self.uom_id | self.uom_ids | self.extra_uom_ids
+        if self.seller_ids:
+            allowed_uoms |= self.seller_ids.filtered(lambda s: not s.product_id or s.product_id == self).mapped('uom_id')
+        return allowed_uoms
+
+    def action_open_packaging_barcodes(self):
+        self.ensure_one()
+        allowed_uoms = self._get_packaging_barcode_uoms()
+        action = self.uom_id.action_open_packaging_barcodes()
+        action['domain'] = [('product_id', 'in', self.ids)]
+        action['context'] = {
+            'create': True,
+            'default_product_id': self.id,
+            'product_ids': self.ids,
+            'uom_ids': allowed_uoms.ids,
+        }
+        return action
+
     #=== BUSINESS METHODS ===#
 
     def _prepare_sellers(self, params=False):

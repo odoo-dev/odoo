@@ -24,9 +24,3 @@ class ProductUom(models.Model):
         domain = [('barcode', 'in', [b for b in self.mapped('barcode') if b])]
         if self.env['product.product'].search_count(domain, limit=1):
             raise ValidationError(_("A product already uses the barcode"))
-
-    def _compute_display_name(self):
-        if not self.env.context.get('show_variant_name'):
-            return super()._compute_display_name()
-        for record in self:
-            record.display_name = f"{record.barcode} for: {record.product_id.display_name}"

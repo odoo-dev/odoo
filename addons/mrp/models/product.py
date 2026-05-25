@@ -112,6 +112,15 @@ class ProductTemplate(models.Model):
             }
         return res
 
+    def _get_packaging_barcode_uoms(self):
+        allowed_uoms = super()._get_packaging_barcode_uoms()
+        if self.bom_ids:
+            allowed_uoms |= self.bom_ids.mapped('uom_id')
+        byproduct_lines = self.env['mrp.bom.byproduct'].search([('product_id', 'in', self.product_variant_ids.ids)])
+        if byproduct_lines:
+            allowed_uoms |= byproduct_lines.mapped('uom_id')
+        return allowed_uoms
+
     def _get_backend_root_menu_ids(self):
         return super()._get_backend_root_menu_ids() + [self.env.ref('mrp.menu_mrp_root').id]
 
@@ -375,6 +384,16 @@ class ProductProduct(models.Model):
         if bom_kits:
             res['context'].pop('default_product_tmpl_id', None)
         return res
+
+    def _get_packaging_barcode_uoms(self):
+        allowed_uoms = super()._get_packaging_barcode_uoms()
+        boms = self.bom_ids.filtered(lambda b: not b.product_id or b.product_id == self)
+        if boms:
+            allowed_uoms |= boms.mapped('uom_id')
+        byproduct_lines = self.env['mrp.bom.byproduct'].search([('product_id', '=', self.id)])
+        if byproduct_lines:
+            allowed_uoms |= byproduct_lines.mapped('uom_id')
+        return allowed_uoms
 
     def _match_all_variant_values(self, product_template_attribute_value_ids):
         """ It currently checks that all variant values (`product_template_attribute_value_ids`)

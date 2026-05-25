@@ -926,6 +926,24 @@ class ProductTemplate(models.Model):
             )
         }
 
+    def _get_packaging_barcode_uoms(self):
+        allowed_uoms = self.uom_id | self.uom_ids
+        if self.seller_ids:
+            allowed_uoms |= self.seller_ids.mapped('uom_id')
+        return allowed_uoms
+
+    def action_open_packaging_barcodes(self):
+        self.ensure_one()
+        allowed_uoms = self._get_packaging_barcode_uoms()
+        action = self.uom_id.action_open_packaging_barcodes()
+        action['domain'] = [('product_id', 'in', self.product_variant_ids.ids)]
+        action['context'] = {
+            'default_product_id': self.product_variant_id.id,
+            'product_ids': self.product_variant_ids.ids,
+            'uom_ids': allowed_uoms.ids,
+        }
+        return action
+
     #=== BUSINESS METHODS ===#
 
     def _get_product_price_context(self, combination):
