@@ -779,7 +779,9 @@ class TestTaxesDownPaymentSale(TestTaxCommonSale, TestTaxesDownPayment):
             so, [{"amount_untaxed": 6000.0, "amount_tax": 750.0, "amount_total": 6750.0}]
         )
 
-        dp_invoice = self._create_down_payment_invoice(so, "percent", 50, post=True)
+        dp_invoice = self._create_down_payment_invoice(
+            so, "fixed", 50, post=True, down_payment_method="percent"
+        )
         self.assertRecordValues(
             dp_invoice, [{"amount_untaxed": 3000.0, "amount_tax": 375.0, "amount_total": 3375.0}]
         )
@@ -910,7 +912,7 @@ class TestTaxesDownPaymentSale(TestTaxCommonSale, TestTaxesDownPayment):
         })
         sale_order.action_confirm()
         payment_params = {
-            "advance_payment_method": "percentage",
+            "advance_payment_method": "fixed",
             "amount": 30,
             "sale_order_ids": [Command.set(sale_order.ids)],
         }

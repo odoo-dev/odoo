@@ -152,7 +152,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         # let's do an invoice for a deposit of 5%
 
         adv_wiz = self.env['sale.advance.payment.inv'].with_context(active_ids=[self.so.id]).create({
-            'advance_payment_method': 'percentage',
+            'advance_payment_method': 'fixed',
             'amount': 5.0,
         })
         act = adv_wiz.create_invoices()
@@ -1464,7 +1464,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         so.action_confirm()
 
         adv_wiz = self.env['sale.advance.payment.inv'].with_context(active_ids=[so.id]).create({
-            'advance_payment_method': 'percentage',
+            'advance_payment_method': 'fixed',
             'amount': 5.0,
         })
 
