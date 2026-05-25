@@ -405,7 +405,13 @@ class AccountMove(models.Model):
             sign = -1 if move.is_refund() else 1
 
             if move.is_sale_document():
-                if not com_partner._l10n_es_is_foreign() or is_simplified:
+
+                require_desglose_operacion = (
+                    'IDOtro' in partner_info
+                    or partner_info.get('NIF', '').startswith('N')
+                )
+
+                if not require_desglose_operacion or is_simplified:
                     tax_details_info_vals = move._l10n_es_edi_get_invoices_tax_details_info()
                     invoice_node['TipoDesglose'] = {'DesgloseFactura': tax_details_info_vals['tax_details_info']}
 

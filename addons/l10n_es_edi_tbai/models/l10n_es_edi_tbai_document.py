@@ -413,16 +413,39 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
             'partner_address': ', '.join(filter(None, [partner.street, partner.street2, partner.city])),
             'alt_id_number': partner.vat or 'NO_DISPONIBLE',
         }
-
         if not partner._l10n_es_is_foreign() and partner.vat:
-            recipient_values['nif'] = split_vat(partner.vat, default_country_code='ES')[1]
+            # Español con NIF → bloque <NIF> (sin IDOtro)
+            recipient_values['nif'] = partner.vat[2:] if partner.vat.startswith('ES') else partner.vat
 
-        elif partner.country_id and 'EU' in partner.country_id.country_group_codes:
+        elif partner.vat and partner.country_id and 'EU' in partner.country_id.country_group_codes:
+            # Operador intracomunitario con NIF-IVA → IDType 02 (sin CodigoPais)
             recipient_values['alt_id_type'] = '02'
+            recipient_values['alt_id_number'] = partner.vat
 
         else:
-            recipient_values['alt_id_type'] = '04' if partner.vat else '06'
+            # Extranjero: hay que aportar documento. CodigoPais obligatorio.
             recipient_values['alt_id_country'] = partner.country_id.code if partner.country_id else None
+
+            if partner.l10n_es_passport:
+                recipient_values['alt_id_type'] = '03'  # Pasaporte
+                recipient_values['alt_id_number'] = partner.l10n_es_passport
+            elif partner.l10n_es_foreign_id:
+                recipient_values['alt_id_type'] = '04'  # Doc. oficial país de residencia
+                recipient_values['alt_id_number'] = partner.l10n_es_foreign_id
+            elif partner.l10n_es_res_cert:
+                recipient_values['alt_id_type'] = '05'  # Certificado de residencia
+                recipient_values['alt_id_number'] = partner.l10n_es_res_cert
+            elif partner.l10n_es_other_id:
+                recipient_values['alt_id_type'] = '06'  # Otro doc. probatorio
+                recipient_values['alt_id_number'] = partner.l10n_es_other_id
+            elif partner.vat:
+                # VAT no comunitario sin documento específico → doc. oficial
+                recipient_values['alt_id_type'] = '04'
+                recipient_values['alt_id_number'] = partner.vat
+            else:
+                # Sin nada utilizable → otro doc. probatorio, ID = NO_DISPONIBLE
+                recipient_values['alt_id_type'] = '06'
+                # alt_id_number se queda como 'NO_DISPONIBLE'
 
         return {'recipient': recipient_values}
 
