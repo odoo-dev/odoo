@@ -28,6 +28,7 @@ from odoo.tests.common import (
 )
 
 from odoo.addons.bus.models.bus import BusBus, channel_with_db, json_dump
+from odoo.addons.bus.tools import encode_snapshot
 from odoo.addons.bus.websocket import CloseCode, Websocket, WebsocketConnectionHandler
 
 
@@ -98,7 +99,7 @@ class MockBusTransactions:
     def snapshot(self):
         xmin = min(self._active_xids) if self._active_xids else self._next_xid
         xip = ",".join(map(str, sorted(self._active_xids)))
-        return f"{xmin}:{self._next_xid}:{xip}"
+        return encode_snapshot(f"{xmin}:{self._next_xid}:{xip}")
 
     def tx(self, cr=None):
         xid = self._next_xid

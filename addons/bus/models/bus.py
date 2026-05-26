@@ -18,7 +18,7 @@ from odoo.service.server import CommonServer
 from odoo.tools import config, json_default, SQL
 from odoo.tools.misc import OrderedSet
 
-from ..tools import orjson
+from ..tools import decode_snapshot, encode_snapshot, orjson
 
 _logger = logging.getLogger(__name__)
 
@@ -205,7 +205,7 @@ class BusBus(models.Model):
     @staticmethod
     def get_current_pg_snapshot(cr):
         cr.execute("SELECT pg_current_snapshot()")
-        return cr.fetchone()[0]
+        return encode_snapshot(cr.fetchone()[0])
 
 
 def fetch_bus_notifications(
@@ -243,13 +243,13 @@ def fetch_bus_notifications(
         return BusBus.get_current_pg_snapshot(cr), []
     where_parts = []
     for snap, channels in snapshot_to_channels.items():
-        _, str_xmax, str_xip = snap.split(":")
+        _, xmax, xips = decode_snapshot(snap)
         where_parts.append(
             SQL(
                 "(channel = ANY(%(channels)s) AND (create_xid >= %(xmax)s OR create_xid = ANY(%(xip)s)))",
                 channels=[json_dump(c) for c in channels],
-                xmax=int(str_xmax),
-                xip=[int(x) for x in str_xip.split(",")] if str_xip else [],
+                xmax=xmax,
+                xip=xips,
             ),
         )
     query = SQL(

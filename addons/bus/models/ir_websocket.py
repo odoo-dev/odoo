@@ -7,6 +7,7 @@ from odoo.http.session import check
 from odoo.tools.misc import OrderedSet
 
 from odoo.addons.bus.models.bus import BusBus, channel_with_db, dispatch
+from odoo.addons.bus.tools import decode_snapshot
 from odoo.addons.bus.websocket import wsrequest
 
 _logger = logging.getLogger(__name__)
@@ -66,7 +67,7 @@ class IrWebsocket(models.AbstractModel):
         channels = self._prepare_subscribe_channels(data["channels"])
         dispatch.subscribe(channels, data["from_snapshot"], wsrequest.ws)
         if data["check_outdated"]:
-            xmin = int(data["from_snapshot"].split(":")[0])
+            xmin, _, _ = decode_snapshot(data["from_snapshot"])
             from_notif_domain = [("create_xid", "<=", xmin)]
             # sudo - bus.bus: checking if last received notification still exists is acceptable.
             if self.env["bus.bus"].sudo().search_count(from_notif_domain, limit=1) == 0:
