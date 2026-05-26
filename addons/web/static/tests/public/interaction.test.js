@@ -1122,6 +1122,7 @@ describe("waitFor...", () => {
                     expect.step("start");
                 }
             }
+
             await startInteraction(Test, TemplateTest, { waitForStart: false });
             expect.verifySteps(["willstart"]);
             await advanceTime(75);
