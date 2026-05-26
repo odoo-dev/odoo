@@ -1688,7 +1688,29 @@ class AccountMove(models.Model):
         """
         for move in self:
             if move.is_invoice(include_receipts=True):
-                base_lines, _tax_lines = move._get_rounded_base_and_tax_lines()
+                # Default to keeping imported/manual taxes (preserving XML values)
+                round_from_tax_lines = True
+
+                if move._origin:
+                    if move.currency_id != move._origin.currency_id:
+                        round_from_tax_lines = False
+                    else:
+                        for line in move.invoice_line_ids.filtered(lambda l: l.display_type == 'product'):
+                            if not line._origin:
+                                round_from_tax_lines = False
+                                break
+
+                            qty_changed = float_compare(line.quantity, line._origin.quantity, precision_digits=3) != 0
+                            price_changed = float_compare(line.price_unit, line._origin.price_unit, precision_digits=3) != 0
+                            discount_changed = float_compare(line.discount, line._origin.discount, precision_digits=3) != 0
+                            taxes_changed = set(line.tax_ids._origin.ids) != set(line._origin.tax_ids.ids)
+
+                            if qty_changed or price_changed or discount_changed or taxes_changed:
+                                round_from_tax_lines = False
+                                break
+
+                base_lines, _tax_lines = move._get_rounded_base_and_tax_lines(round_from_tax_lines=round_from_tax_lines)
+
                 move.tax_totals = self.env['account.tax']._get_tax_totals_summary(
                     base_lines=base_lines,
                     currency=move.currency_id,
