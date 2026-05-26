@@ -1411,17 +1411,21 @@ class SaleOrderLine(models.Model):
     )
     def _compute_amount_to_invoice(self):
         for line in self:
-            if line.product_uom_qty:
-                uom_qty_to_consider = (
-                    line.qty_delivered
-                    if line.product_id.invoice_policy == "delivery"
-                    else line.product_uom_qty
-                )
-                qty_to_invoice = uom_qty_to_consider - line.qty_invoiced_posted
-                unit_price_total = line.price_total / line.product_uom_qty
-                line.amount_to_invoice = unit_price_total * qty_to_invoice
-            else:
+            if line.display_type:
                 line.amount_to_invoice = 0.0
+                continue
+
+            uom_qty_to_consider = (
+                line.qty_delivered
+                if line.product_id.invoice_policy == "delivery"
+                else line.product_uom_qty
+            )
+            if not uom_qty_to_consider:
+                line.amount_to_invoice = 0.0
+                continue
+            qty_to_invoice = uom_qty_to_consider - line.qty_invoiced_posted
+            unit_price_total = line.price_total / (line.product_uom_qty or uom_qty_to_consider)
+            line.amount_to_invoice = unit_price_total * qty_to_invoice
 
     @api.depends("price_unit", "qty_invoiced_at_date", "qty_delivered_at_date")
     @api.depends_context("accrual_entry_date")
