@@ -41,7 +41,13 @@ class SaleOrderLine(models.Model):
         if self.env.context.get('pricelist_update'):
             # Recompute the optional products only if the pricelist got updated
             return self.env['sale.order.line']
-        return self.filtered('sale_order_option_ids')
+        lines_to_exclude = self.env['sale.order.line']
+        for line in self.filtered('sale_order_option_ids'):
+            option = line.sale_order_option_ids[:1]
+            if option.quantity == line.product_uom_qty:
+                # qty unchanged from option → safe to skip recomputation
+                lines_to_exclude |= line
+        return lines_to_exclude
 
     #=== TOOLING ===#
 
