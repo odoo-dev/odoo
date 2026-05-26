@@ -234,7 +234,7 @@ class ProjectTask(models.Model):
     displayed_image_id = fields.Many2one('ir.attachment', domain="[('res_model', '=', 'project.task'), ('res_id', '=', id), ('mimetype', 'ilike', 'image')]", string='Cover Image')
 
     parent_id = fields.Many2one('project.task', string='Parent Task', inverse="_inverse_parent_id", index=True, domain="['!', ('id', 'child_of', id)]", tracking=True)
-    child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", domain="[('recurring_task', '=', False)]", export_string_translation=False)
+    child_ids = fields.One2many('project.task', 'parent_id', string="Sub-tasks", domain=[('recurring_task', '=', False), ('is_template', '=', False)], export_string_translation=False)
     subtask_count = fields.Integer("Sub-task Count", compute='_compute_subtask_count', export_string_translation=False)
     closed_subtask_count = fields.Integer("Closed Sub-tasks Count", compute='_compute_subtask_count', export_string_translation=False)
     project_privacy_visibility = fields.Selection(related='project_id.privacy_visibility', string="Project Visibility", tracking=False)
