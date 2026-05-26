@@ -11,10 +11,6 @@
         </xpath>
     </t>
     <t t-name="mail.ThreadIcon.typing">
-        <div class="o-mail-ThreadIcon-typingContainer rounded-pill" t-att="this.attr">
-            <div class="o-mail-ThreadIcon-typingBg bg-success rounded-pill">
-                <Typing channel="this.channel" size="['sm', 'smaller'].includes(this.props.size) ? 'sm' : 'md'" displayText="false" />
-            </div>
-        </div>
+        <ImStatus className="class" member="this.typingMember" size="this.props.size" typing="true"/>
     </t>
 </templates>
