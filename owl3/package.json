@@ -1,0 +1,74 @@
+{
+  "name": "owl-monorepo",
+  "private": true,
+  "description": "Odoo Web Library (OWL) monorepo",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "tools/playground"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build": "npm run build -w packages/owl-core && npm run build -w packages/owl-compiler && npm run build -w packages/owl-runtime && npm run build -w packages/owl",
+    "build:bundle": "npm run build -w packages/owl-core && npm run build -w packages/owl-compiler && npm run build -w packages/owl-runtime && npm run build:bundle -w packages/owl",
+    "build:runtime": "npm run build -w packages/owl-core && npm run build -w packages/owl-runtime",
+    "build:compiler": "npm run build -w packages/owl-core && npm run build -w packages/owl-compiler",
+    "build:core": "npm run build -w packages/owl-core",
+    "build:types": "npm run build:types -w packages/owl",
+    "build:devtools": "node tools/devtools/build.mjs",
+    "dev:devtools-chrome": "node tools/devtools/build.mjs --browser=chrome",
+    "dev:devtools-firefox": "node tools/devtools/build.mjs --browser=firefox",
+    "build:devtools-chrome": "node tools/devtools/build.mjs --browser=chrome --env=production",
+    "build:devtools-firefox": "node tools/devtools/build.mjs --browser=firefox --env=production",
+    "test": "npm run test -w packages/owl-core && npm run test -w packages/owl-compiler && npm run test -w packages/owl-runtime && npm run test -w packages/owl",
+    "test:types": "npm run test:types -w packages/owl",
+    "test:doc-links": "vitest run --config tools/vitest.config.ts",
+    "build:playground": "npm run build -w tools/playground",
+    "build:doc": "vitepress build doc",
+    "build:doc-v2": "vitepress build doc/v2",
+    "build:site": "npm run build && npm run build:playground && npm run build:doc && npm run build:doc-v2 && node tools/site/assemble.mjs",
+    "serve:site": "npm run build:site && python3 tools/site/server.py || python tools/site/server.py",
+    "playground:serve": "python3 tools/playground/server.py || python tools/playground/server.py",
+    "playground": "npm run build && npm run build:playground && npm run playground:serve",
+    "prettier": "prettier {packages/owl/src/*.ts,packages/owl/src/**/*.ts,packages/owl/tests/*.ts,packages/owl/tests/**/*.ts,doc/*.md,doc/**/*.md,tools/devtools/**/*.js} --write",
+    "prettier-fast": "git diff-tree --no-commit-id --name-only -r HEAD --diff-filter=d | xargs prettier --write",
+    "check-formatting": "prettier {packages/owl/src/*.ts,packages/owl/src/**/*.ts,packages/owl/tests/*.ts,packages/owl/tests/**/*.ts,doc/*.md,doc/**/*.md,tools/devtools/**/*.js} --check",
+    "lint": "eslint packages/owl/src/**/*.ts packages/owl/tests/**/*.ts",
+    "release": "node tools/release.cjs",
+    "compile_templates": "node tools/compile_owl_templates.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/odoo/owl.git"
+  },
+  "author": "Odoo",
+  "license": "LGPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/odoo/owl/issues"
+  },
+  "homepage": "https://github.com/odoo/owl#readme",
+  "devDependencies": {
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^25.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.54.0",
+    "@typescript-eslint/parser": "^8.54.0",
+    "@vitest/expect": "^4.1.4",
+    "chalk": "^3.0.0",
+    "current-git-branch": "^1.1.0",
+    "dts-bundle-generator": "^9.5.1",
+    "esbuild": "^0.28.0",
+    "eslint": "^9.39.2",
+    "globals": "^17.3.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitepress": "^1.6.4",
+    "vitest": "^4.1.4"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "endOfLine": "auto",
+    "trailingComma": "es5"
+  }
+}

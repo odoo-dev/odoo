@@ -1,0 +1,520 @@
+import { Component, mount, onMounted, props, proxy, xml } from "../../src";
+import { makeTestFixture, nextTick, snapshotEverything, getConsoleOutput } from "../helpers";
+
+snapshotEverything();
+let fixture: HTMLElement;
+
+beforeEach(() => {
+  fixture = makeTestFixture();
+});
+
+describe("style and class handling", () => {
+  test("can set style and class inside component", async () => {
+    class Test extends Component {
+      static template = xml`
+          <div style="font-weight:bold;" class="some-class">world</div>
+        `;
+    }
+    await mount(Test, fixture);
+    expect(fixture.innerHTML).toBe(`<div style="font-weight:bold;" class="some-class">world</div>`);
+  });
+
+  test("can set class on sub component, as prop", async () => {
+    class Child extends Component {
+      static template = xml`<div t-att-class="this.props.class">child</div>`;
+      props = props();
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child class="'some-class'" />`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<div class="some-class">child</div>`);
+  });
+
+  test("no class is set is parent does not give it as prop", async () => {
+    class Child extends Component {
+      static template = xml`<div t-att-class="this.props.class">child</div>`;
+      props = props();
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child />`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<div>child</div>`);
+  });
+
+  test("no class is set is child ignores it", async () => {
+    class Child extends Component {
+      static template = xml`<div>child</div>`;
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child class="'hey'"/>`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<div>child</div>`);
+  });
+
+  test("empty class attribute is not added on widget root el", async () => {
+    class Child extends Component {
+      static template = xml`<span t-att-class="this.props.class"/>`;
+      props = props();
+    }
+    class Parent extends Component {
+      static template = xml`<div><Child class=""/></div>`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<div><span></span></div>`);
+  });
+
+  test("can set more than one class on sub component", async () => {
+    class Child extends Component {
+      static template = xml`<div t-att-class="this.props.class">child</div>`;
+      props = props();
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child class="'a  b'" />`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<div class="a b">child</div>`);
+  });
+
+  test("component class and parent class combine together", async () => {
+    class Child extends Component {
+      static template = xml`<div class="child" t-att-class="this.props.class">child</div>`;
+      props = props();
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child class="'from parent'" />`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<div class="child from parent">child</div>`);
+  });
+
+  test("can set class on sub sub component", async () => {
+    class ChildChild extends Component {
+      static template = xml`<div t-att-class="this.props.class">childchild</div>`;
+      props = props();
+    }
+
+    class Child extends Component {
+      static template = xml`<ChildChild class="(this.props.class || '') + ' fromchild'" />`;
+      static components = { ChildChild };
+      props = props();
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child class="'fromparent'" />`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<div class="fromparent fromchild">childchild</div>`);
+  });
+
+  test("can set class on multi root component", async () => {
+    class Child extends Component {
+      static template = xml`<div>a</div><span t-att-class="this.props.class">b</span>`;
+      props = props();
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child class="'fromparent'" />`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<div>a</div><span class="fromparent">b</span>`);
+  });
+
+  test("class on sub component, which is switched to another", async () => {
+    class ChildA extends Component {
+      static template = xml`<div t-att-class="this.props.class">a</div>`;
+      props = props();
+    }
+    class ChildB extends Component {
+      static template = xml`<span t-att-class="this.props.class">b</span>`;
+      props = props();
+    }
+    class Child extends Component {
+      static template = xml`<ChildA class="this.props.class" t-if="this.props.child==='a'"/><ChildB class="this.props.class" t-else=""/>`;
+      static components = { ChildA, ChildB };
+      props = props();
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child class="'someclass'" child="this.state.child" />`;
+      static components = { Child };
+
+      state = proxy({ child: "a" });
+    }
+
+    const parent = await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<div class="someclass">a</div>`);
+    parent.state.child = "b";
+    await nextTick();
+    expect(fixture.innerHTML).toBe(`<span class="someclass">b</span>`);
+  });
+
+  // test("t-att-class is properly added/removed on widget root el", async () => {
+  //   class Child extends Component {
+  //     static template = xml`<div class="c"/>`;
+  //   }
+  //   class Parent extends Component {
+  //     static template = xml`<div><Child t-att-class="{a:state.a, b:state.b}"/></div>`;
+  //     static components = { Child };
+  //     state = proxy({ a: true, b: false });
+  //   }
+  //   const widget = await mount(Parent, fixture);
+  //   expect(fixture.innerHTML).toBe(`<div><div class="c a"></div></div>`);
+
+  //   widget.state.a = false;
+  //   widget.state.b = true;
+  //   await nextTick();
+  //   expect(fixture.innerHTML).toBe(`<div><div class="c b"></div></div>`);
+  // });
+
+  test("class with extra whitespaces", async () => {
+    class Child extends Component {
+      static template = xml`<div t-att-class="this.props.class"/>`;
+      props = props();
+    }
+    class Parent extends Component {
+      static template = xml`<Child class="'a  b c   d'"/>`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<div class="a b c d"></div>`);
+  });
+
+  test("class with extra whitespaces (variation)", async () => {
+    class Child extends Component {
+      static template = xml`<div t-att-class="this.props.class"/>`;
+      props = props();
+    }
+    class Parent extends Component {
+      static template = xml`<p><Child class="'a  b c   d'"/></p>`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe(`<p><div class="a b c d"></div></p>`);
+  });
+
+  // TODO: adapt name (t-att-class no longer makes sense on Components)
+  test("t-att-class is properly added/removed on widget root el (v2)", async () => {
+    let child: Child;
+    class Child extends Component {
+      static template = xml`<span class="c" t-att-class="{ d: this.state.d, ...this.props.class }"/>`;
+      props = props();
+      state = proxy({ d: true });
+      setup() {
+        child = this;
+      }
+    }
+
+    class Parent extends Component {
+      static template = xml`
+        <div>
+          <Child class="{ b: this.state.b }" />
+        </div>`;
+      static components = { Child };
+      state = proxy({ b: true });
+    }
+    const widget = await mount(Parent, fixture);
+
+    const span = fixture.querySelector("span")!;
+    expect(span.className).toBe("c d b");
+
+    widget.state.b = false;
+    await nextTick();
+    expect(span.className).toBe("c d");
+
+    child!.state.d = false;
+    await nextTick();
+    expect(span.className).toBe("c");
+
+    widget.state.b = true;
+    await nextTick();
+    expect(span.className).toBe("c b");
+
+    child!.state.d = true;
+    await nextTick();
+    expect(span.className).toBe("c b d");
+  });
+
+  // TODO: adapt name (t-att-class no longer makes sense on Components)
+  test("t-att-class is properly added/removed on widget root el (v3)", async () => {
+    let child: Child;
+    class Child extends Component {
+      static template = xml`<span class="c" t-att-class="{ d: this.state.d, ...this.props.class }"/>`;
+      props = props();
+      state = proxy({ d: true });
+      setup() {
+        child = this;
+      }
+    }
+    class Parent extends Component {
+      static template = xml`<Child class="{ a: true, b: this.state.b }"/>`;
+      static components = { Child };
+      state = proxy({ b: true });
+    }
+    const widget = await mount(Parent, fixture);
+
+    const span = fixture.querySelector("span")!;
+    expect(span.className).toBe("c d a b");
+
+    widget.state.b = false;
+    await nextTick();
+    expect(span.className).toBe("c d a");
+
+    child!.state.d = false;
+    await nextTick();
+    expect(span.className).toBe("c a");
+
+    widget.state.b = true;
+    await nextTick();
+    expect(span.className).toBe("c a b");
+
+    child!.state.d = true;
+    await nextTick();
+    expect(span.className).toBe("c a b d");
+  });
+
+  test("class on components do not interfere with user defined classes", async () => {
+    class App extends Component {
+      static template = xml`<div t-att-class="{ c: this.state.c }" />`;
+      state = proxy({ c: true });
+      setup() {
+        onMounted(() => {
+          fixture.querySelector("div")!.classList.add("user");
+        });
+      }
+    }
+    const widget = await mount(App, fixture);
+
+    expect(fixture.innerHTML).toBe('<div class="c user"></div>');
+
+    widget.state.c = false;
+    await nextTick();
+
+    expect(fixture.innerHTML).toBe('<div class="user"></div>');
+  });
+
+  // TODO: adapt name
+  test("style is properly added on widget root el", async () => {
+    class SomeComponent extends Component {
+      static template = xml`<div t-att-style="this.props.style"/>`;
+      props = props();
+    }
+
+    class ParentWidget extends Component {
+      static components = { Child: SomeComponent };
+      static template = xml`<Child style="'font-weight: bold;'"/>`;
+    }
+    await mount(ParentWidget, fixture);
+    expect(fixture.innerHTML).toBe(`<div style="font-weight: bold;"></div>`);
+  });
+
+  test("dynamic t-att-style is properly added and updated on widget root el", async () => {
+    class SomeComponent extends Component {
+      static template = xml`<div t-att-style="{ 'font-size': '20px', ...this.props.style }"/>`;
+      props = props();
+    }
+
+    class ParentWidget extends Component {
+      static template = xml`<Child style="this.state.style"/>`;
+      static components = { Child: SomeComponent };
+      state = proxy({ style: { "font-size": "20px" } });
+    }
+    const widget = await mount(ParentWidget, fixture);
+
+    expect(fixture.querySelector("div")!.style.fontSize).toBe("20px");
+
+    widget.state.style = { "font-size": "30px" };
+    await nextTick();
+
+    expect(fixture.querySelector("div")!.style.fontSize).toBe("30px");
+  });
+
+  test("component static style and dynamic t-att-style combine together", async () => {
+    class Child extends Component {
+      static template = xml`<div style="color: red;" t-att-style="this.props.style">child</div>`;
+      props = props();
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child style="'font-weight: bold;'" />`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    const div = fixture.querySelector("div")!;
+    expect(div.style.color).toBe("red");
+    expect(div.style.fontWeight).toBe("bold");
+  });
+
+  test("static style and dynamic t-att-style with object combine together", async () => {
+    class Child extends Component {
+      static template = xml`<div style="color: red;" t-att-style="{ fontWeight: 'bold', ...this.props.style }">child</div>`;
+      props = props();
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child style="{ fontSize: this.state.size }" />`;
+      static components = { Child };
+      state = proxy({ size: "20px" });
+    }
+    const widget = await mount(Parent, fixture);
+    const div = fixture.querySelector("div")!;
+    expect(div.style.color).toBe("red");
+    expect(div.style.fontWeight).toBe("bold");
+    expect(div.style.fontSize).toBe("20px");
+
+    widget.state.size = "30px";
+    await nextTick();
+    expect(div.style.fontSize).toBe("30px");
+    expect(div.style.color).toBe("red");
+    expect(div.style.fontWeight).toBe("bold");
+  });
+
+  test("t-att-style with string value", async () => {
+    class App extends Component {
+      static template = xml`<div t-att-style="this.state.style" />`;
+      state = proxy({ style: "color: red; font-weight: bold;" });
+    }
+    const widget = await mount(App, fixture);
+    const div = fixture.querySelector("div")!;
+    expect(div.style.color).toBe("red");
+    expect(div.style.fontWeight).toBe("bold");
+
+    widget.state.style = "color: blue;";
+    await nextTick();
+    expect(div.style.color).toBe("blue");
+    expect(div.style.fontWeight).toBe("");
+  });
+
+  test("t-att-style with object value", async () => {
+    class App extends Component {
+      static template = xml`<div t-att-style="this.state.style" />`;
+      state = proxy({ style: { color: "red", "font-weight": "bold" } as any });
+    }
+    const widget = await mount(App, fixture);
+    const div = fixture.querySelector("div")!;
+    expect(div.style.color).toBe("red");
+    expect(div.style.fontWeight).toBe("bold");
+
+    widget.state.style = { color: "blue" };
+    await nextTick();
+    expect(div.style.color).toBe("blue");
+    expect(div.style.fontWeight).toBe("");
+  });
+
+  test("t-att-style is cleared when value becomes undefined", async () => {
+    class App extends Component {
+      static template = xml`<div t-att-style="this.state.style" />`;
+      state = proxy({ style: "color: orange;" as any });
+    }
+    const widget = await mount(App, fixture);
+    const div = fixture.querySelector("div")!;
+    expect(div.style.color).toBe("orange");
+
+    widget.state.style = undefined;
+    await nextTick();
+    expect(div.style.color).toBe("");
+    expect(div.hasAttribute("style")).toBe(false);
+  });
+
+  test("t-att-style is cleared when interpolated prop becomes undefined", async () => {
+    class App extends Component {
+      static template = xml`<span t-att-style="this.getStyle()">text</span>`;
+      state = proxy({ color: "orange" as any });
+      getStyle() {
+        return `color: ${this.state.color}`;
+      }
+    }
+    const widget = await mount(App, fixture);
+    const span = fixture.querySelector("span")!;
+    expect(span.style.color).toBe("orange");
+
+    widget.state.color = undefined;
+    await nextTick();
+    expect(span.style.color).toBe("");
+  });
+
+  test("t-att-style string with a data URI containing semicolons", async () => {
+    const dataUri =
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z9DwHwAGBQKA3H7sNwAAAABJRU5ErkJggg==";
+    class App extends Component {
+      static template = xml`<div t-att-style="this.state.style" />`;
+      state = proxy({ style: `background-image: url(${dataUri}); color: red;` });
+    }
+    await mount(App, fixture);
+    const div = fixture.querySelector("div")!;
+    expect(div.style.backgroundImage).toBe(`url("${dataUri}")`);
+    expect(div.style.color).toBe("red");
+  });
+
+  test("t-att-style string value with !important applies priority", async () => {
+    class App extends Component {
+      static template = xml`<div t-att-style="this.state.style" />`;
+      state = proxy({ style: "color: red !important; font-weight: bold;" });
+    }
+    const widget = await mount(App, fixture);
+    const div = fixture.querySelector("div")!;
+    expect(div.style.color).toBe("red");
+    expect(div.style.getPropertyPriority("color")).toBe("important");
+    expect(div.style.fontWeight).toBe("bold");
+    expect(div.style.getPropertyPriority("font-weight")).toBe("");
+
+    widget.state.style = "color: red;";
+    await nextTick();
+    expect(div.style.color).toBe("red");
+    expect(div.style.getPropertyPriority("color")).toBe("");
+  });
+
+  test("t-att-style object value with !important applies priority", async () => {
+    class App extends Component {
+      static template = xml`<div t-att-style="this.state.style" />`;
+      state = proxy({ style: { color: "red !important" } as any });
+    }
+    const widget = await mount(App, fixture);
+    const div = fixture.querySelector("div")!;
+    expect(div.style.color).toBe("red");
+    expect(div.style.getPropertyPriority("color")).toBe("important");
+
+    widget.state.style = { color: "red" };
+    await nextTick();
+    expect(div.style.color).toBe("red");
+    expect(div.style.getPropertyPriority("color")).toBe("");
+  });
+
+  // TODO: does this test need to be moved? (class now a standard prop)
+  test("error in subcomponent with class", async () => {
+    class Child extends Component {
+      static template = xml`<div t-att-class="this.props.class" t-out="this.will.crash"/>`;
+      props = props();
+    }
+    class Parent extends Component {
+      static template = xml`<Child class="'a'"/>`;
+      static components = { Child };
+    }
+    let error: any;
+    try {
+      await mount(Parent, fixture);
+    } catch (e) {
+      error = e;
+    }
+    const regexp =
+      /Cannot read properties of undefined \(reading 'crash'\)|Cannot read property 'crash' of undefined/g;
+    expect(error!.message).toMatch(regexp);
+    expect(fixture.innerHTML).toBe("");
+    expect(getConsoleOutput()).toEqual([]);
+  });
+});

@@ -1,0 +1,108 @@
+{
+  "name": "@odoo/owl",
+  "version": "2.8.2",
+  "description": "Odoo Web Library (OWL)",
+  "main": "dist/owl.cjs.js",
+  "module": "dist/owl.es.js",
+  "types": "dist/types/owl.d.ts",
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "build:bundle": "rollup -c --failAfterWarnings",
+    "build:runtime": "rollup -c --failAfterWarnings runtime",
+    "build:compiler": "rollup -c --failAfterWarnings compiler",
+    "build": "npm run build:bundle",
+    "build:devtools": "rollup -c ./tools/devtools/rollup.config.js",
+    "dev:devtools-chrome": "npm run build:devtools -- --config-browser=chrome",
+    "dev:devtools-firefox": "npm run build:devtools -- --config-browser=firefox",
+    "build:devtools-chrome": "npm run dev:devtools-chrome -- --config-env=production",
+    "build:devtools-firefox": "npm run dev:devtools-firefox -- --config-env=production",
+    "test": "jest",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand --watch --testTimeout=5000000",
+    "test:watch": "jest --watch",
+    "playground:serve": "python3 tools/playground_server.py || python tools/playground_server.py",
+    "playground": "npm run build && npm run playground:serve",
+    "preplayground:watch": "npm run build",
+    "playground:watch": "npm-run-all  --parallel playground:serve \"build:* -- --watch\"",
+    "prettier": "prettier {src/*.ts,src/**/*.ts,tests/*.ts,tests/**/*.ts,doc/*.md,doc/**/*.md,tools/devtools/**/*.js} --write",
+    "check-formatting": "prettier {src/*.ts,src/**/*.ts,tests/*.ts,tests/**/*.ts,doc/*.md,doc/**/*.md,tools/devtools/**/*.js} --check",
+    "lint": "eslint src/**/*.ts tests/**/*.ts",
+    "release": "node tools/release.js",
+    "compile_templates": "node tools/compile_owl_templates.mjs"
+  },
+  "bin": {
+    "compile_owl_templates": "tools/compile_owl_templates.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/odoo/owl.git"
+  },
+  "author": "Odoo",
+  "license": "LGPL-3.0-only",
+  "bugs": {
+    "url": "https://github.com/odoo/owl/issues"
+  },
+  "homepage": "https://github.com/odoo/owl#readme",
+  "devDependencies": {
+    "@types/jest": "^27.0.1",
+    "@types/jsdom": "^21.1.7",
+    "@types/node": "^14.11.8",
+    "@typescript-eslint/eslint-plugin": "5.48.1",
+    "@typescript-eslint/parser": "5.48.1",
+    "chalk": "^3.0.0",
+    "current-git-branch": "^1.1.0",
+    "eslint": "8.31.0",
+    "git-rev-sync": "^3.0.2",
+    "github-api": "^3.3.0",
+    "jest": "^27.1.0",
+    "jest-diff": "^27.3.1",
+    "jest-environment-jsdom": "^27.1.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "2.4.1",
+    "rollup": "^2.56.3",
+    "rollup-plugin-copy": "^3.3.0",
+    "rollup-plugin-delete": "^2.0.0",
+    "rollup-plugin-dts": "^4.2.2",
+    "rollup-plugin-execute": "^1.1.1",
+    "rollup-plugin-string": "^3.0.0",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.31.1",
+    "source-map-support": "^0.5.10",
+    "ts-jest": "^27.0.5",
+    "typescript": "4.5.2"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "roots": [
+      "<rootDir>/src",
+      "<rootDir>/tests"
+    ],
+    "setupFiles": [
+      "./tests/mocks/mockEventTarget.js"
+    ],
+    "transform": {
+      "^.+\\.ts?$": "ts-jest"
+    },
+    "verbose": false,
+    "testRegex": "(/tests/.*(test|spec))\\.ts?$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  },
+  "prettier": {
+    "printWidth": 100,
+    "endOfLine": "auto"
+  },
+  "dependencies": {
+    "jsdom": "^25.0.1"
+  }
+}

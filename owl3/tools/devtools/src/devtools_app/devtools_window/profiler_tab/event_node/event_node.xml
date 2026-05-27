@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+  <t t-name="devtools.EventNode" owl="1">
+    <div class="my-0 p-0 object-line"
+      t-on-click.stop="toggleDisplay"
+      t-on-contextmenu="openNodeMenu"
+    >
+      <div class="text-nowrap" t-attf-style="padding-left: {{eventPadding}}rem">
+        <i class="fa px-1 pointer-icon caret"
+          t-att-class="{'fa-caret-right': !props.event.toggled, 'fa-caret-down': props.event.toggled}"
+          t-attf-style="visibility: {{props.event.children.length > 0 ? '' : 'hidden'}};"
+        />
+        <span>
+          <t t-esc="props.event.type"/>:
+          &lt;<span style="cursor:pointer; color: var(--component-color);"
+                t-on-click.stop="() => this.store.selectComponent(props.event.path)"
+                t-on-mouseover.stop="() => this.store.highlightComponent(props.event.path)"
+                t-on-contextmenu.stop="openComponentMenu"
+                t-esc="props.event.component"/>
+          <t t-if="minimizedKey.length > 0">
+            <span t-if="minimizedKey.length > 0" style="color: var(--key-name);"> key</span>=<span style="color: var(--key-content);">
+              <t t-esc="minimizedKey"/>
+            </span>
+          </t>&gt;
+          <span>
+            (<t t-esc="renderTime"/>ms)
+          </span>
+        </span>
+      </div>
+    </div>
+    <t t-if="props.event.toggled">
+      <t t-foreach="props.event.children" t-as="child" t-key="child.id">
+        <EventNode event="child"/>
+      </t>
+    </t>
+  </t>
+</templates>

@@ -1,0 +1,374 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  color: #111827;
+  background: #fff;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: #1e293b;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* ---- Hero ---- */
+
+header {
+  padding: 40px 24px 44px;
+  text-align: center;
+  border-bottom: 1px solid #f0eff8;
+}
+
+header .logo {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+header h1 {
+  font-size: 42px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+header .tagline {
+  font-size: 17px;
+  color: #4b5563;
+  margin-bottom: 6px;
+}
+
+header .subtitle {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-bottom: 24px;
+}
+
+header .subtitle a {
+  color: #6b7280;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.cta-primary {
+  display: inline-block;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #1e293b;
+  color: #fff;
+  transition: background 0.15s;
+}
+
+.cta-primary:hover {
+  background: #3d3a6e;
+  text-decoration: none;
+}
+
+.cta-secondary {
+  display: inline-block;
+  padding: 10px 24px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  border: 1px solid #d1d0e8;
+  transition: background 0.15s;
+}
+
+.cta-secondary:hover {
+  background: #f5f3fb;
+  text-decoration: none;
+}
+
+/* ---- Features ---- */
+
+.features {
+  padding: 40px 0;
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px 40px;
+}
+
+@media (max-width: 768px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+.feature-card h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #1e293b;
+}
+
+.feature-card p {
+  font-size: 14px;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+/* ---- Example ---- */
+
+.example {
+  padding: 40px 0;
+  background: #fafafa;
+  border-top: 1px solid #f0eff8;
+  border-bottom: 1px solid #f0eff8;
+}
+
+.example h2, .tutorials h2 {
+  font-size: 26px;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 8px;
+  color: #111827;
+}
+
+.section-subtitle {
+  text-align: center;
+  color: #6b7280;
+  font-size: 15px;
+  margin-bottom: 20px;
+}
+
+.example-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .example-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.code-header {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 8px 16px;
+  background: #e5e7eb;
+  border-radius: 8px 8px 0 0;
+  letter-spacing: 0.5px;
+}
+
+.code-block pre {
+  background: #f3f4f6;
+  color: #1f2937;
+  padding: 20px;
+  border-radius: 0 0 8px 8px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: "SF Mono", "Fira Code", "Fira Mono", Menlo, Consolas, monospace;
+}
+
+.code-block code {
+  font-family: inherit;
+}
+
+.demo-block {
+  display: flex;
+  flex-direction: column;
+}
+
+#app-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #e9e8f4;
+  border-radius: 0 0 8px 8px;
+  min-height: 120px;
+}
+
+/* ---- Counter demo styles ---- */
+
+.counter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.counter button {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid #e4e1f0;
+  background: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.counter button:hover {
+  background: #f5f3fb;
+  transform: scale(1.05);
+}
+
+.counter button:active {
+  transform: scale(0.95);
+}
+
+/* ---- Tutorials ---- */
+
+.tutorials {
+  padding: 40px 0;
+}
+
+.tutorial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+  .tutorial-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tutorial-card {
+  display: block;
+  border: 1px solid #e9e8f4;
+  border-radius: 8px;
+  padding: 20px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  color: inherit;
+}
+
+.tutorial-card:hover {
+  border-color: #a8a4d4;
+  box-shadow: 0 2px 8px rgba(42, 39, 85, 0.06);
+  text-decoration: none;
+}
+
+.tutorial-name {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tutorial-desc {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.stars {
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.star {
+  color: #d0d0d8;
+}
+
+.star.filled {
+  color: #a8a4d4;
+}
+
+/* ---- Footer ---- */
+
+footer {
+  text-align: center;
+  padding: 32px 24px;
+  color: #9ca3af;
+  font-size: 13px;
+  border-top: 1px solid #f0eff8;
+}
+
+footer a {
+  color: #6b7280;
+}
+
+/* SITE NAVBAR ****************************************/
+.site-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #1e293b;
+  padding: 0 12px;
+  height: 44px;
+}
+
+.site-nav-link {
+  color: #cbd5e1;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+}
+
+.site-nav-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  text-decoration: none;
+}
+
+.site-nav-link.active {
+  color: #fff;
+  font-weight: 700;
+}
+
+.site-nav-github {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 6px;
+  color: #cbd5e1;
+  transition: color 0.15s, background 0.15s;
+}
+
+.site-nav-github:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}

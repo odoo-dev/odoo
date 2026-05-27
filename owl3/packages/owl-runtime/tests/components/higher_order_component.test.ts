@@ -1,0 +1,119 @@
+import { Component, mount, props, proxy, xml } from "../../src";
+import { makeTestFixture, nextTick, snapshotEverything, render } from "../helpers";
+
+let fixture: HTMLElement;
+
+snapshotEverything();
+
+beforeEach(() => {
+  fixture = makeTestFixture();
+});
+
+describe("basics", () => {
+  test("basic use", async () => {
+    class Child extends Component {
+      static template = xml`<span>child<t t-out="this.props.p"/></span>`;
+      props = props();
+    }
+
+    class Parent extends Component {
+      static template = xml`<Child p="1"/>`;
+      static components = { Child };
+    }
+
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe("<span>child1</span>");
+  });
+
+  test("sub widget is interactive", async () => {
+    class Child extends Component {
+      static template = xml`
+            <span>
+                <button t-on-click="this.inc">click</button>child<t t-out="this.state.val"/>
+            </span>`;
+      state = proxy({ val: 1 });
+      inc() {
+        this.state.val++;
+      }
+    }
+    class Parent extends Component {
+      static template = xml`<Child p="1"/>`;
+      static components = { Child };
+    }
+    await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe("<span><button>click</button>child1</span>");
+    const button = fixture.querySelector("button")!;
+    button.click();
+    await nextTick();
+    expect(fixture.innerHTML).toBe("<span><button>click</button>child2</span>");
+  });
+
+  test("can select a sub widget ", async () => {
+    class Child extends Component {
+      static template = xml`<span>CHILD 1</span>`;
+    }
+    class OtherChild extends Component {
+      static template = xml`<div>CHILD 2</div>`;
+    }
+    class Parent extends Component {
+      static template = xml`
+            <t>
+              <t t-if="this.state.options.flag"><Child /></t>
+              <t t-if="!this.state.options.flag"><OtherChild /></t>
+            </t>
+          `;
+      static components = { Child, OtherChild };
+      state = state;
+    }
+    const state = { options: { flag: true } };
+    const parent = await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe("<span>CHILD 1</span>");
+
+    state.options.flag = false;
+    render(parent);
+    await nextTick();
+    expect(fixture.innerHTML).toBe("<div>CHILD 2</div>");
+  });
+
+  test("can select a sub widget, part 2", async () => {
+    class Child extends Component {
+      static template = xml`<span>CHILD 1</span>`;
+    }
+    class OtherChild extends Component {
+      static template = xml`<div>CHILD 2</div>`;
+    }
+    class Parent extends Component {
+      static template = xml`
+            <t>
+              <t t-if="this.state.flag"><Child /></t>
+              <t t-if="!this.state.flag"><OtherChild /></t>
+            </t>
+          `;
+      state = proxy({ flag: true });
+      static components = { Child, OtherChild };
+    }
+    let parent = await mount(Parent, fixture);
+    expect(fixture.innerHTML).toBe("<span>CHILD 1</span>");
+    parent.state.flag = false;
+    await nextTick();
+    expect(fixture.innerHTML).toBe("<div>CHILD 2</div>");
+  });
+
+  test("top level sub widget with a parent", async () => {
+    class ComponentC extends Component {
+      static template = xml`<span>Hello</span>`;
+    }
+    class ComponentB extends Component {
+      static template = xml`<ComponentC />`;
+      static components = { ComponentC };
+    }
+    class ComponentA extends Component {
+      static template = xml`<div><ComponentB/></div>`;
+      static components = { ComponentB };
+    }
+
+    await mount(ComponentA, fixture);
+
+    expect(fixture.innerHTML).toBe("<div><span>Hello</span></div>");
+  });
+});

@@ -1,0 +1,14 @@
+<templates>
+  <t t-name="hibou.Taskbar">
+    <div class="taskbar">
+      <div class="taskbar-apps">
+        <button class="taskbar-icon" title="Clock">🕐</button>
+        <button class="taskbar-icon" title="Notepad">📝</button>
+        <button class="taskbar-icon" title="Calculator">🧮</button>
+      </div>
+      <div class="systray">
+        <Clock/>
+      </div>
+    </div>
+  </t>
+</templates>

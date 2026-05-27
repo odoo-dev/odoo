@@ -1,0 +1,106 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`debugging > t-debug 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler } = bdom;
+  
+  let block1 = createBlock(\`<div><block-child-0/></div>\`);
+  let block2 = createBlock(\`<span>hey</span>\`);
+  
+  return function template(ctx, node, key = "") {
+    debugger;
+    let b2;
+    if (true) {
+      debugger;
+      b2 = block2();
+    }
+    return block1([], [b2]);
+  }
+}"
+`;
+
+exports[`debugging > t-debug on sub template 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler } = bdom;
+  
+  let block1 = createBlock(\`<p>coucou</p>\`);
+  
+  return function template(ctx, node, key = "") {
+    debugger;
+    return block1();
+  }
+}"
+`;
+
+exports[`debugging > t-debug on sub template 2`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler } = bdom;
+  let { callTemplate } = helpers;
+  
+  let block1 = createBlock(\`<div><block-child-0/></div>\`);
+  
+  return function template(ctx, node, key = "") {
+    const b2 = callTemplate(\`sub\`, this, app, ctx, node, key + \`__1\`);
+    return block1([], [b2]);
+  }
+}"
+`;
+
+exports[`debugging > t-debug: interaction with t-set 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler } = bdom;
+  let { safeOutput } = helpers;
+  
+  let block1 = createBlock(\`<span><block-child-0/></span>\`);
+  
+  return function template(ctx, node, key = "") {
+    ctx = Object.create(ctx);
+    debugger;
+    ctx["foo"] = 42;
+    debugger;
+    ctx["bar"] = 49;
+    const b2 = safeOutput(ctx['foo']+ctx['bar']);
+    return block1([], [b2]);
+  }
+}"
+`;
+
+exports[`debugging > t-log 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler } = bdom;
+  
+  let block1 = createBlock(\`<div/>\`);
+  
+  return function template(ctx, node, key = "") {
+    ctx = Object.create(ctx);
+    ctx["foo"] = 42;
+    console.log(ctx['foo']+3);
+    return block1();
+  }
+}"
+`;
+
+exports[`debugging > t-log: interaction with t-set 1`] = `
+"function anonymous(app, bdom, helpers
+) {
+  let { text, createBlock, list, multi, html, toggler } = bdom;
+  let { safeOutput } = helpers;
+  
+  let block1 = createBlock(\`<span><block-child-0/></span>\`);
+  
+  return function template(ctx, node, key = "") {
+    ctx = Object.create(ctx);
+    console.log(ctx['foo']);
+    ctx["foo"] = 42;
+    console.log(ctx['bar']);
+    ctx["bar"] = 49;
+    const b2 = safeOutput(ctx['foo']+ctx['bar']);
+    return block1([], [b2]);
+  }
+}"
+`;
