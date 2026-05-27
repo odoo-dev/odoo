@@ -10,6 +10,9 @@ Each task lives in ./tasks/<id>.jsonl as an append-only event log:
   lines 2+          {"kind":"event","event":"status"|"priority"|"depends_on"|
                      "problem"|"question"|"progress"|"done"|..., ...}
 
+Status flow: pending -> in_progress -> pushed (committed+pushed to odoo-dev,
+awaiting CI) -> done (CI green) | ci_failed (CI red, needs rework) | blocked.
+
 Mutable fields (status, priority, depends_on, assignee) are event-sourced:
 the *current* value is the latest event that set it.
   - status/priority/assignee:    {"event":"status","value":"ready"}
