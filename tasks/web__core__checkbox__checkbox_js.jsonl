@@ -8,3 +8,4 @@
 {"kind": "event", "ts": "2026-05-27T19:44:13.604058+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "ci", "result": "success", "batch": "2549869"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "done"}
+{"rkind":"visit","head":"475557f529b5961c33b574da827a95705f02fdc6","kind":"review","ts":"2026-05-27T20:44:21.148Z","actor":"nby@odoo.com"}
