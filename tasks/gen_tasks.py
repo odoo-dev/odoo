@@ -217,7 +217,7 @@ def generate():
         # The agent runs `worktree_cmd` to get its own isolated worktree; goa
         # auto-prefixes a unique hash, so the readable name need not be unique.
         # The actual created path/branch is recorded later via a "worktree" event.
-        wt = os.path.basename(path).replace("_", "-").replace(".", "-")
+        wt = "master-" + os.path.basename(path).replace("_", "-").replace(".", "-") + "-tref-nby"
         return {
             "kind": "task", "schema": 1, "id": id_for[path],
             "path": path, "lang": lang, "component": comp,
