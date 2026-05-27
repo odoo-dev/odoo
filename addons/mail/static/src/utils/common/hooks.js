@@ -84,9 +84,12 @@ export function onExternalClick(refOrName, cb) {
  * Should provide a list of ref names, and can add callbacks when elements are
  * hovered-in (onHover), hovered-out (onAway), hovering for some time (onHovering).
  *
- * @param {string | string[] | Function} refNames name of refs that determine whether this is in state "hovering".
- *   ref name that end with "*" means it takes parented HTML node into account too. Useful for floating
- *   menu where dropdown menu container is not accessible. Function type is for useChildRef support.
+ * @param {string | import("@web/core/utils/hooks").Ref | Function | Array} refNames target(s) that determine whether this is in state "hovering".
+ *   Each target may be: a ref NAME string (legacy, resolved via useRef); a ref object exposing `.el`;
+ *   a `useChildRef()` function (exposes `.el` once the child sets it); or an Owl 3 native ref/signal
+ *   (a zero-arg callable returning the element). The element of each target is read lazily and null-safely.
+ *   A ref name that end with "*" means it takes parented HTML node into account too. Useful for floating
+ *   menu where dropdown menu container is not accessible.
  * @param {Object} param1
  * @param {() => void} [param1.onHover] callback when hovering the ref names.
  * @param {() => void} [param1.onAway] callback when stop hovering the ref names.
@@ -106,8 +109,21 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
     let lastHoveredTarget;
     for (const refName of refNames) {
         if (typeof refName === "function") {
-            // Special case: useChildRef support
-            targets.push({ ref: refName });
+            // Non-string target (Owl 3, backward-compatible): a callable can be either a
+            // `useChildRef()` (exposes `.el` once the child sets it; calling it would *set*
+            // its value) or an Owl 3 native ref/signal (a zero-arg callable returning the
+            // element, with a `.set` writer). Resolve the element in one localized place,
+            // lazily and null-safely. An Owl 3 signal is read by *calling* it; anything else
+            // (useChildRef, plain ref object) is read through `.el` — byte-for-byte legacy.
+            const refFn = refName;
+            const isSignal = typeof refFn.set === "function";
+            targets.push({
+                ref: {
+                    get el() {
+                        return (isSignal ? refFn() : refFn.el) ?? null;
+                    },
+                },
+            });
             continue;
         }
         targets.push({ ref: useRef(refName) });
@@ -932,6 +948,19 @@ export class UseForwardRefsToParent {
     constructor(propName, getRefIdFn, ref) {
         const component = useComponent();
         this.ref = ref;
+        // Transitional resolver (Owl 3): consumers of the `useChildRefs()` map read
+        // the element through `.el`. A legacy ref already exposes `.el`, while an Owl 3
+        // native ref is a signal (a callable returning the element). When a signal is
+        // forwarded, store a thin `.el` adapter so the stored-map contract is preserved;
+        // legacy `.el` refs are stored unchanged to keep existing behavior byte-for-byte.
+        this.storedRef =
+            typeof ref === "function"
+                ? {
+                      get el() {
+                          return ref();
+                      },
+                  }
+                : ref;
         // Note: The `useChildRefs()` Map is shared with all children, using useLayoutEffect/willUnmount to ensure proper on/off life cycle hook calls for given child.
         // If we use setup/willDestroy we can have 2 fiber nodes of same child component with one finalizing with willDestroy from cancelling duplicated fiber node.
         useLayoutEffect(
@@ -944,7 +973,7 @@ export class UseForwardRefsToParent {
     }
 
     registerRef(map, key) {
-        map?.set(key, this.ref);
+        map?.set(key, this.storedRef);
     }
 
     removeRef(map, key) {
