@@ -17,6 +17,10 @@ export function useCustomDropzone(
     const overlayService = useService("overlay");
     const uiService = useService("ui");
 
+    // Transitional shim: accept both an Owl 3 signal ref (call it to get the
+    // element) and a legacy `.el` ref object. Remove once all callers pass a signal.
+    const getTargetEl = () => (typeof targetRef === "function" ? targetRef() : targetRef.el);
+
     let dragCount = 0;
     let hasTarget = false;
     let removeDropzone = false;
@@ -45,7 +49,7 @@ export function useCustomDropzone(
 
     function updateDropzone() {
         const hasDropzone = !!removeDropzone;
-        const isTargetInActiveElement = uiService.activeElement.contains(targetRef.el);
+        const isTargetInActiveElement = uiService.activeElement.contains(getTargetEl());
         const shouldDisplayDropzone =
             dragCount && hasTarget && isTargetInActiveElement && isDropzoneEnabled();
 
@@ -80,7 +84,7 @@ export function useCustomDropzone(
             hasTarget = !!el;
             updateDropzone();
         },
-        () => [targetRef.el]
+        () => [getTargetEl()]
     );
 }
 
