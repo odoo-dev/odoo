@@ -39,6 +39,32 @@ PORT=5000 TASKS_DIR=/some/other/tasks bun run .../task-ui/server.ts
   `/api/waves`), 404 if unknown.
 - `GET /api/meta` — `{ tasks_dir }`.
 
+### Review Workstation (additive)
+
+A git-diff review overlay, mounted only when a task's **Review** button is
+clicked or the `#/review/<taskId>` hash is set. Git coordinates are derived
+from the task's latest `run` event (worktree + branch + commits); the diff range
+is always `merge-base(HEAD, master)..HEAD`. The client never sends paths — the
+server resolves the worktree from the task id via the fold. All review state is
+persisted as `{"kind":"review", ...}` records appended to the same
+`tasks/<id>.jsonl` (folded separately from task-state).
+
+- `GET /api/review/context?id=` — `{worktree, branch, head, mergeBase, dirty, ahead, commits[], run_status, run_summary, run_problem, pushed}` (409 `{error:"no_worktree"}` if not run yet).
+- `GET /api/review/diff?id=&context=3&file=<optional>` — `{head, base, dirty, files[{path,old_path,status,additions,deletions,binary}], unified, truncated}`.
+- `GET /api/review/blob?id=&ref=HEAD|base&path=` — `{path, ref, content, truncated}`.
+- `GET /api/review?id=` — folded review state `{verdict, viewed{path:sha}, threads[], visit, version}`.
+- `POST /api/review?id=` — body `{records:[...], expectVersion?}`; validates + stamps `ts`/`actor`, appends JSONL, returns new folded state (`conflict:true` on version mismatch).
+- `GET /api/review/siblings?id=` — same-wave tasks `{id,path,component,run_status,verdict,has_review}`.
+- `GET /api/review/export?id=&format=md` — markdown review summary.
+- `POST /api/review/batch?wave=` — body `{verdict, note?}`; appends a verdict to every reviewable task in the wave.
+- `GET /api/ai/status` — probes the `claude` CLI (6s hard timeout, 60s cache): `{available, reason}`.
+- `POST /api/ai/review?id=&scope=full|hunk&file=` — SSE stream of a Claude review of the diff against the migration checklist (only when AI is available).
+
+Review libs (diff2html, highlight.js, marked, DOMPurify, fuse.js) are
+**vendored** under `task-ui/vendor/` and loaded vendored-first with a CDN
+fallback; they load lazily on first overlay open, so the base dashboard load is
+unchanged.
+
 ## Waves
 
 The `tasks/` directory contains 6 wave files (`wave-0.jsonl`…`wave-5.jsonl`)

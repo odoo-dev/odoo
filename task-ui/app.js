@@ -33,6 +33,28 @@ function badge(status) {
   return b;
 }
 
+// Verdict badge for a folded task summary (null when no verdict yet).
+function reviewBadge(t) {
+  if (!t || !t.verdict) return null;
+  const map = {
+    approved: ["rv-vb-approved", "✓ approved"],
+    changes_requested: ["rv-vb-changes", "✗ changes"],
+    commented: ["rv-vb-commented", "💬 commented"],
+  };
+  const [cls, label] = map[t.verdict] || ["rv-vb-commented", t.verdict];
+  return el("span", "rv-verdict-badge " + cls, label);
+}
+
+// "Review" button that opens the overlay for a task (only when it has a diff).
+function reviewButton(id, label) {
+  const b = el("button", "rv-open-btn", label || "Review");
+  b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (window.ReviewWS) window.ReviewWS.open(id);
+  });
+  return b;
+}
+
 // ---------- data load ----------
 async function loadTasks() {
   const [tRes, wRes] = await Promise.all([
@@ -41,6 +63,7 @@ async function loadTasks() {
   ]);
   TASKS = await tRes.json();
   TASKS_BY_ID = new Map(TASKS.map((t) => [t.id, t]));
+  window.TASKS_BY_ID = TASKS_BY_ID; // exposed for the review overlay (checklist)
   WAVES = await wRes.json();
   WAVES_BY_ID = new Map(WAVES.map((w) => [w.id, w]));
   renderSummary();
@@ -388,6 +411,9 @@ function renderLeaf(leaf) {
   row.appendChild(el("span", "leaf-comp", t.component));
   row.appendChild(el("span", "leaf-lang", t.lang));
   row.appendChild(badge(t.status));
+  const vb = reviewBadge(t);
+  if (vb) row.appendChild(vb);
+  if (t.has_review) row.appendChild(reviewButton(t.id, "⊳"));
   row.addEventListener("click", () => selectTask(t.id));
   return row;
 }
@@ -496,13 +522,26 @@ function renderWaveDetail(w) {
 
   // children (drill-in)
   const children = TASKS.filter((t) => t.wave_id === w.id).sort((a, b) => a.path.localeCompare(b.path));
+  const reviewable = children.filter((t) => t.has_review);
   const cSec = section("Tasks in this wave (" + children.length + ")");
+  if (reviewable.length) {
+    const queue = el("div", "review-bar");
+    const qbtn = el("button", "rv-open-btn", "⊳ Review queue (" + reviewable.length + ")");
+    qbtn.addEventListener("click", () => {
+      if (window.ReviewWS) window.ReviewWS.open(reviewable[0].id);
+    });
+    queue.appendChild(qbtn);
+    cSec.appendChild(queue);
+  }
   const list = el("div", "wave-child-list");
   for (const t of children) {
     const r = el("div", "wave-child");
     r.appendChild(badge(t.status));
     r.appendChild(el("span", "wave-child-comp", t.component));
     r.appendChild(el("span", "wave-child-path mono muted", t.path));
+    const vb = reviewBadge(t);
+    if (vb) r.appendChild(vb);
+    if (t.has_review) r.appendChild(reviewButton(t.id, "⊳"));
     r.addEventListener("click", () => selectTask(t.id));
     list.appendChild(r);
   }
@@ -538,9 +577,39 @@ function renderDetail(data) {
   const title = el("h2", null, def.component);
   title.appendChild(document.createTextNode(" "));
   title.appendChild(badge(st.status));
+  const summary = TASKS_BY_ID.get(def.id);
+  const vb = reviewBadge(summary);
+  if (vb) { title.appendChild(document.createTextNode(" ")); title.appendChild(vb); }
   h.appendChild(title);
   h.appendChild(el("div", "subpath", def.path));
   detail.appendChild(h);
+
+  // --- Review (git diff) ---
+  const rev = data.review;
+  if (rev && rev.worktree_abs) {
+    const rSec = section("Review");
+    const bar = el("div", "review-bar");
+    bar.appendChild(reviewButton(def.id, "⊳ Open Review"));
+    bar.appendChild(el("span", "mono muted", rev.branch || "—"));
+    if (rev.run_status) bar.appendChild(el("span", "chip", "run: " + rev.run_status));
+    bar.appendChild(el("span", "chip", (rev.commits || []).length + " commits"));
+    if (rev.needs_rerun) bar.appendChild(el("span", "chip warn", "needs rerun"));
+    if (rev.pushed) bar.appendChild(el("span", "chip", "pushed → " + (rev.pushed.remote || "")));
+    rSec.appendChild(bar);
+    if (rev.run_summary) rSec.appendChild(el("div", "muted", rev.run_summary));
+    if (rev.run_problem) rSec.appendChild(el("div", "review-problem", rev.run_problem));
+    if ((rev.commits || []).length) {
+      const cl = el("div", "review-commits");
+      for (const c of rev.commits) {
+        const row = el("div", "review-commit");
+        row.appendChild(el("span", "mono review-sha", c.sha));
+        row.appendChild(el("span", "review-subj", c.subject));
+        cl.appendChild(row);
+      }
+      rSec.appendChild(cl);
+    }
+    detail.appendChild(rSec);
+  }
 
   // --- Current state ---
   const stSec = section("Current state (folded)");
@@ -666,7 +735,44 @@ function renderDetail(data) {
   detail.appendChild(tlSec);
 }
 
+function renderReviewRecord(rec) {
+  const item = el("div", "tl-item tl-review");
+  const dot = el("div", "tl-dot tl-sev-review");
+  dot.appendChild(el("span"));
+  item.appendChild(dot);
+  const body = el("div", "tl-body");
+  const head = el("div", "tl-head");
+  head.appendChild(el("span", "tl-type tl-type-review", "review:" + rec.rkind));
+  if (rec.actor) head.appendChild(el("span", "tl-actor", "@" + rec.actor));
+  if (rec.ts) head.appendChild(el("span", "tl-ts", rec.ts));
+  body.appendChild(head);
+  const p = el("div", "tl-payload");
+  if (rec.rkind === "verdict") {
+    const vb = el("span", "rv-verdict-badge rv-vb-" +
+      (rec.verdict === "approved" ? "approved" : rec.verdict === "changes_requested" ? "changes" : "commented"),
+      rec.verdict);
+    p.appendChild(vb);
+    if (rec.note) p.appendChild(el("div", null, rec.note));
+  } else if (rec.rkind === "comment") {
+    const loc = rec.path ? rec.path + (rec.line ? ":" + rec.line : "") : "review-level";
+    p.appendChild(el("div", "mono muted", loc));
+    p.appendChild(el("blockquote", "tl-quote", rec.body || ""));
+  } else if (rec.rkind === "resolve") {
+    p.appendChild(el("div", "muted", (rec.resolved ? "resolved" : "reopened") + " thread " + rec.thread_id));
+  } else if (rec.rkind === "viewed") {
+    p.appendChild(el("div", "mono muted", (rec.viewed ? "viewed " : "unviewed ") + rec.path));
+  } else if (rec.rkind === "visit") {
+    p.appendChild(el("div", "mono muted", "visited @ " + (rec.head || "").slice(0, 10)));
+  } else {
+    p.appendChild(el("span", "mono", JSON.stringify(rec)));
+  }
+  body.appendChild(p);
+  item.appendChild(body);
+  return item;
+}
+
 function renderEvent(ev) {
+  if (ev.kind === "review") return renderReviewRecord(ev);
   const item = el("div", "tl-item");
   const sev = (ev.severity || "").toLowerCase();
   const dot = el("div", "tl-dot" + (sev ? " tl-sev-" + sev : ""));
@@ -735,6 +841,18 @@ function renderPayload(ev) {
   }
   if (ev.event === "done") {
     if (ev.summary) p.appendChild(el("div", null, ev.summary));
+    return p;
+  }
+  if (ev.event === "run" && ev.run) {
+    const r = ev.run;
+    p.appendChild(el("div", "mono", "status: " + (r.status || "—") + (r.branch ? " · " + r.branch : "")));
+    if (r.summary) p.appendChild(el("div", null, r.summary));
+    if (r.problem) p.appendChild(el("div", "review-problem", r.problem));
+    if ((r.commits || []).length) p.appendChild(el("div", "mono muted", r.commits.length + " commit(s)"));
+    return p;
+  }
+  if (ev.event === "push") {
+    p.appendChild(el("div", "mono", (ev.remote || "—") + " / " + (ev.branch || "—")));
     return p;
   }
 
