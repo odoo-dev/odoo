@@ -1,5 +1,5 @@
-import { useRef, useState } from "@web/owl2/utils";
-import { Component } from "@odoo/owl";
+import { useState } from "@web/owl2/utils";
+import { Component, signal } from "@odoo/owl";
 import { scrollToSelected } from "@pos_self_order/app/utils/scroll_to_selected";
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
@@ -40,10 +40,11 @@ export class PillsSelectionPopup extends Component {
         selectionType: String,
     };
 
+    categoryListRef = signal(null);
+
     setup() {
         this.ui = useService("ui");
         this.selfOrder = useService("self_order");
-        this.categoryListRef = useRef("category-list");
         this.state = useState({
             selectedCategoryId: this.categories.length > 0 ? this.categories[0].id : null,
             selectedOptionId: null,
