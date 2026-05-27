@@ -6,3 +6,5 @@
 {"kind": "event", "ts": "2026-05-27T14:14:58.875076+00:00", "actor": "orchestrator", "event": "status", "value": "done"}
 {"kind": "event", "ts": "2026-05-27T15:53:53.765545+00:00", "actor": "orchestrator", "event": "push", "remote": "odoo-dev", "branch": "master-web-user-switch-js-tref-nby"}
 {"kind": "event", "ts": "2026-05-27T19:44:13.604058+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
+{"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "ci", "result": "success", "batch": "2549906"}
+{"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "done"}

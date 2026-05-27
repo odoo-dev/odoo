@@ -10,3 +10,5 @@
 {"kind": "event", "ts": "2026-05-27T17:16:30.492864+00:00", "actor": "orchestrator", "event": "status", "value": "done"}
 {"kind": "event", "ts": "2026-05-27T17:17:06.591173+00:00", "actor": "orchestrator", "event": "push", "remote": "odoo-dev", "branch": "master-point-of-sale-orderline-js-tref-nby"}
 {"kind": "event", "ts": "2026-05-27T19:44:13.604058+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
+{"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "ci", "result": "error", "batch": "2550017", "summary": "eslint + ~365-test shared cascade (integration-based)"}
+{"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "ci_failed"}

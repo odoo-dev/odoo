@@ -7,3 +7,5 @@
 {"kind": "event", "ts": "2026-05-27T16:29:36.164231+00:00", "actor": "orchestrator", "event": "status", "value": "done"}
 {"kind": "event", "ts": "2026-05-27T16:30:26.047878+00:00", "actor": "orchestrator", "event": "push", "remote": "odoo-dev", "branch": "master-web-view-button-hook-js-tref-nby"}
 {"kind": "event", "ts": "2026-05-27T19:44:13.604058+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
+{"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "ci", "result": "error", "batch": "2549927", "summary": "5 tests: m2m/o2m/form view-button actions not fired; undefined.querySelectorAll -> likely real useViewButtons regression"}
+{"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "ci_failed"}
