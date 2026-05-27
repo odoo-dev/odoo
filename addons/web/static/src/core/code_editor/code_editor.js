@@ -1,5 +1,5 @@
-import { useLayoutEffect, useRef, useState } from "@web/owl2/utils";
-import { Component, onWillStart, markRaw, props, status, types as t } from "@odoo/owl";
+import { useLayoutEffect, useState } from "@web/owl2/utils";
+import { Component, onWillStart, markRaw, props, signal, status, types as t } from "@odoo/owl";
 import { loadBundle } from "@web/core/assets";
 import { useDebounced } from "../utils/timing";
 import { Reactive } from "../utils/reactive";
@@ -92,8 +92,9 @@ export class CodeEditor extends Component {
         }
     );
 
+    editorRef = signal(null);
+
     setup() {
-        this.editorRef = useRef("editorRef");
         this.state = useState({
             activeMode: undefined,
         });
@@ -181,7 +182,7 @@ export class CodeEditor extends Component {
                     aceEditor.destroy();
                 };
             },
-            () => [this.editorRef.el]
+            () => [this.editorRef()]
         );
 
         useLayoutEffect(
