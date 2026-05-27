@@ -362,6 +362,46 @@ patch(PosStore.prototype, {
         return couponList;
     },
     /**
+     * @param {int} programId
+     * @param {int} partnerId
+     * @returns {PosLoyaltyCard|null}
+     */
+    _getCachedLoyaltyCard(programId, partnerId) {
+        const couponIds = this.partnerId2CouponIds[partnerId];
+        if (!couponIds) {
+            return null;
+        }
+        for (const couponId of couponIds) {
+            const coupon = this.couponCache[couponId];
+            if (coupon?.program_id === programId) {
+                return coupon;
+            }
+        }
+        return null;
+    },
+    /**
+     * Fetches loyalty cards for the given programs and partner in as few RPCs as possible.
+     *
+     * @param {Array<int>} programIds
+     * @param {int} partnerId
+     */
+    async fetchLoyaltyCards(programIds, partnerId) {
+        const programIdsToFetch = [
+            ...new Set(
+                programIds.filter((programId) => !this._getCachedLoyaltyCard(programId, partnerId))
+            ),
+        ];
+        if (programIdsToFetch.length) {
+            await this.fetchCoupons(
+                [
+                    ["partner_id", "=", partnerId],
+                    ["program_id", "in", programIdsToFetch],
+                ],
+                programIdsToFetch.length
+            );
+        }
+    },
+    /**
      * Fetches a loyalty card for the given program and partner, put in cache afterwards
      *  if a matching card is found in the cache, that one is used instead.
      * If no card is found a local only card will be created until the order is validated.
@@ -370,17 +410,15 @@ patch(PosStore.prototype, {
      * @param {int} partnerId
      */
     async fetchLoyaltyCard(programId, partnerId) {
-        for (const coupon of Object.values(this.couponCache)) {
-            if (coupon.partner_id === partnerId && coupon.program_id === programId) {
-                return coupon;
-            }
+        const cachedCoupon = this._getCachedLoyaltyCard(programId, partnerId);
+        if (cachedCoupon) {
+            return cachedCoupon;
         }
-        const fetchedCoupons = await this.fetchCoupons([
-            ["partner_id", "=", partnerId],
-            ["program_id", "=", programId],
-        ]);
-        const dbCoupon = fetchedCoupons.length > 0 ? fetchedCoupons[0] : null;
-        return dbCoupon || new PosLoyaltyCard(null, null, programId, partnerId, 0);
+        await this.fetchLoyaltyCards([programId], partnerId);
+        return (
+            this._getCachedLoyaltyCard(programId, partnerId) ||
+            new PosLoyaltyCard(null, null, programId, partnerId, 0)
+        );
     },
     getLoyaltyCards(partner) {
         const loyaltyCards = [];

@@ -500,6 +500,7 @@ patch(Order.prototype, {
     async _updatePrograms() {
         const changesPerProgram = {};
         const programsToCheck = new Set();
+        const newCouponEntries = [];
         // By default include all programs that are considered 'applicable'
         for (const program of this.pos.programs) {
             if (this._programIsApplicable(program)) {
@@ -542,17 +543,31 @@ patch(Order.prototype, {
                 );
             } else if (pointsAdded.length > oldChanges.length) {
                 for (const pa of pointsAdded.splice(oldChanges.length)) {
-                    const coupon = await this._couponForProgram(program);
-                    this.couponPointChanges[coupon.id] = {
-                        points: pa.points,
-                        program_id: program.id,
-                        coupon_id: coupon.id,
-                        barcode: pa.barcode,
-                        appliedRules: pointsForProgramsCountedRules[program.id],
-                        giftCardId: pa.giftCardId
-                    };
+                    newCouponEntries.push({ program, pa });
                 }
             }
+        }
+        const partner = this.get_partner();
+        const nominativeProgramIds = [
+            ...new Set(
+                newCouponEntries
+                    .filter(({ program }) => program.is_nominative && partner)
+                    .map(({ program }) => program.id)
+            ),
+        ];
+        if (nominativeProgramIds.length) {
+            await this.pos.fetchLoyaltyCards(nominativeProgramIds, partner.id);
+        }
+        for (const { program, pa } of newCouponEntries) {
+            const coupon = this._couponForProgram(program);
+            this.couponPointChanges[coupon.id] = {
+                points: pa.points,
+                program_id: program.id,
+                coupon_id: coupon.id,
+                barcode: pa.barcode,
+                appliedRules: pointsForProgramsCountedRules[program.id],
+                giftCardId: pa.giftCardId,
+            };
         }
         // Also remove coupons from codeActivatedCoupons if their program applies_on current orders and the program does not give any points
         this.codeActivatedCoupons = this.codeActivatedCoupons.filter((coupon) => {
@@ -706,12 +721,16 @@ patch(Order.prototype, {
      *
      * @param {object} program
      */
-    async _couponForProgram(program) {
+    _couponForProgram(program) {
+        const partner = this.get_partner();
         if (program.is_nominative) {
-            return await this.pos.fetchLoyaltyCard(program.id, this.get_partner().id);
+            return (
+                (partner && this.pos._getCachedLoyaltyCard(program.id, partner.id)) ||
+                new PosLoyaltyCard(null, null, program.id, partner?.id || -1, 0)
+            );
         }
         // This type of coupons don't need to really exist up until validating the order, so no need to cache
-        return new PosLoyaltyCard(null, null, program.id, (this.get_partner() || { id: -1 }).id, 0);
+        return new PosLoyaltyCard(null, null, program.id, (partner || { id: -1 }).id, 0);
     },
     _programIsApplicable(program) {
         if (
