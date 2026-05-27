@@ -10,3 +10,5 @@
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "ci_failed"}
 {"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "triage", "class": "real_regression", "note": "SEVERE: ~565 unique fails, global 'undefined.el' across nearly all JS suites. useNavigation resolver regression. In integration base."}
 {"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "priority", "value": 10}
+{"kind": "event", "ts": "2026-05-27T20:20:33.352783+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 2, "branch": "master-web-navigation-js-tref-nby", "status": "success", "summary": "REWORK after CI: Fixed resolver: string\u2192internal useRef.el, object\u2192.el, signal\u2192call; hardened to ?.el. Real cause: undefined ref deref + useChildRef-is-callable-with-.el.", "commits": ["a6e517551d06 (amended, force-pushed)"], "problem": null, "needs_rerun": false}}
+{"kind": "event", "ts": "2026-05-27T20:20:33.352783+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}

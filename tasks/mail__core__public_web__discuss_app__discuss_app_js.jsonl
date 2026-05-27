@@ -10,3 +10,5 @@
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "ci_failed"}
 {"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "triage", "class": "real_regression", "note": "HIGH: discuss/mail/livechat/whatsapp/voip cascade from malformed/blank xpath on t-custom-ref='root' (discuss template change). In integration base."}
 {"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "priority", "value": 9}
+{"kind": "event", "ts": "2026-05-27T20:20:33.352783+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 2, "branch": "master-mail-discuss-app-js-tref-nby", "status": "success", "summary": "REWORK after CI: Fixed: discuss_app_patch.xml xpath targeted @t-custom-ref='root' (renamed) \u2192 retargeted to hasclass('o-mail-Discuss'). 3 files.", "commits": ["2df4af53aebf (amended, force-pushed)"], "problem": null, "needs_rerun": false}}
+{"kind": "event", "ts": "2026-05-27T20:20:33.352783+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}

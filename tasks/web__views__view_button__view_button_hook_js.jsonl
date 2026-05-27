@@ -11,3 +11,5 @@
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "ci_failed"}
 {"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "triage", "class": "real_regression", "note": "MED: m2m/o2m/x2many view-button actions fail, 'undefined.querySelectorAll'. useViewButtons regression. In integration base."}
 {"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "priority", "value": 8}
+{"kind": "event", "ts": "2026-05-27T20:20:33.352783+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 2, "branch": "master-web-view-button-hook-js-tref-nby", "status": "success", "summary": "REWORK after CI: Fixed: same useChildRef-callable-with-.el bug; getRefEl checks 'el' in ref first, string\u2192useRef.el, true signal\u2192call.", "commits": ["4b464ca96a9c (amended, force-pushed)"], "problem": null, "needs_rerun": false}}
+{"kind": "event", "ts": "2026-05-27T20:20:33.352783+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}

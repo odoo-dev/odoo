@@ -13,3 +13,5 @@
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "ci", "result": "error", "batch": "2550011", "summary": "eslint + ~365-test shared cascade (integration-based)"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "ci_failed"}
 {"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "triage", "class": "base_noise", "note": "CI red only because integration base contains buggy navigation/view-button/discuss/eslint commits; re-verify CI after base is fixed \u2014 no individual rework."}
+{"kind": "event", "ts": "2026-05-27T20:24:15.937707+00:00", "actor": "orchestrator", "event": "note", "text": "Rebased onto fixed integration base (e87b50d, 5 regressions fixed); force-pushed. Awaiting CI re-check."}
+{"kind": "event", "ts": "2026-05-27T20:24:15.937707+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
