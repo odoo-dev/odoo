@@ -23,6 +23,22 @@ import { router } from "@web/core/browser/router";
  * @typedef {{ readonly el: HTMLElement | null; }} Ref
  */
 
+/**
+ * Reads the current element from a ref, supporting both the native Owl 3 signal
+ * ref API (a function you call to get the element) and the legacy Owl 2 ref
+ * object that exposes a `.el` getter.
+ *
+ * TRANSITIONAL: this runtime check is the single, localized place where we
+ * tolerate either ref shape during the Owl 2 → Owl 3 migration. Once every
+ * caller passes a signal, the `.el` branch can be dropped.
+ *
+ * @param {Ref | (() => HTMLElement | null)} ref
+ * @returns {HTMLElement | null}
+ */
+function getRefEl(ref) {
+    return typeof ref === "function" ? ref() : ref?.el;
+}
+
 // -----------------------------------------------------------------------------
 // useAutofocus
 // -----------------------------------------------------------------------------
@@ -70,7 +86,7 @@ export function useAutofocus({ refName, selectAll, mobile } = {}) {
                 }
             }
         },
-        () => [ref.el]
+        () => [getRefEl(ref)]
     );
     return ref;
 }
@@ -203,7 +219,7 @@ export function useSpellCheck({ refName } = {}) {
                 });
             };
         },
-        () => [ref.el]
+        () => [getRefEl(ref)]
     );
 }
 
@@ -228,7 +244,8 @@ export function useChildRef() {
         }
         Object.defineProperty(ref, "el", {
             get() {
-                return value.el;
+                // `value` may be a legacy `.el` ref or an Owl 3 signal ref.
+                return getRefEl(value);
             },
         });
         defined = true;
@@ -275,7 +292,8 @@ export function useOwnedDialogs() {
  * components. If your hook only needs a single event listener, consider simply
  * returning it from the hook and letting the user attach it with t-on.
  *
- * @param {Ref} ref
+ * @param {Ref | (() => HTMLElement | null)} ref a legacy `.el` ref or an Owl 3
+ *  signal ref
  * @param {Parameters<typeof EventTarget.prototype.addEventListener>} listener
  */
 export function useRefListener(ref, ...listener) {
@@ -284,7 +302,7 @@ export function useRefListener(ref, ...listener) {
             el?.addEventListener(...listener);
             return () => el?.removeEventListener(...listener);
         },
-        () => [ref.el]
+        () => [getRefEl(ref)]
     );
 }
 
