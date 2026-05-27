@@ -8,3 +8,4 @@
 {"kind": "event", "ts": "2026-05-27T19:44:13.604058+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "ci", "result": "error", "batch": "2549935", "summary": "2 tests: website test_custom_popup_snippet, test_10_website_conditional_visibility"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "ci_failed"}
+{"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "triage", "class": "likely_flaky", "note": "1-2 website-builder tours fail but master is green and same tours recur on unrelated branches -> likely flaky; re-verify CI before any rework."}

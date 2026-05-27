@@ -12,3 +12,4 @@
 {"kind": "event", "ts": "2026-05-27T19:44:13.604058+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "ci", "result": "error", "batch": "2550009", "summary": "eslint (scroll_shadow_hook prettier, from integration base) + ~368-test shared cascade"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "ci_failed"}
+{"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "triage", "class": "base_noise", "note": "CI red only because integration base contains buggy navigation/view-button/discuss/eslint commits; re-verify CI after base is fixed \u2014 no individual rework."}

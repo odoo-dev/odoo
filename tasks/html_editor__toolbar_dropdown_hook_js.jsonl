@@ -9,3 +9,5 @@
 {"kind": "event", "ts": "2026-05-27T19:44:13.604058+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "ci", "result": "error", "batch": "2549939", "summary": "280 tests: html_editor hoot (align/banner/caption) + Knowledge tour test_knowledge_article_comments"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "ci_failed"}
+{"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "triage", "class": "real_regression", "note": "HIGH: ~278 fails in editor/builder/toolbar, 'undefined.el'. useDropdownAutoVisibility regression. In integration base."}
+{"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "priority", "value": 9}

@@ -8,3 +8,5 @@
 {"kind": "event", "ts": "2026-05-27T19:44:13.604058+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "ci", "result": "error", "batch": "2549887", "summary": "574 tests: pervasive 'Cannot read properties of undefined (reading el)' -> likely real useNavigation regression"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "ci_failed"}
+{"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "triage", "class": "real_regression", "note": "SEVERE: ~565 unique fails, global 'undefined.el' across nearly all JS suites. useNavigation resolver regression. In integration base."}
+{"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "priority", "value": 10}
