@@ -2,3 +2,7 @@
 {"kind": "event", "ts": "2026-05-27T16:24:48.289780+00:00", "actor": "orchestrator", "event": "status", "value": "pending"}
 {"kind": "event", "ts": "2026-05-27T16:24:48.289780+00:00", "actor": "orchestrator", "event": "note", "text": "useScrollShadow/useHorizontalScrollShadow read ref.el"}
 {"kind": "event", "ts": "2026-05-27T16:25:07.153406+00:00", "actor": "orchestrator", "event": "status", "value": "in_progress"}
+{"kind": "event", "ts": "2026-05-27T16:29:36.164231+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 1, "agent_id": "a00504181e26d9b70", "worktree": "/Volumes/Goadrive/odoo/worktrees/master-pos-self-order-scroll-shadow-hook-js-tref-nby/odoo", "branch": "master-pos-self-order-scroll-shadow-hook-js-tref-nby", "status": "success", "summary": "getEl resolver in useScrollShadow/useHorizontalScrollShadow/initScrollShadow; legacy .el intact.", "commits": ["b19ea45549f9 [REF] pos_self_order: make scroll-shadow hooks accept signal refs"], "problem": null, "needs_rerun": false}}
+{"kind": "event", "ts": "2026-05-27T16:29:36.164231+00:00", "actor": "orchestrator", "event": "assignee", "value": "a00504181e26d9b70"}
+{"kind": "event", "ts": "2026-05-27T16:29:36.164231+00:00", "actor": "orchestrator", "event": "status", "value": "done"}
+{"kind": "event", "ts": "2026-05-27T16:30:26.047878+00:00", "actor": "orchestrator", "event": "push", "remote": "odoo-dev", "branch": "master-pos-self-order-scroll-shadow-hook-js-tref-nby"}
