@@ -1,5 +1,5 @@
-import { useState, useRef } from "@web/owl2/utils";
-import { Component } from "@odoo/owl";
+import { useState } from "@web/owl2/utils";
+import { Component, signal } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { toolbarButtonProps } from "@html_editor/main/toolbar/toolbar";
@@ -20,14 +20,15 @@ export class FontTypeSelector extends Component {
     };
     static components = { Dropdown, DropdownItem };
 
+    fontTypeSelectorRef = signal(null);
+
     setup() {
         this.items = this.props.getItems();
         this.state = useState(this.props.getDisplay());
         this.menuRef = useChildRef();
-        this.fontTypeSelector = useRef("fontTypeSelector");
         this.dropdown = useDropdownState();
         useDropdownAutoVisibility(this.env.overlayState, this.menuRef);
-        useToolbarDropdownFocus(this.dropdown, this.fontTypeSelector);
+        useToolbarDropdownFocus(this.dropdown, this.fontTypeSelectorRef);
     }
 
     onSelected(item) {
