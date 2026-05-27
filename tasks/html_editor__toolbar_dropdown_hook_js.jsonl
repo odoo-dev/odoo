@@ -13,3 +13,4 @@
 {"kind": "event", "ts": "2026-05-27T20:11:16.835108+00:00", "actor": "orchestrator", "event": "priority", "value": 9}
 {"kind": "event", "ts": "2026-05-27T20:20:33.352783+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 2, "branch": "master-html-editor-toolbar-dropdown-hook-js-tref-nby", "status": "success", "summary": "REWORK after CI: Fixed: useChildRef forwarded ref is a callable WITH .el getter; resolver was calling it (setter\u2192undefined). Now reads .el first, only calls true zero-arg signals.", "commits": ["fa4b11c45756 (amended, force-pushed)"], "problem": null, "needs_rerun": false}}
 {"kind": "event", "ts": "2026-05-27T20:20:33.352783+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
+{"kind": "event", "ts": "2026-05-27T21:53:01Z", "actor": "orchestrator", "event": "local_test", "result": "pass", "note": "Fix held (fa4b11c); 831 local html_editor hoot tests PASS."}
