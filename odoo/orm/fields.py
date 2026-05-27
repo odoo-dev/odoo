@@ -266,7 +266,7 @@ class Field[T]:
     _args__: dict[str, typing.Any] | None = None  # the parameters given to __init__()
     _module: str | None = None          # the field's module name
     _modules: tuple[str, ...] = ()      # modules that define this field
-    _setup_done = True                  # whether the field is completely set up
+    _setup_done = False                 # whether the field is completely set up
     _sequence: int                      # absolute ordering of the field
     _base_fields__: tuple[Self, ...] = ()  # the fields defining self, in override order
     _extra_keys__: tuple[str, ...] = ()  # unknown attributes set on the field
@@ -397,6 +397,13 @@ class Field[T]:
         # file, it is not yet available and we already declare fields:
         # id and display_name
         assert '_models' not in globals() or isinstance(owner, _models.MetaModel)
+        if self._setup_done:
+            assert getattr(owner, 'pool', None) is not None
+            assert not self._toplevel and self._direct
+            assert self.name in ('id', 'display_name') or self._module is not None
+            assert owner._name == self.model_name
+            assert name == self.name
+            return
         self.model_name = owner._name
         self.name = name
         if getattr(owner, 'pool', None) is None:  # models.is_model_definition(owner)
