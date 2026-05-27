@@ -3,3 +3,7 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "depends_on", "set": ["web__core__utils__hooks_js"], "reason": "seeded: imports ref-helper(s) useChildRef"}
 {"kind": "event", "ts": "2026-05-27T22:25:09.914877+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 1, "branch": "master-html-editor-font-type-selector-js-tref-nby", "status": "blocked", "commits": [], "summary": "Correctly blocked: useToolbarDropdownFocus not signal-aware.", "problem": "useToolbarDropdownFocus reads buttonRef.el; signal breaks Escape-refocus.", "needs_rerun": true}}
 {"kind": "event", "ts": "2026-05-27T22:25:09.914877+00:00", "actor": "orchestrator", "event": "status", "value": "blocked"}
+{"kind": "event", "ts": "2026-05-27T22:43:21.207179+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 2, "branch": "master-html-editor-font-type-selector-js-tref-nby", "status": "success", "summary": "Migrated on fixed base; signal passed to signal-aware toolbar hooks.", "commits": ["2a6a693529f7"], "problem": null, "needs_rerun": false}}
+{"kind": "event", "ts": "2026-05-27T22:43:21.207179+00:00", "actor": "orchestrator", "event": "local_test", "result": "pass", "note": "@html_editor/toolbar 94 tests, Escape-refocus PASS"}
+{"kind": "event", "ts": "2026-05-27T22:43:21.207179+00:00", "actor": "orchestrator", "event": "push", "remote": "odoo-dev", "branch": "master-html-editor-font-type-selector-js-tref-nby"}
+{"kind": "event", "ts": "2026-05-27T22:43:21.207179+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
