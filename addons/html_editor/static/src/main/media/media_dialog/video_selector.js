@@ -1,10 +1,10 @@
-import { useRef, useState } from "@web/owl2/utils";
+import { useState } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { debounce } from "@web/core/utils/timing";
 
-import { Component, onMounted, status } from "@odoo/owl";
+import { Component, onMounted, signal, status } from "@odoo/owl";
 import { Switch } from "@html_editor/components/switch/switch";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 
@@ -56,6 +56,8 @@ export class VideoSelector extends Component {
         vimeoPreviewIds: [],
         isForBgVideo: false,
     };
+
+    urlInputRef = signal(null);
 
     setup() {
         this.http = useService("http");
@@ -133,7 +135,6 @@ export class VideoSelector extends Component {
                 urlParameter: () => this.platformParams[this.state.platform],
             },
         };
-        this.urlInputRef = useRef("url-input");
 
         onMounted(async () => {
             if (this.props.media) {
