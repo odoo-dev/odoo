@@ -932,6 +932,19 @@ export class UseForwardRefsToParent {
     constructor(propName, getRefIdFn, ref) {
         const component = useComponent();
         this.ref = ref;
+        // Transitional resolver (Owl 3): consumers of the `useChildRefs()` map read
+        // the element through `.el`. A legacy ref already exposes `.el`, while an Owl 3
+        // native ref is a signal (a callable returning the element). When a signal is
+        // forwarded, store a thin `.el` adapter so the stored-map contract is preserved;
+        // legacy `.el` refs are stored unchanged to keep existing behavior byte-for-byte.
+        this.storedRef =
+            typeof ref === "function"
+                ? {
+                      get el() {
+                          return ref();
+                      },
+                  }
+                : ref;
         // Note: The `useChildRefs()` Map is shared with all children, using useLayoutEffect/willUnmount to ensure proper on/off life cycle hook calls for given child.
         // If we use setup/willDestroy we can have 2 fiber nodes of same child component with one finalizing with willDestroy from cancelling duplicated fiber node.
         useLayoutEffect(
@@ -944,7 +957,7 @@ export class UseForwardRefsToParent {
     }
 
     registerRef(map, key) {
-        map?.set(key, this.ref);
+        map?.set(key, this.storedRef);
     }
 
     removeRef(map, key) {
