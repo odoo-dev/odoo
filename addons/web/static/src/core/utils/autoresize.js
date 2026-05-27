@@ -12,6 +12,10 @@ import { memoize } from "@web/core/utils/functions";
  * @param {Ref} ref
  */
 export function useAutoresize(ref, options = {}) {
+    // Transitional: Owl 3 native refs are signals (call `ref()` to read the element),
+    // while legacy refs expose `.el`. Resolve the element in this single place so both
+    // kinds of callers keep working.
+    const getEl = () => (typeof ref === "function" ? ref() : ref?.el);
     let wasProgrammaticallyResized = false;
     let resize = null;
     useLayoutEffect(
@@ -47,7 +51,7 @@ export function useAutoresize(ref, options = {}) {
                 };
             }
         },
-        () => [ref.el]
+        () => [getEl()]
     );
     useLayoutEffect(() => {
         if (resize) {
