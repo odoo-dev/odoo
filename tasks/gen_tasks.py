@@ -214,10 +214,15 @@ def generate():
                           if REF_HELPERS[h] != path
                           and REF_HELPERS[h] in id_for})
         comp = os.path.splitext(os.path.basename(path))[0]
-        # The agent runs `worktree_cmd` to get its own isolated worktree; goa
-        # auto-prefixes a unique hash, so the readable name need not be unique.
+        # The agent runs `worktree_cmd` to get its own isolated worktree. The
+        # readable name is addon-qualified (the path segment right after
+        # addons/) so it is unique across tasks even when basenames collide
+        # (e.g. web/.../hooks.js vs point_of_sale/.../hooks.js).
         # The actual created path/branch is recorded later via a "worktree" event.
-        wt = "master-" + os.path.basename(path).replace("_", "-").replace(".", "-") + "-tref-nby"
+        rel = path[len("addons/"):] if path.startswith("addons/") else path
+        addon = rel.split("/", 1)[0].replace("_", "-")
+        base = os.path.basename(path).replace("_", "-").replace(".", "-")
+        wt = "master-" + addon + "-" + base + "-tref-nby"
         return {
             "kind": "task", "schema": 1, "id": id_for[path],
             "path": path, "lang": lang, "component": comp,
