@@ -43,6 +43,7 @@ import { accountTaxHelpers } from "@account/helpers/account_tax";
 import { SnoozedProductTracker } from "@point_of_sale/app/models/utils/snooze_tracker";
 import { ScaleScreen } from "@point_of_sale/app/screens/scale_screen/scale_screen";
 import { Domain } from "@web/core/domain";
+import { PosWebrtcService } from "../utils/webRTC/pos_webrtc";
 
 const { DateTime } = luxon;
 export const CONSOLE_COLOR = "#F5B427";
@@ -173,6 +174,101 @@ export class PosStore extends WithLazyGetterTrap {
         });
 
         this.handleQRPaymentLines();
+        this.initWebRTCService(env);
+    }
+
+    initWebRTCService(env) {
+        this.posWebrtc = new PosWebrtcService(
+            env,
+            "POS-SYNCHRONISATION",
+            odoo.access_token,
+            odoo.pos_config_id
+        );
+        this.posWebrtc.addListener(this.handleWebRTCMessage.bind(this));
+        this.debounceSendWebRTCMessage = debounce(() => {
+            const payload = this.prepareWebRTCPayload();
+            this.sendWebRTCMessage(payload);
+        }, 1000);
+        this.webRTCmsgQueue = [];
+        this.initWebRTCEventListeners();
+    }
+
+    initWebRTCEventListeners() {
+        const watchedEvents = ["update", "delete", "create"];
+
+        for (const model of this.data.opts.dynamicModels) {
+            for (const event of watchedEvents) {
+                this.models[model].addEventListener(event, ({ id }) => {
+                    if (this.lockRTC || !id) {
+                        return;
+                    }
+                    const record = this.models[model].get(id);
+
+                    this.webRTCmsgQueue.push({
+                        id,
+                        model,
+                        event,
+                        data: record?.serializeForIndexedDB(), // false means deleted record
+                    });
+
+                    this.debounceSendWebRTCMessage();
+                });
+            }
+        }
+    }
+
+    prepareWebRTCPayload() {
+        const queuedMessages = [...this.webRTCmsgQueue];
+        this.webRTCmsgQueue = [];
+
+        const dynamicRecords = {};
+        const deletedRecordIds = {};
+        const syncEvents = new Set(["create", "update"]);
+
+        for (const { event, id, model, data } of queuedMessages) {
+            if (!model || !id) {
+                continue;
+            }
+
+            if (event === "delete") {
+                deletedRecordIds[model] ??= [];
+                deletedRecordIds[model].push(id);
+            } else if (data && syncEvents.has(event)) {
+                dynamicRecords[model] ??= {};
+                dynamicRecords[model][id] = data;
+            }
+        }
+        return {
+            dynamicRecords: Object.fromEntries(
+                Object.entries(dynamicRecords)
+                    .map(([model, records]) => [model, Object.values(records)])
+                    .filter(([, records]) => records.length)
+            ),
+            deletedRecordIds,
+        };
+    }
+
+    sendWebRTCMessage(payload) {
+        this.posWebrtc.send(payload);
+    }
+
+    async handleWebRTCMessage({ dynamicRecords, deletedRecordIds }) {
+        this.lockRTC = true;
+
+        try {
+            const missingRecords = await this.data.missingRecursive(dynamicRecords);
+            this.models.loadConnectedData(missingRecords, [], { silent: true });
+
+            for (const [model, ids] of Object.entries(deletedRecordIds)) {
+                const records = this.models[model].readMany(ids).filter(Boolean);
+
+                if (records.length) {
+                    this.models[model].deleteMany(records, { silent: true });
+                }
+            }
+        } finally {
+            this.lockRTC = false;
+        }
     }
 
     handleQRPaymentLines() {

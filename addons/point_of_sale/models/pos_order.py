@@ -1256,10 +1256,11 @@ class PosOrder(models.Model):
         pos_order_ids = self.env['pos.order'].browse(order_ids)
         config = pos_order_ids.config_id[0] if pos_order_ids else False
 
-        for order in pos_order_ids:
-            order._ensure_access_token()
-            if not self.env.context.get('preparation'):
-                order.config_id.notify_synchronisation(order.config_id.current_session_id.id, self.env.context.get('device_identifier', 0))
+        # TODO-PARP: WebRTC testing
+        # for order in pos_order_ids:
+        #     order._ensure_access_token()
+        #     if not self.env.context.get('preparation'):
+        #         order.config_id.notify_synchronisation(order.config_id.current_session_id.id, self.env.context.get('device_identifier', 0))
 
         _logger.info("PoS synchronisation #%d finished", sync_token)
         return pos_order_ids.read_pos_data(orders, config)

@@ -56,7 +56,8 @@ class PosOrder(models.Model):
     def _send_notification(self, order_ids):
         config_ids = order_ids.config_id
         for config in config_ids:
-            config.notify_synchronisation(config.current_session_id.id, self.env.context.get('device_identifier', 0))
+            # TODO-PARP: WebRTC testing
+            # config.notify_synchronisation(config.current_session_id.id, self.env.context.get('device_identifier', 0))
             config._notify('ORDER_STATE_CHANGED', {})
 
     def _send_self_order_receipt(self):

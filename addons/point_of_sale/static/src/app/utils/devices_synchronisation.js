@@ -92,6 +92,10 @@ export default class DevicesSynchronisation {
      * and synchronize the records with other devices.
      */
     async readDataFromServer() {
+        // // TODO-PARP - WebRTC testing
+        // if (this) {
+        //     return false;
+        // }
         const serverOpenOrders = this.pos.getOpenOrders().filter((o) => o.isSynced);
         const { domain, recordIds } = this.constructOrdersDomain(serverOpenOrders);
         let response = {};
