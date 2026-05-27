@@ -21,6 +21,11 @@ This module allows you to easily add extra costs on pickings and decide the spli
         'views/stock_landed_cost_views.xml',
         'views/res_config_settings_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'stock_landed_costs/static/src/js/**/*',
+        ],
+    },
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }
