@@ -1,3 +1,4 @@
 {"kind": "wave", "schema": 1, "id": "wave-0", "wave": 0, "title": "Foundation helpers", "goal": "Make the shared ref-helpers signal-capable, backward-compatibly.", "strategy": "Hand-write these. Each helper must accept a signal AND keep accepting the old string/ref for one transition period, so dependents can migrate independently before the legacy path is removed in wave 5.", "depends_on": [], "parallel_with": ["wave-1", "wave-2"], "subtask_count": 2, "created_at": "2026-05-27T13:55:09.621843+00:00"}
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "priority", "value": 100}
+{"kind": "event", "ts": "2026-05-27T14:10:45.160259+00:00", "actor": "orchestrator", "event": "status", "value": "in_progress"}

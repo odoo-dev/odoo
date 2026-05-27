@@ -17,6 +17,14 @@ the *current* value is the latest event that set it.
                                  {"event":"depends_on","add":[...],"remove":[...]}
 The orchestrator appends events; `reindex` folds them into index.jsonl.
 
+Sub-agent runs are recorded as `run` events; folding collects them into a
+`runs` list (runs[-1] is the latest), so a task that fails can be re-run and
+keep its full history:
+  {"event":"run","run":{
+     "n":1, "agent_id":"abc", "worktree":"/Volumes/.../odoo",
+     "branch":"master_-xxxx-_<name>", "status":"success|failed|blocked",
+     "summary":"...", "commits":["<sha> <subject>", ...], "problem":null}}
+
 Worktree per task: each task carries a `worktree` name and a `worktree_cmd`.
 The sub-agent first runs `worktree_cmd` (goa auto-prefixes a unique hash), cds
 into the created worktree, does the migration there, and records the real
@@ -283,7 +291,7 @@ def generate():
 def fold(path):
     """Fold one task/wave event log into (kind, definition, current state)."""
     state = {"status": "pending", "priority": None, "depends_on": [],
-             "assignee": None}
+             "assignee": None, "runs": []}
     defn, kind = None, None
     with open(path, encoding="utf-8") as f:
         for line in f:
@@ -305,6 +313,10 @@ def fold(path):
                         dep |= set(rec.get("add", []))
                         dep -= set(rec.get("remove", []))
                         state["depends_on"] = sorted(dep)
+                elif ev == "run":
+                    # one sub-agent attempt: see the run-event schema in the
+                    # module docstring. Appended in order so runs[-1] is latest.
+                    state["runs"].append(rec.get("run", {}))
     return kind, defn, state
 
 
@@ -323,6 +335,8 @@ def reindex():
                 "wave": defn.get("wave"), "wave_id": defn.get("wave_id"),
                 "status": state["status"], "priority": state["priority"],
                 "depends_on": state["depends_on"],
+                "runs": len(state["runs"]),
+                "last_run": state["runs"][-1].get("status") if state["runs"] else None,
             })
         elif kind == "wave":
             wave_defs[defn["id"]] = (defn, state)
@@ -352,11 +366,27 @@ def reindex():
           f"-> tasks/index.jsonl")
 
 
+def append_event(task_id, payload):
+    """Append one event to a task/wave log and reindex. `payload` is a dict
+    with at least {"event": <type>, ...}; `actor` defaults to "orchestrator"."""
+    path = os.path.join(TASKS_DIR, task_id + ".jsonl")
+    if not os.path.exists(path):
+        sys.exit("no such task: " + task_id)
+    rec = {"kind": "event", "ts": datetime.now(timezone.utc).isoformat(),
+           "actor": payload.pop("actor", "orchestrator"), **payload}
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(rec) + "\n")
+    reindex()
+
+
 if __name__ == "__main__":
     mode = sys.argv[1] if len(sys.argv) > 1 else "generate"
     if mode == "generate":
         generate()
     elif mode == "reindex":
         reindex()
+    elif mode == "event":
+        # gen_tasks.py event <task-id> '<json payload with "event" key>'
+        append_event(sys.argv[2], json.loads(sys.argv[3]))
     else:
-        sys.exit("usage: gen_tasks.py [generate|reindex]")
+        sys.exit("usage: gen_tasks.py [generate|reindex|event <id> <json>]")
