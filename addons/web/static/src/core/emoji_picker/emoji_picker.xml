@@ -26,7 +26,7 @@
             <div
                 class="o-EmojiPicker-content overflow-auto d-flex flex-grow-1 w-100 flex-wrap align-items-center user-select-none mt-1"
                 t-att-class="!hasEmojisFromSearch ? 'flex-column justify-content-center' : 'align-content-start'"
-                t-custom-ref="emoji-grid"
+                t-ref="this.gridRef"
                 t-on-scroll="this.highlightActiveCategory"
             >
                 <t t-if="this.searchTerm and !hasEmojisFromSearch" class="d-flex flex-column">
@@ -54,7 +54,7 @@
             <div
                 class="o-EmojiPicker-navbar d-flex flex-shrink-0 w-100 align-items-center justify-content-center overflow-auto px-1 gap-1 border-top border-secondary"
                 t-att-class="{ 'opacity-0': !this.state.emojiNavbarRepr }"
-                t-custom-ref="navbar"
+                t-ref="this.navbarRef"
             >
                 <t t-set="currentNavbarPanel" t-value="this.getCurrentNavbarPanel(_recentEmojis)" />
                 <t t-if="currentNavbarPanel">

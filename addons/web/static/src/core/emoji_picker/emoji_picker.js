@@ -15,6 +15,7 @@ import {
     onWillPatch,
     onWillStart,
     onWillUnmount,
+    signal,
     xml,
 } from "@odoo/owl";
 
@@ -64,10 +65,10 @@ export class EmojiPicker extends Component {
     shouldScrollElem = null;
     lastSearchTerm;
     keyboardNavigated = false;
+    gridRef = signal(null);
+    navbarRef = signal(null);
 
     setup() {
-        this.gridRef = useRef("emoji-grid");
-        this.navbarRef = useRef("navbar");
         this.ui = useService("ui");
         this.isMobileOS = isMobileOS();
         this.state = useState({
@@ -97,11 +98,13 @@ export class EmojiPicker extends Component {
                 return;
             }
             this.navbarResizeObserver = new ResizeObserver(() => this.adaptNavbar());
-            this.navbarResizeObserver.observe(this.navbarRef.el);
+            if (this.navbarRef()) {
+                this.navbarResizeObserver.observe(this.navbarRef());
+            }
             this.adaptNavbar();
             this.highlightActiveCategory();
-            if (this.props.storeScroll) {
-                this.gridRef.el.scrollTop = this.props.storeScroll.get();
+            if (this.props.storeScroll && this.gridRef()) {
+                this.gridRef().scrollTop = this.props.storeScroll.get();
             }
             this.state.hoveredEmoji = this.activeEmoji;
         });
@@ -112,7 +115,7 @@ export class EmojiPicker extends Component {
             if (this.shouldScrollElem) {
                 this.shouldScrollElem = false;
                 const getElement = () =>
-                    this.gridRef.el.querySelector(
+                    this.gridRef()?.querySelector(
                         `.o-EmojiPicker-category[data-category="${this.state.categoryId}"`
                     );
                 const elem = getElement();
@@ -129,7 +132,7 @@ export class EmojiPicker extends Component {
         );
         useLayoutEffect(
             (el) => {
-                const gridEl = this.gridRef.el;
+                const gridEl = this.gridRef();
                 const activeEl = gridEl?.querySelector(".o-Emoji.o-active");
                 if (!gridEl) {
                     return;
@@ -140,19 +143,19 @@ export class EmojiPicker extends Component {
                 }
                 this.state.hoveredEmoji = this.activeEmoji;
             },
-            () => [this.state.activeEmojiIndex, this.gridRef.el]
+            () => [this.state.activeEmojiIndex, this.gridRef()]
         );
         useLayoutEffect(
             () => {
-                if (!this.gridRef.el) {
+                if (!this.gridRef()) {
                     return;
                 }
                 if (this.searchTerm) {
-                    this.gridRef.el.scrollTop = 0;
+                    this.gridRef().scrollTop = 0;
                     this.state.categoryId = null;
                 } else {
                     if (this.lastSearchTerm) {
-                        this.gridRef.el.scrollTop = 0;
+                        this.gridRef().scrollTop = 0;
                     }
                     this.highlightActiveCategory();
                 }
@@ -162,25 +165,26 @@ export class EmojiPicker extends Component {
         );
         onWillUnmount(() => {
             this.navbarResizeObserver?.disconnect();
-            if (!this.gridRef.el) {
+            if (!this.gridRef()) {
                 return;
             }
-            this.props.storeScroll?.set(this.gridRef.el.scrollTop);
+            this.props.storeScroll?.set(this.gridRef().scrollTop);
         });
     }
 
     adaptNavbar() {
-        if (!this.navbarRef.el) {
+        const navbarEl = this.navbarRef();
+        if (!navbarEl) {
             return;
         }
-        const computedStyle = getComputedStyle(this.navbarRef.el);
+        const computedStyle = getComputedStyle(navbarEl);
         const availableWidth =
-            this.navbarRef.el.getBoundingClientRect().width -
+            navbarEl.getBoundingClientRect().width -
             parseInt(computedStyle.paddingLeft) -
             parseInt(computedStyle.marginLeft) -
             parseInt(computedStyle.paddingLeft) -
             parseInt(computedStyle.marginLeft);
-        const itemWidth = this.navbarRef.el.querySelector(".o-Emoji").getBoundingClientRect().width;
+        const itemWidth = navbarEl.querySelector(".o-Emoji").getBoundingClientRect().width;
         const gapWidth = parseInt(computedStyle.gap);
         const maxAvailableNavbarItemAmountAtOnce = Math.floor(
             availableWidth / (itemWidth + gapWidth)
@@ -291,7 +295,7 @@ export class EmojiPicker extends Component {
         if (!emojiLoader.loaded) {
             return;
         }
-        const emojiEls = Array.from(this.gridRef.el.querySelectorAll(".o-Emoji"));
+        const emojiEls = Array.from(this.gridRef()?.querySelectorAll(".o-Emoji") ?? []);
         const emojiRects = emojiEls.map((el) => el.getBoundingClientRect());
         this.emojiMatrix = [];
         for (const [index, pos] of emojiRects.entries()) {
@@ -362,7 +366,7 @@ export class EmojiPicker extends Component {
     }
 
     get activeEmoji() {
-        const activeCodepoints = this.gridRef.el.querySelector(
+        const activeCodepoints = this.gridRef()?.querySelector(
             `.o-EmojiPicker-content .o-Emoji[data-index="${this.state.activeEmojiIndex}"]`
         )?.dataset.codepoints;
         return emojiLoader.map.get(activeCodepoints);
@@ -382,7 +386,7 @@ export class EmojiPicker extends Component {
                 break;
             case "Enter":
                 ev.preventDefault();
-                this.gridRef.el
+                this.gridRef()
                     ?.querySelector(
                         `.o-EmojiPicker-content .o-Emoji[data-index="${this.state.activeEmojiIndex}"]`
                     )
@@ -454,17 +458,19 @@ export class EmojiPicker extends Component {
         }
         this.frequentEmojiService.incrementEmojiUsage(codepoints);
         if (resetOnSelect) {
-            this.gridRef.el.scrollTop = 0;
+            if (this.gridRef()) {
+                this.gridRef().scrollTop = 0;
+            }
             this.props.close?.();
             this.props.onClose?.();
         }
     }
 
     highlightActiveCategory() {
-        if (!this.gridRef || !this.gridRef.el) {
+        if (!this.gridRef()) {
             return;
         }
-        const coords = this.gridRef.el.getBoundingClientRect();
+        const coords = this.gridRef().getBoundingClientRect();
         const res = document.elementFromPoint(coords.x + 10, coords.y + 10);
         if (!res) {
             return;
@@ -484,6 +490,10 @@ export class EmojiPicker extends Component {
  */
 export function usePicker(PickerComponent, ref, props, options = {}) {
     const component = useComponent();
+    // Transitional ref resolver: accepts both an Owl 3 signal ref (a function,
+    // resolved by calling it) and a legacy `useRef` object (resolved via `.el`).
+    // Lets callers migrate to signals without breaking the existing `.el` callers.
+    const resolveEl = (x) => (typeof x === "function" ? x() : x?.el);
     const targets = [];
     const state = useState({ isOpen: false });
     const ui = useService("ui");
@@ -510,18 +520,20 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
     function add(ref, onSelect, { show = false } = {}) {
         const toggler = () => toggle(isMobileOS() ? undefined : ref, onSelect);
         targets.push([ref, toggler]);
-        if (!ref.el) {
+        const el = resolveEl(ref);
+        if (!el) {
             return;
         }
-        ref.el.addEventListener("click", toggler);
-        ref.el.addEventListener("mouseenter", loadEmoji);
+        el.addEventListener("click", toggler);
+        el.addEventListener("mouseenter", loadEmoji);
         if (show) {
-            ref.el.click();
+            el.click();
         }
     }
 
     function open(ref, openProps) {
         state.isOpen = true;
+        const refEl = resolveEl(ref);
         if (ui.isSmall || isMobileOS()) {
             const { promise, resolve } = Promise.withResolvers();
             const pickerMobileProps = {
@@ -533,7 +545,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
                     return res;
                 },
             };
-            if (ref?.el) {
+            if (refEl) {
                 pickerMobileProps.close = () => remove();
                 const app = new App({
                     name: "Popout",
@@ -544,7 +556,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
                 app.createRoot(PickerMobile, {
                     env: component.env,
                     props: pickerMobileProps,
-                }).mount(ref.el);
+                }).mount(refEl);
                 remove = () => {
                     state.isOpen = false;
                     props.onClose?.();
@@ -562,7 +574,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
             }
             return promise;
         }
-        return popover.open(ref.el, { ...props, ...openProps });
+        return popover.open(refEl, { ...props, ...openProps });
     }
 
     function close() {
@@ -583,29 +595,32 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
     }
     onMounted(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.addEventListener("click", toggle);
-            ref.el.addEventListener("mouseenter", loadEmoji);
+            el.addEventListener("click", toggle);
+            el.addEventListener("mouseenter", loadEmoji);
         }
     });
     onWillPatch(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.removeEventListener("click", toggle);
-            ref.el.removeEventListener("mouseenter", loadEmoji);
+            el.removeEventListener("click", toggle);
+            el.removeEventListener("mouseenter", loadEmoji);
         }
     });
     onPatched(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.addEventListener("click", toggle);
-            ref.el.addEventListener("mouseenter", loadEmoji);
+            el.addEventListener("click", toggle);
+            el.addEventListener("mouseenter", loadEmoji);
         }
     });
     Object.assign(state, { open, close, toggle });
