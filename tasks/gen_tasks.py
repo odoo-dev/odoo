@@ -229,7 +229,7 @@ def generate():
             "related_files": related, "patterns": patterns,
             "metrics": metrics, "uses_ref_helpers": helpers,
             "worktree": wt,
-            "worktree_cmd": "goa project:worktree:add odoo " + wt,
+            "worktree_cmd": "goa project:worktree:add odoo " + wt + " -b master-tref-integration",
             "created_at": NOW,
         }, depends
 
