@@ -47,7 +47,7 @@ export class Chrome extends Component {
         }
 
         onMounted(this.props.disableLoader);
-
+        this.customerDisplayAdapter = new CustomerDisplayPosAdapter(this.pos);
         const debouncedSendOrderToCustomerDisplay = debounce((pos, routerState) => {
             this.sendOrderToCustomerDisplay(pos, routerState);
         });
@@ -57,14 +57,16 @@ export class Chrome extends Component {
     }
 
     sendOrderToCustomerDisplay({ selectedOrder }, routerState) {
-        const adapter = new CustomerDisplayPosAdapter();
-        if (routerState.current === "SaverScreen" || routerState.current === "LoginScreen") {
-            adapter.displayScreenSaver();
-        } else if (selectedOrder) {
-            adapter.formatOrderData(selectedOrder);
+        if (!this.adapter) {
+            return;
         }
-        adapter.setExtraData(this.getCustomerDisplayExtraData(...arguments));
-        adapter.dispatch(this.pos);
+        if (routerState.current === "SaverScreen" || routerState.current === "LoginScreen") {
+            this.adapter.displayScreenSaver();
+        } else if (selectedOrder) {
+            this.adapter.formatOrderData(selectedOrder);
+        }
+        this.adapter.setExtraData(this.getCustomerDisplayExtraData(...arguments));
+        this.adapter.dispatch(this.pos);
     }
 
     getCustomerDisplayExtraData(pos, routerState) {

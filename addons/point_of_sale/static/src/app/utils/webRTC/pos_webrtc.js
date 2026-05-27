@@ -466,7 +466,9 @@ export class PosWebrtcService {
     }
 
     _notifyListeners(data) {
-        logPosMessage("PosWebrtcService", "send", "data received", CONSOLE_COLOR, [data]);
+        logPosMessage("PosWebrtcService", "_notifyListeners", "data received", CONSOLE_COLOR, [
+            data,
+        ]);
         try {
             const payload = JSON.parse(data);
             for (const listener of this.listeners) {

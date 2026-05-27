@@ -1,7 +1,7 @@
 import { proxy } from "@odoo/owl";
-import { getOnNotified } from "@point_of_sale/utils";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
+import { PosWebrtcService } from "@point_of_sale/app/utils/webRTC/pos_webrtc";
 
 export const CustomerDisplayDataService = {
     dependencies: ["bus_service"],
@@ -10,15 +10,16 @@ export const CustomerDisplayDataService = {
     },
     async setup(env, { bus_service }) {
         const data = proxy({});
-        new BroadcastChannel("UPDATE_CUSTOMER_DISPLAY").onmessage = (event) => {
-            Object.assign(data, event.data);
-        };
-        getOnNotified(bus_service, session.access_token)(
-            `UPDATE_CUSTOMER_DISPLAY-${session.device_uuid}`,
-            (payload) => {
-                Object.assign(data, payload);
-            }
+        const webrtc = new PosWebrtcService(
+            env,
+            `CUSTOMER-DISPLAY-${session.device_uuid}`,
+            session.access_token,
+            session.config_id
         );
+        webrtc.addListener((payload) => {
+            Object.assign(data, payload);
+        });
+        window.webrtc = webrtc;
         return data;
     },
 };

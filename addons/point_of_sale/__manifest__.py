@@ -250,6 +250,8 @@
             "point_of_sale/static/src/app/hooks/time_hook.js",
             "point_of_sale/static/src/app/pos_app.scss",
             "point_of_sale/static/src/app/screens/login_screen/login_screen.scss",
+            "point_of_sale/static/src/app/utils/webRTC/**/*",
+            "point_of_sale/static/src/app/utils/pretty_console_log.js",
         ],
         'point_of_sale.customer_display_assets_test': [
             ('include', 'point_of_sale.base_tests'),

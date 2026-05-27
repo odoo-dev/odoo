@@ -1,7 +1,6 @@
 import { formatCurrency } from "@point_of_sale/app/models/utils/currency";
-import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
-
-const CONSOLE_COLOR = "#FF8269";
+import { PosWebrtcService } from "../utils/webRTC/pos_webrtc";
+import { uuidv4 } from "@point_of_sale/utils";
 
 /**
  * This module provides functions to format order and order line data for customer display.
@@ -9,32 +8,24 @@ const CONSOLE_COLOR = "#FF8269";
  */
 
 export class CustomerDisplayPosAdapter {
-    constructor() {
-        this.setup();
+    constructor(pos) {
+        this.pos = pos;
+        let deviceUuid = localStorage.getItem("device_uuid");
+        if (!deviceUuid) {
+            deviceUuid = uuidv4();
+            localStorage.setItem("device_uuid", deviceUuid);
+        }
+        this.webrtc = new PosWebrtcService(
+            pos.env,
+            `CUSTOMER-DISPLAY-${deviceUuid}`,
+            odoo.access_token,
+            this.pos.config.id
+        );
+        pos.webrtc = this.webrtc;
     }
 
-    setup() {
-        this.data = {};
-        this.channel = new BroadcastChannel("UPDATE_CUSTOMER_DISPLAY");
-    }
-
-    dispatch(pos) {
-        this.channel.postMessage(JSON.parse(JSON.stringify(this.data)));
-        pos.data
-            .call("pos.config", "update_customer_display", [
-                [pos.config.id],
-                this.data,
-                localStorage.getItem("device_uuid"),
-            ])
-            .catch((error) => {
-                logPosMessage(
-                    "CustomerDisplay",
-                    "dispatch",
-                    "Failed to update customer display",
-                    CONSOLE_COLOR,
-                    [error]
-                );
-            });
+    dispatch() {
+        this.webrtc.send(this.data);
     }
 
     displayScreenSaver() {
