@@ -18,8 +18,14 @@ export function useDynamicPlaceholder(elementRef) {
 
     let modelField = null;
 
+    // Resolve the underlying DOM element from the received ref in a single place.
+    // Owl 3 native refs are signals (the element is obtained by CALLING the ref),
+    // while legacy refs expose it through `.el`. Transitional check kept for
+    // backward compatibility with legacy `.el` callers.
+    const getElement = () => (typeof elementRef === "function" ? elementRef() : elementRef?.el);
+
     const onDynamicPlaceholderValidate = function (path, defaultValue) {
-        const element = elementRef?.el;
+        const element = getElement();
         if (!element) {
             return;
         }
@@ -47,7 +53,7 @@ export function useDynamicPlaceholder(elementRef) {
         }
     };
     const onDynamicPlaceholderClose = function () {
-        elementRef?.el.focus();
+        getElement()?.focus();
     };
 
     /**
@@ -71,13 +77,13 @@ export function useDynamicPlaceholder(elementRef) {
         }
         closeCallback = opts.closeCallback;
         positionCallback = opts.positionCallback;
-        popover.open(elementRef?.el, {
+        popover.open(getElement(), {
             resModel: model,
             validate: opts.validateCallback,
         });
     }
     async function onKeydown(ev) {
-        const element = elementRef?.el;
+        const element = getElement();
         if (ev.target === element && ev.key === TRIGGER_KEY) {
             const currentRangeIndex = element.selectionStart;
             // +1 to take the trigger key char into account
