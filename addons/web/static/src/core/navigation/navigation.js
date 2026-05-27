@@ -426,16 +426,34 @@ export class Navigator {
  * - Optional virtual focus
  * - Focus on mouse enter
  *
- * @param {string|Object} containerRef
+ * The container reference can be:
+ * - a string: resolved through the (compat) `useRef`, then read via `.el`;
+ * - an Owl 2 ref-like object exposing `.el`;
+ * - an Owl 3 native ref, which is a signal: a function returning the element
+ *   (or `null` when unmounted).
+ *
+ * @param {string|Object|Function} containerRef
  * @param {NavigationOptions} options
  * @returns {Navigator}
  */
 export function useNavigation(containerRef, options = {}) {
     containerRef = typeof containerRef === "string" ? useRef(containerRef) : containerRef;
 
+    // TRANSITIONAL SHIM (Owl 3 migration): resolve "the current container
+    // element" in a single place so all three accepted input forms work:
+    //   - string  → already converted above via the compat `useRef`, read `.el`
+    //               (original pre-migration behavior);
+    //   - object  → an Owl 2 ref-like object exposing `.el`;
+    //   - function → an Owl 3 native ref (signal), called to get the element.
+    // The optional chaining keeps this null-safe (a ref can be undefined before
+    // mount), so it can never throw "Cannot read properties of undefined".
+    // Remove the function branch once every caller passes a native signal ref.
+    const getContainerEl = () =>
+        typeof containerRef === "function" ? containerRef() : containerRef?.el;
+
     const newOptions = { ...options };
     if (!newOptions.getItems) {
-        newOptions.getItems = () => containerRef.el?.querySelectorAll(":scope .o-navigable") ?? [];
+        newOptions.getItems = () => getContainerEl()?.querySelectorAll(":scope .o-navigable") ?? [];
     }
 
     const hotkeyService = useService("hotkey");
@@ -453,7 +471,7 @@ export function useNavigation(containerRef, options = {}) {
             }
             return () => observer.disconnect();
         },
-        () => [containerRef.el]
+        () => [getContainerEl()]
     );
 
     useExternalListener(browser, "focus", ({ target }) => navigator._checkFocus(target), true);
