@@ -1,10 +1,9 @@
-import { useRef } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
-import { Component, onMounted } from "@odoo/owl";
+import { Component, onMounted, signal } from "@odoo/owl";
 import { ask } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { useRouterParamsChecker } from "@point_of_sale/app/hooks/pos_router_hook";
 import { PriceFormatter } from "@point_of_sale/app/components/price_formatter/price_formatter";
@@ -18,9 +17,9 @@ export class TipScreen extends Component {
     static components = {
         PriceFormatter,
     };
+    posReceiptContainerRef = signal(null);
     setup() {
         this.pos = usePos();
-        this.posReceiptContainer = useRef("pos-receipt-container");
         this.dialog = useService("dialog");
         this.state = this.currentOrder.uiState.TipScreen;
         this._totalAmount = this.currentOrder.priceIncl;
