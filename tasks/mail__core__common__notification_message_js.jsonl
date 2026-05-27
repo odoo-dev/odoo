@@ -5,3 +5,7 @@
 {"kind": "event", "ts": "2026-05-27T14:59:58.516166+00:00", "actor": "orchestrator", "event": "note", "text": "BLOCKED: ref consumed by un-migrated shared hook/consumer \u2014 useForwardRefsToParent (mail/utils/common/hooks.js) + thread.js/thread_patch.js/message.js. Reclassify to wave 3/4; not a pure Pattern A."}
 {"kind": "event", "ts": "2026-05-27T14:59:58.516166+00:00", "actor": "orchestrator", "event": "status", "value": "blocked"}
 {"kind": "event", "ts": "2026-05-27T17:00:33.511964+00:00", "actor": "orchestrator", "event": "status", "value": "in_progress"}
+{"kind": "event", "ts": "2026-05-27T17:16:30.492864+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 2, "agent_id": "ad9f0a81fa90a898c", "worktree": "/Volumes/Goadrive/odoo/worktrees/master-mail-notification-message-js-tref-nby/odoo", "branch": "master-mail-notification-message-js-tref-nby", "status": "success", "summary": "rootRef=signal(null) forwarded via useForwardRefsToParent; t-ref expression.", "commits": ["7aabccc3347e [REF] mail: migrate notification_message t-ref to Owl 3 signals"], "problem": null, "needs_rerun": false}}
+{"kind": "event", "ts": "2026-05-27T17:16:30.492864+00:00", "actor": "orchestrator", "event": "assignee", "value": "ad9f0a81fa90a898c"}
+{"kind": "event", "ts": "2026-05-27T17:16:30.492864+00:00", "actor": "orchestrator", "event": "status", "value": "done"}
+{"kind": "event", "ts": "2026-05-27T17:17:06.591173+00:00", "actor": "orchestrator", "event": "push", "remote": "odoo-dev", "branch": "master-mail-notification-message-js-tref-nby"}
