@@ -15,6 +15,10 @@ from odoo.addons.account_edi_ubl_cii.models.account_edi_common import (
     UOM_TO_UNECE_CODE,
 )
 from odoo.addons.base.models.res_partner_bank import sanitize_account_number
+from odoo.addons.account.tools.partner_identifiers import (
+    pick_preferred_identifier,
+    is_identifier_void,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -23,6 +27,63 @@ class AccountEdiUBL(models.AbstractModel):
     _name = "account.edi.ubl"
     _inherit = 'account.edi.common'
     _description = "Base helpers for UBL"
+
+    # -------------------------------------------------------------------------
+    # IDENTIFIERS HELPERS
+    # -------------------------------------------------------------------------
+
+    def _identifier_en_vat_all(self):
+        pass
+
+    def _identifier_vat_end_all(self):
+        pass
+
+    def _get_endpoint_id_identifier(self, partner):
+        CATEGORY_PRIORITY = {'EN': 0, 'VAT': 1, 'TIN': 1, 'GST': 1}
+        country_code = partner._deduce_country_code()
+        identifiers = partner._get_all_identifiers()
+        identifier_vals = pick_preferred_identifier(
+            identifiers,
+            filter_func=lambda k, v, m: (
+                m.get('scheme')
+                and m.get('category') in CATEGORY_PRIORITY
+                and (not m.get('countries') or country_code in m['countries'])
+            ),
+            sort_key=lambda k, v, m: (CATEGORY_PRIORITY.get(m.get('category'), 100), m.get('sequence', 100)),
+        )
+        return identifier_vals
+
+    def _get_legal_entity_identifier(self, partner):
+        CATEGORY_PRIORITY = {'EN': 0, 'VAT': 1, 'TIN': 1, 'GST': 1}
+        country_code = partner._deduce_country_code()
+        identifiers = partner._get_all_identifiers()
+        identifier_vals = pick_preferred_identifier(
+            identifiers,
+            filter_func=lambda k, v, m: (
+                m.get('scheme') in ISO6523_SCHEMES
+                and (not m.get('countries') or country_code in m['countries'])
+                and not is_identifier_void(v)
+            ),
+            sort_key=lambda k, v, m: (CATEGORY_PRIORITY.get(m.get('category'), 100), m.get('sequence', 100)),
+        )
+        return identifier_vals
+
+    def _get_party_tax_identifier(self, partner):
+        CATEGORY_PRIORITY = {'VAT': 0, 'TIN': 0, 'GST': 0, 'EN': 1}
+        country_code = partner._deduce_country_code()
+        identifiers = partner._get_all_identifiers()
+        identifier_vals = pick_preferred_identifier(
+            identifiers,
+            filter_func=lambda k, v, m: (
+                (not m.get('countries') or country_code in m['countries'])
+                and not is_identifier_void(v)
+            ),
+            sort_key=lambda k, v, m: (CATEGORY_PRIORITY.get(m.get('category'), 100), m.get('sequence', 100)),
+        )
+        return identifier_vals
+
+    def _get_party_identification_identifiers(self, partner):
+        pass
 
     # -------------------------------------------------------------------------
     # BASE LINES HELPERS
@@ -924,9 +985,9 @@ class AccountEdiUBL(models.AbstractModel):
             },
         }
 
-        if delivery_partner.global_location_number:
+        if gln := delivery_partner._get_additional_identifier('EAN_GLN'):
             node['cac:DeliveryLocation']['cbc:ID']['schemeID'] = '0088'
-            node['cac:DeliveryLocation']['cbc:ID']['_text'] = delivery_partner.global_location_number
+            node['cac:DeliveryLocation']['cbc:ID']['_text'] = gln
 
         party_node = node['cac:DeliveryParty'] = {}
 

@@ -2,6 +2,7 @@ from odoo import _, models, tools
 from odoo.tools import html2plaintext
 from odoo.tools.float_utils import float_round
 
+from odoo.addons.account.tools.partner_identifiers import get_prefixed_identifier
 from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
 
 DANISH_NATIONAL_IT_AND_TELECOM_AGENCY_ID = '320'
@@ -159,18 +160,19 @@ class AccountEdiXmlOIOUBL21(models.AbstractModel):
                     'cbc:Name': {'_text': 'Moms'},
                 },
             })
-        if partner.nemhandel_identifier_type and partner.nemhandel_identifier_value:
-            prefix = 'DK' if partner.nemhandel_identifier_type in {'0184', '0198'} else ''
+        edi_identification = partner._get_nemhandel_edi_identification()
+        if edi_identification:
+            eas, _sep, endpoint = edi_identification.partition(':')
+            prefixed_endpoint = get_prefixed_identifier('DK', endpoint)
+            endpoint_identifier = prefixed_endpoint if eas in {'0184', '0198'} else endpoint
             party_node['cbc:EndpointID'] = {
-                '_text': f'{prefix}{partner.nemhandel_identifier_value}',
-                'schemeID': SCHEME_ID_MAPPING[partner.nemhandel_identifier_type],
+                '_text': endpoint_identifier,
+                'schemeID': SCHEME_ID_MAPPING[eas],
             }
-        if partner.nemhandel_identifier_value or partner.ref:
-            prefix = 'DK' if partner.nemhandel_identifier_type in {'0184', '0198'} else ''
             party_node['cac:PartyIdentification'] = {
                 'cbc:ID': {
-                    '_text': f'{prefix}{partner.nemhandel_identifier_value or partner.ref}',
-                    'schemeID': SCHEME_ID_MAPPING[partner.nemhandel_identifier_type],
+                    '_text': endpoint_identifier or partner.ref,
+                    'schemeID': SCHEME_ID_MAPPING.get(eas, 'DK:CVR'),
                 }
             }
 

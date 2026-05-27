@@ -12,14 +12,14 @@
                                 t-foreach="l10n_my_identification_types"
                                 t-as="type"
                                 t-att-value="type"
-                                t-att-selected="(l10n_my_identification_type or partner_sudo.l10n_my_identification_type) == type"
+                                t-att-selected="(l10n_my_identification_type or l10n_my_current_identification_type) == type"
                                 t-out="type_value"
                             />
                         </select>
                     </div>
                     <div t-attf-class="mb-3 col-xl-6">
                         <label class="col-form-label label-optional" for="l10n_my_identification_number">ID Number</label>
-                        <input type="text" name="l10n_my_identification_number" t-attf-class="form-control" t-att-value="l10n_my_identification_number or partner_sudo.l10n_my_identification_number" />
+                        <input type="text" name="l10n_my_identification_number" t-attf-class="form-control" t-att-value="l10n_my_identification_number or l10n_my_current_identification_number" />
                     </div>
                 </t>
                 <div t-attf-class="mb-3 col-xl-6">

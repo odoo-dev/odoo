@@ -21,7 +21,9 @@ class ResPartner(models.Model):
 
     def _nemhandel_fill_participant_supported_documents(self):
         self.ensure_one()
-        edi_identification = f"{self.nemhandel_identifier_type}:{self.nemhandel_identifier_value}".lower()
+        edi_identification = self._get_nemhandel_edi_identification()
+        if not edi_identification:
+            return
         participant_info = self._nemhandel_lookup_participant(edi_identification)
         if not participant_info:
             return
@@ -31,11 +33,8 @@ class ResPartner(models.Model):
     def button_nemhandel_check_partner_endpoint(self, company=None):
         # EXTENDS l10n_dk
         self.ensure_one()
-        super().button_nemhandel_check_partner_endpoint(company)
+        super().button_nemhandel_check_partner_endpoint(company=company)
 
-        if not company:
-            company = self.env.company
-        self_partner = self.with_company(company)
-        if self_partner.nemhandel_verification_state == 'valid':
-            self_partner._nemhandel_fill_participant_supported_documents()
+        if self.nemhandel_verification_state == 'valid':
+            self._nemhandel_fill_participant_supported_documents()
         return False

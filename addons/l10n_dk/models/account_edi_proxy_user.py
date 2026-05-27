@@ -94,9 +94,10 @@ class AccountEdiProxyClientUser(models.Model):
     def _get_proxy_identification(self, company, proxy_type):
         if proxy_type != 'nemhandel':
             return super()._get_proxy_identification(company, proxy_type)
-        if not company.nemhandel_identifier_type or not company.nemhandel_identifier_value:
+        edi_identification = company.partner_id._get_nemhandel_edi_identification()
+        if not edi_identification:
             raise UserError(_("Please fill in the Identifier Type and Value."))
-        return f'{company.nemhandel_identifier_type}:{company.nemhandel_identifier_value}'
+        return edi_identification
 
     def _register_proxy_user(self, company, proxy_type, edi_mode):
         ''' Override to avoid using the deprecated route on IAP '''
@@ -365,7 +366,8 @@ class AccountEdiProxyClientUser(models.Model):
             raise UserError(_('Cannot register a user with a %s application', nemhandel_state_translated))
 
         company_vat = company.vat[2:] if company.vat and company.vat[:2].isalpha() else company.vat
-        if company.nemhandel_identifier_type == '0184' and company_vat != company.nemhandel_identifier_value:
+        edi_identification = company.partner_id._get_nemhandel_edi_identification()
+        if edi_identification and edi_identification.startswith('0184:') and company_vat != edi_identification.split(':')[1]:
             raise ValidationError(_("If you try to register with your CVR, please make sure your company has the same VAT"))
 
         self._check_user_on_alternative_service()

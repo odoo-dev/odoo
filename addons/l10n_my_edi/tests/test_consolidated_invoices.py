@@ -23,8 +23,7 @@ class L10nMyEDITestConsolidatedFileGeneration(L10nMyEDITestFileGenerationCommon)
         super().setUpClass()
         # Purposedly do not set the identification number, so that this partner is picked up for consolidated invoices
         cls.partner_a.write({
-            'l10n_my_identification_type': False,
-            'l10n_my_identification_number': False,
+            'additional_identifiers': False,
             'vat': False,
         })
 

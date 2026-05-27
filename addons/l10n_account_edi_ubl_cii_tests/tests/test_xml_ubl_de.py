@@ -115,8 +115,7 @@ class TestUBLDE(TestUBLCommon):
 
     def test_export_import_invoice_xrechnung(self):
         self.partner_2.write({
-            'peppol_eas': '0204',
-            'peppol_endpoint': '123456789',
+            'additional_identifiers': {'DE_LTW': '123456789'},
             'invoice_edi_format': 'xrechnung'
         })
         invoice = self._generate_move(
@@ -176,10 +175,10 @@ class TestUBLDE(TestUBLCommon):
         self.assertEqual(attachment.name[-13:], "xrechnung.xml")
         self._assert_imported_invoice_from_etree(invoice, attachment)
 
-    def test_export_import_invoice_without_vat_and_peppol_endpoint(self):
+    def test_export_import_invoice_without_vat_and_identifiers(self):
         self.partner_2.write({
             'vat': False,
-            'peppol_endpoint': False,
+            'additional_identifiers': {},
             'email': 'partner_2@test.test',
         })
         invoice = self._generate_move(
@@ -242,8 +241,7 @@ class TestUBLDE(TestUBLCommon):
 
     def test_export_import_refund_xrehnung(self):
         self.partner_2.write({
-            'peppol_eas': '0204',
-            'peppol_endpoint': '123456789',
+            'additional_identifiers': {'DE_LTW': '123456789'},
             'invoice_edi_format': 'xrechnung'
         })
 
@@ -372,8 +370,7 @@ class TestUBLDE(TestUBLCommon):
     def test_leitweg_id(self):
         partner = self.partner_2
         partner.write({
-            'peppol_eas': '0204',
-            'peppol_endpoint': '123456789',
+            'additional_identifiers': {'DE_LTW': '123456789'},
             'invoice_edi_format': 'xrechnung',
         })
 

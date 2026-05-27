@@ -24,8 +24,7 @@ class TestUblImportBis3InvoiceBERetrievePartner(TestUblImportBis3InvoiceBE):
             'city': "Bidule",
             'zip': "6713",
             'vat': 'BE0477472701',
-            'peppol_eas': '0208',
-            'peppol_endpoint': '0477472701',
+            'additional_identifiers': {'BE_EN': '0477472701'},
         }])
 
         # Test the partner has been retrieved.

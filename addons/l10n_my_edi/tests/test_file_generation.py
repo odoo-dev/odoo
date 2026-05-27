@@ -66,7 +66,7 @@ class L10nMyEDITestFileGeneration(L10nMyEDITestFileGenerationCommon):
         self._assert_node_values(
             supplier_root,
             'cac:PartyIdentification/cbc:ID[@schemeID="BRN"]',
-            self.company_data['company'].l10n_my_identification_number,
+            (self.company_data['company'].additional_identifiers or {}).get('MY_BRN'),
         )
 
         # Address format
@@ -88,7 +88,7 @@ class L10nMyEDITestFileGeneration(L10nMyEDITestFileGenerationCommon):
         self._assert_node_values(
             customer_root,
             'cac:PartyIdentification/cbc:ID[@schemeID="BRN"]',
-            self.partner_a.commercial_partner_id.l10n_my_identification_number,
+            (self.partner_a.commercial_partner_id.additional_identifiers or {}).get('MY_BRN'),
         )
 
         # Address format
@@ -337,7 +337,7 @@ class L10nMyEDITestFileGeneration(L10nMyEDITestFileGenerationCommon):
         self._assert_node_values(
             customer_root,
             'cac:PartyIdentification/cbc:ID[@schemeID="BRN"]',
-            self.partner_b.commercial_partner_id.l10n_my_identification_number,
+            (self.partner_b.commercial_partner_id.additional_identifiers or {}).get('MY_BRN'),
         )
 
         with file_open('l10n_my_edi/tests/expected_xmls/invoice_foreigner.xml', 'rb') as f:
@@ -410,7 +410,7 @@ class L10nMyEDITestFileGeneration(L10nMyEDITestFileGenerationCommon):
         supplier_root = root.xpath('cac:AccountingSupplierParty/cac:Party', namespaces=NS_MAP)[0]
         data_to_check = [
             ('cac:PartyIdentification/cbc:ID[@schemeID="TIN"]', 'EI00000000030'),  # The partner_b malaysian TIN is set to the customer one, and it will be transformed to supplier during submission
-            ('cac:PartyIdentification/cbc:ID[@schemeID="BRN"]', self.partner_b.commercial_partner_id.l10n_my_identification_number),
+            ('cac:PartyIdentification/cbc:ID[@schemeID="BRN"]', (self.partner_b.commercial_partner_id.additional_identifiers or {}).get('MY_BRN')),
             ('cbc:IndustryClassificationCode', self.partner_b.commercial_partner_id.l10n_my_edi_industrial_classification.code),  # It should use the code on the partner.
             ('cac:PartyName/cbc:Name', self.partner_b.name),
         ]
@@ -420,7 +420,7 @@ class L10nMyEDITestFileGeneration(L10nMyEDITestFileGenerationCommon):
         customer_root = root.xpath('cac:AccountingCustomerParty/cac:Party', namespaces=NS_MAP)[0]
         data_to_check = [
             ('cac:PartyIdentification/cbc:ID[@schemeID="TIN"]', self.company_data['company'].vat),  # We didn't set the new field as the company is malaysian, the vat should be in use.
-            ('cac:PartyIdentification/cbc:ID[@schemeID="BRN"]', self.company_data['company'].l10n_my_identification_number),
+            ('cac:PartyIdentification/cbc:ID[@schemeID="BRN"]', (self.company_data['company'].partner_id.additional_identifiers or {}).get('MY_BRN')),
             ('cac:PartyName/cbc:Name', self.company_data['company'].name),
         ]
         for path, expected_value in data_to_check:

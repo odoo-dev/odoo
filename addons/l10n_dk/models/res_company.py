@@ -33,8 +33,6 @@ class ResCompany(models.Model):
         ],
         string='Nemhandel status', required=True, default='not_registered',
     )
-    nemhandel_identifier_type = fields.Selection(related='partner_id.nemhandel_identifier_type', readonly=False)
-    nemhandel_identifier_value = fields.Char(related='partner_id.nemhandel_identifier_value', readonly=False)
     nemhandel_purchase_journal_id = fields.Many2one(
         comodel_name='account.journal',
         string='Nemhandel Purchase Journal',

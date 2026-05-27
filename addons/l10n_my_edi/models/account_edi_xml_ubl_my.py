@@ -6,7 +6,6 @@ from lxml import etree
 
 from odoo import api, models
 from odoo.tools import html2plaintext
-
 # Far from ideal, but no better solution yet.
 COUNTRY_CODE_MAP = {
     "BD": "BGD", "BE": "BEL", "BF": "BFA", "BG": "BGR", "BA": "BIH", "BB": "BRB", "WF": "WLF", "BL": "BLM", "BM": "BMU",
@@ -109,8 +108,7 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                     'phone': 'NA',
                     'street': 'NA',
                     'city': 'NA',
-                    'l10n_my_identification_type': 'BRN',
-                    'l10n_my_identification_number': 'NA',
+                    'additional_identifiers': {'MY_BRN': 'NA'},
                     'l10n_my_edi_industrial_classification': self.env.ref('l10n_my_edi.class_00000', raise_if_not_found=False),
                 })
 
@@ -216,7 +214,7 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
         if partner.state_id:
             if (
                 partner._l10n_my_edi_get_tin_for_myinvois() == 'EI00000000010'
-                and partner.l10n_my_identification_number == 'NA'
+                and (partner.additional_identifiers or {}).get('MY_BRN') == 'NA'
             ):
                 # Special case for consolidated entities (e.g., general public).
                 # When TIN is 'EI00000000010' and Identification Number is 'NA', MyInvois requires
@@ -284,11 +282,12 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
             }
         ]
 
-        if partner.l10n_my_identification_type and partner.l10n_my_identification_number:
+        id_type, id_val = partner._l10n_my_get_identification()
+        if id_type and id_val:
             party_identification_node.append({
                 'cbc:ID': {
-                    '_text': partner.l10n_my_identification_number,
-                    'schemeID': partner.l10n_my_identification_type,
+                    '_text': id_val,
+                    'schemeID': id_type,
                 }
             })
             if partner.sst_registration_number:
@@ -587,8 +586,7 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
             elif not phone_number:
                 self._l10n_my_edi_make_validation_error(constraints, 'phone_number_required', partner_type, partner.display_name)
 
-            # We need to provide both l10n_my_identification_type and l10n_my_identification_number
-            if not partner.commercial_partner_id.l10n_my_identification_type or not partner.commercial_partner_id.l10n_my_identification_number:
+            if not all(partner.commercial_partner_id._l10n_my_get_identification()):
                 self._l10n_my_edi_make_validation_error(constraints, 'required_id', partner_type, partner.commercial_partner_id.display_name)
 
             if not partner.state_id:

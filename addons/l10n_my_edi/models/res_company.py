@@ -13,9 +13,6 @@ class ResCompany(models.Model):
         comodel_name="account_edi_proxy_client.user",
         compute="_compute_l10n_my_edi_proxy_user_id",
     )
-    l10n_my_identification_type = fields.Selection(related='partner_id.l10n_my_identification_type', readonly=False)
-    l10n_my_identification_number = fields.Char(related='partner_id.l10n_my_identification_number', readonly=False)
-    l10n_my_identification_number_placeholder = fields.Char(compute="_compute_l10n_my_identification_number_placeholder")
     l10n_my_edi_industrial_classification = fields.Many2one(related='partner_id.l10n_my_edi_industrial_classification', readonly=False)
     l10n_my_edi_mode = fields.Selection(
         selection=[
@@ -46,23 +43,6 @@ class ResCompany(models.Model):
             company.l10n_my_edi_proxy_user_id = company.account_edi_proxy_client_ids.filtered(
                 lambda u: u.proxy_type == 'l10n_my_edi' and u.edi_mode == company.l10n_my_edi_mode
             )[:1]
-
-    @api.depends('l10n_my_identification_type')
-    def _compute_l10n_my_identification_number_placeholder(self):
-        """ Computes a dynamic placeholder that depends on the selected type to help the user inputs their data.
-        The placeholders have been taken from the MyInvois doc.
-        """
-        for company in self:
-            placeholder = 'N/A'
-            if company.l10n_my_identification_type == 'NRIC':
-                placeholder = '830503114923'
-            elif company.l10n_my_identification_type == 'BRN':
-                placeholder = '202201234565'
-            elif company.l10n_my_identification_type == 'PASSPORT':
-                placeholder = 'A00000000'
-            elif company.l10n_my_identification_type == 'ARMY':
-                placeholder = '830805134983'
-            company.l10n_my_identification_number_placeholder = placeholder
 
     # ----------------
     # Business methods

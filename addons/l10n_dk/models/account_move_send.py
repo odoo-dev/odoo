@@ -63,9 +63,10 @@ class AccountMoveSend(models.AbstractModel):
             if 'nemhandel' not in invoice_data['sending_methods']:
                 continue
 
-            if not partner.nemhandel_identifier_type or not partner.nemhandel_identifier_value:
+            edi_identification = partner._get_nemhandel_edi_identification()
+            if not edi_identification:
                 invoice.nemhandel_move_state = 'error'
-                invoice_data['error'] = _('The partner is missing Nemhandel Endpoint Type or Value.')
+                invoice_data['error'] = _('The partner is missing a valid Nemhandel identifier.')
                 continue
 
             if partner._get_nemhandel_verification_state(invoice_data['invoice_edi_format']) != 'valid':
@@ -91,10 +92,9 @@ class AccountMoveSend(models.AbstractModel):
                 )
                 continue
 
-            receiver_identification = f"{partner.nemhandel_identifier_type}:{partner.nemhandel_identifier_value}"
             params['documents'].append({
                 'filename': filename,
-                'receiver': receiver_identification,
+                'receiver': edi_identification,
                 'ubl': b64encode(xml_file).decode(),
             })
             invoices_data_nemhandel[invoice] = invoice_data

@@ -244,10 +244,18 @@
                                 <field name="invoice_edi_format"
                                        placeholder="XML format"
                                        groups="base.group_no_one"
-                                       invisible="not display_invoice_edi_format"/>
+                                       invisible="display_electronic_invoicing"/> <!-- Make sure this is available (in debug) if the electronic_invoicing section is disabled. -->
                                 <field name="invoice_template_pdf_report_id"
                                        invisible="not display_invoice_template_pdf_report_id"
                                        options="{'no_create': True, 'no_edit': True}"/>
+                            </group>
+                            <group id="electronic_invoicing"
+                                   string="Electronic invoicing"
+                                   groups="account.group_account_invoice,account.group_account_readonly"
+                                   invisible="not display_electronic_invoicing">
+                                <field name="invoice_edi_format"
+                                       placeholder="XML format"
+                                       groups="base.group_no_one"/>
                             </group>
                             <group string="Credit Limits"
                                    name="credit_limits"

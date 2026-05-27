@@ -31,7 +31,7 @@ class TestUBLDKOIOUBL21(TestUBLCommon, TestAccountMoveSendCommon):
         })
 
         cls.company_data['company'].partner_id.update({
-            'peppol_endpoint': False,
+            'additional_identifiers': {},
         })
 
         cls.partner_a.write({
@@ -39,11 +39,11 @@ class TestUBLDKOIOUBL21(TestUBLCommon, TestAccountMoveSendCommon):
             'city': 'Aalborg',
             'zip': '9430',
             'vat': 'DK12345674',
-            'nemhandel_identifier_value': '12345674',
             'phone': '+45 32 12 35 56',
             'street': 'Paradisæblevej, 11',
             'country_id': cls.env.ref('base.dk').id,
             'invoice_edi_format': 'oioubl_21',
+            'additional_identifiers': {'DK_CVR': '12345674'},
         })
         cls.partner_b.write({
             'name': 'SUPER BELGIAN PARTNER',
@@ -54,9 +54,7 @@ class TestUBLDKOIOUBL21(TestUBLCommon, TestAccountMoveSendCommon):
             'phone': '061928374',
             'vat': 'BE0897223670',
             'invoice_edi_format': 'oioubl_21',
-            'nemhandel_identifier_type': '0088',
-            'nemhandel_identifier_value': '5798009811512',
-
+            'additional_identifiers': {'EAN_GLN': '5798009811512'},
         })
         cls.partner_c = cls.env["res.partner"].create({
             'name': 'SUPER FRENCH PARTNER',
@@ -68,8 +66,7 @@ class TestUBLDKOIOUBL21(TestUBLCommon, TestAccountMoveSendCommon):
             'vat': 'FR23334175221',
             'company_registry': '123 568 941 00056',
             'invoice_edi_format': 'oioubl_21',
-            'nemhandel_identifier_type': '0088',
-            'nemhandel_identifier_value': '5798009811639',
+            'additional_identifiers': {'EAN_GLN': '5798009811639'},
         })
         cls.dk_local_sale_tax_1 = cls.env["account.chart.template"].ref('tax_s1y')
         cls.dk_local_sale_tax_2 = cls.env["account.chart.template"].ref('tax_s1')
@@ -160,7 +157,7 @@ class TestUBLDKOIOUBL21(TestUBLCommon, TestAccountMoveSendCommon):
     @freeze_time('2017-01-01')
     def test_export_invoice_foreign_partner_be(self):
         # Set peppol endpoint to have schemeID of 'GLN'
-        self.company_data['company'].partner_id.peppol_endpoint = '0239843188'
+        self.company_data['company'].partner_id.additional_identifiers = {'EAN_GLN': '0239843188'}
         invoice = self.create_post_and_send_invoice(partner=self.partner_b)
         self.assertTrue(invoice.ubl_cii_xml_id)
         self._assert_invoice_attachment(invoice.ubl_cii_xml_id, xpaths=None, expected_file_path="from_odoo/oioubl_out_invoice_foreign_partner_be.xml")

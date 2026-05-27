@@ -32,8 +32,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
             'vat': 'C2584563200',
             'l10n_my_edi_mode': 'test',
             'l10n_my_edi_industrial_classification': cls.env['l10n_my_edi.industry_classification'].search([('code', '=', '01111')]).id,
-            'l10n_my_identification_type': 'BRN',
-            'l10n_my_identification_number': '202001234567',
+            'additional_identifiers': {'MY_BRN': '202001234567'},
             'state_id': cls.env.ref('base.state_my_jhr').id,
             'street': 'that one street, 5',
             'city': 'Main city',
@@ -41,8 +40,7 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
         })
         cls.partner_a.write({
             'vat': 'C2584563201',
-            'l10n_my_identification_type': 'BRN',
-            'l10n_my_identification_number': '202001234568',
+            'additional_identifiers': {'MY_BRN': '202001234568'},
             'country_id': cls.env.ref('base.my').id,
             'state_id': cls.env.ref('base.state_my_jhr').id,
             'street': 'that other street, 3',

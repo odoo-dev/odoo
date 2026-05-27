@@ -82,16 +82,15 @@ class AccountEdiXmlUbl_De(models.AbstractModel):
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
 
-        if (
-            not nodes
-            and commercial_partner.peppol_eas
-        ):
-            nodes.append({
-                'cbc:CompanyID': {'_text': None},
-                'cac:TaxScheme': {
-                    'cbc:ID': {'_text': commercial_partner.peppol_eas},
-                },
-            })
+        if not nodes:
+            eas, _endpoint = self._get_eas_endpoint(commercial_partner)
+            if eas:
+                nodes.append({
+                    'cbc:CompanyID': {'_text': None},
+                    'cac:TaxScheme': {
+                        'cbc:ID': {'_text': eas},
+                    },
+                })
 
     def _ubl_add_party_legal_entity_nodes(self, vals):
         # EXTENDS account.edi.xml.ubl_bis3

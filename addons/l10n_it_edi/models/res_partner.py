@@ -3,7 +3,7 @@
 from stdnum.it import codicefiscale, iva
 
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 
 class ResPartner(models.Model):
@@ -11,7 +11,11 @@ class ResPartner(models.Model):
 
     invoice_edi_format = fields.Selection(selection_add=[('it_edi_xml', 'Italy (Factura PA)')])
     l10n_it_pec_email = fields.Char(string="PEC e-mail")
-    l10n_it_codice_fiscale = fields.Char(string="Codice Fiscale", size=16)
+    l10n_it_codice_fiscale = fields.Char(  # acts as a proxy on the JSON additional identifier
+        string="Codice Fiscale",
+        compute='_compute_l10n_it_codice_fiscale',
+        inverse='_inverse_l10n_it_codice_fiscale',
+    )
     l10n_it_pa_index = fields.Char(
         string="Destination Code (SDI)",
         size=7,
@@ -21,14 +25,25 @@ class ResPartner(models.Model):
              "with receiving (and processing) the invoice.",
     )
 
-    _l10n_it_codice_fiscale = models.Constraint(
-        "CHECK(l10n_it_codice_fiscale IS NULL OR l10n_it_codice_fiscale = '' OR LENGTH(l10n_it_codice_fiscale) >= 11)",
-        'Codice fiscale must have between 11 and 16 characters.',
-    )
     _l10n_it_pa_index = models.Constraint(
         "CHECK(l10n_it_pa_index IS NULL OR l10n_it_pa_index = '' OR LENGTH(l10n_it_pa_index) >= 6)",
         'Destination Code (SDI) must have between 6 and 7 characters.',
     )
+
+    @api.constrains('l10n_it_codice_fiscale')
+    def _check_l10n_it_codice_fiscale(self):
+        for partner in self:
+            if partner.l10n_it_codice_fiscale and not (11 <= len(partner.l10n_it_codice_fiscale) <= 16):
+                raise ValidationError(_("Codice fiscale must have between 11 and 16 characters."))
+
+    @api.depends('additional_identifiers')
+    def _compute_l10n_it_codice_fiscale(self):
+        for partner in self:
+            partner.l10n_it_codice_fiscale = partner._get_additional_identifier('IT_CODICE')
+
+    def _inverse_l10n_it_codice_fiscale(self):
+        if codice := self.l10n_it_codice_fiscale:
+            self._set_additional_identifier('IT_CODICE', codice)
 
     def _l10n_it_edi_is_public_administration(self):
         """ Returns True if the destination of the FatturaPA belongs to the Public Administration. """

@@ -712,22 +712,21 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
         self._assert_invoice_ubl_file(invoice, test_file)
 
     def test_invoice_customer_party_identifiers_partner_be(self):
-        # VAT and company registry set.
-        # PartyIdentification is filled using the company registry.
+        # VAT and BCE/KBO are set.
+        # PartyIdentification is filled using the BCE/KBO.
         # PartyTaxScheme is filled using the VAT.
-        # PartyLegalEntity is filled using the company registry.
+        # PartyLegalEntity is filled using the BCE/KBO.
         self._assert_invoice_partner_party_identifiers(
             partner=self.partner_be,
-            test_file='test_invoice_customer_party_identifiers_partner_be_vat_and_company_registry',
+            test_file='test_invoice_customer_party_identifiers_partner_be_vat_and_bce',
         )
 
-        # With only VAT.
-        # PartyIdentification is not there.
-        # PartyTaxScheme / PartyLegalEntity are filled using the VAT.
-        self.partner_be.company_registry = None
+        # With only VAT you should be able to compute the BCE/KBO.
+        # Therefore it should give the same file as above.
+        self.partner_be.additional_identifiers = None
         self._assert_invoice_partner_party_identifiers(
             partner=self.partner_be,
-            test_file='test_invoice_customer_party_identifiers_partner_be_vat',
+            test_file='test_invoice_customer_party_identifiers_partner_be_vat_and_bce',
         )
 
         # With a VAT and a reference.
@@ -739,22 +738,21 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
             test_file='test_invoice_customer_party_identifiers_partner_be_vat_and_ref',
         )
 
-        # No VAT, no ref, only EAS/Endpoint.
+        # No VAT, no ref, only BCE/KBO.
         # PartyIdentification is not there.
-        # PartyTaxScheme is filled using EAS/Endpoint.
-        # PartyLegalEntity is filled using the Endpoint only.
+        # PartyTaxScheme is filled using BCE.
+        # PartyLegalEntity is filled using the BCE.
         self.partner_be.vat = None
         self.partner_be.ref = None
         self._assert_invoice_partner_party_identifiers(
             partner=self.partner_be,
-            test_file='test_invoice_customer_party_identifiers_partner_be_only_eas_endpoint',
+            test_file='test_invoice_customer_party_identifiers_partner_be_only_bce',
         )
 
         # Invoice address without any name.
         # PartyIdentification is not there.
-        # PartyTaxScheme is filled using EAS/Endpoint.
-        # PartyLegalEntity is filled using the Endpoint only.
-        self.partner_be.company_registry = '0477472701'
+        # PartyTaxScheme is filled using BCE.
+        # PartyLegalEntity is filled using the BCE.
         self.partner_be.vat = 'BE0477472701'
         partner_be_invoice_address = self._create_partner_be(
             name=False,
@@ -766,84 +764,33 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
             test_file='test_invoice_customer_party_identifiers_partner_be_invoice_address',
         )
 
-        # VAT in company_registry should render the CBE Numer only
-        self.partner_be.company_registry = 'BE0477472701'
-        self._assert_invoice_partner_party_identifiers(
-            partner=self.partner_be,
-            test_file='test_invoice_customer_party_identifiers_partner_be_vat_and_company_registry',
-        )
-
-        # Malformed company_registry should raise
-        self.partner_be.company_registry = 'BEWrongOne'
-        with self.assertRaises(UserError):
-            self._assert_invoice_partner_party_identifiers(
-                partner=self.partner_be,
-                test_file='test_invoice_customer_party_identifiers_partner_be_vat_and_company_registry',
-            )
-
     def test_invoice_customer_party_identifiers_partner_lu(self):
-        # Both VAT and company registry are not set.
+        # LU enterprise number and vat are set.
         # PartyIdentification is not there.
-        # PartyTaxScheme is filled using EAS/Endpoint.
-        # PartyTaxScheme is filled using the Endpoint only.
+        # PartyTaxScheme is filled.
+        # PartyLegalEntity is filled using the EN.
         self._assert_invoice_partner_party_identifiers(
             partner=self.partner_lu_dig,
-            test_file='test_invoice_customer_party_identifiers_partner_lu_only_eas_endpoint',
-        )
-
-        # Company registry is set.
-        # PartyIdentification is not there.
-        # PartyTaxScheme is filled using EAS/Endpoint.
-        # PartyLegalEntity is filled using the company registry.
-        self.partner_lu_dig.company_registry = "123456789"
-        self._assert_invoice_partner_party_identifiers(
-            partner=self.partner_lu_dig,
-            test_file='test_invoice_customer_party_identifiers_partner_lu_company_registry',
+            test_file='test_invoice_customer_party_identifiers_partner_lu_en',
         )
 
     def test_invoice_customer_party_identifiers_partner_nl(self):
-        # VAT is set plus a KVK number as EAS/Endpoint.
+        # VAT and KVK number are set.
         # PartyIdentification is not there.
         # PartyTaxScheme is filled using VAT.
-        # PartyLegalEntity is filled using the EAS/Endpoint.
+        # PartyLegalEntity is filled using the KVK number.
         self._assert_invoice_partner_party_identifiers(
             partner=self.partner_nl,
             test_file='test_invoice_customer_party_identifiers_partner_nl_vat_kvk_eas',
         )
 
-        # VAT is set plus an OIN number as EAS/Endpoint.
-        # PartyIdentification is not there.
+        # VAT and OIN number are set.
         # PartyTaxScheme is filled using VAT.
-        # PartyLegalEntity is filled using the EAS/Endpoint.
-        self.partner_nl.peppol_eas = '0190'
-        self.partner_nl.peppol_endpoint = '00000001822477348000'
+        # PartyLegalEntity is filled using the OIN identifier.
+        self.partner_nl.additional_identifiers = {'NL_OIN': '00000001822477348000'}
         self._assert_invoice_partner_party_identifiers(
             partner=self.partner_nl,
             test_file='test_invoice_customer_party_identifiers_partner_nl_vat_oin_eas',
-        )
-
-        # VAT in EAS/Endpoint, KVK number in company registry.
-        # PartyIdentification is not there.
-        # PartyTaxScheme is filled using VAT.
-        # PartyLegalEntity is filled using the EAS/Endpoint.
-        self.partner_nl.company_registry = '77777677'
-        self.partner_nl.peppol_eas = '9944'
-        self.partner_nl.peppol_endpoint = 'NL000099998B57'
-        self._assert_invoice_partner_party_identifiers(
-            partner=self.partner_nl,
-            test_file='test_invoice_customer_party_identifiers_partner_nl_vat_eas_kvk_company_registry',
-        )
-
-        # VAT in EAS/Endpoint, OIN number in company registry.
-        # PartyIdentification is not there.
-        # PartyTaxScheme is filled using VAT.
-        # PartyLegalEntity is filled using the EAS/Endpoint.
-        self.partner_nl.company_registry = '00000001822477348000'
-        self.partner_nl.peppol_eas = '9944'
-        self.partner_nl.peppol_endpoint = 'NL000099998B57'
-        self._assert_invoice_partner_party_identifiers(
-            partner=self.partner_nl,
-            test_file='test_invoice_customer_party_identifiers_partner_nl_vat_eas_oin_company_registry',
         )
 
     def test_invoice_BR_E_08_line_extension_amount(self):

@@ -1,3 +1,5 @@
+import logging
+
 from stdnum import (
     ean,
     lei,
@@ -26,6 +28,7 @@ from odoo.addons.account.tools.country_groups import FR_AND_DOM_TOM, SEPA_COUNTR
 
 
 _lt = LazyTranslate(__name__)
+_logger = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------
 # NAMING:
@@ -826,12 +829,16 @@ def is_tin(identifier_type):
     return identifier_type in TIN_METADATA
 
 
+def is_additional_identifier(identifier_type):
+    return identifier_type in ADDITIONAL_IDENTIFIERS_METADATA
+
+
 def get_identifier_metadata(identifier_type):
     """Metadata dict for `identifier_type`."""
     return IDENTIFIERS_METADATA.get(identifier_type) or {}
 
 
-def select_preferred_identifier(identifiers, filter_func=None, sort_key=None):
+def pick_preferred_identifier(identifiers, filter_func=None, sort_key=None):
     """ Pick the best identifier from a candidates dict.
 
     :param identifiers: dict {identifier_type: value} as from `_get_all_identifiers()`
@@ -845,10 +852,11 @@ def select_preferred_identifier(identifiers, filter_func=None, sort_key=None):
             continue
         candidates.append((key, value, meta))
     if not candidates:
-        return (None, None)
+        return {}
     if sort_key:
         candidates.sort(key=lambda c: sort_key(*c))
-    return (candidates[0][0], candidates[0][1])
+    winner = candidates[0]
+    return {'key': winner[0], 'value': winner[1], **winner[2]}
 
 
 def get_tin_metadata_of_country(country_code):
@@ -945,11 +953,11 @@ def normalize_identifier(identifier_type, value):
 
 def validate_identifier(identifier_type, value):
     """ Run the per-scheme stdnum validator (if any) and return a uniform
-    `{valid, value, example}` dict.
+    `{valid, key, value, example}` dict.
     """
     value = normalize_identifier(identifier_type, value)
     if not value:
-        return {'valid': True, 'value': value, 'example': None}
+        return {'valid': True, 'key': identifier_type, 'value': value, 'example': None}
 
     metadata = get_identifier_metadata(identifier_type)
     example = metadata.get('examples') or metadata.get('placeholder')
@@ -960,10 +968,10 @@ def validate_identifier(identifier_type, value):
         try:
             value_normalized = function_validation(value)
         except Exception:  # noqa: BLE001
-            return {'valid': False, 'value': value, 'example': example}
+            return {'valid': False, 'key': identifier_type, 'value': value, 'example': example}
         else:
-            return {'valid': True, 'value': value_normalized, 'example': example}
-    return {'valid': True, 'value': value, 'example': example}
+            return {'valid': True, 'key': identifier_type, 'value': value_normalized, 'example': example}
+    return {'valid': True, 'key': identifier_type, 'value': value, 'example': example}
 
 
 def format_participant_identifier(identifier_type, value):
@@ -976,22 +984,28 @@ def format_participant_identifier(identifier_type, value):
 
 
 def validate_participant_identifier(identifier):
-    """ Validate and normalize identifier formated `eas_scheme:identifier`. """
+    """ Validate and normalize identifier formated `scheme:identifier`. """
     assert ':' in identifier
     iso_scheme, _sep, value = identifier.partition(':')
-    identifier = ISO_IDENTIFIERS_METADATA[iso_scheme]
-    validation = validate_identifier(identifier['key'], value)
-    validation['value'] = f'{iso_scheme}:{validation['value']}'
-    return validation
+    identifier_meta = ISO_IDENTIFIERS_METADATA.get(iso_scheme)
+    if not identifier_meta:
+        _logger.info('Unknown ISO identifier found: %s.', identifier)
+        return {'valid': True, 'key': _lt('Unknown'), 'value': identifier, 'example': None}
+    validation = validate_identifier(identifier_meta['key'], value)
+    return {
+        **validation,
+        'value': f'{iso_scheme}:{validation['value']}',
+    }
 
-
-def validation_error_message(env, identifier_type, example=None):
+def validation_error_message(env, key, value, example=None):
     """ Return error message to use everywhere a malformed identifier
     is rejected.
     """
     example = env._("\nExample: %(example)s", example=example) if example else ""
+    label = get_identifier_label(key)
     return env._(
-        "Invalid identifier: %(identifier)s.%(example)s",
-        identifier=get_identifier_label(identifier_type),
+        "Invalid identifier %(identifier_label)s: %(identifier_value)s.%(example)s",
+        identifier_label=label or env._("Unknown"),
+        identifier_value=value,
         example=example
     )

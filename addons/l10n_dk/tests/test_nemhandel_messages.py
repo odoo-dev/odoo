@@ -29,11 +29,10 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
 
         cls.env.company.write({
             'street': 'Boomvej 42',
-            'nemhandel_identifier_type': '0088',
-            'nemhandel_identifier_value': '5798009811512',
             'vat': 'DK58403288',
             'l10n_dk_nemhandel_proxy_state': 'receiver',
         })
+        cls.env.company.partner_id.additional_identifiers = {'EAN_GLN': '5798009811512'}
 
         edi_identification = cls.env['account_edi_proxy_client.user']._get_proxy_identification(cls.env.company, 'nemhandel')
         cls.private_key = cls.env['certificate.key'].create({
@@ -339,27 +338,17 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
             'city': 'Copenhagen',
             'country_id': self.env.ref('base.dk').id,
             'invoice_sending_method': 'nemhandel',
-
         })
         self.assertRecordValues(
             new_partner,
             [{
                 'nemhandel_verification_state': False,
-                'nemhandel_identifier_type': '0184',
-                'nemhandel_identifier_value': False,
             }],
         )
-        new_partner.write({
-            'nemhandel_identifier_type': '0088',
-            'nemhandel_identifier_value': '5798009811512',
-        })
+        new_partner.additional_identifiers = {'EAN_GLN': '5798009811512'}
         self.assertEqual(new_partner.nemhandel_verification_state, 'valid')  # should validate automatically
 
-        new_partner.write({
-            'nemhandel_identifier_type': '0184',
-            'nemhandel_identifier_value': '12345674',
-        })
-
+        new_partner.additional_identifiers = {'DK_CVR': '12345674'}
         self.assertEqual(new_partner.nemhandel_verification_state, 'not_valid')
 
     def test_nemhandel_edi_formats(self):

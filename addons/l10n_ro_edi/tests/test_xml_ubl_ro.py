@@ -251,7 +251,7 @@ class TestUBLRO(TestUBLROCommon):
 
     def test_export_invoice_without_country_code_prefix_in_vat(self):
         self.company_data['company'].write({'vat': '1234567897'})
-        self.partner_a.write({'vat': False, 'peppol_eas': False, 'peppol_endpoint': False})
+        self.partner_a.write({'vat': False, 'additional_identifiers': {}})
         invoice = self.create_move("out_invoice", currency_id=self.company.currency_id.id)
         attachment = self.get_attachment(invoice)
         self._assert_invoice_attachment(attachment, xpaths=None, expected_file_path='from_odoo/ciusro_out_invoice_no_prefix_vat.xml')
@@ -264,7 +264,7 @@ class TestUBLRO(TestUBLROCommon):
 
     def test_export_no_vat_but_have_company_registry_without_prefix(self):
         self.company_data['company'].write({'vat': False, 'company_registry': '1234567897'})
-        self.partner_a.write({'vat': False, 'peppol_eas': False, 'peppol_endpoint': False})
+        self.partner_a.write({'vat': False, 'additional_identifiers': {}})
         invoice = self.create_move("out_invoice", currency_id=self.company.currency_id.id)
         attachment = self.get_attachment(invoice)
         self._assert_invoice_attachment(attachment, xpaths=None, expected_file_path='from_odoo/ciusro_out_invoice_no_prefix_company_registry.xml')

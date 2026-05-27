@@ -10,6 +10,13 @@ from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
 from odoo.addons.l10n_dk.tools.demo_utils import handle_demo
 
+NEMHANDEL_REGISTRABLE_EAS = [
+    ('0088', 'EAN/GLN'),
+    ('0184', 'CVR'),
+    ('0198', 'SE'),
+    ('9918', 'IBAN'),
+]
+
 
 class NemhandelRegistration(models.TransientModel):
     _name = 'nemhandel.registration'
@@ -37,11 +44,24 @@ class NemhandelRegistration(models.TransientModel):
         string='EDI user',
         compute='_compute_edi_user_id',
     )
-    phone_number = fields.Char(related='company_id.nemhandel_phone_number', readonly=False, inverse='_inverse_phone_number')
+    phone_number = fields.Char(related='company_id.nemhandel_phone_number', readonly=False)
     l10n_dk_nemhandel_proxy_state = fields.Selection(related='company_id.l10n_dk_nemhandel_proxy_state', readonly=False)
     verification_code = fields.Char(related='edi_user_id.nemhandel_verification_code', readonly=False)
-    identifier_type = fields.Selection(related='company_id.nemhandel_identifier_type', readonly=False, required=True)
-    identifier_value = fields.Char(related='company_id.nemhandel_identifier_value', readonly=False, required=True)
+    identifier_type = fields.Selection(
+        selection=NEMHANDEL_REGISTRABLE_EAS,
+        string='Identifier Type',
+        compute='_compute_identifier',
+        inverse='_inverse_identifier',
+        readonly=False,
+        required=True,
+    )
+    identifier_value = fields.Char(
+        string='Identifier Value',
+        compute='_compute_identifier',
+        inverse='_inverse_identifier',
+        readonly=False,
+        required=True,
+    )
 
     # -------------------------------------------------------------------------
     # ONCHANGE METHODS
@@ -90,6 +110,29 @@ class NemhandelRegistration(models.TransientModel):
         for wizard in self:
             if not wizard.edi_user_id and wizard.edi_mode:
                 self.env['ir.config_parameter'].sudo().set_str('l10n_dk.edi.mode', wizard.edi_mode)
+
+    @api.depends('company_id.partner_id.additional_identifiers')
+    def _compute_identifier(self):
+        nemhandel_keys = dict(NEMHANDEL_REGISTRABLE_EAS)
+        for wizard in self:
+            identifiers = wizard.company_id.partner_id.additional_identifiers or {}
+            # Find the first nemhandel-compatible identifier
+            for key in nemhandel_keys:
+                if value := identifiers.get(key):
+                    wizard.identifier_type = key
+                    wizard.identifier_value = value
+                    break
+            else:
+                wizard.identifier_type = '0184'
+                wizard.identifier_value = wizard.company_id.partner_id.company_registry or False
+
+    def _inverse_identifier(self):
+        for wizard in self:
+            if wizard.identifier_type and wizard.identifier_value:
+                partner = wizard.company_id.partner_id
+                identifiers = partner.additional_identifiers or {}
+                identifiers[wizard.identifier_type] = wizard.identifier_value
+                partner.additional_identifiers = identifiers
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS

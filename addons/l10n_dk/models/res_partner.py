@@ -6,6 +6,7 @@ from urllib import parse
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
+from odoo.addons.account.tools.partner_identifiers import format_participant_identifier
 from odoo.addons.l10n_dk.tools.demo_utils import handle_demo
 
 TIMEOUT = 10
@@ -29,25 +30,6 @@ class ResPartner(models.Model):
         company_dependent=True,
     )
 
-    nemhandel_identifier_type = fields.Selection(
-        string='Nemhandel Endpoint Type',
-        help='Unique identifier used by OIOUBL and Nemhandel',
-        compute="_compute_nemhandel_identifier_type", store=True, readonly=False,
-        tracking=True,
-        selection=[
-            ('0088', "EAN/GLN"),
-            ('0184', "CVR"),
-            ('9918', "IBAN"),
-            ('0198', "SE"),
-        ],
-    )
-    nemhandel_identifier_value = fields.Char(
-        string='Nemhandel Endpoint',
-        help='Code used to identify the Endpoint on Nemhandel',
-        compute="_compute_nemhandel_identifier_value", store=True, readonly=False,
-        tracking=True,
-    )
-
     is_using_nemhandel = fields.Boolean(compute='_compute_is_using_nemhandel')
 
     # -------------------------------------------------------------------------
@@ -63,32 +45,6 @@ class ResPartner(models.Model):
             vat_country, vat_number = self._split_vat(partner.vat)
             if vat_country in ('DK', '') and self._check_vat_number('DK', vat_number):
                 partner.company_registry = vat_number
-
-    @api.depends('country_code', 'vat', 'company_registry')
-    def _compute_nemhandel_identifier_type(self):
-        for partner in self:
-            partner.nemhandel_identifier_type = partner.nemhandel_identifier_type
-            country_code = partner._deduce_country_code()
-            if country_code == 'DK' and not partner.nemhandel_identifier_type:
-                partner.nemhandel_identifier_type = '0184'
-            elif country_code != 'DK':
-                partner.nemhandel_identifier_type = False
-
-    @api.depends('country_code', 'vat', 'company_registry', 'nemhandel_identifier_type')
-    def _compute_nemhandel_identifier_value(self):
-        for partner in self:
-            if partner.nemhandel_identifier_value != partner._origin.nemhandel_identifier_value:
-                # value changed, don't override it
-                partner.nemhandel_identifier_value = partner.nemhandel_identifier_value
-                continue
-            country_code = partner._deduce_country_code()
-            if country_code == 'DK' and partner.nemhandel_identifier_type == '0184':
-                vat_country, vat_number = partner._split_vat(partner.company_registry or '')
-                partner.nemhandel_identifier_value = vat_number if vat_country == 'DK' else partner.company_registry
-            elif country_code == 'DK':
-                partner.nemhandel_identifier_value = partner.nemhandel_identifier_value
-            else:
-                partner.nemhandel_identifier_value = ''
 
     @api.depends_context('allowed_company_ids')
     @api.depends('invoice_edi_format')
@@ -199,24 +155,24 @@ class ResPartner(models.Model):
 
         return edi_identification.lower() == participant_identifier.lower() and parse.urlsplit(service_href).netloc == smp_nemhandel_url
 
-    def _update_nemhandel_state_per_company(self, vals=None):
-        partners = self.env['res.partner']
+    def _get_nemhandel_edi_identification(self):
+        """Return the first nemhandel-compatible edi identification string for this partner, or None."""
+        self.ensure_one()
+        for key, value in self._get_all_identifiers(enrich=True).items():
+            if edi_id := format_participant_identifier(key, value):
+                return edi_id
+        return None
+
+    def _update_nemhandel_verification_state(self, vals=None):
         if vals is None:
-            partners = self.filtered(lambda p: all([p.nemhandel_identifier_type, p.nemhandel_identifier_value, p.is_using_nemhandel]))
-        elif {'nemhandel_identifier_type', 'nemhandel_identifier_value', 'is_using_nemhandel'}.intersection(vals.keys()):
+            partners = self.filtered(lambda p: p._get_nemhandel_edi_identification() and p.is_using_nemhandel)
+        elif {'additional_identifiers', 'is_using_nemhandel', 'vat'}.intersection(vals.keys()):
             partners = self.filtered(lambda p: p.is_using_nemhandel)
+        else:
+            partners = self.env['res.partner']
 
-        all_companies = None
-        for partner in partners.sudo():
-            if partner.company_id:
-                partner.button_nemhandel_check_partner_endpoint(company=partner.company_id)
-                continue
-
-            if all_companies is None:
-                all_companies = self.env['res.company'].sudo().search([])
-
-            for company in all_companies:
-                partner.button_nemhandel_check_partner_endpoint(company=company)
+        for partner in partners:
+            partner.button_nemhandel_check_partner_endpoint()
 
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
@@ -224,14 +180,14 @@ class ResPartner(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        self._update_nemhandel_state_per_company(vals=vals)
+        self._update_nemhandel_verification_state(vals=vals)
         return res
 
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
         if res:
-            res._update_nemhandel_state_per_company()
+            res._update_nemhandel_verification_state()
         return res
 
     # -------------------------------------------------------------------------
@@ -240,21 +196,17 @@ class ResPartner(models.Model):
 
     @handle_demo
     def button_nemhandel_check_partner_endpoint(self, company=None):
-        """ A basic check for whether a participant is reachable at the given identifier_type and identifier_value"""
+        """Check whether a participant is reachable on the Nemhandel network."""
         self.ensure_one()
-        if not company:
-            company = self.env.company
+        old_value = self.nemhandel_verification_state
+        self.nemhandel_verification_state = self._get_nemhandel_verification_state(self.invoice_edi_format)
+        if self.nemhandel_verification_state == 'valid' and not self.invoice_sending_method:
+            self.invoice_sending_method = 'nemhandel'
 
-        self_partner = self.with_company(company)
-        old_value = self_partner.nemhandel_verification_state
-        self_partner.nemhandel_verification_state = self._get_nemhandel_verification_state(self_partner.invoice_edi_format)
-        if self_partner.nemhandel_verification_state == 'valid' and not self_partner.invoice_sending_method:
-            self_partner.invoice_sending_method = 'nemhandel'
-
-        if old_value != self_partner.nemhandel_verification_state:
+        if old_value != self.nemhandel_verification_state:
             self._track_add(
                 initial_values={self.id: {'nemhandel_verification_state': old_value}},
-                end_values={self.id: {'nemhandel_verification_state': self_partner.nemhandel_verification_state}},
+                end_values={self.id: {'nemhandel_verification_state': self.nemhandel_verification_state}},
             )
 
         return False
@@ -262,10 +214,10 @@ class ResPartner(models.Model):
     @handle_demo
     def _get_nemhandel_verification_state(self, invoice_edi_format):
         self.ensure_one()
-        if not self.nemhandel_identifier_type or not self.nemhandel_identifier_value or invoice_edi_format != 'oioubl_21':
+        edi_identification = self._get_nemhandel_edi_identification()
+        if not edi_identification or invoice_edi_format != 'oioubl_21':
             return 'not_verified'
 
-        edi_identification = f"{self.nemhandel_identifier_type}:{self.nemhandel_identifier_value}".lower()
         participant_info = self._nemhandel_lookup_participant(edi_identification)
         if participant_info is None:
             return 'not_valid'

@@ -12,11 +12,11 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
     def _export_invoice_constraints(self, invoice, vals):
         constraints = super()._export_invoice_constraints(invoice, vals)
         customer, supplier = vals['customer'].commercial_partner_id, vals['supplier']
-        if self._is_customer_behind_chorus_pro(customer):
+        if customer.is_behind_chorus_pro:
             if not customer._get_additional_identifier('FR_SIRET'):
-                constraints['chorus_customer'] = _("The Company Registry (Siret) of the final recipient is mandatory for the customer when invoicing through Chorus Pro.")
+                constraints['chorus_customer'] = _("The Siret of the final recipient is mandatory for the customer when invoicing through Chorus Pro.")
             if supplier.country_code == 'FR' and not supplier._get_additional_identifier('FR_SIRET'):
-                constraints['chorus_supplier_fr'] = _("The Company Registry (Siret) is mandatory for french suppliers when invoicing through Chorus Pro.")
+                constraints['chorus_supplier_fr'] = _("The Siret is mandatory for french suppliers when invoicing through Chorus Pro.")
             if supplier.country_code != 'FR' and not supplier.vat:
                 constraints['chorus_supplier_not_fr'] = _("The VAT is mandatory for non-french suppliers when invoicing through Chorus Pro.")
         return constraints
@@ -25,7 +25,7 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
         super()._add_invoice_header_nodes(document_node, vals)
 
         customer = vals['customer'].commercial_partner_id
-        if not self._is_customer_behind_chorus_pro(customer):
+        if not customer.is_behind_chorus_pro:
             return
 
         invoice = vals['invoice']
@@ -49,7 +49,7 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
         super()._ubl_add_party_identification_nodes(vals)
 
         customer = vals['customer'].commercial_partner_id
-        if not self._is_customer_behind_chorus_pro(customer):
+        if not customer.is_behind_chorus_pro:
             return
 
         nodes = vals['party_node']['cac:PartyIdentification'] = []
@@ -78,7 +78,7 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
         # should put their VAT.
         super()._ubl_add_party_legal_entity_nodes(vals)
         customer = vals['customer'].commercial_partner_id
-        if not self._is_customer_behind_chorus_pro(customer):
+        if not customer.is_behind_chorus_pro:
             return
 
         partner = vals['party_vals']['partner']
