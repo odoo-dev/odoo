@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Migration Task Dashboard</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header id="topbar">
+    <div class="topbar-title">
+      <h1>Migration Tasks</h1>
+      <span id="task-count" class="muted">loading…</span>
+    </div>
+    <div id="summary" class="summary"></div>
+    <div class="filters">
+      <label>Status
+        <select id="filter-status"><option value="">all</option></select>
+      </label>
+      <label>Pattern
+        <select id="filter-pattern"><option value="">all</option></select>
+      </label>
+      <input id="filter-text" type="text" placeholder="filter by path / component…" />
+      <button id="reload" title="Reload from disk">⟳ Reload</button>
+    </div>
+  </header>
+
+  <main id="layout">
+    <aside id="tree-panel">
+      <div id="tree" class="tree"></div>
+    </aside>
+    <section id="detail-panel">
+      <div id="detail" class="detail-empty">Select a task from the tree.</div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
