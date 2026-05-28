@@ -1,5 +1,5 @@
-import { useChildEnv, useChildSubEnv, useRef, useState } from "@web/owl2/utils";
-import { Component } from "@odoo/owl";
+import { useChildEnv, useChildSubEnv, useState } from "@web/owl2/utils";
+import { Component, signal } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
@@ -265,10 +265,11 @@ export class TextEffectSelector extends Component {
         updateState: Function,
     };
 
+    rootRef = signal(null);
+
     setup() {
         this.props.updateState();
         this.state = this.props.getState();
-        this.root = useRef("root");
         useChildSubEnv({
             dependencyManager: new DependencyManager(),
             getEditingElement: () => this.activeElement,
@@ -308,7 +309,7 @@ export class TextEffectSelector extends Component {
         this.onReset = onReset;
 
         this.props.updateState();
-        this.popover.open(this.root.el, {
+        this.popover.open(this.rootRef(), {
             onReset: () => {
                 onReset(this.activeElement);
                 this.popover.close();
