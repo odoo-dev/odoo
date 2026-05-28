@@ -5,7 +5,60 @@ const METRIC_KEYS = [
   "useRef", "el_access", "t_custom_ref", "loop_ref",
   "useChildRef", "useForwardRefToParent", "useEffect_dep",
 ];
-const KNOWN_STATUSES = ["pending", "ready", "in_progress", "blocked", "needs_input", "done"];
+const KNOWN_STATUSES = ["pending", "ready", "in_progress", "blocked", "needs_input", "done", "pushed", "ci_failed"];
+
+// Local runbot-next viewer (nginx: runbot.localhost -> 127.0.0.1:5173).
+const RUNBOT_BASE = "http://runbot.localhost";
+const RUNBOT_PROJECT = "/runbot/rd-1";
+
+// runbot-next encodes its UI state as ?state=base64(encodeURIComponent(JSON)).
+function runbotStateUrl(state) {
+  return RUNBOT_BASE + "/?state=" + btoa(encodeURIComponent(JSON.stringify(state)));
+}
+// Open the local runbot pre-filtered to a branch (searches bundles on rd-1).
+function runbotBranchUrl(branch) {
+  return runbotStateUrl({ projectPath: RUNBOT_PROJECT, search: branch, hasPr: false });
+}
+// Open a specific batch directly in the local runbot.
+function runbotBatchUrl(batchId) {
+  return runbotStateUrl({ projectPath: RUNBOT_PROJECT, selectedBatchId: Number(batchId) });
+}
+// GitHub cross-fork compare URL: odoo/<repo> master <- odoo-dev/<repo> <branch>.
+function ghPrUrl(repo, branch) {
+  return "https://github.com/odoo/" + repo + "/compare/master...odoo-dev:" + repo + ":" +
+    encodeURIComponent(branch) + "?expand=1";
+}
+// GitHub branch view in the odoo-dev fork.
+function ghDevBranchUrl(repo, branch) {
+  return "https://github.com/odoo-dev/" + repo + "/tree/" + encodeURIComponent(branch);
+}
+
+function extLink(href, label, cls) {
+  const a = el("a", "ext-link" + (cls ? " " + cls : ""), label);
+  a.href = href;
+  a.target = "_blank";
+  a.rel = "noreferrer";
+  return a;
+}
+
+// CI status badge from a folded { result, batch, summary } record (null if none).
+function ciBadge(ci) {
+  if (!ci || !ci.result) return null;
+  const map = {
+    success: ["ci-ok", "CI ✓"],
+    ok: ["ci-ok", "CI ✓"],
+    error: ["ci-fail", "CI ✗"],
+    failed: ["ci-fail", "CI ✗"],
+    killed: ["ci-warn", "CI killed"],
+    skipped: ["ci-warn", "CI skipped"],
+    pending: ["ci-pending", "CI …"],
+    running: ["ci-pending", "CI running"],
+  };
+  const [cls, label] = map[ci.result] || ["ci-unknown", "CI " + ci.result];
+  const b = el("span", "ci-badge " + cls, label);
+  if (ci.batch) b.title = "runbot batch " + ci.batch;
+  return b;
+}
 
 let TASKS = [];            // folded summaries
 let TASKS_BY_ID = new Map();
@@ -411,6 +464,14 @@ function renderLeaf(leaf) {
   row.appendChild(el("span", "leaf-comp", t.component));
   row.appendChild(el("span", "leaf-lang", t.lang));
   row.appendChild(badge(t.status));
+  if (t.ci && t.ci.result) {
+    const r = t.ci.result;
+    const tone = r === "success" || r === "ok" ? "ok"
+      : r === "pending" || r === "running" ? "pending" : "fail";
+    const dot = el("span", "ci-dot ci-dot-" + tone);
+    dot.title = "CI: " + r + (t.ci.batch ? " (batch " + t.ci.batch + ")" : "");
+    row.appendChild(dot);
+  }
   const vb = reviewBadge(t);
   if (vb) row.appendChild(vb);
   if (t.has_review) row.appendChild(reviewButton(t.id, "⊳"));
@@ -584,8 +645,45 @@ function renderDetail(data) {
   h.appendChild(el("div", "subpath", def.path));
   detail.appendChild(h);
 
+  // --- CI & external links ---
+  const rev = data.review || {};
+  const branch = rev.branch ||
+    (rev.pushed && rev.pushed.branch) ||
+    st.worktree_branch ||
+    def.worktree ||
+    null;
+  const ci = rev.ci;
+  if (branch || ci) {
+    const lSec = section("CI & Links");
+
+    // CI status row
+    const ciRow = el("div", "links-row");
+    const cb = ciBadge(ci);
+    if (cb) {
+      ciRow.appendChild(cb);
+      if (ci.batch) ciRow.appendChild(extLink(runbotBatchUrl(ci.batch), "batch " + ci.batch, "runbot"));
+      if (ci.ts) ciRow.appendChild(el("span", "muted", new Date(ci.ts).toLocaleString()));
+    } else {
+      ciRow.appendChild(el("span", "muted", "no CI result recorded yet"));
+    }
+    lSec.appendChild(ciRow);
+    if (ci && ci.summary) lSec.appendChild(el("div", "muted ci-summary", ci.summary));
+
+    // external links row (only meaningful once we know the branch)
+    if (branch) {
+      const linkRow = el("div", "links-row");
+      linkRow.appendChild(extLink(runbotBranchUrl(branch), "▶ Runbot", "runbot"));
+      linkRow.appendChild(extLink(ghPrUrl("odoo", branch), "＋ PR odoo", "gh"));
+      linkRow.appendChild(extLink(ghPrUrl("enterprise", branch), "＋ PR enterprise", "gh"));
+      linkRow.appendChild(extLink(ghDevBranchUrl("odoo", branch), "odoo-dev/odoo", "gh"));
+      linkRow.appendChild(extLink(ghDevBranchUrl("enterprise", branch), "odoo-dev/enterprise", "gh"));
+      lSec.appendChild(linkRow);
+      lSec.appendChild(el("div", "mono muted branch-line", branch));
+    }
+    detail.appendChild(lSec);
+  }
+
   // --- Review (git diff) ---
-  const rev = data.review;
   if (rev && rev.worktree_abs) {
     const rSec = section("Review");
     const bar = el("div", "review-bar");

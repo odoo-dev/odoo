@@ -27,6 +27,7 @@ const DEFAULT_STATE = () => ({
   worktree_branch: null as string | null,
   latest_run: null as any,
   pushed: null as any,
+  ci: null as any,
 });
 
 // "<shortsha> <subject>" => {sha, subject} (guard: no space => whole as sha)
@@ -52,6 +53,7 @@ function reviewCoords(state: any) {
     run_problem: run?.problem ?? null,
     needs_rerun: run?.needs_rerun ?? false,
     pushed: state.pushed ?? null,
+    ci: state.ci ?? null,
   };
 }
 
@@ -100,6 +102,14 @@ function parseTaskFile(text: string) {
       state.pushed = {
         remote: rec.remote ?? null,
         branch: rec.branch ?? null,
+        ts: rec.ts ?? null,
+      };
+    } else if (ev === "ci") {
+      // latest CI result wins (events fold chronologically)
+      state.ci = {
+        result: rec.result ?? null,
+        batch: rec.batch ?? null,
+        summary: rec.summary ?? null,
         ts: rec.ts ?? null,
       };
     } else if (ev === "depends_on") {
@@ -160,6 +170,7 @@ function foldedSummary(parsed: { task: any; state: any; reviewRecords?: any[] })
     needs_rerun: rc.needs_rerun,
     commit_count: rc.commits.length,
     pushed: rc.pushed,
+    ci: rc.ci,
     verdict: review.verdict,
   };
 }
@@ -713,6 +724,7 @@ const server = Bun.serve({
             run_problem: rc.run_problem,
             needs_rerun: rc.needs_rerun,
             pushed: rc.pushed,
+            ci: rc.ci,
           },
           timeline: parsed.timeline,
         });

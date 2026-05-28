@@ -9,3 +9,9 @@
 {"kind": "event", "ts": "2026-05-27T19:44:13.604058+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "ci", "result": "success", "batch": "2549937"}
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "done"}
+{"rkind":"visit","head":"4befd6d7548bec093324d82c8b9e5985040e1a03","kind":"review","ts":"2026-05-28T09:06:26.839Z","actor":"nby@odoo.com"}
+{"rkind":"comment","thread_id":"th_mpp9qy852z5f","path":"addons/pos_self_order/static/src/app/utils/category_scrollspy_hook.js","line":36,"side":"new","body":"blabla","kind":"review","ts":"2026-05-28T09:06:36.875Z","actor":"nby@odoo.com","comment_id":"th_mpp9qy852z5f:pfcoq14"}
+{"rkind":"visit","head":"4befd6d7548bec093324d82c8b9e5985040e1a03","kind":"review","ts":"2026-05-28T09:46:21.725Z","actor":"nby@odoo.com"}
+{"rkind":"resolve","thread_id":"th_mpp9qy852z5f","resolved":true,"kind":"review","ts":"2026-05-28T09:46:35.931Z","actor":"nby@odoo.com"}
+{"rkind":"viewed","path":"checklist:F1","sha":"4befd6d7548bec093324d82c8b9e5985040e1a03","viewed":true,"kind":"review","ts":"2026-05-28T09:46:43.752Z","actor":"nby@odoo.com"}
+{"rkind":"viewed","path":"checklist:F1","sha":"4befd6d7548bec093324d82c8b9e5985040e1a03","viewed":false,"kind":"review","ts":"2026-05-28T09:46:44.147Z","actor":"nby@odoo.com"}

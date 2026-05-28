@@ -14,6 +14,8 @@
   --st-blocked: #dc2626;
   --st-needs_input: #dc2626;
   --st-done: #16a34a;
+  --st-pushed: #0891b2;
+  --st-ci_failed: #b91c1c;
 }
 
 * { box-sizing: border-box; }
@@ -63,6 +65,8 @@ body {
 .st-bg-blocked { background: var(--st-blocked); }
 .st-bg-needs_input { background: var(--st-needs_input); }
 .st-bg-done { background: var(--st-done); }
+.st-bg-pushed { background: var(--st-pushed); }
+.st-bg-ci_failed { background: var(--st-ci_failed); }
 .st-bg-unknown { background: #4b5563; }
 
 /* ---- Progress bar ---- */
@@ -167,7 +171,46 @@ body {
 .badge.st-blocked { background: var(--st-blocked); }
 .badge.st-needs_input { background: var(--st-needs_input); }
 .badge.st-done { background: var(--st-done); }
+.badge.st-pushed { background: var(--st-pushed); }
+.badge.st-ci_failed { background: var(--st-ci_failed); }
 .badge.st-unknown { background: #4b5563; }
+
+/* ---- CI status + external links ---- */
+.ci-badge {
+  display: inline-block; padding: 0 7px; border-radius: 9px;
+  font-size: 10px; font-weight: 700; color: #fff; white-space: nowrap;
+  font-family: var(--mono);
+}
+.ci-badge.ci-ok { background: var(--st-done); }
+.ci-badge.ci-fail { background: var(--st-ci_failed); }
+.ci-badge.ci-warn { background: var(--st-in_progress); }
+.ci-badge.ci-pending { background: var(--st-pushed); }
+.ci-badge.ci-unknown { background: #4b5563; }
+
+/* small CI dot in the tree leaf */
+.ci-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  vertical-align: middle; flex: none;
+}
+.ci-dot-ok { background: var(--st-done); }
+.ci-dot-fail { background: var(--st-ci_failed); }
+.ci-dot-pending { background: var(--st-pushed); }
+
+.links-row {
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0;
+}
+.ci-summary { margin: 2px 0 6px; font-size: 12px; }
+.branch-line { font-size: 11px; margin-top: 4px; word-break: break-all; }
+.ext-link {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; font-family: var(--mono); text-decoration: none;
+  padding: 2px 8px; border-radius: 5px;
+  border: 1px solid var(--border-strong); color: var(--text); background: #fff;
+}
+.ext-link:hover { border-color: var(--accent); color: var(--accent); }
+.ext-link.runbot { border-color: #c084fc; color: #7c3aed; }
+.ext-link.runbot:hover { background: #f5f3ff; }
+.ext-link.gh { }
 
 /* ---- Detail ---- */
 .detail-empty { color: var(--muted); padding: 40px; text-align: center; }
