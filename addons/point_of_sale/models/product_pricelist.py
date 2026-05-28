@@ -21,6 +21,9 @@ class ProductPricelist(models.Model):
     def _load_pos_data_fields(self, config):
         return ['id', 'name', 'display_name', 'currency_id', 'item_ids']
 
+    def _get_active_pos_session_domain(self):
+        return [('config_id.available_pricelist_ids', 'in', self.ids)]
+
 
 class ProductPricelistItem(models.Model):
     _name = 'product.pricelist.item'

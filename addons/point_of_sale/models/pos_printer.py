@@ -125,3 +125,6 @@ class PosPrinter(models.Model):
         for rec in self:
             if rec.paper_size not in rec.paper_size_keys.split(","):
                 rec.paper_size = '80'
+
+    def _get_active_pos_session_domain(self):
+        return ['|', ('config_id.receipt_printer_ids', 'in', self.ids), ('config_id.preparation_printer_ids', 'in', self.ids)]

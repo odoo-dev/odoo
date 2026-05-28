@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import api, models
+from odoo import _, api, models
 from odoo.fields import Domain
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, UserError
 
 
 class PosLoadMixin(models.AbstractModel):
@@ -66,3 +66,40 @@ class PosLoadMixin(models.AbstractModel):
     def _load_pos_data_fields(self, config):
         """ Return the list of fields to be loaded """
         return []
+
+    @api.ondelete(at_uninstall=False)
+    def _unlink_except_active_pos_session(self):
+        self._check_active_pos_session()
+
+    def action_archive(self):
+        self._check_active_pos_session(action='archive')
+        return super().action_archive()
+
+    def _get_active_pos_session_domain(self):
+        """
+        Must be overridden by inheriting models.
+        """
+        return []
+
+    def _get_active_pos_session_item_label(self):
+        return _("Records")
+
+    def _get_active_pos_session(self):
+        domain = self._get_active_pos_session_domain()
+        if not domain:
+            return False
+
+        return self.env['pos.session'].sudo().search(
+            [('state', '!=', 'closed'), *domain],
+            limit=1,
+        )
+
+    def _check_active_pos_session(self, action='delete', item_label=None):
+        item_label = self._get_active_pos_session_item_label()
+        if self._get_active_pos_session():
+            raise UserError(_(
+                "You cannot %(action)s %(item_label)s that are used in an active Point of Sale session.\n"
+                "Close all related PoS sessions first and try again.",
+                action=action,
+                item_label=item_label,
+            ))

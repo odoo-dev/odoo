@@ -25,3 +25,9 @@ class PosBill(models.Model):
     @api.model
     def _load_pos_data_fields(self, config):
         return ['id', 'name', 'value']
+
+    def _get_active_pos_session_domain(self):
+        return ["|", ('config_id.default_bill_ids', 'in', self.ids), ('config_id.default_bill_ids', '=', False)]
+
+    def _get_active_pos_session_item_label(self):
+        return _('Coins/Bills')

@@ -32,6 +32,7 @@ class PosCategory(models.Model):
     hour_until = fields.Float(string='Availability Until', default=24.0, help="The product will be available until this hour for online order and self order.")
     hour_after = fields.Float(string='Availability After', default=0.0, help="The product will be available after this hour for online order and self order.")
     pos_config_ids = fields.Many2many('pos.config', string='Linked PoS Configurations')
+    active = fields.Boolean(default=True)
 
     # During loading of data, the image is not loaded so we expose a lighter
     # field to determine whether a pos.category has an image or not.
@@ -61,7 +62,7 @@ class PosCategory(models.Model):
             cat.display_name = " / ".join(cat._get_hierarchy())
 
     @api.ondelete(at_uninstall=False)
-    def _unlink_except_session_open(self):
+    def _unlink_except_linked_to_pos_config(self):
         for record in self:
             if record.pos_config_ids:
                 raise UserError(_('You cannot delete a category which is currently in use in a point of sale.'))
@@ -95,3 +96,9 @@ class PosCategory(models.Model):
             for pos_category, vals in zip(self, vals_list):
                 vals['name'] = _("%s (copy)", pos_category.name)
         return vals_list
+
+    def _get_active_pos_session_domain(self):
+        return ["|", ('config_id.iface_available_categ_ids', '=', False), ('config_id.iface_available_categ_ids', 'in', self.ids)]
+
+    def _get_active_pos_session_item_label(self):
+        return _('PoS categories')

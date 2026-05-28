@@ -52,7 +52,11 @@ class TestReportSession(TestPoSCommon):
             'to_invoice': False,
         })
         # check that an used product can not be archived
-        with self.assertRaisesRegex(UserError, "Hold up! Archiving products while POS sessions are active is like pulling a plate mid-meal.\nMake sure to close all sessions first to avoid any issues."):
+        with self.assertRaisesRegex(
+            UserError,
+            "You cannot archive Products that are used in an active Point of Sale session.\n"
+            "Close all related PoS sessions first and try again."
+        ):
             self.product1.with_user(self.res_users_partner_manager_user).action_archive()
 
         self.make_payment(order, self.bank_split_pm1, 60)

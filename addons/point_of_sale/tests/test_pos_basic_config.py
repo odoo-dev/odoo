@@ -1448,9 +1448,9 @@ class TestPoSBasicConfig(TestPoSCommon):
             special_product.action_archive()
         with self.assertRaisesRegex(UserError, "You cannot archive a product that is set as a special product in a Point of Sale configuration. Please change the configuration first."):
             special_product.product_variant_ids[0].action_archive()
-        with self.assertRaisesRegex(UserError, "You cannot archive a product that is set as a special product in a Point of Sale configuration. Please change the configuration first."):
+        with self.assertRaisesRegex(UserError, "You cannot delete a product that is set as a special product in a Point of Sale configuration. Please change the configuration first."):
             special_product.unlink()
-        with self.assertRaisesRegex(UserError, "You cannot archive a product that is set as a special product in a Point of Sale configuration. Please change the configuration first."):
+        with self.assertRaisesRegex(UserError, "You cannot delete a product that is set as a special product in a Point of Sale configuration. Please change the configuration first."):
             special_product.product_variant_ids[0].unlink()
 
     def test_pos_invoice_not_to_review_pos_only_user(self):
@@ -1475,3 +1475,94 @@ class TestPoSBasicConfig(TestPoSCommon):
         orders.with_user(pos_only_user)._generate_pos_order_invoice()
 
         self.assertEqual(orders.account_move.review_state, 'no_review')
+
+    def test_delete_archive_product_pos_category_with_active_pos_session(self):
+        """Ensure products and PoS categories cannot be archived or deleted
+        while they are available in an active PoS session.
+
+        This test covers both unrestricted and restricted PoS category
+        configurations:
+
+        * When no categories are restricted, all products/categories are
+        considered available in the active session and must be protected.
+
+        * When categories are restricted, only products/categories linked
+        to the configured PoS categories must be protected, while unrelated
+        products/categories can still be archived or deleted.
+        """
+        category1 = self.env['pos.category'].create({'name': 'Test Category'})
+        category2 = self.env['pos.category'].create({'name': 'Test Category 2'})
+
+        product_in_active_session = self.create_product('Product in active session', self.categ_basic, 0.0, 0.0)
+        product_not_in_active_session = self.create_product('Product not in active session', self.categ_basic, 0.0, 0.0)
+
+        product_in_active_session.pos_categ_ids = [(6, 0, [category1.id])]
+        product_not_in_active_session.pos_categ_ids = [(6, 0, [category2.id])]
+
+        # Open PoS session with unrestricted categories.
+        self.basic_config.iface_available_categ_ids = []
+        self.basic_config.open_ui()
+
+        # Products/Categories should not be archived/deleted when all categories are available.
+        with self.assertRaisesRegex(
+            UserError,
+            "You cannot archive Products that are used in an active Point of Sale session.\n"
+            "Close all related PoS sessions first and try again."
+        ):
+            product_not_in_active_session.action_archive()
+        self.assertTrue(product_not_in_active_session.active)
+
+        with self.assertRaisesRegex(
+            UserError,
+            "You cannot delete PoS categories that are used in an active Point of Sale session.\n"
+            "Close all related PoS sessions first and try again."
+        ):
+            category2.unlink()
+        self.assertIn(category2, self.env['pos.category'].browse(category2.id))
+
+        # Restrict categories to category1 only.
+        self.basic_config.iface_available_categ_ids = [(6, 0, [category1.id])]
+
+        # Product linked to category1 should still be protected.
+        with self.assertRaisesRegex(
+            UserError,
+            "You cannot archive Products that are used in an active Point of Sale session.\n"
+            "Close all related PoS sessions first and try again."
+        ):
+            product_in_active_session.action_archive()
+        self.assertTrue(product_in_active_session.active)
+
+        with self.assertRaisesRegex(
+            UserError,
+            "You cannot delete Products that are used in an active Point of Sale session.\n"
+            "Close all related PoS sessions first and try again."
+        ):
+            product_in_active_session.unlink()
+        self.assertIn(product_in_active_session, self.env['product.product'].browse(product_in_active_session.id))
+
+        # Product linked to category2 should now be archivable/deletable.
+        product_not_in_active_session.action_archive()
+        self.assertFalse(product_not_in_active_session.active)
+        product_not_in_active_session.unlink()
+
+        # category1 is used in active session -> protected.
+        with self.assertRaisesRegex(
+            UserError,
+            "You cannot archive PoS categories that are used in an active Point of Sale session.\n"
+            "Close all related PoS sessions first and try again."
+        ):
+            category1.action_archive()
+        self.assertTrue(category1.active)
+
+        category2.action_archive()
+        self.assertFalse(category2.active)
+
+        category2.unlink()
+
+        # Close session.
+        self.basic_config.current_session_id.action_pos_session_closing_control()
+
+        # category1 is still linked to config -> cannot be deleted.
+        with self.assertRaisesRegex(UserError, "You cannot delete a category which is currently in use in a point of sale."):
+            category1.unlink()
+        product_in_active_session.unlink()

@@ -39,7 +39,7 @@
                 <field name="sequence" widget="handle"/>
                 <field name="display_name" string="PoS Product Category"/>
                 <field name="parent_id"/>
-                <field name="pos_config_ids" widget="many2many_tags"/>
+                <field name="pos_config_ids" widget="many2many_tags_placeholder_list_view" placeholder="For all point of sale."/>
                 <field name="color" widget="color_picker"/>
             </list>
         </field>
@@ -75,6 +75,17 @@
                     </t>
                 </templates>
             </kanban>
+        </field>
+    </record>
+
+    <record id="view_pos_category_search" model="ir.ui.view">
+        <field name="name">pos.category.search.view</field>
+        <field name="model">pos.category</field>
+        <field name="arch" type="xml">
+            <search string="Point of Sale Product Categories">
+                <field name="name"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
         </field>
     </record>
 
