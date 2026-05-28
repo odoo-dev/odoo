@@ -240,8 +240,8 @@ class PeppolRegistration(models.TransientModel):
     def _ensure_mandatory_fields(self):
         if not self.selected_company_id.account_fiscal_country_id.code:
             raise ValidationError(_("Please select a country for your company."))
-        if not self.contact_email or not self.phone_number:
-            raise ValidationError(_("Contact email and phone number are required."))
+        if not self.contact_email:
+            raise ValidationError(self.env._("A Contact email is required."))
         if not self.peppol_eas or not self.peppol_endpoint:
             raise ValidationError(_("Peppol Address should be provided."))
         if self._branch_with_same_address():
@@ -398,7 +398,7 @@ class PeppolRegistration(models.TransientModel):
             'peppol_company_city': company.city,
             'peppol_company_zip': company.zip,
             'peppol_country_code': company.country_id.code,
-            'peppol_phone_number': company.account_peppol_phone_number,
+            **({'peppol_phone_number': company.account_peppol_phone_number} if company.account_peppol_phone_number else {}),
             'peppol_contact_email': company.account_peppol_contact_email,
             'peppol_migration_key': company.sudo().account_peppol_migration_key,
             'peppol_webhook_endpoint': company._get_peppol_webhook_endpoint(),
@@ -422,6 +422,12 @@ class PeppolRegistration(models.TransientModel):
         old_proxy_users.active = False
         _logger.debug("De-registering existing Peppol proxy user for company %s", self.company_id.display_name)
 
+        blocking_proxy_types = set(self.env['account_edi_proxy_client.user']._get_peppol_proxy_types()) - {'peppol'}
+        blocking_user = self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type in blocking_proxy_types)
+        if blocking_user:
+            blocking_proxy_type = dict(blocking_user._fields['proxy_type']._description_selection(self.env))[blocking_user[:1].proxy_type]
+            raise UserError(self.env._("A connection to '%s' already exists.", blocking_proxy_type))
+
         if self.use_parent_connection:
             self.company_id.write({
                 'peppol_eas': self.peppol_eas,
@@ -437,38 +443,10 @@ class PeppolRegistration(models.TransientModel):
                 'target': 'new',
             }
 
-<<<<<<< HEAD
         # No auth required
         peppol_identifier = f'{self.peppol_eas}:{self.peppol_endpoint}'.lower()
         db_uuid = self.env['ir.config_parameter'].sudo().get_param('database.uuid')
         self._create_connection(peppol_identifier, db_uuid, self.company_id)
-=======
-        blocking_proxy_types = set(self.env['account_edi_proxy_client.user']._get_peppol_proxy_types()) - {'peppol'}
-        blocking_user = self.company_id.account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type in blocking_proxy_types)
-        if blocking_user:
-            blocking_proxy_type = dict(blocking_user._fields['proxy_type']._description_selection(self.env))[blocking_user[:1].proxy_type]
-            raise UserError(self.env._("A connection to '%s' already exists.", blocking_proxy_type))
-
-        edi_user = self.edi_user_id or self.env['account_edi_proxy_client.user']._register_proxy_user(self.company_id, 'peppol', self.edi_mode)
-
-        # if there is an error when activating the participant below,
-        # the client side is rolled back and the edi user is deleted on the client side
-        # but remains on the proxy side.
-        # it is important to keep these two in sync, so commit before activating.
-        if not modules.module.current_test:
-            self.env.cr.commit()
-
-        edi_user._peppol_register_sender()
-
-        if self.smp_registration:
-            try:
-                edi_user._peppol_register_sender_as_receiver()
-            except (UserError, AccountEdiProxyError) as e:
-                self.button_deregister_peppol_participant()
-                raise
-
-        # success
->>>>>>> 0d4569f4095c ([ADD] l10n_fr_pdp: French Peppol)
         notifications = {
             'sender': {
                 'message': _('You can now send electronic invoices via Peppol.'),

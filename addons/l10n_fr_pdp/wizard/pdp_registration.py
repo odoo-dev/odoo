@@ -166,7 +166,7 @@ class PdpRegistration(models.TransientModel):
             self.env.cr.commit()
 
         if self.account_peppol_proxy_state not in ('smp_registration', 'receiver'):
-            edi_user._peppol_register_receiver()
+            edi_user._pdp_register_receiver()
             self.invalidate_recordset()  # registering may i.e. have changed self.account_peppol_proxy_state
 
         notifications = {

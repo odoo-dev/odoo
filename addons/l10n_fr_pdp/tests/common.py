@@ -72,7 +72,7 @@ class TestL10nFrPdpCommon(TestUblCiiCommon, TestAccountMoveSendCommon):
             'country_id': cls.env.ref('base.fr').id,
             'phone': '+33 1 23 45 67 89',
             'vat': 'FR23334175221',
-            'siret': '96851575905823',
+            'company_registry': '96851575905823',
             'invoice_edi_format': 'ubl_21_fr',
             'peppol_eas': '0225',
             'peppol_endpoint': '968515759_96851575905823',

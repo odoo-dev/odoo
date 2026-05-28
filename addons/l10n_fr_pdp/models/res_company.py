@@ -51,7 +51,7 @@ class ResCompany(models.Model):
             record.partner_id.write({
                 'peppol_eas': '0225',
                 'peppol_endpoint': record.pdp_identifier,  # Will be verified by `_check_peppol_fields` constraint
-                'siret': siret or siren,
+                'company_id': siret or siren,
             })
 
     @api.depends('l10n_fr_pdp_annuaire_start_date', 'account_peppol_proxy_state')

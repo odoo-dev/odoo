@@ -165,10 +165,11 @@ class AccountEdiProxyClientUser(models.Model):
         })
 
     @handle_demo
-    def _peppol_register_receiver(self):
+    def _pdp_register_receiver(self):
         self.ensure_one()
         if self.proxy_type != 'pdp':
-            return super()._peppol_register_receiver()
+            raise UserError(self.env._("This is only possible for the 'Approved Platform'."))
+
 
         company = self.company_id
         if company.account_peppol_proxy_state in {'smp_registration', 'receiver'}:
@@ -176,7 +177,15 @@ class AccountEdiProxyClientUser(models.Model):
             proxy_state_translated = dict(company._fields['account_peppol_proxy_state']._description_selection(self.env))[company.account_peppol_proxy_state]
             raise UserError(self.env._("Cannot register a user with a '%(proxy_state)s' application.", proxy_state=proxy_state_translated))
 
-        super()._peppol_register_receiver()
+        params = {
+            'company_details': self._get_company_details(),
+            'supported_identifiers': list(self.company_id._peppol_supported_document_types())
+        }
+        self._call_peppol_proxy(
+            endpoint=self._get_peppol_proxy_endpoint('1/register_receiver'),
+            params=params,
+        )
+        self.company_id.account_peppol_proxy_state = 'smp_registration'
 
         datetime_in_1_hour = fields.Datetime.add(fields.Datetime.now(), hours=1)
         self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=datetime_in_1_hour)

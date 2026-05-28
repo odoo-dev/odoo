@@ -95,7 +95,7 @@ class ResConfigSettings(models.TransientModel):
                 }
             }
             record.account_peppol_edi_user._call_peppol_proxy(
-                endpoint='/api/peppol/1/update_user',
+                endpoint=record.account_peppol_edi_user._get_peppol_proxy_endpoint('1/update_user'),
                 params=params,
             )
 
@@ -108,7 +108,6 @@ class ResConfigSettings(models.TransientModel):
         registration_action = registration_wizard._action_open_peppol_form(reopen=False)
         return registration_action
 
-<<<<<<< HEAD
     # Deprecated
     def button_open_peppol_config_wizard(self):
         view = self.env.ref('account_peppol.peppol_config_wizard_form').sudo()
@@ -123,67 +122,10 @@ class ResConfigSettings(models.TransientModel):
             'target': 'new',
         }
 
-=======
     def _get_peppol_proxy_type(self):
         self.ensure_one()
         return self.account_peppol_edi_user.proxy_type
 
-    @handle_demo
-    def button_update_peppol_user_data(self):
-        """
-        Action for the user to be able to update their contact details any time
-        Calls /update_user on the iap server
-        """
-        self.ensure_one()
-
-        if not self.account_peppol_contact_email:
-            raise ValidationError(self.env._("A contact email is required."))
-
-        params = {
-            'update_data': {
-                **({'peppol_phone_number': self.account_peppol_phone_number} if self.account_peppol_phone_number else {}),
-                'peppol_contact_email': self.account_peppol_contact_email,
-            }
-        }
-
-        self.account_peppol_edi_user._call_peppol_proxy(
-            endpoint=self.account_peppol_edi_user._get_peppol_proxy_endpoint('1/update_user'),
-            params=params,
-        )
-        return True
-
-    @handle_demo
-    def button_peppol_smp_registration(self):
-        """
-        The second (optional) step in Peppol registration.
-        The user can choose to become a Receiver and officially register on the Peppol
-        network, i.e. receive documents from other Peppol participants.
-        """
-        self.ensure_one()
-        self.account_peppol_edi_user._peppol_register_sender_as_receiver()
-        if self.account_peppol_proxy_state == 'smp_registration':
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'title': _("Registered to receive documents via Peppol."),
-                    'type': 'success',
-                    'message': _("Your registration on Peppol network should be activated within a day. The updated status will be visible in Settings."),
-                    'next': {'type': 'ir.actions.act_window_close'},
-                }
-            }
-        return True
-
-    def button_migrate_peppol_registration(self):
-        """
-        Migrates AWAY from Odoo's SMP.
-        If the user is a receiver, they need to request a migration key, generated on the IAP server.
-        The migration key is then displayed in Peppol settings.
-        Currently, reopening after migrating away is not supported.
-        """
-        raise UserError(_("This feature is deprecated. Contact Odoo support if you need a migration key."))
-
->>>>>>> 0d4569f4095c ([ADD] l10n_fr_pdp: French Peppol)
     def button_peppol_disconnect_branch_from_parent(self):
         self.ensure_one()
         previous_parent_company_name = self.company_id.peppol_parent_company_id.name

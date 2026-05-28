@@ -3,7 +3,7 @@
     <record id="pdp_response_wizard_form" model="ir.ui.view">
         <field name="name">pdp.response.wizard.form</field>
         <field name="model">pdp.response.wizard</field>
-        <field name="groups_id" eval="[Command.link(ref('account.group_account_manager'))]"/>
+        <field name="group_ids" eval="[Command.link(ref('account.group_account_manager'))]"/>
         <field name="arch" type="xml">
             <form string="Send Response Message">
                 <sheet>

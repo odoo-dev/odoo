@@ -34,17 +34,9 @@ class AccountMoveSend(models.AbstractModel):
             return moves.partner_id.commercial_partner_id
 
         def filter_peppol_state(moves, states):
-<<<<<<< HEAD
             return peppol_partner(
-                moves.filtered(lambda m: peppol_partner(m).peppol_verification_state in states)
+                moves.filtered(lambda m: peppol_partner(m).with_company(m.company_id).peppol_verification_state in states)
             )
-=======
-            return peppol_partner(moves.filtered(
-                lambda m: self.env['res.partner'].with_company(m.company_id)._get_peppol_verification_state(
-                    peppol_partner(m).peppol_endpoint,
-                    peppol_partner(m).peppol_eas,
-                    moves_data[m]['invoice_edi_format']) in states))
->>>>>>> 0d4569f4095c ([ADD] l10n_fr_pdp: French Peppol)
 
         alerts = super()._get_alerts(moves, moves_data)
         # Check for invalid peppol partners.
@@ -174,18 +166,12 @@ class AccountMoveSend(models.AbstractModel):
         if method == 'peppol':
             partner = move.partner_id.commercial_partner_id.with_company(move.company_id)
             invoice_edi_format = move_data.get('invoice_edi_format') or partner._get_peppol_edi_format()
-<<<<<<< HEAD
             if partner.peppol_verification_state == 'not_verified':
                 partner.button_account_peppol_check_partner_endpoint(company=move.company_id)
             return all([
                 partner.country_code in PEPPOL_LIST,
                 self._is_applicable_to_company(method, move.company_id),
                 partner.peppol_verification_state == 'valid',
-=======
-            result = all([
-                self._is_applicable_to_company(method, move.company_id),
-                self.env['res.partner'].with_company(move.company_id)._get_peppol_verification_state(partner.peppol_endpoint, partner.peppol_eas, invoice_edi_format) == 'valid',
->>>>>>> 0d4569f4095c ([ADD] l10n_fr_pdp: French Peppol)
                 move.company_id.account_peppol_proxy_state != 'rejected',
                 move._need_ubl_cii_xml(invoice_edi_format) or move.ubl_cii_xml_id and not move.peppol_is_sent,
             ])
@@ -215,10 +201,7 @@ class AccountMoveSend(models.AbstractModel):
         to_lock_peppol_invoices = self.env['account.move']
         for invoice, invoice_data in invoices_data.items():
             partner = invoice.partner_id.commercial_partner_id.with_company(invoice.company_id)
-<<<<<<< HEAD
             if 'peppol' in invoice_data['sending_methods'] and self._is_applicable_to_move('peppol', invoice, **invoice_data):
-=======
-            if 'peppol' in invoice_data['sending_methods']:
                 if not partner.peppol_eas or not partner.peppol_endpoint:
                     invoice.peppol_move_state = 'error'
                     invoice_data['error'] = _('The partner is missing Peppol EAS and/or Endpoint identifier.')
@@ -236,10 +219,6 @@ class AccountMoveSend(models.AbstractModel):
                     else:
                         invoice_data['error'] = _('Please verify partner configuration in partner settings.')
                     continue
-
-                if not self._is_applicable_to_move('peppol', invoice, **invoice_data):
-                    continue
->>>>>>> 0d4569f4095c ([ADD] l10n_fr_pdp: French Peppol)
 
                 edi_user, document = self._get_peppol_document_params(partner, invoice, invoice_data)
                 if not edi_user or not document:
@@ -326,12 +305,6 @@ class AccountMoveSend(models.AbstractModel):
                         })
                 self.env.ref('account_peppol.ir_cron_peppol_get_message_status')._trigger(at=fields.Datetime.now() + timedelta(minutes=5))
 
-<<<<<<< HEAD
-        if self._can_commit():
-            self.env.cr.commit()
-
-=======
->>>>>>> 0d4569f4095c ([ADD] l10n_fr_pdp: French Peppol)
     def action_what_is_peppol_activate(self, moves):
         companies = moves.company_id
         if len(companies) == 1 and not companies.peppol_can_send:

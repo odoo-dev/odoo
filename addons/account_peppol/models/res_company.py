@@ -391,10 +391,16 @@ class ResCompany(models.Model):
         self.ensure_one()
         config_param = self.env['ir.config_parameter'].sudo().get_param('account_peppol.edi.mode')
         # by design, we can only have zero or one proxy user per company with type Peppol
-<<<<<<< HEAD
-        peppol_user = self.sudo().account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type == 'peppol')
+        peppol_user = self.sudo().account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type in self.env['account_edi_proxy_client.user']._get_peppol_proxy_types())
         demo_if_demo_identifier = 'demo' if (temporary_eas or self.peppol_eas) == 'odemo' else False
         return demo_if_demo_identifier or peppol_user.edi_mode or config_param or 'prod'
+
+    def _get_peppol_proxy_type(self):
+        self.ensure_one()
+        peppol_user = self.sudo().account_edi_proxy_client_ids.filtered(
+            lambda u: u.proxy_type in self.env['account_edi_proxy_client.user']._get_peppol_proxy_types()
+        )
+        return peppol_user.proxy_type or 'peppol'
 
     def _get_peppol_webhook_endpoint(self):
         self.ensure_one()
@@ -449,15 +455,3 @@ class ResCompany(models.Model):
             return
 
         mail_template.send_mail(self.id, force_send=True)
-=======
-        peppol_user = self.sudo().account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type in self.env['account_edi_proxy_client.user']._get_peppol_proxy_types())
-        demo_if_demo_identifier = 'demo' if self.peppol_eas == 'odemo' else False
-        return demo_if_demo_identifier or peppol_user.edi_mode or config_param or 'prod'
-
-    def _get_peppol_proxy_type(self):
-        self.ensure_one()
-        peppol_user = self.sudo().account_edi_proxy_client_ids.filtered(
-            lambda u: u.proxy_type in self.env['account_edi_proxy_client.user']._get_peppol_proxy_types()
-        )
-        return peppol_user.proxy_type or 'peppol'
->>>>>>> 0d4569f4095c ([ADD] l10n_fr_pdp: French Peppol)

@@ -20,7 +20,7 @@ class TestL10nFrPdpPartner(TestL10nFrPdpCommon):
             'country_id': self.env.ref('base.fr').id,
             'phone': '+33 1 23 45 67 89',
             'vat': 'FR23334175221',
-            'siret': '96851575905877',
+            'company_registry': '96851575905877',
             'invoice_edi_format': 'ubl_21_fr',
         })
         self.assertRecordValues(partner, [{
@@ -52,7 +52,7 @@ class TestL10nFrPdpPartner(TestL10nFrPdpCommon):
             'country_id': self.env.ref('base.fr').id,
             'phone': '+33 1 23 45 67 89',
             'vat': 'FR23334175221',
-            'siret': '968515759',
+            'company_registry': '968515759',
             'invoice_edi_format': 'ubl_21_fr',
         })
         self.assertRecordValues(partner, [{

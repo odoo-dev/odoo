@@ -54,7 +54,7 @@ def _mock_register_proxy_user(func, self, *args, **kwargs):
     return edi_user
 
 
-def _mock_peppol_register_receiver(func, self, *args, **kwargs):
+def _mock_pdp_register_receiver(func, self, *args, **kwargs):
     func(self, *args, **kwargs)
     if self.proxy_type != 'pdp':
         return
@@ -104,7 +104,7 @@ def _mock_l10n_fr_pdp_update_pilot_phase(func, self, *args, **kwargs):
 _demo_behaviour = {
     'button_account_peppol_check_partner_endpoint': _mock_button_verify_partner_endpoint,
     '_register_proxy_user': _mock_register_proxy_user,  # account_edi_proxy_client.user
-    '_peppol_register_receiver': _mock_peppol_register_receiver,  # account_edi_proxy_client.user
+    '_pdp_register_receiver': _mock_pdp_register_receiver,  # account_edi_proxy_client.user
     '_call_peppol_proxy': _mock_call_peppol_proxy,  # account_edi_proxy_client.user
     '_pdp_annuaire_lookup_participant': _mock_pdp_annuaire_lookup_participant,  # res.partner
     '_get_peppol_verification_state': _mock_get_peppol_verification_state,  # res.partner
