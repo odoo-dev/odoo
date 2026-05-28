@@ -74,6 +74,9 @@ class AccountChartTemplate(models.AbstractModel):
             self.env.company.id: {
                 'anglo_saxon_accounting': True,
                 'account_fiscal_country_id': 'base.us',
+                'bank_account_code_prefix': False,
+                'cash_account_code_prefix': False,
+                'transfer_account_code_prefix': False,
                 'account_default_pos_receivable_account_id': 'account_account_us_pos_receivable',
                 'income_currency_exchange_account_id': 'account_account_us_income_currency_exchange',
                 'expense_currency_exchange_account_id': 'account_account_us_expense_currency_exchange',
