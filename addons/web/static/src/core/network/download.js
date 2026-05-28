@@ -1,6 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
 import { makeErrorFromResponse, ConnectionLostError } from "@web/core/network/rpc";
-import { browser } from "@web/core/browser/browser";
 
 /* eslint-disable */
 /**
@@ -321,7 +320,7 @@ function _download(data, filename, mimetype) {
         if (anchor.href.indexOf(url) !== -1) {
             // if the browser determines that it's a potentially valid url path:
             return new Promise((resolve, reject) => {
-                let xhr = new browser.XMLHttpRequest();
+                let xhr = new XMLHttpRequest();
                 xhr.open("GET", url, true);
                 configureBlobDownloadXHR(xhr, {
                     onSuccess: resolve,
@@ -480,9 +479,9 @@ export function download(options) {
     return download._download(options);
 }
 
-download._download = (options) => {
-    return new Promise((resolve, reject) => {
-        const xhr = new browser.XMLHttpRequest();
+download._download = (options) =>
+    new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
         let data;
         if (Object.prototype.hasOwnProperty.call(options, "form")) {
             xhr.open(options.form.method, options.form.action);
@@ -506,7 +505,6 @@ download._download = (options) => {
         });
         xhr.send(data);
     });
-};
 
 /**
  * Setup a download xhr request response handling
@@ -542,8 +540,7 @@ export function configureBlobDownloadXHR(
             decoder.onload = () => {
                 const contents = decoder.result;
                 const doc = new DOMParser().parseFromString(contents, "text/html");
-                const nodes =
-                    doc.body.children.length === 0 ? [doc.body] : doc.body.children;
+                const nodes = doc.body.children.length === 0 ? [doc.body] : doc.body.children;
 
                 let error;
                 try {

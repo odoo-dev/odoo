@@ -3,7 +3,6 @@ import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { BlockUI } from "./block_ui";
-import { browser } from "@web/core/browser/browser";
 import { getTabableElements, isFocusable } from "@web/core/utils/ui";
 import { getActiveHotkey } from "../hotkeys/hotkey_service";
 
@@ -249,7 +248,7 @@ export const uiService = {
                 bus.trigger("resize");
             }
         };
-        browser.addEventListener("resize", throttleForAnimation(updateSize));
+        window.addEventListener("resize", throttleForAnimation(updateSize));
 
         Object.defineProperty(env, "isSmall", {
             get() {

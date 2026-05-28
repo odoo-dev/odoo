@@ -4,6 +4,7 @@ import { Setting } from "@web/views/form/setting/setting";
 
 import { Component } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+
 const { DateTime } = luxon;
 
 /**

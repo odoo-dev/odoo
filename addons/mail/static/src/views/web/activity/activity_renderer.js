@@ -5,7 +5,6 @@ import { ActivityRecord } from "@mail/views/web/activity/activity_record";
 
 import { Component } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -164,7 +163,7 @@ export class ActivityRenderer extends Component {
     }
 
     setupStorageActiveColumns() {
-        const storageActiveColumnsList = browser.localStorage.getItem(this.storageKey)?.split(",");
+        const storageActiveColumnsList = localStorage.getItem(this.storageKey)?.split(",");
 
         this.storageActiveColumns = useState({});
         for (const activityType of this.props.activityTypes) {
@@ -180,7 +179,7 @@ export class ActivityRenderer extends Component {
 
     toggleDisplayColumn(typeId) {
         this.storageActiveColumns[typeId] = !this.storageActiveColumns[typeId];
-        browser.localStorage.setItem(
+        localStorage.setItem(
             this.storageKey.join(","),
             Object.keys(this.storageActiveColumns).filter(
                 (activityType) => this.storageActiveColumns[activityType]

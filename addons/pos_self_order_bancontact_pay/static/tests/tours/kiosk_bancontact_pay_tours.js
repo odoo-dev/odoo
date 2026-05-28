@@ -5,6 +5,7 @@ import * as ConfirmationPage from "@pos_self_order/../tests/tours/utils/confirma
 import * as ProductPage from "@pos_self_order/../tests/tours/utils/product_page_util";
 import * as PosBancontactPay from "@pos_bancontact_pay/../tests/tours/utils/bancontact_pay_utils";
 import * as KioskBancontactPay from "@pos_self_order_bancontact_pay/../tests/tours/utils/kiosk_bancontact_pay_utils";
+
 const BancontactPay = { ...PosBancontactPay, ...KioskBancontactPay };
 
 registry.category("web_tour.tours").add("kiosk_bancontact_pay_success", {

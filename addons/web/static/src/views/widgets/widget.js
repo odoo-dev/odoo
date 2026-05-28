@@ -2,6 +2,7 @@ import { evaluateExpr, evaluateBooleanExpr } from "@web/core/py_js/py";
 import { registry } from "@web/core/registry";
 
 import { Component, xml } from "@odoo/owl";
+
 const viewWidgetRegistry = registry.category("view_widgets");
 
 const supportedInfoValidation = {

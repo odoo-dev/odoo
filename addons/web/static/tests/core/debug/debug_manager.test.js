@@ -24,7 +24,6 @@ import {
     serverState,
     webModels,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { useDebugCategory, useOwnDebugContext } from "@web/core/debug/debug_context";
 import { DebugMenu } from "@web/core/debug/debug_menu";
 import { becomeSuperuser, regenerateAssets } from "@web/core/debug/debug_menu_items";
@@ -203,7 +202,7 @@ describe("DebugMenu", () => {
     });
 
     test("can regenerate assets bundles", async () => {
-        patchWithCleanup(browser.location, {
+        patchWithCleanup(location, {
             reload: () => expect.step("reloadPage"),
         });
         debugRegistry.category("default").add("regenerateAssets", regenerateAssets);

@@ -7,7 +7,6 @@ import {
     ProductConfiguratorDialog
 } from '@sale/js/product_configurator_dialog/product_configurator_dialog';
 import { getSelectedCustomPtav, serializeComboItem } from '@sale/js/sale_utils';
-import { browser } from '@web/core/browser/browser';
 import { serializeDateTime } from '@web/core/l10n/dates';
 import { rpc } from '@web/core/network/rpc';
 import { registry } from '@web/core/registry';
@@ -491,7 +490,7 @@ export class CartService {
             return data.quantity;
         }
         if (data.cart_quantity && (
-            data.cart_quantity !== browser.sessionStorage.getItem('website_sale_cart_quantity')
+            data.cart_quantity !== sessionStorage.getItem('website_sale_cart_quantity')
         )) {
             this._updateCartIcon(data.cart_quantity);
         };
@@ -512,7 +511,7 @@ export class CartService {
      * @returns {void}
      */
     _updateCartIcon(cartQuantity) {
-        browser.sessionStorage.setItem('website_sale_cart_quantity', cartQuantity);
+        sessionStorage.setItem('website_sale_cart_quantity', cartQuantity);
         // Mobile and Desktop elements have to be updated.
         const cartQuantityElements = document.querySelectorAll('.my_cart_quantity');
         for(const cartQuantityElement of cartQuantityElements) {

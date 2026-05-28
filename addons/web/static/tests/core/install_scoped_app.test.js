@@ -9,7 +9,6 @@ import {
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 
-import { browser } from "@web/core/browser/browser";
 import { InstallScopedApp } from "@web/core/install_scoped_app/install_scoped_app";
 
 const mountManifestLink = (href) => {
@@ -24,9 +23,9 @@ test("Installation page displays the app info correctly", async () => {
     const beforeInstallPromptEvent = new CustomEvent("beforeinstallprompt");
     beforeInstallPromptEvent.preventDefault = () => {};
     beforeInstallPromptEvent.prompt = async () => ({ outcome: "accepted" });
-    browser.BeforeInstallPromptEvent = beforeInstallPromptEvent;
+    window.BeforeInstallPromptEvent = beforeInstallPromptEvent;
     await makeMockEnv();
-    patchWithCleanup(browser.location, {
+    patchWithCleanup(location, {
         replace: (url) => {
             expect(url.searchParams.get("app_name")).toBe("%3COtto%26", {
                 message: "ask to redirect with updated searchParams",
@@ -67,7 +66,7 @@ test("Installation page displays the app info correctly", async () => {
     expect("button.btn-primary").toHaveCount(0);
     expect("div.bg-info").toHaveCount(1);
     expect("div.bg-info").toHaveText("You can install the app from the browser menu");
-    browser.dispatchEvent(beforeInstallPromptEvent);
+    window.dispatchEvent(beforeInstallPromptEvent);
     await animationFrame();
     expect(".fa-pencil").toHaveCount(1);
     expect("div.bg-info").toHaveCount(0);
@@ -79,7 +78,7 @@ test("Installation page displays the app info correctly", async () => {
 });
 
 test("Installation page displays the error message when browser is not supported", async () => {
-    delete browser.BeforeInstallPromptEvent;
+    delete window.BeforeInstallPromptEvent;
     await makeMockEnv();
     mountManifestLink("/web/manifest.scoped_app_manifest");
     onRpc("/*", (request) => {

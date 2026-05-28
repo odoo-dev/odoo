@@ -5,7 +5,6 @@
 
 import { reactive } from "@web/owl2/utils";
 import { App, effect } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { rpcBus } from "@web/core/network/rpc";
 import { getPopoverForTarget } from "@web/core/popover/popover";
 
@@ -45,7 +44,7 @@ function setup(light, currentState) {
     stopButton.classList.add("btn", "btn-danger");
     stopButton.textContent = "Stop ClickAll!";
     stopButton.onclick = function () {
-        browser.localStorage.removeItem("running.clickbot");
+        localStorage.removeItem("running.clickbot");
         location.reload();
     };
     document.body.appendChild(stopButton);
@@ -69,7 +68,7 @@ function setup(light, currentState) {
         }
     );
     disposeEffect = effect(() => {
-        browser.localStorage.setItem("running.clickbot", JSON.stringify(state));
+        localStorage.setItem("running.clickbot", JSON.stringify(state));
     });
 
     actionCount = 0;
@@ -95,7 +94,7 @@ function uiUpdate() {
 
 function cleanup() {
     disposeEffect();
-    browser.localStorage.removeItem("running.clickbot");
+    localStorage.removeItem("running.clickbot");
     env.bus.removeEventListener("ACTION_MANAGER:UI-UPDATED", uiUpdate);
     rpcBus.removeEventListener("RPC:REQUEST", onRPCRequest);
     rpcBus.removeEventListener("RPC:RESPONSE", onRPCResponse);
@@ -109,7 +108,7 @@ function cleanup() {
  * @returns {Promise}
  */
 async function waitForNextAnimationFrame() {
-    await new Promise(browser.setTimeout);
+    await new Promise(setTimeout);
     await new Promise((r) => requestAnimationFrame(r));
 }
 
@@ -123,7 +122,7 @@ async function waitForNextAnimationFrame() {
 async function triggerClick(target, elDescription) {
     if (target) {
         if (elDescription) {
-            browser.console.log(`Clicking on: ${elDescription}`);
+            console.log(`Clicking on: ${elDescription}`);
         }
     } else {
         throw new Error(`No element "${elDescription}" found.`);
@@ -159,7 +158,7 @@ async function waitForCondition(stopCondition) {
     function errorDialog() {
         if (document.querySelector(".o_error_dialog")) {
             if (errorRPC) {
-                browser.console.error(
+                console.error(
                     "A RPC in error was detected, maybe it's related to the error dialog : " +
                         JSON.stringify(errorRPC)
                 );
@@ -336,7 +335,7 @@ async function testFilters() {
     const simpleFilterSel = ".o_filter_menu > .dropdown-item.o_menu_item:not(.o_add_custom_filter)";
     const dateFilterSel = ".o_filter_menu > .o_accordion";
     const filterMenuItems = document.querySelectorAll(`${simpleFilterSel},${dateFilterSel}`);
-    browser.console.log(`Testing ${filterMenuItems.length} filters`);
+    console.log(`Testing ${filterMenuItems.length} filters`);
     state.testedFilters += filterMenuItems.length;
     for (const filter of filterMenuItems) {
         // Date filters
@@ -381,9 +380,9 @@ async function testViews() {
         const viewType = [...switchButton.classList]
             .find((cls) => cls !== "o_switch_view" && cls.startsWith("o_"))
             .slice(2);
-        browser.console.log(`Testing view switch: ${viewType}`);
+        console.log(`Testing view switch: ${viewType}`);
         // timeout to avoid click debounce
-        browser.setTimeout(function () {
+        setTimeout(function () {
             const target = document.querySelector(
                 `nav.o_cp_switch_buttons > button.o_switch_view.o_${viewType}`
             );
@@ -411,10 +410,10 @@ async function testMenuItem(element) {
     const menu = element.dataset.menuXmlid;
     const menuDescription = element.innerText.trim() + " " + menu;
     if (BLACKLISTED_MENUS.includes(menu)) {
-        browser.console.log(`Skipping blacklisted menu ${menuDescription}`);
+        console.log(`Skipping blacklisted menu ${menuDescription}`);
         return Promise.resolve(); // Skip black listed menus
     }
-    browser.console.log(`Testing menu ${menuDescription}`);
+    console.log(`Testing menu ${menuDescription}`);
     state.testedMenus.push(menu);
     const startActionCount = actionCount;
     await triggerClick(element, `menu item "${element.innerText.trim()}"`);
@@ -423,7 +422,7 @@ async function testMenuItem(element) {
         await waitForCondition(() => {
             if (document.querySelector(".o_dialog:not(.o_error_dialog)")) {
                 isModal = true;
-                browser.console.log(`Modal detected: ${menuDescription}`);
+                console.log(`Modal detected: ${menuDescription}`);
                 state.testedModals++;
                 return true;
             } else {
@@ -441,7 +440,7 @@ async function testMenuItem(element) {
             await testViews();
         }
     } catch (err) {
-        browser.console.error(`Error while testing ${menuDescription}`);
+        console.error(`Error while testing ${menuDescription}`);
         throw err;
     }
 }
@@ -470,11 +469,11 @@ async function testApp() {
         if (!element) {
             throw new Error(`No app found for xmlid ${state.app}`);
         }
-        browser.console.log(`Testing app menu: ${state.app}`);
+        console.log(`Testing app menu: ${state.app}`);
         state.testedApps.push(state.app);
         await testMenuItem(element);
     } else {
-        browser.console.log(`already tested app ${state.app}`);
+        console.log(`already tested app ${state.app}`);
     }
 
     if (state.light === true) {
@@ -513,26 +512,26 @@ async function _clickEverywhere(xmlId, light, currentState) {
         }
 
         console.log(`Test took ${(performance.now() - startTime) / 1000} seconds`);
-        browser.console.log(`Successfully tested ${state.testedApps.length} apps`);
-        browser.console.log(
+        console.log(`Successfully tested ${state.testedApps.length} apps`);
+        console.log(
             `Successfully tested ${state.testedMenus.length - state.testedApps.length} menus`
         );
-        browser.console.log(`Successfully tested ${state.testedModals} modals`);
-        browser.console.log(`Successfully tested ${state.testedFilters} filters`);
+        console.log(`Successfully tested ${state.testedModals} modals`);
+        console.log(`Successfully tested ${state.testedFilters} filters`);
         if (state.studioCount > 0) {
-            browser.console.log(`Successfully tested ${state.studioCount} views in Studio`);
+            console.log(`Successfully tested ${state.studioCount} views in Studio`);
         }
-        browser.console.log(SUCCESS_SIGNAL);
+        console.log(SUCCESS_SIGNAL);
     } catch (err) {
         console.log(`Test took ${(performance.now() - startTime) / 1000} seconds`);
-        browser.console.error(err || "test failed");
+        console.error(err || "test failed");
     } finally {
         cleanup();
     }
 }
 
 function clickEverywhere(xmlId, light = false, currentState) {
-    browser.setTimeout(_clickEverywhere, 1000, xmlId, light, currentState);
+    setTimeout(_clickEverywhere, 1000, xmlId, light, currentState);
 }
 
 window.clickEverywhere = clickEverywhere;

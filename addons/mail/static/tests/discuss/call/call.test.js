@@ -47,8 +47,6 @@ import {
     patchWithCleanup,
     serverState,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
-
 import { waitNotifications } from "@bus/../tests/bus_test_helpers";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 
@@ -445,7 +443,7 @@ test("Dropzones below fullscreen meeting view are disabled", async () => {
         },
     };
     patchWithCleanup(window, { documentPictureInPicture: false });
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         open: () => {
             popoutWindow.closed = false;
             outsideArea.append(popoutIframe);

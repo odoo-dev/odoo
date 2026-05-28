@@ -7,7 +7,6 @@ import { PttAdBanner } from "@mail/discuss/call/common/ptt_ad_banner";
 
 import { Component, onMounted, onPatched, onWillUnmount, toRaw } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useService } from "@web/core/utils/hooks";
@@ -73,7 +72,7 @@ export class Call extends Component {
         onPatched(() => this.arrangeTiles());
         onWillUnmount(() => {
             this.resizeObserver.disconnect();
-            browser.clearTimeout(this.overlayTimeout);
+            clearTimeout(this.overlayTimeout);
         });
         useHotkey("shift+d", () => this.rtc.toggleDeafen());
         useHotkey("shift+m", () => this.rtc.toggleMicrophone());
@@ -210,13 +209,13 @@ export class Call extends Component {
     onMousemoveOverlay(ev) {
         markEventHandled(ev, "CallMain.MousemoveOverlay");
         this.state.overlay = true;
-        browser.clearTimeout(this.overlayTimeout);
+        clearTimeout(this.overlayTimeout);
     }
 
     showOverlay() {
         this.state.overlay = true;
-        browser.clearTimeout(this.overlayTimeout);
-        this.overlayTimeout = browser.setTimeout(() => {
+        clearTimeout(this.overlayTimeout);
+        this.overlayTimeout = setTimeout(() => {
             this.state.overlay = false;
         }, 3000);
     }

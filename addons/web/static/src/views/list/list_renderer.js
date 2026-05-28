@@ -1,5 +1,4 @@
 import { onWillRender, render, useExternalListener, useRef, useState } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -188,7 +187,7 @@ export class ListRenderer extends Component {
             this.editedRecord = this.props.list.editedRecord;
             this.allColumns = this.processAllColumn(this.props.archInfo.columns, this.props.list);
             Object.assign(this.optionalActiveFields, this.computeOptionalActiveFields());
-            this.debugOpenView = exprToBoolean(browser.localStorage.getItem(this.keyDebugOpenView));
+            this.debugOpenView = exprToBoolean(localStorage.getItem(this.keyDebugOpenView));
             this.columns = this.getActiveColumns();
             this.withHandleColumn = this.columns.some((col) => col.widget === "handle");
             this.aggregates = this.computeAggregates();
@@ -1278,7 +1277,7 @@ export class ListRenderer extends Component {
 
     computeOptionalActiveFields() {
         const optionalActiveFields = {};
-        const localStorageValue = browser.localStorage.getItem(this.keyOptionalFields);
+        const localStorageValue = localStorage.getItem(this.keyOptionalFields);
 
         const optionalColumn = [
             ...this.allColumns.filter((col) => col.optional),
@@ -1318,7 +1317,7 @@ export class ListRenderer extends Component {
                 for (const fieldName of optionalShow) {
                     optionalActiveFields[fieldName] = true;
                 }
-                browser.localStorage.setItem(
+                localStorage.setItem(
                     this.keyOptionalFields,
                     Object.keys(optionalActiveFields)
                         .filter((fieldName) => optionalActiveFields[fieldName])
@@ -2120,7 +2119,7 @@ export class ListRenderer extends Component {
     }
 
     saveOptionalActiveFields() {
-        browser.localStorage.setItem(
+        localStorage.setItem(
             this.keyOptionalFields,
             Object.keys(this.optionalActiveFields).filter(
                 (fieldName) => this.optionalActiveFields[fieldName]
@@ -2273,7 +2272,7 @@ export class ListRenderer extends Component {
 
     toggleDebugOpenView() {
         this.debugOpenView = !this.debugOpenView;
-        browser.localStorage.setItem(this.keyDebugOpenView, this.debugOpenView);
+        localStorage.setItem(this.keyDebugOpenView, this.debugOpenView);
         render(this);
     }
 
@@ -2354,7 +2353,7 @@ export class ListRenderer extends Component {
 
     resetLongTouchTimer() {
         if (this.longTouchTimer) {
-            browser.clearTimeout(this.longTouchTimer);
+            clearTimeout(this.longTouchTimer);
             this.longTouchTimer = null;
         }
     }
@@ -2372,7 +2371,7 @@ export class ListRenderer extends Component {
         }
         this.touchStartMs = Date.now();
         if (this.longTouchTimer === null) {
-            this.longTouchTimer = browser.setTimeout(() => {
+            this.longTouchTimer = setTimeout(() => {
                 this.toggleRecordSelection(record);
                 this.resetLongTouchTimer();
             }, TOUCH_SELECTION_THRESHOLD);

@@ -1,6 +1,5 @@
 import { Store } from "@mail/core/common/store_service";
 import { fields } from "@mail/model/export";
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 
 import { patch } from "@web/core/utils/patch";
@@ -77,7 +76,7 @@ const StorePatch = {
         };
         try {
             // useful for synchronizing activity data between multiple tabs
-            this.activityBroadcastChannel = new browser.BroadcastChannel("mail.activity.channel");
+            this.activityBroadcastChannel = new BroadcastChannel("mail.activity.channel");
             this.activityBroadcastChannel.onmessage =
                 this._onActivityBroadcastChannelMessage.bind(this);
         } catch {

@@ -2,7 +2,6 @@ import { clamp } from "@web/core/utils/numbers";
 import { omit } from "@web/core/utils/objects";
 import { closestScrollableX, closestScrollableY } from "@web/core/utils/scrolling";
 import { setRecurringAnimationFrame } from "@web/core/utils/timing";
-import { browser } from "../browser/browser";
 import { hasTouch, isBrowserFirefox, isIOS } from "../browser/feature_detection";
 
 function translatePoint(point, vector) {
@@ -823,7 +822,7 @@ export function makeDraggableHook(hookParams) {
                         }
                     }
 
-                    ctx.current.timeout = browser.setTimeout(() => {
+                    ctx.current.timeout = setTimeout(() => {
                         ctx.current.initialPosition = { ...ctx.pointer };
 
                         willStartDrag(target);
@@ -836,7 +835,7 @@ export function makeDraggableHook(hookParams) {
                             dragEnd(null);
                         }
                     }, initiationDelay);
-                    cleanup.add(() => browser.clearTimeout(ctx.current.timeout));
+                    cleanup.add(() => clearTimeout(ctx.current.timeout));
                 } else {
                     willStartDrag(target);
                 }

@@ -42,6 +42,7 @@ import { waitForDataLoaded } from "@spreadsheet/helpers/model";
 import { insertListInSpreadsheet } from "../helpers/list";
 
 import { createSheet, deleteSheet } from "../helpers/commands";
+
 const { DEFAULT_LOCALE, PIVOT_STATIC_TABLE_CONFIG } = spreadsheet.constants;
 const { deepCopy, toZone } = spreadsheet.helpers;
 const { cellMenuRegistry } = spreadsheet.registries;

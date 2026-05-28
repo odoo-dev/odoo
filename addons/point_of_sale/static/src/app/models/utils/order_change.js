@@ -1,4 +1,5 @@
 import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
+
 const CONSOLE_COLOR = "#F5B427";
 
 export const getStrNotes = (note) => {

@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
@@ -13,7 +12,7 @@ export function useCamera({ width = 480, height = 480 } = {}) {
         }
 
         try {
-            stream = await browser.navigator.mediaDevices.getUserMedia({
+            stream = await navigator.mediaDevices.getUserMedia({
                 video: {
                     width: { ideal: width },
                     height: { ideal: height },

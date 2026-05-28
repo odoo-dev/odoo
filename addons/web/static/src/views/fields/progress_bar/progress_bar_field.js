@@ -8,6 +8,7 @@ import { useInputField } from "@web/views/fields/input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 
 import { Component } from "@odoo/owl";
+
 const formatters = registry.category("formatters");
 
 export class ProgressBarField extends Component {

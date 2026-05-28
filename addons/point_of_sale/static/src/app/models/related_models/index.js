@@ -20,6 +20,7 @@ import { processModelDefs } from "./model_defs";
 import { createExtraField, processModelClasses } from "./model_classes";
 import { ormSerialization } from "./serialization";
 import { toRaw } from "@odoo/owl";
+
 const AVAILABLE_EVENT = ["create", "update", "delete"];
 
 export function createRelatedModels(modelDefs, modelClasses = {}, opts = {}) {

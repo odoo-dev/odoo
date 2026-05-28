@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { Pager } from "@web/core/pager/pager";
 import { useService } from "@web/core/utils/hooks";
@@ -380,7 +379,7 @@ export class ControlPanel extends Component {
             return;
         }
         this.isScrolling = true;
-        browser.requestAnimationFrame(() => (this.isScrolling = false));
+        requestAnimationFrame(() => (this.isScrolling = false));
 
         const scrollTop = this.getScrollingElement().scrollTop;
         const delta = Math.round(scrollTop - this.oldScrollTop);

@@ -5,7 +5,6 @@ import { Reactive } from "@web/core/utils/reactive";
 
 import { CallPermissionDeniedDialog } from "@mail/discuss/call/common/call_permission_denied_dialog";
 import { monitorAudio } from "@mail/utils/common/media_monitoring";
-import { browser } from "@web/core/browser/browser";
 import { OVERLAY_SYMBOL } from "@web/core/overlay/overlay_container";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { useService } from "@web/core/utils/hooks";
@@ -394,7 +393,7 @@ export function useMessageScrolling({
     const state = useState({
         clear() {
             if (this.highlightedMessageId) {
-                browser.clearTimeout(timeout);
+                clearTimeout(timeout);
                 timeout = null;
                 this.highlightedMessageId = null;
             }
@@ -431,7 +430,7 @@ export function useMessageScrolling({
             }
             state.highlightedMessageId = message.id;
             state.initiated = false;
-            timeout = browser.setTimeout(() => this.clear(), duration);
+            timeout = setTimeout(() => this.clear(), duration);
         },
         initiated: false,
         /**
@@ -521,7 +520,7 @@ export function useMicrophoneVolume() {
             }
             let track;
             try {
-                const audioStream = await browser.navigator.mediaDevices.getUserMedia({
+                const audioStream = await navigator.mediaDevices.getUserMedia({
                     audio: store.settings.audioConstraints,
                 });
                 track = audioStream.getAudioTracks()[0];

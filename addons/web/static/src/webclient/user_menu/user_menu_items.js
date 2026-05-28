@@ -5,7 +5,6 @@ import { rpc } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
 import { session } from "@web/session";
 import { router } from "@web/core/browser/router";
-import { browser } from "../../core/browser/browser";
 import { registry } from "../../core/registry";
 import { post } from "@web/core/network/http_service";
 import { redirect } from "@web/core/utils/urls";
@@ -18,7 +17,7 @@ function supportItem(env) {
         description: _t("Help"),
         href: url,
         callback: () => {
-            browser.open(url, "_blank");
+            window.open(url, "_blank");
         },
         sequence: 20,
     };
@@ -80,10 +79,10 @@ export function odooAccountItem(env) {
         callback: () => {
             rpc("/web/session/account")
                 .then((url) => {
-                    browser.open(url, "_blank");
+                    window.open(url, "_blank");
                 })
                 .catch(() => {
-                    browser.open("https://accounts.odoo.com/account", "_blank");
+                    window.open("https://accounts.odoo.com/account", "_blank");
                 });
         },
         sequence: 60,
@@ -129,7 +128,7 @@ function logOutItem(env) {
         id: "logout",
         description: _t("Log out"),
         callback: async () => {
-            browser.navigator.serviceWorker?.controller?.postMessage("user_logout");
+            navigator.serviceWorker?.controller?.postMessage("user_logout");
             const url = await post(route, { csrf_token: odoo.csrf_token }, "url");
             redirect(url);
         },

@@ -16,7 +16,6 @@ import { KeepLast } from "@web/core/utils/concurrency";
 import { status } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { patch } from "@web/core/utils/patch";
@@ -141,9 +140,9 @@ const chatterPatch = {
                 if (!this.state.thread) {
                     return;
                 }
-                browser.clearTimeout(this.loadingAttachmentTimeout);
+                clearTimeout(this.loadingAttachmentTimeout);
                 if (this.state.thread?.isLoadingAttachments) {
-                    this.loadingAttachmentTimeout = browser.setTimeout(
+                    this.loadingAttachmentTimeout = setTimeout(
                         () => (this.state.showAttachmentLoading = true),
                         DELAY_FOR_SPINNER
                     );
@@ -153,7 +152,7 @@ const chatterPatch = {
                         this.state.isAttachmentBoxOpened ||
                         (this.props.isAttachmentBoxVisibleInitially && this.attachments.length > 0);
                 }
-                return () => browser.clearTimeout(this.loadingAttachmentTimeout);
+                return () => clearTimeout(this.loadingAttachmentTimeout);
             },
             () => [this.state.thread, this.state.thread?.isLoadingAttachments]
         );

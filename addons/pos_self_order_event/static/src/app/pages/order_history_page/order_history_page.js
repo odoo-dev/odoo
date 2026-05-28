@@ -3,7 +3,6 @@ import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { rpc } from "@web/core/network/rpc";
-import { browser } from "@web/core/browser/browser";
 
 patch(OrdersHistoryPage.prototype, {
     async setup() {
@@ -23,7 +22,7 @@ patch(OrdersHistoryPage.prototype, {
             const url = `/event/${event_id}/my_tickets?registration_ids=${JSON.stringify(
                 registration_ids
             )}&tickets_hash=${tickets_hash}`;
-            browser.open(url, "_blank");
+            window.open(url, "_blank");
         } catch (error) {
             console.error(error);
             this.notification.add(_t("Unable to download your ticket. Something went wrong"), {

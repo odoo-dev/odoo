@@ -6,6 +6,7 @@ import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { formatMonetary } from "@web/views/fields/formatters";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 import { serializeDate } from "@web/core/l10n/dates";
+
 const { DateTime } = luxon;
 
 import { Component, onWillStart } from "@odoo/owl";
@@ -15,8 +16,6 @@ import { StockValuationReportController } from "../stock_valuation/controller"
 import { StockValuationReportFilters } from "../stock_valuation/filters/filters"
 import { StockValuationReportLine } from "../stock_valuation/line/line"
 import { StockValuationReportToggleLine } from "../stock_valuation/line/toggle_line"
-
-
 export class StockValuationReport extends Component {
     static template = "stock_account.StockValuationReport";
     static props = { ...standardActionServiceProps };

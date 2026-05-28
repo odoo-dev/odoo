@@ -4,6 +4,7 @@ import { exprToBoolean } from "@web/core/utils/strings";
 import { standardFieldProps } from "../standard_field_props";
 
 import { Component } from "@odoo/owl";
+
 const formatters = registry.category("formatters");
 
 export class StatInfoField extends Component {

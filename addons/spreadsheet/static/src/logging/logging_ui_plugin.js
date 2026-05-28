@@ -4,6 +4,7 @@ import { CommandResult } from "@spreadsheet/o_spreadsheet/cancelled_reason";
 import { OdooUIPlugin } from "@spreadsheet/plugins";
 import { rpc } from "@web/core/network/rpc";
 import * as spreadsheet from "@odoo/o-spreadsheet";
+
 const { cellMenuRegistry, topbarMenuRegistry, colMenuRegistry, rowMenuRegistry } =
     spreadsheet.registries;
 

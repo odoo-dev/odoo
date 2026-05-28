@@ -1,5 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import * as spreadsheet from "@odoo/o-spreadsheet";
+
 const { arg, toString, toJsDate, toNumber } = spreadsheet.helpers;
 const { functionRegistry } = spreadsheet.registries;
 

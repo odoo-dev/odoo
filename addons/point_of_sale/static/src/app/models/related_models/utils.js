@@ -4,6 +4,7 @@ import {
     deserializeDate,
     serializeDate,
 } from "@web/core/l10n/dates";
+
 export const RELATION_TYPES = new Set(["many2many", "many2one", "one2many"]);
 export const DATE_TIME_TYPE = new Set(["date", "datetime"]);
 export const X2MANY_TYPES = new Set(["many2many", "one2many"]);

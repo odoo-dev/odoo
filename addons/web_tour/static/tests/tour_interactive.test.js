@@ -15,7 +15,6 @@ import {
     fields,
     defineModels,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { Dialog } from "@web/core/dialog/dialog";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
@@ -222,7 +221,7 @@ test("manual tour with inactive steps", async () => {
 });
 
 test("manual tour with alternative trigger", async () => {
-    patchWithCleanup(browser.console, {
+    patchWithCleanup(console, {
         log: (s) => {
             !s.includes("═") ? expect.step(s) : "";
         },
@@ -394,7 +393,7 @@ test("Tour started by the URL", async () => {
         { trigger: "button.foo", tour_id: 1 },
         { trigger: "button.bar", run: "click", tour_id: 1 },
     ];
-    browser.location.href = `${browser.location.origin}?tour=tour1`;
+    location.href = `${location.origin}?tour=tour1`;
 
     class Dummy extends Component {
         static props = ["*"];
@@ -824,8 +823,8 @@ test("start a tour that no longer exist should clear tourstate", async () => {
     }
     await mountWithCleanup(Root);
     await getService("tour_service").startTour("tour69", { mode: "manual" });
-    expect(browser.localStorage.getItem("current_tour")).toBe("tour69");
+    expect(localStorage.getItem("current_tour")).toBe("tour69");
     registry.category("web_tour.tours").remove("tour69");
     await getService("tour_service").startTour("tour69", { mode: "manual" });
-    expect(browser.localStorage.getItem("current_tour")).toBe(null);
+    expect(localStorage.getItem("current_tour")).toBe(null);
 });

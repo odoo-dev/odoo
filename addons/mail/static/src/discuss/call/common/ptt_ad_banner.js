@@ -1,6 +1,5 @@
 import { useState } from "@web/owl2/utils";
 import { Component } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { useService } from "@web/core/utils/hooks";
 
@@ -14,12 +13,12 @@ export class PttAdBanner extends Component {
         this.pttExtService = useService("discuss.ptt_extension");
         this.store = useService("mail.store");
         this.state = useState({
-            wasDiscarded: browser.localStorage.getItem(PttAdBanner.LOCAL_STORAGE_KEY),
+            wasDiscarded: localStorage.getItem(PttAdBanner.LOCAL_STORAGE_KEY),
         });
     }
 
     onClickClose() {
-        browser.localStorage.setItem(PttAdBanner.LOCAL_STORAGE_KEY, true);
+        localStorage.setItem(PttAdBanner.LOCAL_STORAGE_KEY, true);
         this.state.wasDiscarded = true;
     }
 

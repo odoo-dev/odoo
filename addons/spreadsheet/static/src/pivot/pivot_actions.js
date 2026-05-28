@@ -2,6 +2,7 @@
 
 import { navigateTo } from "../actions/helpers";
 import { helpers } from "@odoo/o-spreadsheet";
+
 const { getNumberOfPivotFunctions } = helpers;
 
 /**

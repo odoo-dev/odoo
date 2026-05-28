@@ -1,5 +1,4 @@
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { ConnectionLostError, rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 
@@ -23,8 +22,8 @@ export const calendarNotificationService = {
             let lastNotifTimer = 0;
 
             // Clear previously set timeouts and destroy currently displayed calendar notifications
-            browser.clearTimeout(nextCalendarNotifTimeout);
-            Object.values(calendarNotifTimeouts).forEach((notif) => browser.clearTimeout(notif));
+            clearTimeout(nextCalendarNotifTimeout);
+            Object.values(calendarNotifTimeouts).forEach((notif) => clearTimeout(notif));
             calendarNotifTimeouts = {};
 
             // For each notification, set a timeout to display it
@@ -33,7 +32,7 @@ export const calendarNotificationService = {
                 if (displayedNotifications.has(key)) {
                     return;
                 }
-                calendarNotifTimeouts[key] = browser.setTimeout(function () {
+                calendarNotifTimeouts[key] = setTimeout(function () {
                     const notificationRemove = notification.add(notif.message, {
                         title: notif.title,
                         type: "warning",
@@ -77,10 +76,7 @@ export const calendarNotificationService = {
 
             // Set a timeout to get the next notifications when the last one has been displayed
             if (lastNotifTimer > 0) {
-                nextCalendarNotifTimeout = browser.setTimeout(
-                    getNextCalendarNotif,
-                    lastNotifTimer * 1000
-                );
+                nextCalendarNotifTimeout = setTimeout(getNextCalendarNotif, lastNotifTimer * 1000);
             }
         }
 

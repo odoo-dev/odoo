@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
@@ -64,7 +63,7 @@ registry.category("actions").add("reload", reload);
 async function home() {
     await new Promise((resolve) => {
         const waitForServer = (delay) => {
-            browser.setTimeout(async () => {
+            setTimeout(async () => {
                 rpc("/web/webclient/version_info", {})
                     .then(resolve)
                     .catch(() => waitForServer(250));
@@ -72,8 +71,8 @@ async function home() {
         };
         waitForServer(1000);
     });
-    const url = "/" + (browser.location.search || "");
-    browser.location.assign(url);
+    const url = "/" + (location.search || "");
+    location.assign(url);
 }
 
 registry.category("actions").add("home", home);

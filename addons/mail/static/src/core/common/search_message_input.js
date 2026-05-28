@@ -1,6 +1,5 @@
 import { useExternalListener } from "@web/owl2/utils";
 import { Component } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { SearchInput } from "@mail/core/common/search_input";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -28,7 +27,7 @@ export class SearchMessageInput extends Component {
     setup() {
         super.setup();
         useExternalListener(
-            browser,
+            window,
             "keydown",
             (ev) => {
                 if (ev.key === "Escape") {

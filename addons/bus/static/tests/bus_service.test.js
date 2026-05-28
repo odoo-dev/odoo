@@ -28,7 +28,6 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { getWebSocketWorker, onWebsocketEvent } from "./mock_websocket";
 
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { session } from "@web/session";
@@ -97,7 +96,7 @@ test("second tab still receives notifications after main pagehide", async () => 
     stepWorkerActions("BUS:LEAVE");
     mainEnv.services.bus_service.addChannel("lambda");
     // Prevent second tab from receiving pagehide event.
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         addEventListener(eventName, callback) {
             if (eventName !== "pagehide") {
                 super.addEventListener(eventName, callback);
@@ -258,7 +257,7 @@ test("websocket connects with URL corresponding to given serverURL", async () =>
 });
 
 test("disconnect on offline, re-connect on online", async () => {
-    browser.addEventListener("online", () => expect.step("online"));
+    window.addEventListener("online", () => expect.step("online"));
     addBusServiceListeners(
         ["BUS:CONNECT", () => expect.step("BUS:CONNECT")],
         ["BUS:DISCONNECT", () => expect.step("BUS:DISCONNECT")]
@@ -275,8 +274,8 @@ test("disconnect on offline, re-connect on online", async () => {
 });
 
 test("no disconnect on offline/online when bus is inactive", async () => {
-    browser.addEventListener("online", () => expect.step("online"));
-    browser.addEventListener("offline", () => expect.step("offline"));
+    window.addEventListener("online", () => expect.step("online"));
+    window.addEventListener("offline", () => expect.step("offline"));
     addBusServiceListeners(
         ["BUS:CONNECT", () => expect.step("BUS:CONNECT")],
         ["BUS:DISCONNECT", () => expect.step("BUS:DISCONNECT")]
@@ -293,7 +292,7 @@ test("no disconnect on offline/online when bus is inactive", async () => {
 });
 
 test("can reconnect after late close event", async () => {
-    browser.addEventListener("online", () => expect.step("online"));
+    window.addEventListener("online", () => expect.step("online"));
     addBusServiceListeners(
         ["BUS:CONNECT", () => expect.step("BUS:CONNECT")],
         ["BUS:DISCONNECT", () => expect.step("BUS:DISCONNECT")],
@@ -338,15 +337,15 @@ test("fallback on simple worker when shared worker failed to initialize", async 
     addBusServiceListeners(["BUS:CONNECT", () => expect.step("BUS:CONNECT")]);
     // Starting the server first, the following patch would be overwritten otherwise.
     await makeMockServer();
-    patchWithCleanup(browser, {
-        SharedWorker: class extends browser.SharedWorker {
+    patchWithCleanup(window, {
+        SharedWorker: class extends SharedWorker {
             constructor() {
                 super(...arguments);
                 expect.step("shared-worker-creation");
                 setTimeout(() => this.dispatchEvent(new Event("error")));
             }
         },
-        Worker: class extends browser.Worker {
+        Worker: class extends Worker {
             constructor() {
                 super(...arguments);
 
@@ -458,7 +457,7 @@ test("remove from main tab candidates when version is outdated", async () => {
 });
 
 test("show notification when version is outdated", async () => {
-    browser.location.addEventListener("reload", () => expect.step("reload"));
+    location.addEventListener("reload", () => expect.step("reload"));
     addBusServiceListeners(
         ["BUS:CONNECT", () => expect.step("BUS:CONNECT")],
         ["BUS:DISCONNECT", () => expect.step("BUS:DISCONNECT")]
@@ -609,10 +608,10 @@ test("subscription last id is captured from the initial call to update channel",
 });
 
 test("disconnect during vacuum should ask for reload", async () => {
-    browser.location.addEventListener("reload", () => expect.step("reload"));
+    location.addEventListener("reload", () => expect.step("reload"));
     addBusServiceListeners(["BUS:CONNECT", () => expect.step("BUS:CONNECT")]);
     await mountWithCleanup(WebClient);
-    browser.localStorage.setItem("bus.last_notification_id", 1);
+    localStorage.setItem("bus.last_notification_id", 1);
     startBusService();
     await runAllTimers();
     await expect.waitForSteps(["BUS:CONNECT"]);

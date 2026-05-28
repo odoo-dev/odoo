@@ -33,7 +33,6 @@ import {
     selectFieldDropdownItem,
     serverState,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { pick } from "@web/core/utils/objects";
 import { Record } from "@web/model/relational_model/record";
@@ -9470,7 +9469,7 @@ test("click on URL should not open the record", async () => {
         expect.step("link clicked");
         ev.preventDefault();
     };
-    browser.addEventListener("click", onClick, { capture: true });
+    window.addEventListener("click", onClick, { capture: true });
 
     await mountView({
         type: "form",
@@ -11826,7 +11825,7 @@ test("open a one2many record containing a one2many", async () => {
             </form>`,
     };
 
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         setItem(args) {
             if (["optional_fields", "debug_open_view"].some((word) => args.startsWith(word))) {
                 expect.step(`setItem: ${args}`);

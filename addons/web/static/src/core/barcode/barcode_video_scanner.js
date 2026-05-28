@@ -1,7 +1,7 @@
 import { useRef, useState } from "@web/owl2/utils";
+
 /* global BarcodeDetector */
 
-import { browser } from "@web/core/browser/browser";
 import { delay } from "@web/core/utils/concurrency";
 import { loadJS } from "@web/core/assets";
 import { isVideoElementReady, buildZXingBarcodeDetector } from "./ZXingBarcodeDetector";
@@ -68,7 +68,7 @@ export class BarcodeVideoScanner extends Component {
             };
 
             try {
-                this.stream = await browser.navigator.mediaDevices.getUserMedia(constraints);
+                this.stream = await navigator.mediaDevices.getUserMedia(constraints);
             } catch (err) {
                 const errors = {
                     NotFoundError: _t("No device can be found."),
@@ -129,7 +129,7 @@ export class BarcodeVideoScanner extends Component {
         // FIXME: even if it shouldn't happened, a timeout could be useful here.
         while (!isVideoElementReady(this.videoPreviewRef.el)) {
             await delay(10);
-            if (status(this) === "destroyed"){
+            if (status(this) === "destroyed") {
                 return false;
             }
         }
@@ -231,5 +231,5 @@ export class BarcodeVideoScanner extends Component {
  * @returns {boolean}
  */
 export function isBarcodeScannerSupported() {
-    return Boolean(browser.navigator.mediaDevices && browser.navigator.mediaDevices.getUserMedia);
+    return Boolean(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
 }

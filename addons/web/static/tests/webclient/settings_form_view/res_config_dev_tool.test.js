@@ -10,7 +10,6 @@ import {
     patchWithCleanup,
     serverState,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
 import { redirect } from "@web/core/utils/urls";
 
@@ -21,9 +20,7 @@ class ResConfigSettings extends models.Model {
 defineModels([ResConfigSettings]);
 
 test("Simple render", async () => {
-    onRpc("/base_setup/demo_active", () => {
-        return true;
-    });
+    onRpc("/base_setup/demo_active", () => true);
     redirect("/odoo");
     await mountView({
         type: "form",
@@ -46,10 +43,8 @@ test("Simple render", async () => {
 });
 
 test("Activate the developer mode", async () => {
-    onRpc("/base_setup/demo_active", () => {
-        return true;
-    });
-    patchWithCleanup(browser.location, {
+    onRpc("/base_setup/demo_active", () => true);
+    patchWithCleanup(location, {
         reload() {
             expect.step("location reload");
         },
@@ -73,10 +68,8 @@ test("Activate the developer mode", async () => {
 });
 
 test("Activate the developer mode (with assets)", async () => {
-    onRpc("/base_setup/demo_active", () => {
-        return true;
-    });
-    patchWithCleanup(browser.location, {
+    onRpc("/base_setup/demo_active", () => true);
+    patchWithCleanup(location, {
         reload() {
             expect.step("location reload");
         },
@@ -100,10 +93,8 @@ test("Activate the developer mode (with assets)", async () => {
 });
 
 test("Activate the developer mode (with tests assets)", async () => {
-    onRpc("/base_setup/demo_active", () => {
-        return true;
-    });
-    patchWithCleanup(browser.location, {
+    onRpc("/base_setup/demo_active", () => true);
+    patchWithCleanup(location, {
         reload() {
             expect.step("location reload");
         },
@@ -129,10 +120,8 @@ test("Activate the developer mode (with tests assets)", async () => {
 
 test("Activate the developer modeddd (with tests assets)", async () => {
     serverState.debug = "assets,tests";
-    onRpc("/base_setup/demo_active", () => {
-        return true;
-    });
-    patchWithCleanup(browser.location, {
+    onRpc("/base_setup/demo_active", () => true);
+    patchWithCleanup(location, {
         reload() {
             expect.step("location reload");
         },

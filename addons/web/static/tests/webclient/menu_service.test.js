@@ -10,7 +10,6 @@ import {
     onRpc,
     webModels,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { Deferred } from "@odoo/hoot-mock";
 import { animationFrame } from "@odoo/hoot-dom";
 import { IndexedDB } from "@web/core/utils/indexed_db";
@@ -95,7 +94,7 @@ test(`use stored menus, and don't update on load_menus return (if identical)`, a
     const webClient = await mountWebClient();
     webClient.env.bus.addEventListener("MENUS:APP-CHANGED", () => expect.step("Don't Update"));
     expect(`.o_menu_brand`).toHaveText("App1");
-    expect(browser.sessionStorage.getItem("menu_id")).toBe("1");
+    expect(sessionStorage.getItem("menu_id")).toBe("1");
     expect(".o_menu_sections").toHaveText("Test1\nTest2");
     def.resolve();
     await animationFrame();
@@ -125,7 +124,7 @@ test(`use stored menus, and update on load_menus return`, async () => {
     const webClient = await mountWebClient();
     webClient.env.bus.addEventListener("MENUS:APP-CHANGED", () => expect.step("Update Menus"));
     expect(`.o_menu_brand`).toHaveText("App1");
-    expect(browser.sessionStorage.getItem("menu_id")).toBe("1");
+    expect(sessionStorage.getItem("menu_id")).toBe("1");
     expect(".o_menu_sections").toHaveText("Test1");
     expect.verifySteps([]);
     def.resolve();

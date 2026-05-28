@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { Tooltip } from "./tooltip";
 import { hasTouch } from "@web/core/browser/feature_detection";
@@ -69,7 +68,7 @@ export const tooltipService = {
          */
         function cleanup() {
             target = null;
-            browser.clearTimeout(openTooltipTimeout);
+            clearTimeout(openTooltipTimeout);
             openTooltipTimeout = null;
             if (closeTooltip) {
                 closeTooltip();
@@ -117,7 +116,7 @@ export const tooltipService = {
             // Prevent title from showing on a parent at the same time
             target.title = "";
             const timeoutDelay = isHelpNode(el) ? 0 : delay;
-            openTooltipTimeout = browser.setTimeout(() => {
+            openTooltipTimeout = setTimeout(() => {
                 // verify that the element is still in the DOM
                 if (target.isConnected) {
                     closeTooltip = popover.add(
@@ -204,14 +203,14 @@ export const tooltipService = {
         function onTouchStart(ev) {
             cleanup();
             const timeoutDelay = isHelpNode(ev.target) ? 0 : SHOW_AFTER_DELAY;
-            showTimer = browser.setTimeout(() => {
+            showTimer = setTimeout(() => {
                 openElementsTooltip(ev.target);
             }, timeoutDelay);
         }
 
         whenReady(() => {
             // Regularly check that the target is still in the DOM and if not, close the tooltip
-            browser.setInterval(() => {
+            setInterval(() => {
                 if (shouldCleanup()) {
                     cleanup();
                 }
@@ -227,8 +226,8 @@ export const tooltipService = {
                     }
                     if (ev.target.closest("[data-tooltip], [data-tooltip-template]")) {
                         if (!ev.target.dataset.tooltipTouchTapToShow) {
-                            browser.clearTimeout(showTimer);
-                            browser.clearTimeout(openTooltipTimeout);
+                            clearTimeout(showTimer);
+                            clearTimeout(openTooltipTimeout);
                         }
                     }
                 });
@@ -239,8 +238,8 @@ export const tooltipService = {
                     }
                     if (ev.target.closest("[data-tooltip], [data-tooltip-template]")) {
                         if (!ev.target.dataset.tooltipTouchTapToShow) {
-                            browser.clearTimeout(showTimer);
-                            browser.clearTimeout(openTooltipTimeout);
+                            clearTimeout(showTimer);
+                            clearTimeout(openTooltipTimeout);
                         }
                     }
                 });

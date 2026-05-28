@@ -1,5 +1,4 @@
 import { useState } from "@web/owl2/utils";
-import { browser } from "../browser/browser";
 import { registry } from "../registry";
 import { Transition } from "../transition";
 import { useBus } from "../utils/hooks";
@@ -25,9 +24,9 @@ export class PagerIndicator extends Component {
     pagerUpdate({ detail }) {
         this.state.value = detail.value;
         this.state.total = detail.total;
-        browser.clearTimeout(this.startShowTimer);
+        clearTimeout(this.startShowTimer);
         this.state.show = true;
-        this.startShowTimer = browser.setTimeout(() => {
+        this.startShowTimer = setTimeout(() => {
             this.state.show = false;
         }, 1400);
     }

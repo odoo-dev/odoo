@@ -1,5 +1,4 @@
 import { useComponent } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { onWillUnmount } from "@odoo/owl";
 
 /**
@@ -70,8 +69,8 @@ export function debounce(func, delay, options) {
                     } else {
                         lastArgs = args;
                     }
-                    browser[clearFnName](handle);
-                    handle = browser[setFnName](() => {
+                    window[clearFnName](handle);
+                    handle = window[setFnName](() => {
                         handle = null;
                         if (trailing && lastArgs) {
                             Promise.resolve(func.apply(this, lastArgs)).then(resolve);
@@ -83,7 +82,7 @@ export function debounce(func, delay, options) {
         }[funcName],
         {
             cancel(execNow = false) {
-                browser[clearFnName](handle);
+                window[clearFnName](handle);
                 if (execNow && lastArgs) {
                     func.apply(this, lastArgs);
                 }
@@ -103,15 +102,15 @@ export function setRecurringAnimationFrame(callback) {
     const handler = (timestamp) => {
         callback(timestamp - lastTimestamp);
         lastTimestamp = timestamp;
-        handle = browser.requestAnimationFrame(handler);
+        handle = requestAnimationFrame(handler);
     };
 
     const stop = () => {
-        browser.cancelAnimationFrame(handle);
+        cancelAnimationFrame(handle);
     };
 
-    let lastTimestamp = browser.performance.now();
-    let handle = browser.requestAnimationFrame(handler);
+    let lastTimestamp = performance.now();
+    let handle = requestAnimationFrame(handler);
 
     return stop;
 }
@@ -135,7 +134,7 @@ export function throttleForAnimation(func) {
     const funcName = func.name ? `${func.name} (throttleForAnimation)` : "throttleForAnimation";
     const pending = () => {
         if (calls.size) {
-            handle = browser.requestAnimationFrame(pending);
+            handle = requestAnimationFrame(pending);
             const { args, resolve } = [...calls].pop();
             calls.clear();
             Promise.resolve(func.apply(this, args)).then(resolve);
@@ -150,7 +149,7 @@ export function throttleForAnimation(func) {
                 return new Promise((resolve) => {
                     const isNew = handle === null;
                     if (isNew) {
-                        handle = browser.requestAnimationFrame(pending);
+                        handle = requestAnimationFrame(pending);
                         Promise.resolve(func.apply(this, args)).then(resolve);
                     } else {
                         calls.add({ args, resolve });
@@ -160,7 +159,7 @@ export function throttleForAnimation(func) {
         }[funcName],
         {
             cancel() {
-                browser.cancelAnimationFrame(handle);
+                cancelAnimationFrame(handle);
                 calls.clear();
                 handle = null;
             },

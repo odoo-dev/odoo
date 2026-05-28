@@ -13,14 +13,17 @@ import {
     stepAllNetworkCalls,
 } from "@web/../tests/web_test_helpers";
 
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { startRouter } from "@web/core/browser/router";
 import { user } from "@web/core/user";
 import { getOrigin } from "@web/core/utils/urls";
 
 import { UserMenu } from "@web/webclient/user_menu/user_menu";
-import { odooAccountItem, preferencesItem, shareUrlMenuItem } from "@web/webclient/user_menu/user_menu_items";
+import {
+    odooAccountItem,
+    preferencesItem,
+    shareUrlMenuItem,
+} from "@web/webclient/user_menu/user_menu_items";
 
 const userMenuRegistry = registry.category("user_menuitems");
 
@@ -152,7 +155,7 @@ test("can execute the callback of settings", async () => {
 });
 
 test("click on odoo account item", async () => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         open: (url) => expect.step(`open ${url}`),
     });
     userMenuRegistry.add("odoo_account", odooAccountItem);
@@ -182,13 +185,13 @@ test("can use component as registry item", async () => {
 });
 
 test("Share URL item is present in the user menu when running as PWA", async () => {
-    patchWithCleanup(browser.navigator, {
+    patchWithCleanup(navigator, {
         share: async () => {
             expect.step("navigator.share");
         },
     });
     startRouter(); // reload the router to make sure navigator.share is defined
-            
+
     mockMatchMedia({ ["display-mode"]: "standalone" });
     userMenuRegistry.add("share_url", shareUrlMenuItem);
     await mountWithCleanup(UserMenu);

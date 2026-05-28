@@ -14,7 +14,6 @@ import {
     patchWithCleanup,
     serverState,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import {
     ClientErrorDialog,
     RPCErrorDialog,
@@ -355,7 +354,7 @@ let errorCb;
 
 describe("Error Service Logs", () => {
     beforeEach(() => {
-        patchWithCleanup(browser, {
+        patchWithCleanup(window, {
             addEventListener: (type, cb) => {
                 if (type === "unhandledrejection") {
                     unhandledRejectionCb = cb;

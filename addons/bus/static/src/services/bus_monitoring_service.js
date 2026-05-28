@@ -1,6 +1,5 @@
 import { reactive } from "@web/owl2/utils";
 import { WORKER_STATE } from "@bus/workers/websocket_worker";
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
 /**
@@ -24,7 +23,7 @@ export class BusMonitoringService {
         bus_service.addEventListener("BUS:WORKER_STATE_UPDATED", ({ detail }) =>
             this.workerStateOnChange(detail)
         );
-        browser.addEventListener("offline", () => (this.isReconnecting = false));
+        window.addEventListener("offline", () => (this.isReconnecting = false));
     }
 
     /**

@@ -1,5 +1,4 @@
 import { markRaw } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { ConnectionLostError, rpc, rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { IndexedDB } from "@web/core/utils/indexed_db";
@@ -61,12 +60,12 @@ class OfflineManager extends Reactive {
         this._syncingORM = false;
 
         // Use "offline" and "online" events for instant detection of connection lost/restored.
-        browser.addEventListener("offline", () => {
+        window.addEventListener("offline", () => {
             if (!this.offline) {
                 this.checkConnection();
             }
         });
-        browser.addEventListener("online", () => {
+        window.addEventListener("online", () => {
             if (this.offline) {
                 this.checkConnection();
             }
@@ -92,7 +91,7 @@ class OfflineManager extends Reactive {
         this._updateScheduledORMList().then(async () => {
             if (!this._offline) {
                 // wait a bit for the webclient to be started before synchronizing
-                await new Promise((r) => browser.setTimeout(r, 3000));
+                await new Promise((r) => setTimeout(r, 3000));
                 this._syncORM();
             }
         });
@@ -146,10 +145,10 @@ class OfflineManager extends Reactive {
                     await this.checkConnection();
                     // exponential backoff, with some jitter
                     delay = delay * 1.5 + 500 * Math.random();
-                    this._timeout = browser.setTimeout(_checkConnection, delay);
+                    this._timeout = setTimeout(_checkConnection, delay);
                 }
             };
-            this._timeout = browser.setTimeout(_checkConnection, delay);
+            this._timeout = setTimeout(_checkConnection, delay);
 
             // Retrieve the information about visited items from indexeddb.
             this._visited[IS_READY] = this._populateVisited();
@@ -157,7 +156,7 @@ class OfflineManager extends Reactive {
             this._onlineUI();
             this._syncORM();
             this._observer?.disconnect();
-            browser.clearTimeout(this._timeout);
+            clearTimeout(this._timeout);
         }
     }
 
@@ -430,7 +429,7 @@ class OfflineManager extends Reactive {
                 .sort((s1, s2) => s1.value.extras.timeStamp - s2.value.extras.timeStamp)
                 .entries()) {
                 if (index !== 0) {
-                    await new Promise((r) => browser.setTimeout(r, 1000)); // Waits 1 second
+                    await new Promise((r) => setTimeout(r, 1000)); // Waits 1 second
                 }
                 try {
                     await this.orm.silent.call(value.model, value.method, value.args, value.kwargs);

@@ -1,6 +1,7 @@
 import { test, expect } from "@odoo/hoot";
 import { getFilledOrder, setupPosEnv, createPaymentLine } from "../utils";
 import { definePosModels } from "../data/generate_model_definitions";
+
 const { DateTime, Settings } = luxon;
 
 definePosModels();

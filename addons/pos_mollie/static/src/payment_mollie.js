@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { PaymentInterface } from "@point_of_sale/app/utils/payment/payment_interface";
@@ -73,7 +72,7 @@ export class PaymentMollie extends PaymentInterface {
 
             // In test mode, the terminal is simulated using a popup
             if (data._links.changePaymentState) {
-                browser.open(data._links.changePaymentState.href, "_blank");
+                window.open(data._links.changePaymentState.href, "_blank");
             }
 
             paymentLine.transaction_id = data.id;

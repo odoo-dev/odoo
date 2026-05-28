@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { fields, Record } from "@mail/model/export";
 
 import { Mutex } from "@web/core/utils/concurrency";
@@ -38,7 +37,7 @@ export class ChatHub extends Record {
     static new() {
         /** @type {import("models").ChatHub} */
         const chatHub = super.new(...arguments);
-        browser.addEventListener("storage", (ev) => {
+        window.addEventListener("storage", (ev) => {
             if (ev.key === CHAT_HUB_KEY) {
                 chatHub.load(ev.newValue);
             } else if (ev.key === null) {
@@ -46,7 +45,7 @@ export class ChatHub extends Record {
             }
         });
         chatHub
-            .load(browser.localStorage.getItem(CHAT_HUB_KEY) ?? undefined)
+            .load(localStorage.getItem(CHAT_HUB_KEY) ?? undefined)
             .then(() => chatHub._resolveInit());
         return chatHub;
     }
@@ -125,7 +124,7 @@ export class ChatHub extends Record {
         const chatBubblesWidth = this.BUBBLE_START + this.BUBBLE + this.BUBBLE_OUTER * 2;
         const startGap = this.store.env.services.ui.isSmall ? 0 : this.WINDOW_GAP;
         const endGap = this.store.env.services.ui.isSmall ? 0 : this.WINDOW_GAP;
-        const available = browser.innerWidth - startGap - endGap - chatBubblesWidth;
+        const available = window.innerWidth - startGap - endGap - chatBubblesWidth;
         const maxAmountWithoutHidden = Math.max(
             1,
             Math.floor(available / (this.WINDOW + this.WINDOW_INBETWEEN))
@@ -135,11 +134,11 @@ export class ChatHub extends Record {
 
     get maxFolded() {
         const chatBubbleSpace = this.BUBBLE_START + this.BUBBLE + this.BUBBLE_OUTER * 2;
-        return Math.min(this.BUBBLE_LIMIT, Math.floor(browser.innerHeight / chatBubbleSpace));
+        return Math.min(this.BUBBLE_LIMIT, Math.floor(window.innerHeight / chatBubbleSpace));
     }
 
     save() {
-        browser.localStorage.setItem(
+        localStorage.setItem(
             CHAT_HUB_KEY,
             JSON.stringify({
                 opened: this.opened.map((chatWindow) => ({ id: chatWindow.channel.id })),

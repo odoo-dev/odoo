@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
 const CLICK_ON_CHAT_STEP = "click-on-chat-action";
@@ -89,8 +88,8 @@ registry
     .add("discuss.meeting_view_tour", {
         steps: () => {
             // Avoid starting with mic/camera to prevent an unhandleable browser permission popup.
-            browser.localStorage.setItem("discuss_call_preview_join_mute", "true");
-            browser.localStorage.setItem("discuss_call_preview_join_video", "false");
+            localStorage.setItem("discuss_call_preview_join_mute", "true");
+            localStorage.setItem("discuss_call_preview_join_video", "false");
             return getMeetingViewTourSteps();
         },
     })

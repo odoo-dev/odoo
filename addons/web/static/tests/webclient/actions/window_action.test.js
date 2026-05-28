@@ -37,7 +37,6 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
-import { browser } from "@web/core/browser/browser";
 import { router, routerBus } from "@web/core/browser/router";
 import { registry } from "@web/core/registry";
 import { redirect } from "@web/core/utils/urls";
@@ -724,7 +723,7 @@ test("A deleted form view can be shown when history back", async () => {
     await contains(".o_list_view .o_data_row .o_data_cell").click();
     expect(".o_form_view").toHaveCount(1, { message: "The form view should be displayed" });
     expect(".o_last_breadcrumb_item").toHaveText("First record");
-    expect(browser.location.pathname).toBe("/odoo/action-3/1");
+    expect(location.pathname).toBe("/odoo/action-3/1");
 
     // Delete the current record
     await contains(".o_cp_action_menus .fa-cog").click();
@@ -734,15 +733,15 @@ test("A deleted form view can be shown when history back", async () => {
     // The form view is automatically switched to the next record
     expect(".o_last_breadcrumb_item").toHaveText("Second record");
     await runAllTimers();
-    expect(browser.location.pathname).toBe("/odoo/action-3/2");
+    expect(location.pathname).toBe("/odoo/action-3/2");
 
     // Go back to the previous (now deleted) record
-    browser.history.back();
+    history.back();
     await animationFrame();
 
     expect(".o_form_view").toHaveCount(1, { message: "The form view should be displayed" });
     expect(".o_last_breadcrumb_item").toHaveText("First record");
-    expect(browser.location.pathname).toBe("/odoo/action-3/1");
+    expect(location.pathname).toBe("/odoo/action-3/1");
 
     expect.verifyErrors([
         "It seems the records with IDs 1 cannot be found. They might have been deleted.",
@@ -1860,7 +1859,7 @@ test("search menus are still available when switching between actions", async ()
 test.tags("desktop");
 test("current act_window action is stored in session_storage if possible", async () => {
     let expectedAction;
-    patchWithCleanup(browser.sessionStorage, {
+    patchWithCleanup(sessionStorage, {
         setItem(key, value) {
             if (key === "current_action") {
                 expect(JSON.parse(value)).toEqual(expectedAction);

@@ -1,5 +1,4 @@
 import { useState } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { Component, onMounted } from "@odoo/owl";
 import { isDisplayStandalone } from "@web/core/browser/feature_detection";
@@ -16,7 +15,7 @@ export class InstallScopedApp extends Component {
         this.isDisplayStandalone = isDisplayStandalone();
         // BeforeInstallPrompt event can take while before the browser triggers it. Some will display
         // immediately, others will wait that the user has interacted for some time with the website.
-        this.isInstallationPossible = browser.BeforeInstallPromptEvent !== undefined;
+        this.isInstallationPossible = window.BeforeInstallPromptEvent !== undefined;
         onMounted(async () => {
             this.state.manifest = await this.pwa.getManifest();
             this.state.showInstallUI = true;
@@ -27,7 +26,7 @@ export class InstallScopedApp extends Component {
         if (value !== this.state.manifest.name) {
             const url = new URL(document.location.href);
             url.searchParams.set("app_name", encodeURIComponent(value));
-            browser.location.replace(url);
+            location.replace(url);
         }
     }
     onInstall() {
@@ -35,7 +34,7 @@ export class InstallScopedApp extends Component {
         this.pwa.show({
             onDone: (res) => {
                 if (res.outcome === "accepted") {
-                    browser.location.replace(this.state.manifest.start_url);
+                    location.replace(this.state.manifest.start_url);
                 } else {
                     this.state.showInstallUI = true;
                 }

@@ -1,5 +1,4 @@
 import { expirableStorage } from "@im_livechat/core/common/expirable_storage";
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
 export class AutopopupService {
@@ -19,7 +18,7 @@ export class AutopopupService {
         this.ui = ui;
 
         store.isReadyPromise.then(() => {
-            browser.setTimeout(async () => {
+            setTimeout(async () => {
                 await store.chatHub.initPromise;
                 if (this.allowAutoPopup) {
                     expirableStorage.setItem(AutopopupService.STORAGE_KEY, true);

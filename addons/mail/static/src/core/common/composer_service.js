@@ -1,6 +1,5 @@
 import { proxy } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
 export const composerService = {
@@ -10,23 +9,23 @@ export const composerService = {
      */
     start(env) {
         const state = proxy({
-            htmlEnabled: JSON.parse(browser.localStorage.getItem("mail.html_composer.enabled")),
+            htmlEnabled: JSON.parse(localStorage.getItem("mail.html_composer.enabled")),
             setHtmlComposer() {
                 if (state.htmlEnabled) {
                     return;
                 }
                 state.htmlEnabled = true;
-                browser.localStorage.setItem("mail.html_composer.enabled", true);
+                localStorage.setItem("mail.html_composer.enabled", true);
             },
             setTextComposer() {
                 if (!state.htmlEnabled) {
                     return;
                 }
                 state.htmlEnabled = false;
-                browser.localStorage.setItem("mail.html_composer.enabled", false);
+                localStorage.setItem("mail.html_composer.enabled", false);
             },
         });
-        browser.addEventListener("storage", ({ key, newValue }) => {
+        window.addEventListener("storage", ({ key, newValue }) => {
             if (key === "mail.html_composer.enabled") {
                 state.htmlEnabled = JSON.parse(newValue);
             }

@@ -4,6 +4,7 @@ import { loadJS } from "@web/core/assets";
 
 // temporary for OnNoResultReturned bug
 import { ThirdPartyScriptError } from "@web/core/errors/error_service";
+
 const errorHandlerRegistry = registry.category("error_handlers");
 import { Component, xml } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";

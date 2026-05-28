@@ -1,6 +1,5 @@
 import { isMacOS } from "../browser/feature_detection";
 import { registry } from "../registry";
-import { browser } from "../browser/browser";
 import { getVisibleElements } from "../utils/ui";
 import { range } from "../utils/numbers";
 
@@ -117,7 +116,7 @@ export const hotkeyService = {
         let nextToken = 0;
         let overlaysVisible = false;
 
-        addListeners(browser);
+        addListeners(window);
 
         function addListeners(target) {
             target.addEventListener("keydown", onKeydown);

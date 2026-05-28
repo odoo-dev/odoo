@@ -1,6 +1,5 @@
 import { Component } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { useService } from "@web/core/utils/hooks";
@@ -53,7 +52,7 @@ export class CashdroAdminButtons extends Component {
         const protocol = this.props.record.data.cashdro_use_lna
             ? "http:"
             : window.location.protocol;
-        browser.open(`${protocol}//${cashdroIp}/Cashdro3Web/#/diagnosis/false`);
+        window.open(`${protocol}//${cashdroIp}/Cashdro3Web/#/diagnosis/false`);
     }
 }
 

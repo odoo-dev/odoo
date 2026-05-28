@@ -2,6 +2,7 @@ import { EvaluationError, helpers, registries } from "@odoo/o-spreadsheet";
 import { OdooUIPlugin } from "@spreadsheet/plugins";
 import { toServerDateString } from "@spreadsheet/helpers/helpers";
 import { _t } from "@web/core/l10n/translation";
+
 const { featurePluginRegistry } = registries;
 const { createCurrencyFormat } = helpers;
 

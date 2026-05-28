@@ -10,7 +10,6 @@ import { NavBar } from "./navbar/navbar";
 
 import { Component, onMounted, onWillStart } from "@odoo/owl";
 import { router, routerBus } from "@web/core/browser/router";
-import { browser } from "@web/core/browser/browser";
 import { rpcBus } from "@web/core/network/rpc";
 
 export class WebClient extends Component {
@@ -70,7 +69,7 @@ export class WebClient extends Component {
         // ** url-retrocompatibility **
         // the menu_id in the url is only possible if we came from an old url
         let menuId = Number(router.current.menu_id || 0);
-        const storedMenuId = Number(browser.sessionStorage.getItem("menu_id"));
+        const storedMenuId = Number(sessionStorage.getItem("menu_id"));
         const firstAction = router.current.actionStack?.[0]?.action;
         if (!menuId && firstAction) {
             // Find all menus that match this action
@@ -80,9 +79,7 @@ export class WebClient extends Component {
 
             if (matchingMenus.length > 0) {
                 // Use sessionStorage context to determine the correct menu
-                menuId = matchingMenus.find(m => 
-                    m.appID === storedMenuId
-                )?.appID;
+                menuId = matchingMenus.find((m) => m.appID === storedMenuId)?.appID;
                 if (!menuId) {
                     menuId = matchingMenus[0]?.appID;
                 }
@@ -123,9 +120,9 @@ export class WebClient extends Component {
 
         // Scroll to anchor after the state is loaded
         if (stateLoaded) {
-            if (browser.location.hash !== "") {
+            if (location.hash !== "") {
                 try {
-                    const el = document.querySelector(browser.location.hash);
+                    const el = document.querySelector(location.hash);
                     if (el !== null) {
                         el.scrollIntoView(true);
                     }

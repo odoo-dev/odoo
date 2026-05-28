@@ -1,6 +1,5 @@
 import { reactive } from "@web/owl2/utils";
 
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
 export const busLogsService = {
@@ -23,7 +22,7 @@ export const busLogsService = {
                 localStorage.setItem("bus_log_menu.enabled", false);
             },
         });
-        browser.addEventListener("storage", ({ key, newValue }) => {
+        window.addEventListener("storage", ({ key, newValue }) => {
             if (key === "bus_log_menu.enabled") {
                 state.enabled = JSON.parse(newValue);
             }

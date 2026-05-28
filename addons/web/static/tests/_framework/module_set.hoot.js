@@ -14,7 +14,6 @@ import {
 } from "@odoo/hoot";
 
 import { mockAssetsFactory } from "./mock_assets.hoot";
-import { mockBrowserFactory } from "./mock_browser.hoot";
 import { mockCurrencyFactory } from "./mock_currency.hoot";
 import { mockFunctionsFactory } from "./mock_functions.hoot";
 import { mockIndexedDBFactory } from "./mock_indexed_db.hoot";
@@ -523,7 +522,6 @@ const MODULE_MOCKS_BY_NAME = new Map([
     ["@web/core/template_inheritance", mockFixedFactory],
     // Other mocks
     ["@web/core/assets", mockAssetsFactory],
-    ["@web/core/browser/browser", mockBrowserFactory],
     ["@web/core/currency", mockCurrencyFactory],
     ["@web/core/templates", mockTemplatesFactory],
     ["@web/core/user", mockUserFactory],

@@ -1,6 +1,5 @@
 import { useRef, useState } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { ColorList } from "@web/core/colorlist/colorlist";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -317,7 +316,7 @@ export class KanbanRecord extends Component {
 
     resetLongTouchTimer() {
         if (this.longTouchTimer) {
-            browser.clearTimeout(this.longTouchTimer);
+            clearTimeout(this.longTouchTimer);
             this.longTouchTimer = null;
         }
     }
@@ -325,7 +324,7 @@ export class KanbanRecord extends Component {
     onTouchStart() {
         this.touchStartMs = Date.now();
         if (this.longTouchTimer === null) {
-            this.longTouchTimer = browser.setTimeout(() => {
+            this.longTouchTimer = setTimeout(() => {
                 this.props.record.toggleSelection(true);
                 this.resetLongTouchTimer();
             }, this.LONG_TOUCH_THRESHOLD);

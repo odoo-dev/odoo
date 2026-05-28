@@ -1,6 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
-import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { Component } from "@odoo/owl";
@@ -22,7 +21,7 @@ export class ResetPasswordLinkButton extends Component {
             this.props.record.resId,
         ]);
         setTimeout(async () => {
-            await browser.navigator.clipboard.writeText(resetPasswordLink);
+            await navigator.clipboard.writeText(resetPasswordLink);
             this.notification.add(_t("Link copied to clipboard!"), { type: "success" });
         });
     }

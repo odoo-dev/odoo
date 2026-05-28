@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { Domain } from "@web/core/domain";
 
 export const ProjectTaskModelMixin = (T) =>
@@ -10,7 +9,7 @@ export const ProjectTaskModelMixin = (T) =>
                 my_tasks ||
                 subtask_action ||
                 activity_action ||
-                JSON.parse(browser.localStorage.getItem("showSubtasks"));
+                JSON.parse(localStorage.getItem("showSubtasks"));
             if (
                 ["project.task", "report.project.task.user"].includes(
                     this.env.searchModel.resModel

@@ -1,6 +1,5 @@
 import { useLayoutEffect } from "@web/owl2/utils";
 import { onMounted } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 
@@ -25,7 +24,7 @@ export class TodoFormControlPanel extends ControlPanel {
             if (
                 !this.env.isSmall &&
                 !this.state.displayChatter &&
-                (isFromActivityView || JSON.parse(browser.localStorage.getItem("isChatterOpened")))
+                (isFromActivityView || JSON.parse(localStorage.getItem("isChatterOpened")))
             ) {
                 this.toggleChatter();
             }
@@ -35,7 +34,7 @@ export class TodoFormControlPanel extends ControlPanel {
     toggleChatter(ev) {
         this.state.displayChatter = !this.state.displayChatter;
         if (ev) {
-            browser.localStorage.setItem("isChatterOpened", this.state.displayChatter);
+            localStorage.setItem("isChatterOpened", this.state.displayChatter);
         }
         this.env.bus.trigger("TODO:TOGGLE_CHATTER", { displayChatter: this.state.displayChatter });
     }

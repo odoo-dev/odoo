@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { EventBus } from "@odoo/owl";
 
 const STATE = Object.freeze({
@@ -15,7 +14,7 @@ export const multiTabSharedWorkerService = {
         /** @type {?PromiseWithResolvers<boolean>} */
         let isMasterTabPromWithResolvers = null;
         let state = STATE.INIT;
-        browser.addEventListener("pagehide", unregister);
+        window.addEventListener("pagehide", unregister);
 
         function messageHandler(messageEv) {
             const { type, data } = messageEv.data;

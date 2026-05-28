@@ -1,12 +1,11 @@
 import { registry } from "@web/core/registry";
 import { patch } from "@web/core/utils/patch";
-import { browser } from "@web/core/browser/browser";
 import { Chatbot } from "@im_livechat/core/common/chatbot_model";
 
 registry.category("web_tour.tours").add("chatbot_redirect_to_portal", {
     steps: () => {
         patch(Chatbot.prototype, {
-            redirect: (url) => browser.open(url, "_self"),
+            redirect: (url) => window.open(url, "_self"),
         });
         return [
             {

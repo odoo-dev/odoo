@@ -5,6 +5,7 @@ import * as PosLoyalty from "@pos_loyalty/../tests/tours/utils/pos_loyalty_util"
 import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import * as Chrome from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 import { registry } from "@web/core/registry";
+
 const ProductScreen = { ...ProductScreenPos, ...ProductScreenResto };
 
 registry.category("web_tour.tours").add("PosRestaurantRewardStay", {

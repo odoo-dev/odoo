@@ -1,5 +1,4 @@
 import { useRef, useState } from "@web/owl2/utils";
-import { browser } from "../browser/browser";
 import { Dialog } from "../dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "../registry";
@@ -77,11 +76,11 @@ export class ErrorDialog extends Component {
 
     showTooltip() {
         this.popover.open(this.copyButtonRef.el, { tooltip: _t("Copied") });
-        browser.setTimeout(this.popover.close, 800);
+        setTimeout(this.popover.close, 800);
     }
 
     onClickClipboard() {
-        browser.navigator.clipboard.writeText(
+        navigator.clipboard.writeText(
             `${this.props.name}\n\n${this.props.message}\n\n${this.contextDetails}\n\n${this.props.traceback}`
         );
         this.showTooltip();
@@ -142,7 +141,7 @@ export class RPCErrorDialog extends ErrorDialog {
     }
 
     onClickClipboard() {
-        browser.navigator.clipboard.writeText(
+        navigator.clipboard.writeText(
             `${this.props.name}\n\n${this.props.message}\n\n${this.contextDetails}\n\n${this.traceback}`
         );
         this.showTooltip();
@@ -226,7 +225,7 @@ export class SessionExpiredDialog extends Component {
     static props = { ...standardErrorDialogProps };
 
     onClick() {
-        browser.location.reload();
+        location.reload();
     }
 }
 

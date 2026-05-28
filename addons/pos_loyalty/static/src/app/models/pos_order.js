@@ -3,6 +3,7 @@ import { patch } from "@web/core/utils/patch";
 import { floatIsZero, range } from "@web/core/utils/numbers";
 import { _t } from "@web/core/l10n/translation";
 import { loyaltyIdsGenerator } from "@pos_loyalty/app/services/pos_store";
+
 const { DateTime } = luxon;
 
 function _newRandomRewardCode() {

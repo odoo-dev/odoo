@@ -15,8 +15,6 @@ import {
     untrack,
     useEffect,
 } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
-
 import { _t } from "@web/core/l10n/translation";
 import { Transition } from "@web/core/transition";
 import { useBus, useRefListener, useService } from "@web/core/utils/hooks";
@@ -504,8 +502,8 @@ export class Thread extends Component {
 
     get viewportEl() {
         let viewportEl = this.scrollableRef.el;
-        if (viewportEl && viewportEl.clientHeight > browser.innerHeight) {
-            while (viewportEl && viewportEl.clientHeight > browser.innerHeight) {
+        if (viewportEl && viewportEl.clientHeight > window.innerHeight) {
+            while (viewportEl && viewportEl.clientHeight > window.innerHeight) {
                 viewportEl = viewportEl.parentElement;
             }
         }

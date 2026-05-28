@@ -3,7 +3,6 @@ import { Component } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
 import { downloadFile } from "@web/core/network/download";
 import { Logger } from "@bus/workers/bus_worker_utils";
@@ -86,7 +85,7 @@ export class GloryAdminButtons extends Component {
         }
         const protocol = this.props.record.data.glory_use_lna ? "http:" : window.location.protocol;
         const port = protocol === "http:" ? 3000 : 3001;
-        browser.open(
+        window.open(
             `${protocol}//${this.props.record.data.glory_websocket_address}:${port}/control`
         );
     }

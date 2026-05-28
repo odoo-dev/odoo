@@ -14,7 +14,6 @@ import { fixInvalidHTML, instanceofMarkup } from "@html_editor/utils/sanitize";
 import { HtmlUpgradeManager } from "@html_editor/html_migrations/html_upgrade_manager";
 import { mountComponent } from "@html_editor/others/embedded_component_utils";
 import { TableOfContentManager } from "@html_editor/others/embedded_components/core/table_of_content/table_of_content_manager";
-import { browser } from "@web/core/browser/browser";
 
 export class HtmlViewer extends Component {
     static template = "html_editor.HtmlViewer";
@@ -174,7 +173,7 @@ export class HtmlViewer extends Component {
         const isInsideIframe = container.ownerDocument !== document;
         const retargetSelector = isInsideIframe
             ? "a"
-            : `a:not([href^="${browser.location.origin}"]):not([href^="/"])`;
+            : `a:not([href^="${location.origin}"]):not([href^="/"])`;
 
         for (const link of container.querySelectorAll(retargetSelector)) {
             this.retargetLink(link);
@@ -290,7 +289,13 @@ export class HtmlViewer extends Component {
             env,
             props,
         });
-        const { root, mountPromise } = mountComponent(this.__owl__.app, Component, host, props, env);
+        const { root, mountPromise } = mountComponent(
+            this.__owl__.app,
+            Component,
+            host,
+            props,
+            env
+        );
         // Don't show mounting errors as they will happen often when the host
         // is disconnected from the DOM because of a patch
         mountPromise.catch();

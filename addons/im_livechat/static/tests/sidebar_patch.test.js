@@ -8,7 +8,6 @@ import { deserializeDateTime } from "@web/core/l10n/dates";
 import { rpc } from "@web/core/network/rpc";
 import { url } from "@web/core/utils/urls";
 import { defineLivechatModels } from "./livechat_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { waitFor, waitForNone } from "@odoo/hoot-dom";
 
 describe.current.tags("desktop");
@@ -359,10 +358,7 @@ test("Local sidebar category state is shared between tabs", async () => {
 test("live chat is displayed in the Live Chat category", async () => {
     const pyEnv = await startServer();
     const livechatChannelId = pyEnv["im_livechat.channel"].create({ name: "Helpdesk" });
-    browser.localStorage.setItem(
-        `discuss_sidebar_category_im_livechat.category_default_open`,
-        false
-    );
+    localStorage.setItem(`discuss_sidebar_category_im_livechat.category_default_open`, false);
     pyEnv["discuss.channel"].create({
         channel_type: "livechat",
         livechat_channel_id: livechatChannelId,

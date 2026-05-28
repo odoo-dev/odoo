@@ -1,6 +1,5 @@
 import * as hootDom from "@odoo/hoot-dom";
 import { enableEventLogs, setupEventActions } from "@web/../lib/hoot-dom/helpers/events";
-import { browser } from "@web/core/browser/browser";
 import { Macro } from "@web/core/macro";
 import { config as transitionConfig } from "@web/core/transition";
 import { TourStepAutomatic } from "@web_tour/js/tour_automatic/tour_step_automatic";
@@ -126,13 +125,13 @@ export class TourAutomatic {
                 end();
             },
             onComplete: () => {
-                browser.console.log("tour succeeded");
+                console.log("tour succeeded");
                 // Used to see easily in the python console and to know which tour has been succeeded in suite tours case.
                 const succeeded = `║ TOUR ${this.name} SUCCEEDED ║`;
                 const msg = [succeeded];
                 msg.unshift("╔" + "═".repeat(succeeded.length - 2) + "╗");
                 msg.push("╚" + "═".repeat(succeeded.length - 2) + "╝");
-                browser.console.log(`\n\n${msg.join("\n")}\n`);
+                console.log(`\n\n${msg.join("\n")}\n`);
                 end();
             },
         });
@@ -189,15 +188,15 @@ export class TourAutomatic {
         tourState.setCurrentTourOnError();
         // The logged text shows the relative position of the failed step.
         // Useful for finding the failed step.
-        browser.console.dir(this.describeWhereIFailed);
+        console.dir(this.describeWhereIFailed);
         const error = [`FAILED: ${this.currentStep.describeMe}.`, ...args].join("\n");
         if (this.debugMode) {
-            browser.console.warn(error);
+            console.warn(error);
             // eslint-disable-next-line no-debugger
             debugger;
         } else {
             // console.error notifies the test runner that the tour failed.
-            browser.console.error(error);
+            console.error(error);
         }
     }
 

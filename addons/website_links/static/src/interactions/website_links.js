@@ -3,7 +3,6 @@ import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { addLoadingEffect } from "@web/core/utils/ui";
-import { browser } from "@web/core/browser/browser";
 import { WebsiteLinksTagsWrapper } from "@website_links/components/website_links_tags_wrapper";
 
 class WebsiteLinks extends Interaction {
@@ -69,7 +68,7 @@ class WebsiteLinks extends Interaction {
             trigger: "manual",
             placement: "top",
         });
-        browser.navigator.clipboard.writeText(copyBtnEl.dataset.url);
+        navigator.clipboard.writeText(copyBtnEl.dataset.url);
         tooltip.show();
         this.waitForTimeout(() => tooltip.hide(), 1200);
     }

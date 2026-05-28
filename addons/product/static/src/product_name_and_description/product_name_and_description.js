@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from "@web/owl2/utils";
+
 /** @odoo-module */
 
 import { _t } from "@web/core/l10n/translation";

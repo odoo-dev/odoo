@@ -2,6 +2,7 @@ import { registry } from "@web/core/registry";
 import { BoardController } from "./board_controller";
 import { visitXML } from "@web/core/utils/xml";
 import { Domain } from "@web/core/domain";
+
 export class BoardArchParser {
     parse(arch, customViewId) {
         let nextId = 1;

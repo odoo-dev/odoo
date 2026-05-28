@@ -1,7 +1,6 @@
 import { preloadBackground } from "@survey/js/survey_preload_image_mixin";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
-import { browser } from "@web/core/browser/browser";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 import { fadeIn, fadeOut } from "@survey/utils";
@@ -186,7 +185,7 @@ export class SurveySessionManage extends Interaction {
             offset: "0, 3",
         });
         await this.waitFor(
-            browser.navigator.clipboard.writeText(ev.currentTarget.innerText.trim())
+            navigator.clipboard.writeText(ev.currentTarget.innerText.trim())
         );
         this.protectSyncAfterAsync(() => {
             this.copyBtnPopover.show();

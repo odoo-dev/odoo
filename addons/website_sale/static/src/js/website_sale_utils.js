@@ -1,4 +1,3 @@
-import { browser } from '@web/core/browser/browser';
 import { _t } from '@web/core/l10n/translation';
 import { createElementWithContent } from '@web/core/utils/html';
 
@@ -8,7 +7,7 @@ import { createElementWithContent } from '@web/core/utils/html';
  * @return {void}
  */
 function updateCartNavBar(data) {
-    browser.sessionStorage.setItem('website_sale_cart_quantity', data.cart_quantity);
+    sessionStorage.setItem('website_sale_cart_quantity', data.cart_quantity);
     // Mobile and Desktop elements have to be updated.
     const cartQuantityElements = document.querySelectorAll('.my_cart_quantity');
     for(const cartQuantityElement of cartQuantityElements) {

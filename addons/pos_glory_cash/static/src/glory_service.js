@@ -14,7 +14,6 @@ import {
 } from "@pos_glory_cash/utils/constants";
 import { SocketIoService } from "@pos_glory_cash/utils/socket_io";
 import { sortBy } from "@web/core/utils/arrays";
-import { browser } from "@web/core/browser/browser";
 import { Logger } from "@bus/workers/bus_worker_utils";
 import { uuid } from "@web/core/utils/strings";
 
@@ -78,7 +77,7 @@ export class GloryService {
         this._resetState();
         this.username = username;
         this.password = password;
-        const protocol = browser.location.protocol === "https:" && !forceHttp ? "wss:" : "ws:";
+        const protocol = location.protocol === "https:" && !forceHttp ? "wss:" : "ws:";
         const port = protocol === "wss:" ? 3001 : 3000;
 
         const websocketEndpoint = `${protocol}//${ip}:${port}${WEBSOCKET_URL}`;

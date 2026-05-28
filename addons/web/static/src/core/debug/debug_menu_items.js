@@ -1,5 +1,4 @@
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
@@ -26,7 +25,7 @@ export function regenerateAssets({ env }) {
         description: _t("Regenerate Assets"),
         callback: async () => {
             await env.services.orm.call("ir.attachment", "regenerate_assets_bundles");
-            browser.location.reload();
+            location.reload();
         },
         sequence: 550,
         section: "tools",
@@ -34,7 +33,7 @@ export function regenerateAssets({ env }) {
 }
 
 export function becomeSuperuser({ env }) {
-    const becomeSuperuserURL = browser.location.origin + "/web/become";
+    const becomeSuperuserURL = location.origin + "/web/become";
     if (!user.isAdmin) {
         return false;
     }
@@ -43,7 +42,7 @@ export function becomeSuperuser({ env }) {
         description: _t("Become Superuser"),
         href: becomeSuperuserURL,
         callback: () => {
-            browser.open(becomeSuperuserURL, "_self");
+            window.open(becomeSuperuserURL, "_self");
         },
         sequence: 560,
         section: "tools",

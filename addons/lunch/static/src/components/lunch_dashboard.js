@@ -5,6 +5,7 @@ import { useBus, useService } from "@web/core/utils/hooks";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { DateTimeInput } from '@web/core/datetime/datetime_input';
 import { Component, onWillStart, markup, xml } from "@odoo/owl";
+
 const { DateTime } = luxon;
 
 export class LunchCurrency extends Component {

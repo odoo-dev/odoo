@@ -1,5 +1,4 @@
 import { useState } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useBus } from "@web/core/utils/hooks";
@@ -38,8 +37,8 @@ export class LoadingIndicator extends Component {
             return;
         }
         if (this.state.count === 0) {
-            browser.clearTimeout(this.startShowTimer);
-            this.startShowTimer = browser.setTimeout(() => {
+            clearTimeout(this.startShowTimer);
+            this.startShowTimer = setTimeout(() => {
                 if (this.state.count) {
                     this.state.show = true;
                 }
@@ -56,7 +55,7 @@ export class LoadingIndicator extends Component {
         this.rpcIds.delete(detail.data.id);
         this.state.count = this.rpcIds.size;
         if (this.state.count === 0) {
-            browser.clearTimeout(this.startShowTimer);
+            clearTimeout(this.startShowTimer);
             this.state.show = false;
         }
     }

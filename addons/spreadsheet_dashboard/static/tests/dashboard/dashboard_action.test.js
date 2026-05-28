@@ -8,7 +8,6 @@ import {
     getDashboardServerData,
 } from "@spreadsheet_dashboard/../tests/helpers/data";
 import { contains, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { RPCError } from "@web/core/network/rpc";
 import { Deferred } from "@web/core/utils/concurrency";
 import { range } from "@web/core/utils/numbers";
@@ -237,7 +236,7 @@ test("Can clear filter date filter value that defaults to current period", async
 });
 
 test("share dashboard from dashboard view", async function () {
-    patchWithCleanup(browser.navigator.clipboard, {
+    patchWithCleanup(navigator.clipboard, {
         writeText: (url) => {
             expect.step("share url copied");
             expect(url).toBe("localhost:8069/share/url/132465");

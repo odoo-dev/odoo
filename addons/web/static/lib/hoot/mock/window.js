@@ -535,6 +535,7 @@ const WINDOW_MOCK_DESCRIPTORS = {
     innerWidth: { get: () => getCurrentDimensions().width },
     isSecureContext: { value: true, writable: false },
     Intl: { value: MockIntl },
+    location: { get: () => mockLocation, set: (value) => (mockLocation.href = value) },
     localStorage: { value: mockLocalStorage, writable: false },
     matchMedia: { value: mockedMatchMedia },
     MessageChannel: { value: MockMessageChannel },

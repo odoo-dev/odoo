@@ -12,7 +12,6 @@ import {
 } from "@odoo/owl";
 import { loadBundle } from "@web/core/assets";
 import { LazyComponent } from "@web/core/lazy_component";
-import { browser } from "@web/core/browser/browser";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
@@ -475,7 +474,7 @@ export class WebsiteBuilderClientAction extends Component {
             if (url) {
                 ev.preventDefault();
                 try {
-                    browser.location.assign(url);
+                    location.assign(url);
                 } catch {
                     this.notification.add(_t("%s is not a valid URL.", url), {
                         title: _t("Invalid URL"),
@@ -700,12 +699,12 @@ export class WebsiteBuilderClientAction extends Component {
     }
 
     get aceEditorWidth() {
-        const storedWidth = browser.localStorage.getItem("ace_editor_width");
+        const storedWidth = localStorage.getItem("ace_editor_width");
         return storedWidth ? parseInt(storedWidth) : 720;
     }
 
     onResourceEditorResize(width) {
-        browser.localStorage.setItem("ace_editor_width", width);
+        localStorage.setItem("ace_editor_width", width);
     }
 
     get translation() {

@@ -1,6 +1,5 @@
 import { useState } from "@web/owl2/utils";
 import { Component, onMounted, onWillUnmount } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { ConnectionLostError, rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 
@@ -33,14 +32,14 @@ export class NetworkConnectionLostPopup extends Component {
                 }
             }, 1000);
 
-            browser.addEventListener("online", this.checkConnectivity);
-            browser.addEventListener("offline", this.checkConnectivity);
+            window.addEventListener("online", this.checkConnectivity);
+            window.addEventListener("offline", this.checkConnectivity);
         });
 
         onWillUnmount(() => {
             clearInterval(this.interval);
-            browser.removeEventListener("online", this.checkConnectivity);
-            browser.removeEventListener("offline", this.checkConnectivity);
+            window.removeEventListener("online", this.checkConnectivity);
+            window.removeEventListener("offline", this.checkConnectivity);
         });
     }
 

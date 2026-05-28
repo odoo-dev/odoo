@@ -9,7 +9,6 @@ import {
     mountWithCleanup,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { Dialog } from "@web/core/dialog/dialog";
 import { Macro } from "@web/core/macro";
 import { registry } from "@web/core/registry";
@@ -138,7 +137,7 @@ test("Step Tour validity", async () => {
 });
 
 test("a tour with invalid step trigger", async () => {
-    patchWithCleanup(browser.console, {
+    patchWithCleanup(console, {
         groupCollapsed: (s) => expect.step(`log: ${s}`),
         log: (s) => expect.step(`log: ${s}`),
         warn: (s) => {},
@@ -168,7 +167,7 @@ Failed to execute 'querySelectorAll' on 'Element': '.button0:contins(brol)' is n
 });
 
 test("a failing tour logs the step that failed in run", async () => {
-    patchWithCleanup(browser.console, {
+    patchWithCleanup(console, {
         groupCollapsed: (s) => expect.step(`log: ${s}`),
         log: (s) => expect.step(`log: ${s}`),
         warn: (s) => {},
@@ -219,7 +218,7 @@ test("a failing tour logs the step that failed in run", async () => {
 });
 
 test("a failing tour with disabled element", async () => {
-    patchWithCleanup(browser.console, {
+    patchWithCleanup(console, {
         log: (s) => {},
         warn: (s) => {},
         error: (s) => expect.step(`error: ${s}`),
@@ -266,7 +265,7 @@ TIMEOUT step failed to complete within 500 ms.`,
 });
 
 test("a failing tour logs the step that failed", async () => {
-    patchWithCleanup(browser.console, {
+    patchWithCleanup(console, {
         dir: (s) => expect.step(`runbot: ${s.replace(/[\s-]*/g, "")}`),
         groupCollapsed: (s) => expect.step(`log: ${s}`),
         log: (s) => expect.step(`log: ${s}`),
@@ -407,7 +406,7 @@ test("check tour with inactive steps", async () => {
 });
 
 test("automatic tour with invisible element", async () => {
-    patchWithCleanup(browser.console, {
+    patchWithCleanup(console, {
         warn: (s) => {},
         error: (s) => expect.step(`error: ${s}`),
     });
@@ -456,7 +455,7 @@ TIMEOUT step failed to complete within 777 ms.`,
 });
 
 test("automatic tour with invisible element but use :not(:visible))", async () => {
-    patchWithCleanup(browser.console, {
+    patchWithCleanup(console, {
         log: (s) => {
             s.includes("tour succeeded") ? expect.step(`succeeded`) : false;
         },
@@ -503,7 +502,7 @@ test("automatic tour with invisible element but use :not(:visible))", async () =
 
 test("automatic tour with alternative trigger", async () => {
     let suppressLog = false;
-    patchWithCleanup(browser.console, {
+    patchWithCleanup(console, {
         groupCollapsed: (s) => {
             expect.step("on step");
             suppressLog = true;
@@ -629,7 +628,7 @@ TIMEOUT step failed to complete within 888 ms.`,
 });
 
 test("a tour where hoot trigger failed", async () => {
-    patchWithCleanup(browser.console, {
+    patchWithCleanup(console, {
         error: (s) => expect.step(`error: ${s}`),
     });
 

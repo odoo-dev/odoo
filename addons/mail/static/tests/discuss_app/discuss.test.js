@@ -39,7 +39,6 @@ import {
 } from "@odoo/hoot-dom";
 import { mockDate } from "@odoo/hoot-mock";
 
-import { browser } from "@web/core/browser/browser";
 import { rpc } from "@web/core/network/rpc";
 import {
     Command,
@@ -659,7 +658,7 @@ test("last discuss conversation is remembered", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
     const LAST_DISCUSS_ACTIVE_ID_LS = makeRecordFieldLocalId(DiscussApp.localId(), "lastActiveId");
-    browser.localStorage.setItem(
+    localStorage.setItem(
         LAST_DISCUSS_ACTIVE_ID_LS,
         toRawValue(`${"discuss.channel_" + channelId}`)
     );
@@ -695,9 +694,7 @@ test("sidebar: change active", async () => {
     await click("button:text('Bookmarks')");
     await contains("button:not(.o-active):text('Inbox')");
     await contains("button.o-active:text('Bookmarks')");
-    expect(browser.localStorage.getItem(LAST_DISCUSS_ACTIVE_ID_LS)).toBe(
-        toRawValue("mail.box_bookmark")
-    );
+    expect(localStorage.getItem(LAST_DISCUSS_ACTIVE_ID_LS)).toBe(toRawValue("mail.box_bookmark"));
 });
 
 test("sidebar: basic channel rendering", async () => {
@@ -1731,7 +1728,7 @@ test("message sound on receiving new message based on user preferences", async (
     await expect.waitForSteps(["sound:new-message"]);
     // simulate message sound settings turned off
     const MESSAGE_SOUND_LS = makeRecordFieldLocalId(Settings.localId(), "messageSound");
-    browser.localStorage.setItem(MESSAGE_SOUND_LS, toRawValue(false));
+    localStorage.setItem(MESSAGE_SOUND_LS, toRawValue(false));
     await animationFrame();
     await withUser(userId, () =>
         rpc("/mail/message/post", {
@@ -1746,7 +1743,7 @@ test("message sound on receiving new message based on user preferences", async (
     await waitFor(".o-mail-ChatBubble .badge:contains(2)", { timeout: 3000 });
     expect.verifySteps([]);
     // simulate message sound settings turned on
-    browser.localStorage.removeItem(MESSAGE_SOUND_LS);
+    localStorage.removeItem(MESSAGE_SOUND_LS);
     await withUser(userId, () =>
         rpc("/mail/message/post", {
             post_data: {

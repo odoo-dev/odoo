@@ -7,7 +7,6 @@ import { useOperation } from "../core/operation_plugin";
 import { BaseOptionComponent } from "../core/base_option_component";
 import { useApplyVisibility, useGetItemValue, useVisibilityObserver } from "../core/utils";
 import { uniqueId } from "@web/core/utils/functions";
-import { browser } from "@web/core/browser/browser";
 
 export class OptionsContainer extends BaseOptionComponent {
     static template = "html_builder.OptionsContainer";
@@ -45,8 +44,8 @@ export class OptionsContainer extends BaseOptionComponent {
         useVisibilityObserver("content", useApplyVisibility("root"));
 
         this.rootRef = useRef("root");
-        useExternalListener(browser, "focusin", this.updateOverlayPreview);
-        useExternalListener(browser, "pointermove", this.updateOverlayPreview);
+        useExternalListener(window, "focusin", this.updateOverlayPreview);
+        useExternalListener(window, "pointermove", this.updateOverlayPreview);
         useExternalListener(this.document, "pointermove", this.updateOverlayPreview);
         this.showingOverlayPreview = false;
 

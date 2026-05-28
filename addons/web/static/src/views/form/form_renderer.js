@@ -3,7 +3,6 @@ import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { Notebook } from "@web/core/notebook/notebook";
 import { Setting } from "./setting/setting";
 import { Field } from "@web/views/fields/field";
-import { browser } from "@web/core/browser/browser";
 import { hasTouch } from "@web/core/browser/feature_detection";
 import { useService } from "@web/core/utils/hooks";
 import { useDebounced, useThrottleForAnimation } from "@web/core/utils/timing";
@@ -61,8 +60,8 @@ export class FormRenderer extends Component {
         this.uiService = useService("ui");
         this.onResize = useDebounced(() => render(this), 200);
         this.onScrollThrottled = useThrottleForAnimation(this.onScroll);
-        onMounted(() => browser.addEventListener("resize", this.onResize));
-        onWillUnmount(() => browser.removeEventListener("resize", this.onResize));
+        onMounted(() => window.addEventListener("resize", this.onResize));
+        onWillUnmount(() => window.removeEventListener("resize", this.onResize));
 
         const { autofocusFieldIds } = archInfo;
         const rootRef = useRef("compiled_view_root");

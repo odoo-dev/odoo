@@ -1,4 +1,5 @@
 import { useState } from "@web/owl2/utils";
+
 /** @odoo-module **/
 
 import { Component, onMounted, onWillStart, onWillUnmount } from "@odoo/owl";

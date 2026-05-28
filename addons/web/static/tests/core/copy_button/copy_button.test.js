@@ -1,12 +1,11 @@
 import { CopyButton } from "@web/core/copy_button/copy_button";
-import { browser } from "@web/core/browser/browser";
 import { mountWithCleanup, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { beforeEach, expect, test } from "@odoo/hoot";
 import { click } from "@odoo/hoot-dom";
 import { Component, xml } from "@odoo/owl";
 
 beforeEach(() => {
-    patchWithCleanup(browser.navigator.clipboard, {
+    patchWithCleanup(navigator.clipboard, {
         async writeText(text) {
             expect.step(`writeText: ${text}`);
         },

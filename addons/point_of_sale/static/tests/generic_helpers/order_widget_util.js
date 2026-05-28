@@ -1,4 +1,5 @@
 import { negate } from "@point_of_sale/../tests/generic_helpers/utils";
+
 /**
  * @typedef {{
  * withClass?: string, // ex: withClass: ".selected.blue"

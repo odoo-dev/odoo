@@ -2,7 +2,6 @@ import { useComponent, useState } from "@web/owl2/utils";
 import { Component, onWillUnmount, status } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { Mp3Encoder } from "./mp3_encoder";
 import { CallPermissionDeniedDialog } from "@mail/discuss/call/common/call_permission_denied_dialog";
 import { loadLamejs } from "@mail/discuss/voice_message/common/voice_message_service";
@@ -102,7 +101,7 @@ export function useVoiceRecorder(params = {}) {
         state.isActionPending = true;
         if (!microphone) {
             try {
-                microphone = await browser.navigator.mediaDevices.getUserMedia({
+                microphone = await navigator.mediaDevices.getUserMedia({
                     audio: store.settings.audioConstraints,
                 });
                 if (status(component) === "destroyed") {
@@ -117,11 +116,11 @@ export function useVoiceRecorder(params = {}) {
         }
         state.elapsed = "00 : 00";
         state.recording = true;
-        audioContext = new browser.AudioContext();
+        audioContext = new AudioContext();
 
         await loadLamejs();
         await audioContext.audioWorklet.addModule("/discuss/voice/worklet_processor");
-        processor = new browser.AudioWorkletNode(audioContext, "processor");
+        processor = new AudioWorkletNode(audioContext, "processor");
         processor.port.onmessage = (e) => {
             if (state.recording && !startTimeStamp) {
                 startTimeStamp = e.timeStamp;

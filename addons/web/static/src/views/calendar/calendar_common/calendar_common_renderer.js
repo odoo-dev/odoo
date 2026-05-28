@@ -1,5 +1,4 @@
 import { useLayoutEffect, useRef } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { getLocalYearAndWeek } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
 import { is24HourFormat } from "@web/core/l10n/time";
@@ -297,10 +296,10 @@ export class CalendarCommonRenderer extends Component {
     onEventClick(info) {
         if (this.clickTimeoutId) {
             this.onDblClick(info);
-            browser.clearTimeout(this.clickTimeoutId);
+            clearTimeout(this.clickTimeoutId);
             this.clickTimeoutId = null;
         } else {
-            this.clickTimeoutId = browser.setTimeout(() => {
+            this.clickTimeoutId = setTimeout(() => {
                 this.onClick(info);
                 this.clickTimeoutId = null;
             }, 250);
@@ -416,21 +415,17 @@ export class CalendarCommonRenderer extends Component {
         if (info.oldEvent.allDay !== info.event.allDay) {
             forceAllDay = true;
         }
-        this.props.model
-            .updateRecord(this.fcEventToRecord(info.event, forceAllDay))
-            .catch((e) => {
-                info.revert();
-                throw e;
-            });
+        this.props.model.updateRecord(this.fcEventToRecord(info.event, forceAllDay)).catch((e) => {
+            info.revert();
+            throw e;
+        });
     }
     onEventResize(info) {
         this.fc.api.unselect();
-        this.props.model
-            .updateRecord(this.fcEventToRecord(info.event))
-            .catch((e) => {
-                info.revert();
-                throw e;
-            });
+        this.props.model.updateRecord(this.fcEventToRecord(info.event)).catch((e) => {
+            info.revert();
+            throw e;
+        });
     }
     async onEventScheduled(info) {
         const original = info.event;
@@ -440,7 +435,7 @@ export class CalendarCommonRenderer extends Component {
         original.remove();
     }
     /**
-     * 
+     *
      * @param {object} event fullcalendar event
      * @param {boolean} forceAllDay if true, set the all_day to the value of allDay, otherwise keep the original record value
      * @returns {object} odoo record values
@@ -475,7 +470,10 @@ export class CalendarCommonRenderer extends Component {
                     // [X, 2000-01-01 16:00] -> [X, 2000-01-02[ -> [X, 2000-01-01 16:00]
                     // [X, 2000-01-02 00:00] -> [X, 2000-01-02[ -> [X, 2000-01-02 00:00]
                     // [X, 2000-01-02 00:01] -> [X, 2000-01-03[ -> [X, 2000-01-02 00:01]
-                    if (existingRecord.end.toMillis() !== existingRecord.end.startOf("day").toMillis()) {
+                    if (
+                        existingRecord.end.toMillis() !==
+                        existingRecord.end.startOf("day").toMillis()
+                    ) {
                         res.end = res.end.minus({ days: 1 });
                     }
                     res.end = res.end.set({

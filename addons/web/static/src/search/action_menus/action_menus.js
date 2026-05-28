@@ -1,5 +1,4 @@
 import { useState } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { makeContext } from "@web/core/context";
 import { session } from "@web/session";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -137,7 +136,7 @@ export class ActionMenus extends Component {
             this.executeAction(item.action);
         } else if (item.url) {
             // Event has been prevented at its source: we need to redirect manually.
-            browser.location = item.url;
+            location = item.url;
         }
     }
 

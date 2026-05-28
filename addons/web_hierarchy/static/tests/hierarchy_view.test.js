@@ -18,7 +18,6 @@ import {
     toggleMenuItem,
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { WebClient } from "@web/webclient/webclient";
 import { HierarchyModel } from "@web_hierarchy/hierarchy_model";
 
@@ -1513,12 +1512,12 @@ test("Avoid fetching subnodes if those subnodes are already in the view", async 
 });
 
 test("Open record on new window", async () => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         open: (url) => {
             expect.step(`opened in new window: ${url}`);
         },
     });
-    patchWithCleanup(browser.sessionStorage, {
+    patchWithCleanup(sessionStorage, {
         setItem(key, value) {
             expect.step(`set ${key}-${value}`);
             super.setItem(key, value);

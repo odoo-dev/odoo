@@ -9,6 +9,7 @@ import { ListCoreViewPlugin } from "@spreadsheet/list/plugins/list_core_view_plu
 import { ListUIPlugin } from "@spreadsheet/list/plugins/list_ui_plugin";
 
 import { SEE_RECORD_LIST, SEE_RECORD_LIST_VISIBLE } from "./list_actions";
+
 const { inverseCommandRegistry } = spreadsheet.registries;
 
 function identity(cmd) {

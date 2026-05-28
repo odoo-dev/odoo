@@ -1,5 +1,6 @@
 import { registry } from "@web/core/registry";
 import { stepUtils } from "@web_tour/tour_utils";
+
 function checkLoginColumn(translation) {
     return [
         stepUtils.showAppsMenuItem(),

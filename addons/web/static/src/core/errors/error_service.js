@@ -1,4 +1,3 @@
-import { browser } from "../browser/browser";
 import { registry } from "../registry";
 import { completeUncaughtError, getErrorTechnicalName } from "./error_utils";
 import { isBrowserFirefox, isBrowserChrome } from "@web/core/browser/feature_detection";
@@ -88,7 +87,7 @@ export const errorService = {
             }
         }
 
-        browser.addEventListener("error", async (ev) => {
+        window.addEventListener("error", async (ev) => {
             const { colno, error, filename, lineno, message } = ev;
             // We never want to display the following ResizeObserver error to the end-user. It
             // simply indicates that the browser delayed notifications to the next frame to prevent
@@ -130,7 +129,7 @@ export const errorService = {
             handleError(uncaughtError);
         });
 
-        browser.addEventListener("unhandledrejection", async (ev) => {
+        window.addEventListener("unhandledrejection", async (ev) => {
             let error = ev.reason;
 
             if (error && error.type === "error" && "eventPhase" in error) {

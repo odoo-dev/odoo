@@ -13,7 +13,6 @@ import { KioskConfirmation } from "@hr_attendance/components/confirmation/confir
 import { KioskGreetings } from "@hr_attendance/components/greetings/greetings";
 import { KioskPinCode } from "@hr_attendance/components/pin_code/pin_code";
 import { KioskBarcodeScanner } from "@hr_attendance/components/kiosk_barcode/kiosk_barcode";
-import { browser } from "@web/core/browser/browser";
 import { isIosApp } from "@web/core/browser/feature_detection";
 import { DocumentationLink } from "@web/views/widgets/documentation_link/documentation_link";
 import { NewEmployeeDialog } from "@hr_attendance/components/new_employee_dialog/new_employee_dialog";
@@ -54,7 +53,7 @@ class kioskAttendanceApp extends Component {
         this.state = useState({
             active_display: "settings",
             displayDemoMessage:
-                browser.localStorage.getItem("hr_attendance.ShowDemoMessage") !== "false",
+                localStorage.getItem("hr_attendance.ShowDemoMessage") !== "false",
             isStreamAvailable: false,
         });
         this.lockScanner = false;
@@ -244,7 +243,7 @@ class kioskAttendanceApp extends Component {
 
     removeDemoMessage() {
         this.state.displayDemoMessage = false;
-        browser.localStorage.setItem("hr_attendance.ShowDemoMessage", "false");
+        localStorage.setItem("hr_attendance.ShowDemoMessage", "false");
         return;
     }
 

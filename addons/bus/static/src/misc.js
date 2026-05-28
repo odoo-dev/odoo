@@ -1,5 +1,3 @@
-import { browser } from "@web/core/browser/browser";
-
 /**
  * Returns a function, that, when invoked, will only be triggered at most once
  * during a given window of time. Normally, the throttled function will run
@@ -35,7 +33,7 @@ function throttle(func, wait, options) {
         args = arguments;
         if (remaining <= 0 || remaining > wait) {
             if (timeout) {
-                browser.clearTimeout(timeout);
+                clearTimeout(timeout);
                 timeout = null;
             }
             previous = _now;
@@ -44,13 +42,13 @@ function throttle(func, wait, options) {
                 context = args = null;
             }
         } else if (!timeout && options.trailing !== false) {
-            timeout = browser.setTimeout(later, remaining);
+            timeout = setTimeout(later, remaining);
         }
         return result;
     };
 
     throttled.cancel = function () {
-        browser.clearTimeout(timeout);
+        clearTimeout(timeout);
         previous = 0;
         timeout = context = args = null;
     };

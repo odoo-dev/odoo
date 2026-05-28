@@ -9,6 +9,7 @@ import { useIdleTimer } from "./utils/use_idle_timer";
 import useTours from "./hooks/use_tours";
 import { init as initDebugFormatters } from "./utils/debug-formatter";
 import { debounce } from "@web/core/utils/timing";
+
 /**
  * Chrome is the root component of the PoS App.
  */

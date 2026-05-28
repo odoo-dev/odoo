@@ -48,6 +48,7 @@ import {
 import { cookie } from "@web/core/browser/cookie";
 import { SearchBar, DROPDOWN_CLOSE_DELAY } from "@web/search/search_bar/search_bar";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
+
 class Partner extends models.Model {
     name = fields.Char();
     bar = fields.Many2one({ relation: "partner" });

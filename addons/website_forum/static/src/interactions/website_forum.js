@@ -2,7 +2,6 @@ import { scrollTo, closestScrollable } from "@html_builder/utils/scrolling";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 import { markup } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { cookie } from "@web/core/browser/cookie";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
@@ -72,7 +71,7 @@ export class WebsiteForum extends Interaction {
         // welcome message action button
         const forumRegisterUrlEl = this.el.querySelector(".forum_register_url");
         if (forumRegisterUrlEl) {
-            const forumLogin = `${browser.location.origin}/odoo?redirect=${encodeURIComponent(browser.location.href)}`;
+            const forumLogin = `${location.origin}/odoo?redirect=${encodeURIComponent(location.href)}`;
             forumRegisterUrlEl.href = forumLogin;
         }
 
@@ -107,7 +106,7 @@ export class WebsiteForum extends Interaction {
                     // - /forum/name-1/post/something-5
                     // - /forum/name-1/post/something-5/edit
                     // TODO: Make this more robust.
-                    resId: +browser.location.pathname.split("-").slice(-1)[0].split("/")[0],
+                    resId: +location.pathname.split("-").slice(-1)[0].split("/")[0],
                 }),
                 ...(!isReply && {
                     resizable: !isMobileOS(),

@@ -1,7 +1,6 @@
 import { onWillRender, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
 
 import { Component } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
@@ -23,8 +22,8 @@ export class SettingsPage extends Component {
         if (this.props.modules) {
             let selectedTab = this.props.initialTab || this.props.modules[0].key;
 
-            if (browser.location.hash) {
-                const hash = browser.location.hash.substring(1);
+            if (location.hash) {
+                const hash = location.hash.substring(1);
                 if (this.props.modules.map((m) => m.key).includes(hash)) {
                     selectedTab = hash;
                 } else {

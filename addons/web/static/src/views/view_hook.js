@@ -1,7 +1,6 @@
 import { render, useComponent, useLayoutEffect } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { useBus, useService } from "@web/core/utils/hooks";
-import { browser } from "@web/core/browser/browser";
 import { evaluateExpr } from "@web/core/py_js/py";
 import { download } from "@web/core/network/download";
 import { rpc } from "@web/core/network/rpc";
@@ -110,8 +109,8 @@ export function useBounceButton(containerRef, shouldBounce) {
                 const button = ui.activeElement.querySelector("[data-bounce-button]");
                 if (button && shouldBounce(ev.target)) {
                     button.classList.add("o_catch_attention");
-                    browser.clearTimeout(timeout);
-                    timeout = browser.setTimeout(() => {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
                         button.classList.remove("o_catch_attention");
                     }, 400);
                 }

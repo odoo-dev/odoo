@@ -3,7 +3,6 @@ import { _t } from "@web/core/l10n/translation";
 import { useInputField } from "../input_field_hook";
 import { standardFieldProps } from "../standard_field_props";
 import { useChildRef } from "@web/core/utils/hooks";
-import { browser } from "@web/core/browser/browser";
 import { Component } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -36,7 +35,7 @@ export class PhoneField extends Component {
     }
 
     onLinkClicked() {
-        browser.open(this.phoneHref);
+        window.open(this.phoneHref);
     }
 }
 

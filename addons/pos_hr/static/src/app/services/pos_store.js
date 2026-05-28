@@ -1,6 +1,5 @@
 import { patch } from "@web/core/utils/patch";
 import { PosStore } from "@point_of_sale/app/services/pos_store";
-import { browser } from "@web/core/browser/browser";
 
 patch(PosStore.prototype, {
     async setup() {
@@ -12,7 +11,7 @@ patch(PosStore.prototype, {
                 this.navigate("LoginScreen");
             }
         }
-        browser.addEventListener("online", () => {
+        window.addEventListener("online", () => {
             this.employeeBuffer.forEach((employee) =>
                 this.data.write("pos.session", [this.config.current_session_id.id], {
                     employee_id: employee.id,

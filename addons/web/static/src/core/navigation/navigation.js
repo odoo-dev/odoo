@@ -4,7 +4,6 @@ import { useService } from "@web/core/utils/hooks";
 import { deepMerge } from "@web/core/utils/objects";
 import { scrollTo } from "@web/core/utils/scrolling";
 import { throttleForAnimation } from "@web/core/utils/timing";
-import { browser } from "@web/core/browser/browser";
 
 export const ACTIVE_ELEMENT_CLASS = "focus";
 const throttledFocus = throttleForAnimation((el) => el?.focus());
@@ -456,7 +455,7 @@ export function useNavigation(containerRef, options = {}) {
         () => [containerRef.el]
     );
 
-    useExternalListener(browser, "focus", ({ target }) => navigator._checkFocus(target), true);
+    useExternalListener(window, "focus", ({ target }) => navigator._checkFocus(target), true);
     onWillUnmount(() => navigator._destroy());
 
     return navigator;

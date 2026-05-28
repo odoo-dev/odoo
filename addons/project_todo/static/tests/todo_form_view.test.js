@@ -9,7 +9,6 @@ import {
     mountWithCleanup,
     onRpc,
 } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { WebClient } from "@web/webclient/webclient";
 import { ProjectTask } from "./mock_server/mock_models/project_task";
 import { defineTodoModels } from "./todo_test_helpers";
@@ -148,7 +147,7 @@ test("Check if opening form view from activity view does open with chatter visbl
     // Second animationFrame for re-rendering as chatter is toggled by change in state
     await animationFrame();
     expect("a.todo_toggle_chatter.active").toHaveCount(1);
-    expect(browser.localStorage.getItem("isChatterOpened")).toBe(null);
+    expect(localStorage.getItem("isChatterOpened")).toBe(null);
 });
 
 test.tags("desktop");
@@ -160,13 +159,13 @@ test("check local stored value on click of chatter toggle icon", async () => {
     });
 
     expect("a.todo_toggle_chatter.active").toHaveCount(0);
-    expect(browser.localStorage.getItem("isChatterOpened")).toBe(null);
+    expect(localStorage.getItem("isChatterOpened")).toBe(null);
     click("a.todo_toggle_chatter");
     await animationFrame();
     expect("a.todo_toggle_chatter.active").toHaveCount(1);
-    expect(browser.localStorage.getItem("isChatterOpened")).toBe("true");
+    expect(localStorage.getItem("isChatterOpened")).toBe("true");
     click("a.todo_toggle_chatter");
     await animationFrame();
     expect("a.todo_toggle_chatter.active").toHaveCount(0);
-    expect(browser.localStorage.getItem("isChatterOpened")).toBe("false");
+    expect(localStorage.getItem("isChatterOpened")).toBe("false");
 });

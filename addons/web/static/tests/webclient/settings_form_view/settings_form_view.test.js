@@ -32,7 +32,6 @@ import {
     stepAllNetworkCalls,
 } from "@web/../tests/web_test_helpers";
 
-import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
 import { rpc } from "@web/core/network/rpc";
 import { RPCCache } from "@web/core/network/rpc_cache";
@@ -991,7 +990,7 @@ test("settings views does not write the id on the url", async () => {
 
     await getService("action").doAction(1);
     await runAllTimers();
-    expect(browser.location.pathname).toBe("/odoo/settings");
+    expect(location.pathname).toBe("/odoo/settings");
     expect(".o_field_boolean input").toHaveProperty("disabled", false);
     await click(".o_field_boolean input");
     await animationFrame();
@@ -1000,7 +999,7 @@ test("settings views does not write the id on the url", async () => {
 
     await animationFrame();
     expect(router.current.resId).toBe(undefined);
-    expect(browser.location.pathname).toBe("/odoo/settings");
+    expect(location.pathname).toBe("/odoo/settings");
 });
 
 test.tags("desktop");

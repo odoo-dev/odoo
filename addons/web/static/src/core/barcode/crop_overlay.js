@@ -1,6 +1,5 @@
 import { useRef } from "@web/owl2/utils";
 import { Component, onPatched } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { isIOS } from "@web/core/browser/feature_detection";
 import { clamp } from "@web/core/utils/numbers";
 
@@ -64,7 +63,7 @@ export class CropOverlay extends Component {
 
     executeOnResizeCallback() {
         const transparentRec = this.getTransparentRec(this.relativePosition, this.boundaryOverlay);
-        browser.localStorage.setItem(this.localStorageKey, JSON.stringify(transparentRec));
+        localStorage.setItem(this.localStorageKey, JSON.stringify(transparentRec));
         this.props.onResize({
             ...transparentRec,
             width: this.boundaryOverlay.width - 2 * transparentRec.x,
@@ -77,7 +76,7 @@ export class CropOverlay extends Component {
         const elementWidth = firstChildComputedStyle.width.slice(0, -2);
         const elementHeight = firstChildComputedStyle.height.slice(0, -2);
 
-        const stringSavedPoint = browser.localStorage.getItem(this.localStorageKey);
+        const stringSavedPoint = localStorage.getItem(this.localStorageKey);
         if (stringSavedPoint) {
             const savedPoint = JSON.parse(stringSavedPoint);
             this.relativePosition = {

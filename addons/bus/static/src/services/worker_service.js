@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
 
@@ -13,7 +12,7 @@ export class WorkerService {
     constructor(env, services) {
         this.params = services["bus.parameters"];
         this.worker = null;
-        this.isUsingSharedWorker = Boolean(browser.SharedWorker);
+        this.isUsingSharedWorker = Boolean(SharedWorker);
         this._state = WORKER_STATE.UNINITIALIZED;
         const promWithResolvers = Promise.withResolvers();
         this.workerInitPromise = promWithResolvers.promise;
@@ -31,7 +30,7 @@ export class WorkerService {
             const source = `importScripts("${workerURL}");`;
             workerURL = "data:application/javascript;base64," + window.btoa(source);
         }
-        const workerClass = this.isUsingSharedWorker ? browser.SharedWorker : browser.Worker;
+        const workerClass = this.isUsingSharedWorker ? SharedWorker : Worker;
         this.worker = new workerClass(workerURL, {
             name: this.isUsingSharedWorker ? "odoo:bus_shared_worker" : "odoo:bus_worker",
         });

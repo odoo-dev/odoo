@@ -3,6 +3,7 @@ import { useThreadActions } from "@mail/core/common/thread_actions";
 
 import { Component } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
+
 /**
  * @typedef {Object} Props
  * @property {import("@mail/core/common/thread_model").Thread} thread

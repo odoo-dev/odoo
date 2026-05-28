@@ -16,7 +16,6 @@ import { SearchBar } from "@web/search/search_bar/search_bar";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
 import { ViewScaleSelector } from "@web/views/view_components/view_scale_selector";
 import { CogMenu } from "@web/search/cog_menu/cog_menu";
-import { browser } from "@web/core/browser/browser";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { MultiSelectionButtons } from "@web/views/view_components/multi_selection_buttons";
 import { getLocalYearAndWeek } from "@web/core/l10n/dates";
@@ -77,11 +76,11 @@ export class CalendarController extends Component {
             getLocalState: () => this.model.exportedState,
         });
         this.keyExpandSidebar = `calendar_sidepanel_expanded,${this.env.config.viewId},${this.env.config.actionId}`;
-        const localSidePanelExpanded = browser.localStorage.getItem(this.keyExpandSidebar);
+        const localSidePanelExpanded = localStorage.getItem(this.keyExpandSidebar);
         this.state = useState({
             isWeekendVisible:
-                browser.localStorage.getItem("calendar.isWeekendVisible") != null
-                    ? JSON.parse(browser.localStorage.getItem("calendar.isWeekendVisible"))
+                localStorage.getItem("calendar.isWeekendVisible") != null
+                    ? JSON.parse(localStorage.getItem("calendar.isWeekendVisible"))
                     : true,
             sidePanelExpanded:
                 !this.env.isSmall &&
@@ -202,7 +201,7 @@ export class CalendarController extends Component {
 
     toggleSidePanel() {
         this.state.sidePanelExpanded = !this.state.sidePanelExpanded;
-        browser.localStorage.setItem(this.keyExpandSidebar, this.state.sidePanelExpanded);
+        localStorage.setItem(this.keyExpandSidebar, this.state.sidePanelExpanded);
     }
 
     get showCalendar() {
@@ -443,6 +442,6 @@ export class CalendarController extends Component {
 
     toggleWeekendVisibility() {
         this.state.isWeekendVisible = !this.state.isWeekendVisible;
-        browser.localStorage.setItem("calendar.isWeekendVisible", this.state.isWeekendVisible);
+        localStorage.setItem("calendar.isWeekendVisible", this.state.isWeekendVisible);
     }
 }

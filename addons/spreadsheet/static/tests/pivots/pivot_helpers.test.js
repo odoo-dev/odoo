@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { getFirstListFunction, hasListFormula } from "@spreadsheet/list/list_helpers";
 import { constants, helpers, CompiledFormula, Model } from "@odoo/o-spreadsheet";
 import { allowTranslations } from "@web/../tests/web_test_helpers";
+
 const {
     getFirstPivotFunction,
     getNumberOfPivotFunctions,
@@ -65,26 +66,42 @@ test("Number of formulas", async function () {
         "no_sheet",
         model.getters
     );
-    expect(getNumberOfPivotFunctions(formula,model.getters)).toBe(2);
+    expect(getNumberOfPivotFunctions(formula, model.getters)).toBe(2);
     expect(hasListFormula(formula, model.getters)).toBe(true);
-    const formula2 = CompiledFormula.Compile("=1+1", "no_sheet",model.getters);
+    const formula2 = CompiledFormula.Compile("=1+1", "no_sheet", model.getters);
     expect(getNumberOfPivotFunctions(formula2, model.getters)).toBe(0);
     expect(hasListFormula(formula2, model.getters)).toBe(false);
-    const formula3 = CompiledFormula.Compile("=bla", "no_sheet",model.getters);
+    const formula3 = CompiledFormula.Compile("=bla", "no_sheet", model.getters);
     expect(getNumberOfPivotFunctions(formula3, model.getters)).toBe(0);
     expect(hasListFormula(formula3, model.getters)).toBe(false);
 });
 
 test("getFirstPivotFunction does not crash when given crap", async function () {
     const model = new Model();
-    expect(getFirstListFunction(CompiledFormula.Compile("=SUM(A1)","no_sheet", model.getters))).toBe(undefined);
-    expect(getFirstPivotFunction(CompiledFormula.Compile("=SUM(A1)","no_sheet", model.getters))).toBe(undefined);
-    expect(getFirstListFunction(CompiledFormula.Compile("=1+1","no_sheet", model.getters))).toBe(undefined);
-    expect(getFirstPivotFunction(CompiledFormula.Compile("=1+1","no_sheet", model.getters))).toBe(undefined);
-    expect(getFirstListFunction(CompiledFormula.Compile("=bla","no_sheet", model.getters))).toBe(undefined);
-    expect(getFirstPivotFunction(CompiledFormula.Compile("=bla","no_sheet", model.getters))).toBe(undefined);
-    expect(getFirstListFunction(CompiledFormula.Compile("bla","no_sheet", model.getters))).toBe(undefined);
-    expect(getFirstPivotFunction(CompiledFormula.Compile("bla","no_sheet", model.getters))).toBe(undefined);
+    expect(
+        getFirstListFunction(CompiledFormula.Compile("=SUM(A1)", "no_sheet", model.getters))
+    ).toBe(undefined);
+    expect(
+        getFirstPivotFunction(CompiledFormula.Compile("=SUM(A1)", "no_sheet", model.getters))
+    ).toBe(undefined);
+    expect(getFirstListFunction(CompiledFormula.Compile("=1+1", "no_sheet", model.getters))).toBe(
+        undefined
+    );
+    expect(getFirstPivotFunction(CompiledFormula.Compile("=1+1", "no_sheet", model.getters))).toBe(
+        undefined
+    );
+    expect(getFirstListFunction(CompiledFormula.Compile("=bla", "no_sheet", model.getters))).toBe(
+        undefined
+    );
+    expect(getFirstPivotFunction(CompiledFormula.Compile("=bla", "no_sheet", model.getters))).toBe(
+        undefined
+    );
+    expect(getFirstListFunction(CompiledFormula.Compile("bla", "no_sheet", model.getters))).toBe(
+        undefined
+    );
+    expect(getFirstPivotFunction(CompiledFormula.Compile("bla", "no_sheet", model.getters))).toBe(
+        undefined
+    );
 });
 
 describe("toNormalizedPivotValue", () => {

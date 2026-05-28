@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
 import {
@@ -74,7 +73,7 @@ export class CalendarModel extends Model {
         if (!this.meta.scales.includes(this.meta.scale)) {
             this.meta.scale = this.meta.scales[0];
         }
-        browser.localStorage.setItem(this.storageKey, this.meta.scale);
+        localStorage.setItem(this.storageKey, this.meta.scale);
         const data = { ...this.data };
         if (params.date) {
             // notify with basic data to render a simple calendar before updating them
@@ -846,7 +845,7 @@ export class CalendarModel extends Model {
     }
 
     getLocalStorageScale() {
-        const localScaleId = browser.localStorage.getItem(this.storageKey);
+        const localScaleId = localStorage.getItem(this.storageKey);
         return this.meta.scales.includes(localScaleId) ? localScaleId : this.meta.scale;
     }
 
@@ -1086,8 +1085,7 @@ export class CalendarModel extends Model {
             colorField &&
             (() => {
                 const sameRelatedModel = colorField.relation === field.relation;
-                const sameRelatedField =
-                    colorField.related === `${fieldName}.${colorFieldName}`;
+                const sameRelatedField = colorField.related === `${fieldName}.${colorFieldName}`;
                 const shouldHaveColor = sameRelatedModel || sameRelatedField;
                 const colorToUse = raw ? value : rawRecord[fieldMapping.color];
                 return shouldHaveColor ? colorToUse : null;

@@ -27,7 +27,6 @@ import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { useSetupAction } from "@web/search/action_hook";
 import { WebClient } from "@web/webclient/webclient";
-import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
@@ -788,7 +787,7 @@ test("doing browser back temporarily disables the UI", async () => {
     });
 
     def = new Deferred();
-    browser.history.back();
+    history.back();
     expect(document.body.style.pointerEvents).toBe("none");
     // await contains(".o_control_panel .breadcrumb-item").click(); todo JUM: click on breadcrumb
     def.resolve();

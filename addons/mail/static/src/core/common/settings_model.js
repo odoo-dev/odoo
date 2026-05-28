@@ -1,6 +1,5 @@
 import { hasHardwareAcceleration } from "@mail/utils/common/misc";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { fields, Record } from "@mail/model/export";
 import { rpc } from "@web/core/network/rpc";
 
@@ -219,11 +218,11 @@ export class Settings extends Record {
         }
         const key = `${partnerId}_${guestId}`;
         if (this.volumeSettingsTimeouts.get(key)) {
-            browser.clearTimeout(this.volumeSettingsTimeouts.get(key));
+            clearTimeout(this.volumeSettingsTimeouts.get(key));
         }
         this.volumeSettingsTimeouts.set(
             key,
-            browser.setTimeout(
+            setTimeout(
                 this._onSaveVolumeSettingTimeout.bind(this, { key, partnerId, guestId, volume }),
                 5000
             )

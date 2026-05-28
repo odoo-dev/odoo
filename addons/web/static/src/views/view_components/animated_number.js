@@ -1,5 +1,4 @@
 import { useState } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { formatInteger, formatMonetary } from "@web/views/fields/formatters";
 
 import { Component, onWillUnmount, onWillUpdateProps } from "@odoo/owl";
@@ -35,7 +34,7 @@ export class AnimatedNumber extends Component {
             const { value: from } = this.props;
             const { value: to, duration } = nextProps;
             if (!this.constructor.enableAnimations || !duration || to <= from) {
-                browser.cancelAnimationFrame(this.handle);
+                cancelAnimationFrame(this.handle);
                 this.state.value = to;
                 return;
             }
@@ -46,13 +45,13 @@ export class AnimatedNumber extends Component {
                     this.state.value = to;
                 } else {
                     this.state.value = from + (to - from) * progress;
-                    this.handle = browser.requestAnimationFrame(animate);
+                    this.handle = requestAnimationFrame(animate);
                 }
             };
-            browser.cancelAnimationFrame(this.handle);
+            cancelAnimationFrame(this.handle);
             animate();
         });
-        onWillUnmount(() => browser.cancelAnimationFrame(this.handle));
+        onWillUnmount(() => cancelAnimationFrame(this.handle));
     }
 
     format(value) {

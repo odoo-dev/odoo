@@ -1,6 +1,5 @@
 import { useChildSubEnv, useState } from "@web/owl2/utils";
 import { Component, markRaw, onMounted, onWillStart, onWillUnmount } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
 
 import { useSpreadsheetNotificationStore } from "@spreadsheet/hooks";
@@ -20,17 +19,17 @@ spreadsheet.registries.topbarMenuRegistry.addChild("download_public_excel", ["fi
 });
 
 function readSheetIdFromURL() {
-    return new URLSearchParams(browser.location.hash.substring(1)).get("sid") ?? null;
+    return new URLSearchParams(location.hash.substring(1)).get("sid") ?? null;
 }
 
 function writeSheetIdToURL(sheetId) {
-    const url = new URL(browser.location.href);
-    const hash = new URLSearchParams(browser.location.hash.substring(1));
+    const url = new URL(location.href);
+    const hash = new URLSearchParams(location.hash.substring(1));
 
     if (hash.get("sid") !== sheetId) {
         hash.set("sid", sheetId);
         url.hash = hash.toString();
-        browser.history.replaceState(browser.history.state, null, url);
+        history.replaceState(history.state, null, url);
     }
 }
 

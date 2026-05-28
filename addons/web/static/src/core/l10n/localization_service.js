@@ -1,7 +1,6 @@
 import { session } from "@web/session";
 import { jsToPyLocale } from "@web/core/l10n/utils";
 import { user } from "@web/core/user";
-import { browser } from "../browser/browser";
 import { registry } from "../registry";
 import { strftimeToLuxonFormat } from "./dates";
 import { localization } from "./localization";
@@ -50,7 +49,7 @@ export const localizationService = {
         const fetchTranslations = async (hash) => {
             let queryString = objectToUrlEncodedString({ hash, lang });
             queryString = queryString.length > 0 ? `?${queryString}` : queryString;
-            const response = await browser.fetch(`${translationURL}${queryString}`, {
+            const response = await fetch(`${translationURL}${queryString}`, {
                 cache: "no-store",
             });
             if (!response.ok) {
@@ -107,7 +106,7 @@ export const localizationService = {
         translatedTerms[translationLoaded] = true;
         translationResolvers.resolve(true);
 
-        const locale = user.lang || browser.navigator.language;
+        const locale = user.lang || navigator.language;
         Settings.defaultLocale = locale;
         for (const [re, numberingSystem] of NUMBERING_SYSTEMS) {
             if (re.test(locale)) {

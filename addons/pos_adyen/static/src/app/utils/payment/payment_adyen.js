@@ -3,6 +3,7 @@ import { PaymentInterface } from "@point_of_sale/app/utils/payment/payment_inter
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { registry } from "@web/core/registry";
 import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
+
 const { DateTime } = luxon;
 
 const POLLING_INTERVAL_MS = 5000;

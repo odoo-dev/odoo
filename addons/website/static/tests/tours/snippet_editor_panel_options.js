@@ -8,7 +8,6 @@ import {
     selectFullText,
     unfoldOptionsGroup,
 } from "@website/js/tours/tour_utils";
-import { browser } from "@web/core/browser/browser";
 import { delay } from "@web/core/utils/concurrency";
 
 const checkIfParagraphSelected = (trigger) => ({
@@ -28,7 +27,7 @@ const checkIfTextToolbarVisible = {
     trigger: ".o-we-toolbar",
 };
 
-const oldWriteText = browser.navigator.clipboard.writeText;
+const oldWriteText = navigator.clipboard.writeText;
 
 registerWebsitePreviewTour(
     "snippet_editor_panel_options",
@@ -63,7 +62,7 @@ registerWebsitePreviewTour(
             async run(helpers) {
                 // Patch and ignore write on clipboard in tour as we don't have
                 // permissions.
-                browser.navigator.clipboard.writeText = () => {
+                navigator.clipboard.writeText = () => {
                     console.info("Copy in clipboard ignored!");
                 };
                 await helpers.click();
@@ -74,7 +73,7 @@ registerWebsitePreviewTour(
             trigger: ".o_notification_manager .o_notification_content",
             run() {
                 // Cleanup the patched clipboard method
-                browser.navigator.clipboard.writeText = oldWriteText;
+                navigator.clipboard.writeText = oldWriteText;
 
                 const { textContent } = this.anchor;
                 const url = textContent.substring(textContent.indexOf("/"));

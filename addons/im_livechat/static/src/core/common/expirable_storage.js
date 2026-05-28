@@ -1,5 +1,4 @@
 import { EventBus } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 
 const BASE_STORAGE_KEY = "EXPIRABLE_STORAGE_";
 const CLEAR_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
@@ -8,12 +7,12 @@ function cleanupExpirableStorage() {
     const now = Date.now();
     // Next line is for testing compatibility as for..in is not supported by
     // the `MockStorage` class.
-    const keys = browser.localStorage.items?.keys() ?? Object.keys(browser.localStorage);
+    const keys = localStorage.items?.keys() ?? Object.keys(localStorage);
     for (const key of keys) {
         if (key.startsWith(BASE_STORAGE_KEY)) {
-            const item = JSON.parse(browser.localStorage.getItem(key));
+            const item = JSON.parse(localStorage.getItem(key));
             if (item.expires && item.expires < now) {
-                browser.localStorage.removeItem(key);
+                localStorage.removeItem(key);
             }
         }
     }
@@ -21,7 +20,7 @@ function cleanupExpirableStorage() {
 
 const storageBus = new EventBus();
 const storageFnToWrapper = new Map();
-browser.addEventListener("storage", ({ key, newValue }) => {
+window.addEventListener("storage", ({ key, newValue }) => {
     if (key?.startsWith(BASE_STORAGE_KEY)) {
         const actualKey = key.slice(BASE_STORAGE_KEY.length);
         storageBus.trigger(actualKey, newValue ? JSON.parse(newValue).value : null);
@@ -32,7 +31,7 @@ export const expirableStorage = {
     /** @param {string} key */
     getItem(key) {
         cleanupExpirableStorage();
-        const item = browser.localStorage.getItem(`${BASE_STORAGE_KEY}${key}`);
+        const item = localStorage.getItem(`${BASE_STORAGE_KEY}${key}`);
         if (item) {
             return JSON.parse(item).value;
         }
@@ -48,14 +47,11 @@ export const expirableStorage = {
         if (ttl) {
             expires = Date.now() + ttl * 1000;
         }
-        browser.localStorage.setItem(
-            `${BASE_STORAGE_KEY}${key}`,
-            JSON.stringify({ value, expires })
-        );
+        localStorage.setItem(`${BASE_STORAGE_KEY}${key}`, JSON.stringify({ value, expires }));
     },
     /** @param {string} key */
     removeItem(key) {
-        browser.localStorage.removeItem(`${BASE_STORAGE_KEY}${key}`);
+        localStorage.removeItem(`${BASE_STORAGE_KEY}${key}`);
     },
     /**
      * @param {string} key

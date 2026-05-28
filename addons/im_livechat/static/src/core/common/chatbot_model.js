@@ -1,6 +1,5 @@
 import { AND, fields, Record } from "@mail/model/export";
 import { rpc, ConnectionAbortedError, ConnectionLostError, RPCError } from "@web/core/network/rpc";
-import { browser } from "@web/core/browser/browser";
 import { debounce } from "@web/core/utils/timing";
 import { expirableStorage } from "@im_livechat/core/common/expirable_storage";
 
@@ -191,7 +190,7 @@ export class Chatbot extends Record {
         ) {
             return;
         }
-        this.nextStepTimeout = browser.setTimeout(
+        this.nextStepTimeout = setTimeout(
             async () => this._runUntilUserInputStep(),
             Chatbot.TYPING_DELAY
         );
@@ -278,7 +277,7 @@ export class Chatbot extends Record {
 
     /** @param {string} url */
     redirect(url) {
-        browser.open(url, "_blank");
+        window.open(url, "_blank");
     }
 
     /**

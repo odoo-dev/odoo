@@ -1,5 +1,4 @@
 import { reactive } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
@@ -111,7 +110,7 @@ export const busService = {
                                     name: _t("Refresh"),
                                     primary: true,
                                     onClick: () => {
-                                        browser.location.reload();
+                                        location.reload();
                                     },
                                 },
                             ],
@@ -151,17 +150,17 @@ export const busService = {
             return workerInitPromise;
         }
 
-        browser.addEventListener("pagehide", ({ persisted }) => {
+        window.addEventListener("pagehide", ({ persisted }) => {
             if (!persisted) {
                 // Page is gonna be unloaded, disconnect this client
                 // from the worker.
                 workerService.send("BUS:LEAVE");
             }
         });
-        browser.addEventListener(
+        window.addEventListener(
             "online",
             () => {
-                backOnlineTimeout = browser.setTimeout(() => {
+                backOnlineTimeout = setTimeout(() => {
                     if (state.isActive) {
                         workerService.send("BUS:START");
                     }
@@ -169,7 +168,7 @@ export const busService = {
             },
             { capture: true }
         );
-        browser.addEventListener(
+        window.addEventListener(
             "offline",
             () => {
                 clearTimeout(backOnlineTimeout);

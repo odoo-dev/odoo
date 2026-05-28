@@ -42,6 +42,7 @@ import * as spreadsheet from "@odoo/o-spreadsheet";
 import { waitForDataLoaded } from "@spreadsheet/helpers/model";
 import { Partner, Product } from "../../helpers/data";
 import { createSheet, deleteSheet } from "../../helpers/commands";
+
 const { toZone } = spreadsheet.helpers;
 const { pivotRegistry, pivotNormalizationValueRegistry } = spreadsheet.registries;
 

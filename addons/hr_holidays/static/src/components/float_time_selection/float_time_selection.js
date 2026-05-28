@@ -5,6 +5,7 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { FloatTimeSelectionPopover } from "./float_time_selection_popover";
 
 import { FloatTimeField, floatTimeField } from "@web/views/fields/float_time/float_time_field";
+
 const { DateTime } = luxon;
 
 function floatToHoursMinutes(floatValue) {

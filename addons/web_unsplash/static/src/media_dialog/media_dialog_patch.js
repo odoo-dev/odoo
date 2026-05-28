@@ -8,7 +8,6 @@ patch(MediaDialog.prototype, {
         super.setup();
         this.unsplashService = useService("unsplash");
     },
-
     async save() {
         const selectedImages = this.selectedMedia[TABS.IMAGES.id];
         if (selectedImages) {

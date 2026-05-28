@@ -1,5 +1,4 @@
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { rpc } from "@web/core/network/rpc";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
@@ -41,7 +40,7 @@ class WebsiteLinksCodeEditor extends Interaction {
             trigger: "manual",
             placement: "right",
         });
-        browser.navigator.clipboard.writeText(copyButtonEl.dataset.clipboardText);
+        navigator.clipboard.writeText(copyButtonEl.dataset.clipboardText);
         tooltip.show();
         this.waitForTimeout(() => tooltip.hide(), 1200);
     }

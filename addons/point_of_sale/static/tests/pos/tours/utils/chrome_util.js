@@ -2,6 +2,7 @@
 import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import { negate } from "@point_of_sale/../tests/generic_helpers/utils";
 import * as Numpad from "@point_of_sale/../tests/generic_helpers/numpad_util";
+
 const { DateTime } = luxon;
 
 export function confirmPopup() {

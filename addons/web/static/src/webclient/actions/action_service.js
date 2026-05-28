@@ -1,6 +1,5 @@
 import { reactive, useChildSubEnv } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { makeContext } from "@web/core/context";
 import { useDebugCategory } from "@web/core/debug/debug_context";
 import { evaluateExpr } from "@web/core/py_js/py";
@@ -164,7 +163,7 @@ export function makeActionManager(env, router = _router) {
      * @returns {Promise<object[]>} an array of virtual controllers
      */
     async function _controllersFromState(state) {
-        const currentState = JSON.parse(browser.sessionStorage.getItem("current_state") || "{}");
+        const currentState = JSON.parse(sessionStorage.getItem("current_state") || "{}");
         if (router.stateToUrl(currentState) === router.stateToUrl(state)) {
             state = currentState;
         }
@@ -500,7 +499,7 @@ export function makeActionManager(env, router = _router) {
     function _getActionParams(state) {
         const options = {};
         let actionRequest = null;
-        const storedAction = browser.sessionStorage.getItem("current_action");
+        const storedAction = sessionStorage.getItem("current_action");
         const lastAction = JSON.parse(storedAction || "{}");
         // If this method is called because of a company switch, the
         // stored allowed_company_ids is incorrect.
@@ -836,15 +835,15 @@ export function makeActionManager(env, router = _router) {
         // "After creating a new auxiliary browsing context and document, the session storage is copied over."
 
         // Store current action of the current window
-        const currentAction = browser.sessionStorage.getItem("current_action");
-        const currentState = browser.sessionStorage.getItem("current_state");
+        const currentAction = sessionStorage.getItem("current_action");
+        const currentState = sessionStorage.getItem("current_state");
         // Store on the session the action for the new window
-        browser.sessionStorage.setItem("current_action", action._originalAction || "{}");
-        browser.sessionStorage.setItem("current_state", JSON.stringify(state));
+        sessionStorage.setItem("current_action", action._originalAction || "{}");
+        sessionStorage.setItem("current_state", JSON.stringify(state));
         _openURL(router.stateToUrl(state));
         // restore the current action from the current window
-        browser.sessionStorage.setItem("current_action", currentAction);
-        browser.sessionStorage.setItem("current_state", currentState);
+        sessionStorage.setItem("current_action", currentAction);
+        sessionStorage.setItem("current_state", currentState);
     }
 
     /**
@@ -1015,11 +1014,8 @@ export function makeActionManager(env, router = _router) {
                     controllerStack = nextStack; // the controller is mounted, commit the new stack
                     pushState(controllerStack, { sync: true });
                     this.titleService.setParts({ action: controller.displayName });
-                    browser.sessionStorage.setItem(
-                        "current_action",
-                        action._originalAction || "{}"
-                    );
-                    browser.sessionStorage.setItem("current_lang", user.lang);
+                    sessionStorage.setItem("current_action", action._originalAction || "{}");
+                    sessionStorage.setItem("current_lang", user.lang);
                 }
                 resolve();
                 env.bus.trigger("ACTION_MANAGER:UI-UPDATED", _getActionMode(action));
@@ -1138,7 +1134,7 @@ export function makeActionManager(env, router = _router) {
     // ---------------------------------------------------------------------------
 
     function _openURL(url) {
-        const w = browser.open(url, "_blank");
+        const w = window.open(url, "_blank");
         if (!w || w.closed || typeof w.closed === "undefined") {
             const msg = _t(
                 "A popup window has been blocked. You may need to change your browser settings to allow popup windows for this page. You can also copy the link and paste it in a new tab."
@@ -1174,7 +1170,7 @@ export function makeActionManager(env, router = _router) {
             url = "/" + url;
         }
         if (action.target === "self") {
-            browser.location.assign(url);
+            location.assign(url);
         } else if (action.target === "download") {
             _openURL(url);
         } else {
@@ -1371,12 +1367,15 @@ export function makeActionManager(env, router = _router) {
         }
         if (action.report_type === "qweb-html") {
             return _executeReportClientAction(action, options);
-        } else if (action.report_type.startsWith("qweb-pdf") || action.report_type === "qweb-text") {
+        } else if (
+            action.report_type.startsWith("qweb-pdf") ||
+            action.report_type === "qweb-text"
+        ) {
             let type = action.report_type.slice(5);
             let engineName;
             if (type.startsWith("pdf-")) {
                 engineName = type.slice(4);
-                type = "pdf"
+                type = "pdf";
             }
             let success, message;
             env.services.ui.block();
@@ -1385,7 +1384,13 @@ export function makeActionManager(env, router = _router) {
                 if (action.context) {
                     Object.assign(downloadContext, action.context);
                 }
-                ({ success, message } = await downloadReport(rpc, action, type, downloadContext, engineName));
+                ({ success, message } = await downloadReport(
+                    rpc,
+                    action,
+                    type,
+                    downloadContext,
+                    engineName
+                ));
             } finally {
                 env.services.ui.unblock();
             }
@@ -1540,7 +1545,7 @@ export function makeActionManager(env, router = _router) {
                     // maybe we should force escaping in xml or do a better parse of the args array
                     additionalArgs = JSON.parse(params.args.replace(/'/g, '"'));
                 } catch {
-                    browser.console.error("Could not JSON.parse arguments", params.args);
+                    console.error("Could not JSON.parse arguments", params.args);
                 }
                 args = args.concat(additionalArgs);
             }
@@ -1774,11 +1779,11 @@ export function makeActionManager(env, router = _router) {
      */
 
     async function loadState(state = router.current) {
-        const lang = browser.sessionStorage.getItem("current_lang");
+        const lang = sessionStorage.getItem("current_lang");
         if (lang && lang !== user.lang) {
-            browser.sessionStorage.removeItem("current_action");
-            browser.sessionStorage.removeItem("current_lang");
-            browser.sessionStorage.removeItem("current_state");
+            sessionStorage.removeItem("current_action");
+            sessionStorage.removeItem("current_lang");
+            sessionStorage.removeItem("current_state");
         }
         const newStack = await _controllersFromState(state);
         const actionParams = _getActionParams(state);
@@ -1865,7 +1870,7 @@ export function makeActionManager(env, router = _router) {
         }
 
         const newState = makeState(cStack);
-        browser.sessionStorage.setItem("current_state", JSON.stringify(newState));
+        sessionStorage.setItem("current_state", JSON.stringify(newState));
 
         cStack.at(-1).state = newState;
         router.pushState(newState, Object.assign({ replace: true }, options));

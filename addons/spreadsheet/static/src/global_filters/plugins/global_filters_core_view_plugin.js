@@ -26,6 +26,7 @@ import { OdooCoreViewPlugin } from "@spreadsheet/plugins";
 import { getItemId } from "../../helpers/model";
 import { serializeDate } from "@web/core/l10n/dates";
 import { getFilterCellValue, getFilterValueDomain } from "../helpers";
+
 const { DateTime } = luxon;
 
 const { UuidGenerator, createEmptyExcelSheet, createEmptySheet, toXC, toNumber } = helpers;

@@ -4,7 +4,6 @@ import { ActionList } from "@mail/core/common/action_list";
 import { useHover, useMovable } from "@mail/utils/common/hooks";
 import { Component } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { registry } from "@web/core/registry";
@@ -46,7 +45,7 @@ export class ChatHub extends Component {
             right: `${this.chatHub.BUBBLE_OUTER + this.chatHub.BUBBLE_START}px;`,
         });
         this.onResize();
-        useExternalListener(browser, "resize", this.onResize);
+        useExternalListener(window, "resize", this.onResize);
         useLayoutEffect(() => {
             if (this.chatHub.folded.length && this.store.channels?.status === "not_fetched") {
                 this.store.channels.fetch();

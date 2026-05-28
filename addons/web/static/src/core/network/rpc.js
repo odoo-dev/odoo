@@ -1,5 +1,4 @@
 import { EventBus } from "@odoo/owl";
-import { browser } from "../browser/browser";
 import { omit } from "../utils/objects";
 
 /**
@@ -104,7 +103,7 @@ rpc._rpc = function (url, params, settings) {
             typeof settings.cache === "boolean" ? {} : settings.cache // cache can be boolean or an object with options (or an empty object of course)
         );
     }
-    const XHR = browser.XMLHttpRequest;
+    const XHR = XMLHttpRequest;
     const data = {
         id: rpcId++,
         jsonrpc: "2.0",

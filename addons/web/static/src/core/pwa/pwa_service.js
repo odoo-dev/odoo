@@ -1,5 +1,4 @@
 import { reactive } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import {
     isDisplayStandalone,
     isIOS,
@@ -21,7 +20,7 @@ const serviceRegistry = registry.category("services");
 let BEFOREINSTALLPROMPT_EVENT;
 let REGISTER_BEFOREINSTALLPROMPT_EVENT;
 
-browser.addEventListener("beforeinstallprompt", (ev) => {
+window.addEventListener("beforeinstallprompt", (ev) => {
     // This event is only triggered by the browser when the native prompt to install can be shown
     // This excludes incognito tabs, as well as visiting the website while the app is installed
     if (REGISTER_BEFOREINSTALLPROMPT_EVENT) {
@@ -42,7 +41,7 @@ const pwaService = {
         const state = reactive({
             canPromptToInstall: false,
             isAvailable: false,
-            isScopedApp: browser.location.href.includes("/scoped_app"),
+            isScopedApp: location.href.includes("/scoped_app"),
             isSupportedOnBrowser: false,
             startUrl: "/odoo",
             decline,
@@ -52,30 +51,28 @@ const pwaService = {
         });
 
         function _getInstallationState(scope = state.startUrl) {
-            const installationState = browser.localStorage.getItem("pwaService.installationState");
+            const installationState = localStorage.getItem("pwaService.installationState");
             return installationState ? JSON.parse(installationState)[scope] : "";
         }
 
         function _setInstallationState(value) {
-            const ls = JSON.parse(
-                browser.localStorage.getItem("pwaService.installationState") || "{}"
-            );
+            const ls = JSON.parse(localStorage.getItem("pwaService.installationState") || "{}");
             ls[state.startUrl] = value;
-            browser.localStorage.setItem("pwaService.installationState", JSON.stringify(ls));
+            localStorage.setItem("pwaService.installationState", JSON.stringify(ls));
         }
 
         function _removeInstallationState() {
-            const ls = JSON.parse(browser.localStorage.getItem("pwaService.installationState"));
+            const ls = JSON.parse(localStorage.getItem("pwaService.installationState"));
             delete ls[state.startUrl];
-            browser.localStorage.setItem("pwaService.installationState", JSON.stringify(ls));
+            localStorage.setItem("pwaService.installationState", JSON.stringify(ls));
         }
 
         if (state.isScopedApp) {
-            if (browser.location.pathname === "/scoped_app") {
+            if (location.pathname === "/scoped_app") {
                 // Installation page, use the path parameter in the URL
-                state.startUrl = "/" + new URL(browser.location.href).searchParams.get("path");
+                state.startUrl = "/" + new URL(location.href).searchParams.get("path");
             } else {
-                state.startUrl = browser.location.pathname;
+                state.startUrl = location.pathname;
             }
         }
 
@@ -84,11 +81,10 @@ const pwaService = {
         // On Safari devices, the check is also done on the display-mode and we rely on the installationState to
         // decide whether we must show the prompt or not
         state.isSupportedOnBrowser =
-            browser.BeforeInstallPromptEvent !== undefined ||
+            window.BeforeInstallPromptEvent !== undefined ||
             (isBrowserSafari() &&
                 !isDisplayStandalone() &&
-                (isIOS() ||
-                    (isMacOS() && browser.navigator.userAgent.match(/Version\/(\d+)/)[1] >= 17)));
+                (isIOS() || (isMacOS() && navigator.userAgent.match(/Version\/(\d+)/)[1] >= 17)));
 
         const installationState = _getInstallationState();
 

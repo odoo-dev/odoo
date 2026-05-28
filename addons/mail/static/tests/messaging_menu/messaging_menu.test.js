@@ -32,7 +32,6 @@ import {
     withUser,
 } from "@web/../tests/web_test_helpers";
 
-import { browser } from "@web/core/browser/browser";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { rpc } from "@web/core/network/rpc";
 import { getOrigin } from "@web/core/utils/urls";
@@ -170,10 +169,10 @@ test("no suggestion to enable chat push notifications in mobile app", async () =
 });
 
 test("rendering with PWA installation request", async () => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         BeforeInstallPromptEvent: () => {},
     });
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         getItem(key) {
             if (key === "pwaService.installationState") {
                 expect.step("getItem " + key);
@@ -193,7 +192,7 @@ test("rendering with PWA installation request", async () => {
     });
     // This event must be triggered to initialize the pwa service properly
     // as if it was run by a browser supporting PWA (never triggered in a test otherwise).
-    browser.dispatchEvent(new CustomEvent("beforeinstallprompt"));
+    window.dispatchEvent(new CustomEvent("beforeinstallprompt"));
     await expect.waitForSteps(["getItem pwaService.installationState"]);
     await contains(".o-mail-MessagingMenu-counter");
     await contains(".o-mail-MessagingMenu-counter:text('1')");
@@ -213,10 +212,10 @@ test("rendering with PWA installation request", async () => {
 });
 
 test("installation of the PWA request can be dismissed", async () => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         BeforeInstallPromptEvent: () => {},
     });
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         getItem(key) {
             if (key === "pwaService.installationState") {
                 expect.step("getItem " + key);
@@ -240,7 +239,7 @@ test("installation of the PWA request can be dismissed", async () => {
     });
     // This event must be triggered to initialize the pwa service properly
     // as if it was run by a browser supporting PWA (never triggered in a test otherwise).
-    browser.dispatchEvent(new CustomEvent("beforeinstallprompt"));
+    window.dispatchEvent(new CustomEvent("beforeinstallprompt"));
     await expect.waitForSteps(["getItem pwaService.installationState"]);
     await click(".o_menu_systray i[aria-label='Messages']");
     await click(".o-mail-NotificationItem .oi-close");
@@ -253,10 +252,10 @@ test("installation of the PWA request can be dismissed", async () => {
 });
 
 test("rendering with PWA installation request (dismissed)", async () => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         BeforeInstallPromptEvent: () => {},
     });
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         getItem(key) {
             if (key === "pwaService.installationState") {
                 expect.step("getItem " + key);
@@ -269,7 +268,7 @@ test("rendering with PWA installation request (dismissed)", async () => {
     await start();
     // This event must be triggered to initialize the pwa service properly
     // as if it was run by a browser supporting PWA (never triggered in a test otherwise).
-    browser.dispatchEvent(new CustomEvent("beforeinstallprompt"));
+    window.dispatchEvent(new CustomEvent("beforeinstallprompt"));
     await expect.waitForSteps(["getItem pwaService.installationState"]);
     await contains(".o_menu_systray i[aria-label='Messages']");
     await contains(".o-mail-MessagingMenu-counter", { count: 0 });
@@ -278,10 +277,10 @@ test("rendering with PWA installation request (dismissed)", async () => {
 });
 
 test("rendering with PWA installation request (already running as PWA)", async () => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         BeforeInstallPromptEvent: () => {},
     });
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         getItem(key) {
             if (key === "pwaService.installationState") {
                 expect.step("getItem " + key);
@@ -626,9 +625,9 @@ test("Counter is updated when receiving new message", async () => {
 });
 
 test("basic rendering", async () => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         Notification: {
-            ...browser.Notification,
+            ...Notification,
             permission: "denied",
         },
     });
@@ -1440,4 +1439,4 @@ test("preserve message link formatting in messaging menu", async () => {
     await start();
     await click(".o_menu_systray i[aria-label='Messages']");
     await contains(`.o-mail-NotificationItem-text a[href="https://odoo.com/"]`);
-})
+});

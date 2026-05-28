@@ -14,7 +14,6 @@ import {
 
 import { onWillStart, onWillUpdateProps } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { SUCCESS_SIGNAL } from "@web/webclient/clickbot/clickbot";
 import { WebClient } from "@web/webclient/webclient";
@@ -91,7 +90,7 @@ test("clickbot clickeverywhere test", async () => {
     onRpc("has_group", () => true);
     mockDate("2017-10-08T15:35:11.000");
     const clickEverywhereDef = new Deferred();
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         console: {
             log: (msg) => {
                 expect.step(msg);
@@ -184,14 +183,14 @@ test("only one app", async () => {
     onRpc("has_group", () => true);
     mockDate("2017-10-08T15:35:11.000");
     const clickEverywhereDef = new Deferred();
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         removeItem(key) {
             const savedState = super.getItem(key);
             expect.step("savedState: " + savedState);
             return super.removeItem(key);
         },
     });
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         console: {
             log: (msg) => {
                 expect.step(msg);
@@ -265,7 +264,7 @@ test("clickbot clickeverywhere test (with dropdown menu)", async () => {
     onRpc("has_group", () => true);
     mockDate("2017-10-08T15:35:11.000");
     const clickEverywhereDef = new Deferred();
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         console: {
             log: (msg) => {
                 expect.step(msg);
@@ -358,7 +357,7 @@ test("clickbot clickeverywhere test (with dropdown menu)", async () => {
 test("clickbot test waiting rpc after clicking filter", async () => {
     const clickEverywhereDef = new Deferred();
     let clickBotStarted = false;
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         console: {
             log: (msg) => {
                 if (msg === SUCCESS_SIGNAL) {
@@ -422,7 +421,7 @@ test("clickbot show rpc error when an error dialog is detected", async () => {
     const clickEverywhereDef = new Deferred();
     let clickBotStarted = false;
     let id = 1;
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         console: {
             log: (msg) => {
                 if (msg === "test successful") {
@@ -580,7 +579,7 @@ test("clickbot test waiting render after clicking filter", async () => {
     onRpc("has_group", () => true);
     const clickEverywhereDef = new Deferred();
     let clickBotStarted = false;
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         console: {
             log: (msg) => {
                 if (msg === SUCCESS_SIGNAL) {
@@ -655,7 +654,7 @@ test("clickbot clickeverywhere menu modal", async () => {
         </form>
     `;
     const clickEverywhereDef = new Deferred();
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         console: {
             log: (msg) => {
                 expect.step(msg);

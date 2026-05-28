@@ -1,6 +1,5 @@
 import { proxy } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 
@@ -36,34 +35,31 @@ export class DiscussCorePublicWeb {
                 );
             }
         });
-        browser.navigator.serviceWorker?.addEventListener(
-            "message",
-            async ({ data: { action, data } }) => {
-                if (action === "OPEN_CHANNEL") {
-                    const channel = await this.store["discuss.channel"].getOrFetch(data.id);
-                    channel?.open({ focus: true });
-                    if (!data.joinCall || !channel || this.store.rtc.localChannel?.eq(channel)) {
-                        return;
-                    }
-                    if (this.store.rtc.localChannel) {
-                        await this.store.rtc.leaveCall();
-                    }
-                    this.store.rtc.joinCall(channel);
-                } else if (action === "POST_RTC_LOGS") {
-                    const logs = data || {};
-                    logs.odooInfo = odoo.info;
-                    const string = JSON.stringify(logs);
-                    const blob = new Blob([string], { type: "application/json" });
-                    const downloadLink = document.createElement("a");
-                    const now = luxon.DateTime.now().toFormat("yyyy-LL-dd_HH-mm");
-                    downloadLink.download = `RtcLogs_${now}.json`;
-                    const url = URL.createObjectURL(blob);
-                    downloadLink.href = url;
-                    downloadLink.click();
-                    URL.revokeObjectURL(url);
+        navigator.serviceWorker?.addEventListener("message", async ({ data: { action, data } }) => {
+            if (action === "OPEN_CHANNEL") {
+                const channel = await this.store["discuss.channel"].getOrFetch(data.id);
+                channel?.open({ focus: true });
+                if (!data.joinCall || !channel || this.store.rtc.localChannel?.eq(channel)) {
+                    return;
                 }
+                if (this.store.rtc.localChannel) {
+                    await this.store.rtc.leaveCall();
+                }
+                this.store.rtc.joinCall(channel);
+            } else if (action === "POST_RTC_LOGS") {
+                const logs = data || {};
+                logs.odooInfo = odoo.info;
+                const string = JSON.stringify(logs);
+                const blob = new Blob([string], { type: "application/json" });
+                const downloadLink = document.createElement("a");
+                const now = luxon.DateTime.now().toFormat("yyyy-LL-dd_HH-mm");
+                downloadLink.download = `RtcLogs_${now}.json`;
+                const url = URL.createObjectURL(blob);
+                downloadLink.href = url;
+                downloadLink.click();
+                URL.revokeObjectURL(url);
             }
-        );
+        });
     }
 }
 

@@ -3,7 +3,6 @@ import { CallPreview } from "@mail/discuss/call/common/call_preview";
 
 import { Component, markup } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
@@ -57,11 +56,8 @@ export class WelcomePage extends Component {
         if (!this.store.self_user) {
             await this.store.self_guest?.updateGuestName(this.state.userName.trim());
         }
-        browser.localStorage.setItem("discuss_call_preview_join_mute", !this.state.hasMicrophone);
-        browser.localStorage.setItem(
-            "discuss_call_preview_join_video",
-            Boolean(this.state.hasCamera)
-        );
+        localStorage.setItem("discuss_call_preview_join_mute", !this.state.hasMicrophone);
+        localStorage.setItem("discuss_call_preview_join_video", Boolean(this.state.hasCamera));
         this.props.proceed?.();
     }
 

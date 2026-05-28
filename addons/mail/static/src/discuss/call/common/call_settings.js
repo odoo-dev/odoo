@@ -2,7 +2,6 @@ import { useExternalListener, useState } from "@web/owl2/utils";
 import { Component, onWillStart, xml } from "@odoo/owl";
 
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { useService } from "@web/core/utils/hooks";
 import { Tabs, TabHeader, TabPanel } from "@mail/core/common/tabs";
@@ -29,10 +28,10 @@ export class CallSettings extends Component {
             userDevices: [],
         });
         this.pttExtService = useService("discuss.ptt_extension");
-        useExternalListener(browser, "keydown", this._onKeyDown, { capture: true });
-        useExternalListener(browser, "keyup", this._onKeyUp, { capture: true });
+        useExternalListener(window, "keydown", this._onKeyDown, { capture: true });
+        useExternalListener(window, "keyup", this._onKeyUp, { capture: true });
         onWillStart(async () => {
-            if (!browser.navigator.mediaDevices) {
+            if (!navigator.mediaDevices) {
                 // zxing-js: isMediaDevicesSuported or canEnumerateDevices is false.
                 this.notification.add(
                     _t("Media devices unobtainable. SSL might not be set up properly."),
@@ -41,7 +40,7 @@ export class CallSettings extends Component {
                 console.warn("Media devices unobtainable. SSL might not be set up properly.");
                 return;
             }
-            this.state.userDevices = await browser.navigator.mediaDevices.enumerateDevices();
+            this.state.userDevices = await navigator.mediaDevices.enumerateDevices();
         });
     }
 

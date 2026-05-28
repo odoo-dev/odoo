@@ -1,6 +1,5 @@
 import { markup } from '@odoo/owl';
 import { Interaction } from '@web/public/interaction';
-import { browser } from '@web/core/browser/browser';
 import { registry } from '@web/core/registry';
 import { rpc } from '@web/core/network/rpc';
 import { redirect } from '@web/core/utils/urls';
@@ -67,7 +66,7 @@ export class CartLine extends Interaction {
 
         if (!data.cart_quantity) {
             // Ensure the last cart removal is recorded.
-            browser.sessionStorage.setItem('website_sale_cart_quantity', 0);
+            sessionStorage.setItem('website_sale_cart_quantity', 0);
             return redirect('/shop/cart');
         }
         input.value = data.quantity;

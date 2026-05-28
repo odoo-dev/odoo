@@ -1,6 +1,5 @@
 import { render, useRef, useState } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -92,7 +91,7 @@ export class BoardController extends Component {
         if (document.querySelector("canvas")) {
             // horrible hack to force charts to be recreated so they pick up the
             // proper size. also, no idea why raf is needed :(
-            browser.requestAnimationFrame(() => render(this, true));
+            requestAnimationFrame(() => render(this, true));
         }
     }
 

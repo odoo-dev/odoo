@@ -1,7 +1,6 @@
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 
 function jsonToFormData(params) {
     if (params instanceof FormData) {
@@ -53,7 +52,7 @@ async function actionGetDrive(env, action, type) {
 
     let result;
     try {
-        result = await browser.fetch(route, {
+        result = await fetch(route, {
             method: "POST",
             targetAddressSpace: useLna ? "local" : undefined,
             body: jsonToFormData(action.params),

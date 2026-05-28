@@ -38,7 +38,6 @@ import {
     serverState,
 } from "@web/../tests/web_test_helpers";
 import { assets } from "@web/core/assets";
-import { browser } from "@web/core/browser/browser";
 import { patch } from "@web/core/utils/patch";
 import { delay } from "@web/core/utils/concurrency";
 import { FormController } from "@web/views/form/form_controller";
@@ -328,7 +327,7 @@ test("only external links should always open on a new tab in readonly", async ()
             <body>
                 <p>first</p>
                 <a class="internal" href="/contactus">Relative link</a>
-                <a class="internal" href="${browser.location.origin}/contactus">Internal link</a>
+                <a class="internal" href="${location.origin}/contactus">Internal link</a>
                 <a class="external" href="https://google.com">External link</a>
             </body>`,
         },
@@ -338,7 +337,7 @@ test("only external links should always open on a new tab in readonly", async ()
             <body>
                 <p>second</p>
                 <a class="internal" href="/contactus2">Relative link</a>
-                <a class="internal" href="${browser.location.origin}/contactus2">Internal link</a>
+                <a class="internal" href="${location.origin}/contactus2">Internal link</a>
                 <a class="external" href="https://google2.com">External link</a>
             </body>`,
         },
@@ -2135,7 +2134,7 @@ describe("sandbox", () => {
                     <div>
                         <p>first</p>
                         <a href="/contactus">Relative link</a>
-                        <a href="${browser.location.origin}/contactus">Internal link</a>
+                        <a href="${location.origin}/contactus">Internal link</a>
                         <a href="https://google.com">External link</a>
                     </div>`),
             },
@@ -2145,7 +2144,7 @@ describe("sandbox", () => {
                     <div>
                         <p>second</p>
                         <a href="/contactus2">Relative link</a>
-                        <a href="${browser.location.origin}/contactus2">Internal link</a>
+                        <a href="${location.origin}/contactus2">Internal link</a>
                         <a href="https://google2.com">External link</a>
                     </div>`),
             },
@@ -2928,7 +2927,7 @@ test("should not render xml template as html in specific invalid cases", async (
         [`<table><t><tr><td></td></tr></t></table>`, false],
         [`<table><tr><t><td></td></t></tr></table>`, false],
         [`<table><tr><t><td></td></t></tr></table>`, false],
-        [`<table><tr><td><table><t/></table></td></tr></table>`, false]
+        [`<table><tr><td><table><t/></table></td></tr></table>`, false],
     ];
     for (const [xmlString, expected] of values) {
         var isValid = canRenderAsHTML(xmlString);

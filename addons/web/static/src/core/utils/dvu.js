@@ -28,7 +28,6 @@
 
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { onWillUnmount } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { isVirtualKeyboardSupported } from "@web/core/browser/feature_detection";
 
 const viewport = {
@@ -62,16 +61,16 @@ const viewport = {
 if (typeof window !== "undefined") {
     const throttledUpdate = throttleForAnimation(() => viewport.notifyListeners());
 
-    if (browser.visualViewport) {
-        browser.visualViewport.addEventListener("resize", throttledUpdate);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener("resize", throttledUpdate);
     }
 
     if (isVirtualKeyboardSupported()) {
-        browser.navigator.virtualKeyboard.addEventListener("geometrychange", throttledUpdate);
+        navigator.virtualKeyboard.addEventListener("geometrychange", throttledUpdate);
     }
 
     // Fallback to window resize for browsers without VisualViewport or VirtualKeyboard
-    browser.addEventListener("resize", throttledUpdate);
+    window.addEventListener("resize", throttledUpdate);
 }
 
 /**
@@ -82,8 +81,8 @@ if (typeof window !== "undefined") {
  */
 export function getViewportDimensions() {
     return {
-        width: browser.visualViewport?.width || browser.innerWidth,
-        height: browser.visualViewport?.height || browser.innerHeight,
+        width: window.visualViewport?.width || window.innerWidth,
+        height: window.visualViewport?.height || window.innerHeight,
     };
 }
 

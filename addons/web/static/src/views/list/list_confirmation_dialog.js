@@ -8,6 +8,7 @@ import { Field, fieldVisualFeedback } from "@web/views/fields/field";
 import { formatDate } from "@web/views/fields/formatters";
 
 import { Component } from "@odoo/owl";
+
 const { DateTime } = luxon;
 
 export class ListConfirmationDialog extends Component {

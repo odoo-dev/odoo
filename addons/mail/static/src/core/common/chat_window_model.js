@@ -1,5 +1,4 @@
 import { fields, Record } from "@mail/model/export";
-import { browser } from "@web/core/browser/browser";
 
 /** @typedef {{ thread?: import("models").Thread }} ChatWindowData */
 
@@ -144,7 +143,7 @@ export class ChatWindow extends Record {
 
     async highlight() {
         this.highlighted = true;
-        await new Promise((resolve) => browser.setTimeout(resolve, 2000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
         if (this.exists()) {
             this.highlighted = false;
         }

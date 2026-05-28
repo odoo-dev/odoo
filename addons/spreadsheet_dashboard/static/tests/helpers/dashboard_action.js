@@ -11,6 +11,7 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { loadBundle } from "@web/core/assets";
 import { WebClient } from "@web/webclient/webclient";
+
 /**
  * @param {object} params
  * @param {object} [params.serverData]

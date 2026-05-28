@@ -1,6 +1,5 @@
 import { useRef, useState } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { Dialog } from "@web/core/dialog/dialog";
 import { rpc } from "@web/core/network/rpc";
@@ -161,11 +160,11 @@ export class ExportDataDialog extends Component {
         });
 
         onMounted(() => {
-            browser.addEventListener("resize", this.debouncedOnResize);
+            window.addEventListener("resize", this.debouncedOnResize);
             this.updateSize();
         });
 
-        onWillUnmount(() => browser.removeEventListener("resize", this.debouncedOnResize));
+        onWillUnmount(() => window.removeEventListener("resize", this.debouncedOnResize));
     }
 
     get fieldsAvailable() {

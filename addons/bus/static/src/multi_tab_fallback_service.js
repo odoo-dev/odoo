@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { EventBus } from "@odoo/owl";
 
 let multiTabId = 0;
@@ -115,7 +114,7 @@ export const multiTabFallbackService = {
                 );
             }
             const hbPeriod = _isOnMainTab ? MAIN_TAB_HEARTBEAT_PERIOD : TAB_HEARTBEAT_PERIOD;
-            heartbeatTimeout = browser.setTimeout(heartbeat, hbPeriod);
+            heartbeatTimeout = setTimeout(heartbeat, hbPeriod);
         }
 
         function onStorage({ key, newValue }) {
@@ -143,12 +142,12 @@ export const multiTabFallbackService = {
             if (_isOnMainTab) {
                 _isOnMainTab = false;
                 bus.trigger("no_longer_main_tab");
-                browser.localStorage.removeItem("multi_tab_service.main");
+                localStorage.removeItem("multi_tab_service.main");
             }
         }
 
-        browser.addEventListener("pagehide", unregister);
-        browser.addEventListener("storage", onStorage);
+        window.addEventListener("pagehide", unregister);
+        window.addEventListener("storage", onStorage);
 
         // REGISTER THIS TAB
         const lastPresenceByTab =

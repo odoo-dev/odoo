@@ -14,7 +14,6 @@ import {
     dragenterFiles,
     dropFiles,
 } from "@mail/../tests/mail_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
@@ -49,7 +48,7 @@ beforeEach(() => {
     };
 });
 
-patchWithCleanup(browser, {
+patchWithCleanup(window, {
     open: () => {
         popoutWindow.closed = false;
         queryOne(".o_popout_holder").append(popoutIframe);
@@ -135,19 +134,21 @@ test("Attachment view popout controls test", async () => {
 
 test("Chatter main attachment: can change from non-viewable to viewable", async () => {
     const pyEnv = await startServer();
-    const recordId = pyEnv['mail.test.simple.main.attachment'].create({});
-    const irAttachmentId = pyEnv['ir.attachment'].create({
-        mimetype: 'text/plain',
+    const recordId = pyEnv["mail.test.simple.main.attachment"].create({});
+    const irAttachmentId = pyEnv["ir.attachment"].create({
+        mimetype: "text/plain",
         name: "Blah.txt",
         res_id: recordId,
-        res_model: 'mail.test.simple.main.attachment',
+        res_model: "mail.test.simple.main.attachment",
     });
-    pyEnv['mail.message'].create({
+    pyEnv["mail.message"].create({
         attachment_ids: [irAttachmentId],
-        model: 'mail.test.simple.main.attachment',
+        model: "mail.test.simple.main.attachment",
         res_id: recordId,
     });
-    pyEnv['mail.test.simple.main.attachment'].write([recordId], {message_main_attachment_id : irAttachmentId});
+    pyEnv["mail.test.simple.main.attachment"].write([recordId], {
+        message_main_attachment_id: irAttachmentId,
+    });
 
     registerArchs({
         "mail.test.simple.main.attachment,false,form": `

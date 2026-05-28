@@ -1,5 +1,4 @@
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
 
@@ -25,8 +24,8 @@ export const assetsWatchdogService = {
                 // Wrap the notification inside a delay.
                 // The server may be overwhelmed with recomputing assets
                 // We wait until things settle down
-                browser.clearTimeout(bundleNotifTimerID);
-                bundleNotifTimerID = browser.setTimeout(() => {
+                clearTimeout(bundleNotifTimerID);
+                bundleNotifTimerID = setTimeout(() => {
                     notification.add(_t("The page appears to be out of date."), {
                         title: _t("Refresh"),
                         type: "warning",
@@ -36,7 +35,7 @@ export const assetsWatchdogService = {
                                 name: _t("Refresh"),
                                 primary: true,
                                 onClick: () => {
-                                    browser.location.reload();
+                                    location.reload();
                                 },
                             },
                         ],

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "@odoo/hoot";
 import { computeSAQRCode } from "@l10n_sa_pos/app/utils/qr";
+
 const { DateTime } = luxon;
 
 describe("SA QR Code", () => {

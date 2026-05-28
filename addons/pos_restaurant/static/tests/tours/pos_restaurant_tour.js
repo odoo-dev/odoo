@@ -4,6 +4,7 @@ import * as FeedbackScreen from "@point_of_sale/../tests/pos/tours/utils/feedbac
 import * as ChromePos from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 import * as PartnerList from "@point_of_sale/../tests/pos/tours/utils/partner_list_util";
 import * as ChromeRestaurant from "@pos_restaurant/../tests/tours/utils/chrome";
+
 const Chrome = { ...ChromePos, ...ChromeRestaurant };
 import * as FloorScreen from "@pos_restaurant/../tests/tours/utils/floor_screen_util";
 import * as ProductScreenPos from "@point_of_sale/../tests/pos/tours/utils/product_screen_util";
@@ -24,6 +25,7 @@ import {
     assertCurrentOrderDirty,
     refresh,
 } from "@point_of_sale/../tests/generic_helpers/utils";
+
 const ProductScreen = { ...ProductScreenPos, ...ProductScreenResto };
 
 registry.category("web_tour.tours").add("pos_restaurant_sync", {

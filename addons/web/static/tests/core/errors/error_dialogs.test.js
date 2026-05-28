@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { describe, test, expect } from "@odoo/hoot";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import {
@@ -228,7 +227,7 @@ test("Error504Dialog", async () => {
 });
 
 test("SessionExpiredDialog", async () => {
-    patchWithCleanup(browser.location, {
+    patchWithCleanup(location, {
         reload() {
             expect.step("location reload");
         },

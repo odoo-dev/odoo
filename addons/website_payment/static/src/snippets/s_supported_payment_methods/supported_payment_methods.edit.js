@@ -1,7 +1,5 @@
 import { SupportedPaymentMethods } from './supported_payment_methods';
 import { registry } from '@web/core/registry';
-import { browser } from '@web/core/browser/browser';
-
 
 const SupportedPaymentMethodsEdit = I => class extends I {
     dynamicContent = {
@@ -19,7 +17,7 @@ const SupportedPaymentMethodsEdit = I => class extends I {
 
     async onClickViewProviders() {
         // Open the view in a separate tab such that any edits are kept.
-        browser.open('/odoo/action-payment.action_payment_provider', '_blank');
+        window.open('/odoo/action-payment.action_payment_provider', '_blank');
     }
 };
 

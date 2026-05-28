@@ -5,7 +5,6 @@ import lazyloader from "@web/public/lazyloader";
 import { makeEnv, startServices } from "@web/env";
 import { getTemplate } from "@web/core/templates";
 import { MainComponentsContainer } from "@web/core/main_components_container";
-import { browser } from "@web/core/browser/browser";
 import { appTranslateFn } from "@web/core/l10n/translation";
 import { jsToPyLocale, pyToJsLocale } from "@web/core/l10n/utils";
 import { App, Component, whenReady } from "@odoo/owl";
@@ -43,7 +42,7 @@ export async function createPublicRoot() {
         translateFn: appTranslateFn,
         translatableAttributes: ["data-tooltip"],
     });
-    const locale = pyToJsLocale(lang) || browser.navigator.language;
+    const locale = pyToJsLocale(lang) || navigator.language;
     Settings.defaultLocale = locale;
     const root = await app.createRoot(MainComponentsContainer, { env }).mount(document.body);
     odoo.__WOWL_DEBUG__ = { root };

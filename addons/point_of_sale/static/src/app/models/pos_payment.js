@@ -1,6 +1,7 @@
 import { registry } from "@web/core/registry";
 import { Base } from "./related_models";
 import { formatCurrency } from "@point_of_sale/app/models/utils/currency";
+
 const { DateTime } = luxon;
 
 export class PosPayment extends Base {

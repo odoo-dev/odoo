@@ -1,5 +1,4 @@
 import { useRef } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { Tooltip } from "@web/core/tooltip/tooltip";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { Component } from "@odoo/owl";
@@ -22,7 +21,7 @@ export class CopyButton extends Component {
 
     showTooltip() {
         this.popover.open(this.button.el, { tooltip: this.props.successText });
-        browser.setTimeout(this.popover.close, 800);
+        setTimeout(this.popover.close, 800);
     }
 
     async onClick() {
@@ -35,14 +34,14 @@ export class CopyButton extends Component {
         // any kind of content can be copied into the clipboard using
         // the appropriate native methods
         if (typeof content === "string" || content instanceof String) {
-            write = (value) => browser.navigator.clipboard.writeText(value);
+            write = (value) => navigator.clipboard.writeText(value);
         } else {
-            write = (value) => browser.navigator.clipboard.write(value);
+            write = (value) => navigator.clipboard.write(value);
         }
         try {
             await write(content);
         } catch (error) {
-            return browser.console.warn(error);
+            return console.warn(error);
         }
         this.showTooltip();
     }

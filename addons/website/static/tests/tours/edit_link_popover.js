@@ -4,7 +4,6 @@ import {
     openLinkPopup,
     clickToolbarButton,
 } from "@website/js/tours/tour_utils";
-import { browser } from "@web/core/browser/browser";
 import { patch } from "@web/core/utils/patch";
 
 const FIRST_PARAGRAPH =
@@ -190,7 +189,7 @@ registerWebsitePreviewTour(
             run(actions) {
                 // We do not want to open a link in a tour
                 patch(
-                    browser,
+                    window,
                     {
                         open(url) {
                             if (

@@ -98,7 +98,7 @@ export class RecordInternal {
 
     /**
      * For fields that use local storage, this map contains the "ls" object that eases interactions on the related
-     * local storage entry. For instance, instead of having to write `browser.localStorage.setItem(EXACT_LOCAL_STORAGE_ENTRY_OF_FIELD, value)`,
+     * local storage entry. For instance, instead of having to write `localStorage.setItem(EXACT_LOCAL_STORAGE_ENTRY_OF_FIELD, value)`,
      * this "ls" object allow to just write the equivalent expression with `ls.set(value)`
      *
      * @type {Map<string, LocalStorageEntry>}

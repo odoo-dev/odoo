@@ -3,6 +3,7 @@ import { registry } from "@web/core/registry";
 import { renderToElement } from "@web/core/utils/render";
 import { Interaction } from "@web/public/interaction";
 import { D3_COLORS } from "@survey/interactions/utils";
+
 const { DateTime } = luxon;
 
 export class SurveySessionTextAnswers extends Interaction {

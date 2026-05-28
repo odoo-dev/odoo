@@ -21,8 +21,6 @@ import { describe, expect, test, waitFor } from "@odoo/hoot";
 import { animationFrame, drag, press, queryFirst, rightClick } from "@odoo/hoot-dom";
 import { mockDate } from "@odoo/hoot-mock";
 import { Command, getService, onRpc, serverState } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
-
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { rpc } from "@web/core/network/rpc";
 import { getOrigin } from "@web/core/utils/urls";
@@ -1113,7 +1111,7 @@ test("Sidebar compact is locally persistent (saved in local storage)", async () 
         DiscussApp.localId(),
         "isSidebarCompact"
     );
-    browser.localStorage.setItem(DISCUSS_SIDEBAR_COMPACT_LS, toRawValue(true));
+    localStorage.setItem(DISCUSS_SIDEBAR_COMPACT_LS, toRawValue(true));
     await start();
     await openDiscuss();
     await contains(".o-mail-DiscussSidebar.o-compact");
@@ -1123,14 +1121,14 @@ test("Sidebar compact is locally persistent (saved in local storage)", async () 
         position: { x: 1000 },
     });
     await contains(".o-mail-DiscussSidebar:not(.o-compact)");
-    expect(browser.localStorage.getItem(DISCUSS_SIDEBAR_COMPACT_LS)).toBe(null);
+    expect(localStorage.getItem(DISCUSS_SIDEBAR_COMPACT_LS)).toBe(null);
     await (
         await drag(".o-mail-DiscussSidebar-resizablePanelContainer .o_resizable_panel_handle")
     ).drop(".o-mail-DiscussSidebar-resizablePanelContainer .o_resizable_panel_handle", {
         position: { x: 0 },
     });
     await contains(".o-mail-DiscussSidebar.o-compact");
-    expect(browser.localStorage.getItem(DISCUSS_SIDEBAR_COMPACT_LS)).toBe(toRawValue(true));
+    expect(localStorage.getItem(DISCUSS_SIDEBAR_COMPACT_LS)).toBe(toRawValue(true));
 });
 
 test("Sidebar compact is crosstab synced", async () => {

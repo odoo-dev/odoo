@@ -2,7 +2,6 @@ import { user } from "@web/core/user";
 import { patch } from "@web/core/utils/patch";
 import { AttendeeCalendarCommonPopover } from "@calendar/views/attendee_calendar/common/attendee_calendar_common_popover";
 import { Field } from "@web/views/fields/field"
-
 export const patchAttendeeCalendarCommonPopoverClass = {
     template: "hr_calendar.AttendeeCalendarCommonPopover",
     subTemplates: {
@@ -15,7 +14,6 @@ export const patchAttendeeCalendarCommonPopoverClass = {
         Field,
     }
 }
-
 export const patchAttendeeCalendarCommonPopover = {
     setup() {
         this.fieldNames = ["work_location_id", "work_location_name", "work_location_type", "employee_id", "weekday", "weekly", "start_date", "employee_name"];

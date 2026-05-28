@@ -6,6 +6,7 @@ import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { downloadPosLogs, downloadIdbErrors } from "../pretty_console_log";
+
 const { DateTime } = luxon;
 
 export class DebugWidget extends Component {

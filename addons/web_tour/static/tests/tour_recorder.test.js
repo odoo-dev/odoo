@@ -10,7 +10,6 @@ import {
     serverState,
 } from "@web/../tests/web_test_helpers";
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { browser } from "@web/core/browser/browser";
 import { TourRecorder } from "@web_tour/js/tour_recorder/tour_recorder";
 import {
     TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY,
@@ -26,7 +25,7 @@ let tourRecorder;
 
 beforeEach(async () => {
     serverState.debug = "1";
-    browser.localStorage.setItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY, "1");
+    localStorage.setItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY, "1");
     patchWithCleanup(TourRecorder.prototype, {
         setup() {
             tourRecorder = this;

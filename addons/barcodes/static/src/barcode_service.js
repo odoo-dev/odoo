@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { isBrowserChrome, isMobileOS } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
@@ -104,7 +103,7 @@ export const barcodeService = {
             if (document.activeElement && !document.activeElement.matches('input:not([type]), input[type="text"], textarea, [contenteditable], ' +
                 '[type="email"], [type="number"], [type="password"], [type="tel"], [type="search"]')) {
                 barcodeInput.focus();
-                browser.requestAnimationFrame(() => barcodeInput.setAttribute("inputmode", "text"));
+                requestAnimationFrame(() => barcodeInput.setAttribute("inputmode", "text"));
             }
         }
 

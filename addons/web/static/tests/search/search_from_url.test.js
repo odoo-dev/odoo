@@ -20,7 +20,6 @@ import {
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { Domain } from "@web/core/domain";
 import { redirect } from "@web/core/utils/urls";
-import { browser } from "@web/core/browser/browser";
 import { WebClient } from "@web/webclient/webclient";
 
 class MockPurchaseOrders extends models.Model {
@@ -362,7 +361,7 @@ test("hotkey sharing triggers notification", async () => {
         },
     });
 
-    patchWithCleanup(browser.navigator.clipboard, {
+    patchWithCleanup(navigator.clipboard, {
         async writeText() {
             expect.step("Copy to clipboard");
         },
@@ -384,7 +383,7 @@ test.tags("desktop"); // Shortcut testing only on computer
 test("hotkey sharing copies simple domain + groupBy to clipboard", async () => {
     // Less comprehensinve testing then decoding url, as we use the same helper
     // as when saving favorite filters to encode the search params in the url
-    patchWithCleanup(browser.navigator.clipboard, {
+    patchWithCleanup(navigator.clipboard, {
         async writeText(url) {
             expect.step(url.split("?domain=")[1]);
         },
@@ -424,7 +423,7 @@ test.tags("desktop"); // Shortcut testing only on computer
 test("hotkey sharing copies complex search to clipboard", async () => {
     // Less comprehensinve testing then decoding url, as we use the same helper
     // as when saving favorite filters to encode the search params in the url
-    patchWithCleanup(browser.navigator.clipboard, {
+    patchWithCleanup(navigator.clipboard, {
         async writeText(url) {
             expect.step(url.split("?domain=")[1]);
         },

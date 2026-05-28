@@ -1,7 +1,5 @@
 import { loadJS } from "../assets"; // use the real, non patched (in tests), loadJS
-
 /** @typedef {import("./error_service").UncaughtError} UncaughtError */
-
 /**
  * @param {UncaughtError} uncaughtError
  * @param {Error} originalError
@@ -16,7 +14,6 @@ function combineErrorNames(uncaughtError, originalError) {
         return `${uncaughtErrorName} > ${originalErrorName}`;
     }
 }
-
 /**
  * Returns the full traceback for an error chain based on error causes
  *

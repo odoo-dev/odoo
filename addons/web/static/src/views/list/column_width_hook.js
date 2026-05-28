@@ -1,5 +1,4 @@
 import { useComponent, useExternalListener, useLayoutEffect } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { utils } from "@web/core/ui/ui_service";
 import { renderToElement } from "@web/core/utils/render";
 import { useDebounced } from "@web/core/utils/timing";
@@ -262,7 +261,7 @@ function computeWidths(table, state, allowedWidth, startingWidths) {
         const shrinkableColumns = [];
         let totalAvailableSpace = 0; // total space we can gain by shrinking columns
         // In mobile, we don't want to shrink columns more than 80% of the viewport
-        const minShrinkWidth = utils.isSmall() ? browser.innerWidth * 0.8 : null;
+        const minShrinkWidth = utils.isSmall() ? window.innerWidth * 0.8 : null;
         for (let columnIndex = 0; columnIndex < columns.length; columnIndex++) {
             const thIndex = columnIndex + columnOffset;
             const { minWidth, canShrink } = columnWidthSpecs[columnIndex];

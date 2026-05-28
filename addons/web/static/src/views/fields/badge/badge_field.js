@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 import { Component } from "@odoo/owl";
+
 const formatters = registry.category("formatters");
 
 export class BadgeField extends Component {
@@ -55,12 +56,10 @@ export const badgeField = {
             help: _t("Set an integer field to use colors with the badge."),
         },
     ],
-    extractProps: ({ decorations, options }) => {
-        return {
-            decorations,
-            colorField: options.color_field,
-        };
-    },
+    extractProps: ({ decorations, options }) => ({
+        decorations,
+        colorField: options.color_field,
+    }),
 };
 
 registry.category("fields").add("badge", badgeField);

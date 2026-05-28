@@ -1,4 +1,3 @@
-import { browser } from '@web/core/browser/browser';
 import { rpc } from '@web/core/network/rpc';
 import { registry } from '@web/core/registry';
 import { redirect } from '@web/core/utils/urls';
@@ -34,7 +33,7 @@ export class SaleOrderPortalReorder extends Interaction {
 
             // Sync cart quantity in session storage when adding reorder products from backend,
             // since `website_sale_cart_quantity` updates only via the cart service.
-            browser.sessionStorage.setItem('website_sale_cart_quantity', values.cart_quantity);
+            sessionStorage.setItem('website_sale_cart_quantity', values.cart_quantity);
 
             this._trackProducts(values.tracking_info);
             redirect('/shop/cart');

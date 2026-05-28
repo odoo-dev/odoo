@@ -1,9 +1,8 @@
-import { browser } from "@web/core/browser/browser";
 import { Domain } from "@web/core/domain";
 
 export const ProjectTaskAnalysisRendererMixin = (T) => class ProjectTaskAnalysisRendererMixin extends T {
     openView(domain, views, context) {
-        const showSubtasks = JSON.parse(browser.localStorage.getItem("showSubtasks") || "false");
+        const showSubtasks = JSON.parse(localStorage.getItem("showSubtasks") || "false");
         if (!showSubtasks) {
             context.show_task_options = false;
         }

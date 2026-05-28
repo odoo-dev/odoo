@@ -1,5 +1,6 @@
     import { stepUtils } from "@web_tour/tour_utils";
     import { registry } from "@web/core/registry";
+
     var inc;
 
     registry.category("web_tour.tours").add('widget_x2many', {

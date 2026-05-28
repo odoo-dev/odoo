@@ -8,7 +8,6 @@ import { parseRawValue } from "@mail/utils/common/local_storage";
 
 import { htmlEscape, markup, toRaw } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { deserializeDate, deserializeDateTime } from "@web/core/l10n/dates";
 
 const Markup = markup().constructor;
@@ -57,7 +56,7 @@ export class StoreInternal extends RecordInternal {
     constructor() {
         super(...arguments);
         this.onStorage = this.onStorage.bind(this);
-        browser.addEventListener("storage", this.onStorage);
+        window.addEventListener("storage", this.onStorage);
     }
     /**
      * Indicates whether the current update cycle was triggered by a

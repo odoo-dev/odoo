@@ -1,9 +1,8 @@
 import { expect, test } from "@odoo/hoot";
 import { getService, makeMockEnv, patchWithCleanup } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 
 test("execute an 'ir.actions.act_url' action with target 'self'", async () => {
-    patchWithCleanup(browser.location, {
+    patchWithCleanup(location, {
         assign: (url) => {
             expect.step(url);
         },
@@ -18,7 +17,7 @@ test("execute an 'ir.actions.act_url' action with target 'self'", async () => {
 });
 
 test("execute an 'ir.actions.act_url' action with onClose option", async () => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         open: () => expect.step("browser open"),
     });
     await makeMockEnv();
@@ -30,7 +29,7 @@ test("execute an 'ir.actions.act_url' action with onClose option", async () => {
 });
 
 test("execute an 'ir.actions.act_url' action with url javascript:", async () => {
-    patchWithCleanup(browser.location, {
+    patchWithCleanup(location, {
         assign: (url) => {
             expect.step(url);
         },
@@ -45,7 +44,7 @@ test("execute an 'ir.actions.act_url' action with url javascript:", async () => 
 });
 
 test("execute an 'ir.actions.act_url' action with target 'download'", async () => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         open: (url) => {
             expect.step(url);
         },

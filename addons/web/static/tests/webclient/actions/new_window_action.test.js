@@ -1,5 +1,4 @@
 import { beforeEach, expect, test } from "@odoo/hoot";
-import { browser } from "@web/core/browser/browser";
 import { WebClient } from "@web/webclient/webclient";
 import {
     defineActions,
@@ -70,7 +69,7 @@ defineActions([
 ]);
 
 beforeEach(() => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         open: (url) => expect.step("open: " + url),
     });
 });

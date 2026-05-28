@@ -82,7 +82,6 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { onRendered, onWillRender } from "@web/owl2/utils";
 
-import { browser } from "@web/core/browser/browser";
 import { currencies } from "@web/core/currency";
 import { FileInput } from "@web/core/file_input/file_input";
 import { registry } from "@web/core/registry";
@@ -8210,12 +8209,12 @@ test("Should load grouped kanban with folded column", async () => {
 });
 
 test("kanban records are middle clickable by default", async () => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         open: (url) => {
             expect.step(`opened in new window: ${url}`);
         },
     });
-    patchWithCleanup(browser.sessionStorage, {
+    patchWithCleanup(sessionStorage, {
         setItem(key, value) {
             expect.step(`set ${key}-${value}`);
             super.setItem(key, value);

@@ -1,6 +1,5 @@
 import { onWillRender, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
 import { Component, toRaw } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { Time } from "@web/core/l10n/time";
@@ -146,7 +145,7 @@ export class MultiSelectionButtons extends Component {
     }
 
     getItemFromStorage(key, defaultValue) {
-        const item = browser.localStorage.getItem(this.generateLocalStorageKey(key));
+        const item = localStorage.getItem(this.generateLocalStorageKey(key));
         try {
             return item ? JSON.parse(item) : defaultValue;
         } catch {
@@ -155,7 +154,7 @@ export class MultiSelectionButtons extends Component {
     }
 
     setItemInStorage(key, value) {
-        browser.localStorage.setItem(this.generateLocalStorageKey(key), JSON.stringify(value));
+        localStorage.setItem(this.generateLocalStorageKey(key), JSON.stringify(value));
     }
 
     storeTimeRange(timeRange) {

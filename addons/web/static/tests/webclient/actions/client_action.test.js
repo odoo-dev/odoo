@@ -14,7 +14,6 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { redirect } from "@web/core/utils/urls";
 import { WebClient } from "@web/webclient/webclient";
@@ -415,17 +414,17 @@ test("test next action on display_notification client action", async () => {
 
 test("test reload client action", async () => {
     redirect("/odoo?test=42");
-    browser.location.search = "?test=42";
+    location.search = "?test=42";
 
-    patchWithCleanup(browser.history, {
+    patchWithCleanup(history, {
         pushState: (_state, _unused, url) => {
-            expect.step(`pushState ${url.replace(browser.location.origin, "")}`);
+            expect.step(`pushState ${url.replace(location.origin, "")}`);
         },
         replaceState: (_state, _unused, url) => {
-            expect.step(`replaceState ${url.replace(browser.location.origin, "")}`);
+            expect.step(`replaceState ${url.replace(location.origin, "")}`);
         },
     });
-    patchWithCleanup(browser.location, {
+    patchWithCleanup(location, {
         reload: function () {
             expect.step("window_reload");
         },
@@ -478,9 +477,9 @@ test("test reload client action", async () => {
 
 test("test home client action", async () => {
     redirect("/odoo");
-    browser.location.search = "";
+    location.search = "";
 
-    patchWithCleanup(browser.location, {
+    patchWithCleanup(location, {
         assign: (url) => expect.step(`assign ${url}`),
     });
 

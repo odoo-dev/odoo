@@ -1,5 +1,4 @@
 import { assertType, Component, markup, types as t, whenReady } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
@@ -70,7 +69,7 @@ export class TourService {
             return;
         }
 
-        const paramsTourName = new URLSearchParams(browser.location.search).get("tour");
+        const paramsTourName = new URLSearchParams(location.search).get("tour");
         if (paramsTourName) {
             this.startTour(paramsTourName, { mode: "manual" });
         }
@@ -89,10 +88,7 @@ export class TourService {
             });
         }
 
-        if (
-            browser.localStorage.getItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY) &&
-            !session.is_public
-        ) {
+        if (localStorage.getItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY) && !session.is_public) {
             this.addTourRecorderToOverlay();
         }
     }
@@ -109,7 +105,7 @@ export class TourService {
                     this.toursEnabled = await this.orm.call("res.users", "switch_tour_enabled", [
                         !this.toursEnabled,
                     ]);
-                    browser.location.reload();
+                    location.reload();
                 },
             },
             sequence: 500,
@@ -132,7 +128,7 @@ export class TourService {
             {
                 onClose: () => {
                     remove();
-                    browser.localStorage.removeItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY);
+                    localStorage.removeItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY);
                     tourRecorderState.clear();
                 },
             },
@@ -141,7 +137,7 @@ export class TourService {
 
         this.removeTourRecorder = () => {
             remove();
-            browser.localStorage.removeItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY);
+            localStorage.removeItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY);
             tourRecorderState.clear();
         };
     }
@@ -251,7 +247,7 @@ export class TourService {
             new TourInteractive(tour).start(this.env, async () => {
                 this.removePointer();
                 tourState.clear();
-                browser.console.log("tour succeeded");
+                console.log("tour succeeded");
                 let message = tourConfig.rainbowManMessage || tour.rainbowManMessage;
                 if (message && window.DOMPurify) {
                     message = window.DOMPurify.sanitize(message);
@@ -317,10 +313,10 @@ export class TourService {
     }
 
     async startTourRecorder() {
-        if (!browser.localStorage.getItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY)) {
+        if (!localStorage.getItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY)) {
             await this.addTourRecorderToOverlay();
         }
-        browser.localStorage.setItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY, "1");
+        localStorage.setItem(TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY, "1");
     }
 
     /**

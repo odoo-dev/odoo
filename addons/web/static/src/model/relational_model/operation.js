@@ -1,6 +1,7 @@
 import { smartDateUnits } from "@web/core/l10n/dates";
 import { localization } from "@web/core/l10n/localization";
 import { escapeRegExp } from "@web/core/utils/strings";
+
 export class Operation {
     static supportedOperators = [];
     static parse() {}

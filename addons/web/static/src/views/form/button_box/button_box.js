@@ -4,6 +4,7 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 import { Component } from "@odoo/owl";
+
 export class ButtonBox extends Component {
     static template = "web.Form.ButtonBox";
     static components = { Dropdown, DropdownItem };

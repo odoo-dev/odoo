@@ -1,5 +1,6 @@
 import { test, describe, expect } from "@odoo/hoot";
 import { convertRawToDate, convertDateToRaw } from "@point_of_sale/app/models/related_models/utils";
+
 const { DateTime } = luxon;
 
 describe("Date conversion utilities", () => {

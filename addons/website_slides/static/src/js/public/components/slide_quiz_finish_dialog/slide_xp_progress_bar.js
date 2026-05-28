@@ -1,5 +1,4 @@
 import { useState } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { Component, onMounted } from "@odoo/owl";
 
 export class SlideXPProgressBar extends Component {
@@ -58,17 +57,17 @@ export class SlideXPProgressBar extends Component {
                     this.props.previousRank.karma +
                         (this.props.newRank.karma - this.props.previousRank.karma) * progress
                 );
-                browser.requestAnimationFrame(animateKarma);
+                requestAnimationFrame(animateKarma);
             }
         };
 
         // progress bar and tooltip animations
         this.state.hideRankBounds = false;
-        browser.requestAnimationFrame(animateKarma);
+        requestAnimationFrame(animateKarma);
         this.state.rankProgressPercentage = this.props.newRank.progress;
 
         if (this.props.levelUp) {
-            browser.setTimeout(() => {
+            setTimeout(() => {
                 this.state.rankLowerBound = this.props.newRank.lower_bound;
                 this.state.rankUpperBound = this.props.newRank.upper_bound;
             }, 800);

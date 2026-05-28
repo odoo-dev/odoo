@@ -61,7 +61,6 @@ import {
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
 
-import { browser } from "@web/core/browser/browser";
 import { makeErrorFromResponse } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { config as transitionConfig } from "@web/core/transition";
@@ -1190,7 +1189,11 @@ test(`Form and subview with _view_ref contexts`, async () => {
     await contains(`.o_field_widget[name="product_id"] .o_external_button`, {
         visible: false,
     }).click();
-    expect.verifySteps(["get_record_default_action", "product get_views", "partner.type get_views"]);
+    expect.verifySteps([
+        "get_record_default_action",
+        "product get_views",
+        "partner.type get_views",
+    ]);
 });
 
 test(`Form and subsubview with only _view_ref contexts`, async () => {
@@ -10661,7 +10664,7 @@ test(`"bare" buttons in template should not trigger button click`, async () => {
 });
 
 test(`form view with inline list view with optional fields and local storage mock`, async () => {
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         getItem(key) {
             if (["optional_fields", "debug_open_view"].some((word) => key.startsWith(word))) {
                 expect.step(`getItem ${key}`);
@@ -10721,7 +10724,7 @@ test(`form view with inline list view with optional fields and local storage moc
 
 test.tags("desktop");
 test(`form view with list_view_ref with optional fields and local storage mock`, async () => {
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         getItem(key) {
             if (["optional_fields", "debug_open_view"].some((word) => key.startsWith(word))) {
                 expect.step(`getItem ${key}`);

@@ -1,5 +1,4 @@
 import { useRef } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
 import { localization } from "@web/core/l10n/localization";
 import { clamp } from "@web/core/utils/numbers";
 import { hasTouch } from "@web/core/browser/feature_detection";
@@ -83,9 +82,9 @@ export class ActionSwiper extends Component {
             }
         });
         onWillUnmount(() => {
-            browser.clearTimeout(this.actionTimeoutId);
-            browser.clearTimeout(this.resetTimeoutId);
-            browser.clearTimeout(this.enabledTimeoutId);
+            clearTimeout(this.actionTimeoutId);
+            clearTimeout(this.resetTimeoutId);
+            clearTimeout(this.enabledTimeoutId);
         });
     }
     get localizedProps() {
@@ -126,10 +125,7 @@ export class ActionSwiper extends Component {
             }
         }
         this.targetContainer.el.style.transform = "translateX(0)";
-        this.resetTimeoutId = browser.setTimeout(
-            () => this._reset(),
-            this.constructor.animationLength
-        );
+        this.resetTimeoutId = setTimeout(() => this._reset(), this.constructor.animationLength);
     }
     /**
      * @private
@@ -137,7 +133,7 @@ export class ActionSwiper extends Component {
      */
     _onTouchMoveSwipe(ev) {
         if (this.isSwipeEnabled) {
-            browser.clearTimeout(this.enabledTimeoutId);
+            clearTimeout(this.enabledTimeoutId);
             const { onLeftSwipe, onRightSwipe } = this.localizedProps;
             this.swipedDistance = clamp(
                 ev.touches[0].clientX - this.startX,
@@ -190,10 +186,7 @@ export class ActionSwiper extends Component {
         this.targetContainer.el.classList.remove("o_actionswiper_transition_enabled");
         this.startX = ev.touches[0].clientX;
         if (this.props.enabledDuration) {
-            this.enabledTimeoutId = browser.setTimeout(
-                () => this._reset(),
-                this.props.enabledDuration
-            );
+            this.enabledTimeoutId = setTimeout(() => this._reset(), this.props.enabledDuration);
         }
     }
 
@@ -214,7 +207,7 @@ export class ActionSwiper extends Component {
 
     handleSwipe(action) {
         this.applyStyle(this.swipedDistance);
-        this.actionTimeoutId = browser.setTimeout(async () => {
+        this.actionTimeoutId = setTimeout(async () => {
             if (this.props.animationType === "bounce") {
                 await action();
                 this._reset();
@@ -222,7 +215,7 @@ export class ActionSwiper extends Component {
                 await action();
                 this.targetContainer.el.classList.remove("o_actionswiper_transition_enabled");
                 this.applyStyle(0);
-                browser.requestAnimationFrame(() => this._reset());
+                requestAnimationFrame(() => this._reset());
             }
         }, this.constructor.animationLength);
     }

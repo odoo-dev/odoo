@@ -6,7 +6,6 @@ import { AvatarCard } from "@mail/core/web/avatar_card/avatar_card";
 
 import { Component, onMounted, onWillUnmount } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { useService } from "@web/core/utils/hooks";
@@ -34,7 +33,7 @@ export class Activity extends Component {
         onMounted(() => {
             this.updateDelayAtNight();
         });
-        onWillUnmount(() => browser.clearTimeout(this.updateDelayMidnightTimeout));
+        onWillUnmount(() => clearTimeout(this.updateDelayMidnightTimeout));
         this.attachmentUploader = useAttachmentUploader(this.thread);
     }
 
@@ -46,11 +45,8 @@ export class Activity extends Component {
     }
 
     updateDelayAtNight() {
-        browser.clearTimeout(this.updateDelayMidnightTimeout);
-        this.updateDelayMidnightTimeout = browser.setTimeout(
-            () => render(this),
-            getMsToTomorrow() + 100
-        ); // Make sure there is no race condition
+        clearTimeout(this.updateDelayMidnightTimeout);
+        this.updateDelayMidnightTimeout = setTimeout(() => render(this), getMsToTomorrow() + 100); // Make sure there is no race condition
     }
 
     get delay() {

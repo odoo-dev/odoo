@@ -1,6 +1,5 @@
 import { useState } from "@web/owl2/utils";
 import { Component } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -43,9 +42,9 @@ export class SpreadsheetShareButton extends Component {
         this.state.url = url;
         setTimeout(async () => {
             try {
-                await browser.navigator.clipboard.writeText(url);
+                await navigator.clipboard.writeText(url);
             } catch (error) {
-                browser.console.warn(error);
+                console.warn(error);
             }
         });
     }

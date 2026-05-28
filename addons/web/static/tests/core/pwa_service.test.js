@@ -1,8 +1,6 @@
 import { describe, expect, getFixture, test } from "@odoo/hoot";
 import { getService, makeMockEnv, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 
-import { browser } from "@web/core/browser/browser";
-
 describe.current.tags("headless");
 
 const mountManifestLink = (href) => {
@@ -34,14 +32,14 @@ test("PWA installation process", async () => {
     const beforeInstallPromptEvent = new CustomEvent("beforeinstallprompt");
     beforeInstallPromptEvent.preventDefault = () => {};
     beforeInstallPromptEvent.prompt = async () => ({ outcome: "accepted" });
-    browser.BeforeInstallPromptEvent = beforeInstallPromptEvent;
+    window.BeforeInstallPromptEvent = beforeInstallPromptEvent;
     await makeMockEnv();
     mountManifestLink("/web/manifest.scoped_app_manifest");
     onRpc("/*", (request) => {
         expect.step(new URL(request.url).pathname);
         return { name: "My App", scope: "/scoped_app/myApp", start_url: "/scoped_app/myApp" };
     });
-    patchWithCleanup(browser.localStorage, {
+    patchWithCleanup(localStorage, {
         setItem(key, value) {
             if (key === "pwaService.installationState") {
                 expect.step(value);
@@ -53,7 +51,7 @@ test("PWA installation process", async () => {
     const pwaService = await getService("pwa");
     expect(pwaService.isAvailable).toBe(false);
     expect(pwaService.canPromptToInstall).toBe(false);
-    browser.dispatchEvent(beforeInstallPromptEvent);
+    window.dispatchEvent(beforeInstallPromptEvent);
     expect(pwaService.isAvailable).toBe(true);
     expect(pwaService.canPromptToInstall).toBe(true);
     await pwaService.show({

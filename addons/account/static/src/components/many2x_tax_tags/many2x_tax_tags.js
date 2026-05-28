@@ -7,7 +7,6 @@ import {
     many2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { TaxTagPopup } from "./tax_tag_popover"
-
 export class Many2XTaxTagsAutocomplete extends Many2XAutocomplete {
     static components = {
         ...Many2XAutocomplete.components,

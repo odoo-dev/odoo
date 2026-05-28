@@ -1,6 +1,5 @@
 import { proxy } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import {
     isAndroidApp,
     isDisplayStandalone,
@@ -11,10 +10,10 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 
 async function getIosPwaPermission() {
-    if (browser.location.protocol !== "https:") {
+    if (location.protocol !== "https:") {
         return "denied";
     }
-    const registration = await browser.navigator.serviceWorker?.getRegistration();
+    const registration = await navigator.serviceWorker?.getRegistration();
     return (await registration?.pushManager.permissionState()) ?? "prompt";
 }
 
@@ -45,7 +44,7 @@ export const notificationPermissionService = {
             } else if (isIOS()) {
                 permission = { state: "denied" };
             } else {
-                permission = await browser.navigator?.permissions?.query({
+                permission = await navigator?.permissions?.query({
                     name: "notifications",
                 });
             }
@@ -57,13 +56,11 @@ export const notificationPermissionService = {
             permission:
                 isIosApp() || isAndroidApp()
                     ? "denied"
-                    : this._normalizePermission(
-                          permission?.state ?? browser.Notification?.permission
-                      ),
+                    : this._normalizePermission(permission?.state ?? Notification?.permission),
             requestPermission: async () => {
-                if (browser.Notification && state.permission === "prompt") {
+                if (Notification && state.permission === "prompt") {
                     state.permission = this._normalizePermission(
-                        await browser.Notification.requestPermission()
+                        await Notification.requestPermission()
                     );
                     if (state.permission === "denied") {
                         notification.add(_t("Odoo will not send notifications on this device."), {

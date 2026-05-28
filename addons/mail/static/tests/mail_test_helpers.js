@@ -34,13 +34,13 @@ import { click, contains } from "./mail_test_helpers_contains";
 
 import { closeStream, mailGlobal } from "@mail/utils/common/misc";
 import { Component, onWillDestroy, status } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { emojiLoader } from "@web/core/emoji_picker/emoji_loader";
 import { registry } from "@web/core/registry";
 import { MEDIAS_BREAKPOINTS, utils as uiUtils } from "@web/core/ui/ui_service";
 import { useServiceProtectMethodHandling } from "@web/core/utils/hooks";
 import { session } from "@web/session";
 import { WebClient } from "@web/webclient/webclient";
+
 export { SIZES } from "@web/core/ui/ui_service";
 import { IndexedDB } from "@web/core/utils/indexed_db";
 
@@ -459,7 +459,7 @@ function getSizeFromWidth(width) {
 /**
  * Adjust ui size either from given size (mapped to window breakpoints) or
  * width. This will impact uiService.{isSmall/size}, (wowl/legacy)
- * browser.innerWidth, (wowl) env.isSmall and. When a size is given, the browser
+ * window.innerWidth, (wowl) env.isSmall and. When a size is given, the browser
  * width is set according to the breakpoints that are used by the webClient.
  *
  * @param {Object} params parameters to configure the ui size.
@@ -509,7 +509,7 @@ export function createVideoStream() {
 export function mockGetMedia() {
     const streams = [];
     // Mock permissions API to return "granted" by default.
-    patchWithCleanup(browser.navigator.permissions, {
+    patchWithCleanup(navigator.permissions, {
         async query() {
             return {
                 state: "granted",
@@ -519,7 +519,7 @@ export function mockGetMedia() {
             };
         },
     });
-    patchWithCleanup(browser.navigator.mediaDevices, {
+    patchWithCleanup(navigator.mediaDevices, {
         getUserMedia(constraints) {
             if (constraints.audio) {
                 const audioStream = createAudioStream();
@@ -790,7 +790,7 @@ function convertChatHubParam(param) {
 }
 
 export function setupChatHub({ opened = [], folded = [] } = {}) {
-    browser.localStorage.setItem(CHAT_HUB_KEY, toChatHubData(opened, folded));
+    localStorage.setItem(CHAT_HUB_KEY, toChatHubData(opened, folded));
 }
 
 export function setDiscussSidebarCategoryFoldState(categoryId, val) {
@@ -810,7 +810,7 @@ export function isDiscussSidebarCategoryFolded(categoryId) {
 }
 
 export function assertChatHub({ opened = [], folded = [] }) {
-    expect(browser.localStorage.getItem(CHAT_HUB_KEY)).toEqual(toChatHubData(opened, folded));
+    expect(localStorage.getItem(CHAT_HUB_KEY)).toEqual(toChatHubData(opened, folded));
 }
 
 export const STORE_FETCH_ROUTES = ["/mail/store"];
@@ -922,8 +922,8 @@ export function patchVoiceMessageAudio() {
         AudioWorkletNode,
         GainNode,
         MediaStreamAudioSourceNode,
-    } = browser;
-    Object.assign(browser, {
+    } = window;
+    Object.assign(window, {
         AnalyserNode: class {
             connect() {}
             disconnect() {}
@@ -950,19 +950,19 @@ export function patchVoiceMessageAudio() {
             async close() {}
             /** @returns {AnalyserNode} */
             createAnalyser() {
-                return new browser.AnalyserNode();
+                return new AnalyserNode();
             }
             /** @returns {AudioBufferSourceNode} */
             createBufferSource() {
-                return new browser.AudioBufferSourceNode();
+                return new AudioBufferSourceNode();
             }
             /** @returns {GainNode} */
             createGain() {
-                return new browser.GainNode();
+                return new GainNode();
             }
             /** @returns {MediaStreamAudioSourceNode} */
             createMediaStreamSource(microphone) {
-                return new browser.MediaStreamAudioSourceNode();
+                return new MediaStreamAudioSourceNode();
             }
             /** @returns {AudioBuffer} */
             decodeAudioData(...args) {
@@ -1001,7 +1001,7 @@ export function patchVoiceMessageAudio() {
         },
     });
     after(() => {
-        Object.assign(browser, {
+        Object.assign(window, {
             AnalyserNode,
             AudioBufferSourceNode,
             AudioContext,
@@ -1014,7 +1014,7 @@ export function patchVoiceMessageAudio() {
 }
 
 export function mockPermissionsPrompt() {
-    patchWithCleanup(browser.navigator.permissions, {
+    patchWithCleanup(navigator.permissions, {
         async query() {
             return {
                 state: "prompt",

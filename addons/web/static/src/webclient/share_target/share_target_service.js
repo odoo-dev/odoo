@@ -1,5 +1,4 @@
 import { registry } from "@web/core/registry";
-import { browser } from "@web/core/browser/browser";
 import { ShareTargetDialog } from "@web/webclient/share_target/share_target_dialog";
 
 export const shareTargetService = {
@@ -11,8 +10,8 @@ export const shareTargetService = {
         return new Promise((resolve) => {
             if (
                 !(
-                    browser.navigator.serviceWorker?.controller &&
-                    new URL(browser.location).searchParams.get("share_target") === "trigger"
+                    navigator.serviceWorker?.controller &&
+                    new URL(location).searchParams.get("share_target") === "trigger"
                 )
             ) {
                 return resolve([]);
@@ -20,11 +19,11 @@ export const shareTargetService = {
             const onmessage = (event) => {
                 if (event.data.action === "odoo_share_target_ack") {
                     resolve(event.data.shared_files);
-                    browser.navigator.serviceWorker.removeEventListener("message", onmessage);
+                    navigator.serviceWorker.removeEventListener("message", onmessage);
                 }
             };
-            browser.navigator.serviceWorker.addEventListener("message", onmessage);
-            browser.navigator.serviceWorker.controller.postMessage("odoo_share_target");
+            navigator.serviceWorker.addEventListener("message", onmessage);
+            navigator.serviceWorker.controller.postMessage("odoo_share_target");
         });
     },
 

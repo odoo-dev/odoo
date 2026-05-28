@@ -3,11 +3,9 @@ import { queryFirst } from "@odoo/hoot-dom";
 import { defineModels, mountView } from "@web/../tests/web_test_helpers";
 import { defineProjectModels } from "@project/../tests/project_models";
 import { ProductProduct, ProjectMilestone, SaleOrderLine } from "./project_task_model"
-
 describe.current.tags("desktop");
 defineModels([SaleOrderLine, ProductProduct]);
 defineProjectModels();
-
 beforeEach(() => {
     ProjectMilestone._records = [
         { id: 1, product_uom_qty: -1, quantity_percentage: -25 },

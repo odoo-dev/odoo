@@ -4,7 +4,6 @@ import { Chatter } from "@mail/chatter/web_portal_project/chatter";
 
 import { onMounted, onWillUnmount } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { SIZES } from "@web/core/ui/ui_service";
 import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
@@ -29,8 +28,8 @@ patch(FormRenderer.prototype, {
         this.mailPopoutService = useService("mail.popout");
 
         this.onResize = useDebounced(this.render, 200);
-        onMounted(() => browser.addEventListener("resize", this.onResize));
-        onWillUnmount(() => browser.removeEventListener("resize", this.onResize));
+        onMounted(() => window.addEventListener("resize", this.onResize));
+        onWillUnmount(() => window.removeEventListener("resize", this.onResize));
     },
     /**
      * @returns {boolean}

@@ -5,7 +5,6 @@ import { CallDropdown } from "@mail/discuss/call/common/call_dropdown";
 import { CONNECTION_TYPES } from "@mail/discuss/call/common/rtc_service";
 import { useHover } from "@mail/utils/common/hooks";
 import { isEventHandled } from "@web/core/utils/misc";
-import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 
 import { Component, onMounted, onWillUnmount } from "@odoo/owl";
@@ -57,7 +56,7 @@ export class CallParticipantCard extends Component {
                 viewCountIncrement: -1,
             });
         });
-        useExternalListener(browser, "fullscreenchange", this.onFullScreenChange);
+        useExternalListener(window, "fullscreenchange", this.onFullScreenChange);
     }
 
     get isContextMenuAvailable() {

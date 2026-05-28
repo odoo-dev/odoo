@@ -1,5 +1,4 @@
 import { Component, onWillStart } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
 import { localeCompare } from "@web/core/l10n/utils";
@@ -15,7 +14,7 @@ function runUnitTestsItem() {
         type: "item",
         description: _t("Run Unit Tests"),
         href,
-        callback: () => browser.open(href),
+        callback: () => window.open(href),
         sequence: 450,
         section: "testing",
     };

@@ -11,7 +11,6 @@ import {
     htmlToHtmlInline,
 } from "@mail/utils/common/format";
 
-import { browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
@@ -626,7 +625,7 @@ export class Message extends Record {
         let notification = _t("Message Link Copied");
         let type = "success";
         try {
-            await browser.navigator.clipboard.writeText(url(`/mail/message/${this.id}`));
+            await navigator.clipboard.writeText(url(`/mail/message/${this.id}`));
         } catch {
             notification = _t("Message Link Copy Failed (Permission denied?)");
             type = "danger";
@@ -637,7 +636,7 @@ export class Message extends Record {
     async copyMessageText() {
         const messageBody = convertBrToLineBreak(this.body);
         try {
-            await browser.navigator.clipboard.writeText(messageBody);
+            await navigator.clipboard.writeText(messageBody);
         } catch {
             this.store.env.services.notification.add(_t("Text Copy Failed (Permission denied?)"), {
                 type: "danger",

@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { pyToJsLocale } from "@web/core/l10n/utils/locales";
 import { rpc } from "@web/core/network/rpc";
 import { Cache } from "@web/core/utils/cache";
@@ -253,7 +252,7 @@ export function _makeUser(session) {
             updateActiveCompanies(newCompanyIds, allowedCompanies, defaultCompany);
 
             if (options.reload) {
-                browser.location.reload();
+                location.reload();
             }
         },
     };
@@ -264,16 +263,16 @@ export const user = _makeUser(session);
 const LAST_CONNECTED_USER_KEY = "web.lastConnectedUser";
 
 export const getLastConnectedUsers = () => {
-    const lastConnectedUsers = browser.localStorage.getItem(LAST_CONNECTED_USER_KEY);
+    const lastConnectedUsers = localStorage.getItem(LAST_CONNECTED_USER_KEY);
     return lastConnectedUsers ? JSON.parse(lastConnectedUsers) : [];
 };
 
 export const setLastConnectedUsers = (users) => {
-    browser.localStorage.setItem(LAST_CONNECTED_USER_KEY, JSON.stringify(users.slice(0, 5)));
+    localStorage.setItem(LAST_CONNECTED_USER_KEY, JSON.stringify(users.slice(0, 5)));
 };
 
 if (!session.quick_login) {
-    browser.localStorage.removeItem(LAST_CONNECTED_USER_KEY);
+    localStorage.removeItem(LAST_CONNECTED_USER_KEY);
 } else if (user.login && user.login !== "__system__") {
     const users = getLastConnectedUsers();
     const lastConnectedUsers = [

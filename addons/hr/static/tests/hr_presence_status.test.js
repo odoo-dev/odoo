@@ -1,10 +1,7 @@
 import { describe, test, expect } from "@odoo/hoot";
-import {
-    mountView,
-    models,
-    defineModels,
-} from "@web/../tests/web_test_helpers";
+import { mountView, models, defineModels } from "@web/../tests/web_test_helpers";
 import { defineMailModels } from "@mail/../tests/mail_test_helpers";
+
 describe.current.tags("desktop");
 
 class HrEmployee extends models.ServerModel {
@@ -38,7 +35,7 @@ test("Office Location (online)", async () => {
     expect(".o_employee_availability.fa-building").toHaveCount(1);
     expect(".o_employee_availability.fa-home").toHaveCount(0);
     expect(".o_employee_availability.fa-map-marker").toHaveCount(0);
-    expect(".o_employee_availability").toHaveClass(["text-success", "fa-building"]);; // color == text-success
+    expect(".o_employee_availability").toHaveClass(["text-success", "fa-building"]); // color == text-success
     expect(".o_employee_availability.fa-building[title='Office 1']").toHaveCount(1);
 });
 

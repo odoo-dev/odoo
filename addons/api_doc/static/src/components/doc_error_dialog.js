@@ -1,6 +1,5 @@
 import { useState } from "@web/owl2/utils";
 import { Component, xml } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 
 export class DocErrorDialog extends Component {
     static template = xml`
@@ -45,7 +44,7 @@ export class DocErrorDialog extends Component {
     }
 
     onClickClipboard() {
-        browser.navigator.clipboard.writeText(
+        navigator.clipboard.writeText(
             `${this.props.name}\n\n${this.props.message}\n\n${this.contextDetails}\n\n${this.props.traceback}`
         );
     }

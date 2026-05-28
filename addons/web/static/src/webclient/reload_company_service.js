@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { UPDATE_METHODS } from "@web/core/orm_service";
@@ -12,7 +11,7 @@ registry.category("services").add("reloadCompany", {
             const { data, error } = ev.detail;
             const { model, method } = data.params;
             if (!error && model === "res.company" && UPDATE_METHODS.includes(method)) {
-                if (!browser.localStorage.getItem("running_tour")) {
+                if (!localStorage.getItem("running_tour")) {
                     action.doAction("reload_context");
                 }
             }

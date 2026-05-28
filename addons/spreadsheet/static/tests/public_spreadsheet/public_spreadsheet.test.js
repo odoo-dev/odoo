@@ -7,8 +7,8 @@ import { THIS_YEAR_GLOBAL_FILTER } from "@spreadsheet/../tests/helpers/global_fi
 import { addGlobalFilter } from "@spreadsheet/../tests/helpers/commands";
 import { freezeOdooData } from "@spreadsheet/helpers/model";
 import { createModelWithDataSource } from "@spreadsheet/../tests/helpers/model";
-import { browser } from "@web/core/browser/browser";
 import { setCellContent } from "../helpers/commands";
+
 defineSpreadsheetModels();
 
 let data;
@@ -21,7 +21,7 @@ mockService("http", {
 });
 
 function getHashParam(key) {
-    return new URLSearchParams(browser.location.hash.substring(1)).get(key);
+    return new URLSearchParams(location.hash.substring(1)).get(key);
 }
 
 test("show spreadsheet in readonly mode", async function () {
@@ -112,13 +112,13 @@ describe("sheetId URL synchronization", () => {
     });
 
     test("activates sheet from URL on initialization", async () => {
-        browser.location.hash = "#sid=sheet2";
+        location.hash = "#sid=sheet2";
         const { model } = await mountPublicSpreadsheet("dashboardDataUrl", "spreadsheet");
         expect(model.getters.getActiveSheetId()).toBe("sheet2");
     });
 
     test("falls back to the first sheet and syncs the URL when sid is invalid", async () => {
-        browser.location.hash = "#sid=unknown";
+        location.hash = "#sid=unknown";
         const { model } = await mountPublicSpreadsheet("dashboardDataUrl", "spreadsheet");
         expect(getHashParam("sid")).toBe("sheet1");
         expect(model.getters.getActiveSheetId()).toBe("sheet1");

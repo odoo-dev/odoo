@@ -1,6 +1,5 @@
 import { useRef } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { CopyButton } from "@web/core/copy_button/copy_button";
 import { Dialog } from "@web/core/dialog/dialog";
 import { EmailSharingInput } from "./email_sharing_input";
@@ -31,12 +30,15 @@ export class SlideShareDialog extends Component {
     }
 
     onSocialShareClick(url) {
-        browser.open(url, "Share Dialog", "width=626,height=436");
+        window.open(url, "Share Dialog", "width=626,height=436");
     }
 
     onPageChange(event) {
         const page = event.currentTarget.value;
-        const newEmbedCodeValue = this.codeInput.el.value.replace(/(page=).*?([^\d]+)/, "$1" + page + "$2");
+        const newEmbedCodeValue = this.codeInput.el.value.replace(
+            /(page=).*?([^\d]+)/,
+            "$1" + page + "$2"
+        );
         this.codeInput.el.value = newEmbedCodeValue;
     }
 }

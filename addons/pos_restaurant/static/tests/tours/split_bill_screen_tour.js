@@ -3,11 +3,13 @@ import * as Dialog from "@point_of_sale/../tests/generic_helpers/dialog_util";
 import * as FeedbackScreen from "@point_of_sale/../tests/pos/tours/utils/feedback_screen_util";
 import * as ChromePos from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 import * as ChromeRestaurant from "@pos_restaurant/../tests/tours/utils/chrome";
+
 const Chrome = { ...ChromePos, ...ChromeRestaurant };
 import * as FloorScreen from "@pos_restaurant/../tests/tours/utils/floor_screen_util";
 import * as Order from "@point_of_sale/../tests/generic_helpers/order_widget_util";
 import * as ProductScreenPos from "@point_of_sale/../tests/pos/tours/utils/product_screen_util";
 import * as ProductScreenResto from "@pos_restaurant/../tests/tours/utils/product_screen_util";
+
 const ProductScreen = { ...ProductScreenPos, ...ProductScreenResto };
 import * as ProductConfiguratorPopup from "@point_of_sale/../tests/pos/tours/utils/product_configurator_util";
 import * as SplitBillScreen from "@pos_restaurant/../tests/tours/utils/split_bill_screen_util";

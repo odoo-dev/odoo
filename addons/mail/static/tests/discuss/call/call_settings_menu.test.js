@@ -15,14 +15,13 @@ import { makeRecordFieldLocalId } from "@mail/model/misc";
 import { describe, keyDown, test, expect } from "@odoo/hoot";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
 
-import { browser } from "@web/core/browser/browser";
 import { isBrowserChrome } from "@web/core/browser/feature_detection";
 
 describe.current.tags("desktop");
 defineMailModels();
 
 test("Renders the call settings", async () => {
-    patchWithCleanup(browser.navigator.mediaDevices, {
+    patchWithCleanup(navigator.mediaDevices, {
         enumerateDevices: () => {
             const deviceList = [
                 {

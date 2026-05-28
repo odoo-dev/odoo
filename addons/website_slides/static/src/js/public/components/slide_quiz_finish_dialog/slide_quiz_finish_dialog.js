@@ -1,6 +1,5 @@
 import { useState } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
 import { Dialog } from "@web/core/dialog/dialog";
 import { Component, onMounted } from "@odoo/owl";
 import { SlideXPProgressBar } from "@website_slides/js/public/components/slide_quiz_finish_dialog/slide_xp_progress_bar";
@@ -47,15 +46,15 @@ export class SlideQuizFinishDialog extends Component {
      * @public
      */
     animateText() {
-        browser.setTimeout(() => {
+        setTimeout(() => {
             this.state.animateKarmaGain = true;
             this.state.hideDismissBtns = false;
         }, 800);
 
         if (this.props.quiz.rankProgress.level_up) {
-            browser.setTimeout(() => {
+            setTimeout(() => {
                 this.state.fadeRankMotivational = true;
-                browser.setTimeout(() => {
+                setTimeout(() => {
                     this.state.showRankMotivational = true;
                 }, 800);
             }, 800);

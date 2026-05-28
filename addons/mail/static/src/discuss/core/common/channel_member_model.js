@@ -1,7 +1,6 @@
 import { Store } from "@mail/core/common/store_service";
 import { fields, Record } from "@mail/model/export";
 
-import { browser } from "@web/core/browser/browser";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { user } from "@web/core/user";
 import { rpc } from "@web/core/network/rpc";
@@ -89,7 +88,7 @@ export class ChannelMember extends Record {
     new_message_separator_ui = null;
     isTyping = fields.Attr(false, {
         onUpdate() {
-            browser.clearTimeout(this.typingTimeoutId);
+            clearTimeout(this.typingTimeoutId);
             if (this.isTyping) {
                 this.registerTypingTimeout();
             }
@@ -103,7 +102,7 @@ export class ChannelMember extends Record {
     }
     is_typing_dt = fields.Datetime({
         onUpdate() {
-            browser.clearTimeout(this.typingTimeoutId);
+            clearTimeout(this.typingTimeoutId);
             if (
                 !this.is_typing_dt ||
                 DateTime.now().diff(this.is_typing_dt).milliseconds > Store.OTHER_LONG_TYPING
@@ -117,7 +116,7 @@ export class ChannelMember extends Record {
     });
     /** To be patched in test, to detect when this timeout is registered. */
     registerTypingTimeout() {
-        this.typingTimeoutId = browser.setTimeout(
+        this.typingTimeoutId = setTimeout(
             () => (this.isTyping = false),
             this.typingTimeoutDuration
         );
@@ -128,7 +127,7 @@ export class ChannelMember extends Record {
         },
         eager: true,
         onDelete() {
-            browser.clearTimeout(this.typingTimeoutId);
+            clearTimeout(this.typingTimeoutId);
         },
     });
     /** @type {number} */

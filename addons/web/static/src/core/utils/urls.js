@@ -1,6 +1,6 @@
 import { session } from "@web/session";
-import { browser } from "../browser/browser";
 import { shallowEqual } from "@web/core/utils/objects";
+
 const { DateTime } = luxon;
 
 export class RedirectionError extends Error {}
@@ -29,7 +29,7 @@ export function getOrigin(origin) {
         // remove trailing slashes
         origin = origin.replace(/\/+$/, "");
     } else {
-        const { host, protocol } = browser.location;
+        const { host, protocol } = location;
         origin = `${protocol}//${host}`;
     }
     return origin;
@@ -139,12 +139,12 @@ export function getDataURLFromFile(file) {
  * @throws {RedirectionError} if the given url has a different origin
  */
 export function redirect(url) {
-    const { origin, pathname } = browser.location;
+    const { origin, pathname } = location;
     const _url = new URL(url, `${origin}${pathname}`);
     if (_url.origin !== origin) {
         throw new RedirectionError("Can't redirect to another origin");
     }
-    browser.location.assign(_url.href);
+    location.assign(_url.href);
 }
 
 /**

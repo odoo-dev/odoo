@@ -1,5 +1,4 @@
 import { EventBus } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
 export const presenceService = {
@@ -8,12 +7,11 @@ export const presenceService = {
         const bus = new EventBus();
         let isOdooFocused = true;
         let lastPresenceTime =
-            browser.localStorage.getItem(`${LOCAL_STORAGE_PREFIX}.lastPresence`) ||
-            luxon.DateTime.now().ts;
+            localStorage.getItem(`${LOCAL_STORAGE_PREFIX}.lastPresence`) || luxon.DateTime.now().ts;
 
         function onPresence() {
             lastPresenceTime = luxon.DateTime.now().ts;
-            browser.localStorage.setItem(`${LOCAL_STORAGE_PREFIX}.lastPresence`, lastPresenceTime);
+            localStorage.setItem(`${LOCAL_STORAGE_PREFIX}.lastPresence`, lastPresenceTime);
             bus.trigger("presence");
         }
 
@@ -24,7 +22,7 @@ export const presenceService = {
                 // noop
             }
             isOdooFocused = isFocused;
-            browser.localStorage.setItem(`${LOCAL_STORAGE_PREFIX}.focus`, isOdooFocused);
+            localStorage.setItem(`${LOCAL_STORAGE_PREFIX}.focus`, isOdooFocused);
             if (isOdooFocused) {
                 lastPresenceTime = luxon.DateTime.now().ts;
                 env.bus.trigger("window_focus", isOdooFocused);
@@ -41,12 +39,12 @@ export const presenceService = {
                 bus.trigger("presence");
             }
         }
-        browser.addEventListener("storage", onStorage);
-        browser.addEventListener("focus", () => onFocusChange(true));
-        browser.addEventListener("blur", () => onFocusChange(false));
-        browser.addEventListener("pagehide", () => onFocusChange(false));
-        browser.addEventListener("click", onPresence, true);
-        browser.addEventListener("keydown", onPresence, true);
+        window.addEventListener("storage", onStorage);
+        window.addEventListener("focus", () => onFocusChange(true));
+        window.addEventListener("blur", () => onFocusChange(false));
+        window.addEventListener("pagehide", () => onFocusChange(false));
+        window.addEventListener("click", onPresence, true);
+        window.addEventListener("keydown", onPresence, true);
 
         return {
             bus,

@@ -3,6 +3,7 @@ import * as spreadsheet from "@odoo/o-spreadsheet";
 import { GlobalFiltersUIPlugin } from "./plugins/global_filters_ui_plugin";
 import { GlobalFiltersCorePlugin } from "./plugins/global_filters_core_plugin";
 import { GlobalFiltersCoreViewPlugin } from "./plugins/global_filters_core_view_plugin";
+
 const { inverseCommandRegistry } = spreadsheet.registries;
 
 function identity(cmd) {

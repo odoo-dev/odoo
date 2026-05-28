@@ -1,7 +1,6 @@
 import { useState } from "@web/owl2/utils";
 import { Component, onWillDestroy, onWillStart } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
@@ -45,7 +44,7 @@ export class DeviceSelect extends Component {
         this.abortController = new AbortController();
         this.isBrowserChrome = isBrowserChrome();
         onWillStart(async () => {
-            if (!browser.navigator.mediaDevices) {
+            if (!navigator.mediaDevices) {
                 // zxing-js: isMediaDevicesSuported or canEnumerateDevices is false.
                 this.notification.add(
                     _t("Media devices unobtainable. SSL might not be set up properly."),
@@ -70,19 +69,19 @@ export class DeviceSelect extends Component {
     }
 
     async updateDevicesList() {
-        this.state.userDevices = await browser.navigator.mediaDevices.enumerateDevices();
+        this.state.userDevices = await navigator.mediaDevices.enumerateDevices();
     }
 
     async setupEventListeners() {
         const boundHandler = this.updateDevicesList.bind(this);
         const signal = this.abortController.signal;
 
-        browser.navigator.mediaDevices.addEventListener("devicechange", boundHandler, { signal });
+        navigator.mediaDevices.addEventListener("devicechange", boundHandler, { signal });
         if (this.props.kind == "videoinput") {
-            const cameraPermission = await browser.navigator.permissions.query({ name: "camera" });
+            const cameraPermission = await navigator.permissions.query({ name: "camera" });
             cameraPermission.addEventListener("change", boundHandler, { signal });
         } else {
-            const microphonePermission = await browser.navigator.permissions.query({
+            const microphonePermission = await navigator.permissions.query({
                 name: "microphone",
             });
             microphonePermission.addEventListener("change", boundHandler, { signal });

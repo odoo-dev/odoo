@@ -4,6 +4,7 @@ import { session } from "@web/session";
 import { cookie } from "@web/core/browser/cookie";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { Time } from "@web/core/l10n/time";
+
 /*
  * comes from o_spreadsheet.js
  * https://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript

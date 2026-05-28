@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { redirect } from "@web/core/utils/urls";
 import { post } from "@web/core/network/http_service";
@@ -16,7 +15,7 @@ registry.category("web_tour.tours").add("website_sale.cart_recovery", {
             trigger: 'div:has(a>h6:contains("Acoustic Bloc Screens"))',
             run: async function () {
                 const orderId = document.querySelector(".my_cart_quantity").dataset["orderId"];
-                browser.localStorage.setItem(orderIdKey, orderId);
+                localStorage.setItem(orderIdKey, orderId);
 
                 const url = await post(
                     "/web/session/logout?redirect=/web/login",
@@ -103,7 +102,7 @@ registry.category("web_tour.tours").add("website_sale.cart_recovery", {
                 var link = queryOne('.o-mail-Message-body a:contains("Resume order")').getAttribute(
                     "href"
                 );
-                browser.localStorage.setItem(recoveryLinkKey, link);
+                localStorage.setItem(recoveryLinkKey, link);
 
                 const url = await post(
                     "/web/session/logout?redirect=/",
@@ -118,7 +117,6 @@ registry.category("web_tour.tours").add("website_sale.cart_recovery", {
             content: "go to the recovery link",
             trigger: 'a[href="/web/login"]',
             run: function () {
-                const localStorage = browser.localStorage;
                 redirect(localStorage.getItem(recoveryLinkKey));
             },
             expectUnloadPage: true,

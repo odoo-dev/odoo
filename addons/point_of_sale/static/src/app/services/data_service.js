@@ -7,7 +7,6 @@ import { debounce } from "@web/core/utils/timing";
 import IndexedDB from "../models/utils/indexed_db";
 import { DataServiceOptions } from "../models/data_service_options";
 import { getOnNotified, uuidv4 } from "@point_of_sale/utils";
-import { browser } from "@web/core/browser/browser";
 import { ConnectionLostError, rpc, RPCError } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import DeviceIdentifierSequence from "../utils/devices_identifier_sequence";
@@ -52,8 +51,8 @@ export class PosData {
         await this.initializeDeviceIdentifier();
         await this.intializeDataRelation();
 
-        browser.addEventListener("online", () => this.checkConnectivity());
-        browser.addEventListener("offline", () => this.checkConnectivity());
+        window.addEventListener("online", () => this.checkConnectivity());
+        window.addEventListener("offline", () => this.checkConnectivity());
         this.bus.addEventListener("BUS:CONNECT", this.reconnectWebSocket.bind(this));
     }
 

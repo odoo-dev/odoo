@@ -8,7 +8,6 @@ import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
 import { HtmlViewer } from "@html_editor/components/html_viewer/html_viewer";
 import { READONLY_MAIN_EMBEDDINGS } from "@html_editor/others/embedded_components/embedding_sets";
-import { browser } from "@web/core/browser/browser";
 import { cookie } from "@web/core/browser/cookie";
 import { loadBundle } from "@web/core/assets";
 import { htmlReplaceAll } from "@web/core/utils/html";
@@ -77,11 +76,9 @@ export class HistoryDialog extends Component {
             );
             revisionData.push({
                 revision_id: revisionId,
-                create_date: DateTime.fromFormat(
-                    record[0]["create_date"],
-                    "yyyy-MM-dd HH:mm:ss",
-                    { zone: "utc" }
-                ).toISO(),
+                create_date: DateTime.fromFormat(record[0]["create_date"], "yyyy-MM-dd HH:mm:ss", {
+                    zone: "utc",
+                }).toISO(),
                 create_uid: record[0]["create_uid"][0],
                 create_user_name: record[0]["create_uid"][1],
             });
@@ -341,7 +338,7 @@ export class HistoryDialog extends Component {
         if (!revision || !revision["create_uid"]) {
             return this.DEFAULT_AVATAR;
         }
-        return `${browser.location.origin}/web/image?model=res.users&field=avatar_128&id=${revision["create_uid"]}`;
+        return `${location.origin}/web/image?model=res.users&field=avatar_128&id=${revision["create_uid"]}`;
     }
 
     get currentRevision() {

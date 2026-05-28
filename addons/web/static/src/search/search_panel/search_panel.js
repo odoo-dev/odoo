@@ -2,13 +2,7 @@ import { reactive, render, useLayoutEffect, useRef, useState } from "@web/owl2/u
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useBus } from "@web/core/utils/hooks";
 
-import {
-    Component,
-    onMounted,
-    onWillStart,
-    onWillUpdateProps,
-} from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
+import { Component, onMounted, onWillStart, onWillUpdateProps } from "@odoo/owl";
 import { exprToBoolean } from "@web/core/utils/strings";
 import { useSetupAction } from "@web/search/action_hook";
 
@@ -68,7 +62,7 @@ export class SearchPanel extends Component {
         this.width = "10px";
 
         this.importState(this.env.searchPanelState);
-        const sidebarExpandedPreference = browser.localStorage.getItem(this.keyExpandSidebar);
+        const sidebarExpandedPreference = localStorage.getItem(this.keyExpandSidebar);
         if (sidebarExpandedPreference !== null) {
             this.state.sidebarExpanded = exprToBoolean(sidebarExpandedPreference);
         }
@@ -322,7 +316,7 @@ export class SearchPanel extends Component {
 
     toggleSidebar() {
         this.state.sidebarExpanded = !this.state.sidebarExpanded;
-        browser.localStorage.setItem(this.keyExpandSidebar, this.state.sidebarExpanded);
+        localStorage.setItem(this.keyExpandSidebar, this.state.sidebarExpanded);
     }
 
     /**

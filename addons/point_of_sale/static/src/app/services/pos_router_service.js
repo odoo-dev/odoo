@@ -1,6 +1,5 @@
 import { registry } from "@web/core/registry";
 import { Reactive } from "@web/core/utils/reactive";
-import { browser } from "@web/core/browser/browser";
 import { escapeRegExp } from "@web/core/utils/strings";
 import { zip } from "@web/core/utils/arrays";
 
@@ -133,7 +132,7 @@ export class PosRouter extends Reactive {
 
     navigate(routeName, routeParams = {}) {
         const route = this.getRoute(routeName);
-        const url = new URL(browser.location.href);
+        const url = new URL(location.href);
 
         url.pathname = route.replace(
             /\{\w+:(\w+)\}/g,

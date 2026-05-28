@@ -1,5 +1,4 @@
 import { session } from "@web/session";
-import { browser } from "../../core/browser/browser";
 import { registry } from "../../core/registry";
 import { IndexedDB } from "@web/core/utils/indexed_db";
 
@@ -17,7 +16,7 @@ export const menuService = {
             if (!reload && odoo.loadMenusPromise) {
                 return odoo.loadMenusPromise;
             }
-            const res = await browser.fetch(loadMenusUrl, { cache: "no-store" });
+            const res = await fetch(loadMenusUrl, { cache: "no-store" });
             if (!res.ok) {
                 throw new Error("Error while fetching menus");
             }
@@ -51,7 +50,7 @@ export const menuService = {
             menu = typeof menu === "number" ? _getMenu(menu) : menu;
             if (menu && menu.appID !== currentAppId) {
                 currentAppId = menu.appID;
-                browser.sessionStorage.setItem("menu_id", currentAppId);
+                sessionStorage.setItem("menu_id", currentAppId);
                 env.bus.trigger("MENUS:APP-CHANGED");
             }
         }

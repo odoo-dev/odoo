@@ -1,7 +1,5 @@
 import { useState } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
-import { browser } from "@web/core/browser/browser";
-
 import { EventBus, Component } from "@odoo/owl";
 
 export class BlockUI extends Component {
@@ -56,7 +54,7 @@ export class BlockUI extends Component {
         this.state.line1 = message.l1;
         this.state.line2 = message.l2 || "";
         if (message.time !== null) {
-            this.msgTimer = browser.setTimeout(() => {
+            this.msgTimer = setTimeout(() => {
                 this.replaceMessage(index + 1);
             }, message.time * 1000);
         }

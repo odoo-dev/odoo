@@ -12,7 +12,6 @@ import { beforeEach, expect, test } from "@odoo/hoot";
 import { click, edit, pointerDown, queryFirst, queryOne } from "@odoo/hoot-dom";
 import { getNextTabableElement } from "@web/core/utils/ui";
 import { animationFrame } from "@odoo/hoot-mock";
-import { browser } from "@web/core/browser/browser";
 
 class Partner extends models.Model {
     foo = fields.Char({ default: "My little Foo Value", trim: true });
@@ -31,7 +30,7 @@ async function assertUrl(target, url) {
 }
 
 beforeEach(() => {
-    patchWithCleanup(browser, {
+    patchWithCleanup(window, {
         open(url) {
             expect.step(url);
         },

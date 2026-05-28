@@ -1,6 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "../registry";
-import { browser } from "../browser/browser";
 import { router } from "../browser/router";
 
 const commandProviderRegistry = registry.category("command_provider");
@@ -27,7 +26,7 @@ commandProviderRegistry.add("debug", {
             });
             result.push({
                 action() {
-                    browser.open("/web/tests?debug=assets");
+                    window.open("/web/tests?debug=assets");
                 },
                 category: "debug",
                 name: _t("Run Unit Tests"),

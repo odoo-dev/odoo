@@ -11,7 +11,6 @@ import {
 } from "@web/../tests/web_test_helpers";
 
 import { Component, onMounted, xml } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { CommandPalette } from "@web/core/commands/command_palette";
 import { registry } from "@web/core/registry";
 import {
@@ -152,7 +151,7 @@ describe("useAutofocus", () => {
             }
         }
 
-        patchWithCleanup(browser, {
+        patchWithCleanup(window, {
             matchMedia: (media) => {
                 if (media === "(pointer:coarse)") {
                     return { matches: true };

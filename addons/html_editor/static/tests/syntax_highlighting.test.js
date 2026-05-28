@@ -14,7 +14,6 @@ import {
     testTextareaRange,
 } from "./_helpers/syntax_highlighting";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
-import { browser } from "@web/core/browser/browser";
 import { setupEditor, testEditor } from "./_helpers/editor";
 import { EMBEDDED_COMPONENT_PLUGINS, MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { MAIN_EMBEDDINGS } from "@html_editor/others/embedded_components/embedding_sets";
@@ -312,7 +311,7 @@ test("the textarea should never contains zws", async () => {
 });
 
 test("can copy content with the copy button", async () => {
-    patchWithCleanup(browser.navigator.clipboard, {
+    patchWithCleanup(navigator.clipboard, {
         async writeText(text) {
             expect.step(text);
         },

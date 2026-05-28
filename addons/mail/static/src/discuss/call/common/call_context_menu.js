@@ -1,7 +1,6 @@
 import { useState } from "@web/owl2/utils";
 import { Component, onMounted, onWillUnmount } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 
@@ -34,9 +33,9 @@ export class CallContextMenu extends Component {
                 return;
             }
             this.updateStats();
-            this.updateStatsTimeout = browser.setInterval(() => this.updateStats(), 3000);
+            this.updateStatsTimeout = setInterval(() => this.updateStats(), 3000);
         });
-        onWillUnmount(() => browser.clearInterval(this.updateStatsTimeout));
+        onWillUnmount(() => clearInterval(this.updateStatsTimeout));
     }
 
     get isSelf() {

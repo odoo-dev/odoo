@@ -1,6 +1,4 @@
 import { render, useComponent, useLayoutEffect, useState } from "@web/owl2/utils";
-import { browser } from "./browser/browser";
-
 import { Component, onWillUpdateProps, status, xml } from "@odoo/owl";
 
 // Allows to disable transitions globally, useful for testing (and maybe for
@@ -79,7 +77,7 @@ export function useTransition({
             if (newState === prevState) {
                 return;
             }
-            browser.clearTimeout(timer);
+            clearTimeout(timer);
             prevState = newState;
             // when true - transition from enter to enter-active
             // when false - transition from enter-active to leave, unmount after leaveDuration
@@ -97,7 +95,7 @@ export function useTransition({
                 state.shouldMount = true;
             } else {
                 state.stage = "leave";
-                timer = browser.setTimeout(() => {
+                timer = setTimeout(() => {
                     state.shouldMount = false;
                     onLeave();
                 }, leaveDuration);

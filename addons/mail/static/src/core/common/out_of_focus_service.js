@@ -1,6 +1,5 @@
 import { htmlToTextContentInline } from "@mail/utils/common/format";
 
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 
@@ -67,7 +66,7 @@ export class OutOfFocusService {
     }
 
     async hasServiceWorkInstalledAndPushSubscriptionActive() {
-        const registration = await browser.navigator.serviceWorker?.getRegistration();
+        const registration = await navigator.serviceWorker?.getRegistration();
         if (registration) {
             const pushManager = await registration.pushManager;
             if (pushManager) {

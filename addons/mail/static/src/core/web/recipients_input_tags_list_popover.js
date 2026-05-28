@@ -5,6 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { isEmail } from "@web/core/utils/strings";
 
 import { Component } from "@odoo/owl";
+
 /**
  * This class represents the popover opened when we detect that one of our recipients is missing an email
  * address in the RecipientsInput. It allows the user to correct this error and update the partner

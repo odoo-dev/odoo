@@ -1,6 +1,5 @@
 import { Component } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { NotificationAlertDialog } from "@web/core/notification_alert_dialog/notification_alert_dialog";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -15,7 +14,7 @@ export class NotificationAlert extends Component {
     }
 
     get isNotificationBlocked() {
-        return browser.Notification && browser.Notification.permission === "denied";
+        return Notification && Notification.permission === "denied";
     }
 
     openNotificationDialog() {

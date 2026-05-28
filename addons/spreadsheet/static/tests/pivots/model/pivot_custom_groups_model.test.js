@@ -7,6 +7,7 @@ import { createSpreadsheetWithPivot } from "@spreadsheet/../tests/helpers/pivot"
 import { doMenuAction } from "@spreadsheet/../tests/helpers/ui";
 import { waitForDataLoaded } from "@spreadsheet/helpers/model";
 import { Partner, Product } from "../../helpers/data";
+
 const { cellMenuRegistry } = registries;
 
 describe.current.tags("headless");

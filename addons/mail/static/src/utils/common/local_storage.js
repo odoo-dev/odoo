@@ -1,4 +1,3 @@
-import { browser } from "@web/core/browser/browser";
 import { session } from "@web/session";
 
 const LOCAL_STORAGE_SUBVERSION = 1;
@@ -42,16 +41,16 @@ export class LocalStorageEntry {
         if (this.rawGet() !== null && this.get() === value) {
             return;
         }
-        browser.localStorage.setItem(this.key, toRawValue(value));
+        localStorage.setItem(this.key, toRawValue(value));
     }
     rawGet() {
-        return browser.localStorage.getItem(this.key);
+        return localStorage.getItem(this.key);
     }
     remove() {
         if (this.rawGet() === null) {
             return;
         }
-        browser.localStorage.removeItem(this.key);
+        localStorage.removeItem(this.key);
     }
 }
 

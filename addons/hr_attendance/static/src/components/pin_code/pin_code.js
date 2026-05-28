@@ -1,6 +1,5 @@
 import { useState } from "@web/owl2/utils";
 import { Component, onWillStart, onWillDestroy } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { range } from "@web/core/utils/numbers";
 
 import { AttendanceVideoStream } from "@hr_attendance/components/attendance_video_stream/attendance_video_stream";
@@ -50,9 +49,9 @@ export class KioskPinCode extends Component {
                 this.state.codePin = this.state.codePin.substring(0, this.state.codePin.length - 1);
             }
         };
-        browser.addEventListener("keydown", onKeyDown);
-        onWillStart(() => browser.addEventListener("keydown", onKeyDown));
-        onWillDestroy(() => browser.removeEventListener("keydown", onKeyDown));
+        window.addEventListener("keydown", onKeyDown);
+        onWillStart(() => window.addEventListener("keydown", onKeyDown));
+        onWillDestroy(() => window.removeEventListener("keydown", onKeyDown));
     }
 
     async onClickPadButton(value) {

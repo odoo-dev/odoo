@@ -1,6 +1,4 @@
 import { useExternalListener, useLayoutEffect, useState } from "@web/owl2/utils";
-import { browser } from "@web/core/browser/browser";
-
 import { Component } from "@odoo/owl";
 
 /**
@@ -50,10 +48,10 @@ export class RainbowMan extends Component {
         if (this.delay) {
             useLayoutEffect(
                 () => {
-                    const timeout = browser.setTimeout(() => {
+                    const timeout = setTimeout(() => {
                         this.state.isFading = true;
                     }, this.delay);
-                    return () => browser.clearTimeout(timeout);
+                    return () => clearTimeout(timeout);
                 },
                 () => []
             );

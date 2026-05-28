@@ -9,7 +9,6 @@ import { assignDefined, closeStream } from "@mail/utils/common/misc";
 
 import { proxy, toRaw } from "@odoo/owl";
 
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { pick } from "@web/core/utils/objects";
@@ -404,7 +403,7 @@ export class Rtc extends Record {
     /** @type {AudioContext} AudioContext used to mix screen and mic audio */
     audioContext;
     // cross tab sync
-    _broadcastChannel = new browser.BroadcastChannel("call_sync_state");
+    _broadcastChannel = new BroadcastChannel("call_sync_state");
     _remotelyHostedSessionId;
     _remotelyHostedChannelId;
     _crossTabTimeoutId;
@@ -531,15 +530,15 @@ export class Rtc extends Record {
                 session.playAudio();
             }
         });
-        browser.addEventListener("blur", () => this.onBlur());
-        browser.addEventListener(
+        window.addEventListener("blur", () => this.onBlur());
+        window.addEventListener(
             "keydown",
             (ev) => {
                 this.onKeyDown(ev);
             },
             { capture: true }
         );
-        browser.addEventListener(
+        window.addEventListener(
             "keyup",
             (ev) => {
                 this.onKeyUp(ev);
@@ -547,7 +546,7 @@ export class Rtc extends Record {
             { capture: true }
         );
 
-        browser.addEventListener("pagehide", () => {
+        window.addEventListener("pagehide", () => {
             if (this.localChannel) {
                 const data = JSON.stringify({
                     params: { channel_id: this.localChannel.id, session_id: this.selfSession.id },
@@ -556,7 +555,7 @@ export class Rtc extends Record {
                 // using sendBeacon allows sending a post request even when the
                 // browser prevents async requests from firing when the browser
                 // is closed. Alternatives like synchronous XHR are not reliable.
-                browser.navigator.sendBeacon("/mail/rtc/channel/leave_call", blob);
+                navigator.sendBeacon("/mail/rtc/channel/leave_call", blob);
                 this.sfuClient?.disconnect();
             }
         });
@@ -568,7 +567,7 @@ export class Rtc extends Record {
          * This is distinct from this.recover which tries to restore
          * connections that were established but failed or timed out.
          */
-        browser.setInterval(async () => {
+        setInterval(async () => {
             if (!this.localSession || !this.localChannel) {
                 return;
             }
@@ -623,7 +622,7 @@ export class Rtc extends Record {
     }
 
     setPttReleaseTimeout(duration = PTT_RELEASE_DURATION) {
-        this.pttReleaseTimeout = browser.setTimeout(() => {
+        this.pttReleaseTimeout = setTimeout(() => {
             this.setTalking(false);
             if (!this.localSession?.isMute) {
                 this.soundEffectsService.play("ptt-release");
@@ -639,7 +638,7 @@ export class Rtc extends Record {
         ) {
             return;
         }
-        browser.clearTimeout(this.pttReleaseTimeout);
+        clearTimeout(this.pttReleaseTimeout);
         if (!this.localSession.isTalking && !this.localSession.isMute) {
             this.soundEffectsService.play("ptt-press");
         }
@@ -681,7 +680,7 @@ export class Rtc extends Record {
         this.notifications.set(id, { id, text });
         this.timeouts.set(
             id,
-            browser.setTimeout(() => {
+            setTimeout(() => {
                 this.notifications.delete(id);
                 this.timeouts.delete(id);
             }, delay)
@@ -692,7 +691,7 @@ export class Rtc extends Record {
      * @param {any} id
      */
     removeCallNotification(id) {
-        browser.clearTimeout(this.timeouts.get(id));
+        clearTimeout(this.timeouts.get(id));
         this.notifications.delete(id);
         this.timeouts.delete(id);
     }
@@ -921,7 +920,7 @@ export class Rtc extends Record {
 
     async askForBrowserPermission({ audio, video }) {
         try {
-            const stream = await browser.navigator.mediaDevices.getUserMedia({
+            const stream = await navigator.mediaDevices.getUserMedia({
                 audio: audio ? this.store.settings.audioConstraints : false,
                 video: video ? this.store.settings.cameraConstraints : false,
             });
@@ -978,7 +977,7 @@ export class Rtc extends Record {
         } catch {
             // trying again with a delay in case of race condition with the asset loading.
             await new Promise((resolve, reject) => {
-                browser.setTimeout(async () => {
+                setTimeout(async () => {
                     try {
                         await load();
                     } catch (error) {
@@ -1108,8 +1107,8 @@ export class Rtc extends Record {
     }
 
     _refreshCrossTabTimeout() {
-        browser.clearTimeout(this._crossTabTimeoutId);
-        this._crossTabTimeoutId = browser.setTimeout(() => {
+        clearTimeout(this._crossTabTimeoutId);
+        this._crossTabTimeoutId = setTimeout(() => {
             this.clear();
         }, PING_INTERVAL + 10_000);
     }
@@ -1388,7 +1387,7 @@ export class Rtc extends Record {
                 this.sfuClient.broadcast({ sequence: getSequence() });
                 break;
             case this.SFU_CLIENT_STATE.CONNECTED:
-                browser.clearTimeout(this.sfuTimeout);
+                clearTimeout(this.sfuTimeout);
                 this.sfuClient.updateInfo(this.formatInfo(), {
                     needRefresh: true, // asks the server to send the info from all the channel
                 });
@@ -1484,8 +1483,8 @@ export class Rtc extends Record {
         }
         if (this.connectionType === CONNECTION_TYPES.SERVER) {
             if (this.sfuClient.state === this.SFU_CLIENT_STATE.DISCONNECTED) {
-                browser.clearTimeout(this.sfuTimeout);
-                this.sfuTimeout = browser.setTimeout(() => {
+                clearTimeout(this.sfuTimeout);
+                this.sfuTimeout = setTimeout(() => {
                     this.log(this.selfSession, "sfu connection timeout", { important: true });
                     this._downgradeConnection();
                 }, 10000);
@@ -1593,7 +1592,7 @@ export class Rtc extends Record {
         this.cleanups.push(
             // only register the beforeunload event if there is a call as FireFox will not place
             // the pages with beforeunload listeners in the bfcache.
-            subscribe(browser, "beforeunload", (event) => {
+            subscribe(window, "beforeunload", (event) => {
                 event.preventDefault();
             })
         );
@@ -1627,7 +1626,7 @@ export class Rtc extends Record {
             logs.push(this.buildSnapshot());
         }
         if (logs.length || download) {
-            browser.navigator.serviceWorker?.controller?.postMessage({
+            navigator.serviceWorker?.controller?.postMessage({
                 name: SW_MESSAGE_TYPE.POST_RTC_LOGS,
                 logs,
                 download,
@@ -1690,7 +1689,7 @@ export class Rtc extends Record {
             // a snapshot out of a call would not collect any data
             return;
         }
-        browser.navigator.serviceWorker?.controller?.postMessage({
+        navigator.serviceWorker?.controller?.postMessage({
             name: SW_MESSAGE_TYPE.POST_RTC_LOGS,
             logs: [this.buildSnapshot()],
         });
@@ -1742,9 +1741,9 @@ export class Rtc extends Record {
         this.exitFullscreen();
         this._remotelyHostedSessionId = undefined;
         this._remotelyHostedChannelId = undefined;
-        browser.clearTimeout(this._crossTabTimeoutId);
+        clearTimeout(this._crossTabTimeoutId);
         this.cleanups.splice(0).forEach((cleanup) => cleanup());
-        browser.clearTimeout(this.sfuTimeout);
+        clearTimeout(this.sfuTimeout);
         this.sfuClient = undefined;
         this.network = undefined;
         this.audioContext?.close();
@@ -2034,7 +2033,7 @@ export class Rtc extends Record {
         }
         /** @type {MediaStream} */
         let sourceStream;
-        const sourceWindow = env?.pipWindow ?? browser;
+        const sourceWindow = env?.pipWindow ?? window;
         try {
             if (type === "camera") {
                 if (this.sourceCameraStream && !options?.refreshStream) {
@@ -2171,7 +2170,7 @@ export class Rtc extends Record {
         if (force) {
             let micAudioTrack;
             try {
-                const audioStream = await browser.navigator.mediaDevices.getUserMedia({
+                const audioStream = await navigator.mediaDevices.getUserMedia({
                     audio: this.store.settings.audioConstraints,
                 });
                 micAudioTrack = audioStream.getAudioTracks()[0];
@@ -2377,7 +2376,7 @@ export class Rtc extends Record {
         const downloadTimeout = this.downloadTimeouts.get(rtcSession.id);
         if (downloadTimeout) {
             this.downloadTimeouts.delete(rtcSession.id);
-            browser.clearTimeout(downloadTimeout);
+            clearTimeout(downloadTimeout);
         }
         if (rtcSession.videoComponentCount > 0) {
             this.network?.updateDownload(rtcSession.id, {
@@ -2391,7 +2390,7 @@ export class Rtc extends Record {
              */
             this.downloadTimeouts.set(
                 rtcSession.id,
-                browser.setTimeout(() => {
+                setTimeout(() => {
                     this.downloadTimeouts.delete(rtcSession.id);
                     this.network?.updateDownload(rtcSession.id, {
                         camera: false,
@@ -2456,11 +2455,11 @@ export const rtcService = {
                 }
             }
         });
-        browser.navigator.permissions?.query({ name: "microphone" }).then((status) => {
+        navigator.permissions?.query({ name: "microphone" }).then((status) => {
             rtc.microphonePermission = status.state;
             status.onchange = () => (rtc.microphonePermission = status.state);
         });
-        browser.navigator.permissions?.query({ name: "camera" }).then((status) => {
+        navigator.permissions?.query({ name: "camera" }).then((status) => {
             rtc.cameraPermission = status.state;
             status.onchange = () => (rtc.cameraPermission = status.state);
         });

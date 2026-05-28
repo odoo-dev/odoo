@@ -1,6 +1,5 @@
 import { useState } from "@web/owl2/utils";
 import { Component, xml } from "@odoo/owl";
-import { browser } from "@web/core/browser/browser";
 import { rpc } from "@web/core/network/rpc";
 
 import { advanceTime, animationFrame, expect, runAllTimers, test, tick } from "@odoo/hoot";
@@ -59,13 +58,13 @@ test("'offline' and 'online' events fired on window", async () => {
     const env = await makeMockEnv();
 
     offline = true;
-    browser.dispatchEvent(new Event("offline"));
+    window.dispatchEvent(new Event("offline"));
     await tick();
     expect.verifySteps(["version_info"]);
     expect(env.services.offline.offline).toBe(true);
 
     offline = false;
-    browser.dispatchEvent(new Event("online"));
+    window.dispatchEvent(new Event("online"));
     await tick();
     expect.verifySteps(["version_info"]);
     expect(env.services.offline.offline).toBe(false);
@@ -77,7 +76,7 @@ test("'offline' and 'online' events fired on window (false positive)", async () 
     const env = await makeMockEnv();
 
     // "online" event triggered when we're online
-    browser.dispatchEvent(new Event("online"));
+    window.dispatchEvent(new Event("online"));
     await tick();
     expect.verifySteps([]);
     expect(env.services.offline.offline).toBe(false);
@@ -86,7 +85,7 @@ test("'offline' and 'online' events fired on window (false positive)", async () 
     env.services.offline.offline = true;
     await tick();
     expect(env.services.offline.offline).toBe(true);
-    browser.dispatchEvent(new Event("offline"));
+    window.dispatchEvent(new Event("offline"));
     await tick();
     expect.waitForSteps([]);
     expect(env.services.offline.offline).toBe(true);
