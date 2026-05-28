@@ -4,3 +4,5 @@
 {"kind": "event", "ts": "2026-05-28T03:43:26.176628+00:00", "actor": "orchestrator", "event": "status", "value": "pending"}
 {"kind": "event", "ts": "2026-05-28T04:30:33.285830+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 99, "branch": "master-html-editor-gradient-picker-js-tref-nby", "status": "partial", "commits": [], "summary": "Agent infrastructure timeout/socket-error (2nd attempt); test suite appears heavy under parallelism.", "problem": "needs serial (single-agent) re-run.", "needs_rerun": true}}
 {"kind": "event", "ts": "2026-05-28T04:30:33.285830+00:00", "actor": "orchestrator", "event": "status", "value": "pending"}
+{"kind": "event", "ts": "2026-05-28T05:09:05.579510+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 99, "branch": "master-html-editor-gradient-picker-js-tref-nby", "status": "incomplete", "commits": [], "summary": "Async/serial agent returned without producing a commit; branch at integration base.", "problem": "agent didn't finish; needs re-dispatch.", "needs_rerun": true}}
+{"kind": "event", "ts": "2026-05-28T05:09:05.579510+00:00", "actor": "orchestrator", "event": "status", "value": "pending"}

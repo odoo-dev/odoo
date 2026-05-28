@@ -7,3 +7,6 @@
 {"kind": "event", "ts": "2026-05-28T03:43:26.176628+00:00", "actor": "orchestrator", "event": "status", "value": "pending"}
 {"kind": "event", "ts": "2026-05-28T04:30:33.285830+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 99, "branch": "master-html-editor-color-selector-js-tref-nby", "status": "partial", "commits": [], "summary": "Agent infrastructure timeout/socket-error (2nd attempt); test suite appears heavy under parallelism.", "problem": "needs serial (single-agent) re-run.", "needs_rerun": true}}
 {"kind": "event", "ts": "2026-05-28T04:30:33.285830+00:00", "actor": "orchestrator", "event": "status", "value": "pending"}
+{"kind": "event", "ts": "2026-05-28T05:09:05.579510+00:00", "actor": "orchestrator", "event": "run", "run": {"n": 2, "branch": "master-html-editor-color-selector-js-tref-nby", "status": "success", "summary": "Migrated by serial agent; useColorPicker fed the signal.", "commits": ["8cca6ea65fdd"], "problem": null, "needs_rerun": false}}
+{"kind": "event", "ts": "2026-05-28T05:09:05.579510+00:00", "actor": "orchestrator", "event": "push", "remote": "odoo-dev", "branch": "master-html-editor-color-selector-js-tref-nby"}
+{"kind": "event", "ts": "2026-05-28T05:09:05.579510+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
