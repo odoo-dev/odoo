@@ -1,4 +1,4 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { expect, getFixture, test, mockLocation } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { Component, xml } from "@odoo/owl";
 import {
@@ -25,7 +25,7 @@ test("Installation page displays the app info correctly", async () => {
     beforeInstallPromptEvent.prompt = async () => ({ outcome: "accepted" });
     window.BeforeInstallPromptEvent = beforeInstallPromptEvent;
     await makeMockEnv();
-    patchWithCleanup(location, {
+    patchWithCleanup(mockLocation, {
         replace: (url) => {
             expect(url.searchParams.get("app_name")).toBe("%3COtto%26", {
                 message: "ask to redirect with updated searchParams",

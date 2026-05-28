@@ -1,4 +1,4 @@
-import { expect, getFixture, test } from "@odoo/hoot";
+import { expect, getFixture, test, mockLocation } from "@odoo/hoot";
 import { queryOne, scroll, waitFor } from "@odoo/hoot-dom";
 import { animationFrame, Deferred } from "@odoo/hoot-mock";
 import { Component, onWillStart, xml } from "@odoo/owl";
@@ -680,7 +680,7 @@ test("retrieving a stored action should remove 'allowed_company_ids' from its co
     );
 
     // Prepare the URL hash to make sure the stored action will get executed.
-    Object.assign(location, { search: "?model=partner&view_type=kanban" });
+    Object.assign(mockLocation, { search: "?model=partner&view_type=kanban" });
 
     // Create the web client. It should execute the stored action.
     await mountWithCleanup(WebClient);
@@ -725,7 +725,7 @@ test("retrieving a stored action should remove 'allowed_company_ids' from its co
     );
 
     // Prepare the URL hash to make sure the stored action will get executed.
-    // Object.assign(location, { search: "?model=partner&view_type=kanban" });
+    // Object.assign(mockLocation, { search: "?model=partner&view_type=kanban" });
     redirect("/odoo/action-1?view_type=kanban");
 
     // Create the web client. It should execute the stored action.

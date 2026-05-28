@@ -1,4 +1,4 @@
-import { beforeEach, expect, test } from "@odoo/hoot";
+import { beforeEach, expect, test, mockLocation } from "@odoo/hoot";
 import { cookie } from "@web/core/browser/cookie";
 import { redirect } from "@web/core/utils/urls";
 import {
@@ -42,12 +42,12 @@ beforeEach(() => {
         { id: 2, name: "Company 2", sequence: 2, parent_id: false, child_ids: [] },
         { id: 3, name: "Company 3", sequence: 3, parent_id: false, child_ids: [] },
     ];
-    patchWithCleanup(location, {
+    patchWithCleanup(mockLocation, {
         reload() {
             expect.step("reload");
         },
     });
-    patchWithCleanup(location, {
+    patchWithCleanup(mockLocation, {
         origin: "http://example.com",
     });
 });

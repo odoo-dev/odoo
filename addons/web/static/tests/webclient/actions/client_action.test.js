@@ -1,4 +1,4 @@
-import { beforeEach, expect, test } from "@odoo/hoot";
+import { beforeEach, expect, test, mockLocation } from "@odoo/hoot";
 import { animationFrame, runAllTimers } from "@odoo/hoot-mock";
 import { Component, onMounted, xml } from "@odoo/owl";
 import {
@@ -424,7 +424,7 @@ test("test reload client action", async () => {
             expect.step(`replaceState ${url.replace(location.origin, "")}`);
         },
     });
-    patchWithCleanup(location, {
+    patchWithCleanup(mockLocation, {
         reload: function () {
             expect.step("window_reload");
         },
@@ -479,7 +479,7 @@ test("test home client action", async () => {
     redirect("/odoo");
     location.search = "";
 
-    patchWithCleanup(location, {
+    patchWithCleanup(mockLocation, {
         assign: (url) => expect.step(`assign ${url}`),
     });
 

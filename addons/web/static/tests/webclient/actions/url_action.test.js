@@ -1,8 +1,8 @@
-import { expect, test } from "@odoo/hoot";
+import { expect, test, mockLocation } from "@odoo/hoot";
 import { getService, makeMockEnv, patchWithCleanup } from "@web/../tests/web_test_helpers";
 
 test("execute an 'ir.actions.act_url' action with target 'self'", async () => {
-    patchWithCleanup(location, {
+    patchWithCleanup(mockLocation, {
         assign: (url) => {
             expect.step(url);
         },
@@ -29,7 +29,7 @@ test("execute an 'ir.actions.act_url' action with onClose option", async () => {
 });
 
 test("execute an 'ir.actions.act_url' action with url javascript:", async () => {
-    patchWithCleanup(location, {
+    patchWithCleanup(mockLocation, {
         assign: (url) => {
             expect.step(url);
         },

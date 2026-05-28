@@ -1,4 +1,4 @@
-import { describe, expect, getFixture, test } from "@odoo/hoot";
+import { describe, expect, getFixture, test, mockLocation } from "@odoo/hoot";
 import { click, on } from "@odoo/hoot-dom";
 import { mockMatchMedia, tick } from "@odoo/hoot-mock";
 import { patchWithCleanup } from "@web/../tests/web_test_helpers";
@@ -1756,7 +1756,7 @@ describe("History", () => {
 
 describe("Scoped apps", () => {
     test("url location is changed to /odoo if the client is not used in a standalone scoped app", async () => {
-        Object.assign(location, { pathname: "/scoped_app/some-path" });
+        Object.assign(mockLocation, { pathname: "/scoped_app/some-path" });
         createRouter();
         router.pushState({ app_name: "some_app", path: "scoped_app/some_path" });
         await tick();
@@ -1766,7 +1766,7 @@ describe("Scoped apps", () => {
     });
     test("url location is preserved as /scoped_app if the client is used in a standalone scoped app", async () => {
         mockMatchMedia({ ["display-mode"]: "standalone" });
-        Object.assign(location, { pathname: "/scoped_app/some-path" });
+        Object.assign(mockLocation, { pathname: "/scoped_app/some-path" });
         createRouter();
         router.pushState({ app_name: "some_app", path: "scoped_app/some_path" });
         await tick();
@@ -1778,7 +1778,7 @@ describe("Scoped apps", () => {
 
 describe("Retrocompatibility", () => {
     test("parse an url with hash (key/values)", async () => {
-        Object.assign(location, { pathname: "/web" });
+        Object.assign(mockLocation, { pathname: "/web" });
         location.hash = "#a=114&k=c.e&f=1&g=91";
         createRouter();
         expect(location.search).toBe("?a=114&k=c.e&f=1&g=91");
@@ -1788,7 +1788,7 @@ describe("Retrocompatibility", () => {
     });
 
     test("parse an url with hash (key/values) and query string", async () => {
-        Object.assign(location, { pathname: "/web" });
+        Object.assign(mockLocation, { pathname: "/web" });
         location.hash = "#g=91";
         location.search = "?a=114&t=c.e&f=1";
         createRouter();

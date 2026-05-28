@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { beforeEach, describe, expect, test, mockLocation } from "@odoo/hoot";
 import { queryAllTexts } from "@odoo/hoot-dom";
 import { Deferred, animationFrame } from "@odoo/hoot-mock";
 import { Component, onMounted, xml } from "@odoo/owl";
@@ -171,7 +171,7 @@ onRpc("has_group", () => true);
 
 beforeEach(() => {
     actionRegistry.add("__test__client__action__", TestClientAction);
-    patchWithCleanup(location, {
+    patchWithCleanup(mockLocation, {
         origin: "http://example.com",
     });
     redirect("/odoo");

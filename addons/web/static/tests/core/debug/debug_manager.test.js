@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "@odoo/hoot";
+import { beforeEach, describe, expect, test, mockLocation } from "@odoo/hoot";
 import {
     click,
     queryAll,
@@ -202,7 +202,7 @@ describe("DebugMenu", () => {
     });
 
     test("can regenerate assets bundles", async () => {
-        patchWithCleanup(location, {
+        patchWithCleanup(mockLocation, {
             reload: () => expect.step("reloadPage"),
         });
         debugRegistry.category("default").add("regenerateAssets", regenerateAssets);

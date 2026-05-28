@@ -518,6 +518,21 @@ const ELEMENT_MOCK_DESCRIPTORS = {
     scrollIntoView: { value: mockedScrollIntoView },
     scrollTo: { value: mockedScrollTo },
 };
+const LOCATION_MOCK_DESCRIPTORS = {
+    assign: { value: (url) => mockLocation.assign(url) },
+    hash: { get: () => mockLocation.hash, set: (v) => (mockLocation.hash = v) },
+    host: { get: () => mockLocation.host, set: (v) => (mockLocation.host = v) },
+    hostname: { get: () => mockLocation.hostname, set: (v) => (mockLocation.hostname = v) },
+    href: { get: () => mockLocation.href, set: (v) => (mockLocation.href = v) },
+    origin: { get: () => mockLocation.origin },
+    pathname: { get: () => mockLocation.pathname, set: (v) => (mockLocation.pathname = v) },
+    port: { get: () => mockLocation.port, set: (v) => (mockLocation.port = v) },
+    protocol: { get: () => mockLocation.protocol, set: (v) => (mockLocation.protocol = v) },
+    reload: { value: () => mockLocation.reload() },
+    replace: { value: (url) => mockLocation.replace(url) },
+    search: { get: () => mockLocation.search, set: (v) => (mockLocation.search = v) },
+    toString: { value: () => mockLocation.href },
+};
 const WINDOW_MOCK_DESCRIPTORS = {
     Animation: { value: MockAnimation },
     Blob: { value: MockBlob },
@@ -535,7 +550,6 @@ const WINDOW_MOCK_DESCRIPTORS = {
     innerWidth: { get: () => getCurrentDimensions().width },
     isSecureContext: { value: true, writable: false },
     Intl: { value: MockIntl },
-    location: { get: () => mockLocation, set: (value) => (mockLocation.href = value) },
     localStorage: { value: mockLocalStorage, writable: false },
     matchMedia: { value: mockedMatchMedia },
     MessageChannel: { value: MockMessageChannel },
@@ -692,6 +706,35 @@ export function mockTouch(setTouch) {
 export function patchWindow(view = getWindow()) {
     // Window (doesn't need to be ready)
     applyPropertyDescriptors(view, WINDOW_MOCK_DESCRIPTORS);
+
+    // Patch Location.prototype directly — only for properties that are own+configurable
+    // on the prototype. Cannot use applyPropertyDescriptors here because its
+    // findPropertyOwner walk would spill non-own properties onto Object.prototype.
+    const locationProto = view.location.constructor.prototype;
+    const locationDescriptors = {};
+    for (const [prop, desc] of $entries(LOCATION_MOCK_DESCRIPTORS)) {
+        if ($getOwnPropertyDescriptor(locationProto, prop)?.configurable) {
+            locationDescriptors[prop] = desc;
+        }
+    }
+    $defineProperties(locationProto, locationDescriptors);
+
+    // location.reload(), location.assign(), location.replace() are [LegacyUnforgeable]:
+    // non-configurable, non-writable own properties on the window.location instance that
+    // shadow any Location.prototype patch. Intercept them via the Navigation API instead.
+    view.navigation?.addEventListener("navigate", (e) => {
+        if (!e.cancelable) {
+            return;
+        }
+        const { navigationType } = e;
+        if (navigationType === "reload") {
+            e.preventDefault();
+            mockLocation.reload();
+        } else if (navigationType === "push" || navigationType === "replace") {
+            e.preventDefault();
+            mockLocation.href = e.destination.url;
+        }
+    });
 
     waitForDocument(view.document).then(() => {
         // Document

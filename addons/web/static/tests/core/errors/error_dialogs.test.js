@@ -1,4 +1,4 @@
-import { describe, test, expect } from "@odoo/hoot";
+import { describe, test, expect, mockLocation } from "@odoo/hoot";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import {
     mountWithCleanup,
@@ -227,7 +227,7 @@ test("Error504Dialog", async () => {
 });
 
 test("SessionExpiredDialog", async () => {
-    patchWithCleanup(location, {
+    patchWithCleanup(mockLocation, {
         reload() {
             expect.step("location reload");
         },
