@@ -38,7 +38,7 @@ $o-cw-popup-avatar-size: 16px;
         border: none;
     }
 
-    .o_cw_popover_field .o_field_widget {
+    .o_cw_popover_field div.o_field_widget {
         @include o-text-overflow(block);
     }
 

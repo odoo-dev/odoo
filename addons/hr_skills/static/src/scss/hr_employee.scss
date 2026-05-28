@@ -8,7 +8,7 @@
     .o_list_table {
         .o_data_row:not(.o_selected_row) .o_data_cell {
             &.o_boolean_toggle_load_cell {
-                > .o_field_widget:not(.o_readonly_modifier) .form-check {
+                > div.o_field_widget:not(.o_readonly_modifier) .form-check {
                     pointer-events: auto;
                 }
             }

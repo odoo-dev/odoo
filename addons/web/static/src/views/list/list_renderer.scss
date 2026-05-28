@@ -148,7 +148,7 @@
             }
             &.o_list_text {
                 word-wrap: break-word;
-                .o_field_widget textarea.o_input {
+                div.o_field_widget textarea.o_input {
                     vertical-align: top;
                 }
             }
@@ -370,7 +370,7 @@
             &.o_boolean_favorite_cell,
             &.o_boolean_toggle_cell,
             &.o_toggle_button_cell {
-                > .o_field_widget:not(.o_readonly_modifier) .form-check {
+                > div.o_field_widget:not(.o_readonly_modifier) .form-check {
                     pointer-events: auto;
                 }
             }
@@ -382,7 +382,7 @@
             .o_list_activity_cell,
             .o_list_number {
                 white-space: nowrap;
-                .o_field_widget:not(.o_row_handle):not(.o_field_handle):not(.o_field_badge) {
+                div.o_field_widget:not(.o_row_handle):not(.o_field_handle):not(.o_field_badge) {
                     display: inline;
                     &.o_field_percent_pie{
                         @include o-text-overflow(inline-flex);
@@ -398,7 +398,7 @@
         }
 
         .o_data_row.o_selected_row > .o_data_cell {
-            > .o_field_widget:not(.o_readonly_modifier):not(.o_invisible_modifier) {
+            > div.o_field_widget:not(.o_readonly_modifier):not(.o_invisible_modifier) {
                 width: 100%;
                 .o_input {
                     --o-input-background-color: initial;

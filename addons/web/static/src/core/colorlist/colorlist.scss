@@ -51,7 +51,7 @@
     @include o-colorlist("button", "&" );
     grid-template-columns: repeat(auto-fit, $o-bubble-color-size-xl);
 
-    :not(.o_field_widget) > & {
+    :not(div.o_field_widget) > & {
         justify-content: center;
     }
 

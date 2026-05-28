@@ -65,7 +65,7 @@
 
 // Status
 // This should normally be put in fields.scss but these classes are used outside
-// of `.o_field_widget` so it needs to be placed at an upper level.
+// of `div.o_field_widget` so it needs to be placed at an upper level.
 .o_status {
     border-radius: 50%;
     background-color: map-get($grays, '200');

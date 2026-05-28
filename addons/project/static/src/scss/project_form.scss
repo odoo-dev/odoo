@@ -30,7 +30,7 @@
     }
 }
 
-.o_field_widget {
+div.o_field_widget {
     &.o_field_subtasks_one2many {
         width: 100%;
     }
@@ -44,7 +44,7 @@
     font-size: 1.35em;
 }
 
-.o_project_task_kanban_view .o_kanban_quick_create .o_field_widget .o_input  {
+.o_project_task_kanban_view .o_kanban_quick_create div.o_field_widget .o_input  {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

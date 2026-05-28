@@ -39,7 +39,7 @@
 
 .loyalty-rule-form {
     // The base width for this field is 100px which is problematic for us.
-    .o_field_widget.o_field_monetary.o_input > input {
+    div.o_field_widget.o_field_monetary.o_input > input {
         width: 100%;
     }
 }

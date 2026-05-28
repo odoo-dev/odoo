@@ -58,7 +58,7 @@
 // have widgets on right end, add margin-right so ribbon not overlap on it
 .ribbon {
     &:not(.o_invisible_modifier) {
-        ~ .oe_title, ~ .o_field_widget {
+        ~ .oe_title, ~ div.o_field_widget {
             margin-right: 100px;
         }
     }

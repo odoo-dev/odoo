@@ -20,7 +20,7 @@
     font-family: emojifont;
 }
 
-.o_field_widget:has(.o_field_input_buttons > .o_mail_emojis_buttons) {
+div.o_field_widget:has(.o_field_input_buttons > .o_mail_emojis_buttons) {
     position: relative;
 }
 .o_field_input_buttons:has(.o_mail_emojis_buttons):has([data-field-type="text"])  {

@@ -26,7 +26,7 @@
             line-height: $o-label-font-size-factor;
         }
 
-        .o_field_widget {
+        div.o_field_widget {
             &:not(.o_field_boolean){
                 width: 100%;
             }
@@ -51,7 +51,7 @@
     }
 }
 
-.o_form_view {
+.o_action_manager > .o_form_view {
     --fieldWidget-margin-bottom: #{$o-form-spacing-unit};
     --Ribbon-z-index: 1;
 
@@ -62,11 +62,11 @@
     }
 
     // Utility classes
-    .oe_inline, .o_field_widget.oe_inline > * {
+    .oe_inline, div.o_field_widget.oe_inline > * {
         width: auto!important;
     }
     @for $i from 2 through 13 {
-        .o_field_widget.o_input_#{$i}ch input{
+        div.o_field_widget.o_input_#{$i}ch input{
             width: 1ch * $i !important;
         }
     }
@@ -76,7 +76,7 @@
     }
 
     .o_row {
-        &, &.o_field_widget { // Some field may want to use o_row as root and these rules must prevalue
+        &, &div.o_field_widget { // Some field may want to use o_row as root and these rules must prevalue
             display: flex;
             width: auto!important;
         }
@@ -104,7 +104,7 @@
         }
     }
 
-    .o_row > div > .o_field_widget,
+    .o_row > div > div.o_field_widget,
 
     // Readonly specific rules
     .o_form_readonly {
@@ -153,7 +153,7 @@
         }
 
         .o_row {
-            > .o_field_widget, > div {
+            > div.o_field_widget, > div {
                 flex: 1 1 auto;
                 width: 0!important; // 3rd flex argument does not work with input (must be auto and real width 0)
 
@@ -184,7 +184,7 @@
         flex: 1 1 auto;
     }
 
-    &:not(.o_field_highlight) .o_field_widget:not(.o_field_invalid):not(.o_field_highlight) .o_input:not(:hover):not(:focus) {
+    &:not(.o_field_highlight) div.o_field_widget:not(.o_field_invalid):not(.o_field_highlight) .o_input:not(:hover):not(:focus) {
         --o-input-border-color: transparent;
     }
 
@@ -284,7 +284,7 @@
     .alert {
         --alert-padding-y: #{map-get($spacers, 2)};
 
-        .o_field_widget, .o_field_widget p {
+        div.o_field_widget, div.o_field_widget p {
             margin-bottom: 0;
         }
     }
@@ -315,7 +315,7 @@
             }
         }
 
-        .o_field_widget {
+        div.o_field_widget {
             --fieldWidget-margin-bottom: 0;
 
             align-self: flex-start;
@@ -397,7 +397,7 @@
             font-weight: $font-weight-normal;
         }
 
-        .o_field_widget {
+        div.o_field_widget {
             > .btn {
                 flex: 0 0 auto;
                 padding: 0 10px;
@@ -405,7 +405,7 @@
         }
 
         @include media-breakpoint-up(sm) {
-            .o_field_widget {
+            div.o_field_widget {
                 &.o_text_overflow {
                     width: 1px!important; // hack to make the table layout believe it is a small element (so that the table does not grow too much) ...
                     min-width: 100%;      // ... but in fact it takes the whole table space
@@ -440,7 +440,7 @@
         margin-bottom: map-get($spacers, 2);
 
         span, .o_field_boolean, .oe_avatar, .o_form_uri {
-            &.o_field_widget {
+            &div.o_field_widget {
                 width: auto;
             }
         }
@@ -469,7 +469,7 @@
     }
 
     .o_group, .o_inner_group {
-        .o_field_widget {
+        div.o_field_widget {
             width: 100%;
         }
     }
@@ -610,7 +610,7 @@
     }
 
     // One2Many List views
-    .o_field_widget {
+    div.o_field_widget {
         .o_list_table {
             &.table-striped {
                 > tbody {
@@ -641,8 +641,8 @@
             min-height: calc(var(--Avatar-size, #{$o-avatar-size}) + #{$o-input-padding-y} * 2 + #{$input-border-width});
         }
     }
-    .o_field_widget, .btn {
-        .o_field_widget {
+    div.o_field_widget, .btn {
+        div.o_field_widget {
             --fieldWidget-margin-bottom: 0;
         }
     }
@@ -729,7 +729,7 @@
     }
 
     // One2Many, Many2Many outside of group
-    .o_field_widget {
+    div.o_field_widget {
         &.o_field_one2many, &.o_field_many2many {
             width: 100%;
             > div {
@@ -739,7 +739,7 @@
     }
 
     // Prevent table overflow when having long chars in x2many list and the o_field_{one,many}2many class is not applied
-    .o_field_widget:has(.o_field_x2many.o_field_x2many_list) {
+    div.o_field_widget:has(.o_field_x2many.o_field_x2many_list) {
         width: 100%;
     }
 
@@ -767,7 +767,7 @@
                 }
             }
 
-            .o_field_widget {
+            div.o_field_widget {
                 text-align: right;
                 justify-content: flex-end;
                 width: 100%;
@@ -813,7 +813,7 @@
                 margin-right: 0;
             }
         }
-        > .o_field_widget span {
+        > div.o_field_widget span {
             width: auto;
         }
     }
@@ -895,7 +895,7 @@
     }
 
     // One2Many Kanban views
-    .o_field_widget .o_kanban_view.o_kanban_ungrouped {
+    div.o_field_widget .o_kanban_view.o_kanban_ungrouped {
         padding: 0;
         .o_kanban_record {
             box-shadow: none;
@@ -903,7 +903,7 @@
     }
 
     // One2Many List views
-    .o_field_widget .o_list_renderer {
+    div.o_field_widget .o_list_renderer {
         --ListRenderer-thead-bg-color: #{$o-view-background-color};
         --ListRenderer-tfoot-bg-color: #{$o-view-background-color};
 
@@ -958,7 +958,7 @@
                         &:first-child {
                             width: 100%;
 
-                            .o_field_widget {
+                            div.o_field_widget {
                                 width: 100% !important;
                             }
 
@@ -998,7 +998,7 @@
             padding-right: 0 !important;
         }
 
-        .oe_inline.o_field_widget.o_field_many2one {
+        .oe_inlinediv.o_field_widget.o_field_many2one {
             width: 100% !important;
         }
 
@@ -1092,7 +1092,7 @@
     }
 }
 
-.o_form_view.o_xxl_form_view {
+.o_action_manager > .o_form_view.o_xxl_form_view {
     flex-flow: row nowrap !important;
 
     .o_form_view_container {
@@ -1107,7 +1107,7 @@
     }
 }
 
-.o_form_view.o_xxs_form_view {
+.o_action_manager > .o_form_view.o_xxs_form_view {
     .o_group {
         .o_inner_group {
             margin-bottom: $o-form-spacing-unit * 4;

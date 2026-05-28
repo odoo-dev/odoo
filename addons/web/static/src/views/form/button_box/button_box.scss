@@ -84,7 +84,7 @@
         }
 
         &:not(:disabled) {
-            > .o_stat_info .o_field_widget, > span .o_field_widget {
+            > .o_stat_info div.o_field_widget, > span div.o_field_widget {
                 cursor: pointer;
             }
         }
@@ -186,7 +186,7 @@
         right: var(--button-box-spacing) !important;
     }
 
-    > span .o_field_widget, .o_stat_info, .o_stat_value {
+    > span div.o_field_widget, .o_stat_info, .o_stat_value {
         @include text-truncate;
     }
 

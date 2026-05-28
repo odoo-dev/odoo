@@ -10,7 +10,7 @@
 }
 
 .o_card_campaign_form {
-     .o_field_widget.o_field_field_selector {
+     div.o_field_widget.o_field_field_selector {
         width: auto;
         &:has(.o_model_field_selector_value:empty) {
             width: 100%;

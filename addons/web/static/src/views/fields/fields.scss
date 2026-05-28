@@ -6,14 +6,14 @@
 // to be displayed with a bottom border even when not hovered (e.g. added
 // by mobile detection, in several specific places such as spreadsheet or
 // knowledge sidebars, settings view, kanban quick create (not a form view), etc.)
-.o_field_highlight .o_field_widget .o_input, .o_field_highlight.o_field_widget .o_input {
+.o_field_highlight div.o_field_widget .o_input, .o_field_highlightdiv.o_field_widget .o_input {
     border-color: var(--o-input-border-color);
 }
 
 // field decoration classes (e.g. text-danger) are set on the field root node,
 // but bootstrap contextual classes do not work on input/textarea, so we have to
 // explicitely set their color to the one of their parent
-.o_field_widget {
+div.o_field_widget {
     input, textarea, select, button.o_input {
         color: inherit;
     }
@@ -33,7 +33,7 @@
     @include print-variable(o-caret-color, $o-input-border-required);
 }
 
-.o_field_widget:focus-within {
+div.o_field_widget:focus-within {
     @include print-variable(o-input-border-color, $o-action);
     @include print-variable(o-caret-color, $o-action);
 }
@@ -89,7 +89,7 @@
 // Fields
 //------------------------------------------------------------------------------
 
-.o_field_widget {
+div.o_field_widget {
     // Default display and alignment of widget and internal <input/>
     text-align: inherit;
     display: var(--fieldWidget-display, inline-block);
@@ -361,6 +361,6 @@ button.o_field_float_toggle {
 }
 
 // Selection fields
-select.o_field_widget.o_input {
+selectdiv.o_field_widget.o_input {
     padding: 1px;  // Other inputs get a 1px padding automatically added by the browsers but selects do not
 }

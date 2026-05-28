@@ -1,4 +1,4 @@
-.o_field_widget.o_field_many2many_tags_avatar {
+div.o_field_widget.o_field_many2many_tags_avatar {
     $-text-spacing-v: $o-line-height-base * 1em;
     --img-text-gap-v: calc(var(--Avatar-size, #{$o-avatar-size}) - #{$-text-spacing-v});
 
@@ -24,18 +24,18 @@
 
 .o_kanban_record, .o_activity_record  {
     @include media-breakpoint-up(sm) {
-        .o_field_widget.o_field_many2many_tags_avatar .o_quick_assign {
+        div.o_field_widget.o_field_many2many_tags_avatar .o_quick_assign {
             visibility: hidden;
         }
         &:hover {
-            .o_field_widget.o_field_many2many_tags_avatar .o_quick_assign {
+            div.o_field_widget.o_field_many2many_tags_avatar .o_quick_assign {
                 visibility: visible;
             }
         }
     }
 }
 
-.o_list_view .o_field_widget.o_field_many2many_tags_avatar {
+.o_list_view div.o_field_widget.o_field_many2many_tags_avatar {
     --img-text-gap-v: 0;
 
     .o_field_many2many_selection {
@@ -65,7 +65,7 @@
         padding-bottom: 0.25rem;
         background-color: var(--o-input-background-color, transparent);
     }
-    &.o_field_widget.o_field_many2many_tags_avatar .o_field_many2many_selection .o-autocomplete {
+    &div.o_field_widget.o_field_many2many_tags_avatar .o_field_many2many_selection .o-autocomplete {
         height: inherit;
     }
 }

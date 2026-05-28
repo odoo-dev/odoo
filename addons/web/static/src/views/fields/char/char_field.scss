@@ -6,7 +6,7 @@
     }
 }
 
-.o_field_widget:has(.o_input + .o_field_input_buttons) {
+div.o_field_widget:has(.o_input + .o_field_input_buttons) {
     position: relative;
 }
 
@@ -35,8 +35,8 @@
     }
 }
 
-.o_field_widget:hover,
-.o_field_widget:focus-within {
+div.o_field_widget:hover,
+div.o_field_widget:focus-within {
     .o_field_input_buttons {
         visibility: visible;
     }
