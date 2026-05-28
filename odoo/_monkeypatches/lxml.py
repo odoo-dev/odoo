@@ -1,4 +1,3 @@
-import lxml.html.clean
 import re
 
 from importlib.metadata import version
@@ -11,11 +10,13 @@ def patch_lxml():
     # between these versions having a couple data urls in a style attribute
     # or style node removes the attribute or node erroneously
     if parse_version("4.6.0") <= parse_version(version('lxml')) < parse_version("5.2.0"):
+        import lxml.html.clean  # noqa: PLC0415
         lxml.html.clean._find_image_dataurls = re.compile(r'data:image/(.+?);base64,').findall
 
     # libxml2 >= 2.14.0 stopped implicitly wrapping plain text in <p> tags.
     # We patch lxml.html parsers here to maintain compatibility across versions.
     if LIBXML_VERSION >= (2, 14, 0):
+        import lxml.html  # noqa: PLC0415
         RE_STARTS_WITH_TAG = r'^\s*<[\w!-]'
         RE_STARTS_WITH_TAG_STR = re.compile(RE_STARTS_WITH_TAG)
         RE_STARTS_WITH_TAG_BYTES = re.compile(RE_STARTS_WITH_TAG.encode('ascii'))
