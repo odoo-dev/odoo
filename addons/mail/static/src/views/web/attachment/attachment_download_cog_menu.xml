@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.AttachmentDownloadCogMenu">
+        <DropdownItem class="'o_attachment_download_menu'" onSelected.bind="onDownload">
+            <i class="fa fa-fw fa-download me-1"/>Download
+        </DropdownItem>
+    </t>
+</templates>
