@@ -1,11 +1,11 @@
-import { useExternalListener, useRef, useSubEnv } from "@web/owl2/utils";
+import { useExternalListener, useSubEnv } from "@web/owl2/utils";
 import { CountryFlag } from "@mail/core/common/country_flag";
 import { Priority } from "@mail/core/common/priority";
 import { ImStatus } from "@mail/core/common/im_status";
 import { NotificationItem } from "@mail/core/public_web/notification_item";
 import { useDiscussSystray } from "@mail/utils/common/hooks";
 
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, signal } from "@odoo/owl";
 
 import { hasTouch, isDisplayStandalone, isIOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -28,6 +28,8 @@ export class MessagingMenu extends Component {
     static props = [];
     static template = "mail.MessagingMenu";
 
+    notificationListRef = signal(null);
+
     setup() {
         super.setup();
         this.isIosPwa = isIOS() && isDisplayStandalone();
@@ -40,7 +42,6 @@ export class MessagingMenu extends Component {
             adding: false,
         });
         this.dropdown = useDropdownState();
-        this.notificationList = useRef("notification-list");
         useSubEnv({ inMessagingMenu: { dropdown: this.dropdown } });
 
         useExternalListener(window, "keydown", this.onKeydown, true);
@@ -144,7 +145,7 @@ export class MessagingMenu extends Component {
     }
 
     get notificationItems() {
-        return this.notificationList.el?.children ?? [];
+        return this.notificationListRef()?.children ?? [];
     }
 
     get threads() {
