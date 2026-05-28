@@ -1,10 +1,10 @@
-import { useLayoutEffect, useRef } from "@web/owl2/utils";
+import { useLayoutEffect } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { useService, useChildRef } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 import { Notebook } from "@web/core/notebook/notebook";
 
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, signal } from "@odoo/owl";
 import { iconClasses } from "@html_editor/utils/dom_info";
 import { TABS, renderMedia } from "./media_dialog_utils";
 
@@ -13,6 +13,7 @@ const sequence = (tab) => tab.sequence ?? DEFAULT_SEQUENCE;
 
 export class MediaDialog extends Component {
     static template = "html_editor.MediaDialog";
+    addButtonRef = signal(null);
     static defaultProps = {
         useMediaLibrary: true,
         extraTabs: [],
@@ -39,8 +40,6 @@ export class MediaDialog extends Component {
 
         this.selectedMedia = proxy({});
 
-        this.addButtonRef = useRef("add-button");
-
         this.initialIconClasses = [];
 
         this.notebookPages = [];
@@ -59,7 +58,7 @@ export class MediaDialog extends Component {
             (nbSelectedAttachments) => {
                 // Disable/enable the add button depending on whether some media
                 // are selected or not.
-                this.addButtonRef.el.toggleAttribute(
+                this.addButtonRef()?.toggleAttribute(
                     "disabled",
                     !nbSelectedAttachments || this.state.isSaving
                 );
