@@ -646,7 +646,7 @@ class ProductPricelistItem(models.Model):
         return price
 
     def _compute_base_price(
-        self, product, quantity, uom, *, currency=None, date=False, depth=0, **kwargs
+        self, product, quantity, uom, *, currency=None, date=False, depth=0, base_prices=None, **kwargs
     ):
         """Compute the base price for a given rule.
 
@@ -662,15 +662,18 @@ class ProductPricelistItem(models.Model):
         """
         rule_base = self.base or 'list_price'
         if rule_base == 'pricelist' and self.base_pricelist_id:
-            price = self.base_pricelist_id._get_product_price(
-                product,
-                quantity,
-                currency=self.base_pricelist_id.currency_id,
-                uom=uom,
-                date=date,
-                depth=depth + 1,
-                **kwargs,
-            )
+            if base_prices:
+                price = base_prices[product.id]
+            else:
+                price = self.base_pricelist_id._get_product_price(
+                    product,
+                    quantity,
+                    currency=self.base_pricelist_id.currency_id,
+                    uom=uom,
+                    date=date,
+                    depth=depth + 1,
+                    **kwargs,
+                )
             src_currency = self.base_pricelist_id.currency_id
         elif rule_base == "standard_price":
             src_currency = product.cost_currency_id
