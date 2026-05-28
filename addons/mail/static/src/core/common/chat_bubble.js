@@ -1,8 +1,8 @@
-import { useLayoutEffect, useRef, useState, useSubEnv } from "@web/owl2/utils";
+import { useLayoutEffect, useState, useSubEnv } from "@web/owl2/utils";
 import { DiscussAvatar } from "@mail/core/common/discuss_avatar";
 import { MessageSeenIndicator } from "@mail/discuss/core/common/message_seen_indicator";
 
-import { Component } from "@odoo/owl";
+import { Component, signal } from "@odoo/owl";
 
 import { useChildRef, useService } from "@web/core/utils/hooks";
 import { useHover } from "@mail/utils/common/hooks";
@@ -36,6 +36,8 @@ export class ChatBubble extends Component {
     static props = ["chatWindow"];
     static template = "mail.ChatBubble";
 
+    rootRef = signal(null);
+
     setup() {
         super.setup();
         this.store = useService("mail.store");
@@ -55,15 +57,14 @@ export class ChatBubble extends Component {
             }
             this.popover.close();
         });
-        this.hover = useHover(["root", popoverRef], {
+        this.hover = useHover([this.rootRef, popoverRef], {
             onHover: () => {
                 this.env.bus.trigger("ChatBubble:preview-will-open", this);
-                this.popover.open(this.rootRef.el, { chatWindow: this.props.chatWindow });
+                this.popover.open(this.rootRef(), { chatWindow: this.props.chatWindow });
                 this.state.isPopoverOpen = true;
             },
             onAway: () => this.popover.close(),
         });
-        this.rootRef = useRef("root");
         this.state = useState({ bouncing: false, isPopoverOpen: false });
         useLayoutEffect(
             (importantCounter) => {
