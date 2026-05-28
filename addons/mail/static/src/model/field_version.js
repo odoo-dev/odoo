@@ -5,22 +5,16 @@
  */
 
 /**
- * Represents a PostgreSQL transaction snapshot. See:
- * https://www.postgresql.org/docs/13/functions-info.html#FUNCTIONS-PG-SNAPSHOT-PARTS
+ * Represents a PostgreSQL transaction snapshot. Two formats are accepted:
+ * - New (string): "xmin:xmax:delta_encoded_xips" where xips are delta-encoded comma-separated
+ *   integers (each value is the difference from the previous one, starting from 0).
+ *   `current_xact_id` is passed as a separate argument to the PgSnapshot constructor.
+ * - Legacy (object): {xmin, xmax, xip_bitmap, current_xact_id} where xip_bitmap is a
+ *   base64-encoded bitmap.
  *
- * @typedef {Object} IPgSnapshot
- * @property {string} xmin The lowest active transaction ID at the time this snapshot was
- * taken. Lower transaction IDs are completed.
+ * See: https://www.postgresql.org/docs/13/functions-info.html#FUNCTIONS-PG-SNAPSHOT-PARTS
  *
- * @property {string} xmax The upper bound of transaction IDs for this snapshot. Greater
- * or equals transaction IDs are invisible by this snapshot.
- *
- * @property {string} xip_bitmap A bitmap representing in progress transactions in the
- * range [xmin, xmax). Each bit corresponds to a transaction ID within this range. If the
- * bit is set, the transaction was in progress at the time this snapshot was taken.
- *
- * @property {string|null} current_xact_id The current transaction ID, assigned when a
- * transaction modify the database.
+ * @typedef {string | {xmin: string, xmax: string, xip_bitmap: string, current_xact_id: string|null}} IPgSnapshot
  *
  * A versioned field value tied to a database snapshot. It tracks what this revision "saw"
  * when this value was set, allowing the client to correctly order updates and ignore late
@@ -35,7 +29,7 @@
 /**
  * Version metadata sent by the server alongside insert data. Used to determine if
  * incoming insert values should override stored ones.
- * @typedef {{snapshot: IPgSnapshot, written_fields_by_record: WrittenFieldsByRecord}} StoreVersion
+ * @typedef {{snapshot: string, current_xact_id: string|null, written_fields_by_record: WrittenFieldsByRecord}} StoreVersion
  */
 
 /**
@@ -61,26 +55,46 @@
  *                          +-------------------------------------------------+
  */
 export class PgSnapshot {
-    /** @param {IPgSnapshot} */
-    constructor(params) {
-        this.current_xact_id = params.current_xact_id
-            ? BigInt(params.current_xact_id)
-            : params.current_xact_id;
-        this.xmin = BigInt(params.xmin);
-        this.xmax = BigInt(params.xmax);
-        const bitmapBinaryStr = atob(params.xip_bitmap);
-        // Bitmap [xmin, xmax) showing which xact_ids are in progress of the time of the snapshot.
-        this.xip_bitmap = new Uint8Array(bitmapBinaryStr.length).map((_, idx) =>
-            bitmapBinaryStr.charCodeAt(idx)
-        );
-        let pendingCount = 0;
-        for (let byte of this.xip_bitmap) {
-            while (byte > 0) {
-                byte &= byte - 1;
-                pendingCount++;
+    /**
+     * @param {IPgSnapshot} snapshot
+     * @param {string|null} [current_xact_id] Only used when snapshot is a string (new format).
+     */
+    constructor(snapshot, current_xact_id = null) {
+        if (typeof snapshot === "object") {
+            // Legacy format: IPgSnapshot object with xip_bitmap (base64 bitmap).
+            this.current_xact_id = snapshot.current_xact_id
+                ? BigInt(snapshot.current_xact_id)
+                : snapshot.current_xact_id;
+            this.xmin = BigInt(snapshot.xmin);
+            this.xmax = BigInt(snapshot.xmax);
+            const bitmapBinaryStr = atob(snapshot.xip_bitmap);
+            const bitmapBytes = new Uint8Array(bitmapBinaryStr.length).map((_, idx) =>
+                bitmapBinaryStr.charCodeAt(idx)
+            );
+            this.xip_set = new Set();
+            for (let byteIdx = 0; byteIdx < bitmapBytes.length; byteIdx++) {
+                for (let bitIdx = 0; bitIdx < 8; bitIdx++) {
+                    if (bitmapBytes[byteIdx] & (1 << bitIdx)) {
+                        this.xip_set.add(this.xmin + BigInt(byteIdx * 8 + bitIdx));
+                    }
+                }
+            }
+        } else {
+            // New format: "xmin:xmax:delta_encoded_xips".
+            this.current_xact_id = current_xact_id ? BigInt(current_xact_id) : current_xact_id;
+            const [xminStr, xmaxStr, xipsStr] = snapshot.split(":");
+            this.xmin = BigInt(xminStr);
+            this.xmax = BigInt(xmaxStr);
+            this.xip_set = new Set();
+            if (xipsStr) {
+                let prev = 0n;
+                for (const d of xipsStr.split(",")) {
+                    prev += BigInt(d);
+                    this.xip_set.add(prev);
+                }
             }
         }
-        this.finishedCount = this.xmax - 1n - BigInt(pendingCount);
+        this.finishedCount = this.xmax - 1n - BigInt(this.xip_set.size);
     }
 
     /**
@@ -89,12 +103,9 @@ export class PgSnapshot {
      * @param {BigInt} txid
      */
     knowsTransaction(txid) {
-        // tx < xmin are completed. tx between xmin and xmax are completed if not in xip.
+        // tx < xmin are completed. tx between xmin and xmax are completed if not in xip_set.
         if (txid >= this.xmin && txid < this.xmax) {
-            const offset = Number(txid - this.xmin);
-            const byteIndex = Math.floor(offset / 8);
-            const bitIndex = offset % 8;
-            return !(this.xip_bitmap[byteIndex] & (1 << bitIndex));
+            return !this.xip_set.has(txid);
         }
         return txid < this.xmin;
     }

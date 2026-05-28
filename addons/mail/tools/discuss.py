@@ -1,7 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import base64
-import math
 import os
 from collections import UserList, defaultdict
 from contextlib import suppress
@@ -88,25 +86,20 @@ class StoreVersion:
             self.__env.cr.execute("SELECT pg_current_snapshot(), pg_current_xact_id_if_assigned()")
             snapshot_str, current_xact_id = self.__env.cr.fetchone()
             xmin_str, xmax_str, xips_str = snapshot_str.split(":")
-            xmin = int(xmin_str)
-            xmax = int(xmax_str)
-            xips = [int(x) for x in xips_str.split(",") if x]
-            bitmap = bytearray(math.ceil((xmax - xmin) / 8))
+            xips = sorted(int(x) for x in xips_str.split(",") if x)
+            prev = 0
+            deltas = []
             for x in xips:
-                offset = x - xmin
-                bitmap[offset // 8] |= 1 << (offset % 8)
+                deltas.append(x - prev)
+                prev = x
             written_fields_by_record = defaultdict(lambda: defaultdict(list))
             for model, field_to_record_ids in self.__model_to_field_to_ids.items():
                 for fname, record_ids in field_to_record_ids.items():
                     for id_ in record_ids:
                         written_fields_by_record[model][id_].append(fname)
             self.__version = {
-                "snapshot": {
-                    "xmin": xmin_str,
-                    "xmax": xmax_str,
-                    "xip_bitmap": base64.b64encode(bitmap).decode(),
-                    "current_xact_id": current_xact_id,
-                },
+                "snapshot": f"{xmin_str}:{xmax_str}:{','.join(str(d) for d in deltas)}",
+                "current_xact_id": current_xact_id,
                 "written_fields_by_record": written_fields_by_record,
             }
         return self.__version

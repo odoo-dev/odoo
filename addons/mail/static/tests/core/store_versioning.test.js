@@ -24,6 +24,18 @@ function xipToBitmap(xmin, xmax, xip) {
     return btoa(String.fromCharCode(...bytes));
 }
 
+/** Build a new-format snapshot string "xmin:xmax:delta_encoded_xips". */
+function makeSnapshotStr(xmin, xmax, xip = []) {
+    const sorted = [...xip].sort((a, b) => a - b);
+    const deltas = [];
+    let prev = 0;
+    for (const txid of sorted) {
+        deltas.push(txid - prev);
+        prev = txid;
+    }
+    return `${xmin}:${xmax}:${deltas.join(",")}`;
+}
+
 const localRegistry = registry.category("discuss.model.test");
 
 defineMailModels();
@@ -477,4 +489,83 @@ test("Inverse of relations are properly versioned", async () => {
             .sort()
     ).toEqual([1, 2]);
     expect(store.Message.get(1).thread.id).toBe(1);
+});
+
+// New-format snapshot string tests (xmin:xmax:delta_encoded_xips + top-level current_xact_id).
+test("new snapshot format - newer read overrides older read", async () => {
+    (class Thread extends Record {
+        static id = "id";
+        id;
+        name;
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert({ id: 1, name: "v0" });
+    store.insert({
+        Thread: { id: 1, name: "v1" },
+        __store_version__: { snapshot: makeSnapshotStr(10, 10), current_xact_id: null },
+    });
+    expect(thread.name).toBe("v1");
+    store.insert({
+        Thread: { id: 1, name: "v3" },
+        __store_version__: { snapshot: makeSnapshotStr(30, 30), current_xact_id: null },
+    });
+    expect(thread.name).toBe("v3", { message: "newer snapshot wins" });
+    store.insert({
+        Thread: { id: 1, name: "v2" },
+        __store_version__: { snapshot: makeSnapshotStr(20, 20), current_xact_id: null },
+    });
+    expect(thread.name).toBe("v3", { message: "older snapshot is ignored" });
+});
+
+test("new snapshot format - delta-encoded xips correctly track in-progress transactions", async () => {
+    (class Thread extends Record {
+        static id = "id";
+        id;
+        name;
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert({ id: 1, name: "v0" });
+    store.insert({
+        Thread: { id: 1, name: "v4" },
+        __store_version__: {
+            snapshot: makeSnapshotStr(65, 68, [65, 66]),
+            current_xact_id: null,
+        },
+    });
+    expect(thread.name).toBe("v4");
+    store.insert({
+        Thread: { id: 1, name: "v5" },
+        __store_version__: {
+            snapshot: makeSnapshotStr(65, 68, [65]),
+            current_xact_id: null,
+        },
+    });
+    expect(thread.name).toBe("v5", { message: "one more committed tx: snapshot is newer" });
+});
+
+test("new snapshot format - write with current_xact_id not seen by prior read is applied", async () => {
+    (class Thread extends Record {
+        static id = "id";
+        id;
+        name;
+    }).register(localRegistry);
+    const store = await start();
+    const thread = store.Thread.insert({ id: 1, name: "v0" });
+    store.insert({
+        Thread: { id: 1, name: "v3" },
+        __store_version__: {
+            snapshot: makeSnapshotStr(30, 40, [30, 35]),
+            current_xact_id: null,
+        },
+    });
+    expect(thread.name).toBe("v3");
+    store.insert({
+        Thread: { id: 1, name: "v4" },
+        __store_version__: {
+            snapshot: makeSnapshotStr(20, 20),
+            current_xact_id: 35,
+            written_fields_by_record: { Thread: { 1: ["name"] } },
+        },
+    });
+    expect(thread.name).toBe("v4", { message: "write not seen by prior read overrides it" });
 });
