@@ -1217,10 +1217,7 @@ class ProductProduct(models.Model):
         price_extra = self.lst_price - self.list_price
         return price_extra + self.env.context.get('no_variant_attributes_price_extra', 0)
 
-    def _price_compute(self, price_type, uom=None, currency=None, company=None, date=False):
-        company = company or self.env.company
-
-        self = self.with_company(company)
+    def _price_compute(self, price_type, uom=None, currency=None, date=False):
         if price_type == 'standard_price':
             # standard_price field can only be seen by users in base.group_user
             # Thus, in order to compute the sale price from the cost for users not in this group
@@ -1242,7 +1239,7 @@ class ProductProduct(models.Model):
             # Convert from current user company currency to asked one
             # This is right cause a field cannot be in more than one currency
             if currency:
-                price = price_currency._convert(price, currency, company, date=date)
+                price = price_currency._convert(price, currency, date=date)
 
             prices[product.id] = price
 

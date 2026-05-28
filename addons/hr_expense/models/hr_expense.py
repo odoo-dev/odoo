@@ -699,12 +699,11 @@ class HrExpense(models.Model):
                 # we choose not to recompute anything and wait for a proper company to be inputted.
                 continue
 
-            product_id = expense.product_id
+            product_id = expense.product_id.with_company(expense.company_id)
             if expense._needs_product_price_computation():
                 expense.price_unit = product_id._price_compute(
                     'standard_price',
                     uom=expense.product_uom_id,
-                    company=expense.company_id,
                 )[product_id.id]
             else:
                 expense.price_unit = expense.company_currency_id.round(expense.total_amount / expense.quantity) if expense.quantity else 0.
