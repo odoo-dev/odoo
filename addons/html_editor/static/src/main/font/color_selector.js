@@ -1,6 +1,6 @@
-import { useChildEnv, useRef, useState } from "@web/owl2/utils";
+import { useChildEnv, useState } from "@web/owl2/utils";
 import { isColorGradient } from "@web/core/utils/colors";
-import { Component, useEffect } from "@odoo/owl";
+import { Component, signal, useEffect } from "@odoo/owl";
 import {
     useColorPicker,
     DEFAULT_COLORS,
@@ -13,6 +13,7 @@ import { useDropdownAutoVisibility } from "@html_editor/toolbar_dropdown_hook";
 
 export class ColorSelector extends Component {
     static template = "html_editor.ColorSelector";
+    rootRef = signal(null);
     static props = {
         ...toolbarButtonProps,
         mode: { type: String },
@@ -56,9 +57,8 @@ export class ColorSelector extends Component {
         });
 
         const colorPickerRef = useChildRef();
-        this.colorSelectorBtn = useRef("root");
         this.colorPicker = useColorPicker(
-            "root",
+            this.rootRef,
             {
                 state: this.state,
                 applyColor: this.props.applyColor,
@@ -69,7 +69,7 @@ export class ColorSelector extends Component {
                 enabledTabs: this.props.enabledTabs,
                 cssVarColorPrefix: this.props.cssVarColorPrefix,
                 useDefaultThemeColors: this.props.useDefaultThemeColors,
-                onEscape: () => this.colorSelectorBtn.el?.focus(),
+                onEscape: () => this.rootRef()?.focus(),
             },
             {
                 env: useChildEnv(),
