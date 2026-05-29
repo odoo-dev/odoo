@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T15:22:22Z","actor":"orchestrator","event":"run","branch":"master-mail-link-preview-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mail-link-preview-js-tref-nby/odoo","commits":["3823f03a08f995c4ef513f5aadc300eaf35acecb"],"summary":"migration committed. videoRef + imageRef = signal(null); both image t-ref bindings (squarish + wide) point to same signal. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:22:22Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:22:53Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
