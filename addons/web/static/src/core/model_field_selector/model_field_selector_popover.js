@@ -1,5 +1,5 @@
-import { onWillRender, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
-import { Component, onWillStart } from "@odoo/owl";
+import { onWillRender, useLayoutEffect, useState } from "@web/owl2/utils";
+import { Component, onWillStart, signal } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { sortBy } from "@web/core/utils/arrays";
 import { KeepLast } from "@web/core/utils/concurrency";
@@ -126,6 +126,8 @@ export class ModelFieldSelectorPopover extends Component {
         followRelation: true,
     };
 
+    rootRef = signal(null);
+
     setup() {
         this.fieldService = useService("field");
         this.state = useState({ page: null });
@@ -147,9 +149,8 @@ export class ModelFieldSelectorPopover extends Component {
             }
         });
 
-        const rootRef = useRef("root");
         useLayoutEffect(() => {
-            const focusedElement = rootRef.el.querySelector(
+            const focusedElement = this.rootRef()?.querySelector(
                 ".o_model_field_selector_popover_item.active"
             );
             if (focusedElement) {
@@ -160,7 +161,7 @@ export class ModelFieldSelectorPopover extends Component {
         useLayoutEffect(
             () => {
                 if (this.props.showSearchInput) {
-                    const searchInput = rootRef.el.querySelector(
+                    const searchInput = this.rootRef()?.querySelector(
                         ".o_model_field_selector_popover_search .o_input"
                     );
                     searchInput.focus();
