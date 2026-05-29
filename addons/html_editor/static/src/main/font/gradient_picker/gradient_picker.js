@@ -1,5 +1,4 @@
-import { useRef } from "@web/owl2/utils";
-import { Component, proxy } from "@odoo/owl";
+import { Component, proxy, signal } from "@odoo/owl";
 import { CustomColorPicker as ColorPicker } from "@web/core/color_picker/custom_color_picker/custom_color_picker";
 import {
     isColorGradient,
@@ -15,6 +14,7 @@ import { isMobileOS } from "@web/core/browser/feature_detection";
 export class GradientPicker extends Component {
     static components = { ColorPicker, CheckBox, Dropdown, DropdownItem };
     static template = "html_editor.GradientPicker";
+    knobRef = signal(null);
     static props = {
         onGradientChange: { type: Function, optional: true },
         onGradientPreview: { type: Function, optional: true },
@@ -40,7 +40,6 @@ export class GradientPicker extends Component {
             { hex: "#6C3582", percentage: 100 },
         ]);
         this.cssGradients = proxy({ preview: "", linear: "", radial: "", sliderThumbStyle: "" });
-        this.knobRef = useRef("gradientAngleKnob");
 
         this.onToggleRepeatingBound = this.onToggleRepeating.bind(this);
         this.isMobileOS = isMobileOS();
@@ -271,7 +270,7 @@ export class GradientPicker extends Component {
     }
 
     onKnobMouseDown(ev) {
-        const knobEl = this.knobRef.el;
+        const knobEl = this.knobRef();
         if (!knobEl) {
             return;
         }
