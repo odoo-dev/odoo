@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:30:06Z","actor":"orchestrator","event":"run","branch":"master-website-slides-email-sharing-input-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-website-slides-email-sharing-input-js-tref-nby/odoo","commits":["2964e0d7d819c79785e151ce1b2440908ea5d9e7"],"summary":"migration committed. inputRef = signal(null); ()?.value / ()?.focus(). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:30:06Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:26:23Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T16:58:53Z","actor":"orchestrator","event":"run","branch":"master-web-settings-block-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-settings-block-js-tref-nby/odoo","commits":["daa995802c67b4ac072005cab39be1cf0bbc7a56"],"summary":"migration committed. 3 refs (Container/Title/Tip) = signal(null); early-guard useLayoutEffect with dep array re-trigger on mount. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T16:58:53Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:26:07Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

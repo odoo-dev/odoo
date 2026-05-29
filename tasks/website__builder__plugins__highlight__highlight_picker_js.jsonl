@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:26:33Z","actor":"orchestrator","event":"run","branch":"master-website-highlight-picker-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-website-highlight-picker-js-tref-nby/odoo","commits":["ea2d5cbdacfae25b1f9e255e94aa6f617beb18f1"],"summary":"migration committed (Shape A class field). rootRef = signal(null); ()?.querySelectorAll(...) ?? []. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:26:33Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:26:13Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

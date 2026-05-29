@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T15:13:10Z","actor":"orchestrator","event":"run","branch":"master-web-settings-page-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-settings-page-js-tref-nby/odoo","commits":["1b254b4cf0d"],"summary":"migration committed. settingsRef = signal(null); dep array switched to (), early-guard in onSettingTabClick. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:13:10Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:26:09Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

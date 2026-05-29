@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T16:36:09Z","actor":"orchestrator","event":"run","branch":"master-website-edit-menu-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-website-edit-menu-js-tref-nby/odoo","commits":["cb400c1f850"],"summary":"migration committed. MenuDialog: autofocusRef + urlInputRef = signal(null); useAutofocus({ref: autofocusRef}). EditMenuDialog menu-editor + useRef preserved (different class). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T16:36:09Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:26:14Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
