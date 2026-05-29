@@ -115,3 +115,22 @@ You ONLY work via sub-agents. Use `general-purpose` subagent_type. Never write o
 4. Inspect `git log --oneline master-tref-claude` to see what's already pushed.
 5. Inspect `git -C /root/git/odoo/worktrees/master-tref-integration/odoo log --oneline master..HEAD | wc -l` to see how many task commits are in integration.
 6. Ask the user what they want this turn: "push next batch", "verify CI", "fix the regressions cluster X", "rebuild integration", etc.
+
+## Known xpath regression pattern (discovered 2026-05-29)
+
+18 XML files use xpath selectors of the form `[@t-custom-ref='X']` to inherit/patch parent templates. When the target file migrates `t-custom-ref="X"` → `t-ref="this.xRef"`, the xpath no longer matches and the inherited extension silently fails.
+
+**Affected files** (run `grep -rln '@t-custom-ref=' --include='*.xml' addons` to refresh):
+- hr_holidays/.../channel_member_patch.xml
+- account/.../file_upload_list_renderer.xml + file_upload_kanban_renderer.xml + account_dashboard_kanban_renderer.xml
+- portal_rating/.../message_patch.xml
+- mail/.../composer_patch.xml + discuss_content_patch.xml
+- im_livechat/.../discuss_sidebar_channel_patch.xml + channel_member_patch.xml + chat_bubble_patch.xml ✅ FIXED + chat_window_patch.xml + message_patch.xml
+- mass_mailing/.../options_container.xml
+- stock/.../forecasted_graph.xml
+- website/.../autocomplete_with_pages.xml + xml/html_editor.xml + builder_urlpicker.xml
+- web/.../settings_form_view.xml
+
+**Fix pattern** (used in commit b6b86dcb2c6 for chat_bubble_patch.xml): replace `[@t-custom-ref='X']` with `hasclass('<unique-class>')` referring to a stable class on the same node.
+
+**When migrating a leaf component**: grep for `@t-custom-ref='<your-ref-name>'` BEFORE committing. If hits exist outside your file set, dispatch a cluster including the patch files OR fix the xpath proactively.
