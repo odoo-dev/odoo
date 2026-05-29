@@ -48,9 +48,12 @@ export function useLazyExternalListener(target, eventName, handler, eventParams)
 
 export function onExternalClick(refOrName, cb) {
     let downTarget, upTarget;
-    const ref = typeof refOrName === "string" ? useRef(refOrName) : refOrName;
+    const refOrSignal = typeof refOrName === "string" ? useRef(refOrName) : refOrName;
+    const getEl = () =>
+        (typeof refOrSignal === "function" ? refOrSignal() : refOrSignal?.el) ?? null;
     function onClick(ev) {
-        if (ref.el && !ref.el.contains(ev.composedPath()[0])) {
+        const el = getEl();
+        if (el && !el.contains(ev.composedPath()[0])) {
             cb(ev, { downTarget, upTarget });
             upTarget = downTarget = null;
         }
@@ -557,30 +560,50 @@ export function useMicrophoneVolume() {
     return state;
 }
 
-export function useSelection({ refName, model, preserveOnClickAwayPredicate = () => false }) {
+/**
+ * Track and restore the text selection of an input/textarea.
+ *
+ * Accepts either a legacy ref NAME string (resolved internally via `useRef`)
+ * or an Owl 3 native ref/signal (a zero-arg callable returning the element)
+ * or a ref-like object exposing `.el`. The element is read lazily/null-safely
+ * via the internal resolver so that both shapes are supported transparently.
+ *
+ * @param {Object} param0
+ * @param {string} [param0.refName] legacy: ref name resolved via `useRef`.
+ * @param {Function | { el: HTMLElement | null }} [param0.ref] Owl 3 native ref/signal
+ *   (zero-arg callable) or a ref-like object. Takes precedence over `refName`.
+ * @param {Object} param0.model reactive selection model with `start`/`end`/`direction`.
+ * @param {(ev: Event) => boolean | Promise<boolean>} [param0.preserveOnClickAwayPredicate]
+ *   when truthy on external click, the selection is preserved (not reset to value end).
+ */
+export function useSelection({ refName, ref, model, preserveOnClickAwayPredicate = () => false }) {
     const ui = useService("ui");
-    const ref = useRef(refName);
+    const refOrSignal = ref ?? useRef(refName);
+    const getEl = () =>
+        (typeof refOrSignal === "function" ? refOrSignal() : refOrSignal?.el) ?? null;
     function onSelectionChange() {
-        const activeElement = ref.el?.getRootNode().activeElement;
-        if (activeElement && activeElement === ref.el) {
+        const el = getEl();
+        const activeElement = el?.getRootNode().activeElement;
+        if (activeElement && activeElement === el) {
             Object.assign(model, {
-                start: ref.el.selectionStart,
-                end: ref.el.selectionEnd,
-                direction: ref.el.selectionDirection,
+                start: el.selectionStart,
+                end: el.selectionEnd,
+                direction: el.selectionDirection,
             });
         }
     }
-    onExternalClick(refName, async (ev) => {
+    onExternalClick(refOrSignal, async (ev) => {
         if (await preserveOnClickAwayPredicate(ev)) {
             return;
         }
-        if (!ref.el) {
+        const el = getEl();
+        if (!el) {
             return;
         }
         Object.assign(model, {
-            start: ref.el.value.length,
-            end: ref.el.value.length,
-            direction: ref.el.selectionDirection,
+            start: el.value.length,
+            end: el.value.length,
+            direction: el.selectionDirection,
         });
     });
     onMounted(() => {
@@ -593,14 +616,15 @@ export function useSelection({ refName, model, preserveOnClickAwayPredicate = ()
     });
     return {
         restore() {
-            ref.el?.setSelectionRange(model.start, model.end, model.direction);
+            getEl()?.setSelectionRange(model.start, model.end, model.direction);
         },
         moveCursor(position) {
             model.start = model.end = position;
-            if (ref.el && !ui.isSmall) {
+            const el = getEl();
+            if (el && !ui.isSmall) {
                 // In mobile, selection seems to adjust correctly.
                 // Don't programmatically adjust, otherwise it shows soft keyboard!
-                ref.el.selectionStart = ref.el.selectionEnd = position;
+                el.selectionStart = el.selectionEnd = position;
             }
         },
     };
