@@ -1,4 +1,4 @@
-import { useExternalListener, useRef } from "@web/owl2/utils";
+import { useExternalListener } from "@web/owl2/utils";
 import { Component, onMounted, signal } from "@odoo/owl";
 
 export class ActivityMarkAsDone extends Component {
@@ -15,12 +15,13 @@ export class ActivityMarkAsDone extends Component {
         hasHeader: false,
     };
 
+    textAreaRef = signal(null);
+
     setup() {
         super.setup();
-        this.textArea = useRef("textarea");
         this.disableDoneButton = signal(false);
         onMounted(() => {
-            this.textArea.el.focus();
+            this.textAreaRef()?.focus();
         });
         useExternalListener(window, "keydown", this.onKeydown);
     }
