@@ -1,5 +1,5 @@
-import { useExternalListener, useRef } from "@web/owl2/utils";
-import { Component, onMounted } from "@odoo/owl";
+import { useExternalListener } from "@web/owl2/utils";
+import { Component, onMounted, signal } from "@odoo/owl";
 import { Toolbar } from "./toolbar";
 
 export class ToolbarMobile extends Component {
@@ -9,8 +9,9 @@ export class ToolbarMobile extends Component {
         Toolbar,
     };
 
+    toolbarRef = signal(null);
+
     setup() {
-        this.toolbar = useRef("toolbarWrapper");
         useExternalListener(window.visualViewport, "resize", this.fixToolbarPosition);
         useExternalListener(window.visualViewport, "scroll", this.fixToolbarPosition);
         onMounted(() => {
@@ -22,12 +23,16 @@ export class ToolbarMobile extends Component {
      * Fixes the position of the toolbar for the keyboard height.
      */
     fixToolbarPosition() {
+        const el = this.toolbarRef();
+        if (!el) {
+            return;
+        }
         const keyboardHeight =
             window.innerHeight - (window.visualViewport.height + window.visualViewport.offsetTop);
         if (keyboardHeight > 0) {
-            this.toolbar.el.style.bottom = `${keyboardHeight}px`;
+            el.style.bottom = `${keyboardHeight}px`;
         } else {
-            this.toolbar.el.style.bottom = `0px`;
+            el.style.bottom = `0px`;
         }
     }
 }
