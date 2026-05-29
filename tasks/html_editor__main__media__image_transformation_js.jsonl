@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T15:53:40Z","actor":"orchestrator","event":"run","branch":"master-html-editor-image-transformation-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-html-editor-image-transformation-js-tref-nby/odoo","commits":["3532d1da893fcae852446143e86c010a993cbb22"],"summary":"migration committed. 3 refs (Container/Controls/Center) = signal(null); positionTransfoContainer early-guard, mouseDown updated. usePositionHook(props.editable) left untouched. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:53:40Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:22:21Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

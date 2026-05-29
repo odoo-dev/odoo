@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T13:40:13Z","actor":"orchestrator","event":"run","branch":"master-im-livechat-livechat-button-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-im-livechat-livechat-button-js-tref-nby/odoo","commits":["6bbca2156374208c8587dc439450f67247e83947"],"summary":"migration committed. No runbot batch → local test deferred. this.ref→this.buttonRef rename; useLayoutEffect dep array reads buttonRef()?.getRootNode() — equivalent."}
 {"kind":"event","ts":"2026-05-29T13:40:13Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:22:46Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
