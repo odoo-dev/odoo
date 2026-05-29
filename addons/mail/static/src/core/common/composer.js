@@ -1,4 +1,4 @@
-import { useChildSubEnv, useExternalListener, useLayoutEffect, useRef } from "@web/owl2/utils";
+import { useChildSubEnv, useExternalListener, useLayoutEffect } from "@web/owl2/utils";
 import { AttachmentList } from "@mail/core/common/attachment_list";
 import { useAttachmentUploader } from "@mail/core/common/attachment_uploader_hook";
 import { useCustomDropzone } from "@web/core/dropzone/dropzone_hook";
@@ -131,6 +131,12 @@ export class Composer extends Component {
     ];
     static template = "mail.Composer";
 
+    textareaRef = signal(null);
+    fakeTextareaRef = signal(null);
+    inputContainerRef = signal(null);
+    pickerContainerRef = signal(null);
+    rootRef = signal(null);
+
     setup() {
         super.setup();
         this.dialogService = useService("dialog");
@@ -153,16 +159,10 @@ export class Composer extends Component {
         );
         this.ui = useService("ui");
         this.composerService = useService("mail.composer");
-        this.ref = useRef("textarea");
-        this.fakeTextarea = useRef("fakeTextarea");
-        this.inputContainerRef = useRef("input-container");
-        this.pickerContainerRef = useRef("picker-container");
         this.state = proxy({
             active: true,
             isFullComposerOpen: false,
         });
-        /** @type {import("@odoo/owl").Signal<Element>} */
-        this.rootRef = signal();
         this.fullComposerRecoveryPopover = usePopover(FullComposerRecoveryPopover, {
             closeOnClickAway: false,
             closeOnEscape: false,
@@ -171,7 +171,7 @@ export class Composer extends Component {
         });
         this.fullComposerBus = new EventBus();
         this.selection = useSelection({
-            refName: "textarea",
+            ref: this.textareaRef,
             model: this.props.composer.selection,
             preserveOnClickAwayPredicate: async (ev) => {
                 // Let event be handled by bubbling handlers first.
@@ -199,12 +199,13 @@ export class Composer extends Component {
             window,
             "click",
             (ev) => {
+                const pickerEl = this.pickerContainerRef();
                 if (
                     this.ui.isSmall &&
                     this.composerActions.activeAction &&
-                    this.pickerContainerRef.el &&
-                    ev.target !== this.pickerContainerRef.el &&
-                    !this.pickerContainerRef.el.contains(ev.target)
+                    pickerEl &&
+                    ev.target !== pickerEl &&
+                    !pickerEl.contains(ev.target)
                 ) {
                     this.composerActions.activeAction.actionPanelClose();
                 }
@@ -227,9 +228,10 @@ export class Composer extends Component {
         useChildSubEnv({ inComposer: true });
         useLayoutEffect(
             (focus) => {
-                if (focus && this.ref.el) {
+                const textareaEl = this.textareaRef();
+                if (focus && textareaEl) {
                     this.selection.restore();
-                    this.ref.el.focus();
+                    textareaEl.focus();
                 }
                 if (focus && this.editor) {
                     this.editor.shared.selection.focusEditable();
@@ -248,20 +250,22 @@ export class Composer extends Component {
         );
         useLayoutEffect(
             () => {
-                if (this.fakeTextarea.el?.scrollHeight) {
+                const fakeEl = this.fakeTextareaRef();
+                const textareaEl = this.textareaRef();
+                if (fakeEl?.scrollHeight && textareaEl) {
                     let wasEmpty = false;
-                    if (!this.fakeTextarea.el.value) {
+                    if (!fakeEl.value) {
                         wasEmpty = true;
-                        this.fakeTextarea.el.value = "0";
+                        fakeEl.value = "0";
                     }
-                    this.ref.el.style.height = this.fakeTextarea.el.scrollHeight + "px";
+                    textareaEl.style.height = fakeEl.scrollHeight + "px";
                     if (wasEmpty) {
-                        this.fakeTextarea.el.value = "";
+                        fakeEl.value = "";
                     }
                 }
                 this.saveContentDebounced();
             },
-            () => [this.props.composer.composerText, this.ref.el]
+            () => [this.props.composer.composerText, this.textareaRef()]
         );
         useLayoutEffect(
             () => {
@@ -337,7 +341,7 @@ export class Composer extends Component {
             ]
         );
         onMounted(() => {
-            this.ref.el?.scrollTo({ top: 0, behavior: "instant" });
+            this.textareaRef()?.scrollTo({ top: 0, behavior: "instant" });
             if (!this.props.composer.composerText) {
                 this.restoreContent();
             }
@@ -544,7 +548,7 @@ export class Composer extends Component {
     get navigableListProps() {
         const { loading, searchTerm, results } = this.suggestion.search;
         const props = {
-            anchorRef: this.inputContainerRef.el,
+            anchorRef: this.inputContainerRef(),
             position: this.env.inChatter ? "bottom-fit" : "top-fit",
             onSelect: (ev, option) => {
                 this.suggestion.insert(option);
@@ -808,7 +812,7 @@ export class Composer extends Component {
             }
             this.clear();
             this.state.active = true;
-            this.ref.el?.focus();
+            this.textareaRef()?.focus();
         }
     }
 
