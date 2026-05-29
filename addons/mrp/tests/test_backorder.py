@@ -699,6 +699,9 @@ class TestMrpProductionBackorder(TestMrpCommon):
         self.assertEqual(len(mo.production_group_id.production_ids), 10)
         self.assertEqual(mo.product_qty, 1)
         self.assertEqual(mo.move_raw_ids.mapped('product_uom_qty'), [0.5, 1])
+        for production in mo.production_group_id.production_ids:
+            self.assertTrue(all(move.reference == production.name for move in production.move_raw_ids | production.move_finished_ids))
+            self.assertTrue(all(move_line.reference == production.name for move_line in (production.move_raw_ids | production.move_finished_ids).move_line_ids))
 
     def test_split_multiple_MOs(self):
         """
