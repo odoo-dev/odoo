@@ -1,5 +1,5 @@
 import { useExternalListener, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
-import { Component } from "@odoo/owl";
+import { Component, signal } from "@odoo/owl";
 import { CustomColorPicker } from "@web/core/color_picker/custom_color_picker/custom_color_picker";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { isCSSColor, isColorGradient, normalizeCSSColor } from "@web/core/utils/colors";
@@ -69,6 +69,7 @@ export class ColorPicker extends Component {
         useDefaultThemeColors: { type: Boolean, optional: true },
         onEscape: { type: Function, optional: true },
     };
+    rootRef = signal(null);
     static defaultProps = {
         close: () => {},
         defaultOpacity: 100,
@@ -88,7 +89,6 @@ export class ColorPicker extends Component {
             .category("color_picker_tabs")
             .getAll()
             .filter((tab) => this.props.enabledTabs.includes(tab.id));
-        this.root = useRef("root");
 
         this.DEFAULT_COLORS = DEFAULT_COLORS;
         this.grayscales = Object.assign({}, DEFAULT_GRAYSCALES, this.props.grayscales);
@@ -230,7 +230,7 @@ export class ColorPicker extends Component {
     }
     getTarget(ev) {
         const target = ev.target.closest(`[data-color]`);
-        return this.root.el.contains(target) ? target : ev.target;
+        return this.rootRef()?.contains(target) ? target : ev.target;
     }
 
     onColorFocusin(ev) {
