@@ -981,7 +981,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         )[:1]
         markup_data = [
             website._prepare_ecommerce_store_markup_data(),
-            product._to_markup_data(website),
+            product._to_markup_data(website, pricelist=request.pricelist),
         ]
         if category:
             # Add breadcrumb's SEO data.

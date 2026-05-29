@@ -1387,7 +1387,7 @@ class ProductTemplate(models.Model):
 
         return price, pricelist_rule_id
 
-    def _to_markup_data(self, website):
+    def _to_markup_data(self, website, pricelist):
         """Generate JSON-LD markup data for the current product template.
 
         If the template has multiple variants, the https://schema.org/ProductGroup schema is used.
@@ -1401,7 +1401,7 @@ class ProductTemplate(models.Model):
         self.ensure_one()
 
         if self.product_variant_count == 1:
-            markup_data = self.product_variant_id._to_markup_data(website)
+            markup_data = next(self.product_variant_id._to_markup_data(website, pricelist))
         else:
             # perf: temporal solution to avoid slowness when product have many variants and
             # pricelist rules
@@ -1413,9 +1413,9 @@ class ProductTemplate(models.Model):
                 or None
             )
             if limit:
-                product_variant_ids = self.product_variant_ids[:limit]
+                variants = self.product_variant_ids[:limit]
             else:
-                product_variant_ids = self.product_variant_ids
+                variants = self.product_variant_ids
 
             base_url = website.get_base_url()
             markup_data = {
@@ -1424,7 +1424,7 @@ class ProductTemplate(models.Model):
                 "name": self.name,
                 "image": f"{base_url}{website.image_url(self, 'image_1920')}",
                 "url": f"{base_url}{self.website_url}",
-                "hasVariant": [product._to_markup_data(website) for product in product_variant_ids],
+                "hasVariant": list(variants._to_markup_data(website, pricelist)),
             }
             if self.description_ecommerce:
                 markup_data["description"] = text_from_html(self.description_ecommerce)

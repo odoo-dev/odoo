@@ -44,23 +44,23 @@ class TestWebsiteSaleProductTemplate(WebsiteSaleCommon):
                 })
             ],
         })
-        with self.mock_request():
-            markup_data = product_template._to_markup_data(self.website)
+        with self.mock_request() as request:
+            markup_data = product_template._to_markup_data(self.website, request.pricelist)
         self.assertEqual(markup_data["@type"], "ProductGroup")
         self.assertEqual(len(markup_data["hasVariant"]), 2)
 
     def test_markup_data_uses_product_schema_when_single_variant(self):
         product_template = self.env["product.template"].create({"name": "Test product"})
-        with self.mock_request():
-            markup_data = product_template._to_markup_data(self.website)
+        with self.mock_request() as request:
+            markup_data = product_template._to_markup_data(self.website, request.pricelist)
         self.assertEqual(markup_data["@type"], "Product")
 
     def test_markup_data_uses_taxes_excluded_price_when_configured_on_website(self):
         self.env["res.config.settings"].create({
             "show_line_subtotals_tax_selection": "tax_excluded"
         }).execute()
-        with self.mock_request():
-            markup_data = self.product._to_markup_data(self.website)
+        with self.mock_request() as request:
+            markup_data = next(self.product._to_markup_data(self.website, request.pricelist))
             self.assertEqual(
                 markup_data["offers"]["price"],
                 self.website.currency_id.round(self.product.base_unit_price),
@@ -71,9 +71,9 @@ class TestWebsiteSaleProductTemplate(WebsiteSaleCommon):
             "show_line_subtotals_tax_selection": "tax_included"
         }).execute()
         self.product.price_extra = 10
-        with self.mock_request():
+        with self.mock_request() as request:
             product_tmpl = self.product.product_tmpl_id
-            markup_data = self.product._to_markup_data(self.website)
+            markup_data = next(self.product._to_markup_data(self.website, request.pricelist))
             self.assertEqual(
                 markup_data["offers"]["price"],
                 self.website.currency_id.round(
@@ -90,8 +90,8 @@ class TestWebsiteSaleProductTemplate(WebsiteSaleCommon):
             .with_context(active_test=False)
             .search([("name", "!=", company_currency.name)], limit=1)
         )
-        with self.mock_request():
-            markup = self.product._to_markup_data(self.website)
+        with self.mock_request() as request:
+            markup = next(self.product._to_markup_data(self.website, request.pricelist))
         # Expected converted price
         expected_price = company_currency._convert(
             self.product.list_price,

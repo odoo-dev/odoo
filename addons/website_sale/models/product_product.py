@@ -4,7 +4,6 @@ from collections import OrderedDict
 from urllib.parse import urlencode, urlparse
 
 from odoo import api, fields, models
-from odoo.http import request
 
 
 class ProductProduct(models.Model):
@@ -121,50 +120,54 @@ class ProductProduct(models.Model):
         else:
             self.website_published = False
 
-    def _to_markup_data(self, website):
+    def _to_markup_data(self, website, pricelist):
         """Generate JSON-LD markup data for the current product.
 
         :param website website: The current website.
         :return: The JSON-LD markup data.
-        :rtype: dict
+        :rtype: generator
         """
-        self.ensure_one()
+        product_prices = pricelist._get_products_price(self, 1, currency=website.currency_id)
+        for product in self:
+            price = product._apply_taxes_to_price(
+                product_prices[product.id], website.currency_id, website=website
+            )
 
-        product_price = request.pricelist._get_product_price(
-            self, quantity=1, currency=website.currency_id
-        )
-        # Use sudo to access cross-company taxes.
-        price = self._apply_taxes_to_price(product_price, website.currency_id, website=website)
+            base_url = website.get_base_url()
+            markup_data = {
+                "@context": "https://schema.org",
+                "@type": "Product",
+                "name": product.with_context(display_default_code=False).display_name,
+                "url": f"{base_url}{product.website_url}",
+                "image": f"{base_url}{website.image_url(product, 'image_1920')}",
+                "offers": {
+                    "@type": "Offer",
+                    "price": price,
+                    "priceCurrency": website.currency_id.name,
+                },
+            }
+            if product.website_meta_description or product.description_sale:
+                markup_data["description"] = (
+                    product.website_meta_description or product.description_sale
+                )
+            if product.barcode:
+                markup_data["gtin"] = product.barcode
+            if product.is_storable:
+                if not product._is_sold_out():
+                    availability = "https://schema.org/InStock"
+                else:
+                    availability = "https://schema.org/OutOfStock"
+                markup_data["offers"]["availability"] = availability
 
-        base_url = website.get_base_url()
-        markup_data = {
-            "@context": "https://schema.org",
-            "@type": "Product",
-            "name": self.with_context(display_default_code=False).display_name,
-            "url": f"{base_url}{self.website_url}",
-            "image": f"{base_url}{website.image_url(self, 'image_1920')}",
-            "offers": {"@type": "Offer", "price": price, "priceCurrency": website.currency_id.name},
-        }
-        if self.website_meta_description or self.description_sale:
-            markup_data["description"] = self.website_meta_description or self.description_sale
-        if self.barcode:
-            markup_data["gtin"] = self.barcode
-        if self.is_product_variant and self.is_storable:
-            if not self._is_sold_out():
-                availability = "https://schema.org/InStock"
-            else:
-                availability = "https://schema.org/OutOfStock"
-            markup_data["offers"]["availability"] = availability
+            direct, others = product._split_standard_from_custom_attributes()
+            markup_data.update(direct)
+            if others:
+                markup_data["additionalProperty"] = [
+                    {"@type": "PropertyValue", "name": name, "value": value}
+                    for name, value in others.items()
+                ]
 
-        direct, others = self._split_standard_from_custom_attributes()
-        markup_data.update(direct)
-        if others:
-            markup_data["additionalProperty"] = [
-                {"@type": "PropertyValue", "name": name, "value": value}
-                for name, value in others.items()
-            ]
-
-        return markup_data
+            yield markup_data
 
     def _get_image_1920_url(self):
         """Return the local url of the product main image.

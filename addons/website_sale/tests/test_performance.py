@@ -260,7 +260,7 @@ class TestWebsiteSalePerformanceWithPricelist(TestWebsiteSalePerformanceWithPric
 
     def _get_product_page_queries(self):
         res = super()._get_product_page_queries()
-        res["product_pricelist_item"] += 19
+        res["product_pricelist_item"] += 3
         res["product_category"] += 1
         if "website_sale_subscription" not in self.installed_modules:
             # FIXME VFE magic comeback when sub is installed makes no **** sense
@@ -314,7 +314,7 @@ class TestWebsiteSalePerformanceWithPricelistDepth(TestWebsiteSalePerformanceWit
 
     def _get_product_page_queries(self):
         res = super()._get_product_page_queries()
-        res["product_pricelist_item"] += 13
+        res["product_pricelist_item"] += 5
         res["product_pricelist"] += 1
         return res
 
