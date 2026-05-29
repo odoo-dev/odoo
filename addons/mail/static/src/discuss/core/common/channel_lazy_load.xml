@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mail.ChannelLazyLoad">
+        <ActionPanel title="this.props.category.name" resizable="false">
+            <ul class="overflow-auto o-scrollbar-thin py-2 flex-grow-1 list-unstyled mb-0" t-custom-ref="scroll">
+                <li t-foreach="this.props.category.channels" t-as="channel" t-key="channel.localId">
+                    <DiscussSidebarChannel channel="channel"/>
+                </li>
+                <li t-if="this.state.loading" class="text-muted small p-1">
+                    <i class="fa fa-circle-o-notch fa-spin"/>
+                </li>
+                <li t-if="!this.state.loading and !this.state.hasMore and this.props.category.channels.length === 0"
+                    class="text-muted small px-3 py-2">
+                    There is no channel in this category.
+                </li>
+            </ul>
+        </ActionPanel>
+    </t>
+</templates>

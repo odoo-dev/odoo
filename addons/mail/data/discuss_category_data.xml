@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="disucss_dm_category" model="discuss.category">
+            <field name="name">Direct Messages</field>
+            <field name="sequence">30</field>
+            <field name="technical_key">mail.direct_messages</field>
+        </record>
+        <record id="discuss_channel_category" model="discuss.category">
+            <field name="name">Channels</field>
+            <field name="sequence">10</field>
+            <field name="technical_key">mail.channels</field>
+        </record>
+    </data>
+</odoo>

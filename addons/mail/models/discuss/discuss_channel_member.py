@@ -270,6 +270,9 @@ class DiscussChannelMember(models.Model):
 
     def _write_after_hook(self, vals):
         """Hook called after a write operation, including parent and children calls."""
+        if {"is_favorite", "unpin_dt"} & vals.keys():
+            for member in self.filtered("is_self"):
+                member._send_favorites_unread_counter()
 
     def _sync_field_names(self, res):
         super()._sync_field_names(res)
@@ -681,6 +684,56 @@ class DiscussChannelMember(models.Model):
         for bus_channel in bus_channels:
             Store(bus_channel=bus_channel).add(self, "_store_seen_fields")
 
+    def _send_discuss_category_unread_counter(self):
+        if category := self.channel_id.discuss_category_id:
+            for bus_channel in self._bus_channels():
+                Store(bus_channel=bus_channel).add(category, "_store_category_fields")
+        if self.is_favorite:
+            self._send_favorites_unread_counter()
+
+    def _get_self_favorites_unread_counter(self):
+        """Number of distinct pinned favorite channels with unread messages
+        for the current self (current partner or guest)."""
+        user, guest = self.env["res.users"]._get_current_persona()
+        if guest:
+            person_filter = SQL("dcm.guest_id = %s", guest.id)
+        elif user and not user._is_public():
+            person_filter = SQL("dcm.partner_id = %s", user.partner_id.id)
+        else:
+            return 0
+        self.env["mail.message"].flush_model()
+        self.env["discuss.channel"].flush_model(["last_interest_dt"])
+        self.env["discuss.channel.member"].flush_model(
+            ["is_favorite", "last_interest_dt", "new_message_separator", "unpin_dt"]
+        )
+        self.env.cr.execute(SQL(
+            """SELECT COUNT(DISTINCT dcm.channel_id)
+                 FROM discuss_channel_member dcm
+                 JOIN discuss_channel dc ON dc.id = dcm.channel_id
+                WHERE %s
+                  AND dcm.is_favorite IS TRUE
+                  AND (
+                      dcm.unpin_dt IS NULL
+                      OR (dcm.last_interest_dt IS NOT NULL AND dcm.last_interest_dt >= dcm.unpin_dt)
+                      OR (dc.last_interest_dt IS NOT NULL AND dc.last_interest_dt >= dcm.unpin_dt)
+                  )
+                  AND EXISTS (
+                      SELECT 1 FROM mail_message mm
+                       WHERE mm.model = 'discuss.channel'
+                         AND mm.res_id = dcm.channel_id
+                         AND mm.message_type NOT IN ('notification', 'user_notification')
+                         AND mm.id >= dcm.new_message_separator
+                  )""",
+            person_filter,
+        ))
+        return self.env.cr.fetchone()[0] or 0
+
+    def _send_favorites_unread_counter(self):
+        self.ensure_one()
+        counter = self._get_self_favorites_unread_counter()
+        for bus_channel in self._bus_channels():
+            Store(bus_channel=bus_channel).add_global_values(favoritesUnreadCounter=counter)
+
     def _set_new_message_separator(self, message_id):
         """
         :param message_id: id of the message above which the new message
@@ -699,8 +752,10 @@ class DiscussChannelMember(models.Model):
                         res.from_method("_store_identifying_fields"),
                     ),
                 )
+            self._send_discuss_category_unread_counter()
             return
         self.new_message_separator = message_id
+        self._send_discuss_category_unread_counter()
 
     def _get_html_link_title(self):
         return self.partner_id.name if self.partner_id else self.guest_id.name

@@ -31,6 +31,7 @@ export class DiscussCategory extends Record {
     channel_ids = fields.Many("discuss.channel");
     /** @type {number} */
     id;
+    message_unread_counter = fields.Attr(0);
     /** @type {string} */
     name;
     /** @type {number} */

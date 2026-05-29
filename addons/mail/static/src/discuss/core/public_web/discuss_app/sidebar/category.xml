@@ -28,15 +28,13 @@
                         'oi oi-chevron-down': !this.isToggleFoldDisabled and this.category.is_open,
                         'oi oi-chevron-right': this.isToggleFoldDisabled or !this.category.is_open,
                     }"/>
-                    <span class="rounded p-1"><i t-if="this.store.channels.status === 'fetching'" class="fa fa-fw fa-circle-o-notch fa-spin"/><i t-else="" class="fa-fw fa-lg" t-att-class="this.category.icon ?? 'fa fa-user'"/></span>
                 </t>
                 <t t-else="">
                     <span class="o-mail-DiscussSidebarCategory-title text-break smaller d-flex align-items-center gap-1" t-att-class="{ 'fs-bold': this.category.open }">
                         <i class="fa-fw opacity-75" t-att-class="this.category.icon ?? 'fa fa-user'"/>
                         <t name="titleText" t-out="this.category.name"/>
                     </span>
-                    <span t-if="this.store.channels.status === 'fetching'" class="o-visible-short-delay"><i class="o-mail-DiscussSidebarCategory-icon o-xxsmaller fa fa-fw fa-circle-o-notch fa-spin opacity-50 ps-1"/></span>
-                    <i t-else="" class="o-mail-DiscussSidebarCategory-icon o-xxsmaller fa-fw align-self-center ps-1" t-att-class="(!this.isToggleFoldDisabled and this.category.is_open) ? 'oi oi-chevron-down' : 'oi oi-chevron-right'"/>
+                    <i class="o-mail-DiscussSidebarCategory-icon o-xxsmaller fa-fw align-self-center ps-1" t-att-class="(!this.isToggleFoldDisabled and this.category.is_open) ? 'oi oi-chevron-down' : 'oi oi-chevron-right'"/>
                 </t>
             </button>
             <t t-if="this.actions.length and !this.store.discuss.isSidebarCompact" t-call="mail.DiscussSidebarCategory.actions"/>

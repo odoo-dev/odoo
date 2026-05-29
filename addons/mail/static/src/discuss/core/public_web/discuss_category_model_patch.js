@@ -8,14 +8,15 @@ const discussCategoryPatch = {
     setup() {
         super.setup(...arguments);
         this.appCategory = fields.One("DiscussAppCategory", {
+            eager: true,
             inverse: "discussCategoryAsAppCategory",
             compute() {
                 return {
                     canView: false,
                     extraClass: "o-mail-DiscussSidebarCategory-discussCategory",
-                    hideWhenEmpty: true,
-                    icon: "fa fa-hashtag",
+                    hideWhenEmpty: false,
                     id: `discuss_category_${this.id}`,
+                    technical_key: this.technical_key,
                 };
             },
         });

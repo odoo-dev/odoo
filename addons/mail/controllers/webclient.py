@@ -178,6 +178,10 @@ class WebclientController(ThreadController):
             "_store_canned_response_fields",
         )
 
+    @store_handler("discuss_categories")
+    def store_discuss_categories(self, store: Store):
+        store.add(request.env["discuss.category"].search([]), "_store_category_fields")
+
     @store_handler("avatar_card")
     def store_avatar_card(self, store: Store, id=None, model=None):
         if not id or model not in self._get_supported_avatar_card_models():

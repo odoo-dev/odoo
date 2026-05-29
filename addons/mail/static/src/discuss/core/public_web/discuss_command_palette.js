@@ -127,7 +127,6 @@ export class DiscussCommandPalette {
     }
 
     async fetch() {
-        await this.store.channels.fetch(); // FIXME: needed to search group chats without explicit name
         await this.store.searchConversations(this.cleanedTerm);
     }
 

@@ -2,19 +2,17 @@ import { useExternalListener, useLayoutEffect, useRef, useSubEnv } from "@web/ow
 import { DiscussSidebar } from "@mail/core/public_web/discuss_app/sidebar/sidebar";
 import { useMessageScrolling } from "@mail/utils/common/hooks";
 
-import { Component } from "@odoo/owl";
+import { Component, onWillStart } from "@odoo/owl";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 
 import { useService } from "@web/core/utils/hooks";
 import { DiscussContent } from "@mail/core/public_web/discuss_content";
 import { MessagingMenu } from "@mail/core/public_web/messaging_menu";
-import { ChannelLazyLoad } from "@mail/discuss/core/common/channel_lazy_load";
 
 export class Discuss extends Component {
     static components = {
         DiscussContent,
         DiscussSidebar,
-        ChannelLazyLoad,
         MessagingMenu,
     };
     static props = {
@@ -70,6 +68,9 @@ export class Discuss extends Component {
                 () => [this.thread, this.ui.isSmall]
             );
         }
+        onWillStart(() => {
+            this.store.categories.fetch();
+        });
     }
 
     get thread() {

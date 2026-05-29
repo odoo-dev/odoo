@@ -25,10 +25,31 @@ export class DiscussAppCategory extends Record {
         );
     }
 
+    color = fields.Attr("", {
+        compute() {
+            if (this.technical_key) {
+                return "";
+            }
+            let hash = 0;
+            for (let i = 0; i < this.name.length; i++) {
+                hash = (hash * 31 + this.name.charCodeAt(i)) | 0;
+            }
+            return `hsl(${Math.abs(hash) % 360}, 35%, 50%)`;
+        },
+    });
     /** @type {string} */
     extraClass;
-    /** @string */
-    icon;
+    icon = fields.Attr("fa fa-hashtag", {
+        compute() {
+            if (this.id === "favorites") {
+                return "fa fa-star";
+            }
+            if (this.technical_key === "mail.direct_messages") {
+                return "oi oi-users";
+            }
+            return "fa fa-hashtag";
+        },
+    });
     /** @string */
     id;
     /** @type {string} */
@@ -42,6 +63,8 @@ export class DiscussAppCategory extends Record {
     hidden = fields.Attr(undefined, { localStorage: true, eager: true });
     hideWhenEmpty = false;
     canView = false;
+    /** @type {string|undefined} */
+    technical_key;
     app = fields.One("DiscussApp", {
         compute() {
             return this.store.discuss;
@@ -60,6 +83,14 @@ export class DiscussAppCategory extends Record {
     });
     channelsWithCounter = fields.Many("discuss.channel", {
         inverse: "categoryAsChannelWithCounter",
+    });
+    message_unread_counter = fields.Attr(0, {
+        compute() {
+            if (this.id === "favorites") {
+                return this.store.favoritesUnreadCounter;
+            }
+            return this.discussCategoryAsAppCategory?.message_unread_counter ?? 0;
+        },
     });
 }
 

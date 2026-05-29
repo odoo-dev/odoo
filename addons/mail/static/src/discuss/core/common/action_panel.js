@@ -49,7 +49,7 @@ export class ActionPanel extends Component {
             "o-mail-ActionPanel overflow-auto o-scrollbar-thin d-flex flex-column flex-shrink-0 position-relative py-2 pt-0 h-100 bg-inherit": true,
             "o-mail-ActionPanel-chatter": this.env.inChatter,
             "o-chatWindow": this.env.inChatWindow,
-            "px-2": !this.env.inChatter && !this.env.inMeetingChat,
+            // "px-2": !this.env.inChatter && !this.env.inMeetingChat,
             rounded: !this.props.resizable,
         });
     }

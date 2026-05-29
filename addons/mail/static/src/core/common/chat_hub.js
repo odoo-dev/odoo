@@ -48,8 +48,10 @@ export class ChatHub extends Component {
         this.onResize();
         useExternalListener(browser, "resize", this.onResize);
         useLayoutEffect(() => {
-            if (this.chatHub.folded.length && this.store.channels?.status === "not_fetched") {
-                this.store.channels.fetch();
+            for (const chatWindow of this.chatHub.folded) {
+                if (chatWindow.channel?.id) {
+                    this.store["discuss.channel"].getOrFetch(chatWindow.channel.id);
+                }
             }
         });
         useMovable({

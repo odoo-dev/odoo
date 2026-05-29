@@ -29,50 +29,30 @@ const discussAppPatch = {
                     : localeCompare(c1.name, c2.name) || c1.id - c2.id;
             },
         });
-        this.channelCategory = fields.One("DiscussAppCategory", {
-            compute() {
-                return {
-                    addTitle: _t("Add or join a channel"),
-                    canView: true,
-                    extraClass: "o-mail-DiscussSidebarCategory-channel",
-                    icon: "fa fa-hashtag",
-                    id: "channels",
-                    name: _t("Channels"),
-                    sequence: 10,
-                };
-            },
-            eager: true,
-        });
-        this.chatCategory = fields.One("DiscussAppCategory", {
-            compute() {
-                return this.computeChatCategory();
-            },
-            eager: true,
-        });
         this.favoriteCategory = fields.One("DiscussAppCategory", {
             compute() {
                 return {
                     extraClass: "o-mail-DiscussSidebarCategory-favorite",
-                    hideWhenEmpty: true,
-                    icon: "fa fa-star",
+                    hideWhenEmpty: false,
                     id: "favorites",
                     name: _t("Favorites"),
                     sequence: 5,
+                    technical_key: "mail.favorites",
                 };
             },
+            eager: true,
         });
         this.unreadChannels = fields.Many("discuss.channel", { inverse: "appAsUnreadChannels" });
-    },
-    computeChatCategory() {
-        return {
-            addTitle: _t("Start a conversation"),
-            canView: false,
-            extraClass: "o-mail-DiscussSidebarCategory-chat",
-            icon: "oi oi-users",
-            id: "chats",
-            name: _t("Direct Messages"),
-            sequence: 30,
-        };
+        this.chatCategory = fields.One("DiscussAppCategory", {
+            compute() {
+                return this.allCategories.find((c) => c.technical_key === "mail.direct_messages");
+            },
+        });
+        this.channelCategory = fields.One("DiscussAppCategory", {
+            compute() {
+                return this.allCategories.find((c) => c.technical_key === "mail.channels");
+            },
+        });
     },
 };
 patch(DiscussApp.prototype, discussAppPatch);

@@ -71,7 +71,7 @@
                 </NotificationItem>
                 <t t-set="itemIndex" t-value="itemIndex + 1"/>
             </t>
-            <t t-if="this.store.channels.status === 'fetching'">
+            <t t-if="this.menuFetchState?.loading">
                 <div class="d-flex align-items-center justify-content-center gap-2 py-4 px-2"><span class="o-visible-short-delay"><i class="fa fa-circle-o-notch fa-spin me-1"/> Loading…</span></div>
             </t>
         </div>

@@ -10,7 +10,15 @@ class SearchController(http.Controller):
     @mail_route("/discuss/search", methods=["POST"], type="jsonrpc", auth="public")
     def search(self, term, category_id=None, limit=10):
         store = Store()
-        base_domain = Domain("name", "ilike", term) & Domain("channel_type", "!=", "chat")
+        # Groups often have a null `name` (display name is derived from members).
+        # Match those by any member partner name so they surface in search.
+        unnamed_group_match = Domain("channel_type", "=", "group") & Domain(
+            "channel_member_ids", "any", [("partner_id.name", "ilike", term)]
+        )
+        base_domain = (
+            (Domain("name", "ilike", term) | unnamed_group_match)
+            & Domain("channel_type", "!=", "chat")
+        )
         priority_conditions = [
             Domain("is_member", "=", True) & base_domain,
             base_domain,
@@ -28,3 +36,11 @@ class SearchController(http.Controller):
         store.add(channels, "_store_channel_fields")
         request.env["res.partner"]._search_for_channel_invite(store, search_term=term, limit=limit)
         return store
+
+
+
+"""
+Messaging menu => pinned messages?
+
+
+"""

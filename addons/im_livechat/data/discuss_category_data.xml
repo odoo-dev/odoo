@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="looking_for_help_category">
+            <field name="name">Looking for help</field>
+            <field name="sequence">15</field>
+            <field name="technical_key">im_livechat.looking_for_help</field>
+        </record>
+        <record id="default_category">
+            <field name="name">Live Chat</field>
+            <field name="sequence">17</field>
+            <field name="technical_key">im_livechat.default</field>
+        </record>
+    </data>
+</odoo>

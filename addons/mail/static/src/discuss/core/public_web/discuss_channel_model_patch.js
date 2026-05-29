@@ -25,14 +25,7 @@ const discussChannelPatch = {
                 if (this.self_member_id?.is_favorite) {
                     return this.store.discuss.favoriteCategory;
                 }
-                if (this.parent_channel_id) {
-                    return;
-                }
-                if (this.discuss_category_id) {
-                    return this.discuss_category_id.appCategory;
-                }
-                // channel_type based categorization (including overrides) comes last
-                return this._computeDiscussAppCategory();
+                return this.discuss_category_id?.appCategory;
             },
         });
         this.isDisplayInSidebar = fields.Attr(false, {
@@ -55,14 +48,6 @@ const discussChannelPatch = {
     },
     _computeCanHide() {
         return Boolean(super._computeCanHide() || this?.isLocallyPinned);
-    },
-    _computeDiscussAppCategory() {
-        if (["group", "chat"].includes(this.channel_type)) {
-            return this.store.discuss.chatCategory;
-        }
-        if (this.channel_type === "channel") {
-            return this.store.discuss.channelCategory;
-        }
     },
     _computeIsDisplayInSidebar() {
         return (
@@ -195,16 +180,8 @@ const discussChannelPatch = {
             this.sub_channel_ids.forEach((c) => (c.isLocallyPinned = false));
         }
         if (!this.self_member_id?.is_pinned && !this.isLocallyPinned && this.discussAppAsThread) {
-            if (this.store.discuss.isActive) {
-                const newChannel =
-                    this.store.discuss.channelCategory.channels.find(
-                        (channel) => channel.self_member_id?.is_pinned || channel.isLocallyPinned
-                    ) || this.store.inbox;
-                if (newChannel) {
-                    newChannel.setAsDiscussThread();
-                } else {
-                    this.store.discuss.thread = undefined;
-                }
+            if (this.store.discuss.isActive && this.store.inbox) {
+                this.store.inbox.setAsDiscussThread();
             } else {
                 this.store.discuss.thread = undefined;
             }

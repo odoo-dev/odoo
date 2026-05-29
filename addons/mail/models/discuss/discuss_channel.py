@@ -84,7 +84,12 @@ class DiscussChannel(models.Model):
     avatar_128 = fields.Image("Avatar", max_width=128, max_height=128, compute='_compute_avatar_128')
     avatar_cache_key = fields.Char(compute="_compute_avatar_cache_key")
     discuss_category_id = fields.Many2one(
-        "discuss.category", string="Category", ondelete="set null", index=True
+        "discuss.category",
+        compute="_compute_discuss_category_id",
+        index=True,
+        ondelete="set null",
+        store=True,
+        string="Category",
     )
     channel_partner_ids = fields.Many2many(
         'res.partner', string='Partners',
@@ -194,6 +199,27 @@ class DiscussChannel(models.Model):
             raise ValidationError(_("For %(channels)s, channel_type should be 'channel' to have the group-based authorization or group auto-subscription.", channels=', '.join([ch.name for ch in failing_channels])))
 
     # COMPUTE / INVERSE
+
+    @api.depends("channel_type")
+    def _compute_discuss_category_id(self):
+        domain_by_technical_key = self.env["discuss.category"]._category_technical_key_to_domain()
+        domain_by_category = {
+            category: domain_by_technical_key[category.technical_key]
+            for category in self.env["discuss.category"].search(
+                [("technical_key", "in", list(domain_by_technical_key.keys()))],
+            )
+        }
+        for record in self:
+            if (
+                record.discuss_category_id
+                and record.discuss_category_id not in domain_by_category
+            ):
+                # Explicitly added to a custom category, keep it.
+                return
+            for category, domain in domain_by_category.items():
+                if record.filtered_domain(domain):
+                    record.discuss_category_id = category
+                    break
 
     @api.depends("channel_name_member_ids", "name")
     def _compute_display_name(self):

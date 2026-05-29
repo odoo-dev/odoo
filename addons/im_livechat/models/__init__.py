@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from . import chatbot_message
+from . import discuss_category
 from . import chatbot_script
 from . import chatbot_script_answer
 from . import chatbot_script_step
