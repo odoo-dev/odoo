@@ -50,6 +50,13 @@ from odoo.tools.mail import (
 
 MAX_DIRECT_PUSH = 5
 BAD_CONTENT_TYPES = ('binary/octet-stream', '*/*', 'bin/plain')  # replaced by application/octet-stream
+PUSH_ATTACHMENT_SYMBOLS = {
+    "audio": "♪",
+    "file": "▣",
+    "image": "▧",
+    "video": "▶",
+    "voice": "◉",
+}
 
 _logger = logging.getLogger(__name__)
 
@@ -3895,6 +3902,27 @@ class MailThread(models.AbstractModel):
             } for device in devices])
             self.env.ref('mail.ir_cron_web_push_notification')._trigger()
 
+    def _notify_by_web_push_get_attachment_type(self, attachment):
+        # sudo: ir.attachment - access voice_ids linked to an attachment, if present.
+        if attachment.sudo().voice_ids:
+            return "voice"
+        mimetype = attachment.mimetype or ""
+        if mimetype.startswith("image/"):
+            return "image"
+        if mimetype.startswith("video/"):
+            return "video"
+        if mimetype.startswith("audio/"):
+            return "audio"
+        return "file"
+
+    def _notify_by_web_push_get_attachment_label(self, attachment):
+        attachment_type = self._notify_by_web_push_get_attachment_type(attachment)
+        symbol = PUSH_ATTACHMENT_SYMBOLS[attachment_type]
+        if attachment_type == "voice":
+            return self.env._("%(symbol)s Voice Message", symbol=symbol)
+        attachment_name = attachment.name or self.env._("attachment")
+        return self.env._("%(symbol)s %(file)s", symbol=symbol, file=attachment_name)
+
     def _notify_by_web_push_prepare_payload(self, message, msg_vals=False):
         """ Returns dictionary containing message information for a browser device.
         This info will be delivered to a browser device via its recorded endpoint.
@@ -3916,24 +3944,20 @@ class MailThread(models.AbstractModel):
 
         if tools.is_html_empty(body) and message.attachment_ids:
             total_attachments = len(message.attachment_ids)
-            # sudo: ir.attachment - access voice_ids linked to an attachment, if present.
             attachments = message.attachment_ids.sudo()
 
-            def get_attachment_label(attachment):
-                return self.env._("Voice Message") if attachment.voice_ids else attachment.name
-
             if total_attachments == 1:
-                body = get_attachment_label(attachments[0])
+                body = self._notify_by_web_push_get_attachment_label(attachments[0])
             elif total_attachments == 2:
                 body = self.env._(
                     "%(file1)s and %(file2)s",
-                    file1=get_attachment_label(attachments[0]),
-                    file2=get_attachment_label(attachments[1]),
+                    file1=self._notify_by_web_push_get_attachment_label(attachments[0]),
+                    file2=self._notify_by_web_push_get_attachment_label(attachments[1]),
                 )
             else:
                 body = self.env._(
                     "%(file1)s and %(count)d other attachments",
-                    file1=get_attachment_label(attachments[0]),
+                    file1=self._notify_by_web_push_get_attachment_label(attachments[0]),
                     count=total_attachments - 1,
                 )
 

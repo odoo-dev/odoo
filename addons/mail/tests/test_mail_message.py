@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import base64
+
 # from odoo import exceptions
 from odoo.addons.mail.tests import common
 from odoo.tests import new_test_user, tagged
@@ -15,6 +17,23 @@ class TestMailMessage(common.MailCommon):
         # TDE to check: cache pollution / inexisting not correctly tracked, ok-ish for stable
         # with self.assertRaises(exceptions.AccessError):
         #     inexisting_message.check_access_rule('read')
+
+    def test_attachment_only_web_push_payload_uses_type_symbol(self):
+        attachment = self.env["ir.attachment"].create({
+            "datas": base64.b64encode(b"image"),
+            "mimetype": "image/png",
+            "name": "picture.png",
+        })
+        message = self.env.user.partner_id.message_post(body="", attachment_ids=[attachment.id])
+
+        payload = self.env.user.partner_id._notify_by_web_push_prepare_payload(message)
+
+        self.assertEqual(payload["options"]["body"], "▧ picture.png")
+        self.assertEqual(
+            payload["options"]["icon"],
+            f"/web/image/res.partner/{self.env.user.partner_id.id}/avatar_128",
+        )
+        self.assertNotIn("badge", payload["options"])
 
     def test_mail_message_read_access(self):
         self.env['res.company'].invalidate_model(['name'])
