@@ -4,3 +4,5 @@
 {"kind":"event","ts":"2026-05-29T12:38:21Z","actor":"orchestrator","event":"status","value":"blocked"}
 {"kind":"event","ts":"2026-05-29T12:38:21Z","actor":"orchestrator","event":"depends_on","set":["web__views__fields__input_field_hook_js","web__views__fields__float__float_field_xml"]}
 {"kind":"event","ts":"2026-05-29T12:38:21Z","actor":"orchestrator","event":"problem","note":"useInputField uses string-named refs (compat); needs signal-aware variant OR float_field+useInputField migrated first."}
+{"kind":"event","ts":"2026-05-29T17:19:32Z","actor":"orchestrator","event":"run","branch":null,"worktree":null,"commits":[],"summary":"still blocked after useInputField fix: this file does not call useInputField itself; it extends FloatField which does. Parent FloatField migration is the next domino."}
+{"kind":"event","ts":"2026-05-29T17:19:32Z","actor":"orchestrator","event":"status","value":"blocked"}
