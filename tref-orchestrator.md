@@ -41,7 +41,13 @@ Each `tasks/<id>.jsonl` is append-only:
   ```
   Event types: `status` (`value`: pending|in_progress|pushed|done|blocked|failed), `priority`, `assignee`, `depends_on` (with `set`/`add`/`remove`), `worktree` (with `path`,`branch`), `run` (sub-agent run record with `branch`/`worktree`/`commits`/`summary`), `problem`, `question`, `decision`, `progress`, `local_test` (with `result`,`note`), `done`, `note`, `start`.
 
-**Status semantics (important):** `pushed` means the branch is pushed to `odoo-dev` but CI is unverified. `done` is reserved for green CI. `blocked` means the sub-agent stopped because of a dependency.
+**Status semantics (important):**
+- `to_check_with_ci` — sub-agent applied the migration, committed locally, but the branch has NOT yet been pushed to `odoo-dev` (no runbot batch exists). Default landing state for fresh work.
+- `pushed` — branch is on `odoo-dev` AND runbot has built at least one batch (success/error/running). CI signal exists but green-ness may be unverified.
+- `done` — reserved for green CI (Enterprise Tests slot passes).
+- `ci_failed` — runbot built a batch with `error` status that we've triaged as a real regression (not base-noise).
+- `blocked` — sub-agent stopped because of an upstream dependency (foundation hook, parent class migration, cross-file ref handoff, etc.).
+- `failed` — migration is structurally impossible from the assigned scope (dead ref, missing template binding, etc.).
 
 **Folding rule** — start from defaults `{status:"pending", priority:null, depends_on:[], assignee:null, worktree_path:null, worktree_branch:null}`. For each event in order: `status`/`priority`/`assignee` overwrite; `depends_on` uses `set` (replace) or `add`/`remove`; `worktree` sets `path`/`branch`; everything else is appended to a timeline.
 

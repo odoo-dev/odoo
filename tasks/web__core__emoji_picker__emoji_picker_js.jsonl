@@ -10,3 +10,4 @@
 {"kind": "event", "ts": "2026-05-27T19:50:32.820181+00:00", "actor": "orchestrator", "event": "status", "value": "done"}
 {"kind":"event","ts":"2026-05-29T17:20:10Z","actor":"orchestrator","event":"run","branch":"master-web-hooks-useemojipicker-tref-nby","commits":["4de5542518fd6709c0048b0e3e73fc52984a1a6c"],"summary":"foundation fix: useEmojiPicker/usePicker resolver explicit. Already worked on prior commits; JSDoc + AnchorRef typedef added. Unblocks quick_reaction_menu/message_reactions/message_actions/create_poll_option_dialog/emojis_field_common."}
 {"kind":"event","ts":"2026-05-29T17:20:10Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind": "event", "ts": "2026-05-29T17:51:12Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: branch committed locally only, not yet on odoo-dev/runbot"}

@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:32:04Z","actor":"orchestrator","event":"run","branch":"master-website-slides-slide-share-dialog-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-website-slides-slide-share-dialog-js-tref-nby/odoo","commits":["e834919b24cad89881f205014cfff0922b19d8c9"],"summary":"migration committed. codeInputRef = signal(null); early-return read+write pattern; also fixed CopyButton content callback. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:32:04Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:26:25Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

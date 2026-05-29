@@ -5,3 +5,4 @@
 {"kind":"event","ts":"2026-05-29T16:03:40Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T16:03:40Z","actor":"orchestrator","event":"note","text":"usePosition at addons/web/static/src/core/position/position_hook.js:44 was confirmed signal-aware in this base — accepts either string-name OR signal function for popperRef. Useful for similar consumers."}
 {"kind":"event","ts":"2026-05-29T17:26:11Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

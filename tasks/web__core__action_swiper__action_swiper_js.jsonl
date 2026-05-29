@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T17:07:19Z","actor":"orchestrator","event":"run","branch":"master-web-action-swiper-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-action-swiper-js-tref-nby/odoo","commits":["ff2658b500a3783f6fc5f46c71b98ec7ba8b8fc4"],"summary":"migration committed. 4 refs (root/targetContainer/leftPanel/rightPanel) = signal(null); all .el sites converted incl. paired addEventListener, classList ops, style assignments, contains, truthiness check. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T17:07:19Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind": "event", "ts": "2026-05-29T17:51:12Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: branch committed locally only, not yet on odoo-dev/runbot"}

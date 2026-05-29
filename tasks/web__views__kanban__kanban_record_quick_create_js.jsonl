@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T16:16:37Z","actor":"orchestrator","event":"run","branch":"master-web-kanban-record-quick-create-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-kanban-record-quick-create-js-tref-nby/odoo","commits":["bdf8a0570708203e1732ce1c6b91a9d3fc379bbb"],"summary":"migration committed. rootRef = signal(null); listener+hotkey converted. useSetupAction doesn't pass rootRef here. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T16:16:37Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:25:58Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

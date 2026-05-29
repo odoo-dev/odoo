@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T15:11:03Z","actor":"orchestrator","event":"run","branch":"master-web-settings-app-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-settings-app-js-tref-nby/odoo","commits":["1c033e8b57f19a53fcc61d07ad679ce592c433af"],"summary":"migration committed. settingsAppRef = signal(null); early-guard in useLayoutEffect body. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:11:03Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:26:05Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

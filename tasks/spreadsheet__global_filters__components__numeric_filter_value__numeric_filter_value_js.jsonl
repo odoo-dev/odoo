@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T17:22:52Z","actor":"orchestrator","event":"run","branch":"master-spreadsheet-numeric-filter-value-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-spreadsheet-numeric-filter-value-js-tref-nby/odoo","commits":["b6366294f92"],"summary":"migration committed. inputRef = signal(null); useNumpadDecimal(this.inputRef); 7 .el sites converted. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T17:22:52Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind": "event", "ts": "2026-05-29T17:51:12Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: branch committed locally only, not yet on odoo-dev/runbot"}

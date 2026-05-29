@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T15:30:39Z","actor":"orchestrator","event":"run","branch":"master-website-resource-editor-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-website-resource-editor-js-tref-nby/odoo","commits":["53ee77a620835adff99e5c3a1c773344648eb2b1"],"summary":"migration committed. editorRef = signal(null); early-guard in showErrorLine/clearErrorLine. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:30:39Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:26:16Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

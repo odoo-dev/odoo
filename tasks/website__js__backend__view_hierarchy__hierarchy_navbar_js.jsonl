@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:28:25Z","actor":"orchestrator","event":"run","branch":"master-website-hierarchy-navbar-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-website-hierarchy-navbar-js-tref-nby/odoo","commits":["1c49149a3764c3be549dd427435bbe764433f4b0"],"summary":"migration committed (search ref only). searchInputRef = signal(null); ()?.value. t-custom-ref=\"navbar\" left untouched (no JS counterpart; consumed cross-file or dead). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:28:25Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:26:18Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

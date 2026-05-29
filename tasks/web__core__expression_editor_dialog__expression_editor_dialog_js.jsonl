@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:48:54Z","actor":"orchestrator","event":"run","branch":"master-web-expression-editor-dialog-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-expression-editor-dialog-js-tref-nby/odoo","commits":["cd988570d598191724a7dba64aec234e2a9a3c1d"],"summary":"migration committed (peer-mirrored domain_selector_dialog). confirmButtonRef = signal(null); early-guard pattern. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:48:54Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:24:45Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

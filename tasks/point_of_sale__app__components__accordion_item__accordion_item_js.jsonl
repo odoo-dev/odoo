@@ -4,3 +4,4 @@
 {"kind":"event","ts":"2026-05-29T13:36:51Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T13:36:51Z","actor":"orchestrator","event":"note","text":"goa+branch worktree-add failed because master-tref-integration is checked out elsewhere; agent fell back to git worktree add from the sha. Update goa CLI or template to add from sha by default."}
 {"kind":"event","ts":"2026-05-29T17:23:41Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

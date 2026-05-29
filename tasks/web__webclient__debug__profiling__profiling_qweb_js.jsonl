@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T15:41:34Z","actor":"orchestrator","event":"run","branch":"master-web-profiling-qweb-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-profiling-qweb-js-tref-nby/odoo","commits":["d74efdf1ca2fc69b6233701ab6012def95a8a29a"],"summary":"migration committed. aceRef + selectorRef = signal(null); early-guard in renderProfilingInformation + _unmoutInfo. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:41:34Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:26:03Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

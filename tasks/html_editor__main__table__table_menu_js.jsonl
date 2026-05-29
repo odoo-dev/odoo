@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:42:46Z","actor":"orchestrator","event":"run","branch":"master-html-editor-table-menu-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-html-editor-table-menu-js-tref-nby/odoo","commits":["b3c9e5e773f1eabb5c731dab40169cb35cda1a3b"],"summary":"migration committed. menuRef = signal(null); cached overlayEl removed, inlined menuRef() in mount/cleanup/listener + 7 accesses in updatePosition. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:42:46Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:22:35Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

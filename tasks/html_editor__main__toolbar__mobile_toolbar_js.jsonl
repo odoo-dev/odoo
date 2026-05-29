@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:10:30Z","actor":"orchestrator","event":"run","branch":"master-html-editor-mobile-toolbar-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-html-editor-mobile-toolbar-js-tref-nby/odoo","commits":["e5a87fbadd4d60f6b0d063231fdb449cbff034a2"],"summary":"migration committed. toolbarRef = signal(null); single null-guard then plain DOM writes. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:10:30Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:22:37Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

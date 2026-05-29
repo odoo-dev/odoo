@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T15:09:18Z","actor":"orchestrator","event":"run","branch":"master-base-automation-actions-one2many-field-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-base-automation-actions-one2many-field-js-tref-nby/odoo","commits":["e0709abca10c35058c4b2f88a7d33606a8d03a4f"],"summary":"migration committed. rootRef = signal(null); early-guard in adapt(). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:09:18Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:21:19Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

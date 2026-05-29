@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T17:20:51Z","actor":"orchestrator","event":"run","branch":"master-web-name-and-signature-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-name-and-signature-js-tref-nby/odoo","commits":["588d1482b08b123dba0cef18c5256dc4fe5ee25f"],"summary":"migration committed. 3 refs = signal(null); useAutofocus({ref: signNameInputRef}); 8 .el sites converted. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T17:20:51Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind": "event", "ts": "2026-05-29T17:51:12Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: branch committed locally only, not yet on odoo-dev/runbot"}

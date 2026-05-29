@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T13:52:23Z","actor":"orchestrator","event":"run","branch":"master-web-iframe-wrapper-field-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-iframe-wrapper-field-js-tref-nby/odoo","commits":["556f0ad5a3c6e33cf8c6ef909e519990e9fbb6f3"],"summary":"migration committed. iframeRef = signal(null); ()?.contentDocument. Dep array did not read .el. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T13:52:23Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:25:37Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

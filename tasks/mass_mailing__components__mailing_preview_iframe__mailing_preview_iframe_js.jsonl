@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:36:57Z","actor":"orchestrator","event":"run","branch":"master-mass-mailing-mailing-preview-iframe-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mass-mailing-mailing-preview-iframe-js-tref-nby/odoo","commits":["f719c9ff853046e9c5b3a00d7303405b8352f2e0"],"summary":"migration committed. iframeRef = signal(null); 3 .el sites converted (loadIframe, ()?.contentDocument, local iframe var). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:36:57Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:23:32Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

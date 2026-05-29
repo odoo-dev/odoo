@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T17:01:26Z","actor":"orchestrator","event":"run","branch":"master-web-file-viewer-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-file-viewer-js-tref-nby/odoo","commits":["dc509042c8c"],"summary":"migration committed. 5 refs (autofocus/image/imageToolbar/zoomer/iframeViewerPdf) = signal(null); useAutofocus({ref}); updateZoomerStyle early-guard. PDF effect dep array switched. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T17:01:26Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:24:48Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

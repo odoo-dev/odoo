@@ -5,3 +5,4 @@
 {"kind":"event","ts":"2026-05-29T14:06:46Z","actor":"orchestrator","event":"run","branch":"master-html-editor-color-picker-gradient-tab-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-html-editor-color-picker-gradient-tab-js-tref-nby/odoo","commits":["764944b8d518de8c215f3effa657391ff3bf1cbc"],"summary":"migration committed. customGradientButtonRef = signal(null); ()?.focus() inside useLayoutEffect. Reset previous WIP snapshot 8062c69d995 to integration head before applying. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:06:46Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:21:55Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

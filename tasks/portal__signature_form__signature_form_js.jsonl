@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:15:52Z","actor":"orchestrator","event":"run","branch":"master-portal-signature-form-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-portal-signature-form-js-tref-nby/odoo","commits":["0a69092a34fa633fb3212a06dfd9d3ebce39d213"],"summary":"migration committed. rootRef = signal(null); ()?.closest / ()?.classList. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:15:52Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:23:57Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:24:46Z","actor":"orchestrator","event":"run","branch":"master-test-translation-mode-side-panel-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-test-translation-mode-side-panel-js-tref-nby/odoo","commits":["9db21ebd37cdbea16dc0ba856ada543f66c80377"],"summary":"migration committed. rootRef = signal(null); composedPath().includes(rootRef()). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:24:46Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:24:27Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T15:22:22Z","actor":"orchestrator","event":"run","branch":"master-mail-link-preview-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mail-link-preview-js-tref-nby/odoo","commits":["3823f03a08f995c4ef513f5aadc300eaf35acecb"],"summary":"migration committed. videoRef + imageRef = signal(null); both image t-ref bindings (squarish + wide) point to same signal. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:22:22Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:22:53Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

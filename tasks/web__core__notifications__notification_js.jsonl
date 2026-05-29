@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:58:11Z","actor":"orchestrator","event":"run","branch":"master-web-notification-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-notification-js-tref-nby/odoo","commits":["8a89b610075ac4bbfa0045f3216506db5e70eb04"],"summary":"migration committed. autocloseProgressRef = signal(null); early-guard for freeze() + animation tick. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:58:11Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:24:57Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:12:32Z","actor":"orchestrator","event":"run","branch":"master-web-pdf-viewer-field-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-pdf-viewer-field-js-tref-nby/odoo","commits":["ff61d3325d6f41bea9661b59d417d40827a1eeb7"],"summary":"migration committed. iframeViewerPdfRef = signal(null); dep+body switched to (). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:12:32Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:25:40Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

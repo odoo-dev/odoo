@@ -5,3 +5,4 @@
 {"kind":"event","ts":"2026-05-29T12:55:41Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T12:55:41Z","actor":"orchestrator","event":"note","text":"status=pushed reused per orchestrator convention: migration complete + green locally + commit ready. User will perform the actual git push."}
 {"kind":"event","ts":"2026-05-29T17:21:28Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

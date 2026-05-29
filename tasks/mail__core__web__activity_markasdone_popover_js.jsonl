@@ -4,3 +4,4 @@
 {"kind":"event","ts":"2026-05-29T13:34:01Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T13:34:01Z","actor":"orchestrator","event":"note","text":"reused 'pushed' status per orchestrator convention: commit ready, user handles the actual push. Local-test deferred to runbot-failure-driven retests."}
 {"kind":"event","ts":"2026-05-29T17:23:13Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

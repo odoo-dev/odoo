@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T15:20:33Z","actor":"orchestrator","event":"run","branch":"master-mail-call-participant-video-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mail-call-participant-video-js-tref-nby/odoo","commits":["bfcf58d673914caee729d8178414c8b3ccc6d573"],"summary":"migration committed. rootRef = signal(null); early-guard in _update(), inlined signal call in play(). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:20:33Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:23:23Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

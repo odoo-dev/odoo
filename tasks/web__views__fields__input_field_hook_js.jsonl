@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T17:16:18Z","actor":"orchestrator","event":"run","branch":"master-web-hooks-useinputfield-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-hooks-useinputfield-tref-nby/odoo","commits":["459d5f9f87247639b614df549c1f3708d2e82f4a"],"summary":"foundation fix: useInputField now accepts ref: <signal>; getEl() resolver replaces all 9 .el sites. Unblocks counted_quantity_widget + field widgets (char/text/numeric/email/url/phone)."}
 {"kind":"event","ts":"2026-05-29T17:16:18Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind": "event", "ts": "2026-05-29T17:51:12Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: branch committed locally only, not yet on odoo-dev/runbot"}

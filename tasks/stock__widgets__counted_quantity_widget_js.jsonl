@@ -8,3 +8,4 @@
 {"kind":"event","ts":"2026-05-29T17:19:32Z","actor":"orchestrator","event":"status","value":"blocked"}
 {"kind":"event","ts":"2026-05-29T17:25:55Z","actor":"orchestrator","event":"run","branch":"master-web-float-field-cluster-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-float-field-cluster-tref-nby/odoo","commits":["398f997d0ee"],"summary":"cluster migration committed: FloatField + counted_quantity_widget + mrp_should_consume. numpadDecimalRef on FloatField; subclasses reference parent's signal via this.numpadDecimalRef. Survey IntegerUpdateFlagField left for a separate IntegerField cluster."}
 {"kind":"event","ts":"2026-05-29T17:25:55Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind": "event", "ts": "2026-05-29T17:51:12Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: branch committed locally only, not yet on odoo-dev/runbot"}

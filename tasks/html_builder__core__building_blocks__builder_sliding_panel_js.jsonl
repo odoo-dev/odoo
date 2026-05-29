@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T15:37:16Z","actor":"orchestrator","event":"run","branch":"master-html-builder-builder-sliding-panel-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-html-builder-builder-sliding-panel-js-tref-nby/odoo","commits":["cc80d5c08a71371a31182efcb556920697dffe36"],"summary":"migration committed. slidingPanelRef + openButtonRef = signal(null); early-return in onMounted, null-safe everywhere else. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:37:16Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:21:37Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

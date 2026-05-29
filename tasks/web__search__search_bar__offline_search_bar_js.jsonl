@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T16:40:40Z","actor":"orchestrator","event":"run","branch":"master-web-offline-search-bar-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-offline-search-bar-js-tref-nby/odoo","commits":["1c72d840fd735451951043dac44b7d2ba341f630"],"summary":"migration committed. autofocusRef + rootRef = signal(null); useAutofocus({ref: autofocusRef}); preserved actual conditional this.env.config.disableSearchBarAutofocus || !this.props.autofocus. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T16:40:40Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:25:23Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

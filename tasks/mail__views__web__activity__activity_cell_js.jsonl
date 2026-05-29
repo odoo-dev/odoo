@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T13:43:47Z","actor":"orchestrator","event":"run","branch":"master-mail-activity-cell-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mail-activity-cell-js-tref-nby/odoo","commits":["d51d0abdc2a52557f24a80b0b241e8e22ff14c70"],"summary":"migration committed. No runbot batch → local test deferred. contentRef = signal(null); popover.open(contentRef())."}
 {"kind":"event","ts":"2026-05-29T13:43:47Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:23:30Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

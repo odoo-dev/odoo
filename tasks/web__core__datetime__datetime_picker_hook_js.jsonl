@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T17:19:22Z","actor":"orchestrator","event":"run","branch":"master-web-hooks-usedatetimepicker-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-hooks-usedatetimepicker-tref-nby/odoo","commits":["32a3b9bd964622f633f86bbd467f35e387b2eb0e"],"summary":"foundation fix: useDateTimePicker now accepts target:<signal> or target:Element in addition to string t-ref name. service.create() getTarget() resolver. Unblocks stock_account filters + datetime field widgets."}
 {"kind":"event","ts":"2026-05-29T17:19:22Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind": "event", "ts": "2026-05-29T17:51:12Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: branch committed locally only, not yet on odoo-dev/runbot"}

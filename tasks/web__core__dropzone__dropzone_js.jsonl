@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T17:19:04Z","actor":"orchestrator","event":"run","branch":"master-web-dropzone-signal-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-dropzone-signal-tref-nby/odoo","commits":["803b30db40368670865c507d205b9701cdad46d5"],"summary":"foundation fix: Dropzone setup() resolver accepts signal callable via this.props.ref. useCustomDropzone shim already had getTargetEl. Unblocks discuss_content + chatter + chat_window + meeting_chat."}
 {"kind":"event","ts":"2026-05-29T17:19:04Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind": "event", "ts": "2026-05-29T17:51:12Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: branch committed locally only, not yet on odoo-dev/runbot"}

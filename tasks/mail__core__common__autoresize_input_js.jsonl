@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T16:09:32Z","actor":"orchestrator","event":"run","branch":"master-mail-autoresize-input-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mail-autoresize-input-js-tref-nby/odoo","commits":["d60cbc11d217d1f2017ef5e8a1e880d34fd5b3a6"],"summary":"migration committed. inputRef = signal(null); useAutoresize accepts signal directly; 4 .el sites converted. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T16:09:32Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:22:48Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

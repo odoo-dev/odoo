@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T17:04:25Z","actor":"orchestrator","event":"run","branch":"master-web-graph-renderer-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-graph-renderer-js-tref-nby/odoo","commits":["3d1849fd4856152f55e0d14ba2ce913eb08359e5"],"summary":"migration committed. 3 refs (root/canvas/container) = signal(null); 13 .el sites across customTooltip/onLegendHover/onLegendLeave/renderChart converted with local-bound early-guards. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T17:04:25Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind": "event", "ts": "2026-05-29T17:51:12Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: branch committed locally only, not yet on odoo-dev/runbot"}

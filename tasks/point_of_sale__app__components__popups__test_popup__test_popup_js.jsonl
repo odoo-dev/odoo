@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:35:11Z","actor":"orchestrator","event":"run","branch":"master-point-of-sale-test-popup-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-point-of-sale-test-popup-js-tref-nby/odoo","commits":["136e89d8257ab144cbef53031116f978a9070c93"],"summary":"migration committed. dialogRef = signal(null); effect body+dep array+appendChild all converted. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:35:11Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:23:48Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

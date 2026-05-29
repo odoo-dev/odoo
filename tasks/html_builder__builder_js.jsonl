@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:04:36Z","actor":"orchestrator","event":"run","branch":"master-html-builder-builder-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-html-builder-builder-js-tref-nby/odoo","commits":["23b8a2bdeb5c4d7605c0d4108b0ba01802ccd495"],"summary":"migration committed. builderSidebarRef = signal(null); .el read inside on_will_save_handlers (post-mount). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:04:36Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:21:30Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

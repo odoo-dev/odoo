@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T15:32:50Z","actor":"orchestrator","event":"run","branch":"master-web-barcode-video-scanner-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-barcode-video-scanner-js-tref-nby/odoo","commits":["04a5ac0cbf679144c19884fff5e46607e3d703bc"],"summary":"migration committed. videoPreviewRef = signal(null); early-guard in onMounted, in-place calls in detectCode/addZoomSlider, signal call in polling loop. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:32:50Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:24:29Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T14:40:30Z","actor":"orchestrator","event":"run","branch":"master-html-editor-powerbox-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-html-editor-powerbox-js-tref-nby/odoo","commits":["fbe2cbc117c8bdabb987d144f6da70827fa24900"],"summary":"migration committed. local ref promoted to class field rootRef = signal(null); onPatched + dep array both null-safe. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:40:30Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T17:22:26Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}

@@ -4,3 +4,4 @@
 {"kind":"event","ts":"2026-05-29T15:18:35Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T15:18:35Z","actor":"orchestrator","event":"note","text":"This commit ONLY touches props.iframeRef in theme_selector.js. The local this.themeSelectorWrapperRef = useRef(\"themeSelectorWrapper\") is still on the compat path. If wave wants to fully migrate theme_selector.js, a follow-up commit on the same branch should also migrate that local ref."}
 {"kind":"event","ts":"2026-05-29T17:23:37Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
+{"kind": "event", "ts": "2026-05-29T17:51:29Z", "actor": "orchestrator", "event": "status", "value": "to_check_with_ci", "note": "reclassified from pushed: runbot has no batch for branch \u2192 not actually on odoo-dev"}
