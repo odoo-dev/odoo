@@ -770,6 +770,26 @@ class MrpBomLine(models.Model):
             'view_mode': 'form',
         }
 
+    def action_unfold_bom_lines(self):
+        """Open all descendant BoM lines of the selected BoM line(s)."""
+        pending_bom_lines = self
+        all_bom_lines = self.env['mrp.bom.line']
+
+        while pending_bom_lines:
+            all_bom_lines |= pending_bom_lines
+            child_bom_lines = pending_bom_lines.filtered(
+                lambda line: line.child_bom_id and line.child_bom_id.type == 'phantom',
+            ).child_line_ids
+            pending_bom_lines = child_bom_lines - all_bom_lines
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'BoM Lines',
+            'res_model': 'mrp.bom.line',
+            'views': [(self.env.ref('mrp.mrp_bom_line_view_list').id, 'list')],
+            'domain': [('id', 'in', all_bom_lines.ids)],
+        }
+
     # -------------------------------------------------------------------------
     # CATALOG
     # -------------------------------------------------------------------------
