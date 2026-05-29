@@ -1,5 +1,5 @@
-import { useExternalListener, useLayoutEffect, useRef } from "@web/owl2/utils";
-import { Component, proxy } from "@odoo/owl";
+import { useExternalListener, useLayoutEffect } from "@web/owl2/utils";
+import { Component, proxy, signal } from "@odoo/owl";
 
 export class MobileTablePicker extends Component {
     static template = "html_editor.MobileTablePicker";
@@ -11,20 +11,21 @@ export class MobileTablePicker extends Component {
         },
     };
 
+    rowCountRef = signal(null);
+    columnCountRef = signal(null);
+
     setup() {
         this.state = proxy({
             rowCount: 3,
             columnCount: 3,
         });
-        this.rowCountRef = useRef("rowCount");
-        this.columnCountRef = useRef("columnCount");
         useLayoutEffect(
             (el) => {
                 if (el) {
                     el.focus();
                 }
             },
-            () => [this.rowCountRef.el]
+            () => [this.rowCountRef()]
         );
         useExternalListener(
             this.props.editable.ownerDocument,
@@ -50,8 +51,14 @@ export class MobileTablePicker extends Component {
     }
 
     updateSize() {
-        this.state.rowCount = parseInt(this.rowCountRef.el.value);
-        this.state.columnCount = parseInt(this.columnCountRef.el.value);
+        const rowEl = this.rowCountRef();
+        const colEl = this.columnCountRef();
+        if (rowEl) {
+            this.state.rowCount = parseInt(rowEl.value);
+        }
+        if (colEl) {
+            this.state.columnCount = parseInt(colEl.value);
+        }
     }
 
     insertTable() {
