@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T13:49:12Z","actor":"orchestrator","event":"run","branch":"master-project-todo-todo-chatter-panel-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-project-todo-todo-chatter-panel-js-tref-nby/odoo","commits":["5c07e26f9bb68fefa3860f4c832311d4f8ddde4b"],"summary":"migration committed. rootRef = signal(null); ()?.parentElement?.classList.toggle. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T13:49:12Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:24:22Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

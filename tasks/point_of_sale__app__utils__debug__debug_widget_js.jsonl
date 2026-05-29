@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:56:12Z","actor":"orchestrator","event":"run","branch":"master-point-of-sale-debug-widget-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-point-of-sale-debug-widget-js-tref-nby/odoo","commits":["44f1d6e153f578448a5064152d15f8e4dd37f458"],"summary":"migration committed. importOrderInputRef = signal(null); onMounted+onWillDestroy use local el via signal call. id attribute on hidden file input kept intact (separate from t-ref). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:56:12Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:23:54Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:19:40Z","actor":"orchestrator","event":"run","branch":"master-web-property-definition-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-property-definition-js-tref-nby/odoo","commits":["f9209e062118191fa018dbe58b93c40c59294ad4"],"summary":"migration committed. propertyDefinitionRef = signal(null); ()?.querySelectorAll. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:19:40Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:25:45Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

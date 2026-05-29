@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T16:40:40Z","actor":"orchestrator","event":"run","branch":"master-web-offline-search-bar-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-offline-search-bar-js-tref-nby/odoo","commits":["1c72d840fd735451951043dac44b7d2ba341f630"],"summary":"migration committed. autofocusRef + rootRef = signal(null); useAutofocus({ref: autofocusRef}); preserved actual conditional this.env.config.disableSearchBarAutofocus || !this.props.autofocus. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T16:40:40Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:25:23Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

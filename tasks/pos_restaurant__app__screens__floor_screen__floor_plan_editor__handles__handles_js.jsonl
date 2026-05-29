@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T15:47:01Z","actor":"orchestrator","event":"run","branch":"master-pos-restaurant-floor-handles-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-pos-restaurant-floor-handles-js-tref-nby/odoo","commits":["6bed05ad7b1437b7ca9d290f4201a0d2a5cef57c"],"summary":"migration committed. root = signal(null); existing get el() getter body switched to return this.root(); all this.el consumers untouched. canvasRef.el (foreign ref) left alone. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:47:01Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:24:01Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

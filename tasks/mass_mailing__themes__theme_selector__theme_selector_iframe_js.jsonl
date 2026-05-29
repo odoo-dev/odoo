@@ -6,3 +6,4 @@
 {"kind":"event","ts":"2026-05-29T15:15:59Z","actor":"orchestrator","event":"problem","note":"Re-dispatch as cluster: theme_selector_iframe.{js,xml} + theme_selector.js (change this.props.iframeRef.el → this.props.iframeRef())."}
 {"kind":"event","ts":"2026-05-29T15:18:35Z","actor":"orchestrator","event":"run","branch":"master-mass-mailing-theme-selector-iframe-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mass-mailing-theme-selector-iframe-js-tref-nby/odoo","commits":["c7532434816c8431ef912c90574e4de1da0b86bf"],"summary":"cluster migration committed: iframe + theme_selector together. iframeRef = signal(null); 4 .el sites + parent's props.iframeRef.el converted. Prop validator Object→Function. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:18:35Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:23:36Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

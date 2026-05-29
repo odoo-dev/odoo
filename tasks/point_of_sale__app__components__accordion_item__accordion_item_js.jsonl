@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T13:36:51Z","actor":"orchestrator","event":"run","branch":"master-point-of-sale-accordion-item-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-point-of-sale-accordion-item-js-tref-nby/odoo","commits":["dc2e169d99e5ae76790785c54f07dec354912ccd"],"summary":"migration committed. No runbot batch yet for fresh branch → local test deferred. useLayoutEffect dep array did not read .el so no dep change needed."}
 {"kind":"event","ts":"2026-05-29T13:36:51Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T13:36:51Z","actor":"orchestrator","event":"note","text":"goa+branch worktree-add failed because master-tref-integration is checked out elsewhere; agent fell back to git worktree add from the sha. Update goa CLI or template to add from sha by default."}
+{"kind":"event","ts":"2026-05-29T17:23:41Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

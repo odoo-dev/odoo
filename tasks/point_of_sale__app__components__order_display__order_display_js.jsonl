@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:21:14Z","actor":"orchestrator","event":"run","branch":"master-point-of-sale-order-display-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-point-of-sale-order-display-js-tref-nby/odoo","commits":["d43c9bec685e506c203997fe5df37e59419331b6"],"summary":"migration committed. scrollableRef = signal(null); early-return + el.querySelector()?.scrollIntoView(). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:21:14Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:23:43Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

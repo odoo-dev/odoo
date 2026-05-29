@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:47:11Z","actor":"orchestrator","event":"run","branch":"master-web-domain-selector-dialog-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-domain-selector-dialog-js-tref-nby/odoo","commits":["e6a63a7a223f946d20856fb3bf19d99cdb846fbd"],"summary":"migration committed. confirmButtonRef = signal(null); early-guard pattern in onConfirm. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:47:11Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:24:43Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

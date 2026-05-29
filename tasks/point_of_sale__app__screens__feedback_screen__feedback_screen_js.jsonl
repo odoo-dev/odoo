@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T15:26:46Z","actor":"orchestrator","event":"run","branch":"master-point-of-sale-feedback-screen-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-point-of-sale-feedback-screen-js-tref-nby/odoo","commits":["e8404b5ebe338847a272376665274da3280a372c"],"summary":"migration committed. containerRef + amountRef = signal(null); scaleText() early-guard pattern (agent caught 3rd .el usage). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:26:46Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:23:52Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

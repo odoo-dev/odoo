@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T13:50:44Z","actor":"orchestrator","event":"run","branch":"master-web-file-handler-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-file-handler-js-tref-nby/odoo","commits":["d4b6724204cf1d6cde301d12ca7f3f3636825d90"],"summary":"migration committed. fileInputRef = signal(null); ()?.click(). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T13:50:44Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:25:31Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

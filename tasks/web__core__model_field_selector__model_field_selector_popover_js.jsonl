@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:50:25Z","actor":"orchestrator","event":"run","branch":"master-web-model-field-selector-popover-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-model-field-selector-popover-js-tref-nby/odoo","commits":["ad1513c08d033401234dc1866adf3cca13876835"],"summary":"migration committed. Local rootRef promoted to class field signal(null); both useLayoutEffect closures null-safe. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:50:25Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:24:50Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

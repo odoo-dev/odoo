@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:35:11Z","actor":"orchestrator","event":"run","branch":"master-point-of-sale-test-popup-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-point-of-sale-test-popup-js-tref-nby/odoo","commits":["136e89d8257ab144cbef53031116f978a9070c93"],"summary":"migration committed. dialogRef = signal(null); effect body+dep array+appendChild all converted. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:35:11Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:23:48Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:58:11Z","actor":"orchestrator","event":"run","branch":"master-web-notification-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-notification-js-tref-nby/odoo","commits":["8a89b610075ac4bbfa0045f3216506db5e70eb04"],"summary":"migration committed. autocloseProgressRef = signal(null); early-guard for freeze() + animation tick. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:58:11Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:24:57Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

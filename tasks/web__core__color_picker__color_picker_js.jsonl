@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T16:23:43Z","actor":"orchestrator","event":"run","branch":"master-web-color-picker-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-color-picker-js-tref-nby/odoo","commits":["0a57c06406ce23cf59c1722f69f7830c38b536aa"],"summary":"migration committed (component-internal ref only). rootRef = signal(null); useRef import kept because useColorPicker helper still uses it for legacy callers. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T16:23:43Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:24:39Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T13:54:23Z","actor":"orchestrator","event":"run","branch":"master-web-journal-dashboard-graph-field-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-journal-dashboard-graph-field-js-tref-nby/odoo","commits":["8915230cc41b58576180c3a699b35bd06ea653c0"],"summary":"migration committed. canvasRef = signal(null); new Chart(canvasRef(), config) inside useLayoutEffect → guaranteed mounted, no nullable. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T13:54:23Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:25:39Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T13:47:28Z","actor":"orchestrator","event":"run","branch":"master-mrp-mrp-bom-overview-control-panel-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mrp-mrp-bom-overview-control-panel-js-tref-nby/odoo","commits":["a5b4430212ba9b6fb2f58044a52c6ddd14249dbd"],"summary":"migration committed. quantityRef hoisted out of conditional (signal is cheap); onMounted focus guarded by original if. No runbot batch → local test deferred."}
 {"kind":"event","ts":"2026-05-29T13:47:28Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:23:39Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

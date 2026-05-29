@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:17:48Z","actor":"orchestrator","event":"run","branch":"master-web-form-status-indicator-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-web-form-status-indicator-js-tref-nby/odoo","commits":["3e027d72cb0c69d26feceaca30baa81964287c83"],"summary":"migration committed. saveButtonRef = signal(null); early-return pattern in effect. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:17:48Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:25:54Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
