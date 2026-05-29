@@ -1,7 +1,7 @@
-import { useRef, useState } from "@web/owl2/utils";
+import { useState } from "@web/owl2/utils";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { Component } from "@odoo/owl";
+import { Component, signal } from "@odoo/owl";
 
 export class HierarchyNavbar extends Component {
     static template = "website.hierarchy_navbar";
@@ -16,8 +16,9 @@ export class HierarchyNavbar extends Component {
         searchView: Function,
     };
 
+    searchInputRef = signal(null);
+
     setup() {
-        this.searchInput = useRef("search");
         this.websiteNamesState = useState(Array.from(this.props.websites.names));
     }
 
@@ -42,6 +43,6 @@ export class HierarchyNavbar extends Component {
      * @param {Event} event
      */
     onInputClick(event) {
-        this.props.searchView(this.searchInput.el.value, !event.shiftKey);
+        this.props.searchView(this.searchInputRef()?.value, !event.shiftKey);
     }
 }
