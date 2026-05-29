@@ -4,3 +4,4 @@
 {"kind":"event","ts":"2026-05-29T12:37:39Z","actor":"orchestrator","event":"status","value":"blocked"}
 {"kind":"event","ts":"2026-05-29T12:37:39Z","actor":"orchestrator","event":"depends_on","set":["web__views__fields__datetime__datetime_field_js"]}
 {"kind":"event","ts":"2026-05-29T12:37:39Z","actor":"orchestrator","event":"problem","note":"Migrate datetime_field.js + datetime_field.xml + list_datetime_field.js together as a cluster. useAutoresize is already signal-aware on this base."}
+{"kind":"event","ts":"2026-05-29T18:54:07Z","actor":"orchestrator","event":"status","value":"blocked","note":"still blocked: parent's start-date/end-date inputs are wired internally by useDateTimePicker, not exposed as a class-field signal. Same dependency."}
