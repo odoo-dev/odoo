@@ -27,8 +27,13 @@ import { DateTimePickerPopover } from "./datetime_picker_popover";
  *  onClose?: () => any;
  *  pickerProps?: DateTimePickerProps;
  *  showSeconds?: boolean;
- *  target: HTMLElement | string;
+ *  target: HTMLElement | string | (() => HTMLElement | null);
  * }} DateTimePickerServiceParams
+ *
+ * `target` accepts three shapes (Owl 2 → Owl 3 migration):
+ *  - a string: the name of a `t-ref` on the current component (legacy);
+ *  - an Owl 3 signal ref: a callable returning the current element;
+ *  - a raw `HTMLElement` (only valid when `useOwlHooks` is false).
  */
 
 /**
@@ -154,7 +159,10 @@ export const datetimePickerService = {
                 }
 
                 function getTarget() {
-                    return targetRef ? targetRef.el : params.target;
+                    if (targetRef) {
+                        return typeof targetRef === "function" ? targetRef() : targetRef.el;
+                    }
+                    return typeof params.target === "function" ? params.target() : params.target;
                 }
 
                 function initInputs(...inputs) {
@@ -509,12 +517,14 @@ export const datetimePickerService = {
                 let shouldFocus = false;
                 /** @type {Partial<DateTimePickerProps>} */
                 let stringProps = {};
-                /** @type {OwlRef | null} */
+                /** @type {OwlRef | (() => HTMLElement | null) | null} */
                 let targetRef = null;
 
                 if (options?.useOwlHooks) {
                     if (typeof params.target === "string") {
                         targetRef = useRef(params.target);
+                    } else if (typeof params.target === "function") {
+                        targetRef = params.target;
                     }
 
                     onWillRender(function computeBasePickerProps() {
