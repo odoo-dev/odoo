@@ -16,7 +16,7 @@ from odoo.tools import SQL
 from ...tools import jwt, discuss
 
 _logger = logging.getLogger(__name__)
-SFU_MODE_THRESHOLD = 3
+SFU_MODE_THRESHOLD = 2
 
 
 class DiscussChannelMember(models.Model):
