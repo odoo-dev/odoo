@@ -549,14 +549,20 @@ export function useSequential() {
     };
 }
 
-export function useDiscussSystray() {
+export function useDiscussSystray(dropdownState) {
     const ui = useService("ui");
-    onMounted(() => {
-        document.body.classList.add("o-mail-use-discuss-systray");
-    });
-    onWillUnmount(() => {
-        document.body.classList.remove("o-mail-use-discuss-systray");
-    });
+    if (dropdownState) {
+        useEffect(
+            (isOpen) => {
+                if (isOpen) {
+                    document.body.classList.add("o-mail-discuss-systray-menu-open");
+                } else {
+                    document.body.classList.remove("o-mail-discuss-systray-menu-open");
+                }
+            },
+            () => [dropdownState.isOpen]
+        );
+    }
     return {
         class: "o-mail-DiscussSystray-class",
         get contentClass() {
