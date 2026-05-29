@@ -15,3 +15,4 @@
 {"kind": "event", "ts": "2026-05-27T20:20:33.352783+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind": "event", "ts": "2026-05-27T21:53:01Z", "actor": "orchestrator", "event": "local_test", "result": "pass", "note": "Fix held (4b464ca); local m2m/o2m/x2many view-button suites PASS."}
 {"kind":"event","ts":"2026-05-29T17:26:00Z","actor":"runbot-cache","event":"runbot_status","value":"success","batch_id":2550177}
+{"kind": "event", "ts": "2026-05-29T17:53:35Z", "actor": "orchestrator", "event": "status", "value": "done", "note": "reclassified from pushed: latest runbot batch was success"}

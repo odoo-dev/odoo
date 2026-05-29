@@ -17,3 +17,4 @@
 {"kind": "event", "ts": "2026-05-27T22:33:30Z", "actor": "orchestrator", "event": "local_test", "result": "pass", "note": "useToolbarDropdownFocus made signal-aware too (shared resolveRefEl); amended sha 0c7b25b9cbc7; @html_editor/toolbar Escape tests PASS; force-pushed. Unblocks the 7 toolbar selectors."}
 {"kind": "event", "ts": "2026-05-27T22:33:30Z", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind":"event","ts":"2026-05-29T17:22:44Z","actor":"runbot-cache","event":"runbot_status","value":"success","batch_id":2550269}
+{"kind": "event", "ts": "2026-05-29T17:53:35Z", "actor": "orchestrator", "event": "status", "value": "done", "note": "reclassified from pushed: latest runbot batch was success"}

@@ -11,3 +11,4 @@
 {"kind": "event", "ts": "2026-05-27T22:33:30Z", "actor": "orchestrator", "event": "local_test", "result": "pass", "note": "useHover made signal-aware (.set discriminator vs useChildRef callable); amended sha 23e13995eae6; @mail/chat_bubble hover suite PASS; force-pushed."}
 {"kind": "event", "ts": "2026-05-27T22:33:30Z", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind":"event","ts":"2026-05-29T17:23:28Z","actor":"runbot-cache","event":"runbot_status","value":"success","batch_id":2550270}
+{"kind": "event", "ts": "2026-05-29T17:53:35Z", "actor": "orchestrator", "event": "status", "value": "done", "note": "reclassified from pushed: latest runbot batch was success"}

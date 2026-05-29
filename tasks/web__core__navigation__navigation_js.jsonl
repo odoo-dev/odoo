@@ -14,3 +14,4 @@
 {"kind": "event", "ts": "2026-05-27T20:20:33.352783+00:00", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind": "event", "ts": "2026-05-27T21:53:01Z", "actor": "orchestrator", "event": "local_test", "result": "pass", "note": "Re-fixed (sha 25d4b29c2340): resolver treats only bare fns w/o .el as signals; useChildRef .el getter made null-safe in hooks.js. Local hoot select_menu/dropdown/search_bar/base_import PASS. Pushed."}
 {"kind":"event","ts":"2026-05-29T17:24:52Z","actor":"runbot-cache","event":"runbot_status","value":"success","batch_id":2550244}
+{"kind": "event", "ts": "2026-05-29T17:53:35Z", "actor": "orchestrator", "event": "status", "value": "done", "note": "reclassified from pushed: latest runbot batch was success"}
