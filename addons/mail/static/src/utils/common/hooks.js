@@ -551,6 +551,12 @@ export function useSequential() {
 
 export function useDiscussSystray() {
     const ui = useService("ui");
+    onMounted(() => {
+        document.body.classList.add("o-mail-use-discuss-systray");
+    });
+    onWillUnmount(() => {
+        document.body.classList.remove("o-mail-use-discuss-systray");
+    });
     return {
         class: "o-mail-DiscussSystray-class",
         get contentClass() {
