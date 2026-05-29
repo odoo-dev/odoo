@@ -7,7 +7,7 @@ import { formatFloat } from "../formatters";
 import { parseFloat } from "../parsers";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component } from "@odoo/owl";
+import { Component, signal } from "@odoo/owl";
 
 export class FloatField extends Component {
     static template = "web.FloatField";
@@ -30,16 +30,18 @@ export class FloatField extends Component {
         trailingZeros: true,
     };
 
+    numpadDecimalRef = signal(null);
+
     setup() {
         this.state = useState({
             hasFocus: false,
         });
         this.inputRef = useInputField({
             getValue: () => this.formattedValue,
-            refName: "numpadDecimal",
+            ref: this.numpadDecimalRef,
             parse: (v) => this.parse(v),
         });
-        useNumpadDecimal();
+        useNumpadDecimal(this.numpadDecimalRef);
     }
 
     onFocusIn() {
