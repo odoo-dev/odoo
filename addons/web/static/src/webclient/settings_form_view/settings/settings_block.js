@@ -1,7 +1,7 @@
-import { onWillRender, useChildSubEnv, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
+import { onWillRender, useChildSubEnv, useLayoutEffect, useState } from "@web/owl2/utils";
 import { HighlightText } from "../highlight_text/highlight_text";
 
-import { Component } from "@odoo/owl";
+import { Component, signal } from "@odoo/owl";
 import { normalize } from "@web/core/l10n/utils";
 
 export class SettingsBlock extends Component {
@@ -15,6 +15,9 @@ export class SettingsBlock extends Component {
         slots: { type: Object, optional: true },
         class: { type: String, optional: true },
     };
+    settingsContainerRef = signal(null);
+    settingsContainerTitleRef = signal(null);
+    settingsContainerTipRef = signal(null);
     setup() {
         this.state = useState({
             search: this.env.searchState,
@@ -25,22 +28,23 @@ export class SettingsBlock extends Component {
         useChildSubEnv({
             showAllContainer: this.showAllContainerState,
         });
-        this.settingsContainerRef = useRef("settingsContainer");
-        this.settingsContainerTitleRef = useRef("settingsContainerTitle");
-        this.settingsContainerTipRef = useRef("settingsContainerTip");
         useLayoutEffect(
             () => {
+                const containerEl = this.settingsContainerRef();
+                if (!containerEl) {
+                    return;
+                }
                 const force =
                     this.state.search.value &&
                     !normalize([this.props.title, this.props.tip].join()).includes(
                         this.state.search.value
                     ) &&
-                    !this.settingsContainerRef.el.querySelector(
+                    !containerEl.querySelector(
                         ".o_setting_box.o_searchable_setting"
                     );
                 this.toggleContainer(force);
             },
-            () => [this.state.search.value]
+            () => [this.state.search.value, this.settingsContainerRef()]
         );
         onWillRender(() => {
             if (
@@ -55,12 +59,17 @@ export class SettingsBlock extends Component {
         });
     }
     toggleContainer(force) {
-        if (this.settingsContainerTitleRef.el) {
-            this.settingsContainerTitleRef.el.classList.toggle("d-none", force);
+        const titleEl = this.settingsContainerTitleRef();
+        if (titleEl) {
+            titleEl.classList.toggle("d-none", force);
         }
-        if (this.settingsContainerTipRef.el) {
-            this.settingsContainerTipRef.el.classList.toggle("d-none", force);
+        const tipEl = this.settingsContainerTipRef();
+        if (tipEl) {
+            tipEl.classList.toggle("d-none", force);
         }
-        this.settingsContainerRef.el.classList.toggle("d-none", force);
+        const containerEl = this.settingsContainerRef();
+        if (containerEl) {
+            containerEl.classList.toggle("d-none", force);
+        }
     }
 }
