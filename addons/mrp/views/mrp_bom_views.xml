@@ -388,5 +388,16 @@
                 }
             </field>
         </record>
+
+        <record id="action_unfold_bom_lines" model="ir.actions.server">
+            <field name="name">Unfold</field>
+            <field name="model_id" ref="mrp.model_mrp_bom_line"/>
+            <field name="binding_model_id" ref="mrp.model_mrp_bom_line"/>
+            <field name="state">code</field>
+            <field name="code">
+                if records:
+                    action = records.action_unfold_bom_lines()
+            </field>
+        </record>
     </data>
 </odoo>
