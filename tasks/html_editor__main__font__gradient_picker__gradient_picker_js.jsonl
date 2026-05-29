@@ -8,3 +8,4 @@
 {"kind": "event", "ts": "2026-05-28T05:09:05.579510+00:00", "actor": "orchestrator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:08:47Z","actor":"orchestrator","event":"run","branch":"master-html-editor-gradient-picker-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-html-editor-gradient-picker-js-tref-nby/odoo","commits":["487fdca7bd57c5c576ea3c1d61e2ba3d7aced3fd"],"summary":"migration committed. knobRef = signal(null); knobEl = knobRef() in handler. Reset prior WIP c3826efca4f to integration head before applying. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:08:47Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:22:08Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

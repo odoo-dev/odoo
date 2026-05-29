@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:54:00Z","actor":"orchestrator","event":"run","branch":"master-api-doc-doc-sidebar-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-api-doc-doc-sidebar-js-tref-nby/odoo","commits":["b4cf9a3f3510e6de4bfad760a4530aeab7b9b601"],"summary":"migration committed. containerRef = signal(null); effect+dep+early-guard for scrollTop assignment. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:54:00Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:21:16Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T14:00:11Z","actor":"orchestrator","event":"run","branch":"master-event-event-registration-summary-dialog-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-event-event-registration-summary-dialog-js-tref-nby/odoo","commits":["4d536650cf6b8fb56a6e5dc52676e49c255cf5cc"],"summary":"migration committed. continueButtonRef = signal(null); ()?.focus(). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T14:00:11Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:21:25Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

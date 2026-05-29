@@ -6,3 +6,4 @@
 {"kind":"event","ts":"2026-05-29T12:50:53Z","actor":"orchestrator","event":"problem","note":"ENV-LEVEL: cannot push — git@github.com publickey denied. /root/.ssh has no private key; ssh-agent not running. Local commit 2ee25f389cc is ready on branch master-hr-contract-template-button-js-tref-nby. Same env issue will block every remaining sub-agent's push."}
 {"kind":"event","ts":"2026-05-29T12:55:52Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T12:55:52Z","actor":"orchestrator","event":"note","text":"reclassified blocked→pushed: user takes over the actual git push. Commit 2ee25f389cc ready on branch."}
+{"kind":"event","ts":"2026-05-29T17:21:26Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

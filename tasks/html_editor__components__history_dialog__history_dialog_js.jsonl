@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T15:00:11Z","actor":"orchestrator","event":"run","branch":"master-html-editor-history-dialog-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-html-editor-history-dialog-js-tref-nby/odoo","commits":["9b7863f3fe265bb33bd62e84ad8647e51a0493e1"],"summary":"migration committed. listboxRef = signal(null); early-guard pattern in navigateRevisions. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:00:11Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:21:44Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

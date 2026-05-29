@@ -4,3 +4,4 @@
 {"kind":"event","ts":"2026-05-29T12:55:41Z","actor":"orchestrator","event":"local_test","result":"pass","note":"/web:WebSuite.test_unit_desktop[@hr_attendance] selected=2, 0 failed, 0 errors"}
 {"kind":"event","ts":"2026-05-29T12:55:41Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T12:55:41Z","actor":"orchestrator","event":"note","text":"status=pushed reused per orchestrator convention: migration complete + green locally + commit ready. User will perform the actual git push."}
+{"kind":"event","ts":"2026-05-29T17:21:28Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

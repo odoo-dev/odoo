@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T13:38:29Z","actor":"orchestrator","event":"run","branch":"master-html-builder-anchor-dialog-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-html-builder-anchor-dialog-js-tref-nby/odoo","commits":["1bfbd78631029c53322eacdddc6b02fcaa030a17"],"summary":"migration committed. No runbot batch → local test deferred. Self-contained: inputRef consumed via this.inputRef()?.value only."}
 {"kind":"event","ts":"2026-05-29T13:38:29Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:21:32Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
