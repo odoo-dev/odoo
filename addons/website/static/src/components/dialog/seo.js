@@ -1,4 +1,4 @@
-import { reactive, useLayoutEffect, useRef, useState } from "@web/owl2/utils";
+import { reactive, useLayoutEffect, useState } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { deduceURLfromText } from "@html_editor/main/link/utils";
 import { pyToJsLocale, jsToPyLocale } from "@web/core/l10n/utils";
@@ -11,7 +11,7 @@ import { CheckBox } from "@web/core/checkbox/checkbox";
 import { MediaDialog } from "@html_editor/main/media/media_dialog/media_dialog";
 import { getMimetype } from "@html_editor/utils/image";
 import { WebsiteDialog } from "./dialog";
-import { Component, onMounted, onWillStart } from "@odoo/owl";
+import { Component, onMounted, onWillStart, signal } from "@odoo/owl";
 import wUtils from "@website/js/utils";
 
 // This replaces \b, because accents(e.g. à, é) are not seen as word boundaries.
@@ -561,10 +561,12 @@ export class TitleDescription extends Component {
         SEOPreview,
     };
 
+    autofocusRef = signal(null);
+
     setup() {
         this.seoContext = useState(seoContext);
         this.website = useService("website");
-        useAutofocus();
+        useAutofocus({ ref: this.autofocusRef });
 
         this.state = useState({
             language: this.getLanguage(),
@@ -678,9 +680,10 @@ export class BrokenLink extends Component {
         link: Object,
     };
 
+    urlInputRef = signal(null);
+
     setup() {
         this.website = useService("website");
-        this.urlInputRef = useRef("url-input");
         this.link = this.props.link;
 
         this.state = useState({
@@ -706,7 +709,7 @@ export class BrokenLink extends Component {
                 );
                 return () => unmountAutocompleteWithPages();
             },
-            () => [this.urlInputRef.el]
+            () => [this.urlInputRef()]
         );
     }
 
