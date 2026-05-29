@@ -3,7 +3,7 @@
     <t t-name="spreadsheet.NumericFilterValue">
         <input
             type="text"
-            t-custom-ref="numpadDecimal"
+            t-ref="this.inputRef"
             class="o_input o-global-filter-numeric-value text-truncate"
             t-on-change="(e) => this.onChange(e.target.value)"
             inputmode="decimal"

@@ -1,7 +1,6 @@
 /** @ts-check */
 
-import { useRef } from "@web/owl2/utils";
-import { Component, onMounted, onWillUpdateProps } from "@odoo/owl";
+import { Component, onMounted, onWillUpdateProps, signal } from "@odoo/owl";
 import { useNumpadDecimal } from "@web/views/fields/numpad_decimal_hook";
 import { parseFloat } from "@web/views/fields/parsers";
 
@@ -12,17 +11,20 @@ export class NumericFilterValue extends Component {
         value: { type: [Number, String], optional: true },
     };
 
+    inputRef = signal(null);
+
     setup() {
-        useNumpadDecimal();
-        this.inputRef = useRef("numpadDecimal");
+        useNumpadDecimal(this.inputRef);
         onWillUpdateProps((newProps) => {
-            if (document.activeElement !== this.inputRef.el && this.inputRef.el) {
-                this.inputRef.el.value = newProps.value || "";
+            const el = this.inputRef();
+            if (el && document.activeElement !== el) {
+                el.value = newProps.value || "";
             }
         });
         onMounted(() => {
-            if (this.inputRef.el) {
-                this.inputRef.el.value = this.props.value?.toString() || "";
+            const el = this.inputRef();
+            if (el) {
+                el.value = this.props.value?.toString() || "";
             }
         });
     }
@@ -45,8 +47,9 @@ export class NumericFilterValue extends Component {
         // doesn't re-render because the prop value hasn't changed. To ensure
         // the input reflects the correct state, we manually set the input
         // element's value to 0.
-        if (numericValue === 0 && this.inputRef?.el) {
-            this.inputRef.el.value = 0;
+        const el = this.inputRef();
+        if (numericValue === 0 && el) {
+            el.value = 0;
         }
     }
 }
