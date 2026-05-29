@@ -121,30 +121,59 @@ naming the callee.
 <SHARED BACKGROUND BLOCK>
 <RECIPE BLOCK>
 
-## Local test BEFORE pushing (postgres :5432, Chrome auto; http-port <PORT>)
+## Commit FIRST, then test only the runbot-failing tests (one at a time)
+
+The Bash tool times out at 10 min; the full `@<addon>` hoot suite often takes
+longer. Skip the full suite. Instead:
+
+### Step 1 — commit the migration immediately
+After applying the recipe and reading the diff, `git add` the assigned files
+and commit:
+  `[REF] <addon>: migrate <component> t-ref to Owl 3 signals`
+ending with: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
+**No `git push`** — orchestrator/user handles pushing.
+
+### Step 2 — query runbot for THIS branch's failing tests
+The branch name is `master-<NAME>-tref-nby`. Use:
+```
+bun --cwd /root/git/skill-runbot run src/cli.ts batches /runbot/rd-1 \
+    --search master-<NAME>-tref-nby --json
+```
+If the result is `[]`, the branch has no CI history yet — there is nothing to
+retest. **Skip Step 3, finish with LOCAL_TEST: deferred (no runbot batch).**
+
+If batches exist, take the newest. Pull failing tests:
+```
+bun --cwd /root/git/skill-runbot run src/cli.ts build-names <batch-id> --json
+bun --cwd /root/git/skill-runbot run src/cli.ts tests --batch <batch-id> \
+    --slot "<failing-slot>" --json
+```
+Build a list of failing test identifiers (suite + test name).
+
+### Step 3 — re-run each failing test locally, ONE AT A TIME
+For each failing test, run a narrow hoot invocation (port <PORT>, unique db):
 ```
 ./odoo-bin --stop-after-init \
   --addons-path "/root/git/odoo/worktrees/master-tref-claude/enterprise" \
-  -d <uniqdb> -i web --test-enable --http-port <PORT> \
-  --test-tags '/web:WebSuite.test_unit_desktop[@<addon>/<area>]'
+  -d <uniqdb_per_test> -i web,<addon> --test-enable --http-port <PORT> \
+  --test-tags '/web:WebSuite.test_unit_desktop[<test-identifier>]'
 ```
-- Confirm tests SELECTED count > 0; if 0, try a broader tag.
-- Verify any failure also fails on base (pre-existing noise).
-- Must PASS overall before pushing.
-- Use a UNIQUE db name; `dropdb` after.
+Confirm SELECTED count > 0, watch for pass/fail. `dropdb` after EACH test.
+Track which ones pass after your migration vs which still fail.
 
-## Commit when green — DO NOT PUSH
-`git add` the assigned files, commit
-  `[REF] <addon>: migrate <component> t-ref to Owl 3 signals`
-ending with: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
-**No `git push`.** The orchestrator/user handles pushing. Drop your test DB.
+Each narrow test should finish well under the 10-min Bash cap. If even one
+narrow test exceeds 10 min, that's a signal it's not actually narrow — refine
+the tag (`--test-tags '/web:WebSuite.test_unit_desktop[<addon>/<file>:<TestName>.test_<func>]'`).
 
 ## Report EXACTLY
 STATUS (committed/blocked/failed) /
 BRANCH /
 COMMIT (sha) /
 WORKTREE (absolute path) /
-LOCAL_TEST (suite + count + pass/fail) /
+RUNBOT_BATCH (id or "none") /
+RUNBOT_FAILING_TESTS (count) /
+LOCAL_TEST (per-test list: name + before-fix-runbot-status + after-fix-local-result; or "deferred (no runbot batch)") /
+STILL_FAILING (list of tests still failing after migration; expect empty if migration is correct) /
 PROBLEM (if any) /
 NEEDS_RERUN (yes/no, why)
 ```
