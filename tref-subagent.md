@@ -15,6 +15,39 @@ A sub-agent must **never** modify the compat layer, the `master-tref-claude` wor
 ## Shared background (always include in the sub-agent prompt)
 
 ```
+## You are one of many parallel sub-agents
+An orchestrator is migrating ~470 files in waves. Other sub-agents are working
+in sibling worktrees RIGHT NOW on different files. Foundation hooks
+(useNavigation, useToolbarDropdownFocus, useHover, useColorPicker, useTagNavigation,
+useForwardRefToParent, draggable/sortable core, etc.) have ALREADY been made
+signal-aware on `master-tref-integration` — that is your base branch. If your
+pre-check finds the file depends on a hook that is NOT signal-aware on this base,
+report `blocked` naming the callee (don't try to fix the hook yourself; the
+orchestrator dispatches foundation fixes separately).
+
+The orchestrator's bookkeeping lives at
+`/root/git/odoo/worktrees/master-tref-claude/odoo/tasks/` — READ-ONLY for you:
+  - `tasks/index.jsonl` — list of all tasks with current status (pending,
+    in_progress, pushed, done, blocked, failed). Use this to check whether a
+    related component you'd touch is already migrated, blocked, or pending.
+  - `tasks/<id>.jsonl` — per-task event log; line 1 is the task def
+    (path, related_files, worktree, branch); subsequent lines are events.
+You can `grep` or read these files freely; you MUST NOT modify them. If you
+need to know whether a sibling file is migrated, look it up here.
+
+## Sibling worktrees: read commits, do NOT edit
+The bare repo is shared, so EVERY task branch is visible from your worktree
+via `git branch -a` / `git log <branch>` / `git show <branch>:<path>`. Use this
+when you need to:
+  - confirm a foundation fix has actually landed (read the branch's commit),
+  - check what an in-flight peer migration changed,
+  - cherry-pick a commit your base needs but doesn't yet have (rare; only
+    when the orchestrator told you to combine two branches — e.g. a foundation
+    fix not yet folded into master-tref-integration):
+      `git -C <your-worktree> cherry-pick <sha-from-sibling-branch>`
+Never `cd` into another worktree to edit files there. Never `git -C` another
+worktree to commit. You ONLY have write access to your own worktree.
+
 ## Background: the Owl 2→3 bridge
 Odoo runs Owl 3 with a temporary compatibility layer at
 `addons/web/static/src/owl2/owl3_compatibility_layer.js` that shims
@@ -26,6 +59,9 @@ In this repo `useRef` is imported from `@web/owl2/utils` (not @odoo/owl).
 Native Owl 3 has no `useRef`.
 
 DO NOT modify the compat layer. DO NOT modify the master-tref-claude worktree.
+DO NOT modify the orchestrator's `tasks/` directory. DO NOT modify other
+sub-agents' worktrees. DO NOT `git push` — the orchestrator/user handles
+pushing; you commit locally only.
 
 ## Native Owl 3 ref API (what you migrate toward)
 - `import { signal } from "@odoo/owl"`.
@@ -62,8 +98,9 @@ Keep all existing `.el` callers working unchanged.
 ## Template A — Migrate a leaf component (1–2 files)
 
 ```
-Migrate ONE Odoo component to native Owl 3 signal refs, LOCAL-TEST, push
-ONLY if green. Keep the master-tref-claude worktree untouched.
+Migrate ONE Odoo component to native Owl 3 signal refs, LOCAL-TEST, COMMIT
+LOCALLY. DO NOT PUSH — the user/orchestrator handles pushing. Keep the
+master-tref-claude worktree untouched.
 
 ## Worktree (base = fixed integration)
 From `/root/git/odoo/worktrees/master-tref-claude/odoo` run:
@@ -96,18 +133,18 @@ naming the callee.
 - Must PASS overall before pushing.
 - Use a UNIQUE db name; `dropdb` after.
 
-## Push when green
+## Commit when green — DO NOT PUSH
 `git add` the assigned files, commit
   `[REF] <addon>: migrate <component> t-ref to Owl 3 signals`
 ending with: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
-Then `git push odoo-dev master-<NAME>-tref-nby`. Drop DB.
+**No `git push`.** The orchestrator/user handles pushing. Drop your test DB.
 
 ## Report EXACTLY
-STATUS (pushed/blocked/failed) /
+STATUS (committed/blocked/failed) /
 BRANCH /
 COMMIT (sha) /
+WORKTREE (absolute path) /
 LOCAL_TEST (suite + count + pass/fail) /
-PUSHED (yes/no) /
 PROBLEM (if any) /
 NEEDS_RERUN (yes/no, why)
 ```
@@ -156,20 +193,20 @@ still pass legacy `.el` refs, so the suite proves backward compatibility):
 ```
 Confirm count>0, must PASS. Drop DB.
 
-## Push when green
+## Commit when green — DO NOT PUSH
 `git add` the changed files, commit
   `[REF] <addon>: make <hook> accept signal refs (Owl 3, backward-compatible)`
 ending with: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
-Then `git push odoo-dev master-<NAME>-tref-nby`.
+**No `git push`.** The orchestrator/user handles pushing.
 
 ## Report EXACTLY
-STATUS (fixed/blocked/failed) /
+STATUS (committed/blocked/failed) /
 BRANCH /
 COMMIT (sha) /
+WORKTREE (absolute path) /
 FILES changed /
 NORMALIZATION (what + where) /
 LOCAL_TEST (suites + counts + pass/fail) /
-PUSHED /
 RESIDUAL concern /
 UNBLOCKS (list the downstream consumers this enables)
 ```
@@ -214,16 +251,16 @@ Run the suite that previously failed for this cluster:
 ```
 Confirm count>0 and the specific previously-failing test passes. Drop DB.
 
-## Push when green
+## Commit when green — DO NOT PUSH
 `git add` all <N> files, commit
   `[REF] <addon>: migrate <component> (+ <caller> caller) to Owl 3 signals`
 ending with: `Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>`
-Then `git push odoo-dev <BRANCH>`. Drop DB.
+**No `git push`.** Drop DB.
 
 ## Report EXACTLY
-STATUS / BRANCH / COMMIT / FILES changed /
+STATUS (committed/blocked/failed) / BRANCH / COMMIT / WORKTREE / FILES changed /
 LOCAL_TEST (suite + count + the specific failing test's result) /
-PUSHED / PROBLEM / NEEDS_RERUN
+PROBLEM / NEEDS_RERUN
 ```
 
 ---
