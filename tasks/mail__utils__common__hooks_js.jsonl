@@ -12,3 +12,5 @@
 {"kind": "event", "ts": "2026-05-27T22:33:30Z", "actor": "orchestrator", "event": "status", "value": "pushed"}
 {"kind":"event","ts":"2026-05-29T17:23:28Z","actor":"runbot-cache","event":"runbot_status","value":"success","batch_id":2550270}
 {"kind": "event", "ts": "2026-05-29T17:53:35Z", "actor": "orchestrator", "event": "status", "value": "done", "note": "reclassified from pushed: latest runbot batch was success"}
+{"kind":"event","ts":"2026-05-29T18:18:04Z","actor":"orchestrator","event":"run","branch":"master-mail-hooks-useselection-tref-nby","commits":["1626952abc14a32262ddf527187be3de8a7a2146"],"summary":"useSelection signal-aware (and onExternalClick too). Unblocks composer + create_poll_option_dialog."}
+{"kind":"event","ts":"2026-05-29T18:18:04Z","actor":"orchestrator","event":"status","value":"to_check_with_ci"}
