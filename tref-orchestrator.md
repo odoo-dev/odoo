@@ -134,3 +134,15 @@ You ONLY work via sub-agents. Use `general-purpose` subagent_type. Never write o
 **Fix pattern** (used in commit b6b86dcb2c6 for chat_bubble_patch.xml): replace `[@t-custom-ref='X']` with `hasclass('<unique-class>')` referring to a stable class on the same node.
 
 **When migrating a leaf component**: grep for `@t-custom-ref='<your-ref-name>'` BEFORE committing. If hits exist outside your file set, dispatch a cluster including the patch files OR fix the xpath proactively.
+
+## Working hoot test-filter syntax (discovered 2026-05-29)
+
+Narrow tag for hoot tests inside a specific file+suite:
+```
+--test-tags '/web:WebSuite.test_unit_desktop[@<addon>/<file>/<test name>]'
+```
+Note: SLASH separator, not colon. Example:
+```
+[@html_editor/toolbar/should not create empty extra nodes while changing format of link]
+```
+Don't use the test description's `describe()` block name as a colon-prefix.
