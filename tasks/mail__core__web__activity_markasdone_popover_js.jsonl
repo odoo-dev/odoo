@@ -3,3 +3,4 @@
 {"kind":"event","ts":"2026-05-29T13:34:01Z","actor":"orchestrator","event":"run","branch":"master-mail-activity-markasdone-popover-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mail-activity-markasdone-popover-js-tref-nby/odoo","commits":["0cfafda59d3"],"summary":"migration applied + committed (diff verified textbook-correct). No local test run: per new protocol, no runbot batch yet for fresh branch; will retest only the runbot-failing tests if CI flags any."}
 {"kind":"event","ts":"2026-05-29T13:34:01Z","actor":"orchestrator","event":"status","value":"pushed"}
 {"kind":"event","ts":"2026-05-29T13:34:01Z","actor":"orchestrator","event":"note","text":"reused 'pushed' status per orchestrator convention: commit ready, user handles the actual push. Local-test deferred to runbot-failure-driven retests."}
+{"kind":"event","ts":"2026-05-29T17:23:13Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

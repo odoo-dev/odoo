@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T15:51:20Z","actor":"orchestrator","event":"run","branch":"master-mail-call-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mail-call-js-tref-nby/odoo","commits":["4ab90318774b68243292c3f00cfaa78520269f6e"],"summary":"migration committed. gridRef + rootRef = signal(null); 6 .el sites converted (onMounted guard, arrangeTiles early-return). No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:51:20Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:23:20Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T15:07:12Z","actor":"orchestrator","event":"run","branch":"master-mail-message-seen-indicator-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mail-message-seen-indicator-js-tref-nby/odoo","commits":["a2c1013a5ead61b9f9a9ce251790f375e1f4603c"],"summary":"migration committed. Dialog class only — contentRef = signal(null); ()?.contains. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:07:12Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:23:25Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}

@@ -2,3 +2,4 @@
 {"kind": "event", "ts": "2026-05-27T13:55:09.621843+00:00", "actor": "generator", "event": "status", "value": "pending"}
 {"kind":"event","ts":"2026-05-29T15:44:26Z","actor":"orchestrator","event":"run","branch":"master-mail-voice-player-js-tref-nby","worktree":"/root/git/odoo/worktrees/master-mail-voice-player-js-tref-nby/odoo","commits":["667a83d4b8ad8057d047c1c107b0868fc6382b8b"],"summary":"migration committed. 4 refs (wrapper/drawer/wave/progress) = signal(null); cached fields wrapper+progressWave dropped, inlined throughout; initElements + onMounted + onProgress all converted. No runbot batch → deferred."}
 {"kind":"event","ts":"2026-05-29T15:44:26Z","actor":"orchestrator","event":"status","value":"pushed"}
+{"kind":"event","ts":"2026-05-29T17:23:27Z","actor":"runbot-cache","event":"runbot_status","value":"no_batch"}
