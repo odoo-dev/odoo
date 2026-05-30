@@ -23,6 +23,7 @@ from werkzeug.urls import URL, url_encode, url_parse
 from werkzeug.utils import redirect
 
 from odoo.tools import consteq, json_default
+from odoo.tools.misc import Callbacks
 
 from . import request
 from ._facade import (  # noqa: F401
@@ -129,6 +130,7 @@ class Request:
         self.future_response = FutureResponse()
         self.dispatcher = HttpDispatcher(self)  # until we match
         self.geoip = GeoIP(httprequest.remote_addr or '')
+        self.post_request_callbacks = Callbacks()
 
         # set by serve_db
         self.registry: Registry | None = None

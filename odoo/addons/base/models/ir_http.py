@@ -47,7 +47,7 @@ from odoo.http.session import (
     session_store,
 )
 from odoo.tools.json import json_default
-from odoo.tools.misc import get_lang, submap
+from odoo.tools.misc import Callbacks, get_lang, submap
 from odoo.tools.translate import code_translations
 
 _logger = logging.getLogger(__name__)
@@ -482,6 +482,25 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _post_logout(cls):
         pass
+
+    @property
+    def post_request(self) -> Callbacks:
+        postcommit = self.env.cr.postcommit
+        post_commit_request_callbacks = postcommit.data.get('ir.http.post_request')
+        if post_commit_request_callbacks is not None:
+            return post_commit_request_callbacks
+        elif not request:
+            return postcommit
+
+        postcommit.data['ir.http.post_request'] = post_commit_request_callbacks = Callbacks()
+
+        def postcommit_hook_for_post_request():
+            # copy the callbacks to post request
+            callbacks = request.post_request_callbacks
+            callbacks.data.update(post_commit_request_callbacks.data)
+            callbacks._funcs.extend(post_commit_request_callbacks._funcs)
+        postcommit.add(postcommit_hook_for_post_request)
+        return post_commit_request_callbacks
 
     @classmethod
     def _handle_error(cls, exception):
