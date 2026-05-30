@@ -2212,7 +2212,7 @@ export class Model extends Array {
         ({ ids: idOrIds, fields, load } = kwargs);
 
         const fieldNames = fields?.length ? fields : Object.keys(this._fields);
-        return this._read_format(idOrIds, fieldNames, load);
+        return this._read_format(idOrIds, fieldNames, load, kwargs);
     }
 
     /**
@@ -3341,7 +3341,11 @@ export class Model extends Array {
      * @param {Iterable<string>} [fnames=[]]
      * @param {string | false} [load="_classic_read"]
      */
-    _read_format(idOrIds, fnames = [], load = "_classic_read") {
+    _read_format(idOrIds, fnames = [], load = "_classic_read", kwargs) {
+        //const kwargs = getKwArgs(arguments, "ids", "fnames", "load");
+        //({ ids: idOrIds, fnames, load } = kwargs);
+
+        const context = kwargs?.context;
         const ids = ensureArray(idOrIds);
         const fieldNames = unique(["id", ...fnames]);
 
