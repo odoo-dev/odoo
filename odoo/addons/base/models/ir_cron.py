@@ -898,7 +898,7 @@ class IrCron(models.Model):
         if not progress:
             # not called during a cron, just commit
             self.env.cr.commit()
-            return float('inf')
+            return max(ctx.get('end_time', float('inf')) - time.monotonic(), 0)
         assert processed >= 0, 'processed must be positive'
         assert (remaining or 0) >= 0, "remaining must be positive"
         assert progress.cron_id.id == ctx.get('cron_id'), "Progress on the wrong cron_id"
