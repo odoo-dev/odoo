@@ -43,6 +43,7 @@ class Response(werkzeug.wrappers.Response):
     ):
         super().__init__(*args, **kw)
         self.set_default(template, qcontext, uid)
+        self.call_on_close(request.post_request_callbacks.run)
 
     @classmethod
     def load(
