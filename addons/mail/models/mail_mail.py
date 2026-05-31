@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import ast
@@ -14,12 +13,11 @@ from dateutil.relativedelta import relativedelta
 from dateutil.parser import parse
 from lxml import html
 
-from odoo import _, api, fields, models, modules, SUPERUSER_ID, tools
+from odoo import _, api, fields, models, modules, tools
 from odoo.addons.base.models.ir_mail_server import MailDeliveryException
 from odoo.addons.mail.tools.attachment import extract_attachment_ids_from_html
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
-from odoo.modules.registry import Registry
 
 _logger = logging.getLogger(__name__)
 _UNFOLLOW_REGEX = re.compile(r'<span\s*(t-if="show_unfollow")?\s*id="mail_unfollow".*?<\/span>', re.DOTALL)
@@ -233,55 +231,18 @@ class MailMail(models.Model):
 
         A maximum of 1K MailMail (configurable using 'mail.mail.queue.batch.size'
         optional ICP) are fetched in order to keep time under control.
+        XXX not needed, cron jobs are responsible of keeping track of time
 
         :param list email_ids: optional list of emails ids to send. If given only
                          scheduled and outgoing emails within this ids list
                          are sent;
         """
-        domain = [
-            '&',
-                ('state', '=', 'outgoing'),
-                '|',
-                   ('scheduled_date', '=', False),
-                   ('scheduled_date', '<=', datetime.datetime.utcnow()),
-        ]
-        if 'filters' in self.env.context:
-            domain.extend(self.env.context['filters'])
+        domain = Domain(self.env.context.get('filters') or Domain.TRUE)
         batch_size = self.env['ir.config_parameter'].sudo().get_int('mail.mail.queue.batch.size') or batch_size
-        send_limit = batch_size if not email_ids else batch_size * 10
-        send_ids = self.search(domain, limit=send_limit).ids
-        _logger.info(
-            "Processing email queue with send limit of '%s'%s",
-            send_limit,
-            " (with forced 'email_ids')" if email_ids else "",
-        )
-
-        if not email_ids:
-            ids_done = set()
-            total = len(send_ids) if len(send_ids) < batch_size else self.search_count(domain)
-
-            def post_send_callback(ids):
-                """ Track mail ids that have been sent, and notify cron progress accordingly. """
-                processed = set(ids) - ids_done
-                ids_done.update(processed)
-                if self.env.context.get('cron_id'):
-                    # commit progress only when running from a cron job
-                    self.env['ir.cron']._commit_progress(len(processed), remaining=total - len(ids_done))
-        else:
-            send_ids = list(set(send_ids) & set(email_ids))
-            post_send_callback = None
-
-        send_ids.sort()
-
-        res = None
-        try:
-            # auto-commit except in testing mode
-            auto_commit = not modules.module.current_test
-            res = self.browse(send_ids).send(auto_commit=auto_commit, post_send_callback=post_send_callback)
-        except Exception:
-            _logger.exception("Failed processing mail queue")
-
-        return res
+        if email_ids:
+            domain &= Domain('id', 'in', email_ids)
+            batch_size = batch_size * 10 if len(email_ids) > 1 else 0
+        api.process.cron_implementation(self, '_send', search_domain=domain, search_limit=batch_size, compute_remaining=not email_ids)
 
     def _postprocess_sent_message(self, success_pids, success_emails, failure_reason=False, failure_type=None):
         """Perform any post-processing necessary after sending ``mail``
@@ -595,22 +556,22 @@ class MailMail(models.Model):
         The same "sending configuration" may repeat in order to limit batch size
         according to the `mail.session.batch.size` system parameter.
 
-        Return iterators over
-            mail_server_id, email_from, Records<mail.mail>.ids
+        Return iterator over
+            mail_server_id, alias_domain_id, email_from, Records<mail.mail>.ids
         """
-        mail_values = self.with_context(prefetch_fields=False).read(['id', 'email_from', 'mail_server_id', 'record_alias_domain_id'])
+        self.fetch(['email_from', 'mail_server_id', 'record_alias_domain_id'])
         all_mail_servers = self.env['ir.mail_server'].sudo().search([], order='sequence, id')
 
         # First group the <mail.mail> per mail_server_id, per alias_domain (if no server) and per email_from
         group_per_email_from = defaultdict(list)
-        for mail, values in zip(self, mail_values):
+        for mail in self:
             # protect against ill-formatted email_from when formataddr was used on an already formatted email
-            emails_from = tools.mail.email_split_and_format_normalize(values['email_from'])
-            email_from = emails_from[0] if emails_from else values['email_from']
-            mail_server_id = values['mail_server_id'][0] if values['mail_server_id'] else False
-            alias_domain_id = values['record_alias_domain_id'][0] if values['record_alias_domain_id'] else False
+            emails_from = tools.mail.email_split_and_format_normalize(mail.email_from)
+            email_from = emails_from[0] if emails_from else mail.email_from
+            mail_server_id = mail.mail_server_id or False
+            alias_domain_id = mail.record_alias_domain_id or False
             key = (mail_server_id, alias_domain_id, email_from, mail._filter_mail_mail_servers(all_mail_servers))
-            group_per_email_from[key].append(values['id'])
+            group_per_email_from[key].append(mail.id)
 
         group_per_smtp_from = defaultdict(list)
         for (mail_server_id, alias_domain_id, email_from, allowed_mail_servers), mail_ids in group_per_email_from.items():
@@ -629,6 +590,7 @@ class MailMail(models.Model):
 
             group_per_smtp_from[(mail_server_id, alias_domain_id, smtp_from)].extend(mail_ids)
 
+        # XXX why batch size below?
         batch_size = self.env['ir.config_parameter'].sudo().get_int('mail.session.batch.size') or 1000
         for (mail_server_id, alias_domain_id, smtp_from), record_ids in group_per_smtp_from.items():
             for batch_ids in tools.split_every(batch_size, record_ids):
@@ -643,9 +605,7 @@ class MailMail(models.Model):
 
         current_minute = datetime.datetime.now().replace(second=0, microsecond=0)
         server_limit_minute = (
-            mail_server.owner_limit_time
-            if mail_server.owner_limit_time
-            else current_minute - relativedelta(minutes=1)
+            mail_server.owner_limit_time or current_minute - datetime.timedelta(minutes=1)
         )
 
         if server_limit_minute < current_minute:
@@ -666,8 +626,8 @@ class MailMail(models.Model):
             )
 
         # Send the oldest mails in priority if the CRON is late
-        to_send = self.browse()
-        to_delay = self.browse()
+        to_send_ids = []
+        to_delay_ids = []
         notifs = self.env['mail.notification'].sudo().search([
             ('notification_type', '=', 'email'),
             ('mail_mail_id', 'in', self.ids),
@@ -676,7 +636,7 @@ class MailMail(models.Model):
         for mail in self.sorted(lambda k: (k.create_date, k.id)):
             all_recipients = mail.recipient_ids | mail.recipient_cc_ids
             if mail_server.owner_limit_count >= MAX_SEND:
-                to_delay |= mail
+                to_delay_ids.append(mail.id)
             elif mail_server.owner_limit_count + (len(all_recipients) or 1) > MAX_SEND:
                 # Because we split for each recipient, if we want to
                 # respect the limit we have to create new mails
@@ -700,13 +660,15 @@ class MailMail(models.Model):
                 })
                 mail_server.owner_limit_count += to_keep or 1
                 notifs.filtered(lambda n: n.mail_mail_id == mail and n.res_partner_id in current_recipients).mail_mail_id = new_mail
-                to_send |= new_mail
-                to_delay |= mail
+                to_send_ids.append(new_mail.id)
+                to_delay_ids.append(mail.id)
             else:
-                to_send |= mail
+                to_send_ids.append(mail.id)
                 mail_server.owner_limit_count += len(all_recipients) or 1
 
         # Delay if necessary
+        to_send = self.browse(to_send_ids)
+        to_delay = self.browse(to_delay_ids)
         if to_delay:
             owner_limit_count = mail_server.owner_limit_count
             for mail in to_delay:
@@ -735,19 +697,11 @@ class MailMail(models.Model):
         # send immediately on same cursor when testing as we don't want
         # to actually commit during tests
         if modules.module.current_test:
-            self.send()
+            api.process.run_try_now(self, '_send', use_savepoit=False)
             return
 
-        email_ids = self.ids
-        dbname = self.env.cr.dbname
-        _context = self.env.context
-
-        @self.env.cr.postcommit.add
-        def send_emails_with_new_cursor():
-            db_registry = Registry(dbname)
-            with db_registry.cursor() as cr:
-                env = api.Environment(cr, SUPERUSER_ID, _context)
-                env['mail.mail'].browse(email_ids).send()
+        _context = self.env.context  # XXX what??? we used to depend on context!
+        return api.process.run_post_request(self, '_send', max_execution_time=60)
 
     def send(self, auto_commit=False, raise_exception=False, post_send_callback=None):
         """ Sends the selected emails immediately, ignoring their current
@@ -767,48 +721,28 @@ class MailMail(models.Model):
                 are possible
             :return: True
         """
-        for mail_server_id, alias_domain_id, smtp_from, batch_ids in self._split_by_mail_configuration():
-            mail_server = self.env["ir.mail_server"].browse(mail_server_id)
+        if len(self) > 2:
+            for batch in self._split_by_mail_configuration():
+                records = self.browse(batch[-1])
+                records.write({'state': 'outgoing', 'scheduled_date': False})
+                # XXX nah, should commit after each message
+                api.process.run_try_now(records, '_send', use_savepoit=not auto_commit)
+                if auto_commit:
+                    self.env.cr.commit()
+        else:
+            self.write({'state': 'outgoing', 'scheduled_date': False})
+            api.process.run_try_now(self, '_send', use_savepoit=not auto_commit)
+            if auto_commit:
+                self.env.cr.commit()
 
-            if mail_server and mail_server.owner_user_id:
-                # Throttle the sending that use personal mail servers
-                batch_ids = self.browse(batch_ids)._split_by_delayed_batch(mail_server).ids
-                if not batch_ids:
-                    continue
-
-            smtp_session = None
-            try:
-                smtp_session = self.env['ir.mail_server']._connect__(mail_server_id=mail_server_id, smtp_from=smtp_from)
-            except Exception as exc:
-                if raise_exception:
-                    # To be consistent and backward compatible with mail_mail.send() raised
-                    # exceptions, it is encapsulated into an Odoo MailDeliveryException
-                    raise MailDeliveryException(_('Unable to connect to SMTP Server'), exc)
-                else:
-                    batch = self.browse(batch_ids)
-                    batch.write({'state': 'exception', 'failure_reason': tools.exception_to_unicode(exc)})
-                    batch._postprocess_sent_message(success_pids=[], success_emails=[], failure_type="mail_smtp")
-            else:
-                self.browse(batch_ids)._send(
-                    auto_commit=auto_commit,
-                    raise_exception=raise_exception,
-                    smtp_session=smtp_session,
-                    alias_domain_id=alias_domain_id,
-                    mail_server=mail_server,
-                    post_send_callback=post_send_callback,
-                )
-                if not modules.module.current_test:
-                    _logger.info(
-                        "Processed batch of %s mail.mail records via mail server ID #%s",
-                        len(batch_ids), mail_server_id)
-            finally:
-                if smtp_session:
-                    try:
-                        smtp_session.quit()
-                    except smtplib.SMTPServerDisconnected:
-                        _logger.info(
-                            "Ignoring SMTPServerDisconnected while trying to quit non open session"
-                        )
+        sent_mails = self.filtered(lambda m: m.state == 'sent')
+        if post_send_callback and sent_mails:
+            post_send_callback(sent_mails.ids)
+        if raise_exception and (failed_mails := self.filtered(lambda m: m.state == 'exception')):
+            if not auto_commit and sent_mails:
+                _logger.warning("Raising and exception, but %d e-mails were sent!", len(sent_mails))
+            raise MailDeliveryException(failed_mails)
+        return True
 
     def action_send_and_close(self):
         """ An action sending the selected mail and redirecting to mail.mail list view. """
@@ -822,31 +756,63 @@ class MailMail(models.Model):
             'type': 'ir.actions.act_window',
         }
 
-    def _send(self, auto_commit=False, raise_exception=False, smtp_session=None, alias_domain_id=False,
-              mail_server=False, post_send_callback=None):
-        IrMailServer = self.env['ir.mail_server']
-        if IrMailServer._disable_send():
+    _send_cron_id = 'mail.ir_cron_mail_scheduler_action'
+    _send_order = 'id'
+    # XXX _send_batch_group = ...  # group mails together, or just use order?
+
+    def _send_precondition(self):
+        return Domain('state', '=', 'outgoing') & (
+            Domain('scheduled_date', '=', False)
+            | Domain('scheduled_date', '<=', 'now'),
+        )
+
+    def _send_resource(self, old_resource=None) -> 'SmtpSessionX':  # XXX resource must be private?
+        if isinstance(old_resource, SmtpSessionX) and old_resource.can_handle(self):
+            return old_resource
+        session = SmtpSessionX(self)
+        if not session.ready:
+            return None
+        mail_server = session.mail_server_id
+        if not self._filter_mail_mail_servers(mail_server):
+            raise UserError(_('Unauthorized server for some of the sending mails.'))
+        if mail_server.owner_user_id:
+            # Throttle the sending that use personal mail servers
+            # XXX need to find other mail items to update in batch
+            if not self._split_by_delayed_batch(mail_server):
+                session.close()
+                return None
+
+        return session
+
+    def _send_error_handler(self, exception):
+        raise exception  # handled in _send, but should be moved here to persist the info
+
+    def _send(self, alias_domain_id=False):
+        send_resource: SmtpSessionX = api.process.check(self, '_send')
+        IrMailServer = send_resource.IrMailServer
+
+        if not send_resource.ready or IrMailServer._disable_send():
+            # throttled or
             # during testing skip sending e-mails unless monkeypatched
             return True
+        try:
+            send_resource.open()
+        except Exception as exc:  # noqa: BLE001
+            self.write({'state': 'exception', 'failure_reason': tools.exception_to_unicode(exc)})
+            self._postprocess_sent_message(success_pids=[], success_emails=[], failure_type="mail_smtp")
+            return
         # check that every email is allowed on this mail server
-        if mail_server and not self._filter_mail_mail_servers(mail_server):
-            raise UserError(_('Unauthorized server for some of the sending mails.'))
         # Only retrieve recipient followers of the mails if needed
         mails_with_unfollow_link = self.filtered(lambda m: m.body_html and '/mail/unfollow' in m.body_html)
         doc_to_followers = self.env['mail.followers']._get_mail_doc_to_followers(mails_with_unfollow_link.ids)
 
-        for mail_id in self.ids:
+        if True:
             success_pids = []
             success_emails = []
             failure_reason = None
             failure_type = None
-            mail = None
-            # separate variable for logging in case of postgres failure
-            message_id = None
+            mail = self
             try:
-                mail = self.browse(mail_id)
-                if mail.state != 'outgoing':
-                    continue
                 no_recipients = (not (mail.email_to or '').strip() and not mail.recipient_ids
                                  and not (mail.email_cc or '').strip() and not mail.recipient_cc_ids)
 
@@ -887,7 +853,7 @@ class MailMail(models.Model):
                 # TDE note: could be great to pre-detect missing to/cc and skip sending it
                 # to go directly to failed state update
                 email_list = mail._prepare_outgoing_list(
-                    mail_server=mail_server or mail.mail_server_id,
+                    mail_server=send_resource.mail_server_id,
                     doc_to_followers=doc_to_followers,
                 )
 
@@ -895,17 +861,7 @@ class MailMail(models.Model):
                 for email in email_list:
                     # give indication to 'send_mail' about emails already considered
                     # as being valid
-                    email_to_normalized = email.pop('email_to_normalized', [])
-                    # if given, contextualize sending using alias domains
-                    if alias_domain_id:
-                        alias_domain = self.env['mail.alias.domain'].sudo().browse(alias_domain_id)
-                        SendIrMailServer = IrMailServer.with_context(
-                            domain_notifications_email=alias_domain.default_from_email,
-                            domain_bounce_address=email['headers'].get('Return-Path') or alias_domain.bounce_email,
-                            send_validated_to=email_to_normalized,
-                        )
-                    else:
-                        SendIrMailServer = IrMailServer.with_context(send_validated_to=email_to_normalized)
+                    SendIrMailServer = send_resource.get_server_object()
                     msg = SendIrMailServer._build_email__(
                         email_from=email_from,
                         email_to=email['email_to'],
@@ -924,14 +880,13 @@ class MailMail(models.Model):
                     )
                     processing_pid = email.pop("partner_id", None)
                     try:
-                        res = SendIrMailServer.send_email(
-                            msg, mail_server_id=mail.mail_server_id.id, smtp_session=smtp_session)
+                        res = SendIrMailServer.send_email(msg, smtp_session=send_resource.smtp_session)
                         if processing_pid:
                             success_pids.append(processing_pid)
                         else:
                             success_emails.extend(email['email_to'] or [])
                         processing_pid = None
-                    except AssertionError as error:
+                    except AssertionError as error:  # XXX what???
                         if str(error) == IrMailServer.NO_VALID_RECIPIENT:
                             # if we have a list of void emails for email_list -> email missing, otherwise generic email failure
                             if not email.get('email_to') and failure_type != "mail_email_invalid":
@@ -1025,21 +980,16 @@ class MailMail(models.Model):
                     success_pids=success_pids, success_emails=success_emails,
                     failure_reason=failure_reason, failure_type=failure_type
                 )
-                if raise_exception:
-                    if isinstance(e, (AssertionError, UnicodeEncodeError)):
-                        if isinstance(e, UnicodeEncodeError):
-                            value = "Invalid text: %s" % e.object
-                        else:
-                            value = '. '.join(e.args)
-                        raise MailDeliveryException(value)
-                    raise
-            if auto_commit is True:
-                if post_send_callback:
-                    post_send_callback([mail_id])
-                self.env.cr.commit()
-        if post_send_callback:
-            post_send_callback(self.ids)
-        return True
+                if isinstance(e, (AssertionError, UnicodeEncodeError)):
+                    if isinstance(e, UnicodeEncodeError):
+                        value = "Invalid text: %s" % e.object
+                    else:
+                        value = '. '.join(e.args)
+                    raise MailDeliveryException(value)
+                raise
+        if not modules.module.current_test:
+            _logger.info(
+                "Processed %s record via mail server ID #%s", self, send_resource.mail_server_id)
 
     # ============================================================
     # Mail -> Notification Helpers
@@ -1072,3 +1022,71 @@ class MailMail(models.Model):
             'exception': 'exception',
             'cancel': 'canceled',
         }.get(self.state, 'ready')
+
+
+class SmtpSessionX:
+    def __init__(self, mail: MailMail):
+        assert mail._name == MailMail._name
+        self.env = mail.env
+        for data in mail._split_by_mail_configuration():
+            self.mail_server_id, self.alias_domain_id, self.email_from, _ids = data
+            break
+        else:
+            self.mail_server_id = self.alias_domain_id = self.email_from = False
+        self.smtp_session = None
+        self.first_mail = True
+
+    def can_handle(self, mail: MailMail):
+        assert mail._name == MailMail._name
+        self.first_mail = False
+        if not self.ready:
+            return False
+        res = False
+        for mail_server_id, alias_domain_id, email_from, _ids in mail._split_by_mail_configuration():
+            if res:
+                return False  # more than one batch
+            res = mail_server_id == self.mail_server_id and alias_domain_id == self.alias_domain_id and email_from == self.email_from
+            if res and mail_server_id.owner_stuff_throttle_XXX and not mail_server_id.try_lock_for_update(allow_referencing=True):
+                return False  # server locked
+        return res
+
+    @property
+    def ready(self):
+        # XXX Check lock on mail server?
+        return self.smtp_session or self.first_mail
+
+    def open(self):
+        if self.smtp_session is None:
+            try:
+                self.smtp_session = self.env['ir.mail_server']._connect__(mail_server_id=self.mail_server_id, smtp_from=self.smtp_from)
+            except Exception as exc:  # noqa: BLE001
+                raise MailDeliveryException(_('Unable to connect to SMTP Server'), exc)
+        return self.smtp_session
+
+    def close(self):
+        if smtp_session := self.smtp_session:
+            self.smtp_session = None
+            try:
+                smtp_session.quit()
+            except smtplib.SMTPServerDisconnected:
+                _logger.info(
+                    "Ignoring SMTPServerDisconnected while trying to quit non open session"
+                )
+
+    @property
+    def IrMailServer(self):
+        return self.env['ir.mail_server']
+
+    def get_server_object(self, email):
+        # if given, contextualize sending using alias domains
+        email_to_normalized = email.pop('email_to_normalized', [])
+        if self.alias_domain_id:
+            alias_domain = self.IrMailServer.env['mail.alias.domain'].sudo().browse(self.alias_domain_id)
+            SendIrMailServer = self.IrMailServer.with_context(
+                domain_notifications_email=alias_domain.default_from_email,
+                domain_bounce_address=email['headers'].get('Return-Path') or alias_domain.bounce_email,
+                send_validated_to=email_to_normalized,
+            )
+        else:
+            SendIrMailServer = self.IrMailServer.with_context(send_validated_to=email_to_normalized)
+        return SendIrMailServer
