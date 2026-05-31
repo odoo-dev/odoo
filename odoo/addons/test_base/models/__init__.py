@@ -4,6 +4,7 @@ from . import (
     test_access_rights,
     test_acl,
     test_action_bindings,
+    test_async,
     test_config,
     test_convert,
     test_domain_expression,
