@@ -242,7 +242,21 @@ class MailMail(models.Model):
         if email_ids:
             domain &= Domain('id', 'in', email_ids)
             batch_size = batch_size * 10 if len(email_ids) > 1 else 0
-        api.process.cron_implementation(self, '_send', search_domain=domain, search_limit=batch_size, compute_remaining=not email_ids)
+        if self.env.context('demo_send_mail'):
+            api.process.cron_implementation(self, '_send', search_domain=domain, search_limit=batch_size, compute_remaining=domain.is_true())
+            return
+        remaining = domain.is_true()
+        domain &= self._send_precondition()
+        domain = domain.optimize_full(self)
+        all_mails = self.search(domain, limit=batch_size, order=self._send_order)
+        if remaining:
+            remaining = len(all_mails)
+            if remaining == batch_size:
+                remaining = self.search_count(self._send_precondition())
+            self.env['ir.cron']._commit_progress(remaining=remaining)
+        for batch in all_mails._split_by_mail_configuration():  # XXX make a resource handler
+            api.process.run_try_now(self.browse(batch[-1]), '_send', use_commit=True)
+            #api.process.cron_implementation(self, '_send', search_domain=Domain('id', 'in', batch[-1]), compute_remaining=False)
 
     def _postprocess_sent_message(self, success_pids, success_emails, failure_reason=False, failure_type=None):
         """Perform any post-processing necessary after sending ``mail``
