@@ -309,6 +309,14 @@ export class StoreInternal extends RecordInternal {
     updateRelation(record, fieldName, value) {
         /** @type {RecordList<Record>} */
         const recordList = record[fieldName];
+        if (
+            value?.Model?._name &&
+            recordList._.owner.Model._.fieldsTargetModel.get(recordList._.name) &&
+            recordList._.owner.Model._.fieldsTargetModel.get(recordList._.name) !==
+                value.Model._name
+        ) {
+            console.warn(`field ${fieldName} on model ${record.Model._name}`);
+        }
         if (isMany(record.Model, fieldName)) {
             this.updateRelationMany(recordList, value);
         } else {
