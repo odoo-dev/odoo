@@ -89,6 +89,12 @@ class PaymentTransaction(models.Model):
         # If it's one of FPX methods, assign the payment methods as FPX automatically
         if self.payment_method_code == "fpx":
             payload["payment_methods"] = const.FPX_METHODS
+        # If it's BPI, allow all BPI channels
+        elif self.payment_method_code == "bpi":
+            payload["payment_methods"] = const.BPI_METHODS
+        # If it's UBP, allow all UBP channels
+        elif self.payment_method_code == "ubp":
+            payload["payment_methods"] = const.UBP_METHODS
         # Extra payload values that must not be included if empty.
         if self.partner_email:
             payload["customer"]["email"] = self.partner_email
@@ -171,6 +177,10 @@ class PaymentTransaction(models.Model):
         payment_method_code = payment_data.get("payment_method", "")
         if payment_method_code in const.FPX_METHODS:
             payment_method_code = "fpx"
+        elif payment_method_code in const.BPI_METHODS:
+            payment_method_code = "bpi"
+        elif payment_method_code in const.UBP_METHODS:
+            payment_method_code = "ubp"
 
         payment_method = self.env["payment.method"]._get_from_code(
             payment_method_code, mapping=const.PAYMENT_METHODS_MAPPING

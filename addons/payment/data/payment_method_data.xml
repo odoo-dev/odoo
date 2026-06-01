@@ -778,6 +778,28 @@
         />
     </record>
 
+    <record id="payment_method_bpi" model="payment.method">
+        <field name="name">BPI</field>
+        <field name="code">bpi</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="bytes" file="payment/static/img/bpi.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_manual_capture">none</field>
+        <field name="support_refund">none</field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.ph'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.PHP'),
+                     ])]"
+        />
+    </record>
+
     <record id="payment_method_boleto" model="payment.method">
         <field name="name">Boleto</field>
         <field name="code">boleto</field>
@@ -1106,6 +1128,28 @@
         <field name="support_refund">none</field>
         <field name="supported_country_ids" eval="[Command.set([ref('base.pk')])]" />
         <field name="supported_currency_ids" eval="[Command.set([ref('base.PKR')])]" />
+    </record>
+
+    <record id="payment_method_ecpay" model="payment.method">
+        <field name="name">ECPay</field>
+        <field name="code">ecpay</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="bytes" file="payment/static/img/ecpay.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_manual_capture">none</field>
+        <field name="support_refund">none</field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.ph'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.PHP'),
+                     ])]"
+        />
     </record>
 
     <record id="payment_method_emi_india" model="payment.method">
@@ -2990,6 +3034,28 @@
         />
     </record>
 
+    <record id="payment_method_qrph" model="payment.method">
+        <field name="name">QRPh</field>
+        <field name="code">qrph</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="bytes" file="payment/static/img/qrph.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_manual_capture">none</field>
+        <field name="support_refund">none</field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.ph'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.PHP'),
+                     ])]"
+        />
+    </record>
+
      <record id="payment_method_rabbit_line_pay" model="payment.method">
         <field name="name">Rabbit LINE Pay</field>
         <field name="code">rabbit_line_pay</field>
@@ -3008,6 +3074,28 @@
         <field name="supported_currency_ids"
                eval="[Command.set([
                          ref('base.THB'),
+                     ])]"
+        />
+    </record>
+
+    <record id="payment_method_rcbc" model="payment.method">
+        <field name="name">RCBC</field>
+        <field name="code">rcbc</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="bytes" file="payment/static/img/rcbc.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_manual_capture">none</field>
+        <field name="support_refund">none</field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.ph'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.PHP'),
                      ])]"
         />
     </record>
@@ -3056,6 +3144,28 @@
         <field name="supported_currency_ids"
                eval="[Command.set([
                          ref('base.GBP'),
+                     ])]"
+        />
+    </record>
+
+    <record id="payment_method_robinsons_bills_payment" model="payment.method">
+        <field name="name">Robinsons Bills Payment</field>
+        <field name="code">robinsons_bills_payment</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="bytes" file="payment/static/img/robinsons_bills_payment.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_manual_capture">none</field>
+        <field name="support_refund">none</field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.ph'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.PHP'),
                      ])]"
         />
     </record>
@@ -3205,6 +3315,28 @@
                          ref('base.THB'),
                          ref('base.MYR'),
                          ref('base.VND'),
+                     ])]"
+        />
+    </record>
+
+    <record id="payment_method_sm_bills_payment" model="payment.method">
+        <field name="name">SM Bills Payment</field>
+        <field name="code">sm_bills_payment</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="bytes" file="payment/static/img/sm_bills_payment.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_manual_capture">none</field>
+        <field name="support_refund">none</field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.ph'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.PHP'),
                      ])]"
         />
     </record>
@@ -3649,6 +3781,28 @@
         <field name="support_express_checkout">True</field>
         <field name="support_manual_capture">partial</field>
         <field name="support_refund">partial</field>
+    </record>
+
+    <record id="payment_method_ubp" model="payment.method">
+        <field name="name">UBP</field>
+        <field name="code">ubp</field>
+        <field name="sequence">1000</field>
+        <field name="active">False</field>
+        <field name="image" type="bytes" file="payment/static/img/ubp.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="support_express_checkout">False</field>
+        <field name="support_manual_capture">none</field>
+        <field name="support_refund">none</field>
+        <field name="supported_country_ids"
+               eval="[Command.set([
+                         ref('base.ph'),
+                     ])]"
+        />
+        <field name="supported_currency_ids"
+               eval="[Command.set([
+                         ref('base.PHP'),
+                     ])]"
+        />
     </record>
 
     <record id="payment_method_uob" model="payment.method">

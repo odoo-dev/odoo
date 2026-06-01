@@ -25,7 +25,18 @@ DEFAULT_PAYMENT_METHOD_CODES = {
     # VN
     "appota",
     "zalopay",
-    "vnptwallet"
+    "vnptwallet",
+    # PH
+    "billease",
+    "bpi",
+    "ecpay",
+    "gcash",
+    "maya",
+    "qrph",
+    "rcbc",
+    "robinsons_bills_payment",
+    "sm_bills_payment",
+    "ubp",
     # Brand payment methods.
     "visa",
     "mastercard",
@@ -81,18 +92,51 @@ FPX_METHODS = [
 
 # Mapping of payment code to channel code according to Xendit API
 PAYMENT_METHODS_MAPPING = {
+    # ID
     "bank_bca": "BCA",
     "bank_permata": "PERMATA",
-    "bpi": "DD_BPI",
     "card": "CREDIT_CARD",
-    "maya": "PAYMAYA",
-    "wechat_pay": "WECHATPAY",
+    "dana": "DANA",
+    "ovo": "OVO",
+    "qris": "QRIS",
+    # MY
+    "touch_n_go": "TOUCHNGO",
+    # TH
+    "promptpay": "PROMPTPAY",
+    "linepay": "LINEPAY",
+    "shopeepay": "SHOPEEPAY",
     "scb": "DD_SCB_MB",
     "krungthai_bank": "DD_KTB_MB",
     "bangkok_bank": "DD_BBL_MB",
-    "touch_n_go": "TOUCHNGO",
+    # VN
+    "appota": "APPOTA",
+    "zalopay": "ZALOPAY",
+    "vnptwallet": "VNPTWALLET",
+    "wechat_pay": "WECHATPAY",
+    # PH
+    "bank_transfer": "BANK_TRANSFER",
+    "billease": "BILLEASE",
+    "bpi": "BPI_DIRECT_DEBIT",
+    "ecpay": "ECPAY",
+    "gcash": "GCASH",
+    "maya": "PAYMAYA",
+    "qrph": "QRPH",
+    "rcbc": "RCBC_DIRECT_DEBIT",
+    "robinsons_bills_payment": "ROBINSONS_BILLS_PAYMENT",
+    "sm_bills_payment": "SM_BILLS_PAYMENT",
+    "ubp": "UBP_DIRECT_DEBIT",
     **{method: "fpx" for method in FPX_METHODS},
 }
+
+# BPI payment channels in Xendit for the Philippines.
+# When the user chooses BPI in Odoo, all channels are sent to Xendit.
+# When a webhook is received, we map any of these back to 'bpi' in Odoo.
+BPI_METHODS = ["BPI_DIRECT_DEBIT", "BPI_RECURRING"]
+
+# UBP (UnionBank of the Philippines) payment channels in Xendit.
+# When the user chooses UBP in Odoo, all channels are sent to Xendit.
+# When a webhook is received, we map any of these back to 'ubp' in Odoo.
+UBP_METHODS = ["UBP_DIRECT_DEBIT", "UBP_EADA"]
 
 # Mapping of transaction states to Xendit payment statuses.
 PAYMENT_STATUS_MAPPING = {
