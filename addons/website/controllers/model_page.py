@@ -18,7 +18,7 @@ class ModelPageController(Controller):
         if not page_name_slugified:
             raise werkzeug.exceptions.NotFound()
 
-        website = request.website
+        website = self.env.website
 
         website_page_domain = Domain("name_slugified", "=", page_name_slugified) & website.website_domain()
         page = request.env["website.controller.page"].search(website_page_domain, limit=1)

@@ -16,7 +16,7 @@ class WebsiteSale(WebsiteSaleController):
             MassMailController.subscribe_to_newsletter(
                 subscription_type='email',
                 value=address_values['email'],
-                list_id=request.website.newsletter_id,
+                list_id=self.env.website.newsletter_id,
                 fname='email',
                 address_name=address_values['name'],
             )

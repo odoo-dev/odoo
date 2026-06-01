@@ -282,7 +282,7 @@ class Delivery(WebsiteSale):
                 )
                 if (
                     not is_express_checkout_flow
-                    and request.website.show_line_subtotals_tax_selection == "tax_excluded"
+                    and self.env.website.show_line_subtotals_tax_selection == "tax_excluded"
                 ):
                     rate["price"] = taxes["total_excluded"]
                 else:

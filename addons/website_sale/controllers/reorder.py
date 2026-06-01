@@ -33,7 +33,7 @@ class CustomerPortal(sale_portal.CustomerPortal):
             raise ValidationError(self.env._("Nothing can be reordered in this order"))
 
         Cart_controller = Cart()
-        order_sudo = request.cart or request.website._create_cart()
+        order_sudo = request.cart or self.env.website._create_cart()
         warnings_to_aggregate = set()
         values = {"tracking_info": []}
         for line in lines_to_reorder:

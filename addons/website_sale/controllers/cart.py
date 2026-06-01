@@ -28,7 +28,7 @@ class Cart(PaymentPortal):
         :return: The rendered cart page.
         :rtype: str
         """
-        if not request.website.has_ecommerce_access():
+        if not self.env.website.has_ecommerce_access():
             return request.redirect("/web/login")
 
         order_sudo = request.cart
@@ -70,7 +70,7 @@ class Cart(PaymentPortal):
             values["suggested_products"] = order_sudo._cart_accessories()
             values.update(self._get_express_shop_payment_values(order_sudo))
 
-        values.update(request.website._get_checkout_step_values())
+        values.update(self.env.website._get_checkout_step_values())
         values.update(self._cart_values(**post))
         values.update(self._prepare_order_history())
         return request.render("website_sale.cart", values)
@@ -119,7 +119,7 @@ class Cart(PaymentPortal):
         :return: The values
         :rtype: dict
         """
-        order_sudo = request.cart or request.website._create_cart()
+        order_sudo = request.cart or self.env.website._create_cart()
         # Do not allow float values in ecommerce by default
         quantity = (quantity and int(quantity)) or 1
 
@@ -263,7 +263,7 @@ class Cart(PaymentPortal):
                 "website_sale_order": order_sudo,
                 "show_shorter_cart_summary": True,
                 **self._get_express_shop_payment_values(order_sudo),
-                **request.website._get_checkout_step_values(),
+                **self.env.website._get_checkout_step_values(),
             },
         )
         values["website_sale.quick_reorder_history"] = website._render_template(
@@ -275,7 +275,7 @@ class Cart(PaymentPortal):
 
     def _get_express_shop_payment_values(self, order, **_kwargs):
         payment_form_values = CustomerPortal._get_payment_values(
-            self, order, website_id=request.website.id, is_express_checkout=True
+            self, order, website_id=self.env.website.id, is_express_checkout=True
         )
         payment_form_values.update({
             "payment_access_token": payment_form_values.pop("access_token"),  # Rename the key.
@@ -283,7 +283,7 @@ class Cart(PaymentPortal):
             "minor_amount": payment_utils.to_minor_currency_units(
                 order._get_amount_total_excluding_delivery(), order.currency_id
             ),
-            "merchant_name": request.website.name,
+            "merchant_name": self.env.website.name,
             "transaction_route": f"/shop/payment/transaction/{order.id}",
             "express_checkout_route": WebsiteSale._express_checkout_route,
             "landing_route": "/shop/payment/validate",
@@ -296,7 +296,7 @@ class Cart(PaymentPortal):
             ),
             "shipping_address_update_route": WebsiteSale._express_checkout_delivery_route,
         })
-        if request.website.is_public_user():
+        if self.env.website.is_public_user():
             payment_form_values["partner_id"] = -1
         return payment_form_values
 
@@ -395,7 +395,7 @@ class Cart(PaymentPortal):
                 [
                     ("partner_id", "=", self.env.user.partner_id.id),
                     ("state", "=", "sale"),
-                    ("website_id", "=", request.website.id),
+                    ("website_id", "=", self.env.website.id),
                 ],
                 order="date_order desc",
                 limit=10,
@@ -415,8 +415,8 @@ class Cart(PaymentPortal):
                 line_sudo.linked_line_id.product_type == "combo"
                 or not line_sudo._is_sellable()
                 or (
-                    request.website.prevent_sale
-                    and request.website._prevent_product_sale(
+                    self.env.website.prevent_sale
+                    and self.env.website._prevent_product_sale(
                         line_sudo.product_id,
                         line_sudo.product_id._get_combination_info_variant()["price"] == 0,
                     )

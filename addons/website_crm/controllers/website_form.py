@@ -75,7 +75,7 @@ class WebsiteForm(form.WebsiteForm):
                 else:
                     values['partner_id'] = visitor_partner.id
             if 'company_id' not in values:
-                values['company_id'] = request.website.company_id.id
+                values['company_id'] = self.env.website.company_id.id
             lang = request.env.context.get('lang', False)
             values['lang_id'] = values.get('lang_id') or request.env['res.lang']._get_data(code=lang).id
 

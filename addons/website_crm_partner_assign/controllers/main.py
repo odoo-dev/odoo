@@ -72,7 +72,7 @@ class WebsiteAccount(CustomerPortal):
 
         # pager
         lead_count = CrmLead.search_count(domain)
-        pager = request.website.pager(
+        pager = self.env.website.pager(
             url="/my/leads",
             url_args={'date_begin': date_begin, 'date_end': date_end, 'sortby': sortby},
             total=lead_count,
@@ -139,7 +139,7 @@ class WebsiteAccount(CustomerPortal):
         leads_sudo = CrmLead.sudo()._search(domain)
         domain = [('id', 'in', leads_sudo)]
         opp_count = CrmLead.search_count(domain)
-        pager = request.website.pager(
+        pager = self.env.website.pager(
             url="/my/opportunities",
             url_args={'date_begin': date_begin, 'date_end': date_end, 'sortby': sortby, 'filterby': filterby},
             total=opp_count,
@@ -291,11 +291,11 @@ class WebsiteCrmPartnerAssign(WebsitePartnership, GoogleMap):
             })
 
         # current search, modify the base_partner_domain
-        if request.website.is_view_active("website_partnership.categories_setting") and grade:
+        if self.env.website.is_view_active("website_partnership.categories_setting") and grade:
             base_partner_domain = Domain.AND([base_partner_domain, Domain('grade_id', '=', grade.id)])
-        if request.website.is_view_active("website_crm_partner_assign.countries_setting") and country:
+        if self.env.website.is_view_active("website_crm_partner_assign.countries_setting") and country:
             base_partner_domain = Domain.AND([base_partner_domain, Domain('country_id', '=', country.id)])
-        if request.website.is_view_active("website_crm_partner_assign.industries_setting") and current_industry:
+        if self.env.website.is_view_active("website_crm_partner_assign.industries_setting") and current_industry:
             base_partner_domain = Domain.AND([base_partner_domain, Domain('implemented_partner_ids.industry_id', 'in', current_industry.id)])
 
         # format pager
@@ -315,11 +315,11 @@ class WebsiteCrmPartnerAssign(WebsitePartnership, GoogleMap):
             url_args['industry'] = slug(current_industry)
 
         partner_count = partner_obj.sudo().search_count(base_partner_domain)
-        pager = request.website.pager(
+        pager = self.env.website.pager(
             url=url, total=partner_count, page=page, step=references_per_page, scope=7,
             url_args=url_args)
 
-        google_maps_api_key = request.website.google_maps_api_key
+        google_maps_api_key = self.env.website.google_maps_api_key
         partners = self._get_partners(base_partner_domain, pager, references_per_page=references_per_page, search_order="grade_sequence ASC, implemented_partner_count DESC, complete_name ASC, id ASC")
 
         keep = QueryURL('/partners', ['grade', 'country'],

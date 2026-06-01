@@ -18,7 +18,7 @@ class CustomerPortal(sale_portal.CustomerPortal):
         if not website_id:
             if order_sudo.website_id:
                 website_id = order_sudo.website_id.id
-            elif request.website:
-                website_id = request.website.id
+            elif self.env.website:
+                website_id = self.env.website.id
 
         return super()._get_payment_values(order_sudo, website_id=website_id, **kwargs)
