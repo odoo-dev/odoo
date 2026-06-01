@@ -541,6 +541,22 @@ class SaleOrder(models.Model):
             lambda c: c.program_id.applies_on == 'future',
         )
 
+    def _coupon_has_remaining_points(self, coupon):
+        """Return True if the coupon still has usable points for at least one reward.
+
+        A coupon can still be used when its ``points`` are greater than or equal to the
+        ``required_points`` of any reward belonging to its program. This mirrors the
+        business rule that a coupon with remaining points may claim additional rewards.
+        """
+        if not coupon:
+            return False
+        # ``program_id.reward_ids`` may contain many reward lines; we succeed if any
+        # of them requires <= the points currently on the coupon.
+        for reward in coupon.program_id.reward_ids:
+            if coupon.points >= (reward.required_points or 0):
+                return True
+        return False
+
     def _get_applied_programs(self):
         """
         Returns all applied programs on current order.
@@ -1076,6 +1092,9 @@ class SaleOrder(models.Model):
         if not program.filtered_domain(self._get_program_domain()):
             return {'error': _('The program is not available for this order.')}
         elif program in self._get_applied_programs():
+            # If any attached coupon still has points left, allow another reward claim.
+            if any(self._coupon_has_remaining_points(c) for c in self.applied_coupon_ids):
+                return {}
             return {'error': _('This program is already applied to this order.'), 'already_applied': True}
         # Check for applicability from the program's triggers/rules.
         # This step should also compute the amount of points to give for that program on that order.

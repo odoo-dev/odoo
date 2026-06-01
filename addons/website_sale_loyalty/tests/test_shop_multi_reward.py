@@ -103,7 +103,11 @@ class TestClaimReward(TransactionCaseWithUserPortal):
             self.assertEqual(order.order_line[1].product_id, product2, 'added reward line should should contain product 2')
 
     def test_apply_coupon_with_multiple_rewards(self):
+        self.coupon.points = 2
         discount_reward = self.coupon_program.reward_ids.filtered('discount')
+        product_reward = self.coupon_program.reward_ids.filtered(
+            lambda r: r.reward_type == 'product'
+        )
 
         with MockRequest(self.env, website=self.website, sale_order_id=self.cart.id):
             self.WebsiteSaleController.pricelist(promo=self.coupon.code)
@@ -121,4 +125,12 @@ class TestClaimReward(TransactionCaseWithUserPortal):
                 self.cart.amount_untaxed,
                 delta=self.cart.currency_id.rounding,
                 msg="10% discount should be applied",
+            )
+
+            # Claim the second reward to verify already applied coupons can claim multiple rewards
+            self.WebsiteSaleController.claim_reward(
+                product_reward.id, code=self.coupon.code, product_id=str(self.product1.id)
+            )
+            self.assertEqual(
+                len(self.cart.order_line.reward_id), 2, "Second reward should be added to order"
             )
