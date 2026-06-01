@@ -5167,3 +5167,16 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
             1000.00,
             msg="Price should be tax included"
         )
+
+    def test_catalog_with_multiple_lines(self):
+        move = self.env["account.move"].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner_a.id,
+            'invoice_line_ids': [
+                Command.create({'product_id': self.product_a.id, 'quantity': 3}),
+                Command.create({'product_id': self.product_a.id, 'quantity': 1, 'product_uom_id': self.env['uom.uom'].search([('name', '=', 'Pack of 6')]).id}),
+            ],
+        })
+        data = move.invoice_line_ids._get_product_catalog_lines_data()
+        self.assertEqual(data['uomDisplayName'], 'Units')
+        self.assertEqual(data['quantity'], 9)

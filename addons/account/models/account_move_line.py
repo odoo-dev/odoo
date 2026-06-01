@@ -3874,14 +3874,16 @@ class AccountMoveLine(models.Model):
         """
         if self:
             self.product_id.ensure_one()
-            return {
-                'quantity': self.quantity,
-                'readOnly': self.move_id._is_readonly() or len(self) > 1,
-                'price': self[0].price_unit,
-                **self.move_id._get_product_catalog_uom_data(
-                    self.product_id, self[0].product_uom_id
-                ),
-            }
+            result = self.move_id._get_product_catalog_uom_data(self.product_id, self[0].product_uom_id)
+            measure_unit = self.env['uom.uom'].browse(result.get('uomId')) or self.product_id.uom_id
+            result.update({
+                "quantity": sum(self.mapped(
+                    lambda line: line.product_uom_id._compute_quantity(qty=line.quantity, to_unit=measure_unit),
+                )),
+                "readOnly": self.move_id._is_readonly() or len(self) > 1,
+                "price": self[0].price_unit,
+            })
+            return result
         return {
             'quantity': 0,
         }
