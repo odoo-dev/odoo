@@ -2298,7 +2298,7 @@ class MailThread(models.AbstractModel):
         # preliminary value safety check
         self._raise_for_invalid_parameters(
             set(kwargs.keys()),
-            forbidden_names={'model', 'res_id', 'subtype'}
+            forbidden_names={'model', 'res_id', 'subtype'},
         )
         if self._name == 'mail.thread' or not self.id:
             raise ValueError(_("Posting a message should be done on a business document. Use message_notify to send a notification to an user."))
@@ -3355,6 +3355,7 @@ class MailThread(models.AbstractModel):
         :param set restricting_names: set of parameters restricting given
           parameter_names, parameters not belonging to this list are rejected;
         """
+        conflicting_names = []
         if forbidden_names:
             conflicting_names = parameter_names & forbidden_names
         elif restricting_names:
@@ -5188,6 +5189,7 @@ class MailThread(models.AbstractModel):
 
     def _store_message_update_extra_fields(self, res: Store.FieldList):
         pass
+
     # ------------------------------------------------------
     # STORE
     # ------------------------------------------------------
