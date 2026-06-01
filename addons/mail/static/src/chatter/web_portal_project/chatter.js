@@ -99,9 +99,12 @@ export class Chatter extends Component {
         this.state.thread = this.store["mail.thread"].insert(data);
         if (threadId === false) {
             if (this.state.thread.messages.length === 0) {
+                const { effectiveSelf } = this.state.thread;
+                const authorModel = effectiveSelf.Model._name;
                 this.state.thread.messages.push({
                     id: this.store.getNextTemporaryId(),
-                    author_id: this.state.thread.effectiveSelf,
+                    author_id: authorModel === "res.partner" ? effectiveSelf : undefined,
+                    author_guest_id: authorModel === "mail.guest" ? effectiveSelf : undefined,
                     body: _t("Creating a new record..."),
                     message_type: "notification",
                     thread: this.state.thread,

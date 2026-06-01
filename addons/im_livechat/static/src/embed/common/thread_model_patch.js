@@ -39,7 +39,8 @@ patch(Thread.prototype, {
                 ].get(extraData.selected_answer_id);
             }
             const temporaryMsg = this.store["mail.message"].insert({
-                author_id: this.store.self,
+                author_id: this.store.self_partner,
+                author_guest_id: this.store.self_guest,
                 body: await generateEmojisOnHtml(body, { allowEmojiLoading: false }),
                 id: this.store.getNextTemporaryId(),
                 model: "discuss.channel",
@@ -49,7 +50,8 @@ patch(Thread.prototype, {
             this.messages.push(temporaryMsg);
             this.channel.chatbot?._simulateTyping(2 ** 31 - 1);
             const channel = await this.store.env.services["im_livechat.livechat"].persist(this);
-            temporaryMsg.author_id = this.store.self; // Might have been created after persist.
+            temporaryMsg.author_id = this.store.self_partner; // Might have been created after persist.
+            temporaryMsg.author_guest_id = this.store.self_guest;
             if (!channel) {
                 return;
             }
