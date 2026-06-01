@@ -1045,6 +1045,7 @@ class TestChatterTweaks(ThreadRecipients):
             }
             if has_header:
                 headers['X-Msg-To-Add'] = f'{self.test_partner.email_formatted},{self.test_partner_catchall.email_formatted}'
+                headers['X-Msg-Cc-Add'] = ''
             for recipient in self.test_partner + self.test_partner_catchall:
                 self.assertMailMail(
                     recipient,

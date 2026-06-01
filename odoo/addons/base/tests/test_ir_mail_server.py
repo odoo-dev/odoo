@@ -534,90 +534,73 @@ class TestIrMailServer(TransactionCase, MockSmtplibCase):
 
         self.assertIsInstance(serialized, bytes)
 
-    def test_mail_force_cc(self):
-        """Check that "To" recipients are turned into "Cc" recipients in the headers when present in X-Msg-Cc-Force."""
+    def test_mail_add_cc(self):
+        """Check that recipients are added to the "Cc" header when present in X-Msg-Cc-Add."""
         IrMailServer = self.env['ir.mail_server']
         mail_from = 'specific_user@test.mycompany.com'
 
-        # Simple use-case to illustrate how it is used in the mail_compose_message wizard:
-        # The wizard adds both "to" and "cc" as partners recipients so they ends up both in the "to" and smtp_to_list.
-        # But configure X-Msg-Cc-Force to move the "cc" partners recipients into fake "cc" through headers.
+        # Simple use-case: Add a new fake CC recipient
         with self.mock_smtplib_connection():
             smtp_session = IrMailServer._connect__(smtp_from=mail_from)
             message = self._build_email(
                 mail_from=mail_from,
-                # email_to includes the "cc" recipients
-                email_to=['test-to@ex.com', 'test-cc@ex.com'],
+                email_to=['test-to@ex.com'],
                 email_cc=['test-cc-std@ex.com'],
-                # force the "cc" recipient setup in the "to" to be moved into the "cc" recipient header
-                headers={'X-Msg-Cc-Force': 'test-cc@ex.com'},
+                headers={'X-Msg-Cc-Add': 'test-cc-new@ex.com'},
             )
             IrMailServer.send_email(message, smtp_session=smtp_session)
         self.assertSMTPEmailsSent(
             smtp_from=mail_from,
             message_from=mail_from,
             mail_server=self.mail_server_user,
-            # Sent directly to the Cc recipient
-            smtp_to_list=['test-to@ex.com', 'test-cc@ex.com', 'test-cc-std@ex.com'],
-            # But the Cc recipient must not appear in the "To" header
+            # fake Cc is not added to the smtp to list
+            smtp_to_list=['test-to@ex.com', 'test-cc-std@ex.com'],
             msg_to_lst=['test-to@ex.com'],
-            # But well in the Cc header
-            msg_cc_lst=['test-cc-std@ex.com', 'test-cc@ex.com'],
+            # Cc header contains original Cc + the fake one
+            msg_cc_lst=['test-cc-std@ex.com', 'test-cc-new@ex.com'],
         )
 
         # Additional checks
-        for (email_to, email_cc, email_to_add, email_cc_force), (expected_to, expected_msg_to, expected_msg_cc) in (
-            # Fake Cc (test-cc@ex.com is present in the headers but not in the smtp_to_list
-            ((['test-to@ex.com'], ['test-cc-std@ex.com'], None, 'test-cc@ex.com'),
-             (['test-to@ex.com', 'test-cc-std@ex.com'], ['test-to@ex.com'], ['test-cc-std@ex.com', 'test-cc@ex.com'])),
-            # Using formated emails (format of X-Msg-Cc-Force wins)
-            ((['"Formatted To" <test-to@ex.com>', '"Formatted Cc" <test-cc@ex.com>'],
-              ['"Formatted Cc std" <test-cc-std@ex.com>'],
-              None,
-              '"Formatted Cc mod" <test-cc@ex.com>'),
-             (['test-to@ex.com', 'test-cc@ex.com', 'test-cc-std@ex.com'],
-              ['"Formatted To" <test-to@ex.com>'],
-              ['"Formatted Cc std" <test-cc-std@ex.com>', '"Formatted Cc mod" <test-cc@ex.com>'])),
-            # Multiple Cc forced (one of them not in the smtp_to_list)
-            ((['test-to@ex.com', 'test-cc2@ex.com'], ['test-cc-std@ex.com'], None, 'test-cc@ex.com, test-cc2@ex.com'),
-             (['test-to@ex.com', 'test-cc2@ex.com', 'test-cc-std@ex.com'],
-              ['test-to@ex.com'],
-              ['test-cc-std@ex.com', 'test-cc@ex.com', 'test-cc2@ex.com'])),
-            # Multiple Cc with format
-            ((['"Formatted To" <test-to@ex.com>', '"Formatted Cc2" <test-cc2@ex.com>'],
-              ['"Formated cc-std" <test-cc-std@ex.com>'],
-                None,
-              '"Formated cc" <test-cc@ex.com>, test-cc2@ex.com'),
-             (['test-to@ex.com', 'test-cc2@ex.com', 'test-cc-std@ex.com'],
-              ['"Formatted To" <test-to@ex.com>'],
-              ['"Formated cc-std" <test-cc-std@ex.com>', '"Formated cc" <test-cc@ex.com>', 'test-cc2@ex.com'])),
-            # Mixin X-Msg-Cc-Force and X-Msg-To-Add (distinct)
-            ((['test-to@ex.com', 'test-to-add@ex.com', 'test-cc-force@ex.com'], ['test-cc@ex.com'],
-              'test-to-add@ex.com', 'test-cc-force@ex.com'),
-             (['test-to@ex.com', 'test-to-add@ex.com', 'test-cc-force@ex.com', 'test-cc@ex.com'],
-              ['test-to@ex.com', 'test-to-add@ex.com'], ['test-cc-force@ex.com', 'test-cc@ex.com'])),
-            # Mixin X-Msg-Cc-Force and X-Msg-To-Add (common)
-            ((['test-to@ex.com', 'test-to-add-cc-force@ex.com'], ['test-cc@ex.com'],
-              'test-to-add-cc-force@ex.com', 'test-to-add-cc-force@ex.com'),
-             (['test-to@ex.com', 'test-to-add-cc-force@ex.com', 'test-cc@ex.com'],
-              ['test-to@ex.com'], ['test-to-add-cc-force@ex.com', 'test-cc@ex.com'])),
-            # Mixin X-Msg-Cc-Force and X-Msg-To-Add (common&distinct)
-            ((['test-to@ex.com', 'test-to-add-cc-force@ex.com', 'test-to-add@ex.com', 'test-force-cc@ex.com'],
-              ['test-cc@ex.com'],
-              'test-to-add@ex.com, test-to-add-cc-force@ex.com',
-              'test-force-cc@ex.com, test-to-add-cc-force@ex.com'),
-             (['test-to@ex.com', 'test-to-add-cc-force@ex.com', 'test-to-add@ex.com', 'test-force-cc@ex.com', 'test-cc@ex.com'],
-              ['test-to-add@ex.com', 'test-to@ex.com'],
-              ['test-to-add-cc-force@ex.com', 'test-cc@ex.com', 'test-force-cc@ex.com'])),
+        for (email_to, email_cc, email_to_add, email_cc_add), (expected_smtp, expected_msg_to, expected_msg_cc) in (
+                # Pure fake Cc
+                ((['test-to@ex.com'], ['test-cc-std@ex.com'], None, 'test-cc-add@ex.com'),
+                 (['test-to@ex.com', 'test-cc-std@ex.com'],
+                  ['test-to@ex.com'], ['test-cc-std@ex.com', 'test-cc-add@ex.com'])),
+
+                # Pure fake To
+                ((['test-to@ex.com'], ['test-cc@ex.com'], 'test-to-add@ex.com', None),
+                 (['test-to@ex.com', 'test-cc@ex.com'],
+                  ['test-to@ex.com', 'test-to-add@ex.com'], ['test-cc@ex.com'])),
+
+                # Mix both
+                ((['test-to@ex.com'], ['test-cc@ex.com'], 'test-to-add@ex.com', 'test-cc-add@ex.com'),
+                 (['test-to@ex.com', 'test-cc@ex.com'],
+                  ['test-to@ex.com', 'test-to-add@ex.com'], ['test-cc@ex.com', 'test-cc-add@ex.com'])),
+
+                # Avoid duplicate in Cc if address is already in To
+                ((['test-to@ex.com'], ['test-cc@ex.com'], None, 'test-to@ex.com'),
+                 (['test-to@ex.com', 'test-cc@ex.com'],
+                  ['test-to@ex.com'], ['test-cc@ex.com'])),
+
+                # 5. Formatted emails
+                ((['"Formatted To" <test-to@ex.com>'], ['"Formatted Cc" <test-cc@ex.com>'],
+                  None, '"New Cc" <test-cc-add@ex.com>'),
+                 (['test-to@ex.com', 'test-cc@ex.com'],
+                  ['"Formatted To" <test-to@ex.com>'],
+                  ['"Formatted Cc" <test-cc@ex.com>', '"New Cc" <test-cc-add@ex.com>'])),
         ):
-            with self.subTest(email_to=email_to, email_cc=email_cc, email_cc_force=email_cc_force):
+            with self.subTest(email_to=email_to, email_cc=email_cc, email_to_add=email_to_add,
+                              email_cc_add=email_cc_add):
                 with self.mock_smtplib_connection():
                     smtp_session = IrMailServer._connect__(smtp_from=mail_from)
-                    message = self._build_email(
-                        mail_from=mail_from, email_to=email_to, email_cc=email_cc,
-                        headers=({'X-Msg-Cc-Force': email_cc_force}
-                                 | ({'X-Msg-To-Add': email_to_add} if email_to_add else {})))
+                    headers = {}
+                    if email_to_add:
+                        headers['X-Msg-To-Add'] = email_to_add
+                    if email_cc_add:
+                        headers['X-Msg-Cc-Add'] = email_cc_add
+
+                    message = self._build_email(mail_from, email_to=email_to, email_cc=email_cc, headers=headers)
                     IrMailServer.send_email(message, smtp_session=smtp_session)
                 self.assertSMTPEmailsSent(
                     smtp_from=mail_from, message_from=mail_from, mail_server=self.mail_server_user,
-                    smtp_to_list=expected_to, msg_to_lst=expected_msg_to, msg_cc_lst=expected_msg_cc)
+                    smtp_to_list=expected_smtp, msg_to_lst=expected_msg_to, msg_cc_lst=expected_msg_cc)

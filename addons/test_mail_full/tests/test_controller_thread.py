@@ -200,4 +200,4 @@ class TestPortalThreadController(MailControllerThreadCommon):
         mail = capture_mail.records
         self.assertEqual(len(mail), 1)
         header = literal_eval(mail.headers)
-        self.assertEqual(header.get('X-Msg-Cc-Force'), ','.join(partner_cc.mapped('email_formatted')))
+        self.assertEqual(header.get('X-Msg-Cc-Add'), ','.join(partner_cc.mapped('email_formatted')))

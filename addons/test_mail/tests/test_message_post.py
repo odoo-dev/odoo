@@ -860,6 +860,7 @@ class TestMessagePost(TestMessagePostCommon, CronMixinCase):
             'X-Custom': 'Done',  # mail.test.simple override
             # contains external people: partner_1 (follower) and asked outgoing email
             'X-Msg-To-Add': f'{additional_to},{self.partner_1.email_formatted}',
+            'X-Msg-Cc-Add': '',
             'X-Odoo-Objects': f'{test_record._name}-{test_record.id}',
         }
         with self.assertSinglePostNotifications(

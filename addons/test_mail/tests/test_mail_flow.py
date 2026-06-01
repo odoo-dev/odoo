@@ -176,8 +176,8 @@ class TestMailFlow(MailCommon, TestRecipients):
             smtp_from=self.mail_server_notification.from_filter,
             smtp_to_list=[self.user_employee.email_normalized],
             # customers in To/Cc of reply added in envelope to keep them in discussions
-            msg_to_lst=[self.user_employee.email_formatted, self.test_emails[0], self.test_emails[1]],
-            msg_cc_lst=[],
+            msg_to_lst=[self.user_employee.email_formatted, self.test_emails[0]],
+            msg_cc_lst=[self.test_emails[1]],
         )
 
         # employee replies from their email reader, adds their colleague
@@ -194,9 +194,9 @@ class TestMailFlow(MailCommon, TestRecipients):
                     'message_values': {
                         'author_id': self.partner_employee,
                         'email_from': self.partner_employee.email_formatted,
-                        'incoming_email_cc': self.partner_employee_2.email_formatted,
+                        'incoming_email_cc': f'{self.partner_employee_2.email_formatted}, {self.test_emails[1]}',
                         # be sure not to have catchall reply-to ! customers are in 'To' due to Reply-All
-                        'incoming_email_to': f'{self.test_emails[0]}, {self.test_emails[1]}',
+                        'incoming_email_to': self.test_emails[0],
                         'notified_partner_ids': self.customer_zboing,
                         'partner_ids': self.customer_zboing,
                         'partner_cc_ids': self.partner_employee_2,
@@ -216,11 +216,8 @@ class TestMailFlow(MailCommon, TestRecipients):
             smtp_from=self.mail_server_notification.from_filter,
             smtp_to_list=[self.customer_zboing.email_normalized],
             # customers are still in discussion
-            msg_to_lst=[self.customer_zboing.email_formatted, self.test_emails[0], self.test_emails[1],
-                        self.partner_employee_2.email_formatted],
-            # Differ from mail.message because the value is removed in _message_route_process and then readded
-            # (so message_post doesn't see it)
-            msg_cc_lst=[],
+            msg_to_lst=[self.customer_zboing.email_formatted, self.test_emails[0]],
+            msg_cc_lst=[self.partner_employee_2.email_formatted, self.test_emails[1]],
         )
 
     def test_lead_mailgateway(self):

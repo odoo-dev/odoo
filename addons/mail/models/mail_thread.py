@@ -9,6 +9,7 @@ import email.policy
 import encodings
 import hashlib
 import hmac
+from itertools import chain, repeat
 import json
 import lxml
 import logging
@@ -3582,7 +3583,9 @@ class MailThread(models.AbstractModel):
                 render_values=render_values,
             )
             recipients_emails = recipients_group['recipients_emails']
-            recipients_ids = recipients_group['recipients_ids']
+            all_recipients_ids = recipients_group['recipients_ids'] + recipients_group['recipients_cc_ids']
+            recipient_ids_set = set(recipients_group['recipients_ids'])
+            recipient_cc_ids_set = set(recipients_group['recipients_cc_ids'])
             recipients_to_emails = {r['id']: r['email_normalized'] for r in recipients_group['recipients_data']}
 
             # Only keep one recipient per email address to avoid sending the exact
@@ -3597,13 +3600,14 @@ class MailThread(models.AbstractModel):
             deduplicated_recipient_ids = set(email_to_deduplicated_recipient_id.values())
 
             # create MailMail for partners
-            for recipients_ids_chunk in split_every(gen_batch_size, recipients_ids):
+            for recipients_ids_chunk in split_every(gen_batch_size, all_recipients_ids):
                 deduplicated_recipient_ids_chunk = [pid for pid in recipients_ids_chunk if pid in deduplicated_recipient_ids]
                 if deduplicated_recipient_ids_chunk:
                     mail_values = self._notify_by_email_get_final_mail_values(
-                        deduplicated_recipient_ids_chunk,
+                        [rid for rid in deduplicated_recipient_ids_chunk if rid in recipient_ids_set],
                         base_mail_values,
-                        additional_values={'body_html': mail_body}
+                        additional_values={'body_html': mail_body},
+                        recipient_cc_ids=[rid for rid in deduplicated_recipient_ids_chunk if rid in recipient_cc_ids_set],
                     )
                     new_email = SafeMail.create(mail_values)
                 else:
@@ -3981,7 +3985,7 @@ class MailThread(models.AbstractModel):
         # notified by incoming email (incoming_email_cc and incoming_email_to)
         # that were not transformed into partners to notify
         external_emails = [
-            formataddr((r['name'], r['email_normalized']))
+            (formataddr((r['name'], r['email_normalized'])), r['is_cc'])
             for r in recipients_data if r['active'] and r['email_normalized'] and r['share']
         ]
         external_emails_normalized = [
@@ -3989,15 +3993,14 @@ class MailThread(models.AbstractModel):
             for r in recipients_data if r['active'] and r['email_normalized'] and r['share']
         ]
         external_emails += list({
-            email for email in email_split_and_format_normalize(
-                f"{message_sudo.incoming_email_to or ''},{message_sudo.incoming_email_cc or ''}"
-            )
+            (email, is_cc) for email, is_cc in chain(
+                zip(email_split_and_format_normalize(message_sudo.incoming_email_to or ''), repeat(False)),
+                zip(email_split_and_format_normalize(message_sudo.incoming_email_cc or ''), repeat(True)))
             if email_normalize(email) not in external_emails_normalized
         })
         if external_emails and len(external_emails) < self._CUSTOMER_HEADERS_LIMIT_COUNT:  # more than threshold = considered as public record (slide, forum, ...) -> do not leak
-            headers['X-Msg-To-Add'] = ','.join(external_emails)
-        if message.partner_cc_ids:
-            headers['X-Msg-Cc-Force'] = ','.join(message.partner_cc_ids.mapped('email_formatted'))
+            headers['X-Msg-To-Add'] = ','.join(email for email, is_cc in external_emails if not is_cc)
+            headers['X-Msg-Cc-Add'] = ','.join(email for email, is_cc in external_emails if is_cc)
         # sudo: access to mail.alias.domain, restricted
         if message_sudo.record_alias_domain_id.bounce_email:
             headers['Return-Path'] = message_sudo.record_alias_domain_id.bounce_email
@@ -4007,7 +4010,7 @@ class MailThread(models.AbstractModel):
         return base_mail_values
 
     def _notify_by_email_get_final_mail_values(self, recipient_ids, mail_values,
-                                               additional_values=None):
+                                               recipient_cc_ids=None, additional_values=None):
         """ Perform final formatting of values to create notification emails.
         Basic method just set the recipient partners as mail_mail recipients.
         Override to generate other mail values like email_to or email_cc.
@@ -4021,6 +4024,7 @@ class MailThread(models.AbstractModel):
         """
         final_mail_values = dict(mail_values)
         final_mail_values['recipient_ids'] = [(4, pid) for pid in recipient_ids]
+        final_mail_values['recipient_cc_ids'] = [(4, pid) for pid in recipient_cc_ids or []]
         if additional_values:
             final_mail_values.update(additional_values)
         return final_mail_values
@@ -4202,6 +4206,7 @@ class MailThread(models.AbstractModel):
                     'name': partner name;
                     'lang': partner lang;
                     'groups': res.group IDs if linked to a user;
+                    'is_cc': whether to send in "Cc" or "To";
                     'notif': notification type, one of 'inbox', 'email', 'sms' (SMS App),
                         'whatsapp (WhatsAapp);
                     'share': is partner a customer (partner.partner_share);
@@ -4250,6 +4255,7 @@ class MailThread(models.AbstractModel):
             f"{msg_sudo.incoming_email_cc or ''}"
         )]
 
+        partner_cc_ids = message.partner_cc_ids
         for pid, pdata in res.items():
             if pid and pid == skip_author_id:
                 continue
@@ -4257,6 +4263,7 @@ class MailThread(models.AbstractModel):
                 continue
             if pdata['email_normalized'] in emailed_normalized:
                 continue
+            pdata['is_cc'] = pid in partner_cc_ids.ids
             recipients_data.append(pdata)
 
         # include emails only
@@ -4265,6 +4272,7 @@ class MailThread(models.AbstractModel):
                 'active': True,
                 'email_normalized': email,
                 'id': False,
+                'is_cc': False,
                 'is_follower': False,
                 'name': name or email,
                 'lang': False,
@@ -4399,6 +4407,7 @@ class MailThread(models.AbstractModel):
             group_data.setdefault('recipients_data', [])
             group_data.setdefault('recipients_emails', [])
             group_data.setdefault('recipients_ids', [])
+            group_data.setdefault('recipients_cc_ids', [])
             group_button_access = group_data.setdefault('button_access', {})
             group_button_access.setdefault('url', access_link)
             group_button_access.setdefault('title', view_title)
@@ -4448,7 +4457,10 @@ class MailThread(models.AbstractModel):
                 if group_data['active'] and group_func(recipient_data):
                     group_data['recipients_data'].append(recipient_data)
                     if recipient_data['id']:
-                        group_data['recipients_ids'].append(recipient_data['id'])
+                        if recipient_data.get('is_cc'):
+                            group_data['recipients_cc_ids'].append(recipient_data['id'])
+                        else:
+                            group_data['recipients_ids'].append(recipient_data['id'])
                     elif recipient_data['email_normalized']:
                         group_data['recipients_emails'].append(recipient_data['email_normalized'])
                     break

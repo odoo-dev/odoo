@@ -919,6 +919,7 @@ class DiscussChannel(models.Model):
                     'active': True,
                     'email_normalized': email_normalized,
                     'id': partner_id,
+                    'is_cc': False,
                     'is_follower': False,
                     'groups': [],
                     'lang': lang,
