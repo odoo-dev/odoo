@@ -1076,6 +1076,13 @@ class SaleOrder(models.Model):
         if not program.filtered_domain(self._get_program_domain()):
             return {'error': _('The program is not available for this order.')}
         elif program in self._get_applied_programs():
+            if coupon:
+                remaining_points = self._get_real_points_for_coupon(coupon)
+                min_required = min(program.reward_ids.mapped('required_points'), default=0)
+                if remaining_points >= min_required:
+                    status = self._program_check_compute_points(program)[program]
+                    if 'error' not in status:
+                        return self.__try_apply_program(program, coupon, status)
             return {'error': _('This program is already applied to this order.'), 'already_applied': True}
         # Check for applicability from the program's triggers/rules.
         # This step should also compute the amount of points to give for that program on that order.
