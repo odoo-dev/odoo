@@ -151,16 +151,13 @@ class UomUom(models.Model):
                 - if true, raise an exception if the conversion is not possible (different UomUom category),
                 - otherwise, return the initial quantity
         """
-        if not self or not qty:
+        if not self or not qty or self == to_unit:
             return qty
         self.ensure_one()
 
-        if self == to_unit:
-            amount = qty
-        else:
-            amount = qty * self.factor
-            if to_unit:
-                amount = amount / to_unit.factor
+        amount = qty * self.factor
+        if to_unit:
+            amount = amount / to_unit.factor
 
         if to_unit and round:
             digits = self.env['decimal.precision'].precision_get('Product Unit')
