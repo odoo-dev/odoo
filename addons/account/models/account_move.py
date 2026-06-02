@@ -1534,8 +1534,6 @@ class AccountMove(models.Model):
 
         if product_line in product_line._get_discount_lines():
             kwargs['special_type'] = 'global_discount'
-        elif product_line in product_line._get_downpayment_lines():
-            kwargs['special_type'] = 'down_payment'
 
         return self.env['account.tax']._prepare_base_line_for_taxes_computation(product_line, **kwargs)
 
