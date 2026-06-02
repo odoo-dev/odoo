@@ -6,6 +6,7 @@ import io
 import logging
 import os
 import os.path
+import re
 import subprocess as sp
 import selectors
 import sys
@@ -15,15 +16,15 @@ from collections.abc import Buffer, Sequence
 from contextlib import contextmanager
 from email.utils import format_datetime
 from functools import cache
-from io import DEFAULT_BUFFER_SIZE
+from io import DEFAULT_BUFFER_SIZE, BytesIO
 from typing import BinaryIO, NamedTuple, Literal
-from urllib.parse import unquote, urlsplit
+from urllib.parse import unquote
 
 import h11
 
-import odoo.release
-from odoo.http import request
 from odoo.http.router import root
+from odoo.http.server import SERVER_AGENT, SERVER_SOFTWARE
+from odoo.http.server_log import http_log
 from odoo.tools.misc import find_in_path
 
 __all__ = ['PaperMuncherServer', '_paper_muncher']
@@ -32,10 +33,11 @@ _logger = logging.getLogger(__name__)
 
 DEFAULT_WRITE_TIMEOUT = 15  # seconds
 DEFAULT_SERVE_TIMEOUT = 15 * 60  # 15 minutes
-DEFAULT_CHUNK_SIZE = 8192  # 8kiB
+DEFAULT_CHUNK_SIZE = 8192  # 8kiB, buffer size of paper-muncher
 MAX_INCOMPLETE_EVENT_SIZE = 8192  # 8kiB
 FALLBACK_BIN_PATH = '/opt/paper-muncher/bin/paper-muncher'
-SERVER_SOFTWARE = f'{odoo.release.product_name}/{odoo.release.version}'
+
+GET_DOCUMENT_RE = re.compile(br"^/paper-muncher/(\.|[0-9]+\.(?:html|xhtml|xml))$")
 
 
 class PaperMuncherServer:
@@ -100,7 +102,8 @@ class PaperMuncherServer:
             e = f"Paper Muncher exceeded the maximum serve timeout ({timeout}s)"
             raise TimeoutError(e) from timeout_error
         except OSError:
-            _try_kill_proc(())
+            _try_kill_proc(self._process)
+            raise
         finally:
             self._selector.close()
 
@@ -126,6 +129,7 @@ class PaperMuncherServer:
 
     def _drain_stderr(self):
         """Read and log any remaining stderr from the paper-muncher process."""
+        return
         chunks = []
         fd = self._process.stderr.fileno()
         try:
@@ -144,8 +148,10 @@ class PaperMuncherServer:
         if not log_data:
             self._selector.unregister(self._process.stderr)
             return
-        _logger.warning("paper-muncher (pid %s) wrote on stderr:\n%s",
-                        self._process.pid, log_data.decode('utf-8', errors='replace'))
+        with open("/tmp/log", "ab") as file:
+            file.write(log_data)
+        #_logger.warning("paper-muncher (pid %s) wrote on stderr:\n%s",
+        #                self._process.pid, log_data.decode('utf-8', errors='replace'))
 
     def _handle_stdout_message(self):
         self._conn.receive_data(os.read(
@@ -158,6 +164,7 @@ class PaperMuncherServer:
 
         while True:
             event = self._conn.next_event()
+            print(self._conn.states, event)
             if event is h11.NEED_DATA:
                 break
             match event:
@@ -170,12 +177,9 @@ class PaperMuncherServer:
                 case h11.Data():
                     body_chunks.append(event.data)
                 case h11.EndOfMessage():
+                    http_log(logging.DEBUG, '[REQ] ', req=request, res=None)
                     body = b''.join(body_chunks)
-                    self.route(
-                        request.method.decode('ascii'),
-                        request.target.decode('ascii'),  # %-encoded
-                        body,
-                    )
+                    self.dispatch(request, body)
                     self._conn.start_next_cycle()
                 case _:
                     e = f"unexpected {event=} in states={self._conn.states=}"
@@ -198,42 +202,14 @@ class PaperMuncherServer:
                 ('Server', SERVER_SOFTWARE),
             ],
         ))
+        with open(f'/tmp/{path.replace("/","_")}', 'wb') as file:
+            file.write(content)
+            print("---------------------> wrote to", file.name)
+
         self._send(h11.Data(data=content))
         self._send(h11.EndOfMessage())
-        self._process.stdin.flush()
+        # self._process.stdin.flush()
         _logger.info("Document %s sent successfully", path)
-        self._documents_served.add(index)
-
-    def _handle_get_asset(self, path):
-        """Serve one ``GET`` asset request from the worker."""
-        ctx = contextvars.copy_context()
-        with _preserve_thread_data():
-            body_iter, http_status, resp_headers = ctx.run(_call_wsgi, _make_environ(path))
-            status_code = int(http_status.split(' ', 1)[0])
-
-            if sendfile_path := resp_headers.get('X-Sendfile'):
-                self._send(h11.Response(status_code=status_code, headers=[
-                    ('Date', format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
-                    ('Server', SERVER_SOFTWARE),
-                    ('Content-Length', str(os.path.getsize(sendfile_path))),
-                    ('Content-Type', resp_headers['Content-Type']),
-                ]))
-                with open(sendfile_path, 'rb') as f:
-                    while chunk := f.read(DEFAULT_BUFFER_SIZE):
-                        self._send(h11.Data(data=chunk))
-            else:
-                self._send(h11.Response(status_code=status_code, headers=[
-                    ('Date', format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
-                    ('Server', SERVER_SOFTWARE),
-                    ('Content-Length', resp_headers['Content-Length']),
-                    ('Content-Type', resp_headers['Content-Type']),
-                ]))
-                for chunk in body_iter:
-                    self._send(h11.Data(data=chunk))
-
-        self._send(h11.EndOfMessage())
-        self._process.stdin.flush()
-        _logger.info("Asset %s sent successfully", path)
 
     def _handle_put(self, body: bytes):
         # The PUT is a signal that the PDF is ready; acknowledge it so paper-muncher
@@ -246,7 +222,7 @@ class PaperMuncherServer:
             ],
         ))
         self._send(h11.EndOfMessage())
-        self._process.stdin.flush()
+        # self._process.stdin.flush()
         self._process.stdin.close()
 
         # Collect: body (older protocol variants), bytes h11 buffered from the same
@@ -288,22 +264,104 @@ class PaperMuncherServer:
                 break
         return chunks
 
-    def route(self, method: str, path: str, body: bytes):
-        components = path.lstrip('/').split('/')
+    def dispatch(self, request: h11.Request, body: bytes):
+        if request.method == b'GET' and (match := GET_DOCUMENT_RE.match(request.target)):
+            x = self._handle_get_document(match[1].decode('ascii'))
+            print("GET ok")
+            return x
+        if request.method == b'PUT' and request.target == b'/paper-muncher':
+            x = self._handle_put(body)
+            print("PUT ok")
+            return x
+        with _preserve_thread_data():
+            return self._handle_fallback(request, body)
 
-        def is_document(file: str):
-            return file.endswith(('.html', '.xhtml', '.xml')) or file == "."
+    def _handle_fallback(self, request: h11.Request, body: bytes):
+        #ctx = contextvars.copy_context() # FIXME ask karma
 
-        match (method, components):
-            case ('GET', (file,)) if is_document(file):
-                return self._handle_get_document(file)
-            case ('GET', _):
-                return self._handle_get_asset(path)
-            case ('PUT', _):
-                return self._handle_put(body)
-            case _:
-                e = f"Unsupported paper-muncher request: {method=}, {path=}"
-                raise RuntimeError(e)
+        # Heavily inspired from odoo.http.server.HTTPSocket._make_environ
+        assert request.target.startswith(b'/'), request.target
+        request_uri = request.target.decode('ascii')
+        path_quoted, _, query = request_uri.partition('?')
+        environ = {
+            'REQUEST_METHOD': request.method.decode('ascii'),
+            'SCRIPT_NAME': '',
+            'PATH_INFO': unquote(path_quoted, 'latin-1'),
+            'QUERY_STRING': query,
+            'REQUEST_URI': request_uri,
+            'RAW_URI': request_uri,
+            # PEP-3333 "WSGI"
+            # > missing variables should be left out of the environ dict
+            # 'REMOTE_ADDR': ...,
+            # 'REMOTE_PORT': ...,
+            # 'SERVER_NAME': ...,
+            # 'SERVER_PORT': ...,
+            'SERVER_PROTOCOL': 'HTTP/' + request.http_version.decode('ascii'),
+            'SERVER_SOFTWARE': SERVER_SOFTWARE,
+            'wsgi.version': (1, 0),
+            'wsgi.url_scheme': 'http',
+            'wsgi.input': BytesIO(body),
+            'wsgi.errors': sys.stderr,
+            'wsgi.multithread': False,
+            'wsgi.multiprocess': False,
+            'wsgi.run_once': False,
+        }
+        # paper-muncher guarantees that there's no duplicated header name
+        headers = {
+            'HTTP_' + header.upper().replace(b'-', b'_').decode('ascii'):
+                value.decode('latin-1')
+            for header, value in request.headers
+        }
+        if content_type := headers.pop('HTTP_CONTENT_TYPE', ''):
+            environ['CONTENT_TYPE'] = content_type
+        if content_length := headers.pop('HTTP_CONTENT_LENGTH', ''):
+            environ['CONTENT_LENGTH'] = content_length
+        environ.update(headers)
+
+        response_status_code = None
+        response_headers: dict[bytes, str | bytes] | None = None
+        def start_response(status, headers, exc_info=None):
+            nonlocal response_status_code, response_headers
+            response_status_code = int(status.partition(' ')[0])
+            response_headers = {
+                header.lower().encode('ascii'): value
+                for header, value in headers
+            }
+
+        response_body = root(environ, start_response)
+        response = None
+
+        try:
+            response_headers[b'date'] = format_datetime(dt.datetime.now(dt.UTC), usegmt=True)
+            response_headers[b'server'] = SERVER_AGENT
+            response_headers.pop(b'connection', None)
+
+            if sendfile_path := response_headers.get('X-Sendfile'):
+                response_headers[b'content-length'] = str(os.path.getsize(sendfile_path))
+                response = h11.Response(
+                    status_code=response_status_code,
+                    headers=list(response_headers.items()),
+                )
+                self._send(response)
+                with open(sendfile_path, 'rb') as f:
+                    while chunk := f.read(DEFAULT_BUFFER_SIZE):
+                        self._send(h11.Data(data=chunk))
+            else:
+                response = h11.Response(
+                    status_code=response_status_code,
+                    headers=list(response_headers.items())
+                )
+                self._send(response)
+                for chunk in response_body:
+                    self._send(h11.Data(data=chunk))
+
+            self._send(h11.EndOfMessage())
+            # self._process.stdin.flush()  # TODO: useful?
+        except Exception:
+            self._conn.send_failed()
+            raise
+        finally:
+            http_log(logging.INFO, '', req=request, res=response)
 
 
 def _remaining_time(deadline: float) -> float:
@@ -353,7 +411,7 @@ def _write_with_timeout(
                 raise RuntimeError(e)
             total_written += written
 
-    _logger.debug("elapsed time writing: %.3fs", time.monotonic() - (deadline - timeout))
+    _logger.debug("sent %d bytes in %.3fs", total_written, time.monotonic() - (deadline - timeout))
 
 
 @contextmanager
@@ -388,50 +446,6 @@ def _preserve_thread_data():
             if hasattr(current_thread, attr):
                 delattr(current_thread, attr)
 
-
-def _make_environ(path: str) -> dict:
-    """Build a WSGI environ for an internal Odoo GET request as a public user.
-
-    Protected resources must carry an access token in the URL; this function
-    deliberately omits session cookies so the request is treated as public.
-    """
-    parsed = urlsplit(path)
-    path_info = unquote(parsed.path, 'latin-1')
-    query_string = parsed.query or ''
-    request_uri = f'{path_info}?{query_string}' if query_string else path_info
-    current_environ = request.httprequest.environ
-    return {
-        'REQUEST_METHOD': 'GET',
-        'SCRIPT_NAME': '',
-        'PATH_INFO': path_info,
-        'QUERY_STRING': query_string,
-        'REQUEST_URI': request_uri,
-        'RAW_URI': request_uri,
-        'REMOTE_ADDR': current_environ['REMOTE_ADDR'],
-        'SERVER_NAME': current_environ['SERVER_NAME'],
-        'SERVER_PORT': current_environ['SERVER_PORT'],
-        'SERVER_PROTOCOL': 'HTTP/1.1',
-        'SERVER_SOFTWARE': SERVER_SOFTWARE,
-        'wsgi.version': (1, 0),
-        'wsgi.url_scheme': current_environ.get('wsgi.url_scheme', 'http'),
-        'wsgi.input': io.BytesIO(),
-        'wsgi.errors': sys.stderr,
-        'wsgi.multithread': True,
-        'wsgi.multiprocess': False,
-        'wsgi.run_once': False,
-    }
-
-
-def _call_wsgi(environ: dict) -> tuple:
-    """Call Odoo's WSGI root app; return (body_iter, status_str, headers_dict)."""
-    result = {}
-
-    def start_response(status, response_headers, exc_info=None):
-        result['status'] = status
-        result['headers'] = dict(response_headers)
-
-    body_iter = root(environ, start_response)
-    return body_iter, result['status'], result['headers']
 
 def _try_kill_proc(process) -> None:
     """Try killing the process, ignore errors."""

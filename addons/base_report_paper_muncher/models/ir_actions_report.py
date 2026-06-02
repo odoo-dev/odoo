@@ -79,7 +79,7 @@ class IrActionsReport(models.Model):
             open_body, body, close_body = partition_on_body(bodies[0])
             documents = [f'{open_body}{header}{body}{footer}{close_body}\n']
 
-        names = [f'pipe:/papermuncher/{i}.html' for i in range(len(documents))]
+        names = [f'pipe:/paper-muncher/{i}.html' for i in range(len(documents))]
         extra_args = [
             '--scale', f'{scale}dpi',
             '--margins', 'none',
@@ -97,6 +97,7 @@ class IrActionsReport(models.Model):
                 extra_args += ['--width', f'{paperformat.page_width}mm']
                 extra_args += ['--height', f'{paperformat.page_height}mm']
 
+        extra_args += ['--debug', 'http-client']
         env = os.environ.copy()
         # Disable ANSI color codes in subprocess logs to prevent parsing errors.
         env['NO_COLOR'] = '1'  # TODO: not any(odoo.tools.config.colors)
