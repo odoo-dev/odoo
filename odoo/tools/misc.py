@@ -131,7 +131,7 @@ SENTINEL = Sentinel.SENTINEL
 
 def find_in_path(name):
     path = os.environ.get('PATH', os.defpath).split(os.pathsep)
-    if config.get('bin_path') and config['bin_path'] != 'None':
+    if config['bin_path'] and config['bin_path'] != 'None':
         path.append(config['bin_path'])
     return which(name, path=os.pathsep.join(path))
 

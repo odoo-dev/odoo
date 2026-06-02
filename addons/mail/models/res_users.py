@@ -619,7 +619,7 @@ class ResUsers(models.Model):
 
         # Check that the user's email is not used by `mail.alias.domain` to avoid leaking the outgoing emails
         alias_domain = self.env["mail.alias.domain"].sudo().search([])
-        cli_default_from = tools.config.get("email_from")
+        cli_default_from = tools.config["email_from"]
         match_from_filter = self.env["ir.mail_server"]._match_from_filter
         if (
             any(match_from_filter(e, normalized_email) for e in alias_domain.mapped("default_from_email"))

@@ -24,7 +24,7 @@ crypt_context = CryptContext(schemes=['pbkdf2_sha512'])
 
 
 def _is_access_token_valid(access_token):
-    stored_hash = config.get('proxy_access_token')
+    stored_hash = config['proxy_access_token']
     if not stored_hash:
         # empty password/hash => authentication forbidden
         return False

@@ -482,7 +482,7 @@ form: module.record_id""" % (xml_id,)
         record = model._load_records([data], self.mode == 'update')
         if xid:
             self.idref[xid] = record.id
-        if config.get('import_partial'):
+        if config['import_partial']:
             env.cr.commit()
         for child_rec, inverse_name in sub_records:
             self._tag_record(child_rec, extra_vals={inverse_name: record.id})

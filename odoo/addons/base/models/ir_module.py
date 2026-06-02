@@ -427,7 +427,7 @@ class IrModuleModule(models.Model):
 
             # Determine which auto-installable modules must be installed.
 
-            if config.get('skip_auto_install'):
+            if config['skip_auto_install']:
                 modules = None
             else:
                 modules = self.search(auto_domain).filtered(must_install)

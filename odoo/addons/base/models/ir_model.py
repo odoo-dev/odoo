@@ -2715,7 +2715,7 @@ class IrModelData(models.Model):
         present in self.pool.loaded_xmlids.
         """
         assert not self.env.registry.ready
-        if not modules or tools.config.get('import_partial'):
+        if not modules or tools.config['import_partial']:
             return True
 
         bad_imd_ids = []

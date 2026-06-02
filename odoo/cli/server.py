@@ -54,9 +54,9 @@ def report_configuration():
     if os.path.isfile(config['config']):
         _logger.info("Using configuration file at %s", config['config'])
     _logger.info('addons paths: %s', odoo.addons.__path__)
-    if config.get('upgrade_path'):
+    if config['upgrade_path']:
         _logger.info('upgrade path: %s', config['upgrade_path'])
-    if config.get('pre_upgrade_scripts'):
+    if config['pre_upgrade_scripts']:
         _logger.info('extra upgrade scripts: %s', config['pre_upgrade_scripts'])
     host = config['db_host'] or os.environ.get('PGHOST', 'default')
     port = config['db_port'] or os.environ.get('PGPORT', 'default')

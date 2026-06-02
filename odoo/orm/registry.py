@@ -96,7 +96,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
     @lazy_classproperty
     def registries(cls) -> LRU[str, Registry]:
         """ A mapping from database names to registries. """
-        size = config.get('registry_lru_size', None)
+        size = None  # config.get('registry_lru_size', None)
         if not size:
             # Size the LRU depending of the memory limits
             if os.name != 'posix':

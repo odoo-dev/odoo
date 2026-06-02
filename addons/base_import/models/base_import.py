@@ -1291,7 +1291,7 @@ class Base_ImportImport(models.TransientModel):
 
                     can_import_urls = self.env.user._can_import_remote_urls()
                     for num, line in enumerate(data):
-                        if re.match(config.get("import_url_regex"), line[index]):
+                        if re.match(config["import_url_regex"], line[index]):
                             if not can_import_urls:
                                 raise ImportValidationError(
                                     _("You can not import file via URL, check with your administrator or support for the reason."),
@@ -1354,11 +1354,11 @@ class Base_ImportImport(models.TransientModel):
         :return: the replacement value
         :rtype: bytes
         """
-        assert re.match(config.get("import_url_regex"), url)
-        maxsize = config.get("import_file_maxbytes")
+        assert re.match(config["import_url_regex"], url)
+        maxsize = config["import_file_maxbytes"]
         _logger.debug("Trying to import file from URL: %s into field %s, at line %s", url, field, line_number)
         try:
-            response = session.get(url, timeout=config.get("import_file_timeout"))
+            response = session.get(url, timeout=config["import_file_timeout"])
             response.raise_for_status()
 
             if response.headers.get('Content-Length') and int(response.headers['Content-Length']) > maxsize:
@@ -1530,7 +1530,7 @@ class Base_ImportImport(models.TransientModel):
                     filename = None
                     value = line[index]
                     if isinstance(value, str):
-                        if re.match(config.get("import_url_regex"), value):
+                        if re.match(config["import_url_regex"], value):
                             pass
                         elif '.' in value:
                             # Detect if it's a filename

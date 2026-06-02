@@ -995,6 +995,11 @@ class configmanager:
             sys.stderr.write("ERROR: couldn't create the config directory\n")
 
     def get(self, key, default=None):
+        warnings.warn(
+            "As of Odoo 20, use config[key] instead of config.get(key)",
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
         return self.options.get(key, default)
 
     def __setitem__(self, key, value):

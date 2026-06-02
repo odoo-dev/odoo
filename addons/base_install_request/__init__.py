@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from . import models
@@ -8,7 +7,7 @@ from odoo import tools
 
 
 def _auto_install_apps(env):
-    if not tools.config.get('default_productivity_apps', False):
+    if not tools.config['default_productivity_apps']:
         return
     env['ir.module.module'].sudo().search([
         ('name', 'in', [

@@ -24,7 +24,7 @@ _default_parameters = {
     "database.secret": lambda: str(uuid.uuid4()),
     "database.uuid": lambda: str(uuid.uuid1()),
     "database.create_date": fields.Datetime.now,
-    "web.base.url": lambda: "http://localhost:%s" % config.get('http_port'),
+    "web.base.url": lambda: "http://localhost:%s" % config['http_port'],
     "base.login_cooldown_after": lambda: 10,
     "base.login_cooldown_duration": lambda: 60,
 }

@@ -454,20 +454,20 @@ class IrMail_Server(models.Model):
 
         else:
             # we were passed individual smtp parameters or nothing and there is no default server
-            smtp_server = host or tools.config.get('smtp_server')
-            smtp_port = tools.config.get('smtp_port', 25) if port is None else port
-            smtp_user = user or tools.config.get('smtp_user')
-            smtp_password = password or tools.config.get('smtp_password')
+            smtp_server = host or tools.config['smtp_server']
+            smtp_port = tools.config['smtp_port'] if port is None else port
+            smtp_user = user or tools.config['smtp_user']
+            smtp_password = password or tools.config['smtp_password']
             if mail_server:
                 from_filter = mail_server.from_filter
             else:
                 from_filter = self.env['ir.mail_server']._get_default_from_filter()
 
             smtp_encryption = encryption
-            if smtp_encryption is None and tools.config.get('smtp_ssl'):
+            if smtp_encryption is None and tools.config['smtp_ssl']:
                 smtp_encryption = 'starttls' # smtp_ssl => STARTTLS as of v7
-            smtp_ssl_certificate_filename = ssl_certificate or tools.config.get('smtp_ssl_certificate_filename')
-            smtp_ssl_private_key_filename = ssl_private_key or tools.config.get('smtp_ssl_private_key_filename')
+            smtp_ssl_certificate_filename = ssl_certificate or tools.config['smtp_ssl_certificate_filename']
+            smtp_ssl_private_key_filename = ssl_private_key or tools.config['smtp_ssl_private_key_filename']
 
             if smtp_ssl_certificate_filename and smtp_ssl_private_key_filename:
                 try:
@@ -629,7 +629,7 @@ class IrMail_Server(models.Model):
         :return: defaults to the ``--email-from`` CLI/config parameter.
         :rtype: str | None
         """
-        return tools.config.get("email_from")
+        return tools.config["email_from"]
 
     @api.model
     def _get_default_from_address(self):
@@ -639,7 +639,7 @@ class IrMail_Server(models.Model):
         :return: defaults to the ``--email-from`` CLI/config parameter.
         :rtype: str | None
         """
-        return tools.config.get("email_from")
+        return tools.config["email_from"]
 
     @api.model
     def _get_default_from_filter(self):
@@ -652,7 +652,7 @@ class IrMail_Server(models.Model):
         :rtype: str | None
         """
         return self.env['ir.config_parameter'].sudo().get_str(
-            'mail.default.from_filter') or tools.config.get('from_filter')
+            'mail.default.from_filter') or tools.config['from_filter']
 
     def _prepare_email_message__(self, message, smtp_session):  # noqa: PLW3201
         """Prepare the SMTP information (from, to, message) before sending.

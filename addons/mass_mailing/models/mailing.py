@@ -1511,10 +1511,10 @@ class MailingMailing(models.Model):
         return mailing_domain
 
     def _get_image_by_url(self, url, session):
-        maxsize = tools.config.get("import_file_maxbytes")
+        maxsize = tools.config["import_file_maxbytes"]
         _logger.debug("Trying to import image from URL: %s", url)
         try:
-            response = session.get(url, timeout=tools.config.get("import_file_timeout"))
+            response = session.get(url, timeout=tools.config["import_file_timeout"])
             response.raise_for_status()
 
             if response.headers.get('Content-Length') and int(response.headers['Content-Length']) > maxsize:
