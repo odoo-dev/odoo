@@ -15,10 +15,10 @@ _logger = logging.getLogger(__name__)
 
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
-    _description = 'Report Action'
+    _description = "Report Action"
 
     report_type = fields.Selection(
-        selection_add=[('qweb-pdf-paper-muncher', 'PDF (Paper Muncher)')],
+        selection_add=[('qweb-pdf-paper-muncher', "PDF (Paper Muncher)")],
         default='qweb-pdf',
         ondelete={'qweb-pdf-paper-muncher': 'set qweb-pdf'},
     )
@@ -49,6 +49,7 @@ class IrActionsReport(models.Model):
         :param header: HTML header fragment.
         :param footer: HTML footer fragment.
         :param landscape: Whether to use landscape layout.
+        :param specific_paperformat_args: TODO
         :param scale: document scale (DPI)
         :returns: PDF bytes returned by Paper Muncher.
         :raises RuntimeError: If Paper Muncher fails during any phase.
@@ -59,8 +60,11 @@ class IrActionsReport(models.Model):
             if specific_paperformat_args.get('data-report-dpi'):
                 scale = int(specific_paperformat_args['data-report-dpi'])
 
-        paperformat = self._get_report(report_ref).get_paperformat() if report_ref else self.get_paperformat()
-
+        paperformat = (
+            self._get_report(report_ref).get_paperformat()
+            if report_ref else
+            self.get_paperformat()
+        )
         header = header or ''
         footer = footer or ''
 
@@ -75,26 +79,29 @@ class IrActionsReport(models.Model):
             open_body, body, close_body = partition_on_body(bodies[0])
             documents = [f'{open_body}{header}{body}{footer}{close_body}\n']
 
-        names = [f'pipe:{i}.html' for i in range(len(documents))]
+        names = [f'pipe:/papermuncher/{i}.html' for i in range(len(documents))]
         extra_args = [
             '--scale', f'{scale}dpi',
             '--margins', 'none',
         ]
         if landscape:
             extra_args += ['--orientation', 'landscape']
+        elif paperformat and paperformat.orientation:
+            extra_args += ['--orientation', paperformat.orientation.lower()]
         if os.getenv('ODOO_PAPER_MUNCHER_FEATURE') == '1':
             extra_args += ['--feature', '*=on']  # activate all experimental/optional features
         if paperformat and paperformat.format:
             if paperformat.format != 'custom':
-                extra_args += ['--paper', str(paperformat.format)]
+                extra_args += ['--paper', paperformat.format]
             elif paperformat.page_height and paperformat.page_width:
                 extra_args += ['--width', f'{paperformat.page_width}mm']
                 extra_args += ['--height', f'{paperformat.page_height}mm']
 
         env = os.environ.copy()
         # Disable ANSI color codes in subprocess logs to prevent parsing errors.
-        env['NO_COLOR'] = '1'
+        env['NO_COLOR'] = '1'  # TODO: not any(odoo.tools.config.colors)
 
+        print("KAKOUUU")
         with PaperMuncherServer(
             args=[_paper_muncher().bin, *names, '-o', 'pipe:', *extra_args],
             env=env,

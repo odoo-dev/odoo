@@ -2,7 +2,6 @@
 
 import contextvars
 import datetime as dt
-import h11
 import io
 import logging
 import os
@@ -12,15 +11,15 @@ import selectors
 import sys
 import threading
 import time
-
-from collections.abc import Buffer, Collection
+from collections.abc import Buffer, Sequence
 from contextlib import contextmanager
 from email.utils import format_datetime
-from functools import cache, partial
+from functools import cache
 from io import DEFAULT_BUFFER_SIZE
-from typing import BinaryIO, NamedTuple
+from typing import BinaryIO, NamedTuple, Literal
 from urllib.parse import unquote, urlsplit
 
+import h11
 
 import odoo.release
 from odoo.http import request
@@ -44,41 +43,50 @@ class PaperMuncherServer:
     def __init__(self, args, env=None):
         self._args = args
         self._env = env
+        self._deadline = None
+        self._pdf = None
+        self._process = None
+
+        # set in __enter__ and serve
+        self._conn = ...
+        self._documents = ...
+        self._selector = ...
 
     def __enter__(self):
-        self.process = sp.Popen(
+        if self._process:
+            e = "process started already"
+            raise RuntimeError(e)
+        self._process = sp.Popen(
             self._args,
             stdin=sp.PIPE,
             stdout=sp.PIPE,
             stderr=sp.PIPE,
             env=self._env,
         )
-        self.conn = h11.Connection(
+        self._conn = h11.Connection(
             h11.SERVER,
             max_incomplete_event_size=MAX_INCOMPLETE_EVENT_SIZE,
         )
-        self.deadline = None
         return self
 
     def __exit__(self, *_):
-        _try_kill_proc(self.process)
+        _try_kill_proc(self._process)
 
-    def serve(self, documents: Collection[str], *, timeout: int = DEFAULT_SERVE_TIMEOUT):
+    def serve(self, documents: Sequence[str], *, timeout: int = DEFAULT_SERVE_TIMEOUT):
         """Serve Paper Muncher requests until the rendered PDF is returned."""
-        _logger.info("_serve_requests: Starting request loop, %d documents available", len(documents))
-        self.deadline = time.monotonic() + timeout
-        self.documents = documents
-        self.documents_served = set()
-        self.pdf_received = False
-        self._current_request = None
-        self._body_chunks = []
-        self.selector = selectors.DefaultSelector()
+        if not self._process:
+            e = "this function cannot be called outside of the context manager"
+            raise RuntimeError(e)
 
-        self.selector.register(self.process.stdout, selectors.EVENT_READ, data='stdout')
-        self.selector.register(self.process.stderr, selectors.EVENT_READ, data='stderr')
+        _logger.info("_serve_requests: Starting request loop, %d documents available", len(documents))
+        self._deadline = time.monotonic() + timeout
+        self._documents = documents
+        self._selector = selectors.DefaultSelector()
+        self._selector.register(self._process.stdout, selectors.EVENT_READ, data='stdout')
+        self._selector.register(self._process.stderr, selectors.EVENT_READ, data='stderr')
 
         try:
-            while not self.pdf_received:
+            while self._pdf is None:
                 events = self._poll_events()
 
                 for key, _mask in events:
@@ -88,31 +96,30 @@ class PaperMuncherServer:
                         self._handle_stdout_message()
 
         except TimeoutError as timeout_error:
-            _try_kill_proc(self.process)
-            e = (
-                f"Paper Muncher exceeded the maximum serve timeout ({timeout}s) "
-                f"after serving {len(self.documents_served)}/{len(self.documents)} document(s)."
-            )
+            _try_kill_proc(self._process)
+            e = f"Paper Muncher exceeded the maximum serve timeout ({timeout}s)"
             raise TimeoutError(e) from timeout_error
+        except OSError:
+            _try_kill_proc(())
         finally:
-            self.selector.close()
+            self._selector.close()
 
-        return self.pdf
+        return self._pdf
 
     def _poll_events(self):
-        exit_code = self.process.poll()
+        exit_code = self._process.poll()
         if exit_code is not None:
             self._drain_stderr()
             raise RuntimeError(
                 f"Paper Muncher exited with code {exit_code} before returning the rendered PDF"
             )
 
-        wait_timeout = min(1.0, _remaining_time(self.deadline))
-        events = self.selector.select(timeout=wait_timeout)
+        wait_timeout = min(1.0, _remaining_time(self._deadline))
+        events = self._selector.select(timeout=wait_timeout)
 
         # Process has may have exited during select; drain stderr before returning
         # so the caller can see the error output on the next _poll_events call.
-        if self.process.poll() is not None:
+        if self._process.poll() is not None:
             self._drain_stderr()
 
         return events
@@ -120,7 +127,7 @@ class PaperMuncherServer:
     def _drain_stderr(self):
         """Read and log any remaining stderr from the paper-muncher process."""
         chunks = []
-        fd = self.process.stderr.fileno()
+        fd = self._process.stderr.fileno()
         try:
             while chunk := os.read(fd, 65536):
                 chunks.append(chunk)
@@ -129,70 +136,73 @@ class PaperMuncherServer:
         if chunks:
             _logger.error(
                 "paper-muncher (pid %s) stderr:\n%s",
-                self.process.pid, b''.join(chunks).decode('utf-8', errors='replace'),
+                self._process.pid, b''.join(chunks).decode('utf-8', errors='replace'),
             )
 
     def _handle_stderr_message(self):
-        log_data = os.read(self.process.stderr.fileno(), 65536)
+        log_data = os.read(self._process.stderr.fileno(), 65536)
         if not log_data:
-            self.selector.unregister(self.process.stderr)
+            self._selector.unregister(self._process.stderr)
             return
         _logger.warning("paper-muncher (pid %s) wrote on stderr:\n%s",
-                        self.process.pid, log_data.decode('utf-8', errors='replace'))
+                        self._process.pid, log_data.decode('utf-8', errors='replace'))
 
     def _handle_stdout_message(self):
-        chunk = os.read(self.process.stdout.fileno(), DEFAULT_CHUNK_SIZE)
-        if not chunk:
-            return
+        self._conn.receive_data(os.read(
+            self._process.stdout.fileno(),
+            DEFAULT_CHUNK_SIZE,
+        ))  # might be an empty bytes, h11 understands them
 
-        self.conn.receive_data(chunk)
+        request: h11.Request
+        body_chunks: list[bytes]
 
         while True:
-            event = self.conn.next_event()
-            if event is h11.NEED_DATA or event is h11.PAUSED:
+            event = self._conn.next_event()
+            if event is h11.NEED_DATA:
                 break
-            if isinstance(event, h11.Request):
-                self._current_request = event
-                self._body_chunks = []
-            elif isinstance(event, h11.Data):
-                self._body_chunks.append(event.data)
-            elif isinstance(event, h11.EndOfMessage):
-                body = b''.join(self._body_chunks)
-                self.route(
-                    self._current_request.method.decode(),
-                    self._current_request.target.decode(),
-                    body,
-                )
-                if self.pdf_received:
-                    # PDF has been read in _handle_put; stop h11 processing here
-                    # so it doesn't try to parse the raw PDF bytes as HTTP.
+            match event:
+                case h11.ConnectionClosed():
+                    self._selector.unregister(self._process.stdout)
                     break
-                self.conn.start_next_cycle()
-            elif isinstance(event, h11.ConnectionClosed):
-                break
+                case h11.Request():
+                    request = event
+                    body_chunks = []
+                case h11.Data():
+                    body_chunks.append(event.data)
+                case h11.EndOfMessage():
+                    body = b''.join(body_chunks)
+                    self.route(
+                        request.method.decode('ascii'),
+                        request.target.decode('ascii'),  # %-encoded
+                        body,
+                    )
+                    self._conn.start_next_cycle()
+                case _:
+                    e = f"unexpected {event=} in states={self._conn.states=}"
+                    raise TypeError(e)
 
     def _send(self, event) -> None:
-        _safe_write(self.process, self.conn.send(event))
+        _write_with_timeout(self._process.stdin, self._conn.send(event))
 
     def _handle_get_document(self, path):
         """Serve one ``GET`` document request from the worker."""
         index = int(path.split('.')[0]) if path != "." else 0
-        content = self.documents[index].encode()
+        content = self._documents[index].encode()
 
         self._send(h11.Response(
             status_code=200,
             headers=[
-                ("Date", format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
-                ("Content-Length", str(len(content))),
-                ("Content-Type", "text/html"),
-                ("Server", SERVER_SOFTWARE),
+                ('Date', format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
+                ('Content-Length', str(len(content))),
+                ('Content-Type', 'text/html; charset=utf-8'),
+                ('Server', SERVER_SOFTWARE),
             ],
         ))
         self._send(h11.Data(data=content))
         self._send(h11.EndOfMessage())
-        self.process.stdin.flush()
+        self._process.stdin.flush()
         _logger.info("Document %s sent successfully", path)
-        self.documents_served.add(index)
+        self._documents_served.add(index)
 
     def _handle_get_asset(self, path):
         """Serve one ``GET`` asset request from the worker."""
@@ -201,77 +211,72 @@ class PaperMuncherServer:
             body_iter, http_status, resp_headers = ctx.run(_call_wsgi, _make_environ(path))
             status_code = int(http_status.split(' ', 1)[0])
 
-            if sendfile_path := resp_headers.get("X-Sendfile"):
+            if sendfile_path := resp_headers.get('X-Sendfile'):
                 self._send(h11.Response(status_code=status_code, headers=[
-                    ("Date", format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
-                    ("Server", SERVER_SOFTWARE),
-                    ("Content-Length", str(os.path.getsize(sendfile_path))),
-                    ("Content-Type", resp_headers["Content-Type"]),
+                    ('Date', format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
+                    ('Server', SERVER_SOFTWARE),
+                    ('Content-Length', str(os.path.getsize(sendfile_path))),
+                    ('Content-Type', resp_headers['Content-Type']),
                 ]))
-                with open(sendfile_path, "rb") as f:
-                    for chunk in iter(partial(f.read, DEFAULT_BUFFER_SIZE), b""):
+                with open(sendfile_path, 'rb') as f:
+                    while chunk := f.read(DEFAULT_BUFFER_SIZE):
                         self._send(h11.Data(data=chunk))
             else:
                 self._send(h11.Response(status_code=status_code, headers=[
-                    ("Date", format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
-                    ("Server", SERVER_SOFTWARE),
-                    ("Content-Length", resp_headers["Content-Length"]),
-                    ("Content-Type", resp_headers["Content-Type"]),
+                    ('Date', format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
+                    ('Server', SERVER_SOFTWARE),
+                    ('Content-Length', resp_headers['Content-Length']),
+                    ('Content-Type', resp_headers['Content-Type']),
                 ]))
                 for chunk in body_iter:
                     self._send(h11.Data(data=chunk))
 
         self._send(h11.EndOfMessage())
-        self.process.stdin.flush()
+        self._process.stdin.flush()
         _logger.info("Asset %s sent successfully", path)
 
     def _handle_put(self, body: bytes):
-        if len(self.documents_served) < len(self.documents):
-            raise RuntimeError("Paper Muncher returned before we sent everything")
-
         # The PUT is a signal that the PDF is ready; acknowledge it so paper-muncher
         # starts streaming the PDF as raw bytes on stdout right after the exchange.
         self._send(h11.Response(
             status_code=200,
             headers=[
-                ("Date", format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
-                ("Server", SERVER_SOFTWARE),
+                ('Date', format_datetime(dt.datetime.now(dt.UTC), usegmt=True)),
+                ('Server', SERVER_SOFTWARE),
             ],
         ))
         self._send(h11.EndOfMessage())
-        self.process.stdin.flush()
-        self.process.stdin.close()
+        self._process.stdin.flush()
+        self._process.stdin.close()
 
         # Collect: body (older protocol variants), bytes h11 buffered from the same
         # read as the PUT headers, then whatever is still incoming on stdout.
         pdf_chunks = [body] if body else []
-        leftover = bytes(self.conn._receive_buffer)
+        leftover = bytes(self._conn._receive_buffer)
         if leftover:
             pdf_chunks.append(leftover)
         pdf_chunks.extend(self._drain_stdout())
 
         pdf = b''.join(pdf_chunks)
         if not pdf.startswith(b'%PDF-'):
-            preview = pdf[:256].decode('utf-8', errors='replace')
             _logger.error(
                 "Paper Muncher (pid %s) returned %d bytes of non-PDF content: %r",
-                self.process.pid, len(pdf), preview,
+                self._process.pid, len(pdf), pdf[:256],
             )
             raise RuntimeError("Paper Muncher did not return valid PDF content")
 
-        self.pdf = pdf
-        self.pdf_received = True
+        self._pdf = pdf
 
     def _drain_stdout(self) -> list[bytes]:
         """Read all remaining bytes from stdout until EOF."""
         chunks = []
-        fd = self.process.stdout.fileno()
+        fd = self._process.stdout.fileno()
         while True:
-            remaining = self.deadline - time.monotonic()
+            remaining = self._deadline - time.monotonic()
             if remaining <= 0:
                 break
             got_stdout = False
-            for key, _mask in self.selector.select(timeout=min(1.0, remaining)):
+            for key, _mask in self._selector.select(timeout=min(1.0, remaining)):
                 if key.data != 'stdout':
                     continue
                 got_stdout = True
@@ -279,7 +284,7 @@ class PaperMuncherServer:
                 if not chunk:
                     return chunks
                 chunks.append(chunk)
-            if not got_stdout and self.process.poll() is not None:
+            if not got_stdout and self._process.poll() is not None:
                 break
         return chunks
 
@@ -297,7 +302,7 @@ class PaperMuncherServer:
             case ('PUT', _):
                 return self._handle_put(body)
             case _:
-                e = f"Unsupported paper-muncher request: method={method!r}, path={path!r}"
+                e = f"Unsupported paper-muncher request: {method=}, {path=}"
                 raise RuntimeError(e)
 
 
@@ -321,7 +326,7 @@ def _write_with_timeout(
 ) -> None:
     """Write all bytes to a binary stream with a global timeout.
 
-    :param file_object: Binary stream (must implement :meth:`fileno`).
+    :param file_object: Binary stream (must implement :meth:`~io.BaseIO.fileno`).
     :param data: Bytes to write.
     :param timeout: Maximum number of seconds.
 
@@ -402,8 +407,6 @@ def _make_environ(path: str) -> dict:
         'QUERY_STRING': query_string,
         'REQUEST_URI': request_uri,
         'RAW_URI': request_uri,
-        'HTTP_HOST': current_environ['HTTP_HOST'],
-        'HTTP_USER_AGENT': SERVER_SOFTWARE,
         'REMOTE_ADDR': current_environ['REMOTE_ADDR'],
         'SERVER_NAME': current_environ['SERVER_NAME'],
         'SERVER_PORT': current_environ['SERVER_PORT'],
@@ -430,18 +433,9 @@ def _call_wsgi(environ: dict) -> tuple:
     body_iter = root(environ, start_response)
     return body_iter, result['status'], result['headers']
 
-
-def _safe_write(process, data: bytes) -> None:
-    """Write to the worker stdin, killing the process if the write times out."""
-    try:
-        _write_with_timeout(process.stdin, data)
-    except TimeoutError:
-        _try_kill_proc(process)
-        raise
-
-
 def _try_kill_proc(process) -> None:
     """Try killing the process, ignore errors."""
+    # TODO: kill() is likely doing kill -9, which doesn't warrant a wait and will never fail
     try:
         process.kill()
     except (OSError, sp.SubprocessError):
@@ -453,7 +447,7 @@ def _try_kill_proc(process) -> None:
 
 
 class PaperMuncherInfo(NamedTuple):
-    state: str  # 'ok' | 'install'
+    state: Literal['ok', 'install']
     bin: str
     version: str
 
@@ -475,9 +469,9 @@ def _paper_muncher() -> PaperMuncherInfo:
             raise RuntimeError(f"bad paper-muncher found at {bin_path}")
         version = result.stdout.decode('utf-8', errors='replace').strip()
     except RuntimeError:
-        _logger.info('You need paper-muncher to print a pdf version of the reports.',
+        _logger.info("You need paper-muncher to print a pdf version of the reports.",
                      exc_info=_logger.isEnabledFor(logging.DEBUG))
         return PaperMuncherInfo(state='install', bin=bin_path, version=version)
 
-    _logger.info('Will use the paper-muncher binary at %s', bin_path)
+    _logger.info("Will use the paper-muncher binary at %s", bin_path)
     return PaperMuncherInfo(state='ok', bin=bin_path, version=version)
