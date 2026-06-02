@@ -50,6 +50,16 @@ class LRU(MutableMapping[K, V], typing.Generic[K, V]):
     def count(self) -> int:
         return self._count
 
+    @count.setter
+    def count(self, value: int):
+        assert value > 0, "LRU needs a positive count"
+        with self._lock:
+            self._count = value
+            for key in self.snapshot:
+                self.pop(key, None)
+                if len(self) <= value:
+                    break
+
     def __contains__(self, key: object) -> bool:
         return key in self._values
 
