@@ -50,6 +50,57 @@ SITEMAP_CACHE_TIME = datetime.timedelta(hours=12)
 MAX_FONT_FILE_SIZE = 10 * 1024 * 1024
 SUPPORTED_FONT_EXTENSIONS = ['ttf', 'woff', 'woff2', 'otf']
 FORCE_SHOW_FIELDS = ['name', 'search_item_metadata', 'tags']
+CONFIGURATOR_PREVIEW_FALLBACK_IMAGES = {
+    f'website.{image_name}': f'website.{fallback_image_name}'
+    for image_name, fallback_image_name in [
+        ('s_intro_pill_default_image', 'library_image_10'),
+        ('s_intro_pill_default_image_2', 'library_image_14'),
+        ('s_banner_default_image_2', 's_image_text_default_image'),
+        ('s_banner_default_image_3', 's_product_list_default_image_1'),
+        ('s_striped_top_default_image', 's_picture_default_image'),
+        ('s_text_cover_default_image', 's_cover_default_image'),
+        ('s_showcase_default_image', 's_image_text_default_image'),
+        ('s_image_hexagonal_default_image', 's_cover_default_image'),
+        ('s_image_hexagonal_default_image_1', 's_company_team_image_1'),
+        ('s_accordion_image_default_image', 's_image_text_default_image'),
+        ('s_pricelist_boxed_default_background', 's_product_catalog_default_image'),
+        ('s_image_title_default_image', 's_cover_default_image'),
+        ('s_key_images_default_image_1', 's_media_list_default_image_1'),
+        ('s_key_images_default_image_2', 's_image_text_default_image'),
+        ('s_key_images_default_image_3', 's_media_list_default_image_2'),
+        ('s_key_images_default_image_4', 's_text_image_default_image'),
+        ('s_kickoff_default_image', 's_cover_default_image'),
+        ('s_quadrant_default_image_1', 'library_image_03'),
+        ('s_quadrant_default_image_2', 'library_image_10'),
+        ('s_quadrant_default_image_3', 'library_image_13'),
+        ('s_quadrant_default_image_4', 'library_image_05'),
+        ('s_sidegrid_default_image_1', 'library_image_03'),
+        ('s_sidegrid_default_image_2', 'library_image_10'),
+        ('s_sidegrid_default_image_3', 'library_image_13'),
+        ('s_sidegrid_default_image_4', 'library_image_05'),
+        ('s_cta_box_default_image', 'library_image_02'),
+        ('s_image_punchy_default_image', 's_cover_default_image'),
+        ('s_image_frame_default_image', 's_carousel_default_image_2'),
+        ('s_carousel_intro_default_image_1', 's_cover_default_image'),
+        ('s_carousel_intro_default_image_2', 's_image_text_default_image'),
+        ('s_carousel_intro_default_image_3', 's_text_image_default_image'),
+        ('s_website_form_overlay_default_image', 's_cover_default_image'),
+        ('s_website_form_cover_default_image', 's_cover_default_image'),
+        ('s_split_intro_default_image', 's_cover_default_image'),
+        ('s_framed_intro_default_image', 's_cover_default_image'),
+        ('s_splash_intro_default_image', 's_cover_default_image'),
+        ('s_wavy_grid_default_image_1', 's_cover_default_image'),
+        ('s_wavy_grid_default_image_2', 's_image_text_default_image'),
+        ('s_wavy_grid_default_image_3', 's_text_image_default_image'),
+        ('s_wavy_grid_default_image_4', 's_carousel_default_image_1'),
+        ('s_timeline_images_default_image_1', 's_media_list_default_image_1'),
+        ('s_timeline_images_default_image_2', 's_media_list_default_image_2'),
+        ('s_carousel_cards_default_image_1', 's_carousel_default_image_1'),
+        ('s_carousel_cards_default_image_2', 's_carousel_default_image_2'),
+        ('s_carousel_cards_default_image_3', 's_carousel_default_image_3'),
+        ('s_banner_connected_default_image', 's_cover_default_image'),
+    ]
+}
 
 
 class QueryURL:
@@ -410,6 +461,203 @@ class Website(Home):
     def cookie_policy_redirect(self, **kwargs):
         url = request.website.cookie_policy_id.sudo().url or '/cookie-policy'
         return request.redirect(url)
+
+    def _load_configurator_preview_html(self, preview_url):
+        if preview_url.startswith('/'):
+            try:
+                with tools.file_open(preview_url.lstrip('/'), 'rb') as file:
+                    return file.read().decode('utf-8')
+            except FileNotFoundError as exc:
+                raise NotFound() from exc
+
+        parsed_url = urllib.parse.urlsplit(preview_url)
+        if parsed_url.scheme not in ('http', 'https'):
+            raise NotFound()
+        try:
+            response = requests.get(preview_url, timeout=10)
+            response.raise_for_status()
+        except requests.RequestException as exc:
+            raise NotFound() from exc
+        return response.text
+
+    def _get_configurator_preview_images_map(self, theme_name, industry_id):
+        if not theme_name or industry_id <= 0:
+            return {}
+        try:
+            custom_resources = request.env['website']._website_api_rpc(
+                '/api/website/2/configurator/custom_resources/%s' % industry_id,
+                {'theme': theme_name}
+            )
+        except AccessError:
+            custom_resources = {'images': {}}
+        if not isinstance(custom_resources, dict):
+            return {}
+        return custom_resources.get('images', {})
+
+    def _get_theme_static_preview_image_url(self, theme_name, image_name):
+        if not theme_name:
+            return None
+        image_name = urllib.parse.unquote(image_name).split('?', 1)[0]
+        image_basename = image_name.split('.', 1)[1] if '.' in image_name else image_name
+        image_basename = image_basename.rsplit('/', 1)[-1]
+        image_stem, image_ext = os.path.splitext(image_basename)
+        candidate_names = [image_basename] if image_ext else [
+            f'{image_basename}.{ext}'
+            for ext in ('png', 'jpg', 'jpeg', 'webp', 'svg', 'gif')
+        ]
+        for folder in ('content', 'backgrounds'):
+            for candidate_name in candidate_names:
+                candidate_path = f'{theme_name}/static/src/img/{folder}/{candidate_name}'
+                try:
+                    with tools.file_open(candidate_path, 'rb'):
+                        return f'/{candidate_path}'
+                except FileNotFoundError:
+                    continue
+        if image_stem and image_stem != image_basename:
+            for folder in ('content', 'backgrounds'):
+                for ext in ('png', 'jpg', 'jpeg', 'webp', 'svg', 'gif'):
+                    candidate_path = f'{theme_name}/static/src/img/{folder}/{image_stem}.{ext}'
+                    try:
+                        with tools.file_open(candidate_path, 'rb'):
+                            return f'/{candidate_path}'
+                    except FileNotFoundError:
+                        continue
+        return None
+
+    def _get_configurator_preview_image_url(self, theme_name, images_map, image_name):
+        image_name = urllib.parse.unquote(image_name).split('?', 1)[0]
+        if image_name not in images_map:
+            image_name = CONFIGURATOR_PREVIEW_FALLBACK_IMAGES.get(image_name, image_name)
+        image_url = images_map.get(image_name)
+        if image_url:
+            return image_url.replace('/small/', '/')
+        return self._get_theme_static_preview_image_url(theme_name, image_name)
+
+    def _apply_configurator_preview_images(self, final_html, theme_name, images_map):
+        for image_url in set(re.findall(r'/web/image/[^"\'\s,)]+', final_html)):
+            mapped_image_url = self._get_configurator_preview_image_url(
+                theme_name,
+                images_map,
+                image_url.replace('/web/image/', '', 1),
+            )
+            if mapped_image_url:
+                final_html = final_html.replace(image_url, mapped_image_url)
+
+        shape_urls = set(re.findall(r'/(html_editor|web_editor)/image_shape/([^/"\']+)/([^"\'\s)]+)', final_html))
+        for editor, image_name, shape_path in shape_urls:
+            mapped_image_url = self._get_configurator_preview_image_url(theme_name, images_map, image_name)
+            if not mapped_image_url:
+                continue
+            shape_src = f'/{editor}/image_shape/{image_name}/{shape_path}'
+            shape_file_path, _, shape_query = shape_path.partition('?')
+            module, _, shape_filename = shape_file_path.partition('/')
+            if not shape_filename:
+                continue
+            shaped_url = f'/{editor}/image_shape_url/{module}/{shape_filename}'
+            image_query = werkzeug.urls.url_encode({'image_url': mapped_image_url})
+            shaped_url = f'{shaped_url}?{shape_query}&{image_query}' if shape_query else f'{shaped_url}?{image_query}'
+            final_html = final_html.replace(shape_src, shaped_url)
+        return final_html
+
+    def _get_configurator_preview_shape_url(self, shape_url, palette_map):
+        decoded_shape_url = shape_url.replace('&amp;', '&')
+        parsed_shape_url = urllib.parse.urlsplit(decoded_shape_url)
+        shape_query_items = urllib.parse.parse_qsl(
+            parsed_shape_url.query, keep_blank_values=True
+        )
+        has_palette_color = False
+        updated_shape_query_items = []
+        for key, value in shape_query_items:
+            palette_color = palette_map.get(value)
+            if palette_color:
+                value = palette_color
+                has_palette_color = True
+            updated_shape_query_items.append((key, value))
+        if not has_palette_color:
+            return shape_url
+        updated_shape_url = urllib.parse.urlunsplit(
+            (
+                parsed_shape_url.scheme,
+                parsed_shape_url.netloc,
+                parsed_shape_url.path,
+                urllib.parse.urlencode(updated_shape_query_items),
+                parsed_shape_url.fragment,
+            )
+        )
+        return updated_shape_url.replace('&', '&amp;') if '&amp;' in shape_url else updated_shape_url
+
+    def _apply_configurator_preview_shape_colors(self, final_html, palette_map):
+        for shape_url in set(re.findall(r'/(?:html_editor|web_editor)/shape/[^"\'\s)]+', final_html)):
+            updated_shape_url = self._get_configurator_preview_shape_url(shape_url, palette_map)
+            if updated_shape_url != shape_url:
+                final_html = final_html.replace(shape_url, updated_shape_url)
+        return final_html
+
+    def _get_configurator_preview_overrides(self, palette):
+        root_variables = ''.join(
+            f'--o-color-{index}: {color};'
+            for index, color in enumerate(palette, start=1)
+            if color
+        )
+        return (
+            '<style id="o_configurator_theme_preview_overrides">'
+            f':root{{{root_variables}}}'
+            '</style>'
+        )
+
+    def _inject_configurator_preview_overrides(self, final_html, preview_url, preview_overrides):
+        base_tag = f'<base href="{markup_escape(preview_url)}">'
+        head_match = re.search(r'<head\b[^>]*>', final_html, flags=re.IGNORECASE)
+        if head_match:
+            final_html = final_html[:head_match.end()] + base_tag + final_html[head_match.end():]
+            head_end_match = re.search(r'</head>', final_html, flags=re.IGNORECASE)
+            if head_end_match:
+                return (
+                    final_html[:head_end_match.start()]
+                    + preview_overrides
+                    + final_html[head_end_match.start():]
+                )
+            return final_html + preview_overrides
+        return base_tag + preview_overrides + final_html
+
+    @http.route('/website/configurator/preview', type='http', auth="user", website=True, multilang=False)
+    def website_configurator_preview(
+        self,
+        preview_url,
+        theme_name=None,
+        industry_id=-1,
+        color1='',
+        color2='',
+        color3='',
+        color4='',
+        color5='',
+        **kwargs,
+    ):
+        if not request.env.user.has_group('website.group_website_designer'):
+            raise werkzeug.exceptions.NotFound()
+        if not preview_url:
+            raise NotFound()
+
+        industry_id = int(industry_id)
+        palette = [color1, color2, color3, color4, color5]
+        palette_map = {
+            f'o-color-{index}': color
+            for index, color in enumerate(palette, start=1)
+            if color
+        }
+
+        final_html = self._load_configurator_preview_html(preview_url)
+        images_map = self._get_configurator_preview_images_map(theme_name, industry_id)
+        final_html = self._apply_configurator_preview_images(final_html, theme_name, images_map)
+        final_html = self._apply_configurator_preview_shape_colors(final_html, palette_map)
+        preview_overrides = self._get_configurator_preview_overrides(palette)
+        final_html = self._inject_configurator_preview_overrides(
+            final_html,
+            preview_url,
+            preview_overrides,
+        )
+
+        return request.make_response(final_html, [('Content-Type', 'text/html; charset=utf-8')])
 
     @http.route('/website/get_suggested_links', type='jsonrpc', auth="user", website=True, readonly=True)
     def get_suggested_link(self, needle, limit=10):

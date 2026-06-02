@@ -10,7 +10,6 @@ import {
 import { browser } from "@web/core/browser/browser";
 const sessionStorage = browser.sessionStorage;
 import { AutoComplete } from "@web/core/autocomplete/autocomplete";
-import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { delay } from "@web/core/utils/concurrency";
 import { getDataURLFromFile, redirect } from "@web/core/utils/urls";
 import { getCSSVariableValue } from "@html_editor/utils/formatting";
@@ -18,28 +17,20 @@ import { _t } from "@web/core/l10n/translation";
 import { svgToPNG, webpToPNG } from "@website/js/utils";
 import { escapeRegExp } from "@web/core/utils/strings";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
-import { htmlSprintf } from "@web/core/utils/html";
 import { clamp } from "@web/core/utils/numbers";
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
 import { mixCssColors } from "@web/core/utils/colors";
 import { router } from "@web/core/browser/router";
-import {
-    Component,
-    markup,
-    onMounted,
-    onWillStart,
-    useEffect,
-} from "@odoo/owl";
+import { Component, onMounted, onWillStart, useEffect, onWillUnmount } from "@odoo/owl";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 import { fuzzyLevenshteinLookup } from "@web/core/utils/search";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 
 export const ROUTES = {
-    descriptionScreen: 2,
-    paletteSelectionScreen: 3,
-    featuresSelectionScreen: 4,
-    themeSelectionScreen: 5,
+    descriptionScreen: 1,
+    paletteSelectionScreen: 2,
+    themeSelectionScreen: 3,
 };
 
 export const WEBSITE_TYPES = {
@@ -48,14 +39,6 @@ export const WEBSITE_TYPES = {
     3: { id: 3, label: _t("a blog"), name: "blog" },
     4: { id: 4, label: _t("an event website"), name: "event" },
     5: { id: 5, label: _t("an elearning platform"), name: "elearning" },
-};
-
-export const WEBSITE_PURPOSES = {
-    1: { id: 1, label: _t("get leads"), name: "get_leads" },
-    2: { id: 2, label: _t("develop the brand"), name: "develop_brand" },
-    3: { id: 3, label: _t("sell more"), name: "sell_more" },
-    4: { id: 4, label: _t("inform customers"), name: "inform_customers" },
-    5: { id: 5, label: _t("schedule appointments"), name: "schedule_appointments" },
 };
 
 export const PALETTE_NAMES = [
@@ -97,30 +80,110 @@ export const PALETTE_NAMES = [
     "default-21",
 ];
 
-// Attributes for which background color should be retrieved
-// from CSS and added in each palette.
 export const CUSTOM_BG_COLOR_ATTRS = ["menu", "footer"];
 
-const MAX_NBR_DISPLAY_MAIN_THEMES = 3;
+const MAX_NBR_DISPLAY_MAIN_THEMES = 6;
+const DESKTOP_PREVIEW_WIDTH = 1440;
+
+function getCSSPalettes(style, paletteNames = PALETTE_NAMES, bgColorAttrs = CUSTOM_BG_COLOR_ATTRS) {
+    const palettes = {};
+    for (const paletteName of paletteNames) {
+        const palette = {
+            name: paletteName,
+        };
+        for (let j = 1; j <= 5; j++) {
+            palette[`color${j}`] = getCSSVariableValue(
+                `o-palette-${paletteName}-o-color-${j}`,
+                style
+            );
+        }
+        for (const attr of bgColorAttrs) {
+            palette[attr] = getCSSVariableValue(`o-palette-${paletteName}-${attr}-bg`, style);
+        }
+        palettes[paletteName] = palette;
+    }
+    return palettes;
+}
 
 /**
- * Returns a list of maximum "resultNbrMax" themes that depends on the wanted
- * industry and the color palette.
+ * Returns a list of maximum "resultNbrMax" themes for the wanted website.
  *
  * @param {Object} orm - The orm used for the server call.
- * @param {Object} state - The state that contains the wanted industry and color
- * palette.
+ * @param {Object} state - The state that contains the wanted website.
  * @param {Number} resultNbrMax - The number of different wanted themes.
- * @returns {Promise<Array>} A list of objects that contains the different
- * theme names and their related text svgs (as result of a Promise). The length
- * of the list is at most 'resultNbrMax'.
+ * @returns {Promise<Array>} A list of theme suggestion objects. The length of
+ * the list is at most 'resultNbrMax'.
  */
 async function getRecommendedThemes(orm, state, resultNbrMax = MAX_NBR_DISPLAY_MAIN_THEMES) {
     return orm.call("website", "configurator_recommended_themes", [], {
-        industry_id: state.selectedIndustry.id,
-        palette: state.selectedPalette,
+        industry_id: state.selectedIndustry?.id || -1,
+        industry_name: state.selectedIndustry?.label || "",
         result_nbr_max: resultNbrMax,
+        website_type: WEBSITE_TYPES[state.selectedType]?.name || "business",
+        positioning: state.selectedPositioning || state.formerSelectedPositioning || "",
     });
+}
+
+async function getIndustryImages(orm, state, theme = "") {
+    const industryId = state.selectedIndustry?.id;
+    if (!industryId || industryId <= 0) {
+        return {};
+    }
+    try {
+        return await orm.call("website", "configurator_get_images", [], {
+            industry_id: industryId,
+            theme,
+        });
+    } catch {
+        return {};
+    }
+}
+
+function getPreviewHeadersKey(state) {
+    return JSON.stringify([
+        state.selectedIndustry?.label || "general",
+        WEBSITE_TYPES[state.selectedType]?.name || "business",
+        state.selectedPositioning || state.formerSelectedPositioning || "general",
+    ]);
+}
+
+async function ensurePreviewHeaders(state) {
+    const industry = state.selectedIndustry?.label || "general";
+    const type = WEBSITE_TYPES[state.selectedType]?.name || "business";
+    const positioning = state.selectedPositioning || state.formerSelectedPositioning || "general";
+    const key = getPreviewHeadersKey(state);
+    if (state.previewHeadersKey === key) {
+        return state.previewHeaders || [];
+    }
+
+    state.previewHeaders = [];
+    state.previewHeadersKey = key;
+    state.previewHeadersLoading = true;
+    try {
+        const prompt = `For a ${industry} ${type} business with a ${positioning} positioning, return only a JSON array of 6 short homepage hero titles. Each item must be a plain string, with no numbering and no explanation.`;
+        const response = await rpc("/html_editor/generate_text", {
+            prompt,
+            conversation_history: [],
+        });
+        const match = response?.match(/\[[\s\S]*\]/);
+        const parsed = match && JSON.parse(match[0]);
+        const generatedHeaders = (
+            Array.isArray(parsed) && parsed.length === 6
+                ? parsed.filter((item) => typeof item === "string").map((item) => item.trim())
+                : []
+        ).filter(Boolean);
+        if (state.previewHeadersKey === key && generatedHeaders.length === 6) {
+            state.previewHeaders = generatedHeaders;
+        }
+    } catch {
+        // Keep the preview HTML unchanged if the AI did not answer correctly.
+    } finally {
+        if (state.previewHeadersKey === key) {
+            state.previewHeadersLoading = false;
+        }
+    }
+
+    return state.previewHeaders || [];
 }
 
 //------------------------------------------------------------------------------
@@ -131,23 +194,8 @@ export class SkipButton extends Component {
     static template = "website.Configurator.SkipButton";
     static props = {
         skip: Function,
+        className: { type: String, optional: true },
     };
-}
-
-export class WelcomeScreen extends Component {
-    static template = "website.Configurator.WelcomeScreen";
-    static components = { SkipButton };
-    static props = {
-        skip: Function,
-        navigate: Function,
-    };
-    setup() {
-        this.state = useStore();
-    }
-
-    goToDescription() {
-        this.props.navigate(ROUTES.descriptionScreen);
-    }
 }
 
 export class DescriptionScreen extends Component {
@@ -192,22 +240,69 @@ export class DescriptionScreen extends Component {
         );
 
         this.safariHackFocusedOutDropdown = null;
+        this.fetchImagesRequestId = 0;
     }
 
     onMounted() {
-        this.selectWebsitePurpose();
+        this.state.selectPositioning();
     }
-    /**
-     * Set the input's parent label value to automatically adapt input size
-     * and update the selected industry.
-     *
-     * @private
-     * @param {string} label
-     * @param {number} id
-     */
+
     _setSelectedIndustry(label, id) {
         this.state.selectIndustry(label, id);
-        this.checkDescriptionCompletion();
+        this.fetchIndustryImages(id);
+        this.fetchPositionings(label);
+    }
+
+    async fetchIndustryImages(industryId) {
+        const requestId = ++this.fetchImagesRequestId;
+        if (!industryId || industryId <= 0) {
+            this.state.setImages({});
+            return;
+        }
+        this.state.setImages({});
+        const images = await getIndustryImages(this.orm, this.state);
+        if (
+            requestId === this.fetchImagesRequestId &&
+            this.state.selectedIndustry?.id === industryId
+        ) {
+            this.state.setImages(images);
+        }
+    }
+
+    async fetchPositionings(industryLabel) {
+        const fallback = [
+            "premium",
+            "affordable",
+            "professional",
+            "modern",
+            "community-focused",
+            "innovative",
+        ];
+        this.state.positionings = [];
+        this.state.selectedPositioning = undefined;
+        this.state.positioningsLoading = true;
+        try {
+            const prompt = `Design a website for my ${industryLabel} business with a _______ positioning. Return only a JSON array of 6 possibilities to fill in the blank.`;
+            const response = await rpc("/html_editor/generate_text", {
+                prompt,
+                conversation_history: [],
+            });
+            const match = response?.match(/\[[\s\S]*\]/);
+            const parsed = match && JSON.parse(match[0]);
+            this.state.positionings =
+                Array.isArray(parsed) && parsed.every((item) => typeof item === "string")
+                    ? parsed
+                    : fallback;
+        } catch {
+            this.state.positionings = fallback;
+        }
+        this.state.positioningsLoading = false;
+    }
+
+    get previewImages() {
+        return Object.values(this.state.images || {})
+            .slice(0, 10)
+            .map((url, slot) => ({ url, slot }));
     }
 
     _splitToSet(string) {
@@ -233,7 +328,7 @@ export class DescriptionScreen extends Component {
      * @param {String} term input current value
      */
     _autocompleteSearch(term) {
-        this.state.selectedIndustry = undefined;
+        this.state.selectIndustry();
         const termsSet = this._splitToSet(term);
 
         //-------words correction--------
@@ -247,7 +342,7 @@ export class DescriptionScreen extends Component {
             const res = fuzzyLevenshteinLookup(term, this.dictionarySet);
             correctedSet.add(res[0] || term);
         }
-        let terms = Array.from(correctedSet);
+        const terms = Array.from(correctedSet);
         const limit = 30;
         // `this.state.industries` is already sorted by hit count (from IAP).
         // That order should be kept after manipulating the recordset.
@@ -285,13 +380,10 @@ export class DescriptionScreen extends Component {
                 matches = matches.slice(0, limit);
             }
         }
-        if (matches.length === 0) {
-            matches = [{ label: term, id: -1 }];
-            terms = [term];
-        }
+        matches.push({ label: term, id: -1 });
         return matches.map((match) => ({
-            label: match.label,
-            labelTermOrder: this._getMatchTermOrder(match.label, terms),
+            label: match.id === -1 ? _t('Create "%s"', match.label) : match.label,
+            labelTermOrder: match.id === -1 ? null : this._getMatchTermOrder(match.label, terms),
             onSelect: () => this._setSelectedIndustry(match.label, match.id),
         }));
     }
@@ -347,16 +439,14 @@ export class DescriptionScreen extends Component {
         this.checkDescriptionCompletion();
     }
 
-    selectWebsitePurpose(id) {
-        this.state.selectWebsitePurpose(id);
+    selectPositioning(positioning) {
+        this.state.selectPositioning(positioning);
         this.checkDescriptionCompletion();
     }
 
     checkDescriptionCompletion() {
-        const { selectedType, selectedPurpose, selectedIndustry } = this.state;
-        if (selectedType && selectedPurpose && selectedIndustry) {
-            // If the industry name is not known by the server, send it to the
-            // IAP server.
+        const { selectedType, selectedPositioning, selectedIndustry } = this.state;
+        if (selectedType && selectedPositioning && selectedIndustry) {
             if (selectedIndustry.id === -1) {
                 this.orm.call("website", "configurator_missing_industry", [], {
                     unknown_industry: selectedIndustry.label,
@@ -411,16 +501,115 @@ export class PaletteSelectionScreen extends Component {
         this.logoInputRef = useRef("logoSelectionInput");
         this.notification = useService("notification");
         this.orm = useService("orm");
+        this.hoverState = useState({ palette: null });
+        this.isDestroyed = false;
 
-        onMounted(() => {
+        onWillUnmount(() => {
+            this.isDestroyed = true;
+        });
+
+        onMounted(async () => {
             if (this.state.logo) {
                 this.updatePalettes();
             }
+            ensurePreviewHeaders(this.state);
+            await this.fetchStyleRecommendation();
+            if (this.isDestroyed) {
+                return;
+            }
+            this.prefetchThemes();
         });
     }
 
+    async fetchStyleRecommendation() {
+        const { selectedIndustry, selectedType, selectedPositioning, formerSelectedPositioning } =
+            this.state;
+        const industry = selectedIndustry?.label || "general";
+        const type = WEBSITE_TYPES[selectedType]?.name || "business";
+        const positioning = selectedPositioning || formerSelectedPositioning || "";
+        const palettes = Object.values(this.state.palettes);
+        const catalog = {};
+        palettes.forEach((palette, idx) => {
+            catalog[idx] = {
+                palette: palette.name,
+                colors: {
+                    color1: palette.color1,
+                    color2: palette.color2,
+                    color3: palette.color3,
+                    color4: palette.color4,
+                    color5: palette.color5,
+                },
+            };
+        });
+        const prompt = `For a ${industry} ${type} business with a ${positioning} positioning, recommend a color palette from this catalog:
+${JSON.stringify(catalog, null, 2)}
+
+Return ONLY a JSON object with:
+- "id": the numeric ID from the catalog
+- "reason": a short sentence mentioning the business context, like: "For a family restaurant with a cozy positioning, I'd recommend warm colors to feel welcoming."`;
+        this.state.styleRecommendationLoading = true;
+        this.state.styleRecommendation = undefined;
+        try {
+            const response = await rpc("/html_editor/generate_text", {
+                prompt,
+                conversation_history: [],
+            });
+            if (this.isDestroyed) {
+                return;
+            }
+            const match = response?.match(/\{[\s\S]*\}/);
+            const parsed = match && JSON.parse(match[0]);
+            if (parsed) {
+                const palette = palettes[parsed.id];
+                if (parsed.reason) {
+                    this.state.styleRecommendation = parsed.reason;
+                }
+                this.state.styleRecommendationLoading = false;
+                if (palette) {
+                    this.state.aiRecommendedPalette = palette.name;
+                    this.state.selectPalette(palette.name);
+                }
+                return;
+            }
+        } catch {
+            // Silently fail — the user can still pick manually
+        }
+        if (this.isDestroyed) {
+            return;
+        }
+        this.state.styleRecommendationLoading = false;
+    }
+
+    async prefetchThemes() {
+        if (!this.state.themes.length) {
+            const themes = await getRecommendedThemes(this.orm, this.state);
+            if (themes.length) {
+                this.state.updateRecommendedThemes(themes);
+            }
+        }
+    }
+
+    get previewPalette() {
+        return (
+            this.hoverState.palette ||
+            this.state.selectedPalette ||
+            this.state.recommendedPalette ||
+            Object.values(this.state.palettes || {})[0] || {
+                color1: "#6EA8FE",
+                color2: "#474973",
+                color3: "#F0F2F5",
+                color4: "#FFFFFF",
+                color5: "#404264",
+            }
+        );
+    }
+
+    onPaletteCardHover(palette = null) {
+        this.hoverState.palette = palette;
+    }
+
     uploadLogo() {
-        this.logoInputRef.el.click();
+        this.logoInputRef.el?.click();
     }
 
     /**
@@ -431,7 +620,9 @@ export class PaletteSelectionScreen extends Component {
     async removeLogo(ev) {
         ev.stopPropagation();
         // Permit to trigger onChange even with the same file.
-        this.logoInputRef.el.value = "";
+        if (this.logoInputRef.el) {
+            this.logoInputRef.el.value = "";
+        }
         if (this.state.logoAttachmentId) {
             await this._removeAttachments([this.state.logoAttachmentId]);
         }
@@ -442,6 +633,9 @@ export class PaletteSelectionScreen extends Component {
 
     async changeLogo() {
         const logoSelectInput = this.logoInputRef.el;
+        if (!logoSelectInput) {
+            return;
+        }
         if (logoSelectInput.files.length === 1) {
             const previousLogoAttachmentId = this.state.logoAttachmentId;
             const file = logoSelectInput.files[0];
@@ -495,7 +689,20 @@ export class PaletteSelectionScreen extends Component {
 
     selectPalette(paletteName) {
         this.state.selectPalette(paletteName);
-        this.props.navigate(ROUTES.featuresSelectionScreen);
+        if (!this.state.themes.length) {
+            getRecommendedThemes(this.orm, this.state).then((themes) => {
+                if (themes.length) {
+                    this.state.updateRecommendedThemes(themes);
+                }
+            });
+        }
+    }
+
+    goToThemeSelection() {
+        if (!this.state.selectedPalette) {
+            return;
+        }
+        this.props.navigate(ROUTES.themeSelectionScreen);
     }
 
     /**
@@ -505,7 +712,7 @@ export class PaletteSelectionScreen extends Component {
      * @param {Array<number>} ids the attachment ids to remove
      */
     async _removeAttachments(ids) {
-        rpc("/html_editor/attachment/remove", { ids: ids });
+        await rpc("/html_editor/attachment/remove", { ids: ids });
     }
 }
 
@@ -540,9 +747,6 @@ export class ApplyConfiguratorScreen extends Component {
         };
 
         if (themeName !== undefined) {
-            const selectedFeatures = Object.values(this.state.features)
-                .filter((feature) => feature.selected)
-                .map((feature) => feature.id);
             const loadingSteps = [
                 {
                     description: _t("Applying your colors and design..."),
@@ -556,20 +760,16 @@ export class ApplyConfiguratorScreen extends Component {
                     description: _t("Generating inspiring text..."),
                     flag: "text",
                 },
-                ...this.getSelectedFeaturesLoadingSteps(selectedFeatures),
                 {
                     title: _t("Finalizing."),
-                    description: _t("Activating the last features."),
+                    description: _t("Activating your website."),
                     flag: "generic",
                 },
             ];
 
-            // Server requests are locked during module installation,
-            // uninstallation, or upgrade (when running without `workers`), so
-            // real-time progress can't be fetched. We simulate it instead.
-            const stopProgressSimulation = this.startConfiguratorProgressSimulation(
-                selectedFeatures.length
-            );
+            // The apply call is long-running, so real-time progress can't be
+            // fetched. We simulate it instead.
+            const stopProgressSimulation = this.startConfiguratorProgressSimulation();
             this.websiteService.showLoader({
                 title: _t("Building your website."),
                 loadingSteps,
@@ -587,7 +787,7 @@ export class ApplyConfiguratorScreen extends Component {
                 ];
             }
             const resp = await attemptConfiguratorApply(
-                this.getConfigurationData(selectedFeatures, selectedPalette, themeName)
+                this.getConfigurationData(selectedPalette, themeName)
             );
 
             this.props.clearStorage();
@@ -597,27 +797,26 @@ export class ApplyConfiguratorScreen extends Component {
                 redirectAction: () => {
                     // Here, the website service `goToWebsite` method is not
                     // used because the web client needs to be reloaded after
-                    // the new modules have been installed.
+                    // the configurator has updated the website.
+                    window.sessionStorage.setItem("website.first_configurator_edit", "1");
                     redirect(
                         `/odoo/action-website.website_preview?website_id=${encodeURIComponent(
                             resp.website_id
-                        )}`
+                        )}&enable_editor=1`
                     );
                 },
             });
         }
     }
 
-    getConfigurationData(selectedFeatures, selectedPalette, themeName) {
+    getConfigurationData(selectedPalette, themeName) {
         return {
-            selected_features: selectedFeatures,
             industry_id: this.state.selectedIndustry.id,
             industry_name: this.state.selectedIndustry.label.toLowerCase(),
             selected_palette: selectedPalette,
             theme_name: themeName,
             website_purpose:
-                WEBSITE_PURPOSES[this.state.selectedPurpose || this.state.formerSelectedPurpose]
-                    .name,
+                this.state.selectedPositioning || this.state.formerSelectedPositioning || "general",
             website_type: WEBSITE_TYPES[this.state.selectedType].name,
             logo_attachment_id: this.state.logoAttachmentId,
         };
@@ -627,21 +826,17 @@ export class ApplyConfiguratorScreen extends Component {
      * Simulates the progress for website creation, divided into three phases:
      * 1. Initial Phase (0-30%): Fast progress to give the impression of quick
      *    processing.
-     * 2. Modules Phase (30-90%): Distributes progress evenly across the
-     *    selected features (modules).
+     * 2. Processing Phase (30-90%): Slower progress while the website is built.
      * 3. Final Phase (90-100%): Slow progress to allow any pending operations
      *    to complete before reaching 100%.
      *
-     * @param {number} selectedFeaturesCount - Number of features to simulate
-     *                                         progress for.
      * @returns {Function} A cleanup function that stops the simulation.
      */
-    startConfiguratorProgressSimulation(selectedFeaturesCount) {
+    startConfiguratorProgressSimulation() {
         const INITIAL_PHASE_END = 30;
-        const MODULES_PHASE_END = 90;
+        const PROCESSING_PHASE_END = 90;
 
-        const moduleCount = Math.max(1, selectedFeaturesCount);
-        const progressPerModule = (MODULES_PHASE_END - INITIAL_PHASE_END) / moduleCount;
+        const processingProgress = PROCESSING_PHASE_END - INITIAL_PHASE_END;
 
         let progress = 0;
         let phase = "initial";
@@ -651,20 +846,17 @@ export class ApplyConfiguratorScreen extends Component {
                 case "initial":
                     progress += 2;
                     if (progress >= INITIAL_PHASE_END) {
-                        phase = "modules";
+                        phase = "processing";
                     }
                     break;
 
-                case "modules": {
-                    const moduleProgress = (progress - INITIAL_PHASE_END) % progressPerModule;
-                    // Gradually reduce speed within each module so the modules
-                    // phase gets adequate time while keeping progression evenly
-                    // distributed.
-                    const ratio = clamp(moduleProgress / progressPerModule, 0, 1);
+                case "processing": {
+                    const currentProgress = progress - INITIAL_PHASE_END;
+                    const ratio = clamp(currentProgress / processingProgress, 0, 1);
                     const speed = 1.5 + (0.2 - 1.5) * ratio;
 
-                    progress = Math.min(progress + speed, MODULES_PHASE_END);
-                    if (progress >= MODULES_PHASE_END) {
+                    progress = Math.min(progress + speed, PROCESSING_PHASE_END);
+                    if (progress >= PROCESSING_PHASE_END) {
                         phase = "final";
                     }
                     break;
@@ -680,112 +872,6 @@ export class ApplyConfiguratorScreen extends Component {
 
         return () => clearInterval(intervalId);
     }
-
-    /**
-     * Returns the list of feature steps with their loading messages.
-     * Each step maps to a `website.configurator.feature` record ID.
-     *
-     * @returns {Object[]} Array of feature step definitions.
-     */
-    get featureSteps() {
-        return [
-            {
-                id: 5,
-                title: _t("Adding features."),
-                name: _t("blog"),
-                description: _t("Enabling your %s."),
-                flag: "generic",
-            },
-            {
-                id: 7,
-                title: _t("Adding features."),
-                name: _t("recruitment platform"),
-                description: _t("Integrating your %s."),
-                flag: "generic",
-            },
-            {
-                id: 8,
-                title: _t("Adding features."),
-                name: _t("online store"),
-                description: _t("Activating your %s."),
-                flag: "generic",
-            },
-            {
-                id: 9,
-                title: _t("Adding features."),
-                name: _t("online appointment system"),
-                description: _t("Configuring your %s."),
-                flag: "generic",
-            },
-            {
-                id: 10,
-                title: _t("Adding features."),
-                name: _t("forum"),
-                description: _t("Setting up your %s."),
-                flag: "generic",
-            },
-            {
-                id: 12,
-                title: _t("Adding features."),
-                name: _t("e-learning platform"),
-                description: _t("Installing your %s."),
-                flag: "generic",
-            },
-        ];
-    }
-
-    /**
-     * Depending on the features selected, returns the right loading steps.
-     *
-     * @param {number[]} [selectedFeatures=[]]
-     * @returns {Object[]} The loading steps filtered by the selected features.
-     */
-    getSelectedFeaturesLoadingSteps(selectedFeatures = []) {
-        return this.featureSteps
-            .filter((step) => selectedFeatures.includes(step.id))
-            .map((step) => {
-                const highlight = markup`<span class="o_website_loader_text_highlight">${step.name}</span>`;
-                return { ...step, description: htmlSprintf(step.description, highlight) };
-            });
-    }
-}
-
-export class FeaturesSelectionScreen extends Component {
-    static components = { SkipButton };
-    static template = "website.Configurator.FeatureSelection";
-    static props = {
-        navigate: Function,
-        skip: Function,
-    };
-    setup() {
-        super.setup();
-        this.state = useStore();
-    }
-
-    /**
-     * Return the theme selection screen as the next step, unless overridden.
-     *
-     * @return {int} Next step route.
-     */
-    static nextStep() {
-        return ROUTES.themeSelectionScreen;
-    }
-
-    async buildWebsite() {
-        const industryId = this.state.selectedIndustry && this.state.selectedIndustry.id;
-        if (!industryId) {
-            return this.props.navigate(ROUTES.descriptionScreen);
-        }
-
-        this.props.navigate(FeaturesSelectionScreen.nextStep());
-    }
-
-    onKeydown(ev) {
-        const hotkey = getActiveHotkey(ev);
-        if (["enter", "space"].includes(hotkey)) {
-            ev.target.click();
-        }
-    }
 }
 
 export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
@@ -797,37 +883,47 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         this.orm = useService("orm");
         this.maxNbrDisplayExtraThemes = 100;
         const env = useEnv();
+        env.store["themesLoading"] = !env.store.themes?.length;
         env.store["extraThemesLoaded"] = false;
         env.store["extraThemes"] = [];
         this.state = useState(env.store);
-        this.themeSVGPreviews = [
-            useRef("ThemePreview1"),
-            useRef("ThemePreview2"),
-            useRef("ThemePreview3"),
-        ];
-        this.extraThemesButtonRef = useRef("extraThemesButton");
-        this.extraThemeSVGPreviews = [];
-        for (let i = 0; i < this.maxNbrDisplayExtraThemes; i++) {
-            this.extraThemeSVGPreviews.push(useRef(`ExtraThemePreview${i}`));
-        }
-        onWillStart(async () => {
-            const themes = await getRecommendedThemes(this.orm, this.state);
-            if (!themes.length) {
-                await this.applyConfigurator("theme_default");
-            } else {
-                this.state.updateRecommendedThemes(themes);
-            }
-        });
-
-        onMounted(() => {
-            this.blockUiDuringImageLoading(this.state.themes, this.themeSVGPreviews);
-        });
-
         useLayoutEffect(
-            () =>
-                this.blockUiDuringImageLoading(this.state.extraThemes, this.extraThemeSVGPreviews),
-            () => [this.state.extraThemes]
+            (previewHeaders) => {
+                if (!previewHeaders) {
+                    return;
+                }
+                this.updatePreviewIframeHeadings();
+                this.scalePreviewIframes();
+            },
+            () => [this.state.previewHeaders?.join("\n") || ""]
         );
+        onMounted(async () => {
+            if (!this.state.previewHeaders?.length && !this.state.previewHeadersLoading) {
+                ensurePreviewHeaders(this.state);
+            }
+            if (!this.state.themes.length) {
+                let themeName;
+                this.uiService.block();
+                try {
+                    const themes = await getRecommendedThemes(this.orm, this.state);
+                    if (!themes.length) {
+                        themeName = "theme_default";
+                    } else {
+                        this.state.updateRecommendedThemes(themes);
+                    }
+                } finally {
+                    this.state.themesLoading = false;
+                    this.uiService.unblock();
+                }
+                if (themeName) {
+                    await this.chooseTheme(themeName);
+                    return;
+                }
+            }
+            this.scalePreviewIframes();
+        });
+
+        useExternalListener(window, "resize", () => this.scalePreviewIframes());
     }
 
     /**
@@ -843,52 +939,153 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         );
     }
 
-    /**
-     * Transforms text svgs into svg elements and adds a loading effect that
-     * blocks the UI during the loading of the images inside those svg elements.
-     *
-     * @param {Array<Object>} themes - The text svgs.
-     * @param {Array} themeSVGPreviews - A reference to the svg elements.
-     */
-    blockUiDuringImageLoading(themes, themeSVGPreviews) {
-        if (!themes.length) {
-            // There is no svg to transform
+    scalePreviewIframes() {
+        for (const iframe of document.querySelectorAll(
+            ".o_theme_selection_screen .o_configurator_theme_preview_iframe"
+        )) {
+            this.scalePreviewIframe(iframe);
+        }
+    }
+
+    getThemePreviewUrl(theme) {
+        const previewUrl = new URL("/website/configurator/preview", browser.location.origin);
+        const palette = this.state.selectedPalette || {};
+        previewUrl.searchParams.set("preview_url", theme.preview_url);
+        previewUrl.searchParams.set("theme_name", theme.name);
+        previewUrl.searchParams.set("industry_id", this.state.selectedIndustry?.id || -1);
+        for (const colorName of ["color1", "color2", "color3", "color4", "color5"]) {
+            previewUrl.searchParams.set(colorName, palette[colorName] || "");
+        }
+        return previewUrl.toString();
+    }
+
+    getPreviewHeader(iframe) {
+        const previewHeaders = this.state.previewHeaders || [];
+        if (!previewHeaders.length) {
+            return null;
+        }
+        const iframes = [
+            ...document.querySelectorAll(
+                ".o_theme_selection_screen .o_configurator_theme_preview_iframe"
+            ),
+        ];
+        const index = iframes.indexOf(iframe);
+        return previewHeaders[(index >= 0 ? index : 0) % previewHeaders.length];
+    }
+
+    replacePreviewIframeHeading(iframe) {
+        const previewHeader = this.getPreviewHeader(iframe);
+        if (!previewHeader) {
             return;
         }
-        const proms = [];
-        this.uiService.block({ delay: 700 });
-        themes.forEach((theme, idx) => {
-            const svgEl = new DOMParser().parseFromString(
-                theme.svg,
-                "image/svg+xml"
-            ).documentElement;
-            for (const imgEl of svgEl.querySelectorAll("image")) {
-                proms.push(
-                    new Promise((resolve, reject) => {
-                        imgEl.addEventListener(
-                            "load",
-                            () => {
-                                resolve(imgEl);
-                            },
-                            { once: true }
-                        );
-                        imgEl.addEventListener(
-                            "error",
-                            () => {
-                                reject(imgEl);
-                            },
-                            { once: true }
-                        );
-                    })
-                );
+        try {
+            const previewDocument = iframe.contentDocument;
+            const heading = previewDocument?.querySelector("h1, .h1");
+            if (heading) {
+                heading.textContent = previewHeader;
             }
-            themeSVGPreviews[idx].el.appendChild(svgEl);
-        });
-        // When all the images inside the svgs are loaded then remove the
-        // loading effect.
-        Promise.allSettled(proms).then(() => {
-            this.uiService.unblock();
-        });
+        } catch {
+            // Ignore iframe access failures and keep the original preview title.
+        }
+    }
+
+    replacePreviewIframeLogo(iframe) {
+        const logo = this.state.logo;
+        if (!logo) {
+            return;
+        }
+        try {
+            const previewDocument = iframe.contentDocument;
+            const logoImage = previewDocument?.querySelector(
+                "header img, #top img, .navbar-brand img"
+            );
+            if (logoImage) {
+                logoImage.src = logo;
+            }
+        } catch {
+            // Ignore iframe access failures and keep the original preview logo.
+        }
+    }
+
+    updatePreviewIframeHeadings() {
+        for (const iframe of document.querySelectorAll(
+            ".o_theme_selection_screen .o_configurator_theme_preview_iframe"
+        )) {
+            this.replacePreviewIframeHeading(iframe);
+        }
+    }
+
+    getPreviewIframeContentSize(iframe) {
+        try {
+            const iframeWindow = iframe.contentWindow;
+            const iframeDocument = iframe.contentDocument;
+            const scrollingElement = iframeDocument?.scrollingElement;
+            const documentElement = iframeDocument?.documentElement;
+            const body = iframeDocument?.body;
+            if (!iframeWindow || !scrollingElement || !documentElement) {
+                return null;
+            }
+            return {
+                width: Math.max(
+                    DESKTOP_PREVIEW_WIDTH,
+                    iframeWindow.innerWidth,
+                    scrollingElement.scrollWidth,
+                    documentElement.scrollWidth,
+                    body?.scrollWidth || 0
+                ),
+                height: Math.max(
+                    scrollingElement.scrollHeight,
+                    documentElement.scrollHeight,
+                    body?.scrollHeight || 0,
+                    documentElement.offsetHeight,
+                    body?.offsetHeight || 0
+                ),
+            };
+        } catch {
+            return null;
+        }
+    }
+
+    scalePreviewIframe(iframe) {
+        if (!iframe) {
+            return;
+        }
+
+        const previewContainer = iframe.parentElement;
+        const availableWidth = previewContainer.clientWidth;
+        const availableHeight = previewContainer.clientHeight;
+
+        if (!availableWidth || !availableHeight) {
+            return;
+        }
+
+        iframe.style.setProperty("width", `${DESKTOP_PREVIEW_WIDTH}px`, "important");
+        const contentSize = this.getPreviewIframeContentSize(iframe);
+        const iframeWidth = contentSize?.width || DESKTOP_PREVIEW_WIDTH;
+        const scale = Math.min(1, availableWidth / iframeWidth);
+        const fallbackContentHeight = (availableHeight * 2) / scale;
+        const iframeHeight = Math.ceil(contentSize?.height || fallbackContentHeight);
+        // `top` is animated in container pixels, so the distance must use the
+        // scaled iframe height, not the raw document height.
+        const scrollDistance = Math.max(0, iframeHeight * scale - availableHeight);
+
+        iframe.style.setProperty("width", `${iframeWidth}px`, "important");
+        iframe.style.setProperty("height", `${iframeHeight}px`, "important");
+        iframe.style.setProperty(
+            "--o-configurator-iframe-scroll-distance",
+            `${Math.floor(scrollDistance)}px`
+        );
+        iframe.style.setProperty("transform-origin", "top left");
+        iframe.style.setProperty("transform", `scale(${scale})`);
+        iframe.style.setProperty("flex", "0 0 auto", "important");
+    }
+
+    onPreviewIframeLoad(ev) {
+        const iframe = ev.currentTarget;
+        this.replacePreviewIframeHeading(iframe);
+        this.replacePreviewIframeLogo(iframe);
+        iframe.parentElement?.classList.add("o_preview_loaded");
+        this.scalePreviewIframe(iframe);
     }
 
     async chooseTheme(themeName) {
@@ -910,10 +1107,6 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         );
         this.state.extraThemesLoaded = true;
         this.uiService.unblock();
-    }
-
-    getExtraThemeName(idx) {
-        return this.state.extraThemes.length > idx && this.state.extraThemes[idx].name;
     }
 }
 
@@ -938,26 +1131,6 @@ export class Store {
         return id && WEBSITE_TYPES[id];
     }
 
-    getWebsitePurpose() {
-        return Object.values(WEBSITE_PURPOSES);
-    }
-
-    getSelectedPurpose(id) {
-        return id && WEBSITE_PURPOSES[id];
-    }
-
-    getFeatures() {
-        return Object.values(this.features);
-    }
-
-    getPalettes() {
-        return Object.values(this.palettes);
-    }
-
-    getThemeName(idx) {
-        return this.themes.length > idx && this.themes[idx].name;
-    }
-
     /**
      * @returns {string | false}
      */
@@ -971,31 +1144,7 @@ export class Store {
     //-------------------------------------------------------------------------
 
     selectWebsiteType(id) {
-        Object.values(this.features)
-            .filter((feature) => feature.module_state !== "installed")
-            .forEach((feature) => {
-                feature.selected = feature.website_config_preselection.includes(
-                    WEBSITE_TYPES[id].name
-                );
-            });
         this.selectedType = id;
-    }
-
-    selectWebsitePurpose(id) {
-        // Keep track or the former selection in order to be able to keep
-        // the auto-advance navigation scheme while being able to use the
-        // browser's back and forward buttons.
-        if (!id && this.selectedPurpose) {
-            this.formerSelectedPurpose = this.selectedPurpose;
-        }
-        Object.values(this.features)
-            .filter((feature) => feature.module_state !== "installed")
-            .forEach((feature) => {
-                // need to check id, since we set to undefined in mount() to avoid the auto next screen on back button
-                feature.selected |=
-                    id && feature.website_config_preselection.includes(WEBSITE_PURPOSES[id].name);
-            });
-        this.selectedPurpose = id;
     }
 
     selectIndustry(label, id) {
@@ -1004,6 +1153,11 @@ export class Store {
         } else {
             this.selectedIndustry = { id, label };
         }
+        this.images = {};
+    }
+
+    setImages(images) {
+        this.images = images || {};
     }
 
     changeLogo(data, attachmentId) {
@@ -1011,18 +1165,25 @@ export class Store {
         this.logoAttachmentId = attachmentId;
     }
 
+    selectPositioning(positioning) {
+        if (!positioning && this.selectedPositioning) {
+            this.formerSelectedPositioning = this.selectedPositioning;
+        }
+        this.selectedPositioning = positioning;
+    }
+
     selectPalette(paletteName) {
+        const prevPalette = this.selectedPalette;
         if (paletteName === "recommendedPalette") {
             this.selectedPalette = this.recommendedPalette;
         } else {
             this.selectedPalette = this.palettes[paletteName];
         }
-    }
-
-    toggleFeature(featureId) {
-        const feature = this.features[featureId];
-        const isModuleInstalled = feature.module_state === "installed";
-        feature.selected = !feature.selected || isModuleInstalled;
+        if (this.selectedPalette !== prevPalette) {
+            this.themes = [];
+            this.extraThemes = [];
+            this.extraThemesLoaded = false;
+        }
     }
 
     setRecommendedPalette(color1, color2) {
@@ -1059,10 +1220,8 @@ export function useStore() {
 
 export class Configurator extends Component {
     static components = {
-        WelcomeScreen,
         DescriptionScreen,
         PaletteSelectionScreen,
-        FeaturesSelectionScreen,
         ThemeSelectionScreen,
     };
     static template = "website.Configurator.Configurator";
@@ -1083,7 +1242,7 @@ export class Configurator extends Component {
             }
         });
 
-        const initialStep = router.current.step;
+        const initialStep = router.current.step || ROUTES.descriptionScreen;
         const store = reactive(new Store());
         let isStoreStarted = false;
         useEffect(() => {
@@ -1145,12 +1304,10 @@ export class Configurator extends Component {
             return DescriptionScreen;
         } else if (this.state.currentStep === ROUTES.paletteSelectionScreen) {
             return PaletteSelectionScreen;
-        } else if (this.state.currentStep === ROUTES.featuresSelectionScreen) {
-            return FeaturesSelectionScreen;
         } else if (this.state.currentStep === ROUTES.themeSelectionScreen) {
             return ThemeSelectionScreen;
         }
-        return WelcomeScreen;
+        return DescriptionScreen;
     }
 
     get componentProps() {
@@ -1191,43 +1348,32 @@ export class Configurator extends Component {
             hitCountOrder: index,
         }));
 
-        // Load palettes from the current CSS
-        const palettes = {};
         const style = window.getComputedStyle(document.documentElement);
-
-        PALETTE_NAMES.forEach((paletteName) => {
-            const palette = {
-                name: paletteName,
-            };
-            for (let j = 1; j <= 5; j += 1) {
-                palette[`color${j}`] = getCSSVariableValue(
-                    `o-palette-${paletteName}-o-color-${j}`,
-                    style
-                );
-            }
-            CUSTOM_BG_COLOR_ATTRS.forEach((attr) => {
-                palette[attr] = getCSSVariableValue(`o-palette-${paletteName}-${attr}-bg`, style);
-            });
-            palettes[paletteName] = palette;
-        });
+        const palettes = getCSSPalettes(style, PALETTE_NAMES, CUSTOM_BG_COLOR_ATTRS);
 
         const localState = JSON.parse(sessionStorage.getItem(this.storageItemName));
         if (localState) {
+            const storedState = { ...localState };
+            delete storedState.selectedPurpose;
+            delete storedState.formerSelectedPurpose;
             let themes = [];
-            if (localState.selectedIndustry && localState.selectedPalette) {
-                themes = await getRecommendedThemes(this.orm, localState);
+            let images = {};
+            if (storedState.selectedIndustry && storedState.selectedPalette) {
+                themes = await getRecommendedThemes(this.orm, storedState);
             }
-            return Object.assign(r, { ...localState, palettes, themes });
-        }
-
-        const features = {};
-        results.features.forEach((feature) => {
-            features[feature.id] = Object.assign({}, feature, {
-                selected: feature.module_state === "installed",
+            if (storedState.selectedIndustry?.id > 0) {
+                images = await getIndustryImages(this.orm, storedState, themes[0]?.name || "");
+            }
+            return Object.assign(r, {
+                ...storedState,
+                images,
+                palettes,
+                themes,
+                previewHeaders: [],
+                previewHeadersKey: undefined,
+                previewHeadersLoading: false,
             });
-            const wtp = features[feature.id]["website_config_preselection"];
-            features[feature.id]["website_config_preselection"] = wtp ? wtp.split(",") : [];
-        });
+        }
 
         // Palette color used by default as background color for menu and footer.
         // Needed to build the recommended palette.
@@ -1241,14 +1387,22 @@ export class Configurator extends Component {
 
         return Object.assign(r, {
             selectedType: undefined,
-            selectedPurpose: undefined,
-            formerSelectedPurpose: undefined,
+            positionings: [],
+            positioningsLoading: false,
+            selectedPositioning: undefined,
+            formerSelectedPositioning: undefined,
             selectedIndustry: undefined,
+            images: {},
             selectedPalette: undefined,
             recommendedPalette: undefined,
+            styleRecommendationLoading: false,
+            styleRecommendation: undefined,
+            aiRecommendedPalette: undefined,
+            previewHeaders: [],
+            previewHeadersKey: undefined,
+            previewHeadersLoading: false,
             defaultColors: defaultColors,
             palettes: palettes,
-            features: features,
             themes: [],
             logoAttachmentId: undefined,
         });
@@ -1257,13 +1411,13 @@ export class Configurator extends Component {
     updateStorage(state) {
         const newState = JSON.stringify({
             defaultColors: state.defaultColors,
-            features: state.features,
             logo: state.logo,
             logoAttachmentId: state.logoAttachmentId,
             selectedIndustry: state.selectedIndustry,
             selectedPalette: state.selectedPalette,
-            selectedPurpose: state.selectedPurpose,
-            formerSelectedPurpose: state.formerSelectedPurpose,
+            positionings: state.positionings,
+            selectedPositioning: state.selectedPositioning,
+            formerSelectedPositioning: state.formerSelectedPositioning,
             selectedType: state.selectedType,
             recommendedPalette: state.recommendedPalette,
         });
@@ -1278,8 +1432,8 @@ export class Configurator extends Component {
         const redirectUrl = await this.orm.call("website", "configurator_skip");
         this.clearStorage();
         // Here the website service goToWebsite method is not used because
-        // the web client needs to be reloaded after the new modules have
-        // been installed.
+        // the web client needs to be reloaded after the configurator has
+        // updated the website.
         await this.action.doAction(redirectUrl);
     }
 }

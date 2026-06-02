@@ -1,21 +1,38 @@
 .o_configurator_container .o_wsale_configurator_screen.o_configurator_screen {
+    .button_area {
+        @include o-position-absolute(0, 0, 0, 0);
+        cursor: pointer;
+        z-index: 2;
+    }
+
     .theme_preview {
-        --ConfiguratorPreview-height: auto;
+        aspect-ratio: auto;
+        overflow: visible;
+        background: transparent;
+        border: 0 !important;
+        transition: all .3s ease 0s;
+        transform: translate3d(0, 0, 0);
+        will-change: transform;
+
+        @include media-breakpoint-up(lg) {
+            &:hover {
+                transform: translate3d(0, -10px, 0);
+            }
+        }
 
         img {
             border: $border-width solid $border-color;
+            box-shadow: $box-shadow-sm;
         }
 
-        &:hover, :focus {
+        &:hover,
+        &:focus-within {
+            box-shadow: none;
+
             img {
-                border-color: inherit;
+                border-color: map-get($theme-colors, primary);
+                box-shadow: $box-shadow;
             }
-        }
-    }
-
-    @include media-breakpoint-down(lg) {
-        .theme_preview {
-            --ConfiguratorPreview-height: auto;
         }
     }
 }

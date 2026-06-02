@@ -679,16 +679,6 @@ class Website(models.CachedModel):
         r = dict()
         current_website = self.get_current_website()
         company = current_website.company_id
-        configurator_features = self.env['website.configurator.feature'].search([])
-        r['features'] = [{
-            'id': feature.id,
-            'name': feature.name,
-            'description': feature.description,
-            'type': 'page' if feature.page_view_id else 'app',
-            'icon': feature.icon,
-            'website_config_preselection': feature.website_config_preselection,
-            'module_state': feature.module_id.state,
-        } for feature in configurator_features]
         r['logo'] = False
         if not company.uses_default_logo:
             r['logo'] = company.logo.to_base64()
@@ -701,24 +691,123 @@ class Website(models.CachedModel):
             r['industries'] = []
         return r
 
+    def _get_configurator_theme_preview_url(self, theme_name, manifest):
+        preview_path = f"{theme_name}/static/description/preview.html"
+        try:
+            with file_open(preview_path):
+                return f'/{preview_path}'
+        except FileNotFoundError:
+            return manifest.get('url')
+
     @api.model
-    def configurator_recommended_themes(self, industry_id, palette, result_nbr_max=3):
+    def configurator_recommended_themes(self, industry_id, result_nbr_max=6,
+                                         industry_name='', website_type='', positioning=''):
         Module = request.env['ir.module.module']
         domain = Module.get_themes_domain()
         domain = Domain.AND([[('name', '!=', 'theme_default')], domain])
         client_themes = Module.search(domain).mapped('name')
-        client_themes_img = {t: get_manifest(t).get('images_preview_theme', {}) for t in client_themes if get_manifest(t)}
-        themes_suggested = self._website_api_rpc(
-            '/api/website/2/configurator/recommended_themes/%s' % (industry_id if industry_id > 0 else ''),
-            {
-                'client_themes': client_themes_img,
-                'result_nbr_max': result_nbr_max,
-            }
+        manifests = {
+            theme_name: manifest
+            for theme_name in client_themes
+            if (manifest := get_manifest(theme_name))
+        }
+        client_themes_img = {
+            theme_name: manifest.get('images_preview_theme', {})
+            for theme_name, manifest in manifests.items()
+        }
+        theme_catalog = {
+            theme_name: manifest.get('summary', '')
+            for theme_name, manifest in manifests.items()
+        }
+
+        # Use AI to pick the best themes for this business
+        ai_theme_names = self._ai_recommend_themes(
+            theme_catalog, industry_name, website_type, positioning, result_nbr_max
         )
-        process_svg = self.env['website.configurator.feature']._process_svg
+
+        # Build the theme list: AI-recommended first, then fill from IAP
+        themes_suggested = []
+        try:
+            iap_themes = self._website_api_rpc(
+                '/api/website/2/configurator/recommended_themes/%s' % (industry_id if industry_id > 0 else ''),
+                {
+                    'client_themes': client_themes_img,
+                    'result_nbr_max': max(result_nbr_max, 20),
+                }
+            )
+        except AccessError:
+            iap_themes = []
+        if not isinstance(iap_themes, list):
+            iap_themes = []
+        iap_themes = [
+            theme for theme in iap_themes
+            if isinstance(theme, dict) and theme.get('name')
+        ]
+
+        iap_by_name = {theme['name']: theme for theme in iap_themes}
+        selected_theme_names = set()
+        # Add AI-recommended themes first (in AI order)
+        for name in ai_theme_names:
+            if name in iap_by_name and name not in selected_theme_names:
+                themes_suggested.append(iap_by_name[name])
+                selected_theme_names.add(name)
+        # Fill remaining slots from IAP results
+        for theme in iap_themes:
+            if len(themes_suggested) >= result_nbr_max:
+                break
+            if theme['name'] not in selected_theme_names:
+                themes_suggested.append(theme)
+                selected_theme_names.add(theme['name'])
+
+        themes_with_previews = []
         for theme in themes_suggested:
-            theme['svg'] = process_svg(theme['name'], palette, theme.pop('image_urls'))
-        return themes_suggested
+            theme.pop('image_urls', None)
+            manifest = manifests.get(theme['name']) or {}
+            preview_url = self._get_configurator_theme_preview_url(theme['name'], manifest)
+            if preview_url:
+                theme['preview_url'] = preview_url
+                themes_with_previews.append(theme)
+            if len(themes_with_previews) >= result_nbr_max:
+                break
+        return themes_with_previews
+
+    def _ai_recommend_themes(self, theme_catalog, industry_name, website_type, positioning, count):
+        """Use OLG to pick the best themes for a given business context."""
+        if not industry_name:
+            return []
+        try:
+            catalog_desc = "\n".join(
+                f"- {name}: {summary}" for name, summary in theme_catalog.items() if summary
+            )
+            prompt = (
+                f"I'm building {website_type or 'a'} website for a {industry_name} business "
+                f"with a {positioning or 'general'} positioning.\n"
+                f"Available themes:\n{catalog_desc}\n\n"
+                f"Pick the {count} best-fitting themes. Return ONLY a JSON array of theme names, "
+                f"e.g. [\"theme_clean\", \"theme_cobalt\"]. No explanation."
+            )
+            IrConfigParameter = self.env['ir.config_parameter'].sudo()
+            olg_api_endpoint = IrConfigParameter.get_str('html_editor.olg_api_endpoint') or 'https://olg.api.odoo.com'
+            database_id = IrConfigParameter.get_str('database.uuid')
+            response = iap_tools.iap_jsonrpc(olg_api_endpoint + "/api/olg/1/chat", params={
+                'prompt': prompt,
+                'conversation_history': [],
+                'database_id': database_id,
+            }, timeout=15)
+            if not isinstance(response, dict):
+                return []
+            if response.get('status') == 'success':
+                content = response.get('content')
+                if not isinstance(content, str):
+                    return []
+                match = re.search(r'\[[\s\S]*\]', content)
+                if match:
+                    names = json.loads(match.group())
+                    if isinstance(names, list) and all(isinstance(n, str) for n in names):
+                        return [n for n in names if n in theme_catalog][:count]
+        except (AccessError, iap_tools.InsufficientCreditError, json.JSONDecodeError):
+            pass
+        return []
 
     @api.model
     def configurator_skip(self):
@@ -738,8 +827,33 @@ class Website(models.CachedModel):
         )
 
     @api.model
+    def configurator_get_images(
+        self,
+        industry_id,
+        theme='',
+    ):
+        if not industry_id or industry_id <= 0:
+            return {}
+        try:
+            custom_resources = self._website_api_rpc(
+                '/api/website/2/configurator/custom_resources/%s' % industry_id,
+                {'theme': theme or ''},
+            )
+        except AccessError as e:
+            logger.warning(
+                "Failed to fetch configurator images for industry %s: %s",
+                industry_id,
+                e,
+            )
+            return {}
+        if not isinstance(custom_resources, dict):
+            return {}
+        return custom_resources.get('images', {})
+
+    @api.model
     def configurator_apply(self, **kwargs):
         website = self.get_current_website()
+        skip_ai = kwargs.get('skip_ai')
         theme_name = kwargs['theme_name']
         theme = self.env['ir.module.module'].search([('name', '=', theme_name)])
         redirect_url = theme.button_choose_theme()
@@ -753,24 +867,25 @@ class Website(models.CachedModel):
         # Set logo from generated attachment or from company's logo
         logo_attachment_id = kwargs.get('logo_attachment_id')
         company = website.company_id
-        if logo_attachment_id:
-            attachment = self.env['ir.attachment'].browse(logo_attachment_id)
+        attachment = self.env['ir.attachment'].browse(logo_attachment_id).exists() if logo_attachment_id else False
+        if attachment:
             attachment.write({
                 'res_model': 'website',
                 'res_field': 'logo',
                 'res_id': website.id,
             })
-        elif not logo_attachment_id and not company.uses_default_logo:
+        elif not company.uses_default_logo:
             website.logo = BinaryBytes(company.logo.content)
 
-        # Configure the color palette
+        # Configure the color palette.
         selected_palette = kwargs.get('selected_palette')
         if selected_palette:
             Assets = self.env['website.assets']
             selected_palette_name = selected_palette if isinstance(selected_palette, str) else 'base-1'
+            customization_values = {'color-palettes-name': "'%s'" % selected_palette_name}
             Assets.make_scss_customization(
                 '/website/static/src/scss/options/user_values.scss',
-                {'color-palettes-name': "'%s'" % selected_palette_name}
+                customization_values
             )
             if isinstance(selected_palette, list):
                 Assets.make_scss_customization(
@@ -813,63 +928,15 @@ class Website(models.CachedModel):
             except ValueError as e:
                 logger.warning(e)
 
-        # Configure the features
-        features = self.env['website.configurator.feature'].browse(kwargs.get('selected_features'))
-
-        menu_company = self.env['website.menu']
-        if len(features.filtered('menu_sequence')) > 5 and len(features.filtered('menu_company')) > 1:
-            menu_company = self.env['website.menu'].create({
-                'name': _('Company'),
-                'parent_id': website.menu_id.id,
-                'website_id': website.id,
-                'sequence': 40,
-            })
-
-        pages_views = {}
-        modules = self.env['ir.module.module']
-        module_data = {}
-        for feature in features:
-            add_menu = bool(feature.menu_sequence)
-            if feature.module_id:
-                if feature.module_id.state != 'installed':
-                    modules += feature.module_id
-                if add_menu:
-                    if feature.module_id.name != 'website_blog':
-                        module_data[feature.feature_url] = {'sequence': feature.menu_sequence}
-                    else:
-                        blogs = module_data.setdefault('#blog', [])
-                        blogs.append({'name': feature.name, 'sequence': feature.menu_sequence})
-            elif feature.page_view_id:
-                result = self.env['website'].new_page(
-                    name=feature.name,
-                    add_menu=add_menu,
-                    page_values=dict(url=feature.feature_url, is_published=True),
-                    menu_values=add_menu and {
-                        'url': feature.feature_url,
-                        'sequence': feature.menu_sequence,
-                        'parent_id': feature.menu_company and menu_company.id or website.menu_id.id,
-                    },
-                    template=feature.page_view_id.key
-                )
-                pages_views[feature.iap_page_code] = result['view_id']
-
-        if modules:
-            modules.button_immediate_install()
-
-        self.env['website'].browse(website.id).configurator_set_menu_links(menu_company, module_data)
-
-        # Extension hook: allows installed modules (e.g. website_sale, website_blog, ...) to perform
-        # additional setup steps on the generated website. This acts as an entry point for modules to
-        # customize the website.
+        # Extension hook: allows installed modules to perform additional setup
+        # steps on the generated website.
         self.env['website'].configurator_addons_apply(**kwargs)
 
-        # We need to refresh the environment of the website because we installed
-        # some new module and we need the overrides of these new menus e.g. for
-        # the call to `get_cta_data`.
+        # Refresh the environment of the website to use addon overrides.
         website = self.env['website'].browse(website.id)
 
-        # Update footers links, needs to be done after "Features" addition to go
-        # through module overrides of `configurator_get_footer_links`.
+        # Update footers links after addon setup to go through module overrides
+        # of `configurator_get_footer_links`.
         footer_links = website.configurator_get_footer_links()
         footer_ids = [
             'website.template_footer_contact', 'website.template_footer_headline',
@@ -896,16 +963,19 @@ class Website(models.CachedModel):
                     el[0].attrib['t-value'] = json.dumps(footer_links)
                     view_id.with_context(website_id=website.id).write({'arch_db': etree.tostring(arch_string)})
 
-        # Load suggestion from iap for selected pages
+        # Load suggestions from IAP.
         industry_id = kwargs['industry_id']
-        custom_resources = self._website_api_rpc(
-            '/api/website/2/configurator/custom_resources/%s' % (industry_id if industry_id > 0 else ''),
-            {'theme': theme_name}
-        )
+        custom_resources = {'images': {}}
+        # Keep the theme visuals untouched for unknown industries.
+        if not skip_ai and industry_id > 0:
+            custom_resources = self._website_api_rpc(
+                '/api/website/2/configurator/custom_resources/%s' % industry_id,
+                {'theme': theme_name}
+            )
 
-        # Generate text for the pages
-        requested_pages = set(pages_views.keys()).union({'homepage'})
+        # Generate text for the homepage.
         configurator_snippets = website.get_theme_configurator_snippets(theme_name)
+        snippet_list = configurator_snippets.get('homepage', [])
         industry = kwargs['industry_name']
 
         IrQweb = self.env['ir.qweb'].with_context(website_id=website.id, lang=website.default_lang_id.code)
@@ -923,13 +993,11 @@ class Website(models.CachedModel):
         )
         generated_content = {}
         translated_content = {}
-        for page_code in requested_pages - {'privacy_policy'}:
-            snippet_list = configurator_snippets.get(page_code, [])
-            for snippet in snippet_list:
-                snippet_key = website._get_snippet_view_key(snippet, page_code)
-                html_text_processor, snippet_generated_content, snippet_translated_content = html_text_processor._get_snippet_content(snippet_key)
-                generated_content.update(snippet_generated_content)
-                translated_content.update(snippet_translated_content)
+        for snippet in snippet_list:
+            snippet_key = website._get_snippet_view_key(snippet, 'homepage')
+            html_text_processor, snippet_generated_content, snippet_translated_content = html_text_processor._get_snippet_content(snippet_key)
+            generated_content.update(snippet_generated_content)
+            translated_content.update(snippet_translated_content)
 
         # Extract placeholders from footers
         for footer_id in footer_ids:
@@ -939,82 +1007,78 @@ class Website(models.CachedModel):
                 for placeholder in placeholders:
                     generated_content[placeholder] = ''
 
-        translated_ratio = html_text_processor._calculate_translation_ratio(generated_content, translated_content)
-        if translated_ratio > 0.8:
-            try:
-                database_id = self.env['ir.config_parameter'].sudo().get_str('database.uuid')
-                response = self._OLG_api_rpc('/api/olg/1/generate_placeholder', {
-                    'placeholders': list(generated_content.keys()),
-                    'lang': website.default_lang_id.name,
-                    'industry': industry,
-                    'database_id': database_id,
-                })
-                name_replace_parser = re.compile(r"XXXX", re.MULTILINE)
-                website_name = re.escape(website.name)
-                for key in generated_content:
-                    if response.get(key):
-                        generated_content[key] = (name_replace_parser.sub(website_name, response[key], 0))
-            except RequestException:
-                # If IAP is broken continue normally (without generating text)
-                pass
-        else:
-            logger.info("Skip AI text generation because translation coverage is too low (%s%%)", translated_ratio * 100)
-
-        # Configure the pages
-        for index, page_code in enumerate(requested_pages):
-            snippet_list = configurator_snippets.get(page_code, [])
-            if page_code == 'homepage':
-                page_view_id = self.with_context(website_id=website.id).viewref('website.homepage')
-            else:
-                page_view_id = self.env['ir.ui.view'].browse(pages_views[page_code])
-            rendered_snippets = []
-            nb_snippets = len(snippet_list)
-            for i, snippet in enumerate(snippet_list, start=1):
+        if not skip_ai:
+            translated_ratio = html_text_processor._calculate_translation_ratio(generated_content, translated_content)
+            if translated_ratio > 0.8:
                 try:
-                    snippet_key = website._get_snippet_view_key(snippet, page_code)
-                    el = html_text_processor._update_snippet_content(generated_content, snippet_key)
+                    database_id = self.env['ir.config_parameter'].sudo().get_str('database.uuid')
+                    response = self._OLG_api_rpc('/api/olg/1/generate_placeholder', {
+                        'placeholders': list(generated_content.keys()),
+                        'lang': website.default_lang_id.name,
+                        'industry': industry,
+                        'database_id': database_id,
+                    })
+                    name_replace_parser = re.compile(r"XXXX", re.MULTILINE)
+                    website_name = re.escape(website.name)
+                    for key in generated_content:
+                        if response.get(key):
+                            generated_content[key] = (name_replace_parser.sub(website_name, response[key], 0))
+                except RequestException:
+                    # If IAP is broken continue normally (without generating text)
+                    pass
+            else:
+                logger.info("Skip AI text generation because translation coverage is too low (%s%%)", translated_ratio * 100)
 
-                    # Add the data-snippet attribute to identify the snippet
-                    # for compatibility code
-                    el.attrib['data-snippet'] = snippet
+        # Configure the homepage.
+        page_view_id = self.with_context(website_id=website.id).viewref('website.homepage')
+        rendered_snippets = []
+        nb_snippets = len(snippet_list)
+        for i, snippet in enumerate(snippet_list, start=1):
+            try:
+                snippet_key = website._get_snippet_view_key(snippet, 'homepage')
+                el = html_text_processor._update_snippet_content(generated_content, snippet_key)
 
-                    # Theme specific customizations for non-website snippets
-                    theme_customizations = get_manifest(theme_name).get('theme_customizations', {})
-                    customizations = theme_customizations.get(snippet, {})
+                # Add the data-snippet attribute to identify the snippet
+                # for compatibility code
+                el.attrib['data-snippet'] = snippet
 
-                    # Configure non-website snippet with defaults and theme-level customizations.
-                    website._preconfigure_snippet(snippet, el, customizations)
+                # Theme specific customizations for non-website snippets
+                theme_customizations = get_manifest(theme_name).get('theme_customizations', {})
+                customizations = theme_customizations.get(snippet, {})
 
-                    # Remove the previews needed for the snippets dialog
-                    dialog_preview_els = el.find_class('s_dialog_preview')
-                    for preview_el in dialog_preview_els:
-                        preview_el.getparent().remove(preview_el)
+                # Configure non-website snippet with defaults and theme-level customizations.
+                website._preconfigure_snippet(snippet, el, customizations)
 
-                    # Tweak the shape of the first snippet to connect it
-                    # properly with the header color in some themes
-                    if i == 1:
-                        shape_el = el.xpath("//*[hasclass('o_we_shape')]")
-                        if shape_el:
-                            shape_el[0].attrib['class'] += ' o_header_extra_shape_mapping'
+                # Remove the previews needed for the snippets dialog
+                dialog_preview_els = el.find_class('s_dialog_preview')
+                for preview_el in dialog_preview_els:
+                    preview_el.getparent().remove(preview_el)
 
-                    # Tweak the shape of the last snippet to connect it
-                    # properly with the footer color in some themes
-                    if i == nb_snippets:
-                        shape_el = el.xpath("//*[hasclass('o_we_shape')]")
-                        if shape_el:
-                            shape_el[0].attrib['class'] += ' o_footer_extra_shape_mapping'
-                    rendered_snippet = etree.tostring(el, encoding='unicode')
-                    rendered_snippets.append(rendered_snippet)
-                except ValueError as e:
-                    logger.warning(e)
-            page_view_id.save(value=f'<div class="oe_structure">{"".join(rendered_snippets)}</div>',
-                              xpath="(//div[hasclass('oe_structure')])[last()]")
-            # Copy the configurator pages to preserve the original untouched
-            # pages in the landing page category when creating a new page.
-            page_view_id.copy({
-                'key': f"{index}_{page_view_id.key}_configurator_pages_landing",
-                'website_id': website.id,
-            })
+                # Tweak the shape of the first snippet to connect it
+                # properly with the header color in some themes
+                if i == 1:
+                    shape_el = el.xpath("//*[hasclass('o_we_shape')]")
+                    if shape_el:
+                        shape_el[0].attrib['class'] += ' o_header_extra_shape_mapping'
+
+                # Tweak the shape of the last snippet to connect it
+                # properly with the footer color in some themes
+                if i == nb_snippets:
+                    shape_el = el.xpath("//*[hasclass('o_we_shape')]")
+                    if shape_el:
+                        shape_el[0].attrib['class'] += ' o_footer_extra_shape_mapping'
+                rendered_snippet = etree.tostring(el, encoding='unicode')
+                rendered_snippets.append(rendered_snippet)
+            except ValueError as e:
+                logger.warning(e)
+        page_view_id.save(value=f'<div class="oe_structure">{"".join(rendered_snippets)}</div>',
+                          xpath="(//div[hasclass('oe_structure')])[last()]")
+        # Copy the configurator homepage to preserve the original untouched
+        # page in the landing page category when creating a new page.
+        page_view_id.copy({
+            'key': f"0_{page_view_id.key}_configurator_pages_landing",
+            'website_id': website.id,
+        })
 
         # Configure the footers
         for key in footer_ids:
