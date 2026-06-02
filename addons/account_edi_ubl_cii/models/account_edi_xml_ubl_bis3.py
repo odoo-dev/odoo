@@ -1145,12 +1145,7 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
         for base_line in vals['base_lines']:
             base_line['_ubl_values'] = {}
             # Set a special type to the global discount product lines.
-            record = base_line['record']
-            if (
-                isinstance(record, models.Model)
-                and record._name == 'account.move.line'
-                and record._get_discount_lines()
-            ):
+            if (base_line['computation_key'] or '').startswith('global_discount'):
                 base_line['special_type'] = 'global_discount'
 
         # Global rounding of tax_details using 6 digits.
