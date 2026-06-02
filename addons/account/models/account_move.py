@@ -1532,10 +1532,9 @@ class AccountMove(models.Model):
             'name': product_line.name,
         }
 
-        if product_line in product_line._get_discount_lines():
+        extra_tax_data = self.env['account.tax']._get_base_line_field_value_from_record(product_line, 'extra_tax_data', kwargs, {}) or {}
+        if (extra_tax_data.get('computation_key') or '').startswith('global_discount'):
             kwargs['special_type'] = 'global_discount'
-        elif product_line in product_line._get_downpayment_lines():
-            kwargs['special_type'] = 'down_payment'
 
         return self.env['account.tax']._prepare_base_line_for_taxes_computation(product_line, **kwargs)
 
