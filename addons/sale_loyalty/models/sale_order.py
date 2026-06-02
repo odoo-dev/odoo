@@ -530,7 +530,15 @@ class SaleOrder(models.Model):
         Returns all programs that are being used for rewards.
         """
         self.ensure_one()
-        return self.order_line.reward_id.program_id
+        reward_programs = self.order_line.reward_id.program_id
+        programs_with_remaining_points = self.env['loyalty.program']
+        for program in reward_programs:
+            coupon = self.applied_coupon_ids.filtered(lambda c: c.program_id == program)[:1]
+            if coupon:
+                min_required = min(program.reward_ids.mapped('required_points'), default=1)
+                if self._get_real_points_for_coupon(coupon) >= min_required:
+                    programs_with_remaining_points |= program
+        return reward_programs - programs_with_remaining_points
 
     def _get_reward_coupons(self):
         """

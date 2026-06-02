@@ -401,3 +401,36 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
         self.assertIn(
             promo_code_program.reward_ids.id, reward_wizard_action["context"]["default_reward_ids"]
         )
+
+    def test_multiple_rewards_from_single_coupon(self):
+        """Test that a coupon with multiple points can claim different rewards."""
+        self.immediate_promotion_program.active = False
+        self.code_promotion_program.reward_ids.write({
+            'reward_type': 'discount',
+            'discount': 10,
+            'discount_mode': 'percent',
+            'discount_applicability': 'order',
+            'required_points': 1,
+        })
+        second_reward = self.env['loyalty.reward'].create({
+            'program_id': self.code_promotion_program.id,
+            'reward_type': 'shipping',
+            'required_points': 1,
+        })
+        self.env['loyalty.generate.wizard'].with_context(active_id=self.code_promotion_program.id).create({
+            'coupon_qty': 1,
+            'points_granted': 2,
+        }).generate_coupons()
+        coupon = self.code_promotion_program.coupon_ids
+        order = self.empty_order
+        self.assertEqual(order._get_real_points_for_coupon(coupon), 2)
+        order.write({'order_line': [Command.create({'product_id': self.product_A.id})]})
+        order._try_apply_code(coupon.code)
+        order._apply_program_reward(self.code_promotion_program.reward_ids[0], coupon)
+        self.assertEqual(len(order.order_line.filtered('is_reward_line')), 1)
+        self.assertEqual(order._get_real_points_for_coupon(coupon), 1)
+
+        order._try_apply_code(coupon.code)
+        order._apply_program_reward(second_reward, coupon)
+        self.assertEqual(len(order.order_line.filtered('is_reward_line')), 2)
+        self.assertEqual(order._get_real_points_for_coupon(coupon), 0)
