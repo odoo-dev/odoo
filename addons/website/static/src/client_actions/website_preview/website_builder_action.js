@@ -214,6 +214,12 @@ export class WebsiteBuilderClientAction extends Component {
             },
             () => [this.hasSideBarOpen]
         );
+        onMounted(() => {
+            document.body.classList.add("o_website_o_website_preview");
+        });
+        onWillUnmount(() => {
+            document.body.classList.remove("o_website_o_website_preview");
+        });
     }
 
     get hasSideBarOpen() {
