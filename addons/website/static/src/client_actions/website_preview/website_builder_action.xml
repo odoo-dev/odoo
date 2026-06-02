@@ -20,7 +20,7 @@
             <ResourceEditor close="() => this.websiteContext.showResourceEditor = false"/>
         </ResizablePanel>
         <LocalOverlayContainer localOverlay="overlayRef" identifier="env.localOverlayContainerKey"/>
-        <div t-att-class="{'o_builder_sidebar_open': state.isEditing and state.showSidebar, 'o_is_microsoft_edge': isMicrosoftEdge}"
+        <div t-att-class="{'o_builder_sidebar_open': this.hasSideBarOpen, 'o_is_microsoft_edge': isMicrosoftEdge}"
             class="o-website-builder_sidebar border-start border-dark" t-ref="builder_sidebar">
             <LazyComponent  t-if="state.isEditing" Component="'website.WebsiteBuilder'" props="() => this.websiteBuilderProps" bundle="'website.website_builder_assets'" t-key="state.key"/>
         </div>

@@ -203,6 +203,21 @@ export class WebsiteBuilderClientAction extends Component {
             },
             () => [this.state.isEditing]
         );
+        useEffect(
+            (hasSideBarOpen) => {
+                if (hasSideBarOpen) {
+                    document.body.classList.add("o_website_builder_sidebar_open");
+                    return () => {
+                        document.body.classList.remove("o_website_builder_sidebar_open");
+                    };
+                }
+            },
+            () => [this.hasSideBarOpen]
+        );
+    }
+
+    get hasSideBarOpen() {
+        return this.state.isEditing && this.state.showSidebar;
     }
 
     get testMode() {
