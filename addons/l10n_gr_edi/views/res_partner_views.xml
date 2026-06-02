@@ -9,6 +9,12 @@
             <field name="property_account_position_id" position="after">
                 <field name="l10n_gr_edi_branch_number" invisible="'GR' not in fiscal_country_codes"/>
             </field>
+            <xpath expr="//group[@id='invoice_send_settings']" position="inside">
+                <field name="l10n_gr_edi_default_inv_type"
+                       invisible="'GR' not in fiscal_country_codes"/>
+                <field name="l10n_gr_edi_default_payment_method"
+                       invisible="'GR' not in fiscal_country_codes"/>
+            </xpath>
         </field>
     </record>
 

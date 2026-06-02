@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="view_account_journal_form_inherit_l10n_gr_edi" model="ir.ui.view">
+        <field name="name">account.journal.form.inherit.l10n_gr_edi</field>
+        <field name="model">account.journal</field>
+        <field name="inherit_id" ref="account.view_account_journal_form"/>
+        <field name="arch" type="xml">
+            <field name="refund_sequence" position="after">
+                <field name="l10n_gr_edi_default_inv_type"
+                       invisible="country_code != 'GR' or type not in ('sale', 'purchase')"/>
+                <field name="l10n_gr_edi_default_payment_method"
+                       invisible="country_code != 'GR' or type not in ('sale', 'purchase')"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

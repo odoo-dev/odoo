@@ -164,11 +164,16 @@ class AccountMove(models.Model):
                 move.l10n_gr_edi_mark,
             ))
 
-    @api.depends('country_code')
+    @api.depends('country_code', 'partner_id', 'journal_id')
     def _compute_l10n_gr_edi_payment_method(self):
         for move in self:
             if move.country_code == 'GR':
-                move.l10n_gr_edi_payment_method = move.l10n_gr_edi_payment_method or '1'
+                move.l10n_gr_edi_payment_method = (
+                    move.l10n_gr_edi_payment_method
+                    or move.commercial_partner_id.l10n_gr_edi_default_payment_method
+                    or move.journal_id.l10n_gr_edi_default_payment_method
+                    or '1'
+                )
             else:
                 move.l10n_gr_edi_payment_method = False
 
@@ -186,7 +191,7 @@ class AccountMove(models.Model):
             else:  # move.move_type == 'entry'
                 move.l10n_gr_edi_available_inv_type = False
 
-    @api.depends('fiscal_position_id', 'l10n_gr_edi_available_inv_type')
+    @api.depends('fiscal_position_id', 'l10n_gr_edi_available_inv_type', 'partner_id', 'journal_id')
     def _compute_l10n_gr_edi_inv_type(self):
         for move in self:
             if move.country_code == 'GR':
@@ -202,11 +207,23 @@ class AccountMove(models.Model):
                     else:
                         move.l10n_gr_edi_inv_type = '5.2'
                 else:  # move.move_type in ('out_invoice', 'in_invoice', 'out_receipt', 'in_receipt')
-                    inv_type = '1.1' if move.move_type == 'out_invoice' else '13.1'
-                    preferred_clss = move.fiscal_position_id.l10n_gr_edi_preferred_classification_ids.filtered(
-                        lambda p: p.l10n_gr_edi_inv_type in (move.l10n_gr_edi_available_inv_type or "").split(','))
-                    if preferred_clss:
-                        inv_type = preferred_clss[0].l10n_gr_edi_inv_type
+                    available_types = (move.l10n_gr_edi_available_inv_type or "").split(',')
+                    # Priority: Partner > Journal > Fiscal Position > Default
+                    inv_type = False
+                    partner_default = move.commercial_partner_id.l10n_gr_edi_default_inv_type
+                    if partner_default and partner_default in available_types:
+                        inv_type = partner_default
+                    if not inv_type:
+                        journal_default = move.journal_id.l10n_gr_edi_default_inv_type
+                        if journal_default and journal_default in available_types:
+                            inv_type = journal_default
+                    if not inv_type:
+                        preferred_clss = move.fiscal_position_id.l10n_gr_edi_preferred_classification_ids.filtered(
+                            lambda p: p.l10n_gr_edi_inv_type in available_types)
+                        if preferred_clss:
+                            inv_type = preferred_clss[0].l10n_gr_edi_inv_type
+                    if not inv_type:
+                        inv_type = '1.1' if move.move_type == 'out_invoice' else '13.1'
                     move.l10n_gr_edi_inv_type = inv_type
             else:
                 move.l10n_gr_edi_inv_type = False

@@ -16,6 +16,7 @@
         'data/template.xml',
         'security/ir.model.access.csv',
         'views/account_fiscal_position_views.xml',
+        'views/account_journal_views.xml',
         'views/account_move_views.xml',
         'views/account_tax_views.xml',
         'views/product_template_views.xml',
