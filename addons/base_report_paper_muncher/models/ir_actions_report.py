@@ -1,17 +1,19 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import logging
-import lxml
 import os
 import re
 from collections.abc import Sequence
 from typing import Literal
 
-from odoo import _, api, fields, models
+import lxml
 
-from ..paper_muncher import PaperMuncherServer, _paper_muncher
+from odoo import api, fields, models
+
+from ..paper_muncher import PaperMuncherServer, paper_muncher
 
 _logger = logging.getLogger(__name__)
+
 
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
@@ -29,7 +31,7 @@ class IrActionsReport(models.Model):
             engine_name = self._get_pdf_engine(self)
         if engine_name != 'paper-muncher':
             return super().get_pdf_engine_state(engine_name)
-        return _paper_muncher().state
+        return paper_muncher().state
 
     @api.model
     def _run_paper_muncher(
@@ -100,15 +102,13 @@ class IrActionsReport(models.Model):
         extra_args += ['--debug', 'http-client']
         env = os.environ.copy()
         # Disable ANSI color codes in subprocess logs to prevent parsing errors.
-        env['NO_COLOR'] = '1'  # TODO: not any(odoo.tools.config.colors)
+        env['NO_COLOR'] = '1'
 
-        print("KAKOUUU")
         with PaperMuncherServer(
-            args=[_paper_muncher().bin, *names, '-o', 'pipe:', *extra_args],
+            args=[paper_muncher().bin, *names, '-o', 'pipe:/paper-muncher/output.pdf', *extra_args],
             env=env,
         ) as server:
-            return server.serve(documents)
-
+            return server.serve(documents)  # TODO: ir.config_parameter
 
     def _run_pdf_engine_without_processing(
             self,
@@ -164,7 +164,7 @@ class IrActionsReport(models.Model):
         return super()._run_pdf_engine(engine_name, html, report_ref, landscape, **kwargs)
 
 
-_BODY_TAG_RE = re.compile(r'<body(?:\s[^>]*)?>',  re.IGNORECASE)
+_BODY_TAG_RE = re.compile(r'<body(?:\s[^>]*)?>', re.IGNORECASE)
 
 
 def partition_on_body(html: str) -> tuple[str, str, str]:
