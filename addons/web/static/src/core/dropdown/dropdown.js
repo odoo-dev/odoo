@@ -108,6 +108,9 @@ export class Dropdown extends Component {
          */
         navigationOptions: { type: Object, optional: true },
         bottomSheet: { type: Boolean, optional: true },
+
+        /** Optional override: return false to prevent closing when a given target is clicked. */
+        closeOnClickAway: { type: Function, optional: true },
     };
     static defaultProps = {
         disabled: false,
@@ -149,7 +152,9 @@ export class Dropdown extends Component {
         const options = {
             animation: false,
             arrow: false,
-            closeOnClickAway: (target) => this.popoverCloseOnClickAway(target),
+            closeOnClickAway: (target) =>
+                (!this.props.closeOnClickAway || this.props.closeOnClickAway(target)) &&
+                this.popoverCloseOnClickAway(target),
             closeOnEscape: false, // Handled via navigation and prevents closing root of nested dropdown
             env: useChildEnv(),
             holdOnHover: this.props.holdOnHover,

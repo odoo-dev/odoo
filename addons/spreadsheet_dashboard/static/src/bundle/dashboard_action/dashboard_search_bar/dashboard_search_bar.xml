@@ -17,6 +17,7 @@
 
                     <div
                         class="o_searchview form-control d-flex align-items-center py-1 border-end-0 gap-1"
+                        t-custom-ref="searchArea"
                         t-on-click="this.onInputContainerClick">
                         <button class="btn border-0 p-0" t-on-click="this.onSearchClick">
                             <i class="oi oi-search me-2"></i>
@@ -50,7 +51,8 @@
                 <Dropdown menuClass="'pt-0 px-2'"
                     manual="true"
                     position="'bottom-end'"
-                    state="this.filtersValuesDropdown">
+                    state="this.filtersValuesDropdown"
+                    closeOnClickAway.bind="this.filterDropdownCloseOnClickAway">
                     <button
                         class="o_searchview_dropdown_toggler btn btn-outline-secondary o-dropdown-caret rounded-start-0 o-dropdown dropdown-toggle dropdown"
                         t-on-click="this.toggleFilterValueDropdown" />

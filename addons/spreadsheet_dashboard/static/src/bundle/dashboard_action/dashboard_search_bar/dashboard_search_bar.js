@@ -1,4 +1,4 @@
-import { useState } from "@web/owl2/utils";
+import { useState, useRef } from "@web/owl2/utils";
 import { Component, onWillUpdateProps, onWillStart, status } from "@odoo/owl";
 import { DashboardFacet } from "../dashboard_facet/dashboard_facet";
 import { DashboardDateFilter } from "../dashboard_date_filter/dashboard_date_filter";
@@ -35,6 +35,7 @@ export class DashboardSearchBar extends Component {
         this.fields = useService("field");
 
         this.inputRef = useAutofocus("autofocus");
+        this.searchAreaRef = useRef("searchArea");
 
         this.state = useState({
             showDropdown: false,
@@ -53,6 +54,10 @@ export class DashboardSearchBar extends Component {
         this.menuRef = useChildRef();
         onWillStart(this.computeState.bind(this));
         onWillUpdateProps(this.computeState.bind(this));
+    }
+
+    filterDropdownCloseOnClickAway(target) {
+        return !this.searchAreaRef.el?.contains(target);
     }
 
     closeFilterValueDropdown() {

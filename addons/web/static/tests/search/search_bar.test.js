@@ -1652,6 +1652,27 @@ test("clicking on search input trigger the search menu", async () => {
     expect(`.o_search_bar_menu`).toHaveCount(1);
 });
 
+test.tags("desktop");
+test("clicking on search input does not close the search bar menu", async () => {
+    await mountWithSearch(SearchBar, {
+        resModel: "partner",
+        searchMenuTypes: ["filter"],
+        searchViewId: false,
+        searchViewArch: `<search><filter string="Foo" name="foo" domain="[]"/></search>`,
+    });
+
+    await toggleSearchBarMenu();
+    expect(".o_search_bar_menu").toHaveCount(1);
+
+    // pointerdown on the search input is what the popover service uses to detect
+    // a click-away; the menu must stay open because the input is inside searchAreaRef
+    await pointerDown(".o_searchview_input");
+    await animationFrame();
+    expect(".o_search_bar_menu").toHaveCount(1, {
+        message: "search bar menu should not close when clicking inside the search input",
+    });
+});
+
 test("clicking on the searchview icon trigger the search", async () => {
     await mountWithSearch(SearchBar, {
         resModel: "partner",

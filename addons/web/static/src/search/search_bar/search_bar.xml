@@ -92,7 +92,7 @@
                 bottomSheet="false"
             >
                 <div class="o_searchview form-control d-print-contents d-flex align-items-center py-1 border-end-0"
-                    role="search" aria-autocomplete="list">
+                    role="search" aria-autocomplete="list" t-custom-ref="searchArea">
                     <button class="d-print-none btn border-0 p-0"
                         aria-label="Search..."
                         title="Search..."
@@ -120,7 +120,7 @@
                     <t t-call="web.SearchBar.QuickSearchItems"/>
                 </t>
             </Dropdown>
-            <SearchBarMenu dropdownState="this.searchBarDropdownState">
+            <SearchBarMenu dropdownState="this.searchBarDropdownState" closeOnClickAway.bind="this.searchBarMenuCloseOnClickAway">
                 <t t-call-slot="search-bar-additional-menu"/>
             </SearchBarMenu>
         </div>

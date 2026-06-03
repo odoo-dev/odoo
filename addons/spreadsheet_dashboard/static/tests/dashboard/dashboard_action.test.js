@@ -1,5 +1,5 @@
 import { describe, expect, test } from "@odoo/hoot";
-import { queryAll, press, queryAllTexts } from "@odoo/hoot-dom";
+import { pointerDown, queryAll, press, queryAllTexts } from "@odoo/hoot-dom";
 import { animationFrame } from "@odoo/hoot-mock";
 import { getBasicData, Product } from "@spreadsheet/../tests/helpers/data";
 import { createSpreadsheetDashboard } from "@spreadsheet_dashboard/../tests/helpers/dashboard_action";
@@ -452,6 +452,32 @@ test("Can open the dialog by clicking on the search bar", async function () {
 
     await contains(".o_searchview input").click();
     expect(".o-filter-values").toHaveCount(1);
+});
+
+test("clicking on search input does not close the filter values dropdown", async function () {
+    const spreadsheetData = {
+        globalFilters: [
+            {
+                id: "1",
+                type: "text",
+                label: "Text Filter",
+            },
+        ],
+    };
+    const serverData = getServerData(spreadsheetData);
+    await createSpreadsheetDashboard({ serverData });
+
+    // Open the filter values dropdown via the caret toggle button
+    await contains(".o_searchview_dropdown_toggler").click();
+    expect(".o-filter-values").toHaveCount(1);
+
+    // pointerdown on the search input is what the popover service uses to detect
+    // a click-away; the dropdown must stay open because the input is inside searchAreaRef
+    await pointerDown(".o_searchview input");
+    await animationFrame();
+    expect(".o-filter-values").toHaveCount(1, {
+        message: "filter values dropdown should not close when clicking inside the search input",
+    });
 });
 
 test("Changes of global filters are not dispatched while inside the dialog", async function () {

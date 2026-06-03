@@ -91,6 +91,7 @@ export class SearchBar extends Component {
         this.subItems = {};
 
         this.facetContainerRef = useRef("facetContainerRef");
+        this.searchAreaRef = useRef("searchArea");
         this.menuRef = useChildRef();
         this.setupFacetNavigation();
         this.inputDropdownState = useDropdownState();
@@ -702,6 +703,10 @@ export class SearchBar extends Component {
                 this.selectItem(item);
             }
         }
+    }
+
+    searchBarMenuCloseOnClickAway(target) {
+        return !this.searchAreaRef.el?.contains(target);
     }
 
     onToggleSearchBar() {

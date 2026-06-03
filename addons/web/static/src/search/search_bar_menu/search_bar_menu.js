@@ -36,6 +36,7 @@ export class SearchBarMenu extends Component {
             },
         },
         dropdownState: { ...Dropdown.props.state },
+        closeOnClickAway: { type: Function, optional: true },
     };
 
     setup() {

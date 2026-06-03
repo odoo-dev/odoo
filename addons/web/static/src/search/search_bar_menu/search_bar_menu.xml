@@ -6,6 +6,7 @@
                   position="'bottom-end'"
                   state="this.props.dropdownState"
                   t-if="this.env.searchModel.searchMenuTypes.size"
+                  closeOnClickAway="this.props.closeOnClickAway"
                   bottomSheet="false">
             <button
                 class="o_searchview_dropdown_toggler abcdddd d-print-none btn btn-outline-secondary o-dropdown-caret rounded-start-0"
