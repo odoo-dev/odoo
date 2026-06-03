@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import base64
+import colorsys
 import datetime
 import logging
 import math
@@ -593,12 +594,53 @@ class Website(Home):
                 final_html = final_html.replace(shape_url, updated_shape_url)
         return final_html
 
-    def _get_configurator_preview_overrides(self, palette):
+    def _get_configurator_preview_hex_to_rgb(self, color):
+        match = re.fullmatch(r'#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})', color.strip())
+        if not match:
+            return None
+        hex_color = match.group(1)
+        if len(hex_color) == 3:
+            hex_color = ''.join(char * 2 for char in hex_color)
+        return tuple(int(hex_color[index:index + 2], 16) for index in range(0, 6, 2))
+
+    def _get_configurator_preview_contrast_color(self, background_color):
+        background_rgb = self._get_configurator_preview_hex_to_rgb(background_color)
+        if not background_rgb:
+            return ''
+        _, _, value = colorsys.rgb_to_hsv(*(channel / 255 for channel in background_rgb))
+        # Preview-only fallback to avoid dark text on dark generated previews.
+        return '#212529' if value > 0.5 else '#FFFFFF'
+
+    def _get_configurator_preview_color_combination_text_variables(self, final_html, palette):
+        palette_map = {
+            f'o-color-{index}': color
+            for index, color in enumerate(palette, start=1)
+            if color
+        }
+        color_combination_backgrounds = {}
+        background_regex = (
+            r'--o-cc([1-5])-bg\s*:\s*'
+            r'(?:var\(--(o-color-[1-5])\)|(#[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?))\s*;'
+        )
+        for color_combination, color_name, color_value in re.findall(background_regex, final_html):
+            background_color = palette_map.get(color_name) if color_name else color_value
+            if background_color:
+                color_combination_backgrounds[color_combination] = background_color
+
+        text_variables = []
+        for color_combination, background_color in sorted(color_combination_backgrounds.items()):
+            text_color = self._get_configurator_preview_contrast_color(background_color)
+            if text_color:
+                text_variables.append(f'--o-cc{color_combination}-text:{text_color};')
+        return ''.join(text_variables)
+
+    def _get_configurator_preview_overrides(self, palette, final_html):
         root_variables = ''.join(
             f'--o-color-{index}: {color};'
             for index, color in enumerate(palette, start=1)
             if color
         )
+        root_variables += self._get_configurator_preview_color_combination_text_variables(final_html, palette)
         return (
             '<style id="o_configurator_theme_preview_overrides">'
             f':root{{{root_variables}}}'
@@ -650,7 +692,7 @@ class Website(Home):
         images_map = self._get_configurator_preview_images_map(theme_name, industry_id)
         final_html = self._apply_configurator_preview_images(final_html, theme_name, images_map)
         final_html = self._apply_configurator_preview_shape_colors(final_html, palette_map)
-        preview_overrides = self._get_configurator_preview_overrides(palette)
+        preview_overrides = self._get_configurator_preview_overrides(palette, final_html)
         final_html = self._inject_configurator_preview_overrides(
             final_html,
             preview_url,

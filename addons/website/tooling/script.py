@@ -291,6 +291,27 @@ def inject_palette_variables(soup):
     soup.head.append(style)
 
 
+def inject_color_combination_text_overrides(soup):
+    if soup.head is None:
+        soup.html.insert(0, soup.new_tag("head"))
+
+    heading_selectors = "h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6"
+    rules = []
+    for index in range(1, 6):
+        text_color = f"var(--o-cc{index}-text)"
+        rules.append(f".o_cc{index}{{--color:{text_color};color:{text_color};}}")
+        rules.append(
+            f".o_cc{index} :is({heading_selectors}),"
+            f".o_colored_level .o_cc{index} :is({heading_selectors})"
+            f"{{color:{text_color};}}"
+        )
+
+    style = soup.new_tag("style")
+    style["id"] = "preview-color-combination-text-overrides"
+    style.string = "".join(rules)
+    soup.head.append(style)
+
+
 def convert_vh_to_vw(css_text, ratio=VH_TO_VW_RATIO):
     if "vh" not in css_text:
         return css_text
@@ -302,10 +323,23 @@ def convert_vh_to_vw(css_text, ratio=VH_TO_VW_RATIO):
     return VH_RE.sub(replace, css_text)
 
 
+def remove_parallax_fixed_background(css_text):
+    def replace(match):
+        selector = match.group(1)
+        body = match.group(2)
+        if ".s_parallax_bg" not in selector:
+            return match.group(0)
+        body = re.sub(r"\s*background-attachment\s*:\s*fixed\s*;?", "", body, flags=re.I)
+        return f"{selector}{{{body}}}"
+
+    return re.sub(r"([^{}]+)\{([^{}]*)\}", replace, css_text)
+
+
 def process_css(css_text, base_url):
     css_text = resolve_css_imports(css_text, base_url)
     css_text = resolve_css_urls(css_text, base_url)
     css_text = convert_vh_to_vw(css_text)
+    css_text = remove_parallax_fixed_background(css_text)
     css_text = replace_palette_colors_in_urls(css_text)
     return replace_palette_colors_in_css(css_text)
 
@@ -382,6 +416,15 @@ def remove_javascript(soup):
 
     for link in soup.find_all("a", href=re.compile(r"^\s*javascript:", re.I)):
         link["href"] = "#"
+
+
+def remove_animation_classes(soup):
+    for tag in soup.select(".o_animate"):
+        classes = [class_name for class_name in tag.get("class", []) if class_name != "o_animate"]
+        if classes:
+            tag["class"] = classes
+        else:
+            tag.attrs.pop("class", None)
 
 
 def _skip_string(css, position):
@@ -516,8 +559,10 @@ def download_static_html(url, output_path):
     inline_font_preloads(soup, url)
     replace_palette_colors_in_attributes(soup)
     remove_javascript(soup)
+    remove_animation_classes(soup)
     purge_unused_css(soup)
     inject_palette_variables(soup)
+    inject_color_combination_text_overrides(soup)
 
     for meta in soup.find_all("meta", attrs={"http-equiv": True}):
         if meta["http-equiv"].lower() in ("refresh", "content-security-policy"):
