@@ -201,7 +201,6 @@ class HrEmployee(models.Model):
     }
     """
 
-    permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user", tracking=True)
     visa_no = fields.Char('Visa No', groups="hr.group_hr_user", tracking=True)
     visa_expire = fields.Date('Visa Expiration Date', groups="hr.group_hr_user", tracking=True)
     work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user", tracking=True)
@@ -239,6 +238,8 @@ class HrEmployee(models.Model):
         related='version_id.country_id.code',
         groups="hr.group_hr_user"
     )
+    permit_no = fields.Char('Work Permit No', readonly=False, related="version_id.permit_no", inherited=True, groups="hr.group_hr_user", tracking=True)
+
     # Direct subordinates
     parent_id = fields.Many2one('hr.employee', 'Manager', tracking=True, index=True,
                                 domain="['|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]")
