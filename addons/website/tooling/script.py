@@ -64,6 +64,12 @@ FONT_MIME_TYPES = {
     ".otf": "font/otf",
     ".eot": "application/vnd.ms-fontobject",
 }
+FONT_ASSET_URLS = {
+    "web.fontawesome.min.woff2": "/web/static/src/libs/fontawesome/fonts/fontawesome-webfont.woff2",
+    "web.fontawesome.min.woff": "/web/static/src/libs/fontawesome/fonts/fontawesome-webfont.woff",
+    "web.odoo_ui_icons.min.woff2": "/web/static/lib/odoo_ui_icons/fonts/odoo_ui_icons.woff2",
+    "web.odoo_ui_icons.min.woff": "/web/static/lib/odoo_ui_icons/fonts/odoo_ui_icons.woff",
+}
 VH_TO_VW_RATIO = 10 / 16
 
 
@@ -227,6 +233,9 @@ def resolve_css_urls(css, base_url):
         raw_url = match.group(1).strip().strip("'\"")
         if raw_url.startswith("data:"):
             return match.group(0)
+        font_asset_url = get_stable_font_asset_url(raw_url)
+        if font_asset_url:
+            return f'url("{font_asset_url}")'
         if get_font_mime_type(raw_url):
             if is_external_url(raw_url, base_url):
                 return f'url("{urljoin(base_url, raw_url)}")'
@@ -234,6 +243,11 @@ def resolve_css_urls(css, base_url):
         return f'url("{root_relative_url(raw_url, base_url)}")'
 
     return re.sub(r'url\(([^)]+)\)', replace, css)
+
+
+def get_stable_font_asset_url(url):
+    filename = Path(urlparse(url).path).name
+    return FONT_ASSET_URLS.get(filename)
 
 
 def replace_palette_colors_in_css(css_text):
@@ -396,10 +410,28 @@ def inline_font_preloads(soup, base_url):
         href = link.get("href")
         if not href:
             continue
+        font_asset_url = get_stable_font_asset_url(href)
+        if font_asset_url:
+            link["href"] = font_asset_url
+            continue
         if is_external_url(href, base_url):
             link["href"] = urljoin(base_url, href)
             continue
         link["href"] = root_relative_url(href, base_url)
+
+
+def remove_preview_metadata(soup):
+    for tag in soup.find_all("meta", property=lambda value: value in ("og:url", "og:image")):
+        tag.decompose()
+    for tag in soup.find_all("meta", attrs={"name": "twitter:image"}):
+        tag.decompose()
+
+    for link in soup.find_all("link"):
+        rel = link.get("rel", [])
+        rel = [rel] if isinstance(rel, str) else rel
+        rel = {value.lower() for value in rel}
+        if rel & {"canonical", "apple-touch-icon", "icon"}:
+            link.decompose()
 
 
 def remove_javascript(soup):
@@ -557,6 +589,7 @@ def download_static_html(url, output_path):
     inline_images(soup, url)
     inline_favicons(soup, url)
     inline_font_preloads(soup, url)
+    remove_preview_metadata(soup)
     replace_palette_colors_in_attributes(soup)
     remove_javascript(soup)
     remove_animation_classes(soup)
