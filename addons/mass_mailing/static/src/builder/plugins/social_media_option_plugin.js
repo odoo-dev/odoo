@@ -20,6 +20,9 @@ const LINK_OPTIONS_CLASSLIST = [
 
 const LINKS_CONTAINER_SELECTOR = ".s_social_media_links";
 
+// Exported for easier customization
+export const DEFAULT_HIDDEN_LINKS = ["social_github", "social_discord"];
+
 export class MassMailingSocialMediaOptionPlugin extends Plugin {
     static id = "massMailingSocialMediaOptionPlugin";
     static shared = [
@@ -141,7 +144,11 @@ export class MassMailingSocialMediaOptionPlugin extends Plugin {
         let currentIndex = snippetEl.querySelectorAll("[data-platform]").length;
 
         for (const [platform, href] of Object.entries(medias)) {
-            if (snippetEl.querySelector(`[data-platform="${platform}"]`) || !href) {
+            if (
+                snippetEl.querySelector(`[data-platform="${platform}"]`) ||
+                !href ||
+                DEFAULT_HIDDEN_LINKS.includes(platform)
+            ) {
                 continue;
             }
             this.dependencies.builderActions.getAction("toggleSocialMediaLink").apply({
@@ -341,6 +348,7 @@ export class ToggleSocialMediaLinkAction extends BuilderAction {
         this.styleAction = this.dependencies.builderActions.getAction("styleAction");
     }
 
+    // toadd/refactor new method to add element to list
     apply({ editingElement, params: { platform, getIndex, href } }) {
         const editingLink = editingElement.querySelector(`[data-platform="${platform}"]`);
         if (editingLink) {
@@ -397,6 +405,9 @@ export class ToggleSocialMediaLinkAction extends BuilderAction {
             icon.classList.add(...appliedClasses);
         }
     }
+
+    addToList(platform) {}
+
     isApplied({ editingElement, params }) {
         return editingElement.querySelector(`[data-platform="${params.platform}"]`) !== null;
     }

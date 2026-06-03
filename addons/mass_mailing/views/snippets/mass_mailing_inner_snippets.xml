@@ -112,6 +112,7 @@
         'social_twitter': res_company.social_twitter,
         'social_linkedin': res_company.social_linkedin,
         'social_tiktok': res_company.social_tiktok,
+        'social_youtube': res_company.social_youtube,
     }"/>
     <t t-set="base_social_links" t-value="{
         'social_facebook': 'https://www.facebook.com/odoo',
@@ -120,7 +121,7 @@
         'social_linkedin': 'https://www.linkedin.com/company/odoo',
         'social_tiktok': 'https://www.tiktok.com/@odoo',
     }"/>
-    <t t-set="updated_links" t-value="{key: social_links.get(key) or val for key, val in base_social_links.items()}"/>
+    <t t-set="updated_links" t-value="{key: val or base_social_links.get(key) for key, val in social_links.items() if val or base_social_links.get(key)}"/>
     <t t-foreach="updated_links.items() if fillSocialLinks else []" t-as="link">
         <t t-set="platform" t-value="link[0].split('social_')[1]"/>
         <a t-att-data-platform="link[0] if social_links.get(link[0]) else 'customLink-' + link[0]" t-att-href="link[1]" t-att-aria-label="platform.capitalize()" t-att-title="platform.capitalize()">
