@@ -1,6 +1,7 @@
 import { onWillRender, useComponent, useLayoutEffect, useRef } from "@web/owl2/utils";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { useBus } from "@web/core/utils/hooks";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 /**
  * This hook is meant to be used by field components that use an input or
@@ -20,8 +21,7 @@ import { useBus } from "@web/core/utils/hooks";
  */
 export function useInputField(params) {
     const inputRefOrSignal = params.ref || useRef(params.refName || "input");
-    const getEl = () =>
-        (typeof inputRefOrSignal === "function" ? inputRefOrSignal() : inputRefOrSignal?.el) ?? null;
+    const getEl = () => resolveRefEl(inputRefOrSignal) ?? null;
     const component = useComponent();
     const fieldName = params.fieldName || component.props.name;
     const shouldSave = params.shouldSave ?? (() => false);

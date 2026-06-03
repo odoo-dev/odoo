@@ -4,6 +4,7 @@ import { closestScrollableX, closestScrollableY } from "@web/core/utils/scrollin
 import { setRecurringAnimationFrame } from "@web/core/utils/timing";
 import { browser } from "../browser/browser";
 import { hasTouch, isBrowserFirefox, isIOS } from "../browser/feature_detection";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 function translatePoint(point, vector) {
     return {
@@ -186,41 +187,6 @@ const elCache = {};
  */
 function camelToKebab(str) {
     return str.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
-}
-
-/**
- * Resolves the element backing a `ref` regardless of its kind, preserving every
- * legacy form and ADDING the Owl 3 native signal case. Null-safe: never throws.
- * - undefined/null ref           -> undefined (mirrors the old `ref.el`)
- * - object refs (useRef)         -> `.el`
- * - forwarded refs (useChildRef) -> a callable that ALSO exposes an `.el` getter
- *   once mounted. `.el` must take precedence over calling it (calling a
- *   useChildRef with no argument would clear its value). It also takes a value
- *   argument (arity 1), so we never call it: before it is mounted `.el` is
- *   simply absent (undefined), exactly like the original direct `ref.el` read.
- * - Owl 3 native signal refs     -> a zero-argument callable with no `.el`,
- *   resolved by calling it.
- * @param {{ el?: HTMLElement } | (() => HTMLElement) | null | undefined} ref
- * @returns {HTMLElement | null | undefined}
- */
-function resolveRefEl(ref) {
-    if (ref == null) {
-        return undefined;
-    }
-    // Legacy contract: object refs (useRef) and mounted forwarded refs
-    // (useChildRef) expose the element through `.el`. Matches the original
-    // direct `ref.el`.
-    if (typeof ref !== "function") {
-        return ref.el;
-    }
-    // Forwarded refs (useChildRef) are callables that accept a value
-    // (length === 1) and surface the element via an `.el` getter. Never call
-    // them; read `.el` (undefined until mounted).
-    if (ref.length > 0 || "el" in ref) {
-        return ref.el;
-    }
-    // Owl 3 native signal ref: a zero-argument getter. Call it to read the element.
-    return ref();
 }
 
 /**

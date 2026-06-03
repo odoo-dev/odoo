@@ -17,6 +17,7 @@ import { useNavigation } from "@web/core/navigation/navigation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { mergeClasses } from "@web/core/utils/classname";
 import { useChildRef, useService } from "@web/core/utils/hooks";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 import { deepMerge } from "@web/core/utils/objects";
 import { hasTouch } from "@web/core/browser/feature_detection";
 
@@ -131,8 +132,9 @@ export class Dropdown extends Component {
             shouldRegisterHotkeys: false,
             isNavigationAvailable: () => this.state.isOpen,
             getItems: () => {
-                if (this.state.isOpen && this.menuRef.el) {
-                    return this.menuRef.el.querySelectorAll(
+                const menuEl = resolveRefEl(this.menuRef);
+                if (this.state.isOpen && menuEl) {
+                    return menuEl.querySelectorAll(
                         ":scope .o-navigable, :scope .o-dropdown"
                     );
                 } else {
@@ -399,7 +401,7 @@ export class Dropdown extends Component {
             this.target.classList.add("show");
         }
 
-        const menuEl = this.menuRef.el;
+        const menuEl = resolveRefEl(this.menuRef);
         if (menuEl) {
             this.observer = new MutationObserver(() => this.navigation.update());
             this.observer.observe(menuEl, {

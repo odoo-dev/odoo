@@ -1,30 +1,6 @@
 import { useRef } from "@web/owl2/utils";
 import { useNavigation } from "../navigation/navigation";
-
-/**
- * Resolves the element backing a `ref` regardless of its kind, preserving the
- * legacy forms and ADDING the Owl 3 native signal case. Null-safe: never throws.
- * - undefined/null ref           -> undefined (mirrors the old `ref.el`)
- * - object refs (useRef)         -> `.el`
- * - forwarded refs (useChildRef) -> callables exposing an `.el` getter; read
- *   `.el` (never call them, that would clear their value).
- * - Owl 3 native signal refs     -> zero-argument callables with no `.el`,
- *   resolved by calling them.
- * @param {{ el?: HTMLElement } | (() => HTMLElement) | null | undefined} ref
- * @returns {HTMLElement | null | undefined}
- */
-function resolveRefEl(ref) {
-    if (ref == null) {
-        return undefined;
-    }
-    if (typeof ref !== "function") {
-        return ref.el;
-    }
-    if (ref.length > 0 || "el" in ref) {
-        return ref.el;
-    }
-    return ref();
-}
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 /**
  * This hook allows to navigate between tags in a record selector. It also

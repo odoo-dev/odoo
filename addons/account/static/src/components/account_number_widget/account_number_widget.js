@@ -2,6 +2,7 @@ import { registry } from "@web/core/registry";
 import { CharField, charField } from "@web/views/fields/char/char_field";
 import { useDebounced } from "@web/core/utils/timing";
 import { useService } from "@web/core/utils/hooks";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 import { onMounted, onPatched, proxy } from "@odoo/owl";
 
 export const DELAY = 400;
@@ -21,7 +22,11 @@ export class AccountNumberWidget extends CharField {
     }
 
     async validateAccountNumber() {
-        const accountNumber = this.props.readonly ? this.formattedValue : this.input.el?.value;
+        // `CharField` exposes the input as `inputRef` (Owl 3 signal) post-migration
+        // and as the legacy `input` ref before it; resolve whichever is present.
+        const accountNumber = this.props.readonly
+            ? this.formattedValue
+            : resolveRefEl(this.inputRef ?? this.input)?.value;
         const accountType = await this.orm.call("res.partner.bank", "retrieve_account_type", [accountNumber]);
         if (["iban", "clabe"].includes(accountType)) {
             this.state.label = accountType.toUpperCase();

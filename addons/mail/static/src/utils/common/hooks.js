@@ -9,6 +9,7 @@ import { browser } from "@web/core/browser/browser";
 import { OVERLAY_SYMBOL } from "@web/core/overlay/overlay_container";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { useService } from "@web/core/utils/hooks";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 /**
  * @param {() => HTMLElement} target
@@ -49,8 +50,7 @@ export function useLazyExternalListener(target, eventName, handler, eventParams)
 export function onExternalClick(refOrName, cb) {
     let downTarget, upTarget;
     const refOrSignal = typeof refOrName === "string" ? useRef(refOrName) : refOrName;
-    const getEl = () =>
-        (typeof refOrSignal === "function" ? refOrSignal() : refOrSignal?.el) ?? null;
+    const getEl = () => resolveRefEl(refOrSignal) ?? null;
     function onClick(ev) {
         const el = getEl();
         if (el && !el.contains(ev.composedPath()[0])) {
@@ -579,8 +579,7 @@ export function useMicrophoneVolume() {
 export function useSelection({ refName, ref, model, preserveOnClickAwayPredicate = () => false }) {
     const ui = useService("ui");
     const refOrSignal = ref ?? useRef(refName);
-    const getEl = () =>
-        (typeof refOrSignal === "function" ? refOrSignal() : refOrSignal?.el) ?? null;
+    const getEl = () => resolveRefEl(refOrSignal) ?? null;
     function onSelectionChange() {
         const el = getEl();
         const activeElement = el?.getRootNode().activeElement;

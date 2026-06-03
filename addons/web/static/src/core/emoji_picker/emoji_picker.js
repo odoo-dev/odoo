@@ -23,6 +23,7 @@ import { _t, appTranslateFn } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { getTemplate } from "@web/core/templates";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 import { range } from "@web/core/utils/numbers";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { Dialog } from "../dialog/dialog";
@@ -510,13 +511,14 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
     function add(ref, onSelect, { show = false } = {}) {
         const toggler = () => toggle(isMobileOS() ? undefined : ref, onSelect);
         targets.push([ref, toggler]);
-        if (!ref.el) {
+        const el = resolveRefEl(ref);
+        if (!el) {
             return;
         }
-        ref.el.addEventListener("click", toggler);
-        ref.el.addEventListener("mouseenter", loadEmoji);
+        el.addEventListener("click", toggler);
+        el.addEventListener("mouseenter", loadEmoji);
         if (show) {
-            ref.el.click();
+            el.click();
         }
     }
 
@@ -533,7 +535,8 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
                     return res;
                 },
             };
-            if (ref?.el) {
+            const refEl = resolveRefEl(ref);
+            if (refEl) {
                 pickerMobileProps.close = () => remove();
                 const app = new App({
                     name: "Popout",
@@ -544,7 +547,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
                 app.createRoot(PickerMobile, {
                     env: component.env,
                     props: pickerMobileProps,
-                }).mount(ref.el);
+                }).mount(refEl);
                 remove = () => {
                     state.isOpen = false;
                     props.onClose?.();
@@ -562,7 +565,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
             }
             return promise;
         }
-        return popover.open(ref.el, { ...props, ...openProps });
+        return popover.open(resolveRefEl(ref), { ...props, ...openProps });
     }
 
     function close() {
@@ -583,29 +586,32 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
     }
     onMounted(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveRefEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.addEventListener("click", toggle);
-            ref.el.addEventListener("mouseenter", loadEmoji);
+            el.addEventListener("click", toggle);
+            el.addEventListener("mouseenter", loadEmoji);
         }
     });
     onWillPatch(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveRefEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.removeEventListener("click", toggle);
-            ref.el.removeEventListener("mouseenter", loadEmoji);
+            el.removeEventListener("click", toggle);
+            el.removeEventListener("mouseenter", loadEmoji);
         }
     });
     onPatched(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveRefEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.addEventListener("click", toggle);
-            ref.el.addEventListener("mouseenter", loadEmoji);
+            el.addEventListener("click", toggle);
+            el.addEventListener("mouseenter", loadEmoji);
         }
     });
     Object.assign(state, { open, close, toggle });

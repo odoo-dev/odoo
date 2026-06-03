@@ -1,5 +1,6 @@
 import { useLayoutEffect } from "@web/owl2/utils";
 import { memoize } from "@web/core/utils/functions";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 /**
  * This is used on text inputs or textareas to automatically resize it based on its
@@ -14,8 +15,8 @@ import { memoize } from "@web/core/utils/functions";
 export function useAutoresize(ref, options = {}) {
     // Transitional: Owl 3 native refs are signals (call `ref()` to read the element),
     // while legacy refs expose `.el`. Resolve the element in this single place so both
-    // kinds of callers keep working.
-    const getEl = () => (typeof ref === "function" ? ref() : ref?.el);
+    // kinds of callers (incl. useChildRef callables) keep working.
+    const getEl = () => resolveRefEl(ref);
     let wasProgrammaticallyResized = false;
     let resize = null;
     useLayoutEffect(

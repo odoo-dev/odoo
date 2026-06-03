@@ -3,6 +3,7 @@ import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 
 import { status, onWillUnmount, toRaw, onMounted, onPatched } from "@odoo/owl";
 import { router } from "@web/core/browser/router";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 /**
  * This file contains various custom hooks.
@@ -175,9 +176,10 @@ export function useService(serviceName) {
  * longer in focus. We only add this attribute when needed. To disable this
  * behavior, use the spellcheck attribute on the element.
  */
-export function useSpellCheck({ refName } = {}) {
+export function useSpellCheck({ refName, ref } = {}) {
     const elements = [];
-    const ref = useRef(refName || "spellcheck");
+    // Accept an explicit ref/signal (Owl 3) or fall back to the legacy named ref.
+    const r = ref ?? useRef(refName || "spellcheck");
     function toggleSpellcheck(ev) {
         ev.target.spellcheck = document.activeElement === ev.target;
     }
@@ -203,7 +205,7 @@ export function useSpellCheck({ refName } = {}) {
                 });
             };
         },
-        () => [ref.el]
+        () => [resolveRefEl(r)]
     );
 }
 
