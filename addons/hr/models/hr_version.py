@@ -118,6 +118,7 @@ class HrVersion(models.Model):
     spouse_complete_name = fields.Char(string="Spouse Legal Name", groups="hr.group_hr_user", tracking=1)
     spouse_birthdate = fields.Date(string="Spouse Birthdate", groups="hr.group_hr_user", tracking=1)
     children = fields.Integer(string='Dependent Children', groups="hr.group_hr_user", tracking=1)
+    permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user", tracking=1)
 
     # Work Information
     department_id = fields.Many2one('hr.department', check_company=True, tracking=1, index=True)
