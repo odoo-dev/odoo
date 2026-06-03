@@ -1268,11 +1268,11 @@ export class Configurator extends Component {
         const store = reactive(new Store());
         let isStoreStarted = false;
         useEffect(() => {
+            const storageState = this.getStorageState(store);
             if (!isStoreStarted) {
-                store; // consume signal
                 return;
             }
-            this.updateStorage(store);
+            this.updateStorage(storageState);
         });
 
         this.state = useState({
@@ -1285,7 +1285,7 @@ export class Configurator extends Component {
             this.websiteId = (await this.orm.call("website", "get_current_website"))[0];
 
             await store.start(() => this.getInitialState());
-            this.updateStorage(store);
+            this.updateStorage(this.getStorageState(store));
             isStoreStarted = true;
             if (!store.industries || store.configurator_done) {
                 await this.skipConfigurator();
@@ -1430,8 +1430,8 @@ export class Configurator extends Component {
         });
     }
 
-    updateStorage(state) {
-        const newState = JSON.stringify({
+    getStorageState(state) {
+        return {
             defaultColors: state.defaultColors,
             logo: state.logo,
             logoAttachmentId: state.logoAttachmentId,
@@ -1442,7 +1442,11 @@ export class Configurator extends Component {
             formerSelectedPositioning: state.formerSelectedPositioning,
             selectedType: state.selectedType,
             recommendedPalette: state.recommendedPalette,
-        });
+        };
+    }
+
+    updateStorage(state) {
+        const newState = JSON.stringify(state);
         sessionStorage.setItem(this.storageItemName, newState);
     }
 
