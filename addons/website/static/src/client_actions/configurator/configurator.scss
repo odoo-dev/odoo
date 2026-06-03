@@ -18,7 +18,7 @@
         .o_cfg_background_inner {
             @keyframes revealDots {
                 0% {
-                    background-position: 25% 25%;
+                    background-position: 0% 0%;
                 }
                 25% {
                     background-position: 70% 100%;
@@ -70,6 +70,14 @@
             50% {
                 transform: scale(1.08);
                 opacity: 0.65;
+            }
+        }
+
+        @keyframes o-cfg-showcase-float {
+            0% {transform: translateZ(0)}
+            100% { transform: translate(0, 0) translateZ(0);}
+            50% {
+                transform: translate(var(--o-cfg-float-x, 0px),calc(var(--o-cfg-float-y, 12px) * -1) ) translateZ(0);
             }
         }
 
@@ -128,6 +136,45 @@
             img {
                 object-fit: contain;
             }
+        }
+
+        // ── Floating image showcase ───────────────────────────────────────
+        .o_cfg_industry_showcase {
+            transform: rotate3d(0,1,1,1deg) scale(0.94) translateX(10%);
+        }
+
+        .o_cfg_showcase_float {
+            animation: configuratorFadeIn 0.35s ease-out forwards;
+            animation-delay: #{calc(var(--o-cfg-float-delay, 0s) * 0.5s)};
+            will-change: opacity, transform;
+            opacity: 0;
+        }
+
+        $o-cfg-slots: (
+                0: (5.5s, 0.55s, -2.5px, 6px),   1: (6.5s, .4s, 3px, 8px),
+                2: (6s, .8s, -2px, 5px),         3: (7s, .275s, 2.5px, 7px),
+                4: (5.75s, 1.2s, -3px, 9px),     5: (6.75s, .6s, 2px, 5.5px),
+                6: (6.25s, .3s, -3.5px, 7.5px),  7: (7.25s, 1s, 3px, 4.5px),
+                8: (6s, .5s, -2.5px, 8.5px),
+        );
+        @each $i, $v in $o-cfg-slots {
+            .o_cfg_slot_#{$i} {
+                --o-cfg-float-dur: #{nth($v, 1)};
+                --o-cfg-float-delay: #{nth($v, 2)};
+                --o-cfg-float-x: #{nth($v, 3)};
+                --o-cfg-float-y: #{nth($v, 4)};
+            }
+        }
+
+        .o_cfg_showcase_img {
+            animation:
+                    o-cfg-showcase-float
+                    var(--o-cfg-float-dur, 10s)
+                    var(--o-cfg-float-delay, 0s)
+                    ease-in-out
+                    infinite;
+            perspective: 800px;
+            will-change: transform;
         }
 
         .o_description_screen_image_title {

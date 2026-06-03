@@ -7,6 +7,117 @@
         </div>
     </t>
 
+<!-- Industry image showcase (DescriptionScreen, desktop only) -->
+<t t-name="website.Configurator.IndustryImageShowcase">
+    <div class="o_cfg_industry_showcase pe-none overflow-visible d-none d-lg-block" aria-hidden="true">
+        <div class="d-flex align-items-start justify-content-center gap-4 w-100"
+             style="transform:translateY(50%)">
+
+            <div class="flex-shrink-0" style="width:8vw">
+                <t t-if="this.previewImages[0]">
+                    <div t-attf-class="o_cfg_showcase_item o_cfg_slot_0 {{ this.previewImages[0].fetched ? 'o_cfg_slot_fetched' : '' }}">
+                        <div class="o_cfg_showcase_float">
+                            <img class="o_cfg_showcase_img h-auto d-block w-100 shadow rounded" t-att-src="this.previewImages[0].url"/>
+                        </div>
+                    </div>
+                </t>
+            </div>
+
+            <div class="d-flex flex-column align-items-end gap-4 mt-3 flex-shrink-0" style="width:8vw">
+                <t t-if="this.previewImages[1]">
+                    <div t-attf-class="o_cfg_showcase_item o_cfg_slot_1 {{ this.previewImages[1].fetched ? 'o_cfg_slot_fetched' : '' }}">
+                        <div class="o_cfg_showcase_float">
+                            <img class="o_cfg_showcase_img h-auto d-block w-100 shadow rounded" t-att-src="this.previewImages[1].url"/>
+                        </div>
+                    </div>
+                </t>
+                <div class="flex-shrink-0" style="width:17vw">
+                    <t t-if="this.previewImages[6]">
+                        <div t-attf-class="o_cfg_showcase_item o_cfg_slot_6 {{ this.previewImages[6].fetched ? 'o_cfg_slot_fetched' : '' }}">
+                            <div class="o_cfg_showcase_float">
+                                <img class="o_cfg_showcase_img h-auto d-block w-100 shadow-lg rounded-3" t-att-src="this.previewImages[6].url"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- Col 3: main stack + absolute overlay -->
+            <div class="d-flex align-items-center flex-column gap-4 flex-shrink-0 position-relative">
+
+                <div class="flex-shrink-0" style="width:12vw">
+                    <t t-if="this.previewImages[2]">
+                        <div t-attf-class="o_cfg_showcase_item o_cfg_slot_2 {{ this.previewImages[2].fetched ? 'o_cfg_slot_fetched' : '' }}">
+                            <div class="o_cfg_showcase_float">
+                                <img class="o_cfg_showcase_img h-auto d-block w-100 shadow-lg rounded-3" t-att-src="this.previewImages[2].url"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="flex-shrink-0" style="width:8vw">
+                    <t t-if="this.previewImages[3]">
+                        <div t-attf-class="o_cfg_showcase_item o_cfg_slot_3 {{ this.previewImages[3].fetched ? 'o_cfg_slot_fetched' : '' }}">
+                            <div class="o_cfg_showcase_float">
+                                <img class="o_cfg_showcase_img h-auto d-block w-100 shadow rounded" t-att-src="this.previewImages[3].url"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- absolute overlay above col-3 (slots 4 & 5) -->
+                <div class="position-absolute bottom-100 end-0 d-flex align-items-end gap-4 gap-xxl-5 mb-4">
+
+                    <div class="flex-shrink-0 mb-3 mb-xxl-4 me-xxl-4" style="width:15vw">
+                        <t t-if="this.previewImages[4]">
+                            <div t-attf-class="o_cfg_showcase_item o_cfg_slot_4 {{ this.previewImages[4].fetched ? 'o_cfg_slot_fetched' : '' }}">
+                                <div class="o_cfg_showcase_float">
+                                    <img class="o_cfg_showcase_img h-auto d-block w-100 shadow-lg rounded-3" t-att-src="this.previewImages[4].url"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <div class="flex-shrink-0" style="width:16vw">
+                        <t t-if="this.previewImages[5]">
+                            <div t-attf-class="o_cfg_showcase_item o_cfg_slot_5 {{ this.previewImages[5].fetched ? 'o_cfg_slot_fetched' : '' }}">
+                                <div class="o_cfg_showcase_float">
+                                    <img class="o_cfg_showcase_img h-auto d-block w-100 shadow rounded" t-att-src="this.previewImages[5].url"/>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Col 4: three stacked, offset upward -->
+            <div class="d-flex flex-column gap-4 gap-xxl-5 flex-shrink-0 justify-content-start"
+                 style="transform:translateY(-50%)">
+
+                <div class="flex-shrink-0" style="width:17vw">
+                    <t t-if="this.previewImages[7]">
+                        <div t-attf-class="o_cfg_showcase_item o_cfg_slot_7 {{ this.previewImages[7].fetched ? 'o_cfg_slot_fetched' : '' }}">
+                            <div class="o_cfg_showcase_float">
+                                <img class="o_cfg_showcase_img h-auto d-block w-100 shadow rounded" t-att-src="this.previewImages[7].url"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="flex-shrink-0" style="width:9vw">
+                    <t t-if="this.previewImages[8]">
+                        <div t-attf-class="o_cfg_showcase_item o_cfg_slot_8 {{ this.previewImages[8].fetched ? 'o_cfg_slot_fetched' : '' }}">
+                            <div class="o_cfg_showcase_float">
+                                <img class="o_cfg_showcase_img h-auto d-block w-100 shadow rounded" t-att-src="this.previewImages[8].url"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+    </div>
+</t>
+
 <t t-name="website.Configurator.DescriptionScreen">
     <div class="o_cfg_background position-absolute top-0 start-0 end-0 bottom-0">
         <span class="o_cfg_background_inner position-absolute top-0 start-0 end-0 bottom-0"/>
@@ -14,13 +125,7 @@
     <div class="o_configurator_screen overflow-x-hidden h-100 d-flex flex-row-reverse justify-content-around position-relative px-3 px-xxl-0">
         <div class="o_description_screen_image_preview position-relative d-none d-lg-flex flex-column w-50 h-100">
             <div class="d-flex flex-grow-1 align-items-center justify-content-center">
-                <div t-if="this.previewImages.length" class="o_description_screen_image_disc position-relative w-75 w-xxl-100 h-75 pe-none">
-                    <t t-foreach="this.previewImages" t-as="image" t-key="image.slot">
-                        <div t-attf-class="o_description_screen_image_card o_description_screen_image_card_{{image.slot}}">
-                            <img t-att-src="image.url" alt="" class="o_description_screen_image_card_img"/>
-                        </div>
-                    </t>
-                </div>
+                <t t-if="this.previewImages.length" t-call="website.Configurator.IndustryImageShowcase"/>
             </div>
             <SkipButton skip="this.props.skip" className="'py-2 pb-md-3 text-end mt-auto z-1'"/>
         </div>
