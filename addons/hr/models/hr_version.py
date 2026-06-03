@@ -154,6 +154,7 @@ class HrVersion(models.Model):
     is_flexible = fields.Boolean(compute='_compute_is_flexible', store=True, groups="hr.group_hr_user")
     is_fully_flexible = fields.Boolean(compute='_compute_is_flexible', store=True, groups="hr.group_hr_user")
     tz = fields.Selection(_tz_get, string='Timezone', required=True, default=lambda self: self.env.context.get('tz') or self.env.user.tz or 'UTC')
+    permit_no = fields.Char(string='Work Permit No', tracking=True, groups="hr.group_hr_user")
 
     # Contract Information
     contract_date_start = fields.Date('Contract Start Date', tracking=1, groups="hr.group_hr_manager")
