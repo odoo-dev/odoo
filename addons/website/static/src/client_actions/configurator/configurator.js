@@ -20,6 +20,7 @@ import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { clamp } from "@web/core/utils/numbers";
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
+import { user } from "@web/core/user";
 import { mixCssColors } from "@web/core/utils/colors";
 import { router } from "@web/core/browser/router";
 import { Component, onMounted, onWillStart, useEffect, onWillUnmount } from "@odoo/owl";
@@ -84,6 +85,12 @@ export const CUSTOM_BG_COLOR_ATTRS = ["menu", "footer"];
 
 const MAX_NBR_DISPLAY_MAIN_THEMES = 6;
 const DESKTOP_PREVIEW_WIDTH = 1440;
+
+function getUserLanguageName() {
+    const locale = user.lang || "en-US";
+    const language = new Intl.Locale(locale).language;
+    return new Intl.DisplayNames([locale], { type: "language" }).of(language) || "English";
+}
 
 function getCSSPalettes(style, paletteNames = PALETTE_NAMES, bgColorAttrs = CUSTOM_BG_COLOR_ATTRS) {
     const palettes = {};
@@ -270,6 +277,7 @@ export class DescriptionScreen extends Component {
     }
 
     async fetchPositionings(industryLabel) {
+        const userLanguage = getUserLanguageName();
         const fallback = [
             "premium",
             "affordable",
@@ -282,7 +290,10 @@ export class DescriptionScreen extends Component {
         this.state.selectedPositioning = undefined;
         this.state.positioningsLoading = true;
         try {
-            const prompt = `Design a website for my ${industryLabel} business with a _______ positioning. Return only a JSON array of 6 possibilities to fill in the blank.`;
+            const prompt = `${_t(
+                "Design a website for my %(industry)s business with a _______ positioning.",
+                { industry: industryLabel }
+            )} Return only a JSON array of 6 possibilities in ${userLanguage} to fill in the blank.`;
             const response = await rpc("/html_editor/generate_text", {
                 prompt,
                 conversation_history: [],
@@ -524,6 +535,7 @@ export class PaletteSelectionScreen extends Component {
     async fetchStyleRecommendation() {
         const { selectedIndustry, selectedType, selectedPositioning, formerSelectedPositioning } =
             this.state;
+        const userLanguage = getUserLanguageName();
         const industry = selectedIndustry?.label || "general";
         const type = WEBSITE_TYPES[selectedType]?.name || "business";
         const positioning = selectedPositioning || formerSelectedPositioning || "";
@@ -546,7 +558,7 @@ ${JSON.stringify(catalog, null, 2)}
 
 Return ONLY a JSON object with:
 - "id": the numeric ID from the catalog
-- "reason": a short sentence mentioning the business context, like: "For a family restaurant with a cozy positioning, I'd recommend warm colors to feel welcoming."`;
+- "reason": a short sentence in ${userLanguage} mentioning the business context, like: "For a family restaurant with a cozy positioning, I'd recommend warm colors to feel welcoming."`;
         this.state.styleRecommendationLoading = true;
         this.state.styleRecommendation = undefined;
         try {
@@ -973,19 +985,30 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         return previewHeaders[(index >= 0 ? index : 0) % previewHeaders.length];
     }
 
+    getPreviewIframeDocument(iframe) {
+        try {
+            const previewDocument = iframe.contentDocument;
+            return previewDocument?.readyState === "complete" ? previewDocument : null;
+        } catch (error) {
+            if (error.name === "SecurityError") {
+                return null;
+            }
+            throw error;
+        }
+    }
+
     replacePreviewIframeHeading(iframe) {
         const previewHeader = this.getPreviewHeader(iframe);
         if (!previewHeader) {
             return;
         }
-        try {
-            const previewDocument = iframe.contentDocument;
-            const heading = previewDocument?.querySelector("h1, .h1");
-            if (heading) {
-                heading.textContent = previewHeader;
-            }
-        } catch {
-            // Ignore iframe access failures and keep the original preview title.
+        const previewDocument = this.getPreviewIframeDocument(iframe);
+        if (!previewDocument) {
+            return;
+        }
+        const heading = previewDocument.querySelector("h1, .h1");
+        if (heading) {
+            heading.textContent = previewHeader;
         }
     }
 
@@ -994,16 +1017,13 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
         if (!logo) {
             return;
         }
-        try {
-            const previewDocument = iframe.contentDocument;
-            const logoImage = previewDocument?.querySelector(
-                "header img, #top img, .navbar-brand img"
-            );
-            if (logoImage) {
-                logoImage.src = logo;
-            }
-        } catch {
-            // Ignore iframe access failures and keep the original preview logo.
+        const previewDocument = this.getPreviewIframeDocument(iframe);
+        if (!previewDocument) {
+            return;
+        }
+        const logoImage = previewDocument.querySelector("header img, #top img, .navbar-brand img");
+        if (logoImage) {
+            logoImage.src = logo;
         }
     }
 
@@ -1018,7 +1038,7 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
     getPreviewIframeContentSize(iframe) {
         try {
             const iframeWindow = iframe.contentWindow;
-            const iframeDocument = iframe.contentDocument;
+            const iframeDocument = this.getPreviewIframeDocument(iframe);
             const scrollingElement = iframeDocument?.scrollingElement;
             const documentElement = iframeDocument?.documentElement;
             const body = iframeDocument?.body;
@@ -1041,8 +1061,11 @@ export class ThemeSelectionScreen extends ApplyConfiguratorScreen {
                     body?.offsetHeight || 0
                 ),
             };
-        } catch {
-            return null;
+        } catch (error) {
+            if (error.name === "SecurityError") {
+                return null;
+            }
+            throw error;
         }
     }
 

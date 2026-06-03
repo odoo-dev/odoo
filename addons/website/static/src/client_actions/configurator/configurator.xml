@@ -319,7 +319,7 @@
                                     <div class="o_theme_selection_col d-flex align-items-end">
                                         <t t-set="extraThemeId" t-value="nbrExtraRow_index * 3 + nbrExtraCol_index"/>
                                         <t t-set="extraTheme" t-value="this.state.extraThemes[extraThemeId]"/>
-                                        <t t-set="extraThemeName" t-value="extraTheme &amp;&amp; extraTheme.name"/>
+                                        <t t-set="extraThemeName" t-value="extraTheme and extraTheme.name"/>
                                         <t t-if="extraThemeName">
                                             <div class="theme_preview border rounded position-relative w-100 small o_configurator_show_fast">
                                                 <h6 class="theme_preview_tip text-center text-muted">Click to select</h6>
