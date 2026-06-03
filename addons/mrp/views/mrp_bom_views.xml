@@ -290,7 +290,7 @@
             <field name="name">mrp.bom.line.view.list</field>
             <field name="model">mrp.bom.line</field>
             <field name="arch" type="xml">
-                <list create="0" multi_edit="1" action="action_open_parent_bom" type="object">
+                <list create="0" multi_edit="1" action="action_open_parent_bom" type="object" default_order="bom_id">
                     <field name="bom_id" readonly="1" string="Bill of Material"/>
                     <field name="product_id" string="Component" context="{'default_is_storable': True}"/>
                     <field name="product_qty"/>

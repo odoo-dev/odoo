@@ -722,13 +722,6 @@ class MrpBomLine(models.Model):
         for line in self:
             line.child_line_ids = line.child_bom_id.bom_line_ids.ids or False
 
-    @api.model
-    def search_fetch(self, domain, field_names=None, offset=0, limit=None, order=None):
-        if unfolded_line_ids := self.env.context.get('unfolded_line_ids'):
-            # Preserve the unfolded lines in the proper hierarchy order.
-            return self.browse(unfolded_line_ids)
-        return super().search_fetch(domain, field_names, offset, limit, order)
-
     @api.onchange('product_id')
     def onchange_product_id(self):
         if self.product_id:
@@ -783,6 +776,8 @@ class MrpBomLine(models.Model):
         unfolded_line_ids = []
 
         def _traverse_bom_line(line):
+            if line.id in unfolded_line_ids:
+                return
             unfolded_line_ids.append(line.id)
             for child_line in line.child_line_ids:
                 _traverse_bom_line(child_line)
@@ -795,6 +790,7 @@ class MrpBomLine(models.Model):
             'name': 'BoM Lines',
             'res_model': 'mrp.bom.line',
             'views': [(self.env.ref('mrp.mrp_bom_line_view_list').id, 'list')],
+            'domain': [('id', 'in', unfolded_line_ids)],
             'context': dict(self.env.context, unfolded_line_ids=unfolded_line_ids),
         }
 
