@@ -579,7 +579,6 @@ Return ONLY a JSON object with:
                 this.state.styleRecommendationLoading = false;
                 if (palette) {
                     this.state.aiRecommendedPalette = palette.name;
-                    this.state.selectPalette(palette.name);
                 }
                 return;
             }
