@@ -1,3 +1,5 @@
+import { untrack } from "@odoo/owl";
+
 /**
  * Resolve the element backing a ref regardless of its kind, preserving every
  * legacy form and only ADDING the Owl 3 native signal case:
@@ -32,5 +34,11 @@ export function resolveRefEl(ref) {
         return ref.el;
     }
     // Owl 3 native signal ref: a zero-argument getter. Call it to read the element.
-    return ref();
+    // Untrack the read so resolving a ref's element never subscribes the caller
+    // to the signal: this mirrors the legacy `useRef().el` contract (which read
+    // the underlying signal through `owl.untrack`). Without this, reading the ref
+    // during a render phase (e.g. `useInputField`'s layout-effect dependency
+    // computation, run in `onWillRender`) registers a spurious render dependency,
+    // causing the component to re-patch when the ref signal is set on mount.
+    return untrack(ref);
 }
