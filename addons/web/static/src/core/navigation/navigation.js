@@ -5,6 +5,7 @@ import { deepMerge } from "@web/core/utils/objects";
 import { scrollTo } from "@web/core/utils/scrolling";
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { browser } from "@web/core/browser/browser";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 export const ACTIVE_ELEMENT_CLASS = "focus";
 const throttledFocus = throttleForAnimation((el) => el?.focus());
@@ -439,24 +440,16 @@ export class Navigator {
 export function useNavigation(containerRef, options = {}) {
     containerRef = typeof containerRef === "string" ? useRef(containerRef) : containerRef;
 
-    // TRANSITIONAL SHIM (Owl 3 migration): resolve "the current container
-    // element" in a single place so all accepted input forms work:
-    //   - string  → already converted above via the compat `useRef`, read `.el`
-    //               (original pre-migration behavior);
-    //   - ref-like object/callable → anything exposing an `el` accessor, read
-    //               `.el` (covers Owl 2 refs, `useRef` and `useChildRef`). Note
-    //               `useChildRef` returns a *callable* that is also ref-like, so
-    //               we must NOT call it: invoking it would reset its internal
-    //               value and corrupt the ref;
-    //   - bare function → an Owl 3 native ref (signal) that has no `el`
-    //               accessor, called to get the element.
-    // The `el` check first ensures ref-like callables go through the `.el` path
-    // (original behavior); only genuine signals fall through to being called.
-    // The optional chaining keeps this null-safe (a ref can be undefined before
-    // mount), so it can never throw "Cannot read properties of undefined".
-    // Remove the function branch once every caller passes a native signal ref.
-    const isSignal = typeof containerRef === "function" && !("el" in containerRef);
-    const getContainerEl = () => (isSignal ? containerRef() : containerRef?.el);
+    // Resolve "the current container element" through the shared resolveRefEl
+    // helper so every accepted input form (string→compat useRef, Owl 2 ref-like
+    // `.el`, useChildRef callable, Owl 3 native signal ref) behaves identically
+    // here and everywhere else. Crucially, resolveRefEl UNTRACKS the signal read,
+    // so computing the container element (e.g. as a useLayoutEffect dependency,
+    // whose computeDependencies runs in onWillRender) never subscribes the
+    // component's render to the ref signal. A tracked read here re-patches the
+    // dropdown when its menuRef signal is set, disrupting active-item focus
+    // (`.focus`) during keyboard navigation.
+    const getContainerEl = () => resolveRefEl(containerRef);
 
     const newOptions = { ...options };
     if (!newOptions.getItems) {
