@@ -62,9 +62,10 @@
             display: none;
         }
         .page {
+            background: brown;
             margin-left: 5mm;
             margin-right: 10mm;
-            > h2, h1, #informations, .mt-4 > h2 {
+            > h2, h1, #informations > *, .mt-4 > h2 {
                 display: none;
             }
             [name=invoice_line_table], [name=stock_move_table], .o_main_table {
@@ -72,6 +73,9 @@
                 th {
                     color: $o-default-report-secondary-color;
                 }
+            }
+            [name=plan] {
+                display: block !important;
             }
 
         }
@@ -113,7 +117,7 @@
             &.o_line_section td {
                 background-color: rgba($gray-300, .5);
             }
-    
+
             th {
                 font-weight: bolder;
             }
