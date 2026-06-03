@@ -107,5 +107,18 @@
             </field>
         </record>
 
+        <record id="view_account_invoice_filter_inherit_l10n_es_edi_sii" model="ir.ui.view">
+            <field name="name">account.move.search.inherit.l10n_es_edi_sii</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+                <filter name="not_sent" position="after">
+                    <filter name="l10n_es_edi_sii_to_send"
+                            string="To Send to SII"
+                            domain="[('l10n_es_edi_sii_state', '=', 'to_send')]"/>
+                </filter>
+            </field>
+        </record>
+
     </data>
 </odoo>

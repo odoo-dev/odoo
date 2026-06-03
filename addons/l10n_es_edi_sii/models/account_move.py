@@ -5,6 +5,7 @@ import math
 from odoo import api, fields, models, modules, tools
 from odoo.tools.date_utils import get_quarter_number
 from odoo.exceptions import LockError, UserError
+from odoo.tools import SQL
 from odoo.tools.float_utils import float_round
 from markupsafe import Markup
 
@@ -31,6 +32,8 @@ class AccountMove(models.Model):
     l10n_es_edi_is_required = fields.Boolean(
         string="Is the Spanish EDI needed",
         compute='_compute_l10n_es_edi_is_required',
+        compute_sql='_compute_sql_l10n_es_edi_is_required',
+        compute_sudo=True,
     )
     l10n_es_edi_sii_state = fields.Selection(
         selection=[
@@ -40,15 +43,19 @@ class AccountMove(models.Model):
         ],
         string="Spain SII Status",
         compute='_compute_l10n_es_edi_sii_data',
+        compute_sql='_compute_sql_l10n_es_edi_sii_state',
+        compute_sudo=True,
     )
     l10n_es_edi_csv = fields.Char(
         string="CSV",
         compute='_compute_l10n_es_edi_sii_data',
+        compute_sudo=True,
         help="Secure Verification Code of the last accepted document",
     )
     l10n_es_edi_sii_error = fields.Html(
         string="SII Error",
         compute='_compute_l10n_es_edi_sii_data',
+        compute_sudo=True,
     )
 
     # -------------------------------------------------------------------------
@@ -95,6 +102,69 @@ class AccountMove(models.Model):
                 and move.company_id.l10n_es_sii_tax_agency
                 and has_tax
             )
+
+    def _compute_sql_l10n_es_edi_is_required(self, table):
+        is_invoice = SQL("%s IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')", table.move_type)
+        is_purchase = SQL("%s IN ('in_invoice', 'in_refund')", table.move_type)
+        has_sii_tax = SQL("""
+            EXISTS (
+                SELECT 1
+                  FROM account_move_line line
+                  JOIN account_move_line_account_tax_rel tax_rel ON tax_rel.account_move_line_id = line.id
+                  JOIN account_tax tax ON tax.id = tax_rel.account_tax_id
+                 WHERE line.move_id = %(move_id)s
+                   AND line.display_type IN ('product', 'line_section', 'line_subsection', 'line_note')
+                   AND tax.l10n_es_type IS NOT NULL
+                   AND tax.l10n_es_type != 'ignore'
+            )
+        """, move_id=table.id)
+        return SQL(
+            """CASE WHEN %(is_invoice)s
+                      AND %(country_code)s = 'ES'
+                      AND NULLIF(%(sii_tax_agency)s, '') IS NOT NULL
+                      AND (NOT %(is_purchase)s OR %(has_sii_tax)s)
+                 THEN TRUE
+                 ELSE FALSE
+                END""",
+            is_invoice=is_invoice,
+            country_code=table.company_id.account_fiscal_country_id.code,
+            sii_tax_agency=table.company_id.l10n_es_sii_tax_agency,
+            is_purchase=is_purchase,
+            has_sii_tax=has_sii_tax,
+        )
+
+    def _compute_sql_l10n_es_edi_sii_state(self, table):
+        is_required = self._compute_sql_l10n_es_edi_is_required(table)
+        latest_doc_state = SQL("""
+            (
+                SELECT doc.state
+                  FROM l10n_es_edi_sii_document doc
+                 WHERE doc.move_id = %(move_id)s
+              ORDER BY doc.create_date DESC, doc.id DESC
+                 LIMIT 1
+            )
+        """, move_id=table.id)
+        has_accepted_doc = SQL("""
+            EXISTS (
+                SELECT 1
+                  FROM l10n_es_edi_sii_document doc
+                 WHERE doc.move_id = %(move_id)s
+                   AND doc.state IN ('accepted', 'accepted_with_errors')
+            )
+        """, move_id=table.id)
+        return SQL(
+            """CASE
+                WHEN NOT %(is_required)s THEN NULL
+                WHEN %(latest_doc_state)s IS NULL THEN 'to_send'
+                WHEN %(latest_doc_state)s IN ('accepted', 'accepted_with_errors') THEN 'sent'
+                WHEN %(latest_doc_state)s = 'cancelled' THEN 'cancelled'
+                WHEN %(has_accepted_doc)s THEN 'sent'
+                ELSE 'to_send'
+               END""",
+            is_required=is_required,
+            latest_doc_state=latest_doc_state,
+            has_accepted_doc=has_accepted_doc,
+        )
 
     @api.depends('l10n_es_edi_is_required', 'l10n_es_edi_sii_state')
     def _compute_need_cancel_request(self):
