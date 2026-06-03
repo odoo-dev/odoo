@@ -2,7 +2,7 @@
 
 from odoo.tools.sql import column_exists, create_column
 
-from . import controllers, models
+from . import controllers, models, report
 
 
 def pre_init_hook(env):

@@ -48,8 +48,9 @@ The Dashboard for the Sales Manager will include
         "views/sale_order_views.xml",
         "views/sale_portal_templates.xml",
         "views/sale_management_menus.xml",
+        "report/sale_report_views.xml",
     ],
-    "demo": ["data/sale_order_template_demo.xml"],
+    "demo": ["data/sale_order_template_demo.xml", "data/sale_margin_demo.xml"],
     "assets": {
         "web.assets_backend": [
             "sale_management/static/src/fields/**/*",

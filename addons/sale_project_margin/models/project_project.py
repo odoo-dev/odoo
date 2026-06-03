@@ -18,7 +18,7 @@ class ProjectProject(models.Model):
 
     def action_estimated_margin(self):
         self.ensure_one()
-        action = self.env['ir.actions.act_window']._for_xml_id('sale_margin.action_order_report_projected_margins')
+        action = self.env['ir.actions.act_window']._for_xml_id('sale_management.action_order_report_projected_margins')
         all_sale_orders_lines = self._fetch_sale_order_items({'project.task': [('is_closed', '=', False)]})
         action["domain"] = [("id", "in", all_sale_orders_lines.ids)]
         context = ast.literal_eval(action.get('context', '{}'))

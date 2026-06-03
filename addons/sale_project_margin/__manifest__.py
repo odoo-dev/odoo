@@ -6,7 +6,7 @@ Allows to compute accurate margin for Service sales.
 ======================================================
 """,
     'category': 'Sales/Sales',
-    'depends': ['sale_margin', 'sale_project'],
+    'depends': ['sale_management', 'sale_project'],
     'auto_install': True,
     'data': [
         'views/project_task_views.xml',
