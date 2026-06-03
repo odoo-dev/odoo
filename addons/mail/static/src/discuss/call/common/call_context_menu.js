@@ -1,4 +1,4 @@
-import { Component, onMounted, onWillUnmount, proxy } from "@odoo/owl";
+import { Component, computed, onMounted, onWillUnmount, proxy } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
@@ -27,6 +27,9 @@ export class CallContextMenu extends Component {
             producerStats: {},
             peerStats: {},
             rangeVolume: this.volume,
+        });
+        this.rangeVolume = computed(() => this.state.rangeVolume, {
+            set: (value) => (this.state.rangeVolume = value),
         });
         onMounted(() => {
             if (!this.env.debug) {

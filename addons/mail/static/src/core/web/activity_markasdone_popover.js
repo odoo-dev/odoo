@@ -1,5 +1,5 @@
 import { useExternalListener, useRef } from "@web/owl2/utils";
-import { Component, onMounted, signal } from "@odoo/owl";
+import { Component, computed, onMounted, signal } from "@odoo/owl";
 
 export class ActivityMarkAsDone extends Component {
     static template = "mail.ActivityMarkAsDone";
@@ -19,6 +19,9 @@ export class ActivityMarkAsDone extends Component {
         super.setup();
         this.textArea = useRef("textarea");
         this.disableDoneButton = signal(false);
+        this.activityFeedback = computed(() => this.props.activity.feedback, {
+            set: (value) => (this.props.activity.feedback = value),
+        });
         onMounted(() => {
             this.textArea.el.focus();
         });

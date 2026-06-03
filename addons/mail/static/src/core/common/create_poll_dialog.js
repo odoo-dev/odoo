@@ -1,6 +1,6 @@
 import { CreatePollOptionDialog } from "@mail/core/common/create_poll_option_dialog";
 
-import { Component, proxy } from "@odoo/owl";
+import { Component, computed, proxy } from "@odoo/owl";
 
 import { Dialog } from "@web/core/dialog/dialog";
 import { EmojiPicker } from "@web/core/emoji_picker/emoji_picker";
@@ -20,6 +20,15 @@ export class CreatePollDialog extends Component {
             options: [{ label: "" }, { label: "" }],
             question: "",
             submitted: false,
+        });
+        this.question = computed(() => this.state.question, {
+            set: (value) => (this.state.question = value),
+        });
+        this.duration = computed(() => this.state.duration, {
+            set: (value) => (this.state.duration = value),
+        });
+        this.allowMultipleOptions = computed(() => this.state.allowMultipleOptions, {
+            set: (value) => (this.state.allowMultipleOptions = value),
         });
         this.orm = useService("orm");
     }

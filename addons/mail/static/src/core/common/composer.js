@@ -19,6 +19,7 @@ import { useDebounced } from "@web/core/utils/timing";
 
 import {
     Component,
+    computed,
     markup,
     onMounted,
     onWillUnmount,
@@ -160,6 +161,9 @@ export class Composer extends Component {
         this.state = proxy({
             active: true,
             isFullComposerOpen: false,
+        });
+        this.composerText = computed(() => this.props.composer.composerText, {
+            set: (value) => (this.props.composer.composerText = value),
         });
         /** @type {import("@odoo/owl").Signal<Element>} */
         this.rootRef = signal();

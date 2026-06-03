@@ -1,4 +1,4 @@
-import { Component, signal, useEffect } from "@odoo/owl";
+import { Component, computed, signal, useEffect } from "@odoo/owl";
 import { useAutofocus, useForwardRefToParent } from "@web/core/utils/hooks";
 
 let nextId = 0;
@@ -53,6 +53,9 @@ export class SearchInput extends Component {
             }
             const timer = setTimeout(() => this.spinner.set(true), this.props.loadingDelay);
             return () => clearTimeout(timer);
+        });
+        this.searchTerms = computed(() => this.props.search.searchTerm, {
+            set: (value) => (this.props.search.searchTerm = value),
         });
         this.inputRef = useForwardRefToParent("inputRef");
         if (this.props.autofocus) {
