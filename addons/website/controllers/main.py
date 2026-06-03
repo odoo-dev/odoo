@@ -506,7 +506,7 @@ class Website(Home):
             f'{image_basename}.{ext}'
             for ext in ('png', 'jpg', 'jpeg', 'webp', 'svg', 'gif')
         ]
-        for folder in ('content', 'backgrounds'):
+        for folder in ('content', 'backgrounds', 'pictures', 'snippets'):
             for candidate_name in candidate_names:
                 candidate_path = f'{theme_name}/static/src/img/{folder}/{candidate_name}'
                 try:
@@ -515,7 +515,7 @@ class Website(Home):
                 except FileNotFoundError:
                     continue
         if image_stem and image_stem != image_basename:
-            for folder in ('content', 'backgrounds'):
+            for folder in ('content', 'backgrounds', 'pictures', 'snippets'):
                 for ext in ('png', 'jpg', 'jpeg', 'webp', 'svg', 'gif'):
                     candidate_path = f'{theme_name}/static/src/img/{folder}/{image_stem}.{ext}'
                     try:
@@ -555,7 +555,8 @@ class Website(Home):
             if not shape_filename:
                 continue
             shaped_url = f'/{editor}/image_shape_url/{module}/{shape_filename}'
-            image_query = werkzeug.urls.url_encode({'image_url': mapped_image_url})
+            image_url = werkzeug.urls.url_join(request.httprequest.host_url, mapped_image_url)
+            image_query = werkzeug.urls.url_encode({'image_url': image_url})
             shaped_url = f'{shaped_url}?{shape_query}&{image_query}' if shape_query else f'{shaped_url}?{image_query}'
             final_html = final_html.replace(shape_src, shaped_url)
         return final_html
