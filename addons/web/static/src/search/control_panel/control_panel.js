@@ -17,7 +17,7 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { Transition } from "@web/core/transition";
 import { Breadcrumbs } from "../breadcrumbs/breadcrumbs";
 
-import { Component, onMounted } from "@odoo/owl";
+import { Component, Portal, onMounted, signal } from "@odoo/owl";
 
 const STICKY_CLASS = "o_mobile_sticky";
 
@@ -97,6 +97,7 @@ export class ControlPanel extends Component {
         AccordionItem,
         CheckBox,
         Transition,
+        Portal,
     };
     static props = {
         display: { type: Object, optional: true },
@@ -108,6 +109,7 @@ export class ControlPanel extends Component {
             buttons: true,
         },
     };
+    portalTarget = signal(null);
 
     setup() {
         this.actionService = useService("action");
@@ -247,6 +249,7 @@ export class ControlPanel extends Component {
             this.oldScrollTop = 0;
             this.lastScrollTop = 0;
             this.initialScrollTop = this.getScrollingElement().scrollTop;
+            this.portalTarget.set(document.querySelector(`.o_navbar_breadcrumbs, .o_fallback_breadcrumbs`));
         });
 
         useSortable({
