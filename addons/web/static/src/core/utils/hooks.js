@@ -38,8 +38,11 @@ import { resolveRefEl } from "@web/core/utils/ref_utils";
  * @param {boolean} [params.mobile] if true, will force autofocus on touch devices.
  * @returns {Ref} the element reference
  */
-export function useAutofocus({ refName, selectAll, mobile } = {}) {
-    const ref = useRef(refName || "autofocus");
+export function useAutofocus({ ref, refName, selectAll, mobile } = {}) {
+    // `ref` may be an Owl 3 signal ref (a callable) or a legacy `useRef` object;
+    // when omitted, fall back to looking up a `t-ref`/`t-custom-ref` by name.
+    // All element reads go through `resolveRefEl` so both forms are supported.
+    ref = ref || useRef(refName || "autofocus");
     const uiService = useService("ui");
 
     // Prevent autofocus on touch devices to avoid the virtual keyboard from popping up unexpectedly
@@ -71,7 +74,7 @@ export function useAutofocus({ refName, selectAll, mobile } = {}) {
                 }
             }
         },
-        () => [ref.el]
+        () => [resolveRefEl(ref)]
     );
     return ref;
 }
