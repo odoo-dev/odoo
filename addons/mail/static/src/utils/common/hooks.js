@@ -9,6 +9,7 @@ import { browser } from "@web/core/browser/browser";
 import { OVERLAY_SYMBOL } from "@web/core/overlay/overlay_container";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { useService } from "@web/core/utils/hooks";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 /**
  * @param {() => HTMLElement} target
@@ -100,7 +101,8 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
     let lastHoveredTarget;
     for (const refName of refNames) {
         if (typeof refName === "function") {
-            // Special case: useChildRef support
+            // Special case: useChildRef support and Owl 3 native signal refs.
+            // Both are callables; their element is read through `resolveRefEl`.
             targets.push({ ref: refName });
             continue;
         }
@@ -125,11 +127,13 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
             state._targets.push(target);
             const handleMouseenter = (ev) => onmouseenter(ev);
             const handleMouseleave = (ev) => onmouseleave(ev);
-            target.ref.el.addEventListener("mouseenter", handleMouseenter, true);
-            target.ref.el.addEventListener("mouseleave", handleMouseleave, true);
+            const el = resolveRefEl(target.ref);
+            el.addEventListener("mouseenter", handleMouseenter, true);
+            el.addEventListener("mouseleave", handleMouseleave, true);
             return () => {
-                target.ref.el.removeEventListener("mouseenter", handleMouseenter, true);
-                target.ref.el.removeEventListener("mouseleave", handleMouseleave, true);
+                const el = resolveRefEl(target.ref);
+                el?.removeEventListener("mouseenter", handleMouseenter, true);
+                el?.removeEventListener("mouseleave", handleMouseleave, true);
                 const idx = state._targets.findIndex((t) => t === target);
                 if (idx !== -1) {
                     state._targets.splice(idx, 1);
@@ -168,10 +172,11 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
             return;
         }
         for (const target of state._targets) {
-            if (!target.ref.el) {
+            const el = resolveRefEl(target.ref);
+            if (!el) {
                 continue;
             }
-            if (target.ref.el.contains(ev.target)) {
+            if (el.contains(ev.target)) {
                 setHover(true);
                 lastHoveredTarget = target;
                 return;
@@ -189,10 +194,11 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
             return;
         }
         for (const target of state._targets) {
-            if (!target.ref.el) {
+            const el = resolveRefEl(target.ref);
+            if (!el) {
                 continue;
             }
-            if (target.ref.el.contains(ev.relatedTarget)) {
+            if (el.contains(ev.relatedTarget)) {
                 return;
             }
         }
@@ -207,13 +213,13 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
 
     for (const target of targets) {
         useLazyExternalListener(
-            () => target.ref.el,
+            () => resolveRefEl(target.ref),
             "mouseenter",
             (ev) => onmouseenter(ev),
             true
         );
         useLazyExternalListener(
-            () => target.ref.el,
+            () => resolveRefEl(target.ref),
             "mouseleave",
             (ev) => onmouseleave(ev),
             true
@@ -225,7 +231,7 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
             // Note: stateObserver is essentially used with useDropdownState()?.isOpen.
             // While isOpen can become false, the ref.el can still be there for a short period of time.
             // Relying on isOpen becoming false forces good syncing of isHover state on dropdown close.
-            if ((lastHoveredTarget && !lastHoveredTarget.ref.el) || !open) {
+            if ((lastHoveredTarget && !resolveRefEl(lastHoveredTarget.ref)) || !open) {
                 setHover(false);
                 lastHoveredTarget = null;
             }
