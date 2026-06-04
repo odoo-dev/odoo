@@ -24,7 +24,7 @@ export class TodoChatterPanel extends Component {
 
     toggleChatter(ev) {
         this.state.displayChatter = ev.detail.displayChatter;
-        this.rootRef()?.parentElement?.classList.toggle('d-none', !this.state.displayChatter);
+        this.rootRef()?.parentElement?.classList.toggle("d-none", !this.state.displayChatter);
     }
 }
 

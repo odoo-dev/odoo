@@ -569,7 +569,12 @@ export class AnalyticDistribution extends Component {
 
     focusToSelector() {
         if (this.focusSelector && this.isDropdownOpen) {
-            this.focus(this.adjacentElementToFocus("next", this.dropdownRef()?.querySelector(this.focusSelector)));
+            this.focus(
+                this.adjacentElementToFocus(
+                    "next",
+                    this.dropdownRef()?.querySelector(this.focusSelector)
+                )
+            );
         }
         this.focusSelector = false;
     }
@@ -622,7 +627,11 @@ export class AnalyticDistribution extends Component {
                     const closestCell = ev.target.closest("td, th");
                     const row = closestCell.parentElement;
                     const line = this.state.formattedData[parseInt(row.id)];
-                    if (this.adjacentElementToFocus("next") == this.addLineButton() && line && this.lineIsValid(line)) {
+                    if (
+                        this.adjacentElementToFocus("next") == this.addLineButton() &&
+                        line &&
+                        this.lineIsValid(line)
+                    ) {
                         this.addLine();
                         break;
                     }
@@ -674,13 +683,14 @@ export class AnalyticDistribution extends Component {
             ".modal:not(.o_inactive_modal):not(:has(.o_act_window))",
         ];
         const widgetEl = this.widgetRef();
-        if (this.isDropdownOpen
-            && widgetEl
-            && !widgetEl.contains(ev.target)
-            && (!ev.target.closest(selectors.join(",")) ||
-                document.querySelector(".modal:not(.o_inactive_modal)").contains(widgetEl))
-            && !ev.target.isSameNode(document.documentElement)
-           ) {
+        if (
+            this.isDropdownOpen &&
+            widgetEl &&
+            !widgetEl.contains(ev.target) &&
+            (!ev.target.closest(selectors.join(",")) ||
+                document.querySelector(".modal:not(.o_inactive_modal)").contains(widgetEl)) &&
+            !ev.target.isSameNode(document.documentElement)
+        ) {
             this.forceCloseEditor();
         }
     }
