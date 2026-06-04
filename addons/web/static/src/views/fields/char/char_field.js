@@ -91,12 +91,7 @@ export class CharField extends Component {
             const dynamicPlaceholder = ` {{object.${chain}${
                 defaultValue?.length ? ` ||| ${defaultValue}` : ""
             }}}`;
-            input.setRangeText(
-                dynamicPlaceholder,
-                this.selectionStart,
-                this.selectionStart,
-                "end"
-            );
+            input.setRangeText(dynamicPlaceholder, this.selectionStart, this.selectionStart, "end");
             // trigger events to make the field dirty
             input.dispatchEvent(new InputEvent("input"));
             input.dispatchEvent(new KeyboardEvent("keydown"));

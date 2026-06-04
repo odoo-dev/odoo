@@ -116,22 +116,18 @@ export class EmbeddedSyntaxHighlightingComponent extends Component {
             let spacesRemovedAtStart = 0;
             if (ev.shiftKey) {
                 // Remove tabs.
-                let end = textarea.value
-                    .slice(selectionEnd, textarea.value.length)
-                    .indexOf("\n");
+                let end = textarea.value.slice(selectionEnd, textarea.value.length).indexOf("\n");
                 end = end === -1 ? 0 : end;
                 end = selectionEnd + end;
                 // From 0 to the last \n before selection start.
                 newValue = textarea.value.slice(0, start);
                 // From the last \n before selection start to selection end.
-                const regex = new RegExp(`(\n|^)( | ){1,${tabSize}}`, "g");
+                const regex = new RegExp(`(\n|^)( |\u00A0){1,${tabSize}}`, "g");
                 const startSlice = textarea.value.slice(start, selectionStart);
                 const cleanStartSlice = startSlice.replace(regex, "$1");
                 spacesRemovedAtStart = startSlice.length - cleanStartSlice.length;
                 newValue += cleanStartSlice;
-                newValue += textarea.value
-                    .slice(selectionStart, selectionEnd)
-                    .replace(regex, "$1");
+                newValue += textarea.value.slice(selectionStart, selectionEnd).replace(regex, "$1");
                 newValue += textarea.value.slice(selectionEnd, end).replace(regex, "$1");
                 // From selection end to end.
                 newValue += textarea.value.slice(end, textarea.value.length);

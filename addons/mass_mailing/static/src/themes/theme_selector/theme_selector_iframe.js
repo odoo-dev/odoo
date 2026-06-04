@@ -1,7 +1,16 @@
 import { reactive } from "@web/owl2/utils";
 import { ThemeSelector } from "./theme_selector";
 import { assets, AssetsLoadingError, getBundle } from "@web/core/assets";
-import { Component, markup, onMounted, onWillUnmount, onWillUpdateProps, status, proxy, signal } from "@odoo/owl";
+import {
+    Component,
+    markup,
+    onMounted,
+    onWillUnmount,
+    onWillUpdateProps,
+    proxy,
+    signal,
+    status,
+} from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { renderToFragment } from "@web/core/utils/render";
 import { localization } from "@web/core/l10n/localization";
