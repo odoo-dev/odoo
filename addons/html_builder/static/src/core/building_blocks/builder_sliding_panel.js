@@ -34,7 +34,9 @@ export class BuilderSlidingPanel extends Component {
         });
         onMounted(() => {
             const slidingPanelEl = this.slidingPanelRef();
-            if (!slidingPanelEl) return;
+            if (!slidingPanelEl) {
+                return;
+            }
             const optionsContainerEl = slidingPanelEl.closest("div.options-container");
             this.state.optionContainerName = optionsContainerEl.dataset.containerTitle;
             optionsContainerEl.parentElement.append(slidingPanelEl);
