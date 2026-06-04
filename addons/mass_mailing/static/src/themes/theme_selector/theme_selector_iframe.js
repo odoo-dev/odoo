@@ -142,7 +142,7 @@ export class ThemeSelectorIframe extends Component {
         }
         const sheetPromises = [];
         for (const cssText of cssTexts) {
-            const sheet = new this.iframeRef().contentDocument.defaultView.CSSStyleSheet();
+            const sheet = new (this.iframeRef().contentDocument.defaultView.CSSStyleSheet)();
             sheetPromises.push(sheet.replace(cssText).then(() => sheet));
         }
         return Promise.all(sheetPromises);
