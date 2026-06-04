@@ -9,6 +9,7 @@ import { useCommand } from "@web/core/commands/command_hook";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useSortable } from "@web/core/utils/sortable_owl";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 import { user } from "@web/core/user";
 import { AccordionItem } from "@web/core/dropdown/accordion_item";
 import { CheckBox } from "@web/core/checkbox/checkbox";
@@ -189,7 +190,8 @@ export class ControlPanel extends Component {
                 },
                 {
                     bypassEditableProtection: true,
-                    withOverlay: () => this.rootRef()?.querySelector("nav.o_cp_switch_buttons"),
+                    withOverlay: () =>
+                        resolveRefEl(this.rootRef)?.querySelector("nav.o_cp_switch_buttons"),
                 }
             );
         }
@@ -204,7 +206,7 @@ export class ControlPanel extends Component {
             const scrollingEl = this.getScrollingElement();
             this.scrollingElementResizeObserver.observe(scrollingEl);
             scrollingEl.addEventListener("scroll", this.onScrollThrottledBound);
-            const rootEl = this.rootRef();
+            const rootEl = resolveRefEl(this.rootRef);
             if (rootEl) {
                 rootEl.style.top = "0px";
             }
@@ -229,7 +231,7 @@ export class ControlPanel extends Component {
                 }, 100);
                 return () => clearTimeout(timer);
             },
-            () => [this.rootRef(), this.state.embeddedInfos.showEmbedded]
+            () => [resolveRefEl(this.rootRef), this.state.embeddedInfos.showEmbedded]
         );
 
         onMounted(() => {
@@ -283,7 +285,7 @@ export class ControlPanel extends Component {
     }
 
     getScrollingElement() {
-        return this.rootRef()?.parentElement;
+        return resolveRefEl(this.rootRef)?.parentElement;
     }
 
     /**
@@ -386,7 +388,7 @@ export class ControlPanel extends Component {
         this.isScrolling = true;
         browser.requestAnimationFrame(() => (this.isScrolling = false));
 
-        const rootEl = this.rootRef();
+        const rootEl = resolveRefEl(this.rootRef);
         if (!rootEl) {
             return;
         }
@@ -501,7 +503,7 @@ export class ControlPanel extends Component {
                 type: "danger",
             });
             ev.stopPropagation();
-            return this.newActionNameRef()?.focus();
+            return resolveRefEl(this.newActionNameRef)?.focus();
         }
         const duplicateName = embeddedActions.some(({ name }) => name === newActionName);
         if (duplicateName) {
@@ -509,7 +511,7 @@ export class ControlPanel extends Component {
                 type: "danger",
             });
             ev.stopPropagation();
-            return this.newActionNameRef()?.focus();
+            return resolveRefEl(this.newActionNameRef)?.focus();
         }
         const userId = newActionIsShared ? false : user.userId;
 

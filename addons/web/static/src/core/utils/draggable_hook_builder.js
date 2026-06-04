@@ -1,3 +1,4 @@
+import { untrack } from "@odoo/owl";
 import { clamp } from "@web/core/utils/numbers";
 import { omit } from "@web/core/utils/objects";
 import { closestScrollableX, closestScrollableY } from "@web/core/utils/scrolling";
@@ -220,7 +221,13 @@ function resolveRefEl(ref) {
         return ref.el;
     }
     // Owl 3 native signal ref: a zero-argument getter. Call it to read the element.
-    return ref();
+    // Untrack the read so resolving a ref's element never subscribes the caller to
+    // the signal: this mirrors the legacy `useRef().el` contract (read through
+    // `owl.untrack`). Without this, reading the ref in a layout-effect dependency
+    // function (e.g. `() => [ctx.ref.el]`, evaluated during render) registers a
+    // spurious render dependency, causing the host component to re-patch when the
+    // ref signal is set on mount.
+    return untrack(ref);
 }
 
 /**
@@ -533,6 +540,14 @@ export function makeDraggableHook(hookParams) {
             if (prop in params) {
                 if (prop === "enable") {
                     computedParams[prop] = toFunction(params[prop]);
+                } else if (prop === "ref") {
+                    // `ref` may be a bare Owl 3 native signal (a zero-arg function);
+                    // resolve it through `resolveRefEl` (which untracks) so this
+                    // dependency never subscribes the host component's render to the
+                    // ref signal. Otherwise `getReturnValue` would call the signal in
+                    // a tracked context, causing a spurious re-render when the ref is
+                    // set on mount. Legacy object refs resolve to their `.el` here too.
+                    computedParams[prop] = resolveRefEl(params[prop]);
                 } else if (
                     allAcceptedParams[prop].length === 1 &&
                     allAcceptedParams[prop][0] === Function
