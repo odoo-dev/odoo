@@ -225,6 +225,9 @@ export default class IndexedDB {
                 .then(() => ({ status: "fulfilled" }))
                 .catch((err) => ({ status: "rejected", reason: err }));
             results.push(result);
+
+            // Yield to the browser main thread to prevent UI freezing
+            await new Promise((resolve) => setTimeout(resolve, 0));
         }
 
         return results;

@@ -224,7 +224,15 @@ class ProductTemplate(models.Model):
         return read_records
 
     def _load_product_with_domain(self, domain, load_archived=False, offset=0, limit=None):
-        context = {**self.env.context, 'display_default_code': False, 'active_test': not load_archived}
+        # `bin_size` makes binary fields read as their size instead of their content. The PoS
+        # only needs to know whether `image_128` is set, and reading the base64 payload of
+        # every product is by far the most expensive part of the read.
+        context = {
+            **self.env.context,
+            'display_default_code': False,
+            'active_test': not load_archived,
+            'bin_size': True,
+        }
         domain = self._server_date_to_domain(domain)
         return self.with_context(context).search(
             domain,
@@ -247,12 +255,12 @@ class ProductTemplate(models.Model):
                 comp = comp.parent_id
             return taxes
 
-        taxes = self.env['account.tax'].search(self.env['account.tax']._check_company_domain(self.env.company))
         # group all taxes by company in a dict where:
         # - key: ID of the company
         # - values: list of tax ids
         taxes_by_company = defaultdict(set)
         if self.env.company.parent_id:
+            taxes = self.env['account.tax'].search(self.env['account.tax']._check_company_domain(self.env.company))
             for tax in taxes:
                 taxes_by_company[tax.company_id.id].add(tax.id)
 
@@ -268,16 +276,54 @@ class ProductTemplate(models.Model):
                 product['taxes_id'] = filter_taxes_on_company(product['taxes_id'], taxes_by_company)
 
     def _add_archived_combinations(self, products):
-        """ Add archived combinations to the product template data. """
+        """ Add archived combinations to the product template data.
+
+        Everything is read through the ORM, but the reads are hoisted out of the loop:
+        `_get_attribute_exclusions` is `ensure_one` and issues a few queries per template,
+        which does not scale on a full catalog. Prefetching the variants and the attribute
+        values once lets the loop below run on cached data only.
+        """
         product_data = {product['id']: product for product in products}
-        for product_tmpl in self.browse(product_data.keys()):
-            product = product_data[product_tmpl.id]
-            attribute_exclusions = product_tmpl._get_attribute_exclusions()
-            product['_archived_combinations'] = attribute_exclusions['archived_combinations']
+        for product in products:
+            product['_archived_combinations'] = []
+
+        # A template without attribute line has no combination at all, and reading
+        # `attribute_line_ids` here fills the cache for the whole batch in one query.
+        templates = self.browse(product_data.keys()).filtered('attribute_line_ids')
+        if not templates:
+            return
+
+        variants = templates.with_context(active_test=False).product_variant_ids
+        variants.fetch(['active', 'product_tmpl_id', 'product_template_attribute_value_ids'])
+        attribute_values = templates.valid_product_template_attribute_line_ids.product_template_value_ids
+        attribute_values.fetch(['ptav_active', 'excluded_value_ids'])
+
+        variants_by_template = defaultdict(list)
+        for variant in variants:
+            variants_by_template[variant.product_tmpl_id.id].append(variant)
+
+        for template in templates:
+            active_combinations = set()
+            archived_combinations = set()
+            for variant in variants_by_template[template.id]:
+                attribute_value_ids = variant.product_template_attribute_value_ids
+                combination = tuple(attribute_value_ids.ids)
+                if variant.active:
+                    active_combinations.add(combination)
+                elif combination and all(ptav.ptav_active for ptav in attribute_value_ids):
+                    archived_combinations.add(combination)
+
+            # `_get_attribute_exclusions` is deliberately not reused here: it also builds
+            # `mapped_attribute_names`, i.e. one `display_name` per attribute value, which
+            # the PoS never reads.
+            exclusions = self._complete_inverse_exclusions(template._get_own_attribute_exclusions())
             excluded = {}
-            for ptav_id, ptav_ids in attribute_exclusions['exclusions'].items():
+            for ptav_id, ptav_ids in exclusions.items():
                 for ptav_id2 in set(ptav_ids) - excluded.keys():
                     excluded[ptav_id] = ptav_id2
+
+            product = product_data[template.id]
+            product['_archived_combinations'] = list(archived_combinations - active_combinations)
             product['_archived_combinations'].extend(excluded.items())
 
     @api.ondelete(at_uninstall=False)

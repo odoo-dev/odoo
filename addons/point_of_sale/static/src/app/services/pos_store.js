@@ -575,6 +575,16 @@ export class PosStore extends WithLazyGetterTrap {
             order.setPricelist(this.models["product.pricelist"].get(currentPricelistId));
         });
 
+        // The sorted product lists are memoized per category, so they must be dropped as
+        // soon as a product or a category changes.
+        for (const modelName of ["product.template", "pos.category"]) {
+            for (const event of ["create", "update", "delete"]) {
+                this.models[modelName].addEventListener(event, () =>
+                    this.clearCategoryProductsCache()
+                );
+            }
+        }
+
         await this.processProductAttributes();
         this.comboSuggestion = new ComboSuggestion(
             this.models,
@@ -2495,58 +2505,95 @@ export class PosStore extends WithLazyGetterTrap {
         );
     }
 
+    clearCategoryProductsCache() {
+        this._directCategoryProducts = null;
+        this._displayedCategoryProducts = null;
+    }
+
+    /**
+     * Products directly linked to each category, sorted once. `productToDisplayByCateg`
+     * walks the category tree itself, so it needs the products of each category alone.
+     */
+    getDirectCategoryProducts() {
+        if (!this._directCategoryProducts) {
+            this._directCategoryProducts = {};
+            const byCateg = this.models["product.template"].toRaw().getAllBy("pos_categ_ids");
+            for (const catId in byCateg) {
+                this._directCategoryProducts[catId] = this.sortProductBySequenceAndFav([
+                    ...byCateg[catId],
+                ]);
+            }
+        }
+        return this._directCategoryProducts;
+    }
+
+    /**
+     * Products shown when `categoryId` is selected: the category and its children, or the
+     * whole catalog when no category is selected. Sorting them is the expensive part of
+     * `productsToDisplay`, so keep the result until the products or the categories change.
+     */
+    getDisplayedCategoryProducts(categoryId) {
+        if (!this._displayedCategoryProducts) {
+            this._displayedCategoryProducts = new Map();
+        }
+        if (!this._displayedCategoryProducts.has(categoryId)) {
+            const products = categoryId
+                ? this.models["pos.category"].get(categoryId).associatedProducts
+                : this.models["product.template"].toRaw().getAll();
+            this._displayedCategoryProducts.set(
+                categoryId,
+                this.sortProductBySequenceAndFav([...products])
+            );
+        }
+        return this._displayedCategoryProducts.get(categoryId);
+    }
+
+    sortProductBySequenceAndFav(products) {
+        return products.sort((a, b) => {
+            if (b.is_favorite !== a.is_favorite) {
+                return b.is_favorite - a.is_favorite;
+            } else if (a.pos_sequence !== b.pos_sequence) {
+                return a.pos_sequence - b.pos_sequence;
+            }
+            return localeCompare(a.name, b.name);
+        });
+    }
+
     orderProductBySequenceAndFav(products) {
         const searchWord = this.searchProductWord.trim();
         const isSearchByWord = searchWord !== "";
         return isSearchByWord
             ? products.sort((a, b) => b.is_favorite - a.is_favorite)
-            : products.sort((a, b) => {
-                  if (b.is_favorite !== a.is_favorite) {
-                      return b.is_favorite - a.is_favorite;
-                  } else if (a.pos_sequence !== b.pos_sequence) {
-                      return a.pos_sequence - b.pos_sequence;
-                  }
-                  return localeCompare(a.name, b.name);
-              });
+            : this.sortProductBySequenceAndFav(products);
     }
 
     get productsToDisplay() {
         const searchWord = this.searchProductWord.trim();
-        let recordIterator;
         const isSearchByWord = searchWord !== "";
 
-        const productTemplateModel = this.models["product.template"].toRaw();
         if (isSearchByWord) {
             if (!this._searchTriggered) {
                 this.setSelectedCategory(0);
                 this._searchTriggered = true;
             }
-            recordIterator = this.getProductsBySearchWord(
+            const recordIterator = this.getProductsBySearchWord(
                 searchWord,
                 this.selectedCategory?.id
                     ? this.selectedCategory.associatedProducts.values()
-                    : productTemplateModel.getIterator()
+                    : this.models["product.template"].toRaw().getIterator()
             );
+            const filteredList = this.filterExcludedProducts(recordIterator);
+            return this.orderProductBySequenceAndFav(filteredList);
         } else {
             this._searchTriggered = false;
-            if (this.selectedCategory?.id) {
-                recordIterator = this.selectedCategory.associatedProducts;
-            } else {
-                recordIterator = productTemplateModel.getIterator();
+            const preSortedList = this.getDisplayedCategoryProducts(this.selectedCategory?.id || 0);
+            const filteredList = this.filterExcludedProducts(preSortedList);
+
+            if (!this.selectedCategory?.id && this.areAllProductsSpecial(filteredList)) {
+                return [];
             }
+            return filteredList;
         }
-
-        const filteredList = this.filterExcludedProducts(recordIterator);
-
-        if (
-            !isSearchByWord &&
-            !this.selectedCategory?.id &&
-            this.areAllProductsSpecial(filteredList)
-        ) {
-            return [];
-        }
-
-        return this.orderProductBySequenceAndFav(filteredList);
     }
 
     filterExcludedProducts(products) {
@@ -2585,7 +2632,9 @@ export class PosStore extends WithLazyGetterTrap {
 
         const results = [];
         const searchWord = this.searchProductWord.trim();
-        const byCateg = this.models["product.template"].toRaw().getAllBy("pos_categ_ids");
+        const isSearch = searchWord !== "";
+        const byCateg = { ...this.getDirectCategoryProducts() };
+
         const selectedCategoryIds = !this.selectedCategory
             ? this.models["pos.category"].map((c) => c.id)
             : this.selectedCategory.getAllChildren().map((c) => c.id);
@@ -2618,17 +2667,11 @@ export class PosStore extends WithLazyGetterTrap {
         for (const catId of selectedCategoryIds) {
             const products = byCateg[catId] || [];
 
-            let filtered = searchWord
-                ? this.getProductsBySearchWord(searchWord, products)
-                : products;
+            let filtered = isSearch ? this.getProductsBySearchWord(searchWord, products) : products;
 
-            // Its advised to not use group by categ with too much products in differents
-            // categories, but in case of we end up with too much products, we slice them in
-            // group of 100 to avoid freezing the browser tab.
-            // We cannot just slice the products to display and keep the same category, because
-            // we want to avoid having categories with only few products displayed and others
-            // with a lot of products not displayed.
-            filtered = this.orderProductBySequenceAndFav(filtered);
+            if (isSearch) {
+                filtered = this.orderProductBySequenceAndFav(filtered);
+            }
             filtered = this.filterExcludedProducts(filtered);
 
             if (filtered.length) {

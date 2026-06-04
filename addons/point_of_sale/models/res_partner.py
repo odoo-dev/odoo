@@ -68,8 +68,31 @@ class ResPartner(models.Model):
         return [('id', 'in', list(partner_ids))]
 
     def _compute_fiscal_position_id(self):
+        # `_get_fiscal_position` searches the auto-applicable fiscal positions on every call,
+        # i.e. once per partner. Resolve them once for the whole recordset instead, and warm
+        # up the cache of everything the matching functions read so that the loop below does
+        # not query the database at all.
+        AccountFiscalPosition = self.env['account.fiscal.position'].with_company(self.env.company)
+        auto_apply_fpos = AccountFiscalPosition.search([
+            *AccountFiscalPosition._check_company_domain(self.env.company),
+            ('auto_apply', '=', True),
+        ])
+        auto_apply_fpos.fetch([
+            'company_id', 'sequence', 'vat_required', 'zip_from', 'zip_to',
+            'state_ids', 'country_id', 'country_group_id',
+        ])
+        self.fetch(['vat', 'zip', 'state_id', 'country_id'])
+
+        # A fiscal position set manually on the partner always wins. Reading the company
+        # dependent field over the whole recordset resolves it in a single query.
+        partners = self.with_company(self.env.company)
+        manual_fpos = {partner.id: partner.property_account_position_id for partner in partners}
+
         for partner in self:
-            partner.fiscal_position_id = self.env['account.fiscal.position'].with_company(self.env.company)._get_fiscal_position(partner)
+            fiscal_position = manual_fpos[partner.id]
+            if not fiscal_position and partner.country_id:
+                fiscal_position = auto_apply_fpos._get_first_matching_fpos(partner)
+            partner.fiscal_position_id = fiscal_position
 
     @api.model
     def _load_pos_data_fields(self, config):

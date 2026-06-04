@@ -45,9 +45,44 @@ class LoyaltyReward(models.Model):
     @api.model
     def _load_pos_data_read(self, records, config):
         read_records = super()._load_pos_data_read(records, config)
-        for reward in read_records:
-            reward['reward_product_domain'] = self._replace_ilike_with_in(reward['reward_product_domain'])
+        self._replace_ilike_with_in(read_records)
         return read_records
+
+    def _replace_ilike_with_in(self, read_records):
+        """ Replace the `ilike` conditions of the reward domains by the matching ids.
+
+        The searches are resolved once per (comodel, value) pair for the whole batch: the
+        same condition is usually repeated across the rewards of a program, and each one
+        used to trigger its own search.
+        """
+        searches = set()
+        parsed_rewards = []
+        for reward in read_records:
+            domain_str = reward['reward_product_domain']
+            if domain_str == "null":
+                continue
+
+            domain = json.loads(domain_str)
+            conditions = []
+            for index, condition in self._parse_domain(domain).items():
+                field_name, operator, value = condition
+                field = self.env['product.product']._fields.get(field_name)
+
+                if field and field.type in ['many2one', 'many2many'] and operator in ('ilike', 'not ilike'):
+                    conditions.append((index, field_name, operator, value, field.comodel_name))
+                    searches.add((field.comodel_name, value))
+            parsed_rewards.append((reward, domain, conditions))
+
+        matching_ids = {
+            (comodel_name, value): list(self.env[comodel_name]._search([('display_name', 'ilike', value)]))
+            for comodel_name, value in searches
+        }
+
+        for reward, domain, conditions in parsed_rewards:
+            for index, field_name, operator, value, comodel_name in conditions:
+                new_operator = 'in' if operator == 'ilike' else 'not in'
+                domain[index] = [field_name, new_operator, matching_ids[comodel_name, value]]
+            reward['reward_product_domain'] = json.dumps(domain)
 
     def _get_reward_product_domain_fields(self, config):
         fields = set()
@@ -60,28 +95,8 @@ class LoyaltyReward(models.Model):
                 fields.add(field_name)
         return fields
 
-    def _replace_ilike_with_in(self, domain_str):
-        if domain_str == "null":
-            return domain_str
-
-        domain = json.loads(domain_str)
-
-        for index, condition in self._parse_domain(domain).items():
-            field_name, operator, value = condition
-            field = self.env['product.product']._fields.get(field_name)
-
-            if field and field.type in ['many2one', 'many2many'] and operator in ('ilike', 'not ilike'):
-                comodel = self.env[field.comodel_name]
-                matching_ids = list(comodel._search([('display_name', 'ilike', value)]))
-
-                new_operator = 'in' if operator == 'ilike' else 'not in'
-                domain[index] = [field_name, new_operator, matching_ids]
-
-        return json.dumps(domain)
-
     def _parse_domain(self, domain):
         parsed_domain = {}
-
         for index, condition in enumerate(domain):
             if isinstance(condition, (list, tuple)) and len(condition) == 3:
                 parsed_domain[index] = condition

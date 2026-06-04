@@ -3,7 +3,6 @@ from collections import defaultdict
 
 from odoo import api, models
 from odoo.fields import Domain
-from odoo.exceptions import AccessError
 
 
 class PosLoadMixin(models.AbstractModel):
@@ -56,15 +55,15 @@ class PosLoadMixin(models.AbstractModel):
         return records or []
 
     def _unrelevant_records(self, config):
-        unrelevant_record_ids = []
-        for record in self:
-            try:
-                if not record.active:
-                    unrelevant_record_ids.append(record.id)
-            except AccessError:
-                # If the user has no read access, consider the record as unrelevant
-                unrelevant_record_ids.append(record.id)
-        return unrelevant_record_ids
+        if 'active' not in self._fields:
+            return []
+
+        # Records the user cannot read are unrelevant, and so are the archived ones.
+        # ``_filtered_access`` and ``filtered`` both work on the whole recordset at once,
+        # which avoids the ``AccessError``-guarded read of ``active`` record by record.
+        readable = self._filtered_access("read")
+        unreadable = self - readable
+        return (unreadable + readable.filtered(lambda record: not record.active)).ids
 
     @api.model
     def _load_pos_data_fields(self, config):
@@ -92,7 +91,12 @@ class PosLoadMixin(models.AbstractModel):
 
         for currency_id, currency_records in records_by_currency.items():
             currency = self.env['res.currency'].browse(currency_id)
+            # Resolve the rate once per source currency: ``_convert`` rebuilds an
+            # environment and looks the rate up again on every single call, which is
+            # measurable when converting a whole catalog.
+            rate = self.env['res.currency']._get_conversion_rate(
+                currency, config.currency_id, self.env.company
+            )
             for record in currency_records:
-                record[price_field] = currency._convert(
-                    record[price_field], config.currency_id, self.env.company
-                )
+                amount = record[price_field]
+                record[price_field] = config.currency_id.round(amount * rate) if amount else 0.0
