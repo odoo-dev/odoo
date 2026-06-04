@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import odoo.tests
+from odoo.tests import patch
+from odoo.tests.common import TEST_CURSOR_COOKIE_NAME, release_test_lock
 
 from odoo.addons.base_report_paper_muncher.paper_muncher import paper_muncher
 
@@ -42,6 +44,32 @@ class TestPaperMuncherReport(odoo.tests.HttpCase):
             {'name': 'PM Test Partner 1'},
             {'name': 'PM Test Partner 2'},
         ])
+
+        # Mirror what HttpCase does for _run_wkhtmltopdf: set the test cursor key,
+        # release the registry lock so _handle_fallback can open a TestCursor, and
+        # inject the matching cookie into every fallback environ so Odoo's asset
+        # routes pass assertCanOpenTestCursor.
+        case_instance = self
+        report_model = self.env.registry['ir.actions.report']
+        old_run = report_model._run_paper_muncher
+
+        def _patched_run_paper_muncher(self_report, bodies, **kwargs):
+            with (
+                patch.object(case_instance, 'http_request_key', 'paper-muncher'),
+                release_test_lock(),
+                patch('odoo.tests.common._disable_flushing_cursor', True),
+            ):
+                return old_run(
+                    self_report, bodies,
+                    extra_environ={'HTTP_COOKIE': f'{TEST_CURSOR_COOKIE_NAME}=paper-muncher'},
+                    **kwargs,
+                )
+
+        self.startPatcher(patch.object(
+            report_model,
+            '_run_paper_muncher',
+            _patched_run_paper_muncher,
+        ))
 
     def _render_pdf(self, partner_ids):
         return self.env['ir.actions.report'].with_context(

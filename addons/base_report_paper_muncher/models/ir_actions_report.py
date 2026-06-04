@@ -43,6 +43,7 @@ class IrActionsReport(models.Model):
         landscape: bool = False,
         specific_paperformat_args: dict | None = None,
         scale: int = 72,
+        extra_environ: dict | None = None,
     ) -> bytes:
         """Render a PDF from HTML content using Paper Muncher subprocess.
 
@@ -107,6 +108,7 @@ class IrActionsReport(models.Model):
         with PaperMuncherServer(
             args=[paper_muncher().bin, *names, '-o', 'pipe:/paper-muncher/output.pdf', *extra_args],
             env=env,
+            extra_environ=extra_environ,
         ) as server:
             return server.serve(documents)  # TODO: ir.config_parameter
 
