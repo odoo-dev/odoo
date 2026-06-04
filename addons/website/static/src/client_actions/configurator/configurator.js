@@ -167,7 +167,7 @@ async function ensurePreviewHeaders(state) {
     state.previewHeadersKey = key;
     state.previewHeadersLoading = true;
     try {
-        const prompt = `For a ${industry} ${type} business with a ${positioning} positioning, return only a JSON array of 6 short homepage hero titles. Each item must be a plain string, with no numbering and no explanation.`;
+        const prompt = `For a ${industry} ${type} business with a ${positioning} positioning, return only a JSON array of 6 short homepage hero titles. Each item must be a plain string of not more than 4 words, with no numbering and no explanation.`;
         const response = await rpc("/html_editor/generate_text", {
             prompt,
             conversation_history: [],
