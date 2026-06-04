@@ -26,8 +26,10 @@ export class CustomerDisplay extends Component {
             if (!el) {
                 return;
             }
-            el.querySelector(".orderline.selected")
-                ?.scrollIntoView({ behavior: "smooth", block: "start" });
+            el.querySelector(".orderline.selected")?.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
         });
     }
 
