@@ -1,6 +1,7 @@
 import { partnerCompareRegistry } from "@mail/core/common/partner_compare";
 import { COMPOSER_TYPES } from "./composer";
 import { cleanTerm } from "@mail/utils/common/format";
+import { compareDatetime } from "@mail/utils/common/misc";
 import { emojiLoader } from "@web/core/emoji_picker/emoji_loader";
 
 import { localeCompare } from "@web/core/l10n/utils";
@@ -154,7 +155,11 @@ export class SuggestionService {
             ) {
                 return 1;
             }
-            return localeCompare(c1.source, c2.source) || c1.id - c2.id;
+            return (
+                compareDatetime(c2.last_used, c1.last_used) ||
+                localeCompare(c1.source, c2.source) ||
+                c1.id - c2.id
+            );
         };
         return {
             type: "mail.canned.response",
