@@ -103,8 +103,17 @@ export function useHover(refNames, { onHover, onAway, stateObserver, onHovering 
     let lastHoveredTarget;
     for (const refName of refNames) {
         if (typeof refName === "function") {
-            // Special case: useChildRef support
-            targets.push({ ref: refName });
+            // Special case: callable refs (useChildRef and Owl 3 signal refs).
+            // Wrap in a `.el`-shaped adapter so the `target.ref.el` reads below
+            // work uniformly; `resolveRefEl` knows how to read each form.
+            const callableRef = refName;
+            targets.push({
+                ref: {
+                    get el() {
+                        return resolveRefEl(callableRef) ?? null;
+                    },
+                },
+            });
             continue;
         }
         targets.push({ ref: useRef(refName) });
