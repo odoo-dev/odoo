@@ -451,6 +451,10 @@ class TestUi(TestPosStockHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'GS1BarcodeScanningTourWithLots', login="pos_user")
 
+    def test_07_pos_barcodes_scan_2(self):
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_pos_tour('BarcodeScanningTour2')
+
 
 class MobileTestUi(TestUi):
     browser_size = '375x667'
