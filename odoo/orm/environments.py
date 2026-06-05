@@ -72,6 +72,7 @@ class Environment(Mapping[str, "BaseModel"]):
             if cr._closing:
                 _logger.error("The cursor is being closed, but starts a new transaction", stack_info=True)
             transaction = cr.transaction = Transaction(Registry(cr.dbname))
+            transaction.registry.__enter__()
             transaction._check_signaling(cr)
 
         else:
@@ -808,6 +809,7 @@ class Transaction:
 
         Note: registry changes are not thread-safe.
         """
+        self.registry._lock_for_update(15)
         self._registry_invalidated += 1
 
     def _reset_registry_change(self):
@@ -911,7 +913,9 @@ class Transaction:
         if self.registry is new_registry:
             self._reset_registry_change()
         else:
+            self.registry.__exit__(None, None, None)
             self.registry = new_registry
+            self.registry.__enter__()
             self._registry_invalidated = 0
         # the registry sequence can change during testing, always copy it
         self._registry_sequence = self.registry.registry_sequence
@@ -1010,6 +1014,7 @@ class Transaction:
         self._recent_envs.clear()
         self._registry_caches__ = None
         self.ormcaches__ = None
+        self.registry.__exit__(None, None, None)
 
     def save_state(self):
         """ Save the current state of the transaction for future restore. """

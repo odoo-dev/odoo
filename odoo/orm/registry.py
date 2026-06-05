@@ -20,6 +20,7 @@ from operator import attrgetter
 import psycopg2.sql
 
 from odoo import sql_db
+from odoo.exceptions import ConcurrencyError
 from odoo.tools import (
     SQL,
     OrderedSet,
@@ -253,6 +254,10 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self.loaded = False
         self.ready = False
 
+        self._used_lock = threading.Condition()
+        self._used_by = defaultdict(int)
+        self._used_excluive = None
+
         self.models: dict[str, type[BaseModel]] = {}    # model name/model instance mapping
         self._sql_constraints = set()  # type: ignore
         self._database_translated_fields: dict[str, str] = {}  # names and translate function names of translated fields in database {"{model}.{field_name}": "translate_func"}
@@ -332,6 +337,51 @@ class Registry(Mapping[str, type["BaseModel"]]):
     def delete_all(cls):
         """ Delete all the registries. """
         cls.registries.clear()
+
+    def __enter__(self):
+        tid = threading.get_ident()
+        with self._used_lock:
+            # Don't allow new entrants if locked exclusively.
+            while (
+                self._used_excluive is not None
+                and self._used_excluive != tid
+            ):
+                self._used_lock.wait()
+
+            self._used_by[tid] += 1
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        tid = threading.get_ident()
+        with self._used_lock:
+            if count := self._used_by[tid] - 1:
+                self._used_by[tid] = count
+            else:
+                if self._used_excluive == tid:
+                    self._used_excluive = None
+                del self._used_by[tid]
+            self._used_lock.notify_all()
+
+    def _lock_for_update(self, timeout: float | None = None):
+        tid = threading.get_ident()
+        assert tid in self._used_by, "Registry not managed"
+        with self._used_lock:
+            # Only one thread may attempt an upgrade.
+            if self._used_excluive is not None:
+                if self._used_excluive != tid:
+                    raise ConcurrencyError("Another thread is already updating the Registry")
+                return  # already locked
+
+            locked = False
+            try:
+                self._used_excluive = tid
+                locked = self._used_lock.wait_for(lambda: len(self._used_by) == 1, timeout=timeout)
+                if not locked:
+                    raise ConcurrencyError("Failed to acquire an exclusive lock on the Registry")
+            finally:
+                if not locked:
+                    self._used_excluive = None
+                    self._used_lock.notify_all()
 
     #
     # Mapping abstract methods implementation
