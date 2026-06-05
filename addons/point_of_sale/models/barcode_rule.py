@@ -13,11 +13,13 @@ class BarcodeRule(models.Model):
         ('price', 'Priced Product'),
         ('discount', 'Discounted Product'),
         ('client', 'Client'),
-        ('cashier', 'Cashier')
+        ('cashier', 'Cashier'),
+        ('order', 'Order'),
     ], ondelete={
         'weight': 'set default',
         'price': 'set default',
         'discount': 'set default',
         'client': 'set default',
         'cashier': 'set default',
+        'order': 'set default',
     })

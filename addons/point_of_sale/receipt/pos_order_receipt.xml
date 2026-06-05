@@ -101,6 +101,17 @@
                     </div>
                     <div name="before-footer" />
                     <t t-call="point_of_sale.pos_order_receipt_footer" />
+                    <div class="w-100">
+                        <table class="w-100 text-center">
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <img class="order-barcode" t-att-src="image['order_barcode']" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </html>
         </template>

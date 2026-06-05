@@ -1,4 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+import base64
 import qrcode
 from io import BytesIO
 from odoo import models, api, _
@@ -112,6 +113,14 @@ class PosOrderReceipt(models.AbstractModel):
         img.save(buffer, format="PNG")
         return image_data_uri(buffer.getvalue())
 
+    def _order_generate_barcode(self, barcode_value):
+        barcode = f"ORD-{str(self.id).zfill(8)}"
+        return image_data_uri(self.env['ir.actions.report'].barcode(
+            barcode_type='Code128',
+            value=barcode,
+            quiet=False,
+        ))
+
     def order_receipt_generate_data(self, basic_receipt=False):
         self.ensure_one()
 
@@ -138,6 +147,7 @@ class PosOrderReceipt(models.AbstractModel):
             'image': {
                 'logo': config_logo,
                 'invoice_qr_code': self._order_receipt_generate_qr_code(qr_code_value) if use_qr_code else False,
+                'order_barcode': self._order_generate_barcode(self.id),
             },
             'conditions': {
                 'basic_receipt': basic_receipt,

@@ -31,6 +31,7 @@ import { OptionalProductPopup } from "@point_of_sale/app/components/popups/optio
 import { useRouterParamsChecker } from "@point_of_sale/app/hooks/pos_router_hook";
 import { debounce } from "@web/core/utils/timing";
 import { useSortable } from "@web/core/utils/sortable_owl";
+import { useOrderBarcode } from "@point_of_sale/app/utils/order_barcode_mixin";
 
 const { DateTime } = luxon;
 
@@ -106,6 +107,7 @@ export class ProductScreen extends Component {
             discount: this._barcodeDiscountAction,
             gs1: this._barcodeGS1Action,
         });
+        useOrderBarcode();
 
         this.numberBuffer.use({
             useWithBarcode: true,

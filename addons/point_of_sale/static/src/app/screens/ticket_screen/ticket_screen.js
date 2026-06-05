@@ -32,6 +32,7 @@ import { ConnectionLostError } from "@web/core/network/rpc";
 import { TipCell } from "@point_of_sale/app/screens/ticket_screen/tip_cell/tip_cell";
 import { ProgressBar } from "@point_of_sale/app/screens/ticket_screen/progress_bar/progress_bar";
 import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
+import { useOrderBarcode } from "@point_of_sale/app/utils/order_barcode_mixin";
 
 const { DateTime } = luxon;
 const NBR_BY_PAGE = 30;
@@ -99,6 +100,10 @@ export class TicketScreen extends Component {
                 this.state.nbrByPage,
             ]
         );
+
+        this.barcodeReader = useService("barcode_reader");
+        this.sound = useService("mail.sound_effects");
+        useOrderBarcode();
 
         onMounted(() => {
             this._timersInterval = setInterval(this.updateOrderTimers.bind(this), 60_000);

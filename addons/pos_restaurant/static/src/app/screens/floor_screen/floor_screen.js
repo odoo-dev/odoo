@@ -8,6 +8,7 @@ import { NumpadDropdown } from "@pos_restaurant/app/components/numpad_dropdown/n
 import { FloorPlan } from "@pos_restaurant/app/screens/floor_screen/floor_plan/floor_plan";
 import { useFloorPlanStore } from "@pos_restaurant/app/hooks/floor_plan_hook";
 import { FloorPlanEditor } from "@pos_restaurant/app/screens/floor_screen/floor_plan_editor/floor_plan_editor";
+import { useOrderBarcode } from "@point_of_sale/app/utils/order_barcode_mixin";
 
 export class FloorScreen extends Component {
     static template = "pos_restaurant.FloorScreen";
@@ -19,6 +20,10 @@ export class FloorScreen extends Component {
         this.pos = usePos();
         this.floorPlanStore = useFloorPlanStore();
         this.ui = useService("ui");
+
+        this.barcodeReader = useService("barcode_reader");
+        this.sound = useService("mail.sound_effects");
+        useOrderBarcode();
 
         useLayoutEffect(
             (isEditMode) => {

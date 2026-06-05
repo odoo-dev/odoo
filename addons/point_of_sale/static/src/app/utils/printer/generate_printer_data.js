@@ -176,6 +176,14 @@ export class GeneratePrinterData {
         return generateQRCodeDataUrl(value);
     }
 
+    generateOrderBarcode(value) {
+        if (!value) {
+            return null;
+        }
+        const barcode = `ORD-${String(value).padStart(8, "0")}`;
+        return `/report/barcode/?barcode_type=Code128&value=${barcode}&width=600&height=100`;
+    }
+
     generateLineData() {
         return this.order.lines.map((line) => {
             const productData = { ...line.product_id.raw };
@@ -227,6 +235,7 @@ export class GeneratePrinterData {
             lines: this.generateLineData(),
             payments: this.generatePaymentData(),
             image: {
+                order_barcode: this.generateOrderBarcode(this.order.id),
                 invoice_qr_code: useQrCode ? this.generateQrCode(url) : false,
                 logo: this.config.receiptLogoUrl,
             },
