@@ -75,6 +75,7 @@
 
         /** @type {OdooModuleLoader["findErrors"]} */
         findErrors(moduleNames) {
+            
             /**
              * @param {Iterable<string>} currentModuleNames
              * @param {Set<string>} visited
