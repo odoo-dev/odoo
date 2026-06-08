@@ -28,8 +28,9 @@ class AccountJournal(models.Model):
     json_activity_data = fields.Text(compute='_get_json_activity_data')
     show_on_dashboard = fields.Boolean(string='Show journal on dashboard', help="Whether this journal should be displayed on the dashboard or not", default=True)
     color = fields.Integer("Color Index", default=0)
-    current_statement_balance = fields.Monetary(compute='_compute_current_statement_balance') # technical field used to avoid computing the value multiple times
-    has_statement_lines = fields.Boolean(compute='_compute_current_statement_balance') # technical field used to avoid computing the value multiple times
+    current_statement_balance = fields.Monetary(compute='_compute_current_statement_balance', store=True) # technical field used to avoid computing the value multiple times
+    has_statement_lines = fields.Boolean(compute='_compute_current_statement_balance', store=True) # technical field used to avoid computing the value multiple times
+    statement_line_ids = fields.One2many(comodel_name='account.bank.statement.line', inverse_name='journal_id')
     entries_count = fields.Integer(compute='_compute_entries_count')
     has_posted_entries = fields.Boolean(compute='_compute_has_entries')
     has_entries = fields.Boolean(compute='_compute_has_entries')
@@ -37,6 +38,7 @@ class AccountJournal(models.Model):
     has_unhashed_entries = fields.Boolean(string='Unhashed Entries', compute='_compute_has_unhashed_entries')
     last_statement_id = fields.Many2one(comodel_name='account.bank.statement', compute='_compute_last_bank_statement')
 
+    @api.depends('statement_line_ids.amount_residual')
     def _compute_current_statement_balance(self):
         query_result = self._get_journal_dashboard_bank_running_balance()
         for journal in self:
