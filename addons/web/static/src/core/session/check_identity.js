@@ -1,8 +1,8 @@
-import { Component, onWillStart, useState } from "@odoo/owl";
+import { Component, EventBus, onWillDestroy, onWillStart, useState } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { rpc, RPCError } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { redirect } from "@web/core/utils/urls";
 import { post } from "@web/core/network/http_service";
 import { session } from "@web/session";
@@ -35,33 +35,18 @@ export class CheckIdentityForm extends Component {
         };
 
         this.checkIdentityService = useService("check_identity");
-
-        if (!this.checkIdentityService.identityCheckPromise) {
-            // The form is mounted directly into an HTTP page (bypassing the dialog service)
-            const { promise, resolve } = Promise.withResolvers();
-            this.checkIdentityService.identityCheckPromise = promise;
-
-            this.checkIdentityService.identityCheckCleanUp = () => {
-                this.close();
-                resolve();
-                this.checkIdentityService.identityCheckPromise = null;
-                this.checkIdentityService.identityCheckCleanUp = null;
-            };
-        }
-
+        this.checkIdentityService.bus.trigger("start");
         this.state = useState({
             error: false,
             authMethod: null,
         });
-
         onWillStart(async () => {
             const data = await this.checkIdentityService.getInitData();
 
             // Attempting to verify the identity of the device using its fingerprint
             if (data.fingerprint_check && (await this.checkIdentityService.updateFingerprint())) {
                 // There is no need to re-authenticate the user explicitly via the form
-                this.checkIdentityService.identityCheckCleanUp();
-                this.checkIdentityService.channel.postMessage("identityChecked");
+                this.checkIdentityService.checkSignaling();
             }
 
             this.user = {
@@ -70,6 +55,11 @@ export class CheckIdentityForm extends Component {
             };
             this.setAuthMethods(data.auth_methods);
         });
+        onWillDestroy(() => {
+            this.checkIdentityService.bus.trigger("stop");
+        });
+
+        useBus(this.checkIdentityService.bus, "identityChecked", () => this.close());
     }
 
     setAuthMethods(authMethods) {
@@ -153,17 +143,21 @@ export class CheckIdentity {
     }
 
     setup(env, services) {
+        this.bus = new EventBus();
+        this.channel = new BroadcastChannel("check_identity");
         this.dialogService = services["dialog"];
+        this.started = false;
         this.fingerprint = null;
 
-        this.identityCheckPromise = null;
-        this.identityCheckCleanUp = null;
-
-        // Multi-tab sync: if another tab verified the identity, clean up locally
-        this.channel = new BroadcastChannel("check_identity");
+        this.bus.addEventListener("start", () => {
+            this.started = true;
+        });
+        this.bus.addEventListener("stop", () => {
+            this.started = false;
+        });
         this.channel.addEventListener("message", (event) => {
-            if (event.data === "identityChecked" && this.identityCheckCleanUp) {
-                this.identityCheckCleanUp();
+            if (event.data === "identityChecked") {
+                this.bus.trigger("identityChecked");
             }
         });
 
@@ -261,24 +255,22 @@ export class CheckIdentity {
         if (result?.mfa) {
             return { success: false, mfa: result.mfa, auth_methods: result.auth_methods };
         }
-        this.identityCheckCleanUp();
+        this.checkSignaling();
+    }
+
+    checkSignaling() {
+        this.bus.trigger("identityChecked");
         this.channel.postMessage("identityChecked");
     }
 
     async checkIdentity() {
-        if (!this.identityCheckPromise) {
-            const { promise, resolve } = Promise.withResolvers();
-            this.identityCheckPromise = promise;
-            const closeDialog = this.dialogService.add(CheckIdentityDialog);
-
-            this.identityCheckCleanUp = () => {
-                closeDialog();
-                resolve();
-                this.identityCheckPromise = null;
-                this.identityCheckCleanUp = null;
-            };
+        if (!this.started) {
+            this.dialogService.add(CheckIdentityDialog);
         }
-        return this.identityCheckPromise;
+        // Mutex
+        await new Promise((resolve) => {
+            this.bus.addEventListener("identityChecked", resolve, { once: true });
+        });
     }
 
     async run() {
