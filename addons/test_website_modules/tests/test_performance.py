@@ -318,8 +318,6 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
         addons = tuple(self.env.registry._init_modules) + (self.env.context.get('install_module'),)
         if 'website_helpdesk' in addons:
             queries['helpdesk_team'] = 1
-        if 'website_sale_subscription' in addons:
-            queries['product_product'] += 1
 
         tax = self.env.ref(f'account.{self.env.company.id}_sale_tax_template', raise_if_not_found=False)
         if tax and tax.name == '15%':

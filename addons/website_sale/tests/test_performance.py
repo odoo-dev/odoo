@@ -87,8 +87,6 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
             if "website_sale_stock" in self.installed_modules:
                 # Out of Stock Ribbon in demo data
                 res["product_ribbon"] += 1
-        if "website_sale_renting" in self.installed_modules:
-            res["product_product"] += 1
         if "website_helpdesk" in self.installed_modules:
             # Additional query used to check whether "Helpdesk" menu should be visible
             res["helpdesk_team"] += 1
@@ -241,9 +239,8 @@ class TestWebsiteSalePerformanceWithPricelist(TestWebsiteSalePerformanceWithPric
         res = super()._get_shop_page_queries()
         res["product_pricelist_item"] += 2
         res["product_category"] += 1
-        if "website_sale_renting" not in self.installed_modules:
-            # FIXME VFE find where this one is coming from
-            res["product_product"] += 1
+        # FIXME VFE find where this one is coming from
+        res["product_product"] += 1
         return res
 
     def test_shop_page_generation(self):
