@@ -300,7 +300,7 @@ class IrModel(models.Model):
                 stored_fields.update(
                     fname
                     for fname, fval in self.env[model.model]._fields.items()
-                    if fval.inherited and fval.base_field.store
+                    if fval.inherited and fval.get_base_field(self.pool).store
                 )
 
             order_fields = RE_ORDER_FIELDS.findall(model.order)

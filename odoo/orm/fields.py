@@ -274,7 +274,6 @@ class Field[T]:
     _toplevel: bool = False             # whether self is on the model's registry class
 
     inherited: bool = False             # whether the field is inherited (_inherits)
-    inherited_field: Field | None = None  # the corresponding inherited field
 
     name: str = ''                      # name of the field
     model_name: str = ''                # name of the model of this field
@@ -305,7 +304,6 @@ class Field[T]:
     groups: str | None = None           # csv list of group xml ids
     change_default = False              # whether the field may trigger a "user-onchange"
 
-    related_field: Field | None = None  # corresponding related field
     aggregator: str | None = None       # operator for aggregating values
     group_expand: str | Callable[[BaseModel, ModelType, DomainType], ModelType] | None = None  # name of method to expand groups in formatted_read_group()
     falsy_value_label: str | None = None  # value to display when the field is not set (webclient attr)
@@ -648,8 +646,6 @@ class Field[T]:
         if self.type != field.type:
             raise TypeError("Type of related field %s is inconsistent with %s" % (self, field))
 
-        self.related_field = field
-
         # if field's setup is invalidated, then self's setup must be invalidated, too
         model.pool.field_setup_dependents.add(field, self)
 
@@ -692,7 +688,6 @@ class Field[T]:
 
         # special cases of inherited fields
         if self.inherited:
-            self.inherited_field = field
             if field.required:
                 self.required = True
             # add modules from delegate and target fields; the first one ensures
@@ -743,8 +738,9 @@ class Field[T]:
                     document_model=records._name,
                 ))
         # assign final values to records
+        related_field = self.get_related_field(records.pool)
         for record, value in zip(records, values):
-            record[self.name] = self._process_related(value[self.related_field.name], record.env)
+            record[self.name] = self._process_related(value[related_field.name], record.env)
 
     def _compute_sql_related(self, model, table: TableSQL) -> SQL:
         # traverse_related
@@ -774,7 +770,7 @@ class Field[T]:
         # store record values, otherwise they may be lost by cache invalidation!
         record_value = {record: record[self.name] for record in records}
         path = self.related.split('.')[:-1]
-        field = self.related_field
+        field = self.get_related_field(records.pool)
         for record in records:
             target = record
             for name in path:
@@ -823,6 +819,28 @@ class Field[T]:
                 domain |= Domain(field.name, '=', False)
         return domain
 
+    def get_related_field(self, registry: Registry) -> Field:
+        """Return the target field of a related field."""
+        if not self.related:
+            return None
+
+        field = self
+        model_name = self.model_name
+        for name in self.related.split('.'):
+            assert field is registry.models[field.model_name]._fields[field.name]
+            field = registry.models[model_name]._fields.get(name)
+            if field is None:
+                raise KeyError(
+                    f"Field {name} referenced in related field definition {self} does not exist."
+                )
+            model_name = field.comodel_name
+        assert field is registry.models[field.model_name]._fields[field.name]
+        return field
+
+    def get_inherited_field(self, registry: Registry) -> Field | None:
+        """Return the inherited target field, if any."""
+        return self.get_related_field(registry) if self.inherited else None
+
     # properties used by setup_related() to copy values from related field
     _related_comodel_name = property(attrgetter('comodel_name'))
     _related_string = property(attrgetter('string'))
@@ -840,10 +858,14 @@ class Field[T]:
         assert self._column_type
         return SQL(self._column_type[1])
 
-    @property
-    def base_field(self) -> Self:
-        """ Return the base field of an inherited field, or ``self``. """
-        return self.inherited_field.base_field if self.inherited_field else self
+    def get_base_field(self, registry: Registry) -> Field:
+        """Return the base field of an inherited field, or ``self``."""
+        field = self
+        assert field is registry.models[field.model_name]._fields[field.name]
+        while field.inherited:
+            field = field.get_related_field(registry)
+        assert field is registry.models[field.model_name]._fields[field.name]
+        return field
 
     #
     # Company-dependent fields
@@ -967,7 +989,8 @@ class Field[T]:
     def _description_sortable(self, env: Environment):
         if self.column_type and (self.store or self.compute_sql):  # shortcut
             return True
-        if self.inherited_field and self.inherited_field._description_sortable(env):
+        inherited_field = self.get_inherited_field(env.registry)
+        if inherited_field and inherited_field._description_sortable(env):
             # avoid compuation for inherited field
             return True
 
@@ -982,7 +1005,8 @@ class Field[T]:
     def _description_groupable(self, env: Environment):
         if self.column_type and (self.store or self.compute_sql):  # shortcut
             return True
-        if self.inherited_field and self.inherited_field._description_groupable(env):
+        inherited_field = self.get_inherited_field(env.registry)
+        if inherited_field and inherited_field._description_groupable(env):
             # avoid compuation for inherited field
             return True
         from .models import BaseModel  # noqa: PLC0415
@@ -1001,9 +1025,10 @@ class Field[T]:
     def _description_aggregator(self, env: Environment):
         if not self.aggregator or (self.column_type and (self.store or self.compute_sql)):  # shortcut
             return self.aggregator
-        if self.inherited_field and self.inherited_field._description_aggregator(env):
+        inherited_field = self.get_inherited_field(env.registry)
+        if inherited_field and inherited_field._description_aggregator(env):
             # avoid compuation for inherited field
-            return self.inherited_field.aggregator
+            return inherited_field.aggregator
         from .models import BaseModel  # noqa: PLC0415
         if env.registry[self.model_name]._read_group_select is BaseModel._read_group_select:
             # the default implementation does not handle additional fields
@@ -1019,14 +1044,14 @@ class Field[T]:
 
     def _description_string(self, env: Environment) -> str:
         if self.string and env.lang:
-            model_name = self.base_field.model_name
+            model_name = self.get_base_field(env.registry).model_name
             field_string = env['ir.model.fields'].get_field_string(model_name)
             return field_string.get(self.name) or self.string
         return self.string
 
     def _description_help(self, env: Environment):
         if self.help and env.lang:
-            model_name = self.base_field.model_name
+            model_name = self.get_base_field(env.registry).model_name
             field_help = env['ir.model.fields'].get_field_help(model_name)
             return field_help.get(self.name) or self.help
         return self.help
@@ -1173,13 +1198,14 @@ class Field[T]:
         self.update_db_column(model, column)
         self.update_db_notnull(model, column)
 
+        related_field = self.get_related_field(model.pool) if self.related else None
         # optimization for computing simple related fields like 'foo_id.bar'
         if (
             not column
             and self.related and self.related.count('.') == 1
-            and self.related_field.store and not self.related_field.compute
-            and not (self.related_field.type == 'binary' and self.related_field.attachment)
-            and self.related_field.type not in ('one2many', 'many2many')
+            and related_field.store and not related_field.compute
+            and not (related_field.type == 'binary' and related_field.attachment)
+            and related_field.type not in ('one2many', 'many2many')
         ):
             join_field = model._fields[self.related.split('.')[0]]
             if (
@@ -1251,7 +1277,8 @@ class Field[T]:
 
     def update_db_related(self, model: BaseModel) -> None:
         """ Compute a stored related field directly in SQL. """
-        comodel = model.env[self.related_field.model_name]
+        related_field = self.get_related_field(model.pool)
+        comodel = model.env[related_field.model_name]
         join_field, comodel_field = self.related.split('.')
         model.env.cr.execute(SQL(
             """ UPDATE %(model_table)s AS x

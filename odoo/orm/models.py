@@ -1348,7 +1348,7 @@ class BaseModel(metaclass=MetaModel):
 
             # 5. delegate to parent model
             if field.inherited and self.has_field_access(field, 'write'):
-                field = field.related_field
+                field = field.get_related_field(self.pool)
                 parent_fields[field.model_name].append(field.name)
 
         # convert default values to the right format
@@ -1616,7 +1616,7 @@ class BaseModel(metaclass=MetaModel):
             # check whether the field is inherited from one of avoid_models
             if avoid_models:
                 while field.inherited:
-                    field = field.related_field
+                    field = field.get_related_field(self.pool)
                     if field.model_name in avoid_models:
                         return True
             return False
@@ -4063,7 +4063,7 @@ class BaseModel(metaclass=MetaModel):
                 if field.store:
                     stored[key] = val
                 if field.inherited:
-                    inherited[field.related_field.model_name][key] = val
+                    inherited[field.get_related_field(self.pool).model_name][key] = val
                 elif field.inverse and field not in precomputed:
                     inversed[key] = val
                     determine_inverses[field.inverse].add(field)
@@ -6434,7 +6434,7 @@ class BaseModel(metaclass=MetaModel):
         """
         return (field.name in self._onchange_methods) or any(
             dep in other_fields
-            for dep in self.pool.get_dependent_fields(field.base_field)
+            for dep in self.pool.get_dependent_fields(field.get_base_field(self.pool))
         )
 
     def _apply_onchange_methods(self, field_name: str, result: dict) -> None:

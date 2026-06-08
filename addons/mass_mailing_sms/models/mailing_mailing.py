@@ -376,7 +376,7 @@ class MailingMailing(models.Model):
         result = super()._get_ab_testing_winner_selection()
         if self.mailing_type == 'sms':
             ab_testing_winner_selection_description = dict(
-                self._fields.get('ab_testing_sms_winner_selection').related_field.selection
+                self._fields.get('ab_testing_sms_winner_selection').get_related_field(self.pool).selection
             ).get(self.ab_testing_sms_winner_selection)
             result.update({
                 'value': self.campaign_id.ab_testing_sms_winner_selection,

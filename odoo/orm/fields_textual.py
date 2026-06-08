@@ -308,7 +308,7 @@ class BaseString(Field[str | typing.Literal[False]]):
             for record in records
         }
         path = self.related.split('.')[:-1]
-        field = self.related_field
+        field = self.get_related_field(records.pool)
         for record in records:
             target = record
             for name in path:
@@ -555,7 +555,7 @@ class Char(BaseString):
             and self.compute
             and not self.store
             and model._rec_name
-            and model._fields[model._rec_name].base_field.translate
+            and model._fields[model._rec_name].get_base_field(model.pool).translate
             and 'lang' not in depends_context
         ):
             depends_context = [*depends_context, 'lang']

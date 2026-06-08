@@ -361,7 +361,7 @@ class HrEmployee(models.Model):
             version_vals = {}
             for fname, value in vals.items():
                 employee_field = self._fields.get(fname)
-                if not (employee_field and employee_field.inherited and employee_field.related_field.model_name == 'hr.version'):
+                if not (employee_field and employee_field.inherited and employee_field.get_related_field(self.pool).model_name == 'hr.version'):
                     employee_vals[fname] = value
                 else:
                     version_vals[fname] = value
@@ -1370,8 +1370,8 @@ class HrEmployee(models.Model):
         for field_name in field_names:
             public_field = self.env['hr.employee.public']._fields[field_name]
             private_field = self.env['hr.employee']._fields[field_name]
-            if (public_field.related and public_field.related_field.model_name == 'hr.employee'
-                    or private_field.inherited and private_field.inherited_field.model_name == 'hr.version'):
+            if (public_field.related and public_field.get_related_field(self.pool).model_name == 'hr.employee'
+                    or private_field.inherited and private_field.get_inherited_field(self.pool).model_name == 'hr.version'):
                 public.mapped(field_name)
         self._copy_cache_from(public, field_names)
 

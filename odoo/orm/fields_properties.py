@@ -111,8 +111,9 @@ class Properties(Field):
 
     def setup_related(self, model):
         super().setup_related(model)
-        if self.inherited_field and not self.definition:
-            self.definition = self.inherited_field.definition
+        inherited_field = self.get_inherited_field(model.pool)
+        if inherited_field and not self.definition:
+            self.definition = inherited_field.definition
             self._setup_definition_attrs(model)
 
     # Database/cache format: a value is either None, or a dict mapping property

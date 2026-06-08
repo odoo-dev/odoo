@@ -42,9 +42,9 @@ class MailMail(models.Model):
     def default_get(self, fields):
         # protection for `default_type` values leaking from menu action context (e.g. for invoices)
         # To remove when automatic context propagation is removed in web client
-        if self.env.context.get('default_type') not in self._fields['message_type'].base_field.selection:
+        if self.env.context.get('default_type') not in self._fields['message_type'].get_base_field(self.pool).selection:
             self = self.with_context(dict(self.env.context, default_type=None))  # noqa: PLW0642
-        if self.env.context.get('default_state') not in self._fields['state'].base_field.selection:
+        if self.env.context.get('default_state') not in self._fields['state'].get_base_field(self.pool).selection:
             self = self.with_context(dict(self.env.context, default_state='outgoing'))  # noqa: PLW0642
         return super().default_get(fields)
 

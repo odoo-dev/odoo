@@ -1784,7 +1784,7 @@ class Many2many(_RelationalMulti):
                 table = traverse.id._table
                 if self.compute_sudo:
                     table = table._with_model(table._model.with_env(env))
-                return self.related_field.join(table, kind=kind, only_ids=only_ids)
+                return self.get_related_field(table._model.pool).join(table, kind=kind, only_ids=only_ids)
             raise ValueError(f"Cannot join a non-stored many2many field: {self!r}")
 
         model = table._model

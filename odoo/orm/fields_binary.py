@@ -77,7 +77,7 @@ class Binary(Field[BinaryValue]):
             return BinaryBytes(decoded_value)
         # Error needed because we used to write base64 encoded data and we
         # cannot distinguish whether bytes are encoded or not in base64.
-        if isinstance(value, bytes) and (self.related_field or self).name == 'raw':
+        if isinstance(value, bytes) and (self.get_related_field(record.pool) if self.related else self).name == 'raw':
             # Exception for the raw field, we know bytes are raw.
             return BinaryBytes(value)
         raise TypeError(f'{self}: use BinaryValue instead of {value.__class__.__name__}')
@@ -277,9 +277,10 @@ class Image(Binary):
         if self.readonly and (
             (not self.max_width and not self.max_height)
             or (
-                isinstance(self.related_field, Image)
-                and self.max_width == self.related_field.max_width
-                and self.max_height == self.related_field.max_height
+                self.related
+                and isinstance((related_field := self.get_related_field(env.registry)), Image)
+                and self.max_width == related_field.max_width
+                and self.max_height == related_field.max_height
             )
         ):
             # no need to process images for computed fields, or related fields

@@ -704,7 +704,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                     dependencies = list(field.resolve_depends(self))
                 except Exception:
                     # dependencies of custom fields may not exist; ignore that case
-                    if not field.base_field.manual:
+                    if not field.get_base_field(self).manual:
                         raise
                 else:
                     for dependency in dependencies:

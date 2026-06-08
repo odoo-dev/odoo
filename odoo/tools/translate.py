@@ -1674,8 +1674,9 @@ class TranslationRecordReader(TranslationReader):
             inherited_fields = defaultdict(list)
             for field_name in field_names:
                 field = records._fields[field_name]
-                if field.translate and not field.store and field.inherited_field:
-                    inherited_fields[field.inherited_field.model_name].append(field_name)
+                inherited_field = field.get_inherited_field(records.pool)
+                if field.translate and not field.store and inherited_field:
+                    inherited_fields[inherited_field.model_name].append(field_name)
             for parent_mname, parent_fname in records._inherits.items():
                 if parent_mname in inherited_fields:
                     self._export_translatable_records(records[parent_fname], inherited_fields[parent_mname])

@@ -519,7 +519,6 @@ def _add_inherited_fields(model_cls: type[BaseModel]):
             field_cls = type(field)
             add_field(model_cls, name, field_cls(
                 inherited=True,
-                inherited_field=field,
                 related=f"{parent_fname}.{name}",
                 related_sudo=False,
                 copy=field.copy,
@@ -537,7 +536,7 @@ def _setup_fields(model_cls: type[BaseModel], env: Environment):
         try:
             field.setup(model)
         except Exception:
-            if field.base_field.manual:
+            if field.get_base_field(model_cls.pool).manual:
                 # Something goes wrong when setup a manual field.
                 # This can happen with related fields using another manual many2one field
                 # that hasn't been loaded because the comodel does not exist yet.

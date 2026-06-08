@@ -942,7 +942,7 @@ class MailingMailing(models.Model):
 
     def _get_ab_testing_winner_selection(self):
         ab_testing_winner_selection_description = dict(
-            self._fields.get('ab_testing_winner_selection').related_field.selection
+            self._fields.get('ab_testing_winner_selection').get_related_field(self.pool).selection
         ).get(self.ab_testing_winner_selection)
         return {
             'value': self.ab_testing_winner_selection,

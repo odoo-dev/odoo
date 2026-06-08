@@ -80,7 +80,7 @@ class Selection(Field[str | typing.Literal[False]]):
     def setup_related(self, model):
         super().setup_related(model)
         # selection must be computed on related field
-        field = self.related_field
+        field = self.get_related_field(model.pool)
         self.selection = lambda model: field._description_selection(model.env)
         self._selection = None
 

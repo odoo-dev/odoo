@@ -353,8 +353,9 @@ class Many2manyModelWrapper:
         self._rec_name = None
         self._rec_names_search = []
         # if the field is inherited, the column attributes are defined on the base_field
-        column1 = field.column1 or field.base_field.column1
-        column2 = field.column2 or field.base_field.column2
+        base_field = field.get_base_field(env.registry)
+        column1 = field.column1 or base_field.column1
+        column2 = field.column2 or base_field.column2
         # column1 refers to the model, while column2 refers to the comodel
         self._fields = {
             field.column1: Many2oneFieldWrapper(self, column1, field.model_name),

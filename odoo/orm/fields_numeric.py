@@ -238,7 +238,8 @@ class Monetary(Field[float]):
     def setup_related(self, model):
         super().setup_related(model)
         if self.inherited:
-            self.currency_field = self.related_field.get_currency_field(model.env[self.related_field.model_name])
+            related_field = self.get_related_field(model.pool)
+            self.currency_field = related_field.get_currency_field(model.env[related_field.model_name])
         assert self.get_currency_field(model) in model._fields, \
             "Field %s with unknown currency_field %r" % (self, self.get_currency_field(model))
 

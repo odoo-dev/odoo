@@ -224,7 +224,7 @@ class TestIndex(TransactionCase):
             for field in model._fields.values():
                 if field.type == 'one2many' and field.inverse_name:
                     comodel = self.registry[field.comodel_name]
-                    inverse_field = comodel._fields[field.inverse_name].base_field
+                    inverse_field = comodel._fields[field.inverse_name].get_base_field(self.registry)
                     if not self.should_ignore(inverse_field):
                         fields_to_index.add(f"{inverse_field} (inverse of {field})")
         if fields_to_index:
@@ -255,7 +255,7 @@ class TestIndex(TransactionCase):
             model_name = field.model_name
 
             for segment_name in field.related.split('.'):
-                segment_field = self.registry[model_name]._fields[segment_name].base_field
+                segment_field = self.registry[model_name]._fields[segment_name].get_base_field(self.registry)
 
                 if segment_field in visited:
                     continue

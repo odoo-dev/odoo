@@ -540,7 +540,7 @@ class TestMarketingCardSecurity(MarketingCardCommon):
         # reconsidered for security reasons.
         self.assertTrue(
             all(
-                field.related_field.model_name == 'card.template'
+                field.get_related_field(CardCampaign.pool).model_name == 'card.template'
                 and not field.store
                 and not field.readonly
                 for field in CardCampaign._fields.values() if hasattr(field, 'render_engine')
