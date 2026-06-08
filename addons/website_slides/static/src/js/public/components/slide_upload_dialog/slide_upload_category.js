@@ -1,4 +1,4 @@
-import { Component, onMounted, onWillStart, proxy } from "@odoo/owl";
+import { Component, Portal, onMounted, onWillStart, proxy } from "@odoo/owl";
 import { getDataURLFromFile } from "@web/core/utils/urls";
 import { rpc } from "@web/core/network/rpc";
 import { uniqueId } from "@web/core/utils/functions";
@@ -8,7 +8,7 @@ import { _t } from "@web/core/l10n/translation";
 import { SlideUploadSourceTypes } from "./slide_upload_source_types";
 
 export class SlideUploadCategory extends Component {
-    static components = { DropdownItem, SelectMenu, SlideUploadSourceTypes };
+    static components = { DropdownItem, SelectMenu, SlideUploadSourceTypes, Portal };
     static props = {
         alertMsg: { type: String, optional: true },
         channelId: Number,
