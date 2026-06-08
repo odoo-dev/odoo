@@ -628,7 +628,11 @@ class Html(BaseString):
         # `elif` intended, because HTML fields with translate=True and sanitize=False
         # where not using `html_translate` before and they must remain without `html_translate`.
         # Otherwise, breaks `--test-tags .test_render_field`, for instance.
-        elif attrs.get('translate') is True and attrs.get('sanitize', True):
+        elif attrs.get('translate') is True and attrs.get('render_engine', False):
+            # HTML fields should hold HTML that can be specific to each language (ie translate=True).
+            # If render_engine is passed we expect to have some sort of templating language instead
+            # only translatable with a method that breaks down the html in translatable blocks.
+            # In other cases, the translate function should be explicitly passed to the field
             attrs['translate'] = html_translate
         return attrs
 
