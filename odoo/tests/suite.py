@@ -19,6 +19,7 @@ import sys
 import warnings
 
 import odoo.modules
+from odoo.orm.models_cached import CachedModel
 from . import case
 from .common import HttpCase
 from .result import stats_logger
@@ -225,3 +226,17 @@ class OdooSuite(TestSuite):
 
     def has_http_case(self):
         return self.countTestCases() and any(isinstance(test_case, HttpCase) for test_case in self)
+
+    def warmup_suite(self, env):
+        if self.has_http_case():
+            env['ir.qweb']._pregenerate_assets_bundles()
+            env.cr.commit()
+        # warm up caches
+        for model in env.values():
+            env['ir.model']._get_id(model._name)
+            env['ir.model.fields']._get_ids(model._name)
+            if isinstance(model, CachedModel):
+                model.get_all()
+        env['ir.model.access']._get_all_access_groups()
+        env['ir.rule']._get_all_rules()
+        env['res.currency'].get_all_currencies()

@@ -1524,11 +1524,10 @@ def preload_registries(dbnames):
                     _logger.info("Starting post tests")
                     tests_before = registry._assertion_report.testsRun
                     post_install_suite = loader.make_suite(module_names, 'post_install')
-                    if post_install_suite.has_http_case():
-                        with registry.cursor() as cr:
-                            env = api.Environment(cr, api.SUPERUSER_ID, {})
-                            env.registry._assertion_report = registry._assertion_report
-                            env['ir.qweb']._pregenerate_assets_bundles()
+                    with registry.cursor() as cr:
+                        env = api.Environment(cr, api.SUPERUSER_ID, {})
+                        post_install_suite.warmup_suite(env)
+                        env.registry._assertion_report = registry._assertion_report
                     result = loader.run_suite(post_install_suite, global_report=registry._assertion_report)
                     registry._assertion_report.update(result)
                     _logger.info("%d post-tests in %.2fs, %s queries",
