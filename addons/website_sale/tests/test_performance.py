@@ -136,8 +136,6 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
         if "website_helpdesk" in self.installed_modules:
             # Additional query used to check whether "Helpdesk" menu should be visible
             res["helpdesk_team"] += 1
-        if "website_sale_collect" in self.installed_modules:
-            res["delivery_carrier"] += 1
         return res
 
     def test_product_page_generation(self):
@@ -154,8 +152,6 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
         if self._has_demo_data():
             no_product_change_query_count += 1
         if "website_sale_stock" in self.installed_modules:
-            no_product_change_query_count += 1
-        if "website_sale_collect" in self.installed_modules:
             no_product_change_query_count += 1
         with self.assertQueryCount(no_product_change_query_count):
             res = self.make_jsonrpc_request(
@@ -175,8 +171,6 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
         if self._has_demo_data():
             product_change_query_count += 1
         if "website_sale_stock" in self.installed_modules:
-            product_change_query_count += 1
-        if "website_sale_collect" in self.installed_modules:
             product_change_query_count += 1
         with self.assertQueryCount(product_change_query_count):
             res = self.make_jsonrpc_request(
