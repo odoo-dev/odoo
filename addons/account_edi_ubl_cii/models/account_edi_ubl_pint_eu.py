@@ -5,7 +5,7 @@ from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EUROPEAN_E
 
 class AccountEdiUBLPintEU(models.AbstractModel):
     _name = "account.edi.ubl_pint_eu"
-    _inherit = 'account.edi.ubl_pint'
+    _inherit = ['account.edi.ubl_pint', 'account.edi.ubl_cen_en16931']
     _description = "UBL PINT-EU Layer"
 
     def _ubl_add_customization_id_node(self, vals):
@@ -125,7 +125,10 @@ class AccountEdiUBLPintEU(models.AbstractModel):
         if (
             self._is_document(vals, 'credit_note')
             and document_node['cac:AccountingSupplierParty']['cac:Party']['cac:PostalAddress']['cac:Country']['cbc:IdentificationCode']['_text'] == 'NL'
-            and dict_to_xml(document_node['cac:BillingReference']['cac:InvoiceDocumentReference']['cbc:ID'], nsmap=nsmap, tag='cbc:ID') is None
+            and all(
+                dict_to_xml(bill_ref_node['cac:InvoiceDocumentReference']['cbc:ID'], nsmap=nsmap, tag='cbc:ID') is None
+                for bill_ref_node in document_node['cac:BillingReference']
+            )
         ):
             # [NL-R-001] For suppliers in the Netherlands, if the document is a creditnote, the document MUST contain
             # an invoice reference.
