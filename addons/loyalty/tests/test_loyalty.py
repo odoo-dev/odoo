@@ -231,3 +231,26 @@ class TestLoyalty(TransactionCase):
             "Free Product - [Test Product, Test Product 2]",
             "Reward description for reward with tag should be 'Free Product - [Test Product, Test Product 2]'"
         )
+
+    def test_loyalty_program_copy_with_discount_code(self):
+        program = self.env['loyalty.program'].create({
+                'name': 'FREE FOR ONE',
+                'program_type': 'promo_code',
+                'limit_usage': True,
+                'max_usage': 1,
+                'rule_ids': [Command.create({
+                    'minimum_qty': 0,
+                    'code': 'TEST_CODE',
+                })],
+                'reward_ids': [Command.create({
+                    'reward_type': 'discount',
+                    'discount_mode': 'percent',
+                    'discount_applicability': 'order',
+                    'discount': 100.0,
+                })]
+            })
+
+        copied_program = program.copy()
+
+        self.assertTrue(copied_program.rule_ids)
+        self.assertEqual(copied_program.rule_ids[0].code, "TEST_CODE(copy)")
