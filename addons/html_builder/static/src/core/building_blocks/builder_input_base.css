@@ -1,5 +1,5 @@
 .o_hb_input_base {
-    border: var(--o-we-sidebar-content-field-border-width) solid var(--o-we-sidebar-content-field-border-color);
+    border: var(--o-we-sidebar-content-field-border-width) solid var(--o-hb-input-border, var(--o-we-sidebar-content-field-border-color));
     border-radius: var(--o-we-sidebar-content-field-border-radius);
     background-color: var(--o-hb-field-input-bg, var(--o-we-sidebar-content-field-input-bg));
     padding: 0.15rem var(--o-we-sidebar-content-field-clickable-spacing);
