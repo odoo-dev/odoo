@@ -113,8 +113,8 @@ test("should show the current highlight as active when opening the picker", asyn
     await expandToolbar();
     await contains(".o-we-toolbar .o_hb_select_highlight").click();
     await contains("#highlightPicker").click();
-    expect(".o_popover .border-primary .o_text_highlight").toHaveCount(1);
-    expect(".o_popover .border-primary .o_text_highlight").toHaveClass(
+    expect(".o_popover .btn.active .o_text_highlight").toHaveCount(1);
+    expect(".o_popover .btn.active .o_text_highlight").toHaveClass(
         "o_text_highlight_freehand_2"
     );
 });
