@@ -270,7 +270,6 @@ class Field[T]:
     _sequence: int                      # absolute ordering of the field
     _base_fields__: tuple[Self, ...] = ()  # the fields defining self, in override order
     _extra_keys__: tuple[str, ...] = ()  # unknown attributes set on the field
-    _direct: bool = False               # whether self may be used directly (shared)
     _toplevel: bool = False             # whether self is on the model's registry class
 
     inherited: bool = False             # whether the field is inherited (_inherits)
@@ -397,7 +396,7 @@ class Field[T]:
         assert '_models' not in globals() or isinstance(owner, _models.MetaModel)
         if self._setup_done:
             assert getattr(owner, 'pool', None) is not None
-            assert not self._toplevel and self._direct
+            assert not self._toplevel
             assert self.name in ('id', 'display_name') or self._module is not None
             assert owner._name == self.model_name
             assert name == self.name
@@ -409,16 +408,13 @@ class Field[T]:
             self._module = owner._module
             owner._field_definitions.append(self)
 
-        if not self._args__.get('related'):
-            self._direct = True
-        if self._direct or self._toplevel:
-            self._setup_attrs__(owner, name)
-            if self._toplevel:
-                # free memory from stuff that is no longer useful
-                self.__dict__.pop('_args__', None)
-                if not self.related:
-                    # keep _base_fields__ on related fields for incremental model setup
-                    self.__dict__.pop('_base_fields__', None)
+        self._setup_attrs__(owner, name)
+        if self._toplevel:
+            # free memory from stuff that is no longer useful
+            self.__dict__.pop('_args__', None)
+            if not self.related:
+                # keep _base_fields__ on related fields for incremental model setup
+                self.__dict__.pop('_base_fields__', None)
 
     #
     # Setup field parameter attributes

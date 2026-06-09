@@ -418,7 +418,7 @@ def _setup(model_cls: type[BaseModel], env: Environment):
                     # patch the field definition by adding an override
                     _logger.debug("Patching %s.%s with company_dependent=True", model_cls._name, name)
                     fields_.append(type(fields_[0])(company_dependent=True))
-        if len(fields_) == 1 and fields_[0]._direct:
+        if len(fields_) == 1:
             original_field_ = field_ = fields_[0]
             if field_.model_name == model_cls._name:
                 model_cls._fields__[name] = field_
