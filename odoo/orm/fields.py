@@ -397,7 +397,7 @@ class Field[T]:
         if self._setup_done:
             assert getattr(owner, 'pool', None) is not None
             assert not self._toplevel
-            assert self.name in ('id', 'display_name') or self._module is not None
+            assert self.name in ('id', 'display_name') or self._module is not None or self.inherited
             assert owner._name == self.model_name
             assert name == self.name
             return

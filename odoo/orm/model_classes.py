@@ -418,21 +418,18 @@ def _setup(model_cls: type[BaseModel], env: Environment):
                     # patch the field definition by adding an override
                     _logger.debug("Patching %s.%s with company_dependent=True", model_cls._name, name)
                     fields_.append(type(fields_[0])(company_dependent=True))
-        if len(fields_) == 1:
-            original_field_ = field_ = fields_[0]
-            if field_.model_name == model_cls._name:
-                model_cls._fields__[name] = field_
-            else:
-                if not hasattr(field_, '_inherit_fields__'):
-                    original_field_._inherit_fields__ = weakref.WeakValueDictionary()
-                if (field_ := original_field_._inherit_fields__.get(model_cls._name)) is None:
-                    Field = type(fields_[-1])
-                    field_ = Field(_base_fields__=tuple(fields_))
-                    original_field_._inherit_fields__[model_cls._name] = field_
-                add_field(model_cls, name, field_, toplevel=False)
+        original_field_ = field_ = fields_[-1]
+        other_base_fields_ids = tuple(id(field) for field in fields_[:-1])
+        if not other_base_fields_ids and field_.model_name == model_cls._name:
+            model_cls._fields__[name] = field_
         else:
-            Field = type(fields_[-1])
-            add_field(model_cls, name, Field(_base_fields__=tuple(fields_)))
+            if not hasattr(field_, '_cached_fields__'):
+                original_field_._cached_fields__ = weakref.WeakValueDictionary()
+            if (field_ := original_field_._cached_fields__.get((model_cls._name, other_base_fields_ids))) is None:
+                Field = type(fields_[-1])
+                field_ = Field(_base_fields__=tuple(fields_))
+                original_field_._cached_fields__[(model_cls._name, other_base_fields_ids)] = field_
+            add_field(model_cls, name, field_, toplevel=False)
 
     # 2. add manual fields
     if model_cls.pool._init_modules:
@@ -516,15 +513,20 @@ def _add_inherited_fields(model_cls: type[BaseModel]):
             # following specific properties:
             #  - reading inherited fields should not bypass access rights
             #  - copy inherited fields iff their original field is copied
-            field_cls = type(field)
-            add_field(model_cls, name, field_cls(
-                inherited=True,
-                related=f"{parent_fname}.{name}",
-                related_sudo=False,
-                copy=field.copy,
-                readonly=field.readonly,
-                export_string_translation=field.export_string_translation,
-            ))
+            if not hasattr(field, '_cached_fields__'):
+                field._cached_fields__ = weakref.WeakValueDictionary()
+            related = f"{parent_fname}.{name}"
+            if (field_ := field._cached_fields__.get((model_cls._name, related))) is None:
+                field_ = type(field)(
+                    inherited=True,
+                    related=related,
+                    related_sudo=False,
+                    copy=field.copy,
+                    readonly=field.readonly,
+                    export_string_translation=field.export_string_translation,
+                )
+                field._cached_fields__[(model_cls._name, related)] = field_
+            add_field(model_cls, name, field_, toplevel=False)
 
 
 def _setup_fields(model_cls: type[BaseModel], env: Environment):
