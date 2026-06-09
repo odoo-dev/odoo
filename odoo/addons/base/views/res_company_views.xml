@@ -15,7 +15,7 @@
                                 icon="fa-sitemap"
                                 string="Branches"/>
                     </div>
-                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <widget name="web_ribbon" data-tooltip="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <div class="d-flex flex-column flex-md-row align-items-center gap-3">
                         <field name="logo" widget="contact_image" class="oe_avatar text-start float-none" nolabel="1" options="{'size': [100,100], 'img_class': 'rounded-4'}"/>
                         <div class="oe_title w-100">
@@ -84,11 +84,11 @@
                             <main>
                                 <field class="h5" name="name"/>
                                 <div t-if="record.email.value" class="text-truncate">
-                                    <i class="fa fa-fw me-1 fa-envelope" title="Email"/>
+                                    <i class="fa fa-fw me-1 fa-envelope" data-tooltip="Email"/>
                                     <field name="email"/>
                                 </div>
                                 <div t-if="record.phone.value" class="text-truncate">
-                                    <i class="fa fa-fw me-1 fa-phone" title="Phone"/>
+                                    <i class="fa fa-fw me-1 fa-phone" data-tooltip="Phone"/>
                                     <field name="phone"/>
                                 </div>
                             </main>

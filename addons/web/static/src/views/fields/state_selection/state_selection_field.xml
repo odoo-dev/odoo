@@ -11,7 +11,7 @@
         <t t-else="">
             <Dropdown menuClass="'state_selection_field_menu'">
                 <button class="btn btn-link d-flex p-0" data-available-offline="">
-                    <div class="d-flex align-items-center" t-att-title="this.props.showLabel ? '' : this.label">
+                    <div class="d-flex align-items-center" t-att-data-tooltip="this.props.showLabel ? '' : this.label">
                         <span t-attf-class="o_status {{ this.statusColor(this.currentValue) }} "/>
                         <span t-if="this.props.showLabel" class="o_status_label ms-1" t-out="this.label"/>
                     </div>

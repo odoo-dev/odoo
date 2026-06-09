@@ -16,7 +16,7 @@
                             domain="this.props.domain"
                             icon="button.icon"
                             string="button.string"
-                            title="button.title"
+                            data-tooltip="button.title"
                             attrs="button.attrs"
                         />
                     </t>
@@ -35,7 +35,7 @@
                                     domain="this.props.domain"
                                     icon="button.icon"
                                     string="button.string"
-                                    title="button.title"
+                                    data-tooltip="button.title"
                                     attrs="button.attrs"
                                 />
                             </t>
@@ -59,7 +59,7 @@
                                     domain="this.props.domain"
                                     icon="button.icon"
                                     string="button.string"
-                                    title="button.title"
+                                    data-tooltip="button.title"
                                     attrs="button.attrs"
                                 />
                             </DropdownItem>

@@ -403,7 +403,7 @@
                                 <field name="state" widget="badges_selection" options="{'allowed_selection_field': 'allowed_states'}"/>
                             </div>
                             <div class="alert alert-warning" role="alert" invisible="not warning">
-                                <i class="fa fa-warning pe-2" title="Warning"/><field class="d-inline" name="warning" nolabel="1"/>
+                                <i class="fa fa-warning pe-2" data-tooltip="Warning"/><field class="d-inline" name="warning" nolabel="1"/>
                             </div>
                             <div class="d-flex flex-row flex-wrap gap-2" invisible="state != 'object_write'">
                                 <field name="evaluation_type" class="oe_inline"/>
@@ -537,7 +537,7 @@ env['res.partner'].create({'name': partner_name})
                             <!-- Icon section -->
                             <i
                                 data-name="server_action_icon"
-                                t-att-title="record.state.value"
+                                t-att-data-tooltip="record.state.value"
                                 class="fa fa-fw"
                                 t-att-class="{
                                     'code': 'fa-code',
@@ -555,9 +555,9 @@ env['res.partner'].create({'name': partner_name})
                                     'ai': 'fa-magic',
                                 }[record.state.raw_value] || 'fa-circle-thin'"
                             />
-                            <i class="fa fa-warning text-warning px-2 m-0" invisible="not warning" t-att-title="record.warning.raw_value"/>
+                            <i class="fa fa-warning text-warning px-2 m-0" invisible="not warning" t-att-data-tooltip="record.warning.raw_value"/>
                             <field name="name" class="text-truncate" />
-                            <button type="delete" name="delete" class="btn fa fa-trash fa-xl px-3 ms-auto" title="Delete Action" />
+                            <button type="delete" name="delete" class="btn fa fa-trash fa-xl px-3 ms-auto" data-tooltip="Delete Action" />
                         </t>
                     </templates>
                 </kanban>

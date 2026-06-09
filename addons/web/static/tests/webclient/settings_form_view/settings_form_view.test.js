@@ -105,10 +105,10 @@ test("change setting on nav bar click in base settings on desktop", async () => 
             <form string="Settings" class="oe_form_configuration o_base_settings" js_class="base_settings">
                 <app string="CRM" name="crm">
                     <setting type="header" string="Foo">
-                        <field name="foo" title="Foo?."/>
+                        <field name="foo" data-tooltip="Foo?."/>
                         <button name="nameAction" type="object" string="Button" class="btn btn-link"/>
                     </setting>
-                    <block title="Title of group Bar">
+                    <block data-tooltip="Title of group Bar">
                         <setting help="this is bar" info="this is bar info" documentation="/applications/technical/web/settings/this_is_a_test.html">
                             <field name="bar"/>
                             <button name="buttonName" icon="oi-arrow-right" type="action" string="Manage Users" class="btn-link"/>
@@ -120,7 +120,7 @@ test("change setting on nav bar click in base settings on desktop", async () => 
                             <label>label with content</label>
                         </setting>
                     </block>
-                    <block title="Title of group Foo">
+                    <block data-tooltip="Title of group Foo">
                         <setting help="this is foo" info="this is foo info" documentation="https://www.odoo.com/documentation/1.0/applications/technical/web/settings/this_is_another_test.html">
                             <field name="foo"/>
                         </setting>
@@ -128,7 +128,7 @@ test("change setting on nav bar click in base settings on desktop", async () => 
                             <div>This is a different setting</div>
                         </setting>
                     </block>
-                    <block title="Hide group Foo" invisible="not bar">
+                    <block data-tooltip="Hide group Foo" invisible="not bar">
                         <setting string="Hide Foo" help="this is hide foo">
                             <field name="foo"/>
                         </setting>
@@ -235,21 +235,21 @@ test("Search setting on multiple apps", async () => {
         arch: /* xml */ `
             <form string="Settings" class="oe_form_configuration o_base_settings" js_class="base_settings">
                 <app string="CRM" name="crm">
-                    <block title="Title of group Foo">
+                    <block data-tooltip="Title of group Foo">
                         <setting>
                             <field name="foo"/>
                         </setting>
                     </block>
                 </app>
                 <app string="DRM" name="drm">
-                    <block title="Title of group Foo">
+                    <block data-tooltip="Title of group Foo">
                         <setting>
                             <field name="foo"/>
                         </setting>
                     </block>
                 </app>
                 <app string="ERM" name="erm">
-                    <block title="Title of group Foo">
+                    <block data-tooltip="Title of group Foo">
                         <setting>
                             <field name="foo"/>
                         </setting>
@@ -280,10 +280,10 @@ test("change setting on nav bar click in base settings on mobile", async () => {
             <form string="Settings" class="oe_form_configuration o_base_settings" js_class="base_settings">
                 <app string="CRM" name="crm">
                     <setting type="header" string="Foo">
-                        <field name="foo" title="Foo?."/>
+                        <field name="foo" data-tooltip="Foo?."/>
                         <button name="nameAction" type="object" string="Button" class="btn btn-link"/>
                     </setting>
-                    <block title="Title of group Bar">
+                    <block data-tooltip="Title of group Bar">
                         <setting help="this is bar" info="this is bar info" documentation="/applications/technical/web/settings/this_is_a_test.html">
                             <field name="bar"/>
                             <button name="buttonName" icon="oi-arrow-right" type="action" string="Manage Users" class="btn-link"/>
@@ -295,7 +295,7 @@ test("change setting on nav bar click in base settings on mobile", async () => {
                             <label>label with content</label>
                         </setting>
                     </block>
-                    <block title="Title of group Foo">
+                    <block data-tooltip="Title of group Foo">
                         <setting help="this is foo" info="this is foo info" documentation="https://www.odoo.com/documentation/1.0/applications/technical/web/settings/this_is_another_test.html">
                             <field name="foo"/>
                         </setting>
@@ -303,7 +303,7 @@ test("change setting on nav bar click in base settings on mobile", async () => {
                             <div>This is a different setting</div>
                         </setting>
                     </block>
-                    <block title="Hide group Foo" invisible="not bar">
+                    <block data-tooltip="Hide group Foo" invisible="not bar">
                         <setting string="Hide Foo" help="this is hide foo">
                             <field name="foo"/>
                         </setting>
@@ -436,9 +436,9 @@ test("edit header field", async () => {
             <form string="Settings" class="oe_form_configuration o_base_settings" js_class="base_settings">
                 <app string="CRM" name="crm">
                     <setting type="header" string="Type">
-                        <field name="baz" title="Make a choice" widget="radio"/>
+                        <field name="baz" data-tooltip="Make a choice" widget="radio"/>
                     </setting>
-                    <block title="Title of group Bar">
+                    <block data-tooltip="Title of group Bar">
                         <setting documentation="/applications/technical/web/settings/this_is_a_test.html">
                             <field name="foo_text"/>
                         </setting>
@@ -582,7 +582,7 @@ test("don't show noContentHelper if no search is done", async () => {
         arch: /* xml */ `
             <form string="Settings" class="oe_form_configuration o_base_settings" js_class="base_settings">
                 <app string="CRM" name="crm">
-                    <block title="Setting title" help="Settings will appear below">
+                    <block data-tooltip="Setting title" help="Settings will appear below">
                         <div/>
                     </block>
                 </app>
@@ -598,12 +598,12 @@ test("hide / show setting tips properly", async () => {
         arch: /* xml */ `
             <form string="Settings" class="oe_form_configuration o_base_settings" js_class="base_settings">
                 <app string="Settings" name="settings">
-                    <block title="Setting Header" help="Settings will appear below">
+                    <block data-tooltip="Setting Header" help="Settings will appear below">
                         <setting help="this is bar">
                             <field name="bar"/>
                         </setting>
                     </block>
-                    <block title="Title of group Foo">
+                    <block data-tooltip="Title of group Foo">
                         <setting help="this is foo">
                             <field name="foo"/>
                         </setting>
@@ -742,7 +742,7 @@ test("resIds should contains only 1 id", async () => {
                     <div class="settings">
                         <app string="CRM" name="crm">
                             <block>
-                                <setting title="Foo Text">
+                                <setting data-tooltip="Foo Text">
                                     <field name="foo_text"/>
                                 </setting>
                             </block>
@@ -780,7 +780,7 @@ test("settings views does not read existing id when reload", async () => {
         <form string="Settings" js_class="base_settings">
             <app string="CRM" name="crm">
                 <block>
-                    <setting title="Foo" help="this is foo">
+                    <setting data-tooltip="Foo" help="this is foo">
                         <field name="foo"/>
                     </setting>
                 </block>
@@ -1203,7 +1203,7 @@ test("header field don't dirty settings", async () => {
         <form string="Settings" js_class="base_settings">
             <app string="CRM" name="crm">
                 <setting type="header" string="Foo">
-                    <field name="foo" title="Foo?."/>
+                    <field name="foo" data-tooltip="Foo?."/>
                 </setting>
                 <button name="4" string="Execute action" type="action"/>
             </app>
@@ -1501,7 +1501,7 @@ test("settings view does not display o_not_app settings - Desktop", async () => 
         arch: /* xml */ `
             <form string="Settings" class="oe_form_configuration o_base_settings" js_class="base_settings">
                 <app string="CRM" name="crm">
-                    <block title="CRM">
+                    <block data-tooltip="CRM">
                         <setting help="this is bar">
                             <field name="bar"/>
                         </setting>
@@ -1532,7 +1532,7 @@ test("settings view does not display o_not_app settings - mobile", async () => {
         arch: /* xml */ `
             <form string="Settings" class="oe_form_configuration o_base_settings" js_class="base_settings">
                 <app string="CRM" name="crm">
-                    <block title="CRM">
+                    <block data-tooltip="CRM">
                         <setting help="this is bar">
                             <field name="bar"/>
                         </setting>
@@ -1650,7 +1650,7 @@ test("execute action from settings view with several actions in the breadcrumb",
     ResConfigSettings._views[["form", 2]] = /* xml */ `
         <form string="Settings" js_class="base_settings">
             <app string="CRM" name="crm">
-                <block title="Title of group">
+                <block data-tooltip="Title of group">
                     <setting>
                         <button name="3" string="Execute action" type="action"/>
                     </setting>

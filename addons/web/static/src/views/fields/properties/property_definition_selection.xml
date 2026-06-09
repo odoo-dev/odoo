@@ -23,14 +23,14 @@
                     />
                     <button
                         class="btn btn-link m-0 p-0 text-muted fs-5"
-                        title="Select Default"
+                        data-tooltip="Select Default"
                         t-on-click="() => this.onOptionSetDefault(option_index)">
                         <i t-att-class="option[0] === this.props.default ? 'fa fa-star align-bottom' : 'fa fa-star-o align-bottom'"/>
                     </button>
                     <button
                         t-if="!this.props.readonly"
                         class="btn btn-link link-danger ms-2 p-0 fs-5"
-                        title="Remove Property"
+                        data-tooltip="Remove Property"
                         t-on-click="() => this.onOptionDelete(option_index)">
                         <i class="fa fa-trash-o align-bottom"/>
                     </button>

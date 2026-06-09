@@ -8,7 +8,7 @@
             <field name="arch" type="xml">
                 <form string="Bank account" name="bank_account_form" create="0">
                     <sheet>
-                        <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                        <widget name="web_ribbon" data-tooltip="Archived" bg_color="text-bg-danger" invisible="active"/>
                         <group>
                             <group>
                                 <field name="partner_id" invisible="1"/> <!-- Needed for default partner to be set for newly created records -->

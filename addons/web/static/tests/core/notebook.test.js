@@ -15,16 +15,16 @@ test("not rendered if empty slots", async () => {
 test("notebook with multiple pages given as slots", async () => {
     class Parent extends Component {
         static template = xml`<Notebook>
-                <t t-set-slot="page_about" title="'About'" isVisible="true">
+                <t t-set-slot="page_about" data-tooltip="'About'" isVisible="true">
                     <h3>About the bird</h3>
                     <p>Owls are birds from the order Strigiformes which includes over
                     200 species of mostly solitary and nocturnal birds of prey typified by an upright stance, ...</p>
                 </t>
-                <t t-set-slot="page_hunting" title="'Owl Activities'" isVisible="true">
+                <t t-set-slot="page_hunting" data-tooltip="'Owl Activities'" isVisible="true">
                     <h3>Their favorite activity: hunting</h3>
                     <p>Owls are called raptors, or birds of prey, which means they use sharp talons and curved bills to hunt, kill, and eat other animals.</p>
                 </t>
-                <t t-set-slot="page_secret" title="'Secret about OWLs'" isVisible="false">
+                <t t-set-slot="page_secret" data-tooltip="'Secret about OWLs'" isVisible="false">
                     <p>TODO find a great secret about OWLs.</p>
                 </t>
             </Notebook>`;
@@ -63,16 +63,16 @@ test("notebook with multiple pages given as slots", async () => {
 test("notebook with defaultPage props", async () => {
     class Parent extends Component {
         static template = xml`<Notebook defaultPage="'page_hunting'">
-                <t t-set-slot="page_about" title="'About'" isVisible="true">
+                <t t-set-slot="page_about" data-tooltip="'About'" isVisible="true">
                     <h3>About the bird</h3>
                     <p>Owls are birds from the order Strigiformes which includes over
                     200 species of mostly solitary and nocturnal birds of prey typified by an upright stance, ...</p>
                 </t>
-                <t t-set-slot="page_hunting" title="'Owl Activities'" isVisible="true">
+                <t t-set-slot="page_hunting" data-tooltip="'Owl Activities'" isVisible="true">
                     <h3>Their favorite activity: hunting</h3>
                     <p>Owls are called raptors, or birds of prey, which means they use sharp talons and curved bills to hunt, kill, and eat other animals.</p>
                 </t>
-                <t t-set-slot="page_secret" title="'Secret about OWLs'" isVisible="false">
+                <t t-set-slot="page_secret" data-tooltip="'Secret about OWLs'" isVisible="false">
                     <p>TODO find a great secret about OWLs.</p>
                 </t>
             </Notebook>`;
@@ -93,16 +93,16 @@ test("notebook with defaultPage props", async () => {
 test("notebook with defaultPage set on invisible page", async () => {
     class Parent extends Component {
         static template = xml`<Notebook defaultPage="'page_secret'">
-                    <t t-set-slot="page_about" title="'About'" isVisible="true">
+                    <t t-set-slot="page_about" data-tooltip="'About'" isVisible="true">
                         <h3>About the bird</h3>
                         <p>Owls are birds from the order Strigiformes which includes over
                         200 species of mostly solitary and nocturnal birds of prey typified by an upright stance, ...</p>
                     </t>
-                    <t t-set-slot="page_hunting" title="'Owl Activities'" isVisible="true">
+                    <t t-set-slot="page_hunting" data-tooltip="'Owl Activities'" isVisible="true">
                         <h3>Their favorite activity: hunting</h3>
                         <p>Owls are called raptors, or birds of prey, which means they use sharp talons and curved bills to hunt, kill, and eat other animals.</p>
                     </t>
-                    <t t-set-slot="page_secret" title="'Secret about OWLs'" isVisible="false">
+                    <t t-set-slot="page_secret" data-tooltip="'Secret about OWLs'" isVisible="false">
                         <h3>Oooops</h3>
                         <p>TODO find a great secret to reveal about OWLs.</p>
                     </t>
@@ -120,12 +120,12 @@ test("notebook with defaultPage set on invisible page", async () => {
 test("notebook set vertically", async () => {
     class Parent extends Component {
         static template = xml`<Notebook orientation="'vertical'">
-                <t t-set-slot="page_about" title="'About'" isVisible="true">
+                <t t-set-slot="page_about" data-tooltip="'About'" isVisible="true">
                     <h3>About the bird</h3>
                     <p>Owls are birds from the order Strigiformes which includes over
                     200 species of mostly solitary and nocturnal birds of prey typified by an upright stance, ...</p>
                 </t>
-                <t t-set-slot="page_hunting" title="'Owl Activities'" isVisible="true">
+                <t t-set-slot="page_hunting" data-tooltip="'Owl Activities'" isVisible="true">
                     <h3>Their favorite activity: hunting</h3>
                     <p>Owls are called raptors, or birds of prey, which means they use sharp talons and curved bills to hunt, kill, and eat other animals.</p>
                 </t>
@@ -158,11 +158,11 @@ test("notebook pages rendered by a template component", async () => {
 
     class Parent extends Component {
         static template = xml`<Notebook defaultPage="'page_three'" pages="this.pages">
-                <t t-set-slot="page_one" title="'Page 1'" isVisible="true">
+                <t t-set-slot="page_one" data-tooltip="'Page 1'" isVisible="true">
                     <h3>Page 1</h3>
                     <p>First page set directly as a slot</p>
                 </t>
-                <t t-set-slot="page_four" title="'Page 4'" isVisible="true">
+                <t t-set-slot="page_four" data-tooltip="'Page 4'" isVisible="true">
                     <h3>Page 4</h3>
                 </t>
             </Notebook>`;
@@ -249,13 +249,13 @@ test("defaultPage recomputed when isVisible is dynamic", async () => {
         static components = { Notebook };
         static template = xml`
                 <Notebook defaultPage="'3'">
-                    <t t-set-slot="1" title="'page1'" isVisible="true">
+                    <t t-set-slot="1" data-tooltip="'page1'" isVisible="true">
                         <div class="page1" />
                     </t>
-                    <t t-set-slot="2" title="'page2'" isVisible="true">
+                    <t t-set-slot="2" data-tooltip="'page2'" isVisible="true">
                         <div class="page2" />
                     </t>
-                    <t t-set-slot="3" title="'page3'" isVisible="this.defaultPageVisible">
+                    <t t-set-slot="3" data-tooltip="'page3'" isVisible="this.defaultPageVisible">
                         <div class="page3" />
                     </t>
                 </Notebook>`;
@@ -291,13 +291,13 @@ test("disabled pages are greyed out and can't be toggled", async () => {
         static components = { Notebook };
         static template = xml`
             <Notebook defaultPage="'1'">
-                <t t-set-slot="1" title="'page1'" isVisible="true">
+                <t t-set-slot="1" data-tooltip="'page1'" isVisible="true">
                     <div class="page1" />
                 </t>
-                <t t-set-slot="2" title="'page2'" isVisible="true" isDisabled="true">
+                <t t-set-slot="2" data-tooltip="'page2'" isVisible="true" isDisabled="true">
                     <div class="page2" />
                 </t>
-                <t t-set-slot="3" title="'page3'" isVisible="true">
+                <t t-set-slot="3" data-tooltip="'page3'" isVisible="true">
                     <div class="page3" />
                 </t>
             </Notebook>`;
@@ -328,13 +328,13 @@ test("icons can be given for each page tab", async () => {
         static components = { Notebook };
         static template = xml`
             <Notebook defaultPage="'1'" icons="this.icons">
-                <t t-set-slot="1" title="'page1'" isVisible="true">
+                <t t-set-slot="1" data-tooltip="'page1'" isVisible="true">
                     <div class="page1" />
                 </t>
-                <t t-set-slot="2" title="'page2'" isVisible="true">
+                <t t-set-slot="2" data-tooltip="'page2'" isVisible="true">
                     <div class="page2" />
                 </t>
-                <t t-set-slot="3" title="'page3'" isVisible="true">
+                <t t-set-slot="3" data-tooltip="'page3'" isVisible="true">
                     <div class="page3" />
                 </t>
             </Notebook>`;

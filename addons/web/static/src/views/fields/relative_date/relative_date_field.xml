@@ -4,7 +4,7 @@
         <t t-if="this.props.readonly">
             <div
                 t-att-class="this.classNames"
-                t-att-title="this.numericValue"
+                t-att-data-tooltip="this.numericValue"
             >
                 <t t-out="this.diffString"/>
             </div>

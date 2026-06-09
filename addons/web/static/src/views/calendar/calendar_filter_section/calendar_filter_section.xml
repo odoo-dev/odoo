@@ -87,7 +87,7 @@
                 <button
                     class="o_remove btn position-absolute top-0 end-0 py-0 p-1 bg-view text-body transition-base"
                     role="img"
-                    title="Remove this favorite from the list"
+                    data-tooltip="Remove this favorite from the list"
                     aria-label="Remove this favorite from the list"
                     t-on-click="(ev) => this.onFilterRemoveBtnClick(filter, ev)"
                 >

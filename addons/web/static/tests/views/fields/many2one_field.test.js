@@ -514,7 +514,7 @@ test("many2ones in form views with show_address", async () => {
 
     expect("input.o_input").toHaveValue("aaa");
     expect(".o_field_many2one_extra").toHaveInnerHTML(
-        `<div class="text-truncate" title="Street">Street</div> <div class="text-truncate" title="City ZIP">City ZIP</div>`,
+        `<div class="text-truncate" data-tooltip="Street">Street</div> <div class="text-truncate" data-tooltip="City ZIP">City ZIP</div>`,
         { type: "html" }
     );
     expect("button.o_external_button").toHaveCount(1);
@@ -561,7 +561,7 @@ test("many2one show_address in edit", async () => {
 
     expect(".o_field_widget input").toHaveValue("aaa");
     expect(".o_field_many2one_extra").toHaveInnerHTML(
-        `<div class="text-truncate" title="AAA">AAA</div><div class="text-truncate" title="Record">Record</div>`,
+        `<div class="text-truncate" data-tooltip="AAA">AAA</div><div class="text-truncate" data-tooltip="Record">Record</div>`,
         { type: "html" }
     );
 
@@ -571,7 +571,7 @@ test("many2one show_address in edit", async () => {
 
     expect(".o_field_widget input").toHaveValue("first record");
     expect(".o_field_many2one_extra").toHaveInnerHTML(
-        `<div class="text-truncate" title="First">First</div><div class="text-truncate" title="Record">Record</div>`,
+        `<div class="text-truncate" data-tooltip="First">First</div><div class="text-truncate" data-tooltip="Record">Record</div>`,
         { type: "html" }
     );
 
@@ -581,7 +581,7 @@ test("many2one show_address in edit", async () => {
 
     expect(".o_field_widget input").toHaveValue("second record");
     expect(".o_field_many2one_extra").toHaveInnerHTML(
-        `<div class="text-truncate" title="Second">Second</div><div class="text-truncate" title="Record">Record</div>`,
+        `<div class="text-truncate" data-tooltip="Second">Second</div><div class="text-truncate" data-tooltip="Record">Record</div>`,
         { type: "html" }
     );
 });

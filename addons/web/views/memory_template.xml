@@ -177,7 +177,7 @@
                     if (fullTracebackKey) {
                         html += `
                             <div style="margin-bottom: 10px; padding: 8px; background: #e8f4f8; border-radius: 3px; font-size: 11px; color: #555;">
-                                <strong>Full Path:</strong> <span class="copyable" title="Click to select for copying">${fullTracebackKey}</span>
+                                <strong>Full Path:</strong> <span class="copyable" data-tooltip="Click to select for copying">${fullTracebackKey}</span>
                             </div>
                         `;
                     }
@@ -186,7 +186,7 @@
                         const [filename, lineNo, functionName, code] = frame;
                         html += `
                             <div class="traceback-item">
-                                <div class="traceback-file copyable" title="Click to select for copying">${filename}:${lineNo}</div>
+                                <div class="traceback-file copyable" data-tooltip="Click to select for copying">${filename}:${lineNo}</div>
                                 <div>in <strong>${functionName || 'unknown'}</strong></div>
                                 ${code ? `<div class="traceback-line">${code}</div>` : ''}
                             </div>

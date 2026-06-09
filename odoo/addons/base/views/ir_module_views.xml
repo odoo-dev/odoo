@@ -170,7 +170,7 @@
                             <field name="icon" widget="image_url" options="{'size': [50, 50]}" alt="Icon"/>
                             <field t-if="record.icon_flag" name="icon_flag" class="oe_module_flag"/>
                         </aside>
-                        <main class="me-4" t-att-title="record.shortdesc.value">
+                        <main class="me-4" t-att-data-tooltip="record.shortdesc.value">
                             <h2 class="h5 mb-0">
                                 <field name="shortdesc"/>
                             </h2>

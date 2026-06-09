@@ -355,9 +355,9 @@ test("data-hotkey added to command palette", async () => {
         static components = { TestComponent };
         static template = xml`
             <div>
-                <button title="Aria Stark" data-hotkey="a" t-on-click="this.onClick">visible</button>
-                <input title="Bran Stark" type="text" data-hotkey="b" />
-                <button title="Sansa Stark" data-hotkey="c" style="display: none;" />
+                <button data-tooltip="Aria Stark" data-hotkey="a" t-on-click="this.onClick">visible</button>
+                <input data-tooltip="Bran Stark" type="text" data-hotkey="b" />
+                <button data-tooltip="Sansa Stark" data-hotkey="c" style="display: none;" />
                 <TestComponent />
             </div>
         `;
@@ -403,8 +403,8 @@ test("access to hotkeys from the command palette", async () => {
         static components = { TestComponent };
         static template = xml`
             <div>
-                <button title="B" data-hotkey="b" t-on-click="this.onClickB">visible</button>
-                <button title="C" data-hotkey="c" t-on-click="this.onClickC">visible</button>
+                <button data-tooltip="B" data-hotkey="b" t-on-click="this.onClickB">visible</button>
+                <button data-tooltip="C" data-hotkey="c" t-on-click="this.onClickC">visible</button>
                 <TestComponent />
             </div>
         `;
@@ -855,12 +855,12 @@ test("data-command-category", async () => {
         static template = xml`
             <div>
             <div>
-                <button title="Aria Stark" data-hotkey="a">visible</button>
-                <button title="Bran Stark" data-hotkey="b">visible</button>
+                <button data-tooltip="Aria Stark" data-hotkey="a">visible</button>
+                <button data-tooltip="Bran Stark" data-hotkey="b">visible</button>
             </div>
             <div data-command-category="custom">
-                <button title="Robert Baratheon" data-hotkey="r">visible</button>
-                <button title="Joffrey Baratheon" data-hotkey="j">visible</button>
+                <button data-tooltip="Robert Baratheon" data-hotkey="r">visible</button>
+                <button data-tooltip="Joffrey Baratheon" data-hotkey="j">visible</button>
             </div>
             <TestComponent />
             </div>
@@ -887,7 +887,7 @@ test("display shortcuts correctly for non-MacOS ", async () => {
         static components = { TestComponent };
         static template = xml`
             <div>
-                <button title="Click" data-hotkey="f">visible</button>
+                <button data-tooltip="Click" data-hotkey="f">visible</button>
                 <TestComponent />
             </div>
         `;
@@ -930,7 +930,7 @@ test("display shortcuts correctly for MacOS ", async () => {
         static components = { TestComponent };
         static template = xml`
             <div>
-            <button title="Click" data-hotkey="f">visible</button>
+            <button data-tooltip="Click" data-hotkey="f">visible</button>
             <TestComponent />
             </div>
         `;
@@ -976,7 +976,7 @@ test("display shortcuts correctly for non-MacOS with a new overlayModifier", asy
         static components = { TestComponent };
         static template = xml`
                 <div>
-                <button title="Click" data-hotkey="a">visible</button>
+                <button data-tooltip="Click" data-hotkey="a">visible</button>
                 <TestComponent />
                 </div>
             `;
@@ -1003,7 +1003,7 @@ test("display shortcuts correctly for MacOS with a new overlayModifier", async (
         static components = { TestComponent };
         static template = xml`
             <div>
-            <button title="Click" data-hotkey="a">visible</button>
+            <button data-tooltip="Click" data-hotkey="a">visible</button>
             <TestComponent />
             </div>
         `;

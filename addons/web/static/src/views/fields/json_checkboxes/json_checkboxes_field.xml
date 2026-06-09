@@ -17,7 +17,7 @@
                        class="fa fa-question-circle"
                        role="img"
                        aria-label="Warning"
-                       t-att-title="checkbox_value.question_circle"/>
+                       t-att-data-tooltip="checkbox_value.question_circle"/>
                 </div>
             </t>
         </div>

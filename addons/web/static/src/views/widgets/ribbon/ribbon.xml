@@ -3,7 +3,7 @@
 
     <t t-name="web.Ribbon">
         <div class="ribbon ribbon-top-right">
-            <span t-att-class="this.classes" t-att-title="this.props.title">
+            <span t-att-class="this.classes" t-att-data-tooltip="this.props.title">
                 <t t-out="this.props.text"/>
             </span>
         </div>

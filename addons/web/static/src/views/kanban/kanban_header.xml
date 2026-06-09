@@ -23,8 +23,8 @@
                     </button>
                 </t>
                 <button t-else="" class="o_column_unfold btn d-flex align-items-center justify-content-between flex-nowrap transition-base">
-                    <i class="fa fa-caret-left transition-base" role="img" aria-label="Unfold" title="Unfold" />
-                    <i class="fa fa-caret-right" role="img" aria-label="Unfold" title="Unfold" />
+                    <i class="fa fa-caret-left transition-base" role="img" aria-label="Unfold" data-tooltip="Unfold" />
+                    <i class="fa fa-caret-right" role="img" aria-label="Unfold" data-tooltip="Unfold" />
                 </button>
             </div>
             <div t-if="(this.env.isSmall or !this.group.isFolded) and this.progressBar" class="o_kanban_counter position-relative d-flex align-items-center justify-content-between" t-att-class="{ 'opacity-25': !this.group.count }">

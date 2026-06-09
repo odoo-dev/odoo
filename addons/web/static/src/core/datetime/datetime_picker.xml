@@ -10,7 +10,7 @@
                     <t t-foreach="month.daysOfWeek" t-as="dayOfWeek" t-key="dayOfWeek[0]">
                         <div
                             class="o_day_of_week_cell fw-bolder d-flex align-items-center justify-content-center"
-                            t-att-title="dayOfWeek[1]"
+                            t-att-data-tooltip="dayOfWeek[1]"
                         >
                             <div class="text-nowrap overflow-hidden" t-out="this.props.daysOfWeekFormat === 'narrow' ? dayOfWeek[2] : dayOfWeek[0]"/>
                         </div>
@@ -110,7 +110,7 @@
                     tabindex="-1"
                     data-available-offline=""
                 >
-                    <i class="oi oi-chevron-left" t-att-title="this.activePrecisionLevel.prevTitle" />
+                    <i class="oi oi-chevron-left" t-att-data-tooltip="this.activePrecisionLevel.prevTitle" />
                 </button>
                 <button
                     class="o_next btn btn-sm opacity-75 opacity-100-hover"
@@ -118,13 +118,13 @@
                     tabindex="-1"
                     data-available-offline=""
                 >
-                    <i class="oi oi-chevron-right" t-att-title="this.activePrecisionLevel.nextTitle" />
+                    <i class="oi oi-chevron-right" t-att-data-tooltip="this.activePrecisionLevel.nextTitle" />
                 </button>
                 <button
                     class="o_zoom_out o_datetime_button btn opacity-75 opacity-100-hover text-truncate"
                     tabindex="-1"
                     t-att-class="{ 'disabled': this.isLastPrecisionLevel }"
-                    t-att-title="!this.isLastPrecisionLevel and this.activePrecisionLevel.mainTitle"
+                    t-att-data-tooltip="!this.isLastPrecisionLevel and this.activePrecisionLevel.mainTitle"
                     t-on-click="this.zoomOut"
                     data-available-offline=""
                 >
@@ -139,7 +139,7 @@
                     <button
                         class="o_toggle_range btn btn-secondary btn-sm"
                         tabindex="-1"
-                        title="Single date"
+                        data-tooltip="Single date"
                         t-on-click="this.props.onToggleRange"
                         t-att-class="{'active': !this.props.range}"
                     >
@@ -148,7 +148,7 @@
                     <button
                         class="o_toggle_range btn btn-secondary btn-sm"
                         tabindex="-1"
-                        title="Date range"
+                        data-tooltip="Date range"
                         t-on-click="this.props.onToggleRange"
                         t-att-class="{'active': this.props.range}"
                     >

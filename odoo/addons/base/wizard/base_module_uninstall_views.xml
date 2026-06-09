@@ -26,7 +26,7 @@
                                             <aside>
                                                 <field name="icon" widget="image_url" options="{'size': [50, 50]}" alt="Icon"/>
                                             </aside>
-                                            <main t-att-title="record.shortdesc.value" class="overflow-auto">
+                                            <main t-att-data-tooltip="record.shortdesc.value" class="overflow-auto">
                                                 <field class="fw-bold fs-5 mb-0" name="shortdesc" />
                                                 <p class="text-muted small my-1 lh-sm">
                                                     <code groups="base.group_no_one">
@@ -48,7 +48,7 @@
                                             <aside>
                                                 <field name="icon" widget="image_url" options="{'size': [50, 50]}" alt="Icon"/>
                                             </aside>
-                                            <main t-att-title="record.shortdesc.value" class="overflow-auto">
+                                            <main t-att-data-tooltip="record.shortdesc.value" class="overflow-auto">
                                                 <field class="fw-bold fs-5 mb-0" name="shortdesc" />
                                                 <p class="text-muted small my-1 lh-sm">
                                                     <code groups="base.group_no_one">

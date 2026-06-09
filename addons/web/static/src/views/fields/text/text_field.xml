@@ -26,7 +26,7 @@
                 />
                 <button t-if="this.props.dynamicPlaceholder"
                     class="btn btn-link fa fa-magic"
-                    title="Insert Field"
+                    data-tooltip="Insert Field"
                     t-on-click="this.onDynamicPlaceholderOpen"
                 />
             </div>

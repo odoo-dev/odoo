@@ -7,7 +7,7 @@
                 <div class="o_kanban_image_wrapper">
                     <div class="o_image o_image_thumbnail" t-att-data-mimetype="this.props.fileUpload.type"/>
                 </div>
-                <div t-att-title="this.props.fileUpload.title" t-att-aria-label="this.props.fileUpload.title" class="fw-bold fs-5 mb-2 p-2">
+                <div t-att-data-tooltip="this.props.fileUpload.title" t-att-aria-label="this.props.fileUpload.title" class="fw-bold fs-5 mb-2 p-2">
                     <span t-out="this.props.fileUpload.title"/>
                 </div>
                 <div class="o_kanban_record_body"/>

@@ -1191,7 +1191,11 @@ test(`Form and subview with _view_ref contexts`, async () => {
     await contains(`.o_field_widget[name="product_id"] .o_external_button`, {
         visible: false,
     }).click();
-    expect.verifySteps(["get_record_default_action", "product get_views", "partner.type get_views"]);
+    expect.verifySteps([
+        "get_record_default_action",
+        "product get_views",
+        "partner.type get_views",
+    ]);
 });
 
 test(`Form and subsubview with only _view_ref contexts`, async () => {
@@ -9681,7 +9685,7 @@ test(`display tooltips for buttons (debug = false)`, async () => {
         arch: `
             <form>
                 <header>
-                    <button name="some_method" class="oe_highlight" string="Button" type="object" title="This is title"/>
+                    <button name="some_method" class="oe_highlight" string="Button" type="object" data-tooltip="This is title"/>
                     <button name="empty_method" string="Empty Button" type="object"/>
                 </header>
                 <button name="other_method" class="oe_highlight" string="Button2" type="object" help="help Button2"/>
@@ -9712,7 +9716,7 @@ test(`display tooltips for buttons (debug = true)`, async () => {
         arch: `
             <form>
                 <header>
-                    <button name="some_method" class="oe_highlight" string="Button" type="object" title="This is title" readonly="display_name == 'readonly'"/>
+                    <button name="some_method" class="oe_highlight" string="Button" type="object" data-tooltip="This is title" readonly="display_name == 'readonly'"/>
                     <button name="empty_method" string="Empty Button" type="object"/>
                 </header>
                 <button name="other_method" class="oe_highlight" string="Button2" type="object" help="help Button2"/>

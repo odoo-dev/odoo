@@ -8,7 +8,7 @@
                     Add <t t-out="this.relatedFieldName"/>
                 </div>
                 <button class="o_quick_create_button btn d-flex align-items-center justify-content-between flex-nowrap py-0 px-1">
-                    <i class="fa fa-angle-double-right" role="img" aria-label="Add column" title="Add column" />
+                    <i class="fa fa-angle-double-right" role="img" aria-label="Add column" data-tooltip="Add column" />
                 </button>
             </div>
             <div t-else="" class="pt-3 pb-2">

@@ -27,7 +27,7 @@
         <t t-if="this.props.progressBar.isReady">
             <AnimatedNumber
                 value="this.props.aggregate.value"
-                title="this.props.aggregate.title"
+                data-tooltip="this.props.aggregate.title"
                 duration="1000"
                 currencies="this.props.aggregate.currencies"
                 animationClass="this.props.aggregate.value > 999 ? 'o_animated_grow' : 'o_animated_grow_huge'"

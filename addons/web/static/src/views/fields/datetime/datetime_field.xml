@@ -35,14 +35,14 @@
                         t-on-input="this.onInput"
                         t-on-focus="() => this.picker.activeInput = this.startDateField"
                         t-on-blur="this.onInputBlured"
-                        t-att-title="this.props.warnFuture and this.isDateInTheFuture(0) ? this.futureWarningMsg : ''"
+                        t-att-data-tooltip="this.props.warnFuture and this.isDateInTheFuture(0) ? this.futureWarningMsg : ''"
                     />
                 </t>
             </t>
 
             <!-- Separator -->
             <t t-if="showSeparator">
-                <i class="fa fa-long-arrow-right" aria-label="Arrow icon" title="Arrow" />
+                <i class="fa fa-long-arrow-right" aria-label="Arrow icon" data-tooltip="Arrow" />
             </t>
 
             <!-- End date -->
@@ -77,7 +77,7 @@
                             t-on-input="this.onInput"
                             t-on-focus="() => this.picker.activeInput = this.endDateField"
                             t-on-blur="this.onInputBlured"
-                            t-att-title="this.props.warnFuture and this.isDateInTheFuture(1) ? this.futureWarningMsg : ''"
+                            t-att-data-tooltip="this.props.warnFuture and this.isDateInTheFuture(1) ? this.futureWarningMsg : ''"
                         />
                     </t>
                 </t>

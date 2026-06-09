@@ -6,7 +6,7 @@
                 <div class="o_datetime_buttons d-flex gap-2">
                     <button
                         class="btn btn-sm btn-secondary"
-                        title="Clear"
+                        data-tooltip="Clear"
                         tabindex="-1"
                         t-on-click="this.props.pickerProps.onReset"
                         data-available-offline=""

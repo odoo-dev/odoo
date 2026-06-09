@@ -6,7 +6,7 @@
 <t t-name="web.BurgerMenu">
   <button
     class="o_mobile_menu_toggle o_nav_entry o-no-caret d-md-none border-0 pe-3"
-    title="Toggle menu" aria-label="Toggle menu"
+    data-tooltip="Toggle menu" aria-label="Toggle menu"
     t-on-click="this._openBurger">
     <img class="o_burger_menu_avatar o_image_24_cover rounded" t-att-src="'/web/image?model=res.users&amp;field=avatar_128&amp;id=' + this.user.userId" alt="Menu"/>
   </button>
@@ -20,8 +20,8 @@
               <span class="o_burger_menu_username px-2"><t t-out="this.user.name"/></span>
             </small>
             <div class="d-flex align-items-center h-100 bg-transparent">
-                <button t-if="this.router.shareUrl and this.isDisplayStandalone" class="o_sidebar_share fa fa-share-alt btn border-0 fs-5 text-reset" aria-label="Share URL" title="Share URL" t-on-click.stop="() => this._shareUrl()"/>
-                <button class="o_sidebar_close oi oi-close btn border-0 fs-3 text-reset" aria-label="Close menu" title="Close menu" t-on-click.stop="() => this._closeBurger()"/>
+                <button t-if="this.router.shareUrl and this.isDisplayStandalone" class="o_sidebar_share fa fa-share-alt btn border-0 fs-5 text-reset" aria-label="Share URL" data-tooltip="Share URL" t-on-click.stop="() => this._shareUrl()"/>
+                <button class="o_sidebar_close oi oi-close btn border-0 fs-3 text-reset" aria-label="Close menu" data-tooltip="Close menu" t-on-click.stop="() => this._closeBurger()"/>
             </div>
         </div>
         <nav class="o_burger_menu_content flex-grow-1 flex-shrink-1 overflow-auto o_burger_menu_app">

@@ -8,7 +8,7 @@
                 <t t-set="otherSlots" t-value="this.visibleSlotNames.slice(1)" />
                 <t t-if="firstSlot" t-call-slot="{{ firstSlot }}" />
                 <Dropdown t-if="otherSlots.length">
-                    <button class="btn btn-secondary" title="More">
+                    <button class="btn btn-secondary" data-tooltip="More">
                         <i class="oi oi-fw oi-ellipsis-v" />
                     </button>
                     <t t-set-slot="content">

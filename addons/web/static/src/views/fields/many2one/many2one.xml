@@ -45,7 +45,7 @@
             <t t-if="lines.length">
                 <div class="o_field_many2one_extra" t-on-click="this.onExtraLinesClick">
                     <t t-foreach="lines" t-as="line" t-key="line_index">
-                        <div t-out="line" t-att-title="line"  class="text-truncate"/>
+                        <div t-out="line" t-att-data-tooltip="line"  class="text-truncate"/>
                     </t>
                 </div>
             </t>

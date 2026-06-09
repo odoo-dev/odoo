@@ -9,7 +9,7 @@
                 class="o-autocomplete--input o_input pe-3 text-truncate"
                 t-att-autocomplete="this.props.autocomplete"
                 t-att-placeholder="this.props.placeholder"
-                t-att-title="this.props.title"
+                t-att-data-tooltip="this.props.title"
                 role="combobox"
                 t-att-aria-activedescendant="this.activeSourceOptionId"
                 t-att-aria-expanded="this.displayOptions ? 'true' : 'false'"

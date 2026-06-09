@@ -168,7 +168,7 @@
                     <label for="db" class="col-form-label">Database</label>
                     <div class="input-group">
                         <input type="text" name="db" t-att-value="request.db" id="db" class="form-control" required="required" readonly="readonly"/>
-                        <a role="button" href="/web/database/selector" class="btn border border-start-0">Select <i class="fa fa-database" role="img" aria-label="Database" title="Database"></i></a>
+                        <a role="button" href="/web/database/selector" class="btn border border-start-0">Select <i class="fa fa-database" role="img" aria-label="Database" data-tooltip="Database"></i></a>
                     </div>
                 </div>
 
@@ -383,7 +383,7 @@
         </t>
         <t t-call="web.layout"
             html_data="{'style': 'height: 100%;'}"
-            title="'Install %s' % (app_name)"
+            data-tooltip="'Install %s' % (app_name)"
             x_icon="x_icon"
             head="head">
             <owl-component name="web.install_scoped_app" />

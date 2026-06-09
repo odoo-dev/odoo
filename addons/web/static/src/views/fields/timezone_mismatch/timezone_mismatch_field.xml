@@ -5,7 +5,7 @@
         <xpath expr="." position="inside">
             <span t-if="this.mismatch"
                 class="o_tz_warning fa fa-exclamation-triangle position-static align-self-center m-0 ms-2"
-                t-att-title="this.mismatchTitle" />
+                t-att-data-tooltip="this.mismatchTitle" />
         </xpath>
     </t>
 

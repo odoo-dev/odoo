@@ -12,7 +12,7 @@
                                     <img class="o_avatar o_user_avatar rounded me-2" t-attf-src="{{this.getAvatarUrl(user)}}" t-att-alt="user.login"/>
                                     <t t-out="user.name" />
                                 </span>
-                                <i class="fa fa-times" title="Remove user from switcher" t-on-click.stop="() => this.remove(user)"/>
+                                <i class="fa fa-times" data-tooltip="Remove user from switcher" t-on-click.stop="() => this.remove(user)"/>
                             </button>
                         </t>
                     </div>

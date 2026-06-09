@@ -21,13 +21,13 @@
                         <div t-if="!this.env.isSmall" class="o_calendar_navigation_buttons btn-group d-print-none">
                             <button
                                 class="o_calendar_button_prev btn btn-secondary d-none d-md-block"
-                                title="Previous"
+                                data-tooltip="Previous"
                                 aria-label="Previous"
                                 t-on-click.stop="() => this.setDate('previous')"
                             ><i class="oi oi-arrow-left"/></button>
                             <button
                                 class="o_calendar_button_next btn btn-secondary d-none d-md-block"
-                                title="Next"
+                                data-tooltip="Next"
                                 aria-label="Next"
                                 t-on-click.stop="() => this.setDate('next')"
                             ><i class="oi oi-arrow-right"/></button>

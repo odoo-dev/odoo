@@ -55,7 +55,7 @@
                                 <div>
                                     <button
                                         class="btn btn-link text-danger fa fa-trash py-0"
-                                        title="Discard offline changes"
+                                        data-tooltip="Discard offline changes"
                                         data-available-offline=""
                                         t-on-click.stop="() => this.discard(element.id)"/>
                                 </div>

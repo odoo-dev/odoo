@@ -193,7 +193,7 @@
                             attrs="control.attrs"
                             record="this.props.list"
                             string="control.string"
-                            title="control.title"
+                            data-tooltip="control.title"
                             tabindex="this.props.list.editedRecord ? '-1' : '0'"
                         />
                     </t>
@@ -264,7 +264,7 @@
                                         icon="button.icon"
                                         record="group.record"
                                         string="button.string"
-                                        title="button.title"
+                                        data-tooltip="button.title"
                                         tabindex="'-1'"
                                     />
                                 </t>
@@ -385,7 +385,7 @@
                                     icon="button.icon"
                                     record="record"
                                     string="button.string"
-                                    title="button.title"
+                                    data-tooltip="button.title"
                                     tabindex="this.editedRecord() ? '-1' : '0'"
                                     onClick="this.isX2Many and record.isNew ? this.displaySaveNotification.bind(this) : ''"
                                 />

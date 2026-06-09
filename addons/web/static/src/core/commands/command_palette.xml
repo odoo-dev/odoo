@@ -14,8 +14,8 @@
               aria-haspopup="listbox"
           />
           <div class="input-group-text border-0 bg-transparent">
-              <i t-if="this.state.isLoading" title="Loading..." role="img" aria-label="Loading..." class="fa fa-circle-o-notch fa-spin"/>
-              <i t-else="" t-att-title="this.state.placeholder" role="img"  t-att-aria-label="this.state.placeholder" class="oi oi-search"/>
+              <i t-if="this.state.isLoading" data-tooltip="Loading..." role="img" aria-label="Loading..." class="fa fa-circle-o-notch fa-spin"/>
+              <i t-else="" t-att-data-tooltip="this.state.placeholder" role="img"  t-att-aria-label="this.state.placeholder" class="oi oi-search"/>
           </div>
         </div>
 
@@ -36,7 +36,7 @@
                   <a t-att-href="command.href" t-att-class="command.className">
                     <t t-component="command.Component || this.DefaultCommandItem" name="command.name" searchValue="this.state.searchValue" t-props="command.props" executeCommand="() => this.executeCommand(command)">
                       <t t-set-slot="name">
-                        <span class="o_command_name text-ellipsis" t-att-title="command.name" t-out="command.text"/>
+                        <span class="o_command_name text-ellipsis" t-att-data-tooltip="command.name" t-out="command.text"/>
                       </t>
                       <t t-set-slot="focusMessage">
                           <small t-if="!this.hasTouch and command.href and this.state.selectedCommand === command" class="o_command_focus text-muted"><kbd><t t-if="this.isMacOS">CMD</t><t t-else="">CTRL</t></kbd>+<kbd>⏎</kbd><span class="ms-1">new tab</span></small>

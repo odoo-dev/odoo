@@ -82,7 +82,7 @@ test("handle RPC_ERROR of type='server' and no associated dialog class", async (
 
 test("handle custom RPC_ERROR of type='server' and associated custom dialog class", async () => {
     class CustomDialog extends Component {
-        static template = xml`<RPCErrorDialog title="'Strange Error'"/>`;
+        static template = xml`<RPCErrorDialog data-tooltip="'Strange Error'"/>`;
         static components = { RPCErrorDialog };
         static props = { ...standardErrorDialogProps };
     }
@@ -125,12 +125,12 @@ test("handle custom RPC_ERROR of type='server' and associated custom dialog clas
 
 test("handle normal RPC_ERROR of type='server' and associated custom dialog class", async () => {
     class CustomDialog extends Component {
-        static template = xml`<RPCErrorDialog title="'Strange Error'"/>`;
+        static template = xml`<RPCErrorDialog data-tooltip="'Strange Error'"/>`;
         static components = { RPCErrorDialog };
         static props = ["*"];
     }
     class NormalDialog extends Component {
-        static template = xml`<RPCErrorDialog title="'Normal Error'"/>`;
+        static template = xml`<RPCErrorDialog data-tooltip="'Normal Error'"/>`;
         static components = { RPCErrorDialog };
         static props = ["*"];
     }

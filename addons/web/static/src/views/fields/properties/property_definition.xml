@@ -7,7 +7,7 @@
                 <button
                     t-if="!this.props.readonly and this.props.canChangeDefinition"
                     class="btn pe-0 text-danger float-end o_field_property_definition_delete"
-                    title="Remove Property"
+                    data-tooltip="Remove Property"
                     t-on-click="this.props.onDelete">
                     <i class="fa fa-trash"/> Delete
                 </button>
@@ -104,7 +104,7 @@
                             className="'d-inline-block me-2'"
                         />
                         <div t-if="this.state.matchingRecordsCount !== undefined" class="d-inline-block">
-                            <i class="oi oi-arrow-right" role="img" title="Domain"/>
+                            <i class="oi oi-arrow-right" role="img" data-tooltip="Domain"/>
                             <button class="btn btn-sm btn-secondary" type="button"
                                 t-on-click.stop="this.onButtonDomainClick">
                                 <t t-out="this.state.matchingRecordsCount"/> record(s)
@@ -162,7 +162,7 @@
                     class="o_field_property_definition_kanban d-contents mb-3 mb-sm-0">
                     <label t-att-for="this.getUniqueDomID('kanban')" class="o_form_label align-self-center text-900">
                         Display in Cards
-                        <sup class="text-info" title="Whether or not this Property Field is displayed in the Calendar, Cards &amp; Kanban views">?</sup>
+                        <sup class="text-info" data-tooltip="Whether or not this Property Field is displayed in the Calendar, Cards &amp; Kanban views">?</sup>
                     </label>
                     <CheckBox
                         id="this.getUniqueDomID('kanban')"
@@ -192,7 +192,7 @@
                 <button
                     t-if="!this.props.readonly and this.props.canChangeDefinition"
                     class="ms-auto btn btn-danger o_field_property_definition_delete"
-                    title="Remove Property"
+                    data-tooltip="Remove Property"
                     t-on-click="this.props.onDelete">
                     <i class="fa fa-trash"/> Delete
                 </button>

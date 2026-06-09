@@ -23,7 +23,7 @@
                                 icon="control.icon"
                                 record="this.props.record.data[this.props.name]"
                                 string="control.string"
-                                title="control.title"
+                                data-tooltip="control.title"
                             />
                         </t>
                     </div>

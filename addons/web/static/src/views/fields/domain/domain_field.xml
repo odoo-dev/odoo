@@ -54,9 +54,9 @@
                         />
                     </div>
                     <div class="o_field_domain_panel d-flex align-items-center gap-2 mt-1">
-                        <i class="oi oi-arrow-right" role="img" aria-label="Domain" title="Domain" />
+                        <i class="oi oi-arrow-right" role="img" aria-label="Domain" data-tooltip="Domain" />
                         <t t-if="this.state.isValid === null and this.state.recordCount === null">
-                            <i class="fa fa-circle-o-notch fa-spin ms-2" role="img" aria-label="Loading" title="Loading" />
+                            <i class="fa fa-circle-o-notch fa-spin ms-2" role="img" aria-label="Loading" data-tooltip="Loading" />
                         </t>
                         <t t-else="">
                             <t t-if="this.state.isValid">
@@ -66,7 +66,7 @@
                             </t>
                             <t t-else="">
                                 <span class="text-warning" role="alert">
-                                    <i class="fa fa-exclamation-triangle" role="img" aria-label="Warning" title="Warning" /> Invalid domain
+                                    <i class="fa fa-exclamation-triangle" role="img" aria-label="Warning" data-tooltip="Warning" /> Invalid domain
                                 </span>
                             </t>
                             <t t-if="!!this.env.debug and !this.props.readonly">
@@ -74,7 +74,7 @@
                                     class="btn btn-sm btn-icon fa fa-refresh o_refresh_count"
                                     role="img"
                                     aria-label="Refresh"
-                                    title="Refresh"
+                                    data-tooltip="Refresh"
                                     t-on-click="() => this.checkProps()"
                                 />
                             </t>

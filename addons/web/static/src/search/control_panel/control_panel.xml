@@ -24,7 +24,7 @@
                     <div class="o_control_panel_main_buttons d-flex gap-1 d-empty-none d-print-none text-nowrap" t-on-keydown="this.onMainButtonsKeydown">
                         <t t-if="this.display.buttons" t-call-slot="control-panel-buttons"/>
                         <Dropdown t-if="this.env.isSmall" menuClass="'o-control-panel-adaptive-dropdown'" onOpened.bind="this.dropdownifyButtons">
-                            <button class="btn btn-secondary o-control-panel-adaptive-dropdown" title="More">
+                            <button class="btn btn-secondary o-control-panel-adaptive-dropdown" data-tooltip="More">
                                 <i class="oi oi-fw oi-ellipsis-v" />
                             </button>
                             <t t-set-slot="content">
@@ -85,7 +85,7 @@
                     <button t-if="this.state.embeddedInfos.embeddedActions?.length and !this.env.isSmall" name="embedded_actions" class="btn btn-secondary"
                             t-att-class="{active: this.state.embeddedInfos.showEmbedded}"
                             t-on-click="this.onClickShowEmbedded"
-                            title="View related documents">
+                            data-tooltip="View related documents">
                         <i class="fa fa-sliders" />
                     </button>
                     <t t-if="this.env.config.viewSwitcherEntries?.length > 1">
@@ -144,7 +144,7 @@
                     >
                         <div class="d-flex p-0 pe-1 align-items-center justify-content-between">
                             <span t-out="action.name"/>
-                            <i t-if="action.is_deletable" class="o_icon_right btn btn-link text-danger p-0 position-absolute end-0 fa fa-trash-o" title="Delete item" t-on-click.stop="() => this.openConfirmationDialog(action)" />
+                            <i t-if="action.is_deletable" class="o_icon_right btn btn-link text-danger p-0 position-absolute end-0 fa fa-trash-o" data-tooltip="Delete item" t-on-click.stop="() => this.openConfirmationDialog(action)" />
                         </div>
                     </DropdownItem>
                 </t>

@@ -16,7 +16,7 @@
                         name="action_open_record"
                         type="object"
                         icon="fa-external-link"
-                        title="Open record"
+                        data-tooltip="Open record"
                         class="oe_highlight"
                     />
                 </list>

@@ -72,18 +72,18 @@
                                 <label for="login" class="d-md-none"/>
                                 <div class="d-flex align-items-baseline w-md-50 gap-2">
                                     <field name="email" invisible="1"/> <!-- needed to update partner's email from on_change_login() -->
-                                    <i class="d-none d-md-inline-flex fa fa-envelope" title="Email"/>
+                                    <i class="d-none d-md-inline-flex fa fa-envelope" data-tooltip="Email"/>
                                     <field name="email_domain_placeholder" invisible="1" /> <!-- needed to compute the placeholder whenever the dialog opens -->
                                     <field name="login" options="{'placeholder_field': 'email_domain_placeholder'}"/>
                                 </div>
                                 <label for="phone" class="d-md-none"/>
                                 <div class="d-flex align-items-baseline w-md-50 gap-2">
-                                    <i class="d-none d-md-inline-flex fa fa-phone" title="Phone"/>
+                                    <i class="d-none d-md-inline-flex fa fa-phone" data-tooltip="Phone"/>
                                     <field name="phone" widget="phone" placeholder="Phone"/>
                                 </div>
                                 <label for="company_id" class="d-md-none" groups="base.group_multi_company"/>
                                 <div class="d-flex align-items-baseline w-md-50 gap-2" groups="base.group_multi_company">
-                                    <i class="d-none d-md-inline-flex fa fa-building" title="Company"/>
+                                    <i class="d-none d-md-inline-flex fa fa-building" data-tooltip="Company"/>
                                     <field name="company_id" context="{'user_preference': 0}" placeholder="Company"/>
                                 </div>
                             </group>
@@ -117,8 +117,8 @@
                                 <field string="Record Rules" name="rules_count" widget="statinfo"/>
                             </button>
                         </div>
-                        <widget name="web_ribbon" title="External user" bg_color="text-bg-warning" invisible="not share"/>
-                        <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                        <widget name="web_ribbon" data-tooltip="External user" bg_color="text-bg-warning" invisible="not share"/>
+                        <widget name="web_ribbon" data-tooltip="Archived" bg_color="text-bg-danger" invisible="active"/>
                         <div class="alert alert-info text-center o_form_header"
                             invisible="active and active_partner or not active and not active_partner or active and not active_partner"
                             role="alert">
@@ -140,18 +140,18 @@
                                 </h1>
                                 <label for="login" class="d-md-none"/>
                                 <div name="login" class="d-flex align-items-baseline w-md-50 gap-2">
-                                    <i class="d-none d-md-block fa fa-envelope" title="Login / Email" invisible="login != email"/>
-                                    <i class="d-none d-md-block fa fa-key" title="Login" invisible="login == email"/>
+                                    <i class="d-none d-md-block fa fa-envelope" data-tooltip="Login / Email" invisible="login != email"/>
+                                    <i class="d-none d-md-block fa fa-key" data-tooltip="Login" invisible="login == email"/>
                                     <field name="login" placeholder="Login"/>
                                 </div>
                                 <label for="email" class="d-md-none" invisible="login == email"/>
                                 <div name="email" class="d-flex align-items-baseline w-md-50 gap-2" invisible="login == email">
-                                    <i class="d-none d-md-block fa fa-envelope" title="Email"/>
+                                    <i class="d-none d-md-block fa fa-envelope" data-tooltip="Email"/>
                                     <field name="email" placeholder="Email"/>
                                 </div>
                                 <label for="phone" class="d-md-none"/>
                                 <div name="phone" class="d-flex align-items-baseline w-md-50 gap-2">
-                                    <i class="d-none d-md-block fa fa-phone" title="Phone"/>
+                                    <i class="d-none d-md-block fa fa-phone" data-tooltip="Phone"/>
                                     <field name="phone" placeholder="Phone"/>
                                 </div>
                             </group>
@@ -184,7 +184,7 @@
                                                 class="oe_edit_only btn-sm btn-link mb4 fa fa-globe"
                                                 groups="base.group_system"
                                                 aria-label="Add a language"
-                                                title="Add a language"/>
+                                                data-tooltip="Add a language"/>
                                         </div>
                                         <field name="signature" options="{'codeview': true, 'height': 112, 'resizable': true}" class="o_field_border_visible"/>
                                     </group>
@@ -281,15 +281,15 @@
                             <main class="w-100 ps-2 pt-1">
                                 <div>
                                     <div t-if="record.active.raw_value" class="text-success float-end mb4">
-                                        <i class="fa fa-circle" role="img" aria-label="Ok" title="Ok"></i>
+                                        <i class="fa fa-circle" role="img" aria-label="Ok" data-tooltip="Ok"></i>
                                     </div>
                                     <div t-else="" class="text-danger float-end mb4">
-                                        <i class="fa fa-circle" role="img" aria-label="Invalid" title="Invalid"></i>
+                                        <i class="fa fa-circle" role="img" aria-label="Invalid" data-tooltip="Invalid"></i>
                                     </div>
                                     <field class="fw-bold" name="name"/>
                                 </div>
                                 <div>
-                                    <span class="mb4 text-truncate" title="Login">
+                                    <span class="mb4 text-truncate" data-tooltip="Login">
                                         <i class="fa fa-envelope me-1" role="img" aria-label="Login"></i>
                                         <field name="login"/>
                                     </span>
@@ -424,12 +424,12 @@
                                 </h1>
                                 <label for="email" class="d-md-none"/>
                                 <div name="email" class="d-flex align-items-baseline w-md-50 gap-2">
-                                    <i class="d-none d-md-inline-flex fa fa-fw fa-envelope" title="Email"/>
+                                    <i class="d-none d-md-inline-flex fa fa-fw fa-envelope" data-tooltip="Email"/>
                                     <field name="email" placeholder="Email"/>
                                 </div>
                                 <label for="phone" class="d-md-none"/>
                                 <div name="phone" class="d-flex align-items-baseline w-md-50 gap-2">
-                                    <i class="d-none d-md-inline-flex fa fa-fw fa-phone" title="Phone"/>
+                                    <i class="d-none d-md-inline-flex fa fa-fw fa-phone" data-tooltip="Phone"/>
                                     <field name="phone" placeholder="Phone"/>
                                 </div>
                             </group>
@@ -447,7 +447,7 @@
                                                 class="oe_edit_only btn-sm btn-link mb4 fa fa-globe"
                                                 aria-label="Add a language"
                                                 groups="base.group_system"
-                                                title="Add a language"
+                                                data-tooltip="Add a language"
                                             />
                                         </div>
                                         <field name="signature" readonly="0" options="{'codeview': true, 'height': 112, 'resizable': true}" class="o_field_border_visible" />
@@ -540,7 +540,7 @@
                     <field name="name"/>
                     <field name="scope"/>
                     <field name="create_date"/>
-                    <button type="object" name="remove" title="Delete API key." icon="fa-trash"/>
+                    <button type="object" name="remove" data-tooltip="Delete API key." icon="fa-trash"/>
                 </list>
             </field>
         </record>

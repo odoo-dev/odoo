@@ -2302,7 +2302,7 @@ actual arch.
 
     def _validate_fa_class_accessibility(self, node, description):
         valid_aria_attrs = {
-            *att_names('title'), *att_names('aria-label'), *att_names('aria-labelledby'),
+            *att_names('title'), *att_names('data-tooltip'), *att_names('aria-label'), *att_names('aria-labelledby'),
         }
         valid_t_attrs = {'t-value', 't-field', 't-out'}
 

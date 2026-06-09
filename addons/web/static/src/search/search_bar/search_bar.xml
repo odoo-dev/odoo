@@ -37,11 +37,11 @@
                 <div class="o_facet_values position-relative d-flex flex-wrap align-items-center ps-2 rounded-end-2 text-wrap overflow-hidden">
                     <t t-foreach="facet.values" t-as="facetValue" t-key="facetValue_index">
                         <em t-if="!facetValue_first" class="o_facet_values_sep small fw-bold mx-1 opacity-50" t-out="facet.separator"/>
-                        <small class="o_facet_value text-truncate" t-out="facetValue" t-att-title="facet.tooltip or facetValue"/>
+                        <small class="o_facet_value text-truncate" t-out="facetValue" t-att-data-tooltip="facet.tooltip or facetValue"/>
                     </t>
                     <button class="o_facet_remove oi oi-close btn btn-link py-0 px-2 text-danger d-print-none"
                         aria-label="Remove"
-                        title="Remove"
+                        data-tooltip="Remove"
                         t-on-click="() => this.onFacetRemove(facet)"
                         tabindex="-1"
                     />
@@ -66,7 +66,7 @@
                         <i t-attf-class="fa fa-caret-{{ item.isExpanded ? 'down' : 'right' }}"/>
                     </a>
                 </t>
-                <a href="#" t-on-click.prevent="" t-att-class="{'ps-3 pe-2 text-truncate': item.isFieldProperty }" t-att-title="item.title">
+                <a href="#" t-on-click.prevent="" t-att-class="{'ps-3 pe-2 text-truncate': item.isFieldProperty }" t-att-data-tooltip="item.title">
                     <t t-if="item.isAddCustomFilterButton"><span class="text-action">Custom Filter...</span></t>
                     <t t-elif="item.loadMore"><span class="text-action"><t t-out="item.label"/></span></t>
                     <t t-elif="item.isChild">
@@ -95,7 +95,7 @@
                     role="search" aria-autocomplete="list">
                     <button class="d-print-none btn border-0 p-0"
                         aria-label="Search..."
-                        title="Search..."
+                        data-tooltip="Search..."
                         t-on-click="this.onClickSearchIcon"
                     >
                         <i class="o_searchview_icon oi oi-search me-2"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="web.DocumentationLink">
-        <a t-att-href="this.url" title="Documentation" t-att-class="this.classes" target="_blank">
+        <a t-att-href="this.url" data-tooltip="Documentation" t-att-class="this.classes" target="_blank">
             <t t-if="!this.props.icon and !this.props.label">
                 <i class="fa fa-external-link" aria-hidden="true"></i>
                 <span>View Documentation</span>

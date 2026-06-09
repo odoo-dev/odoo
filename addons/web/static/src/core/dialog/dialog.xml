@@ -39,7 +39,7 @@
             <button type="button" class="fa fa-expand btn opacity-50 opacity-100-hover o_expand_button" aria-label="Expand" tabindex="-1" t-on-click="onExpand" data-available-offline=""/>
         </t>
         <t t-if="!fullscreen">
-            <button type="button" class="btn-close" title="Close" t-att-class="{'position-sm-absolute top-0 end-0': this.design == 'minimal' and !onExpand }" aria-label="Close" tabindex="-1" t-on-click="dismiss or this.dismiss" data-available-offline=""/>
+            <button type="button" class="btn-close" data-tooltip="Close" t-att-class="{'position-sm-absolute top-0 end-0': this.design == 'minimal' and !onExpand }" aria-label="Close" tabindex="-1" t-on-click="dismiss or this.dismiss" data-available-offline=""/>
         </t>
     </t>
 </templates>
