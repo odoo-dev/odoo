@@ -306,6 +306,13 @@ export class CalendarCommonRenderer extends Component {
             }, 250);
         }
     }
+    getEventTemplateProps(record) {
+        return {
+            ...record,
+            startTime: this.getStartTime(record),
+            endTime: this.getEndTime(record),
+        };
+    }
     onEventContent(arg) {
         const { event } = arg;
         if (event.start && event.end) {
@@ -316,9 +323,7 @@ export class CalendarCommonRenderer extends Component {
         if (record) {
             // This is needed in order to give the possibility to change the event template.
             const fragment = renderToFragment(this.constructor.eventTemplate, {
-                ...record,
-                startTime: this.getStartTime(record),
-                endTime: this.getEndTime(record),
+                ...this.getEventTemplateProps(record),
             });
             return { domNodes: fragment.children };
         }
