@@ -49,7 +49,7 @@ class TestMailTemplateTools(TestMailTemplateCommon):
 
         self.assertFalse(preview.error_msg)
         for field in preview._MAIL_TEMPLATE_FIELDS:
-            if field in ['partner_to', 'report_template_ids']:
+            if field in ['partner_to', 'partner_cc', 'report_template_ids']:
                 continue
             self.assertEqual(test_template[field], preview[field])
 

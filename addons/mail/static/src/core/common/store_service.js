@@ -570,14 +570,14 @@ export class Store extends BaseStore {
             body: await generateEmojisOnHtml(body),
             email_add_signature: emailAddSignature,
             message_type: "comment",
+            partner_cc_emails: [],
+            partner_cc_ids: [],
+            partner_emails: [],
+            partner_ids: validMentions?.partners.map((partner) => partner.id) ?? [],
+            role_ids: validMentions?.roles.map((role) => role.id) ?? [],
             subtype_xmlid: subtype,
             subject,
         };
-        postData.partner_ids = validMentions?.partners.map((partner) => partner.id) ?? [];
-        postData.partner_emails = [];
-        postData.partner_cc_ids = [];
-        postData.partner_cc_emails = [];
-        postData.role_ids = validMentions?.roles.map((role) => role.id) ?? [];
         if (!isNote) {
             for (const recipient of [
                 ...thread.suggestedRecipients,

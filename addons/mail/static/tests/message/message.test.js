@@ -1399,7 +1399,7 @@ test("Notification Sent", async () => {
     await contains(".o-mail-MessageNotificationPopover:text('ToSomeone CcSomeoneInCc')");
 });
 
-test("Notification Incoming", async () => {
+test("Check notification popover for incoming messages", async () => {
     const pyEnv = await startServer();
     const [threadId, partnerId] = pyEnv["res.partner"].create([
         {},

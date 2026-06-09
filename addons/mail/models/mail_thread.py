@@ -1457,8 +1457,12 @@ class MailThread(models.AbstractModel):
             if new_msg and (original_partner_ids or original_partner_cc_ids):
                 # postponed after message_post, because this is an external message and we don't want to create
                 # duplicate emails due to notifications
-                new_msg.write(({'partner_ids': original_partner_ids} if original_partner_ids else {}) |
-                              ({'partner_cc_ids': original_partner_cc_ids} if original_partner_cc_ids else {}))
+                update_vals = {}
+                if original_partner_ids:
+                    update_vals['partner_ids'] = original_partner_ids
+                if original_partner_cc_ids:
+                    update_vals['partner_cc_ids'] = original_partner_cc_ids
+                new_msg.write(update_vals)
         return thread.with_env(self.env)
 
     @api.model
@@ -1826,9 +1830,10 @@ class MailThread(models.AbstractModel):
                 { 'message_id': msg_id,
                   'subject': subject,
                   'email_from': from,
-                  'to': to + delivered-to,
+                  'to': to + delivered-to (unless in cc),
                   'cc': cc,
-                  'recipients': delivered-to + to + cc + resent-to + resent-cc,
+                  'recipients': delivered-to (unless in recipients_cc) + to + resent-to,
+                  'recipients_cc': cc + resent-cc
                   'body': unified_body,
                   'references': references,
                   'in_reply_to': in-reply-to,
@@ -1855,40 +1860,24 @@ class MailThread(models.AbstractModel):
             msg_dict['subject'] = decode_message_header(message, 'Subject')
 
         email_from = decode_message_header(message, 'From', separator=',')
-        email_cc = decode_message_header(message, 'cc', separator=',')
         email_from_list = email_split_and_format(email_from)
-        email_cc_list = email_split_and_format(email_cc)
         msg_dict['email_from'] = email_from_list[0] if email_from_list else email_from
         msg_dict['from'] = msg_dict['email_from']  # compatibility for message_new
-        msg_dict['cc'] = ','.join(email_cc_list) if email_cc_list else email_cc
         # Delivered-To is a safe bet in most modern MTAs, but we have to fallback on To + Cc values
         # for all the odd MTAs out there, as there is no standard header for the envelope's `rcpt_to` value.
-        recipients_cc = {
-            formatted_email
-            for address in [
-                decode_message_header(message, 'Cc', separator=','),
-                decode_message_header(message, 'Resent-Cc', separator=',')
-            ] if address
-            for formatted_email in email_split_and_format(address)}
-        recipients = {
-            formatted_email
-            for address in [
-                decode_message_header(message, 'Delivered-To', separator=','),
-                decode_message_header(message, 'To', separator=','),
-                decode_message_header(message, 'Resent-To', separator=','),
-            ] if address
-            for formatted_email in email_split_and_format(address)}
+        # We support Ccs but Delivered-To is interpreted as "To" recipients unless present in the Cc/Resent-Cc headers.
+        delivered_to_emails, to_header_emails, resent_to_header_emails, cc_header_emails, resent_cc_header_emails = [
+            set(email_split_and_format(decode_message_header(message, field, separator=',')))
+            for field in ('Delivered-To', 'To', 'Resent-To', 'Cc', 'Resent-Cc')
+        ]
+        recipients_cc = cc_header_emails | resent_cc_header_emails
+        recipients = to_header_emails | delivered_to_emails.difference(recipients_cc) | resent_to_header_emails
         msg_dict['recipients'] = ','.join(recipients)
         msg_dict['recipients_cc'] = ','.join(recipients_cc.difference(recipients))
-        email_to_list = list({
-            formatted_email
-            for address in [
-                decode_message_header(message, 'Delivered-To', separator=','),
-                decode_message_header(message, 'To', separator=',')
-            ] if address
-            for formatted_email in email_split_and_format(address)
-        })
+        email_to_list = list(to_header_emails | delivered_to_emails.difference(cc_header_emails))
+        email_cc_list = list(cc_header_emails)
         msg_dict['to'] = ','.join(email_to_list)
+        msg_dict['cc'] = ','.join(email_cc_list)
         # filtered to / cc, excluding aliases
         recipients_normalized_all = email_normalize_all(f'{msg_dict["to"]},{msg_dict["cc"]}')
         alias_emails = self.env['mail.alias.domain'].sudo()._find_aliases(recipients_normalized_all)
@@ -2330,7 +2319,8 @@ class MailThread(models.AbstractModel):
                   pids=repr(partner_cc_ids),
                  )
             )
-        partner_cc_ids = list(partner_cc_ids or [])
+        # If a partner is in "To" and "Cc", "To" wins.
+        partner_cc_ids = [pid for pid in list(partner_cc_ids or []) if pid not in partner_ids]
         all_partner_ids = partner_ids + partner_cc_ids
 
         # split message additional values from notify additional values
@@ -3984,7 +3974,7 @@ class MailThread(models.AbstractModel):
         # including external people (aka share partners to notify + emails
         # notified by incoming email (incoming_email_cc and incoming_email_to)
         # that were not transformed into partners to notify
-        external_emails = [
+        external_emails_info = [
             (formataddr((r['name'], r['email_normalized'])), r['is_cc'])
             for r in recipients_data if r['active'] and r['email_normalized'] and r['share']
         ]
@@ -3992,15 +3982,15 @@ class MailThread(models.AbstractModel):
             r['email_normalized']
             for r in recipients_data if r['active'] and r['email_normalized'] and r['share']
         ]
-        external_emails += list({
+        external_emails_info += list({
             (email, is_cc) for email, is_cc in chain(
                 zip(email_split_and_format_normalize(message_sudo.incoming_email_to or ''), repeat(False)),
                 zip(email_split_and_format_normalize(message_sudo.incoming_email_cc or ''), repeat(True)))
             if email_normalize(email) not in external_emails_normalized
         })
-        if external_emails and len(external_emails) < self._CUSTOMER_HEADERS_LIMIT_COUNT:  # more than threshold = considered as public record (slide, forum, ...) -> do not leak
-            headers['X-Msg-To-Add'] = ','.join(email for email, is_cc in external_emails if not is_cc)
-            headers['X-Msg-Cc-Add'] = ','.join(email for email, is_cc in external_emails if is_cc)
+        if external_emails_info and len(external_emails_info) < self._CUSTOMER_HEADERS_LIMIT_COUNT:  # more than threshold = considered as public record (slide, forum, ...) -> do not leak
+            headers['X-Msg-To-Add'] = ','.join(email for email, is_cc in external_emails_info if not is_cc)
+            headers['X-Msg-Cc-Add'] = ','.join(email for email, is_cc in external_emails_info if is_cc)
         # sudo: access to mail.alias.domain, restricted
         if message_sudo.record_alias_domain_id.bounce_email:
             headers['Return-Path'] = message_sudo.record_alias_domain_id.bounce_email

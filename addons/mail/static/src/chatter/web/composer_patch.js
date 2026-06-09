@@ -85,8 +85,4 @@ patch(Composer.prototype, {
     get subject() {
         return this.subjectInputRef.el?.value;
     },
-
-    toggleIsCcEnabled() {
-        this.chatterState.isCcEnabled = !this.chatterState.isCcEnabled;
-    },
 });

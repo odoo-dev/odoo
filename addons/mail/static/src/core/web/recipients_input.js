@@ -225,8 +225,12 @@ export class RecipientsInput extends Component {
                 bus: this.recipientCheckerBus,
             });
         };
-        for (const recipient of this.getAllMailThreadRecipients()) {
-            createTagForRecipient(recipient, "suggestedRecipients");
+        for (const recipientField of ["suggestedRecipients", "additionalRecipients"]) {
+            for (const recipient of this.props.thread[recipientField].filter(
+                (r) => r.recipient_type === this.props.recipientType
+            )) {
+                createTagForRecipient(recipient, recipientField);
+            }
         }
         return tags;
     }

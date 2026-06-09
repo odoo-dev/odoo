@@ -18,12 +18,6 @@ export class MessageNotificationPopover extends Component {
         const messagePartnerCcIds = message.partner_cc_ids ?? [];
         const toTitle = _t("To"),
             ccTitle = _t("Cc");
-        const orderFollower = 3,
-            orderIncoming = 2,
-            orderOther = 1;
-        const sectionOrderTo = 0,
-            sectionOrderCc = 10,
-            sectionOrderUnknown = 20;
         const data = this.props.message.notification_ids.map((notification) => {
             const email = notification.mail_email_address || notification.res_partner_id?.email;
             const failure = notification.isFailure && notification.failureMessage;
@@ -32,7 +26,7 @@ export class MessageNotificationPopover extends Component {
                 return {
                     email,
                     failure,
-                    order: sectionOrderUnknown + (isFollower ? orderFollower : orderOther),
+                    isFollower,
                 };
             }
             const isCc = messagePartnerCcIds.includes(notification.res_partner_id);
@@ -41,9 +35,8 @@ export class MessageNotificationPopover extends Component {
                 email,
                 recipientTypeTitle: isCc ? ccTitle : toTitle,
                 failure,
-                order:
-                    (isCc ? sectionOrderCc : sectionOrderTo) +
-                    (isFollower ? orderFollower : orderOther),
+                isCc,
+                isFollower,
                 notification: notification,
             };
         });
@@ -57,10 +50,19 @@ export class MessageNotificationPopover extends Component {
             data.push({
                 name,
                 email,
+                isCc,
+                isFollower: false,
                 recipientTypeTitle: isCc ? ccTitle : toTitle,
-                order: (isCc ? sectionOrderCc : sectionOrderTo) + orderIncoming,
             });
         });
-        return data.sort((r1, r2) => r1.order - r2.order).map(({ order, ...filtered }) => filtered);
+        return data
+            .sort(
+                // To, Cc, unknown (within each section, follower at the end)
+                (a, b) =>
+                    (a.isCc === undefined) - (b.isCc === undefined) ||
+                    a.isCc - b.isCc ||
+                    a.isFollower - b.isFollower
+            )
+            .map(({ isCc, isFollower, ...filtered }) => filtered);
     }
 }

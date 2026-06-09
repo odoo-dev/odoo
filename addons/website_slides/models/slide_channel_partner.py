@@ -237,14 +237,16 @@ class SlideChannelPartner(models.Model):
 
             if not email_values:
                 continue
-            partner_ids = (email_values.get('partner_ids') or []) + (email_values.get('partner_cc_ids') or [])
-            if not partner_ids:
+            partner_ids = email_values.get('partner_ids') or []
+            partner_cc_ids = email_values.get('partner_cc_ids') or []
+            if not partner_ids and not partner_cc_ids:
                 continue
 
             email_values.update(
                 author_id=record.channel_id.user_id.partner_id.id or self.env.company.partner_id.id,
                 auto_delete=True,
                 recipient_ids=[(4, pid) for pid in partner_ids],
+                recipient_cc_ids=[(4, pid) for pid in partner_cc_ids],
             )
             email_values['body_html'] = template._render_encapsulate(
                 'mail.mail_notification_light', email_values['body_html'],

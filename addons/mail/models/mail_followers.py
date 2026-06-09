@@ -322,6 +322,7 @@ class MailFollowers(models.Model):
                     'active': is_active,
                     'email_normalized': email_normalized,
                     'id': partner_id,
+                    'is_cc': False,
                     'is_follower': is_follower,
                     'lang': lang,
                     'name': name,

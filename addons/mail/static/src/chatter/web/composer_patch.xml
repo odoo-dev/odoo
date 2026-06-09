@@ -9,7 +9,7 @@
                         recipientType="'to'"
                         placeholder.translate="Followers only"/>
                     <button class="btn btn-sm" t-if="!this.chatterState.isCcEnabled"
-                        t-on-click="() => this.toggleIsCcEnabled()">Cc</button>
+                        t-on-click="() => (this.chatterState.isCcEnabled = true)">Cc</button>
                 </div>
                 <div t-if="this.chatterState.isCcEnabled" class="d-flex">
                     <span class="flex-shrink-0 text-end fw-bold" style="width:55px">Cc: </span>

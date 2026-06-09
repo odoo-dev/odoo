@@ -3,7 +3,6 @@
 
 import ast
 import datetime
-from itertools import chain, repeat
 import json
 import logging
 import re
@@ -459,16 +458,17 @@ class MailMail(models.Model):
                     'partner_id': False,
                 })
         # specific behavior to customize the send email for notified partners
-        for partner, is_cc in chain(zip(self.recipient_ids, repeat(False)), zip(self.recipient_cc_ids, repeat(True))):
+        for partner in self.recipient_ids | self.recipient_cc_ids:
+            is_cc = partner not in self.recipient_ids
             # check partner email content
             email_to_normalized = tools.mail.email_normalize_all(partner.email)
-            email = [
+            partner_email = [
                 tools.formataddr((partner.name or "", email or "False"))
                 for email in email_to_normalized or [partner.email]
             ]
             email_list.append({
-                'email_cc': email if is_cc else [],
-                'email_to': email if not is_cc else [],
+                'email_cc': partner_email if is_cc else [],
+                'email_to': partner_email if not is_cc else [],
                 # list of normalized emails to help extract_rfc2822
                 'email_to_normalized': email_to_normalized,
                 # keep raw initial value for incoming pre processing of outgoing emails
@@ -646,11 +646,11 @@ class MailMail(models.Model):
                     'headers': mail.headers,
                     'mail_message_id': mail.mail_message_id.id,
                     'recipient_ids': current_recipients.filtered(lambda r: r in mail.recipient_ids),
-                    'recipient_cc_ids': current_recipients.filtered(lambda r: r in mail.recipient_cc_ids and r not in mail.recipient_ids),
+                    'recipient_cc_ids': current_recipients.filtered(lambda r: r not in mail.recipient_ids),
                 })
                 mail.write({
                     'recipient_ids': delayed_recipients.filtered(lambda r: r in mail.recipient_ids),
-                    'recipient_cc_ids': delayed_recipients.filtered(lambda r: r in mail.recipient_cc_ids and r not in mail.recipient_ids),
+                    'recipient_cc_ids': delayed_recipients.filtered(lambda r: r not in mail.recipient_ids),
                     'email_cc': False,
                     'email_to': False,
                 })

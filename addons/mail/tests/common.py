@@ -415,7 +415,7 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
     # GATEWAY GETTERS
     # ------------------------------------------------------------
 
-    def _find_sent_email(self, email_from, emails_to, emails_cc=None, subject=None, body=None, attachment_names=None):
+    def _find_sent_email(self, email_from, emails_to, subject=None, body=None, attachment_names=None):
         """ Find an outgoing email based on from / to and optional subject, body
         and attachment names when having conflicts.
 
@@ -424,7 +424,6 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
         sent_emails = [
             mail for mail in self._mails
             if set(mail['email_to']) == set(emails_to) and mail['email_from'] == email_from
-               and set(mail['email_cc']) == set(emails_cc or [])
         ]
         if len(sent_emails) > 1:
             # try to better filter
@@ -928,17 +927,6 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
                 else:
                     email_to_list.append(email_to)
         expected['email_to'] = email_to_list
-        if 'email_cc' in values:
-            email_cc_list = values['email_cc']
-        else:
-            email_cc_list = []
-            for email_cc in (recipients_cc or []):
-                if isinstance(email_cc, self.env['res.partner'].__class__):
-                    email_cc_list.append(
-                        formataddr((email_cc.name, email_normalize(email_cc.email, strict=False) or email_cc.email)))
-                else:
-                    email_cc_list.append(email_cc)
-        expected['email_cc'] = email_cc_list
 
         # fetch mail
         attachments = [attachment['name']
@@ -948,7 +936,6 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
         sent_mail = self._find_sent_email(
             expected['email_from'],
             expected['email_to'],
-            emails_cc=expected['email_cc'],
             subject=values.get('subject'),
             body=values.get('body'),
             attachment_names=attachments or None

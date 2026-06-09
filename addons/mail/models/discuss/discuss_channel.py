@@ -969,6 +969,7 @@ class DiscussChannel(models.Model):
             recipients_data.append({
                 "active": True,
                 "id": member.partner_id.id,
+                "is_cc": False,
                 "is_follower": False,
                 "groups": [],
                 "lang": member.partner_id.lang,
