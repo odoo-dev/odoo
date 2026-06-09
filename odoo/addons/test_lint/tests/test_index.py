@@ -283,12 +283,12 @@ class TestIndex(TransactionCase):
                 resolved_dependencies = list(field.resolve_depends(self.registry))
             except Exception:
                 # Custom fields can have invalid dependencies -> ignore them.
-                if not field.base_field.manual:
+                if not field.get_base_field(self.registry).manual:
                     raise
                 return
 
             for field_dep in resolved_dependencies:
-                field_dep = tuple(segment_field.base_field for segment_field in field_dep)
+                field_dep = tuple(segment_field.get_base_field(self.registry) for segment_field in field_dep)
 
                 leaf_field = field_dep[-1]
                 if leaf_field.compute and not leaf_field.store:

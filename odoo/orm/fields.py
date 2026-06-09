@@ -822,20 +822,20 @@ class Field[T]:
     def get_related_field(self, registry: Registry) -> Field:
         """Return the target field of a related field."""
         if not self.related:
-            return None
+            raise ValueError(f"Field {self} is not a related field")
 
-        field = self
+        models = registry.models
         model_name = self.model_name
-        for name in self.related.split('.'):
-            assert field is registry.models[field.model_name]._fields[field.name]
-            field = registry.models[model_name]._fields.get(name)
-            if field is None:
-                raise KeyError(
-                    f"Field {name} referenced in related field definition {self} does not exist."
-                )
-            model_name = field.comodel_name
-        assert field is registry.models[field.model_name]._fields[field.name]
-        return field
+        assert self is models[model_name]._fields[self.name]
+        try:
+            for name in self.related.split('.'):
+                field = models[model_name]._fields[name]
+                model_name = field.comodel_name
+            return field
+        except KeyError:
+            raise KeyError(
+                f"Field {self.related} referenced in related field {self} does not exist."
+            )
 
     def get_inherited_field(self, registry: Registry) -> Field | None:
         """Return the inherited target field, if any."""
