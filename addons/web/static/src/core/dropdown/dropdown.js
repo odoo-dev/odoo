@@ -1,8 +1,9 @@
-import { onRendered, reactive, useChildEnv, useLayoutEffect } from "@web/owl2/utils";
+import { reactive, useChildEnv, useLayoutEffect } from "@web/owl2/utils";
 import {
     Component,
     immediateEffect,
     onMounted,
+    onPatched,
     onWillDestroy,
     onWillUpdateProps,
     status,
@@ -178,7 +179,7 @@ export class Dropdown extends Component {
 
         // As the popover is in another context we need to force
         // its re-rendering when the dropdown re-renders
-        onRendered(() =>
+        onPatched(() =>
             untrack(() => (this.popoverRefresher ? this.popoverRefresher.token++ : null))
         );
 

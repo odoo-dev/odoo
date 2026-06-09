@@ -1,5 +1,5 @@
-import { onRendered, useLayoutEffect, useRef } from "@web/owl2/utils";
-import { onMounted, proxy } from "@odoo/owl";
+import { useLayoutEffect, useRef } from "@web/owl2/utils";
+import { onMounted, onPatched, proxy } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { useDebounced } from "@web/core/utils/timing";
@@ -72,7 +72,7 @@ export class ProductImageViewer extends Dialog {
             )?.addEventListener('load', this.updateCarousel.bind(this), { once: true });
         });
         // For some reason the styling does not always update properly.
-        onRendered(() => {
+        onPatched(() => {
             this.updateImage();
         })
     }

@@ -1,5 +1,4 @@
-import { onRendered } from "@web/owl2/utils";
-import { Component, onMounted, onWillDestroy, onWillStart, xml } from "@odoo/owl";
+import { Component, onMounted, onWillDestroy, onWillStart, useEffect, xml } from "@odoo/owl";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 export class DropdownPopover extends Component {
@@ -28,7 +27,7 @@ export class DropdownPopover extends Component {
     };
 
     setup() {
-        onRendered(() => {
+        useEffect(() => {
             // Note that the Dropdown component and the DropdownPopover component
             // are not in the same context.
             // So when the Dropdown component is re-rendered, the DropdownPopover
