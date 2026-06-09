@@ -10,6 +10,10 @@ from .fields_numeric import Integer
 from .fields_selection import Selection
 from .models import BaseModel
 
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 class Reference(Selection):
     """ Pseudo-relational field (no FK in database).
@@ -75,6 +79,20 @@ class Many2oneReference(Integer):
     _related_model_field = property(attrgetter('model_field'))
 
     _description_model_field = property(attrgetter('model_field'))
+
+    def setup(self, model):
+        super().setup(model)
+        if not self.store:
+            return  # from _inherits
+        if self.model_field not in model._fields:
+            _logger.critical("Invalid definition for %r: %r not defined in %r", self, self.model_field, model)
+            return
+        model_field = model._fields[self.model_field]
+        if model_field.type != 'char':
+            _logger.critical("Invalid definition for %r: %r is not a char field", self, model_field)
+            return
+        if not model_field.store:
+            _logger.critical("Invalid definition for %r: %r is not stored", self, model_field)
 
     def convert_to_cache(self, value, record, validate=True):
         # cache format: id or None
