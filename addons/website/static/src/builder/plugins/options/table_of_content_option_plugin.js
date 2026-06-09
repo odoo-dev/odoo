@@ -51,6 +51,7 @@ export class TableOfContentOptionPlugin extends Plugin {
         applyFunDependOnSelectorAndExclude(this.updateTableOfContentNavbar.bind(this), root, {
             selector: ".s_table_of_content_main",
         });
+        return root;
     }
 
     updateTableOfContentNavbar(tableOfContentMain) {

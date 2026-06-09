@@ -347,6 +347,7 @@ export class ListPlugin extends Plugin {
                 }
             }
         }
+        return root;
     }
 
     // --------------------------------------------------------------------------

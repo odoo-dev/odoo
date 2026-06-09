@@ -40,6 +40,7 @@ export class CarouselSlidesOptionPlugin extends Plugin {
         for (const slideEl of noLinkSlideEls) {
             slideEl.classList.remove("clickable-slide");
         }
+        return root;
     }
 }
 

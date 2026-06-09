@@ -34,6 +34,28 @@ test("can get content of an empty paragraph", async () => {
     expect(editor.getContent()).toBe(`<p></p>`);
 });
 
+test("processThrough forwards intentional falsy values", async () => {
+    class TestPlugin extends Plugin {
+        static id = "test";
+        resources = {
+            test_processors: [
+                (item) => {
+                    expect(item).toBe("initial");
+                    return null;
+                },
+                (item) => {
+                    expect(item).toBe(null);
+                    return undefined;
+                },
+            ],
+        };
+    }
+    const { editor } = await setupEditor("<p>[]</p>", {
+        config: { Plugins: [...MAIN_PLUGINS, TestPlugin] },
+    });
+    expect(editor.processThrough("test_processors", "initial")).toBe(undefined);
+});
+
 test("is notified when content is changed", async () => {
     let n = 0;
     const { editor } = await setupEditor("<p>hello[] world</p>", {
@@ -117,6 +139,7 @@ test("clean_for_save_processors is done last", async () => {
                 for (const el of root.querySelectorAll("c-div")) {
                     el.removeAttribute("class");
                 }
+                return root;
             },
         };
         setup() {

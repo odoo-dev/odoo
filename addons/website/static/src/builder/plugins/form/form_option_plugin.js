@@ -184,6 +184,7 @@ export class FormOptionPlugin extends Plugin {
         ].map((selector) => `.s_website_form form ${selector}`),
         clean_for_save_processors: (rootEl) => {
             this.removeSuccessMessagePreviews(rootEl);
+            return rootEl;
         },
         dropzone_selectors: [
             {
@@ -290,7 +291,7 @@ export class FormOptionPlugin extends Plugin {
                 field.relation,
                 field.domain || [],
                 fieldNames,
-                { context: this.dependencies.websiteBridge.getWebsiteContextLang() },
+                { context: this.dependencies.websiteBridge.getWebsiteContextLang() }
             );
             if (field.fieldName) {
                 field.records.forEach((r) => (r["display_name"] = r[field.fieldName]));
@@ -861,6 +862,7 @@ export class FormOptionPlugin extends Plugin {
     removeSuccessMessagePreviews(rootEl) {
         const toCleanEls = rootEl.querySelectorAll(".o_show_form_success_message");
         toCleanEls.forEach((el) => el.classList.remove("o_show_form_success_message"));
+        return rootEl;
     }
     /**
      * Clear the dataset of the field to avoid keeping old values.
