@@ -542,7 +542,13 @@ Please change the quantity done or the rounding precision of your unit of measur
 
     def _get_moves_to_propagate_date_deadline(self):
         self.ensure_one()
-        return self.move_dest_ids | self.move_orig_ids
+        all_moves = self.move_dest_ids | self.move_orig_ids
+        return all_moves.filtered(
+            lambda m: not (
+                m.group_id != self.group_id
+            )
+        )
+
 
     def _set_date_deadline(self, new_deadline):
         # Handle the propagation of `date_deadline` fields (up and down stream - only update by up/downstream documents)
