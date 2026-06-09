@@ -852,15 +852,25 @@ class TestBatchPicking02(TransactionCase):
         package. It should be possible to transfer the whole package across the
         two pickings
         """
-        package = self.env['stock.package'].create({
-            'name': 'superpackage',
-            'package_type_id': self.package_type.id,
+        outer_package_type = self.env['stock.package.type'].create({
+            'name': 'Pallet',
+            'base_weight': 20,
+            'packaging_length': 800,
+            'width': 800,
+            'height': 800,
         })
+        box, pallet = self.env['stock.package'].create([{
+            'name': 'BOX',
+            'package_type_id': self.package_type.id,
+        }, {
+            'name': 'PALLET',
+            'package_type_id': outer_package_type.id,
+        }])
         self.productA.weight = 10
         self.productB.weight = 15
 
         loc1, loc2 = self.stock_location.child_ids
-        self.env['stock.quant']._update_available_quantity(self.productA, loc1, 10, package_id=package)
+        self.env['stock.quant']._update_available_quantity(self.productA, loc1, 10, package_id=box)
         self.env['stock.quant']._update_available_quantity(self.productB, loc1, 10)
 
         pickings = self.env['stock.picking'].create([{
@@ -892,20 +902,21 @@ class TestBatchPicking02(TransactionCase):
 
         pickings.move_ids.picked = True
         # put productA in a package but not productB
-        pickings.move_line_ids.filtered(lambda l: l.product_id == self.productA).result_package_id = package
+        pickings.move_line_ids.filtered(lambda l: l.product_id == self.productA).result_package_id = box
+        box.action_put_in_pack(package_id=pallet.id)
 
-        batch.action_done()
-        self.assertEqual(batch.estimated_shipping_weight, 10 + 10*10 + 10*15)
+        self.assertEqual(batch.estimated_shipping_weight, 10 + 20 + 10 * 10 + 10 * 15)
         precision = self.env['decimal.precision'].precision_get('Product Unit')
-        volume = float_round((500*500*500)/1000**3, precision_digits=precision)
+        volume = float_round((800 * 800 * 800) / 1000**3, precision_digits=precision)
         self.assertEqual(batch.estimated_shipping_volume, volume)
+        batch.action_done()
         self.assertRecordValues(pickings.move_ids, [
             {'state': 'done', 'quantity': 3},
             {'state': 'done', 'quantity': 3},
             {'state': 'done', 'quantity': 7},
             {'state': 'done', 'quantity': 7},
         ])
-        self.assertEqual(pickings.move_line_ids.result_package_id, package)
+        self.assertEqual(pickings.move_line_ids.result_package_id, box)
 
     def test_batch_validation_without_backorder(self):
         loc1, loc2 = self.stock_location.child_ids

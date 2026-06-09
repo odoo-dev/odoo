@@ -940,43 +940,59 @@ class StockPicking(models.Model):
 
     @api.depends(
         'move_line_ids.result_package_id', 'move_line_ids.result_package_id.package_type_id', 'move_line_ids.result_package_id.shipping_weight',
-        'move_line_ids.result_package_id.outermost_package_id', 'move_line_ids.result_package_id.outermost_package_id.package_type_id', 'move_line_ids.result_package_id.outermost_package_id.shipping_weight',
-        'weight_bulk')
-    def _compute_shipping_weight(self):
-        for picking in self:
-            # if shipping weight is not assigned => default to calculated product weight
-            shipping_weight = picking.weight_bulk
-            relevant_packages = picking.move_line_ids.result_package_id.outermost_package_id
-            packages_weight = relevant_packages.sudo()._get_weight(picking.id)
-            for package in relevant_packages:
-                if package.shipping_weight:
-                    shipping_weight += package.shipping_weight
-                else:
-                    shipping_weight += packages_weight.get(package, 0)
-            picking.shipping_weight = shipping_weight
-
-    @api.depends(
-        'move_line_ids.result_package_id', 'move_line_ids.result_package_id.volume', 'move_line_ids.result_package_id.shipping_volume',
-        'move_line_ids.result_package_id.outermost_package_id', 'move_line_ids.result_package_id.outermost_package_id.volume',
-        'move_line_ids.result_package_id.outermost_package_id.shipping_volume', 'volume_bulk')
-    def _compute_shipping_volume(self):
-        products_vol_in_result_package_id_per_picking_id = defaultdict(lambda: defaultdict(float))
-        res_groups = self.env['stock.move.line']._read_group(
-                [('result_package_id', 'in', self.move_line_ids.result_package_id.ids), ('picking_id', 'in', self.ids)],
-                ['picking_id', 'result_package_id', 'product_id'],
-                ['quantity_product_uom:sum'],
+        'move_line_ids.result_package_id.outermost_package_id.package_type_id', 'move_line_ids.result_package_id.outermost_package_id.shipping_weight',
+        'weight_bulk'
         )
-        for picking, package, product, qty_sum in res_groups:
-            products_vol_in_result_package_id_per_picking_id[picking.id][package.id] += (qty_sum * product.volume)
+    def _compute_shipping_weight(self):
+        def get_effective_weight(package, defined_weights_per_pack, content_weights_per_pack):
+            if shipping_weight := defined_weights_per_pack[package.id]['shipping_weight']:
+                return shipping_weight
+            weight = defined_weights_per_pack[package.id]['base_weight']
+            weight += content_weights_per_pack[package.id]
+            for child_package in package.child_package_dest_ids:
+                weight += get_effective_weight(child_package, defined_weights_per_pack, content_weights_per_pack)
+            return weight
+
+        relevant_packages = self.move_line_ids.result_package_id.outermost_package_id
+        __, all_pack_ids = relevant_packages._get_all_children_package_dest_ids()
+        defined_weights_per_pack = self.env['stock.package']._get_defined_weights_per_package(all_pack_ids)
+        content_weight_per_picking = self.env['stock.package']._get_content_weight_per_pickings(all_pack_ids, self.ids)
 
         for picking in self:
             if picking.state == 'done':
                 continue
-            outermost_packages = picking.move_line_ids.result_package_id.outermost_package_id
-            packages_volumes = outermost_packages._get_volume_in_picking(products_vol_in_result_package_id_per_picking_id[picking.id])
-            shipping_volume = picking.volume_bulk
-            shipping_volume += sum(packages_volumes[package.id] for package in outermost_packages)
-            picking.shipping_volume = shipping_volume
+            weight = picking.weight_bulk
+            content_weights_per_pack = content_weight_per_picking[picking.id]
+            for package in picking.move_line_ids.result_package_id.outermost_package_id:
+                weight += get_effective_weight(package, defined_weights_per_pack, content_weights_per_pack)
+            picking.shipping_weight = weight
+
+    @api.depends(
+        'move_line_ids.result_package_id', 'move_line_ids.result_package_id.volume', 'move_line_ids.result_package_id.shipping_volume',
+        'move_line_ids.result_package_id.outermost_package_id.volume', 'move_line_ids.result_package_id.outermost_package_id.shipping_volume',
+        'volume_bulk')
+    def _compute_shipping_volume(self):
+        def get_effective_volume(package, defined_volumes_per_pack, content_volumes_per_pack):
+            if shipping_volume := defined_volumes_per_pack[package.id]:
+                return shipping_volume
+            volume = content_volumes_per_pack[package.id]
+            for child_package in package.child_package_dest_ids:
+                volume += get_effective_volume(child_package, defined_volumes_per_pack, content_volumes_per_pack)
+            return volume
+
+        relevant_packages = self.move_line_ids.result_package_id.outermost_package_id
+        __, all_pack_ids = relevant_packages._get_all_children_package_dest_ids()
+        defined_volumes_per_pack = self.env['stock.package']._get_defined_volume_per_package(all_pack_ids)
+        content_volume_per_picking = self.env['stock.package']._get_content_volume_per_pickings(all_pack_ids, self.ids)
+
+        for picking in self:
+            if picking.state == 'done':
+                continue
+            volume = picking.volume_bulk
+            content_volumes_per_pack = content_volume_per_picking[picking.id]
+            for package in picking.move_line_ids.result_package_id.outermost_package_id:
+                volume += get_effective_volume(package, defined_volumes_per_pack, content_volumes_per_pack)
+            picking.shipping_volume = volume
 
     def _compute_weight_uom_name(self):
         self.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
