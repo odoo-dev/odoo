@@ -2170,9 +2170,24 @@ class MrpProduction(models.Model):
             initial_workorder_remaining_qty = []
             bo = production_to_backorders[production]
 
-            # Adapt duration
+            # Adapt duration for backorder WOs.
+            # - With operation_id: _get_duration_expected() recomputes from
+            #   time_cycle * cycle_number, which is already quantity-proportional.
+            # - Without operation_id (manually-set duration): scale proportionally
+            #   using initial_qty, because the copied duration_expected still holds
+            #   the full pre-split value.
             for workorder in bo.workorder_ids:
-                workorder.duration_expected = workorder._get_duration_expected()
+                if workorder.operation_id:
+                    workorder.duration_expected = workorder._get_duration_expected()
+                elif initial_qty:
+                    workorder.duration_expected = workorder.duration_expected * workorder.qty_production / initial_qty
+            # For non-done original WOs without operation_id, the stored compute
+            # does not proportionally scale when qty_production is reduced after a
+            # split. Correct them here. Done WOs are intentionally skipped so
+            # any manually-set duration is preserved.
+            for workorder in production.workorder_ids:
+                if not workorder.operation_id and workorder.state not in ('done', 'cancel') and initial_qty:
+                    workorder.duration_expected = workorder.duration_expected * workorder.qty_production / initial_qty
 
             # Adapt quantities produced
             for workorder in production.workorder_ids.sorted('id'):
