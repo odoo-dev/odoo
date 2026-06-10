@@ -1,5 +1,5 @@
-import { useLayoutEffect, useRef } from "@web/owl2/utils";
-import { Component, proxy } from "@odoo/owl";
+import { useLayoutEffect } from "@web/owl2/utils";
+import { Component, proxy, signal } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 
 export class CalendarScheduleSection extends Component {
@@ -8,8 +8,8 @@ export class CalendarScheduleSection extends Component {
         model: Object,
         editRecord: Function,
     };
+    rootRef = signal(null);
     setup() {
-        this.rootRef = useRef("eventsToSchedule");
         this.state = proxy({ collapsed: false });
         useLayoutEffect(
             (el) => {
@@ -24,7 +24,7 @@ export class CalendarScheduleSection extends Component {
                     appendTo: document.body,
                 });
             },
-            () => [this.rootRef.el]
+            () => [this.rootRef()]
         );
     }
 

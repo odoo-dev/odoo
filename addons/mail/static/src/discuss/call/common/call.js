@@ -1,11 +1,10 @@
-import { useRef } from "@web/owl2/utils";
 import { BlurPerformanceWarning } from "@mail/discuss/call/common/blur_performance_warning";
 import { CallActionList } from "@mail/discuss/call/common/call_action_list";
 import { CallPresentationBar } from "@mail/discuss/call/common/call_presentation_bar";
 import { CallParticipantCard } from "@mail/discuss/call/common/call_participant_card";
 import { PttAdBanner } from "@mail/discuss/call/common/ptt_ad_banner";
 
-import { Component, onMounted, onPatched, onWillUnmount, proxy } from "@odoo/owl";
+import { Component, onMounted, onPatched, onWillUnmount, proxy, signal } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
 import { isMobileOS } from "@web/core/browser/feature_detection";
@@ -45,11 +44,11 @@ export class Call extends Component {
     static template = "discuss.Call";
 
     overlayTimeout;
+    gridRef = signal(null);
+    rootRef = signal(null);
 
     setup() {
         super.setup();
-        this.grid = useRef("grid");
-        this.root = useRef("root");
         this.notification = useService("notification");
         this.rtc = useService("discuss.rtc");
         this.isMobileOs = isMobileOS();
@@ -67,7 +66,10 @@ export class Call extends Component {
         this.callActions = useCallActions({ channel: () => this.channel });
         onMounted(() => {
             this.resizeObserver = new ResizeObserver(() => this.arrangeTiles());
-            this.resizeObserver.observe(this.grid.el);
+            const gridEl = this.gridRef();
+            if (gridEl) {
+                this.resizeObserver.observe(gridEl);
+            }
             this.arrangeTiles();
         });
         onPatched(() => this.arrangeTiles());
@@ -222,14 +224,15 @@ export class Call extends Component {
     }
 
     arrangeTiles() {
-        if (!this.grid.el) {
+        const gridEl = this.gridRef();
+        if (!gridEl) {
             return;
         }
-        this.grid.el.style.setProperty("--width", "0");
-        this.grid.el.style.setProperty("--height", "0");
-        const { width, height } = this.grid.el.getBoundingClientRect();
+        gridEl.style.setProperty("--width", "0");
+        gridEl.style.setProperty("--height", "0");
+        const { width, height } = gridEl.getBoundingClientRect();
         const aspectRatio = this.minimized && this.channel.videoCount === 0 ? 1 : 16 / 9;
-        const tileCount = this.grid.el.children.length;
+        const tileCount = gridEl.children.length;
         let optimal = {
             area: 0,
             columnCount: 0,
@@ -265,7 +268,7 @@ export class Call extends Component {
             tileHeight: optimal.tileHeight,
             columnCount: optimal.columnCount,
         });
-        this.grid.el.style.setProperty("--width", `${this.state.tileWidth}px`);
-        this.grid.el.style.setProperty("--height", `${this.state.tileHeight}px`);
+        gridEl.style.setProperty("--width", `${this.state.tileWidth}px`);
+        gridEl.style.setProperty("--height", `${this.state.tileHeight}px`);
     }
 }

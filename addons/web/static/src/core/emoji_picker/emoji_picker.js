@@ -21,6 +21,7 @@ import {
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { _t, appTranslateFn } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 import { getTemplate } from "@web/core/templates";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { range } from "@web/core/utils/numbers";
@@ -32,6 +33,25 @@ import { emojiLoader, useLoadEmoji } from "./emoji_loader";
  * @typedef {import("./emoji_loader").Emoji} Emoji
  */
 
+/**
+ * @typedef {(() => HTMLElement | null) | { el: HTMLElement | null } | null | undefined} AnchorRef
+ *   An anchor for the emoji picker popover. Accepts either:
+ *     - an Owl 3 signal ref: a callable returning the element (or null);
+ *     - a legacy Owl `useRef` object exposing `.el`;
+ *     - `null` / `undefined` when the consumer prefers to register an anchor
+ *       later via the returned state's `open`/`toggle`/`add` helpers.
+ */
+
+/**
+ * Thin wrapper around {@link usePicker} that defaults the picker component to
+ * {@link EmojiPicker}. Forwards every argument unchanged, so it accepts both
+ * legacy `useRef` anchors and Owl 3 signal-callable anchors (see {@link AnchorRef}).
+ *
+ * @param {AnchorRef} [ref]
+ * @param {object} [props]
+ * @param {object} [options]
+ * @returns {ReturnType<typeof usePicker>}
+ */
 export function useEmojiPicker(...args) {
     return usePicker(EmojiPicker, ...args);
 }
@@ -474,8 +494,16 @@ export class EmojiPicker extends Component {
 }
 
 /**
+ * Hook that wires an anchor element to a popover picker (typically the emoji
+ * picker). The anchor `ref` is **dual-form**: it can be either an Owl 3 signal
+ * (a callable returning the anchor element) or a legacy Owl `useRef` object
+ * exposing `.el`. Internally all element reads go through `resolveRefEl`, so
+ * existing callers passing a `useRef` object keep working unchanged while new
+ * Owl 3 callers can pass a signal callable.
+ *
  * @param {import("@odoo/owl").ComponentConstructor} PickerComponent
- * @param {import("@web/core/utils/hooks").Ref} [ref]
+ * @param {AnchorRef} [ref] Anchor for the picker; may be a signal callable,
+ *   a legacy `useRef` object, or nullish (anchor registered later).
  * @param {Object} props
  * @param {() => {}} [props.onSelect] function that is invoked when an item in picker has been selected.
  *   When explicit value `false` is returned, this will keep the picker open (= it won't auto-close it)
@@ -510,18 +538,20 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
     function add(ref, onSelect, { show = false } = {}) {
         const toggler = () => toggle(isMobileOS() ? undefined : ref, onSelect);
         targets.push([ref, toggler]);
-        if (!ref.el) {
+        const el = resolveRefEl(ref);
+        if (!el) {
             return;
         }
-        ref.el.addEventListener("click", toggler);
-        ref.el.addEventListener("mouseenter", loadEmoji);
+        el.addEventListener("click", toggler);
+        el.addEventListener("mouseenter", loadEmoji);
         if (show) {
-            ref.el.click();
+            el.click();
         }
     }
 
     function open(ref, openProps) {
         state.isOpen = true;
+        const refEl = resolveRefEl(ref);
         if (ui.isSmall || isMobileOS()) {
             const { promise, resolve } = Promise.withResolvers();
             const pickerMobileProps = {
@@ -533,7 +563,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
                     return res;
                 },
             };
-            if (ref?.el) {
+            if (refEl) {
                 pickerMobileProps.close = () => remove();
                 const app = new App({
                     name: "Popout",
@@ -544,7 +574,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
                 app.createRoot(PickerMobile, {
                     env: component.env,
                     props: pickerMobileProps,
-                }).mount(ref.el);
+                }).mount(refEl);
                 remove = () => {
                     state.isOpen = false;
                     props.onClose?.();
@@ -562,7 +592,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
             }
             return promise;
         }
-        return popover.open(ref.el, { ...props, ...openProps });
+        return popover.open(refEl, { ...props, ...openProps });
     }
 
     function close() {
@@ -583,29 +613,32 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
     }
     onMounted(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveRefEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.addEventListener("click", toggle);
-            ref.el.addEventListener("mouseenter", loadEmoji);
+            el.addEventListener("click", toggle);
+            el.addEventListener("mouseenter", loadEmoji);
         }
     });
     onWillPatch(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveRefEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.removeEventListener("click", toggle);
-            ref.el.removeEventListener("mouseenter", loadEmoji);
+            el.removeEventListener("click", toggle);
+            el.removeEventListener("mouseenter", loadEmoji);
         }
     });
     onPatched(() => {
         for (const [ref, toggle] of targets) {
-            if (!ref.el) {
+            const el = resolveRefEl(ref);
+            if (!el) {
                 continue;
             }
-            ref.el.addEventListener("click", toggle);
-            ref.el.addEventListener("mouseenter", loadEmoji);
+            el.addEventListener("click", toggle);
+            el.addEventListener("mouseenter", loadEmoji);
         }
     });
     Object.assign(state, { open, close, toggle });

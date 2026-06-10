@@ -1,4 +1,4 @@
-import { useRef, useSubEnv } from "@web/owl2/utils";
+import { useSubEnv } from "@web/owl2/utils";
 import { Editor } from "@html_editor/editor";
 import {
     Component,
@@ -7,6 +7,7 @@ import {
     onWillDestroy,
     onWillStart,
     onWillUnmount,
+    signal,
     status,
     proxy,
 } from "@odoo/owl";
@@ -72,9 +73,10 @@ export class Builder extends Component {
         onlyCustomizeTab: false,
     };
 
+    builderSidebarRef = signal(null);
+
     setup() {
         this.ThemeTab = this.props.getThemeTab?.();
-        this.builder_sidebarRef = useRef("builder_sidebar");
         this.state = proxy({
             canUndo: false,
             canRedo: false,
@@ -146,7 +148,7 @@ export class Builder extends Component {
                         this.updateInvisibleEls();
                     }),
                     on_will_save_handlers: () => {
-                        const snippetMenuEl = this.builder_sidebarRef.el;
+                        const snippetMenuEl = this.builderSidebarRef();
                         const saveButton = snippetMenuEl.querySelector("[data-action='save']");
                         delete this.removeLoadingEffect;
                         if (saveButton) {

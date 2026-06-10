@@ -1,5 +1,5 @@
-import { useExternalListener, useRef } from "@web/owl2/utils";
-import { Component, onMounted, proxy } from "@odoo/owl";
+import { useExternalListener } from "@web/owl2/utils";
+import { Component, onMounted, proxy, signal } from "@odoo/owl";
 import { useDebounced } from "@web/core/utils/timing";
 import { search } from "@api_doc/utils/doc_model_search";
 
@@ -11,11 +11,11 @@ export class SearchModal extends Component {
         close: { type: Function },
     };
 
-    setup() {
-        this.seachRef = useRef("seachRef");
-        this.modalRef = useRef("modalRef");
-        this.scrollRef = useRef("scrollRef");
+    seachRef = signal(null);
+    modalRef = signal(null);
+    scrollRef = signal(null);
 
+    setup() {
         this.results = [];
         this.itemHeight = 45;
         this.itemMargin = 10;
@@ -33,8 +33,11 @@ export class SearchModal extends Component {
         this.search = useDebounced((query) => {
             this.results = search(this.env.modelStore.models, query, this.state.activeFilters);
             this.state.resultCount = this.results.length;
-            this.scrollRef.el.scrollTop = 0;
-            this.onScroll(this.scrollRef.el);
+            const scrollEl = this.scrollRef();
+            if (scrollEl) {
+                scrollEl.scrollTop = 0;
+                this.onScroll(scrollEl);
+            }
         }, 300);
 
         useExternalListener(window, "keydown", (event) => {
@@ -44,13 +47,13 @@ export class SearchModal extends Component {
         });
 
         useExternalListener(window, "click", (event) => {
-            if (!this.modalRef.el.contains(event.target)) {
+            if (!this.modalRef()?.contains(event.target)) {
                 this.props.close();
             }
         });
 
         onMounted(() => {
-            this.seachRef.el.focus();
+            this.seachRef()?.focus();
         });
     }
 
@@ -67,7 +70,7 @@ export class SearchModal extends Component {
 
     onFilterClick(filter) {
         this.state.activeFilters[filter] = !this.state.activeFilters[filter];
-        this.search(this.seachRef.el.value.trim());
+        this.search(this.seachRef()?.value.trim());
     }
 
     onScroll(container) {
