@@ -57,7 +57,7 @@ PAYMENT_METHODS_RESPONSE_MAPPING = MappingProxyType({
 
 # Mapping IETF language tags (e.g.: 'fr-BE') to ECPay language codes.
 # If a language tag is not listed, the country code prefix can serve as fallback.
-LANGUAGE_CODES_MAPPING = MappingProxyType({"en": "ENG", "ja_JP": "JPN", "ko": "KOR", "zh": "CHI"})
+LANGUAGE_CODES_MAPPING = MappingProxyType({"zh_TW": "DEFAULT", "en": "ENG", "ja_JP": "JPN", "ko": "KOR", "zh_CN": "CHI"})
 
 # Mapping of transaction states to ECPay success codes.
 SUCCESS_CODE_MAPPING = MappingProxyType({"done": ("1", "2", "10100073")})

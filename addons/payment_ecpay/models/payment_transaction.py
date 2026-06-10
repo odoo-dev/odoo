@@ -83,6 +83,10 @@ class PaymentTransaction(models.Model):
                 self.env.context.get("lang", "en_US"), const.LANGUAGE_CODES_MAPPING
             ),
         }
+
+        if rendering_values.get('Language') == const.LANGUAGE_CODES_MAPPING.get('zh_TW'):
+            rendering_values.pop('Language', None)
+
         rendering_values.update({
             "CheckMacValue": self.provider_id._ecpay_calculate_signature(rendering_values),
             "api_url": self.provider_id._ecpay_get_api_url(),

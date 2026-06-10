@@ -98,3 +98,33 @@ class TestPaymentTransaction(EcpayCommon):
         tx = self._create_transaction("redirect")
         tx._apply_updates(self.payment_result_data)
         self.assertEqual(tx.payment_method_id, self.env.ref("payment.payment_method_ipass_money"))
+
+    def test_rendering_values_language_chi_for_simplified_chinese(self):
+        """Test that Language=CHI must be sent to ECPay when language is set to zh_CN (Simplified Chinese)."""
+        self.env["res.lang"]._activate_lang("zh_CN")
+        tx = self._create_transaction(
+            "redirect", payment_method_id=self.env.ref("payment.payment_method_card").id
+        )
+        rendering_values = tx.with_context(lang="zh_CN")._get_specific_rendering_values(None)
+        self.assertEqual(rendering_values.get("Language"), "CHI")
+
+    def test_omit_traditional_chinese_in_rendering_values(self):
+        """Test that Tradional Chinese (zh_TW) will be omited from rendering values"""
+        tx = self._create_transaction(
+            "redirect", payment_method_id=self.env.ref("payment.payment_method_card").id
+        )
+        rendering_values = tx.with_context(lang="zh_TW")._get_specific_rendering_values(None)
+        self.assertNotIn("Language", rendering_values)
+
+    def test_checkmacvalue_without_omitted_traditional_chinese(self):
+        """Test that CheckMacValue must be computed correctly without Language key when lang is zh_TW."""
+        tx = self._create_transaction(
+            "redirect", payment_method_id=self.env.ref("payment.payment_method_card").id
+        )
+        rendering_values = tx.with_context(lang="zh_TW")._get_specific_rendering_values(None)
+        signature_data = dict(rendering_values)
+        signature_data.pop("CheckMacValue", None)
+        signature_data.pop("api_url", None)
+        self.assertNotIn("Language", signature_data)
+        expected_mac = tx.provider_id._ecpay_calculate_signature(signature_data)
+        self.assertEqual(rendering_values["CheckMacValue"], expected_mac)
