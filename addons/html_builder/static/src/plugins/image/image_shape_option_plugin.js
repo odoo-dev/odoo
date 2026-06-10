@@ -439,32 +439,38 @@ export class ImageShapeOptionPlugin extends Plugin {
         if (!shapeId) {
             return false;
         }
-        const canTransform = this.imageShapes[shapeId].transform;
+
+        const shape = this.imageShapes[shapeId]
+        if (!shape){
+            return false;
+        }
+
+        const canTransform = shape.transform;
         return typeof canTransform === "undefined" ? true : canTransform;
     }
     isTechnicalShape(shapeId) {
         if (!shapeId) {
             return false;
         }
-        return this.imageShapes[shapeId].isTechnical;
+        return this.imageShapes[shapeId]?.isTechnical ?? false;
     }
     getShapeLabel(shapeId) {
         if (!shapeId) {
             return _t("None");
         }
-        return this.imageShapes[shapeId].selectLabel || _t("None");
+        return this.imageShapes[shapeId]?.selectLabel || _t("None");
     }
     isAnimableShape(shape) {
         if (!shape) {
             return false;
         }
-        return this.imageShapes[shape].animated;
+        return this.imageShapes[shape]?.animated ?? false;
     }
     isTogglableRatioShape(shape) {
         if (!shape) {
             return false;
         }
-        return this.imageShapes[shape].togglableRatio;
+        return this.imageShapes[shape]?.togglableRatio ?? false;
     }
     getImageShapeGroups() {
         return imageShapeDefinitions;
