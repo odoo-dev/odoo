@@ -33,6 +33,8 @@ def _post_init_hook(env):  # noqa: RUF067
             """
         )
     )
+    if pa_sides := env.ref("pos_restaurant.pa_sides", raise_if_not_found=False):
+        pa_sides.visibility = "hidden"
 
 
 def uninstall_hook(env):  # noqa: RUF067
