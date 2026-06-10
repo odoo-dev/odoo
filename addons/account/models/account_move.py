@@ -2515,7 +2515,7 @@ class AccountMove(models.Model):
     def _compute_document_tax_mode(self):
         for move in self:
             if not move.document_tax_mode:
-                if (move.is_sale_document() or move.is_purchase_document()):
+                if move.is_invoice(include_receipts=True):
                     company = move.company_id or self.env.company
                     move.document_tax_mode = company.account_price_include
                 else:
@@ -2953,7 +2953,7 @@ class AccountMove(models.Model):
     def _check_document_tax_mode(self):
         """Ensure that when a move is a sale or purchase document the field is set."""
         for move in self:
-            if (move.is_sale_document() or move.is_purchase_document()) and not move.document_tax_mode:
+            if move.is_invoice(include_receipts=True) and not move.document_tax_mode:
                 raise ValidationError(_("The document tax mode must be set."))
 
     # -------------------------------------------------------------------------
@@ -5770,6 +5770,7 @@ class AccountMove(models.Model):
                 'move_type': TYPE_REVERSE_MAP[move.move_type],
                 'reversed_entry_id': move.id,
                 'partner_id': move.partner_id.id,
+                'document_tax_mode': move.document_tax_mode,
             })
             reverse_moves += move.with_context(
                 move_reverse_cancel=cancel,
