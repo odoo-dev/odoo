@@ -5001,9 +5001,9 @@ class AccountMove(models.Model):
 
         return res
 
-    def get_default_create_values(self):
+    def _create_records_from_attachments_default_create_values(self):
         '''The default for the tax mode for all imported invoices should be tax excluded'''
-        values = super().get_default_create_values()
+        values = super()._create_records_from_attachments_default_create_values()
         values['document_tax_mode'] = 'tax_excluded'
         return values
 
@@ -6252,7 +6252,13 @@ class AccountMove(models.Model):
                 lines_to_recompute |= line
                 continue
             new_taxes = line._get_computed_taxes()
-            if [tax for tax in line.tax_ids if tax._is_price_included(line.document_tax_mode)] != [tax for tax in new_taxes if tax._is_price_included(line.document_tax_mode)]:
+
+            def filter_price_included(tax):
+                return tax._is_price_included(line.document_tax_mode)
+
+            taxes_price_include_before = line.tax_ids.flatten_taxes_hierarchy().filtered(filter_price_included)
+            taxes_price_include_after = new_taxes.flatten_taxes_hierarchy().filtered(filter_price_included)
+            if taxes_price_include_before != taxes_price_include_after:
                 line.price_unit_json['fiscal_position'] = line.move_id.fiscal_position_id.id
                 line.price_unit = line.price_unit_json['price_unit'] = line.product_id._get_tax_included_unit_price_from_price(
                     line.price_unit,
@@ -6261,6 +6267,7 @@ class AccountMove(models.Model):
                     product_taxes_after_fp=new_taxes,
                     document_tax_mode=line.document_tax_mode,
                 )
+
         lines_to_recompute._compute_price_unit()
         self.invoice_line_ids._compute_tax_ids()
         self.line_ids._compute_account_id()

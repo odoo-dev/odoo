@@ -63,7 +63,6 @@ class TestOnchangeProductId(TransactionCase):
 
         po_vals = {
             'partner_id': partner_id.id,
-            'fiscal_position_id': fp_id.id,
             'order_line': [
                 (0, 0, {
                     'name': product_id.name,
@@ -77,6 +76,7 @@ class TestOnchangeProductId(TransactionCase):
         po = self.po_model.create(po_vals)
 
         po_line = po.order_line[0]
+        po.fiscal_position_id = fp_id
         po_line.onchange_product_id()
         self.assertEqual(100, po_line.price_unit, "The included tax must be subtracted to the price")
 

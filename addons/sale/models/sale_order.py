@@ -1762,7 +1762,6 @@ class SaleOrder(models.Model):
         # Special case: we want to overwrite the existing discount on _recompute_prices call
         # i.e. to make sure the discount is correctly reset
         # if pricelist rule is different than when the price was first computed.
-        lines_to_recompute.filtered(lambda x: x._is_delivery())
         lines_to_recompute.discount = 0.0
         lines_to_recompute._compute_discount()
         self.show_update_pricelist = False

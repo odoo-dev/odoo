@@ -169,7 +169,12 @@ class PurchaseOrderLine(models.Model):
                 line.env.context.get("recompute_unit_price_on_tax_change", False)
                 and new_taxes != line.tax_ids
             ):
-                if [tax for tax in line.tax_ids if tax._is_price_included(line.document_tax_mode)] != [tax for tax in new_taxes if tax._is_price_included(line.document_tax_mode)]:
+                def filter_price_included(tax):
+                    return tax._is_price_included(line.document_tax_mode)
+
+                taxes_price_include_before = taxes.flatten_taxes_hierarchy().filtered(filter_price_included)
+                taxes_price_include_after = new_taxes.flatten_taxes_hierarchy().filtered(filter_price_included)
+                if taxes_price_include_before != taxes_price_include_after:
                     line.price_unit = line.price_unit_json['price_unit'] = line.product_id._get_tax_included_unit_price_from_price(
                         line.price_unit,
                         line.tax_ids,
@@ -434,7 +439,7 @@ class PurchaseOrderLine(models.Model):
         )
         self.name = self._get_product_purchase_description(product_lang)
 
-        self._compute_tax_id()
+        self.with_context(recompute_unit_price_on_tax_change=True)._compute_tax_id()
 
     @api.depends('product_id', 'product_id.uom_id', 'product_id.uom_ids', 'product_id.extra_uom_ids', 'product_id.seller_ids', 'product_id.seller_ids.uom_id')
     def _compute_allowed_uom_ids(self):
@@ -499,9 +504,9 @@ class PurchaseOrderLine(models.Model):
                 line._suggest_quantity()
 
             # When price_unit is set to None _get_line_price_unit will fall back on the price on the line
+            price_unit = currency._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
             price_unit = None if line.price_unit and not seller_price_change else price_unit
             price_unit = line.product_id._get_line_price_unit(line, 'purchase', price_unit)
-            price_unit = currency._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
             line.price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
 
             line.price_unit_json = {
@@ -661,6 +666,7 @@ class PurchaseOrderLine(models.Model):
             'tax_ids': [(6, 0, self.tax_ids.ids)],
             'purchase_line_id': self.id,
             'is_downpayment': self.is_downpayment,
+            'document_tax_mode': self.document_tax_mode,
         }
         if self.is_downpayment and self.invoice_lines:
             res['account_id'] = self.invoice_lines.account_id[:1].id

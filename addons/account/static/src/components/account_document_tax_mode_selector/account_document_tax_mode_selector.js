@@ -11,4 +11,4 @@ export const accountDocumentTaxModeSelector = {
     }),
 };
 
-registry.category("fields").add("tax_mode_selector", accountDocumentTaxModeSelector);
+registry.category("fields").add("document_tax_mode_selector", accountDocumentTaxModeSelector);

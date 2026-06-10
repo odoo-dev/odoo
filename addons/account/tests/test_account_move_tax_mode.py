@@ -250,7 +250,8 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
 
         # Changing the document tax mode will then recompute the price_unit accordingly
         document.document_tax_mode = 'tax_excluded'
-        self.assertEqual(line.price_unit, 2363.636363636)
+        expected_price_unit = 2363.64 if document_type == 'purchase_order' else 2363.6363636363635
+        self.assertEqual(line.price_unit, expected_price_unit)
         self.assertEqual(line.tax_ids.ids, [self.tax_10_default.id])
         self.assertRecordValues(document, document_expected_values_without_extra_tax)
 
@@ -378,7 +379,8 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
 
         document.document_tax_mode = 'tax_included'
         # unlike the overidden tax, the default tax will impact the price_unit
-        self.assertEqual(line.price_unit, 1090.909090909)
+        expected_price_unit = 1090.91 if document_type == 'purchase_order' else 1090.909090909091
+        self.assertEqual(line.price_unit, expected_price_unit)
         self.assertRecordValues(document, document_expected_values)
 
         # Product with tax excluded overriden tax + default tax
@@ -431,12 +433,13 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
             'amount_untaxed': 909.09,
             'amount_total': 1090.91,
         }]
-        self.assertEqual(line.price_unit, 1000)
+        self.assertAlmostEqual(line.price_unit, 1000)
         self.assertRecordValues(document, document_expected_values)
 
         document.document_tax_mode = 'tax_excluded'
         # Unlike the overidden tax, the default tax will impact the price_unit
-        self.assertEqual(line.price_unit, 909.090909091)
+        expected_price_unit = 909.09 if document_type == 'purchase_order' else 909.0909090909092
+        self.assertEqual(line.price_unit, expected_price_unit)
         self.assertRecordValues(document, document_expected_values)
 
         # Product with tax included overriden tax + default tax
@@ -484,11 +487,7 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
             document.partner_id = self.fpos_partner_id
             # Clicking on 'Update Taxes and Accounts'
             document.action_update_fpos_values()
-        elif document_type == 'sale_order':
-            document.partner_id = self.fpos_partner_id
-            # Clicking on 'Update Taxes and Accounts'
-            document.action_update_taxes()
-        else:  # purchase_order case
+        else:  # for both purchase and sale orders there is an onchange for fpos that recomputes taxes
             form = Form(document)
             # Changing the fiscal position by setting a customer with the equivalent fiscal position of the above tax
             form.partner_id = self.fpos_partner_id
