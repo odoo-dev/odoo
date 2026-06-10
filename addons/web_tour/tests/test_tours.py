@@ -2,6 +2,9 @@ from odoo.tests import tagged
 from odoo import Command
 from odoo.addons.base.tests.common import BaseCommon, HttpCase
 from markupsafe import Markup
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 @tagged('post_install', '-at_install')
@@ -175,3 +178,50 @@ class WebTourHttp(HttpCase):
         self.browser_js("/odoo?debug=0", code, ready=ready, login="admin")
         if "website" in IrAsset._get_installed_addons_list():
             self.browser_js("/?debug=0", code, ready=ready, login="admin")
+
+
+@tagged('post_install', '-at_install')
+class TestOnboardingToursAuto(HttpCase):
+
+    tour_filter = None
+
+    def test_onboarding_tours(self):
+        """Automatically run all non-custom onboarding tours found in the database.
+
+        Set `tour_filter` to a tour name to run only that tour, e.g.:
+            TestOnboardingToursAuto.tour_filter = 'sale_tour'
+        """
+        admin = self.env.ref('base.user_admin')
+        admin.email = 'admin@example.com'
+
+        # Ensure admin has a linked employee (required for hr_holidays, timesheet tours)
+        if 'hr.employee' in self.env and not self.env['hr.employee'].search([('user_id', '=', admin.id)], limit=1):
+            self.env['hr.employee'].create({'name': admin.name, 'user_id': admin.id})
+
+        # Tours skipped: require external services or infrastructure not in a default install
+        _skip_tours = {
+            'nemhandel_onboarding_tour',  # requires Danish company (Peppol/NemHandel)
+            'social_tour',                # requires connected social media account
+            'documents_account_tour',     # requires demo documents (Mails_inbox.pdf)
+            'sign_tour',                  # drag&drop in iframe not testable in headless
+            'hr_holidays_tour',           # requires admin linked to an employee
+            'timesheet_tour',             # requires admin linked to an employee (systray timer)
+        }
+
+        domain = [('custom', '=', False), ('step_ids', '!=', False)]
+        if self.tour_filter:
+            domain.append(('name', '=', self.tour_filter))
+
+        tours = self.env['web_tour.tour'].search(domain)
+        if not tours:
+            self.skipTest(f"No onboarding tour found matching filter: {self.tour_filter!r}")
+
+        for tour in tours:
+            if tour.name in _skip_tours:
+                _logger.info("Skipping onboarding tour (requires specific config): %s", tour.name)
+                continue
+            with self.subTest(tour=tour.name):
+                _logger.info("Running onboarding tour: %s", tour.name)
+                tour.user_consumed_ids = [Command.clear()]
+                self.start_tour(tour.url or '/odoo', tour.name, login='admin')
+

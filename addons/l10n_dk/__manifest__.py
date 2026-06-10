@@ -42,7 +42,6 @@ Also provides Nemhandel registration and invoice sending throught the Odoo Acces
     'assets': {
         'web.assets_backend': [
             'l10n_dk/static/src/components/**/*',
-            'l10n_dk/static/src/tours/nemhandel_onboarding.js',
         ],
     },
     'license': 'LGPL-3',

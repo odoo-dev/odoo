@@ -5,4 +5,32 @@
         <field name="sequence">45</field>
         <field name="rainbow_man_message"></field>
     </record>
+
+    <record id="point_of_sale_tour_step_1" model="web_tour.tour.step">
+        <field name="tour_id" ref="point_of_sale_tour"/>
+        <field name="sequence">10</field>
+        <field name="is_active" eval='["community", "desktop"]'/>
+        <field name="trigger">.o_navbar_apps_menu button</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="point_of_sale_tour_step_2" model="web_tour.tour.step">
+        <field name="tour_id" ref="point_of_sale_tour"/>
+        <field name="sequence">20</field>
+        <field name="is_active" eval='["community"]'/>
+        <field name="trigger">.o_app[data-menu-xmlid="point_of_sale.menu_point_root"]</field>
+        <field name="content"><![CDATA[Ready to launch your <b>point of sale</b>?]]></field>
+        <field name="tooltip_position">right</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="point_of_sale_tour_step_3" model="web_tour.tour.step">
+        <field name="tour_id" ref="point_of_sale_tour"/>
+        <field name="sequence">20</field>
+        <field name="is_active" eval='["enterprise"]'/>
+        <field name="trigger">.o_app[data-menu-xmlid="point_of_sale.menu_point_root"]</field>
+        <field name="content"><![CDATA[Ready to launch your <b>point of sale</b>?]]></field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
 </odoo>

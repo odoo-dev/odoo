@@ -31,7 +31,6 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'website_blog/static/src/tours/website_blog.js',
         ],
         'web.assets_tests': [
             'website_blog/static/tests/tours/**/*',

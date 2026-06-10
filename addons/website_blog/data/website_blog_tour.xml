@@ -2,6 +2,184 @@
 <odoo>
     <record id="blog" model="web_tour.tour">
         <field name="name">blog</field>
-        <field name="url"></field>
+        <field name="url">/odoo/website</field>
+    </record>
+
+    <record id="blog_tour_step_1" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">10</field>
+        <field name="trigger">body:not(:has(.o_new_content_menu_choices)) .o_new_content_container > button</field>
+        <field name="content">Click here to add new content to your website.</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="blog_tour_step_2" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">20</field>
+        <field name="trigger">button[data-module-xml-id="base.module_website_blog"]</field>
+        <field name="content">Select this menu item to create a new blog post.</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="blog_tour_step_3" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">30</field>
+        <field name="trigger">div[name="name"] input</field>
+        <field name="content">Enter your post's title</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">edit Test</field>
+    </record>
+
+    <!-- Only shown when 2+ blogs exist (blog selector dialog) -->
+    <record id="blog_tour_step_4" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">40</field>
+        <field name="is_active" eval='["div.o_field_widget[name=blog_id]"]'/>
+        <field name="trigger">div.o_field_widget[name="blog_id"]</field>
+    </record>
+
+    <record id="blog_tour_step_5" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">50</field>
+        <field name="is_active" eval='["div.o_field_widget[name=blog_id]"]'/>
+        <field name="trigger">button.o_form_button_save</field>
+        <field name="content">Select the blog you want to add the post to.</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="blog_tour_step_6" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">60</field>
+        <field name="trigger">.o_builder_sidebar_open .o-snippets-menu</field>
+    </record>
+
+    <record id="blog_tour_step_7" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">70</field>
+        <field name="trigger">:iframe h1[data-oe-expression="blog_post.name"]</field>
+        <field name="content">Edit your title, the subtitle is optional.</field>
+        <field name="tooltip_position">top</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="blog_tour_step_8" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">80</field>
+        <field name="trigger">:iframe #wrap h1[data-oe-expression="blog_post.name"]:not(:contains(''))</field>
+    </record>
+
+    <record id="blog_tour_step_9" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">90</field>
+        <field name="trigger">button[data-action-id="setCoverBackground"][title="Image"]</field>
+        <field name="content"><![CDATA[Set a blog post <b>cover</b>.]]></field>
+        <field name="tooltip_position">top</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="blog_tour_step_10" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">100</field>
+        <field name="trigger">.o_select_media_dialog .o_we_search</field>
+        <field name="content">Search for an image.</field>
+        <field name="tooltip_position">top</field>
+    </record>
+
+    <record id="blog_tour_step_11" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">110</field>
+        <field name="trigger">.o_select_media_dialog .o_existing_attachment_cell:first .o_button_area</field>
+        <field name="content">Choose an image from the library.</field>
+        <field name="tooltip_position">top</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="blog_tour_step_12" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">120</field>
+        <field name="trigger">:iframe #o_wblog_post_content p</field>
+        <field name="content"><![CDATA[<b>Write your story here.</b> Use the top toolbar to style your text.]]></field>
+        <field name="tooltip_position">top</field>
+        <field name="run">editor Blog content</field>
+    </record>
+
+    <!-- clickOnSave() inlined -->
+    <record id="blog_tour_step_13" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">130</field>
+        <field name="trigger">.o-snippets-menu:not(:has(.o_we_ongoing_insertion))</field>
+    </record>
+
+    <record id="blog_tour_step_14" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">140</field>
+        <field name="trigger">body:not(:has(.o_dialog))</field>
+    </record>
+
+    <record id="blog_tour_step_15" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">150</field>
+        <field name="trigger">button[data-action=save]:enabled:contains(save)</field>
+        <field name="content"><![CDATA[Good job! It's time to <b>Save</b> your work.]]></field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="blog_tour_step_16" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">160</field>
+        <field name="trigger">body:not(.o_builder_open)</field>
+    </record>
+
+    <record id="blog_tour_step_17" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">170</field>
+        <field name="trigger">:iframe body[is-ready=true]</field>
+    </record>
+
+    <record id="blog_tour_step_18" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">180</field>
+        <field name="trigger">.o_menu_systray_item.o_mobile_preview > a</field>
+        <field name="content"><![CDATA[Use this icon to preview your blog post on <b>mobile devices</b>.]]></field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="blog_tour_step_19" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">190</field>
+        <field name="trigger">.o_website_preview.o_is_mobile</field>
+    </record>
+
+    <record id="blog_tour_step_20" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">200</field>
+        <field name="trigger">.o_menu_systray_item.o_mobile_preview > a</field>
+        <field name="content">Switch back to the normal view.</field>
+        <field name="tooltip_position">right</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="blog_tour_step_21" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">210</field>
+        <field name="trigger">:iframe body:not(.editor_enable)</field>
+    </record>
+
+    <record id="blog_tour_step_22" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">220</field>
+        <field name="trigger">.o_menu_systray_item a:contains("Unpublished")</field>
+        <field name="content"><![CDATA[<b>Publish your blog post</b> to make it visible to your visitors.]]></field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="blog_tour_step_23" model="web_tour.tour.step">
+        <field name="tour_id" ref="blog"/>
+        <field name="sequence">230</field>
+        <field name="trigger">.o_menu_systray_item a:contains("Published")</field>
     </record>
 </odoo>

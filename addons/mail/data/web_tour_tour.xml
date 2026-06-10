@@ -5,4 +5,104 @@
         <field name="sequence">2000</field>
         <field name="url">/odoo</field>
     </record>
+
+    <record id="discuss_channel_tour_step_1" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">10</field>
+        <field name="is_active" eval='["enterprise"]'/>
+        <field name="trigger">a[data-menu-xmlid="mail.menu_root_discuss"]</field>
+        <field name="content">Open Discuss App</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="discuss_channel_tour_step_2" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">20</field>
+        <field name="trigger">.o-mail-DiscussSearch-inputContainer</field>
+        <field name="content"><![CDATA[<p>Channels make it easy to organize information across different topics and groups.</p> <p>Try to <b>create your first channel</b> (e.g. sales, marketing, product XYZ, after work party, etc).</p>]]></field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="discuss_channel_tour_step_3" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">30</field>
+        <field name="trigger">.o_command_palette_search input</field>
+        <field name="content"><![CDATA[<p>Create a channel here.</p>]]></field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">edit SomeChannel</field>
+    </record>
+
+    <record id="discuss_channel_tour_step_4" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">40</field>
+        <field name="trigger">.o-mail-DiscussCommand-createChannel</field>
+        <field name="content"><![CDATA[<p>Create a public or private channel.</p>]]></field>
+        <field name="tooltip_position">right</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="discuss_channel_tour_step_5" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">50</field>
+        <field name="trigger">.o-mail-CreateChannelDialog .btn-primary</field>
+        <field name="content"><![CDATA[<p>Create a public or private channel.</p>]]></field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="discuss_channel_tour_step_6" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">60</field>
+        <field name="trigger">.o-mail-Composer-input</field>
+        <field name="content"><![CDATA[<p><b>Write a message</b> to the members of the channel here.</p> <p>You can notify someone with <i>'@'</i> or link another channel with <i>'#'</i>. Start your message with <i>'/'</i> to get the list of possible commands.</p>]]></field>
+        <field name="tooltip_position">top</field>
+        <field name="run">edit SomeText</field>
+    </record>
+
+    <record id="discuss_channel_tour_step_7" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">70</field>
+        <field name="trigger">.o-mail-Composer-input</field>
+        <field name="content">Post your message on the thread</field>
+        <field name="tooltip_position">top</field>
+        <field name="run">press Enter</field>
+    </record>
+
+    <record id="discuss_channel_tour_step_8" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">80</field>
+        <field name="trigger">.o-mail-Message[data-persistent] [name="more-action:undefined"]:not(:visible)</field>
+        <field name="content">Hover and click to view more actions on the message</field>
+        <field name="tooltip_position">top</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="discuss_channel_tour_step_9" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">90</field>
+        <field name="trigger">.o-dropdown-item[name="add-bookmark"]</field>
+        <field name="content">click to bookmark your message</field>
+        <field name="tooltip_position">right</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="discuss_channel_tour_step_10" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">100</field>
+        <field name="trigger">button[data-mailbox-id="bookmark"]</field>
+        <field name="content">Once a message has been bookmarked, you can come back and review it at any time here.</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="discuss_channel_tour_step_11" model="web_tour.tour.step">
+        <field name="tour_id" ref="discuss_channel_tour"/>
+        <field name="sequence">110</field>
+        <field name="trigger">.o-mail-DiscussSearch-inputContainer</field>
+        <field name="content"><![CDATA[<p><b>Chat with coworkers</b> in real-time using direct messages.</p><p><i>You might need to invite users from the Settings app first.</i></p>]]></field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
 </odoo>

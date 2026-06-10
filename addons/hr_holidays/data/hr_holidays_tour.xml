@@ -4,4 +4,140 @@
         <field name="name">hr_holidays_tour</field>
         <field name="rainbow_man_message">Congrats, we can see that your request has been validated.</field>
     </record>
+
+    <record id="hr_holidays_tour_step_1" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">10</field>
+        <field name="is_active" eval='["community", "desktop"]'/>
+        <field name="trigger">.o_navbar_apps_menu button</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_2" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">20</field>
+        <field name="trigger">.o_app[data-menu-xmlid="hr_holidays.menu_hr_holidays_root"]</field>
+        <field name="content"><![CDATA[Let's discover the <strong>Time Off</strong> app!]]></field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_3" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">30</field>
+        <field name="trigger">.o_timeoff_buttons .o-dropdown-caret</field>
+        <field name="content">Click on this button to request time-off or allocation</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_4" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">40</field>
+        <field name="trigger">.o-dropdown-item:nth-child(1)</field>
+        <field name="content">Click on this button to request a time-off</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_5" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">50</field>
+        <field name="trigger">div[name="work_entry_type_id"] input</field>
+        <field name="content">Let's try to create a Sick Time Off, select it in the list</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_6" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">60</field>
+        <field name="trigger">.ui-autocomplete .ui-menu-item a:contains('Sick Time Off')</field>
+        <field name="tooltip_position">right</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_7" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">70</field>
+        <field name="trigger">div[name=request_date_from] button</field>
+        <field name="content">You can select the period you need to take off</field>
+        <field name="tooltip_position">right</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_8" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">80</field>
+        <field name="trigger">.o_date_item_cell:nth-child(31)</field>
+        <field name="content">Click on the 22nd</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_9" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">90</field>
+        <field name="trigger">.o_date_item_cell:nth-child(34)</field>
+        <field name="content">Click on the 25th</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_10" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">100</field>
+        <field name="trigger">.modal-content</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_11" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">110</field>
+        <field name="trigger">div[name="name"] textarea</field>
+        <field name="content">Add some description for the leave</field>
+        <field name="tooltip_position">right</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_12" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">120</field>
+        <field name="trigger">button.o_form_button_save</field>
+        <field name="content">Submit your request</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_13" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">130</field>
+        <field name="trigger">button[data-menu-xmlid="hr_holidays.menu_hr_holidays_management"]</field>
+        <field name="content">Let's go check it</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_14" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">140</field>
+        <field name="trigger">a[data-menu-xmlid="hr_holidays.menu_open_department_leave_approve"]</field>
+        <field name="content">Select Time Off</field>
+        <field name="tooltip_position">right</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_15" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">150</field>
+        <field name="trigger">.o_switch_view.o_list</field>
+        <field name="content">Switch to list view</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="hr_holidays_tour_step_16" model="web_tour.tour.step">
+        <field name="tour_id" ref="hr_holidays_tour"/>
+        <field name="sequence">160</field>
+        <field name="trigger">table.o_list_table tr.o_data_row:nth-child(1)</field>
+        <field name="content">Select the request you just created</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
 </odoo>

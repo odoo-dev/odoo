@@ -148,40 +148,28 @@ export class TourService {
 
     /**
      * @param {string} name The name of the tour
+     * @returns {Promise<{tour: Object, mode: "auto"|"manual"}>}
      */
-    async getTour(name, options) {
+    async getTour(name) {
         // Onboarding tour (come from database (.xml files))
-        if (options.mode === "manual") {
-            const tour = await this.orm.call("web_tour.tour", "get_tour_json_by_name", [name]);
-            if (!tour) {
-                throw new Error(`Tour '${name}' is not found in the database.`);
-            }
-            if (!tour.steps.length && tourRegistry.contains(tour.name)) {
-                tour.steps = tourRegistry.get(tour.name).steps;
-            }
+        const dbTour = await this.orm.call("web_tour.tour", "get_tour_json_by_name", [name]);
+        if (dbTour) {
             return {
-                ...tour,
-                steps:
-                    typeof tour.steps === "function"
-                        ? tour.steps()
-                        : Array.isArray(tour.steps)
-                        ? tour.steps
-                        : [],
+                ...dbTour,
+                steps: Array.isArray(dbTour.steps) ? dbTour.steps : [],
             };
         }
         // Automatic tour (come from registry)
-        else {
-            await this.waitUntilTourRegistered(name);
-            const tour = tourRegistry.get(name, null);
-            if (!tour) {
-                throw new Error(`Tour '${name}' is not found in registry 'web_tour.tours'.`);
-            }
-            return {
-                ...tour,
-                name,
-                steps: tour.steps(),
-            };
+        await this.waitUntilTourRegistered(name);
+        const tour = tourRegistry.get(name, null);
+        if (!tour) {
+            throw new Error(`Tour '${name}' is not found in registry 'web_tour.tours'.`);
         }
+        return {
+            ...tour,
+            name,
+            steps: tour.steps(),
+        };
     }
 
     /**
@@ -205,17 +193,21 @@ export class TourService {
     }
 
     /**
-     * Check that the registry contains the tour (only for automatic tour)
+     * Check that the registry or DB contains the tour.
      * @param {string} name The name of the tour
      */
-    isTourReady(name) {
-        return tourRegistry.contains(name);
+    async isTourReady(name) {
+        if (tourRegistry.contains(name)) {
+            return true;
+        }
+        const dbTour = await this.orm.call("web_tour.tour", "get_tour_json_by_name", [name]);
+        return !!(dbTour && dbTour.steps.length);
     }
 
     async resumeTour() {
         const tourName = tourState.getCurrentTour();
         const tourConfig = tourState.getCurrentConfig();
-        const tour = await this.getTour(tourName, tourConfig);
+        const tour = await this.getTour(tourName);
         if (!tour || !tour.steps.length) {
             tourState.clear();
             return;
@@ -287,7 +279,7 @@ export class TourService {
     async startTour(name, options = {}) {
         this.removePointer();
         this.removeTourRecorder();
-        const tour = await this.getTour(name, options);
+        const tour = await this.getTour(name);
 
         if (!session.is_public && !this.toursEnabled && options.mode === "manual") {
             this.toursEnabled = await this.orm.call("res.users", "switch_tour_enabled", [

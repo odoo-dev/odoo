@@ -33,24 +33,6 @@ class TestWebsiteBlogUi(odoo.tests.HttpCase, TestWebsiteBlogCommon):
             "cover_properties": """{"background-image": "url('/website_blog/static/src/img/cover_1.jpg')", "resize_class": "o_record_has_cover o_half_screen_height", "opacity": "0"}""",
         })
 
-    def test_admin(self):
-        self.env.ref('base.user_admin').write({
-            'email': 'mitchell.admin@example.com',
-        })
-        # Ensure at least two blogs exist for the step asking to select a blog
-        self.env['blog.blog'].create({'name': 'Travel'})
-
-        # Ensure at least one image exists for the step that chooses one
-        self.env['ir.attachment'].create({
-            'public': True,
-            'type': 'url',
-            'url': '/web/image/123/transparent.png',
-            'name': 'transparent.png',
-            'mimetype': 'image/png',
-        })
-
-        self.start_tour(self.env['website'].get_client_action_url('/'), 'blog', login='admin')
-
     def test_blog_post_tags(self):
         self.start_tour(self.env['website'].get_client_action_url('/blog'), 'blog_tags', login='admin')
 

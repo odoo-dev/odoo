@@ -8,4 +8,58 @@
             <br>You can now fill in the data for your customers and send them invoices electronically
         ]]></field>
     </record>
+
+    <record id="nemhandel_onboarding_tour_step_1" model="web_tour.tour.step">
+        <field name="tour_id" ref="nemhandel_onboarding_tour"/>
+        <field name="sequence">10</field>
+        <field name="is_active" eval='["community", "desktop"]'/>
+        <field name="trigger">.o_navbar_apps_menu button</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="nemhandel_onboarding_tour_step_2" model="web_tour.tour.step">
+        <field name="tour_id" ref="nemhandel_onboarding_tour"/>
+        <field name="sequence">20</field>
+        <field name="is_active" eval='["community"]'/>
+        <field name="trigger">.o_app[data-menu-xmlid="account.menu_finance"]</field>
+        <field name="content">Let's register on Nemhandel.</field>
+        <field name="tooltip_position">right</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="nemhandel_onboarding_tour_step_3" model="web_tour.tour.step">
+        <field name="tour_id" ref="nemhandel_onboarding_tour"/>
+        <field name="sequence">20</field>
+        <field name="is_active" eval='["enterprise"]'/>
+        <field name="trigger">.o_app[data-menu-xmlid="account.menu_finance"]</field>
+        <field name="content">Let's register on Nemhandel.</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="nemhandel_onboarding_tour_step_4" model="web_tour.tour.step">
+        <field name="tour_id" ref="nemhandel_onboarding_tour"/>
+        <field name="sequence">30</field>
+        <field name="trigger">button[data-menu-xmlid="account.menu_finance_configuration"]</field>
+        <field name="content">Configuration</field>
+        <field name="tooltip_position">bottom</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="nemhandel_onboarding_tour_step_5" model="web_tour.tour.step">
+        <field name="tour_id" ref="nemhandel_onboarding_tour"/>
+        <field name="sequence">40</field>
+        <field name="trigger">a[data-menu-xmlid="account.menu_account_config"]</field>
+        <field name="content">Settings</field>
+        <field name="tooltip_position">right</field>
+        <field name="run">click</field>
+    </record>
+
+    <record id="nemhandel_onboarding_tour_step_6" model="web_tour.tour.step">
+        <field name="tour_id" ref="nemhandel_onboarding_tour"/>
+        <field name="sequence">50</field>
+        <field name="trigger">button[name="action_open_nemhandel_form"]</field>
+        <field name="content">Click to start signing up</field>
+        <field name="run">click</field>
+    </record>
 </odoo>
