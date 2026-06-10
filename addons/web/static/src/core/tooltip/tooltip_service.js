@@ -42,6 +42,7 @@ import { whenReady } from "@odoo/owl";
 export const OPEN_DELAY = 400;
 export const CLOSE_DELAY = 200;
 export const SHOW_AFTER_DELAY = 250;
+export const SELECTOR_TOOLTIP = "[data-tooltip], [data-tooltip-template], [title]";
 
 export const tooltipService = {
     dependencies: ["popover", "ui"],
@@ -115,6 +116,7 @@ export const tooltipService = {
 
             target = el;
             // Prevent title from showing on a parent at the same time
+            const title = el.title;
             target.title = "";
             const timeoutDelay = isHelpNode(el) ? 0 : delay;
             openTooltipTimeout = browser.setTimeout(() => {
@@ -124,7 +126,14 @@ export const tooltipService = {
                         target,
                         Tooltip,
                         { tooltip, template, info },
-                        { position }
+                        {
+                            position,
+                            onClose: () => {
+                                if (el) {
+                                    el.title = title;
+                                }
+                            },
+                        }
                     );
                 }
             }, timeoutDelay);
@@ -144,14 +153,12 @@ export const tooltipService = {
             if (el.nodeType === Node.TEXT_NODE) {
                 return;
             }
-            const element = el.closest("[data-tooltip], [data-tooltip-template]");
+            const element = el.closest(SELECTOR_TOOLTIP);
             if (element && element === target) {
                 return;
             }
             if (elChildTooltip) {
-                const childTooltip = elChildTooltip.closest(
-                    "[data-tooltip], [data-tooltip-template]"
-                );
+                const childTooltip = elChildTooltip.closest(SELECTOR_TOOLTIP);
                 if (childTooltip === target) {
                     return;
                 }
@@ -165,7 +172,7 @@ export const tooltipService = {
             function spawnTooltip(elementTooltip) {
                 const dataset = elementTooltip.dataset;
                 const params = {
-                    tooltip: dataset.tooltip,
+                    tooltip: dataset.tooltip ?? elementTooltip.title,
                     template: dataset.tooltipTemplate,
                     position: dataset.tooltipPosition,
                 };
@@ -259,7 +266,7 @@ export const tooltipService = {
                         ev.preventDefault();
                         return;
                     }
-                    if (ev.target.closest("[data-tooltip], [data-tooltip-template]")) {
+                    if (ev.target.closest(SELECTOR_TOOLTIP)) {
                         if (!ev.target.dataset.tooltipTouchTapToShow) {
                             browser.clearTimeout(showTimer);
                             browser.clearTimeout(openTooltipTimeout);
@@ -271,7 +278,7 @@ export const tooltipService = {
                         ev.preventDefault();
                         return;
                     }
-                    if (ev.target.closest("[data-tooltip], [data-tooltip-template]")) {
+                    if (ev.target.closest(SELECTOR_TOOLTIP)) {
                         if (!ev.target.dataset.tooltipTouchTapToShow) {
                             browser.clearTimeout(showTimer);
                             browser.clearTimeout(openTooltipTimeout);
