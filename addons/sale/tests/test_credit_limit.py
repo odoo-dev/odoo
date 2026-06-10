@@ -345,6 +345,8 @@ class TestSaleOrderCreditLimit(TestSaleCommon):
         orders = order + order.copy({"partner_invoice_id": invoice_partner.id})
         orders.action_confirm()
 
+        self.partner_a.invalidate_recordset(['credit_to_invoice'])
+        company_a.invalidate_recordset(['credit', 'credit_to_invoice'])
         self.assertFalse(
             self.partner_a.credit_to_invoice, "Credit should only apply to the commercial entity"
         )
@@ -353,7 +355,8 @@ class TestSaleOrderCreditLimit(TestSaleCommon):
 
         invoices = orders._create_invoices()
         invoices.action_post()
-        company_a.invalidate_recordset()
+
+        company_a.invalidate_recordset(['credit', 'credit_to_invoice'])
         self.assertFalse(company_a.credit_to_invoice)
         self.assertEqual(company_a.credit, 1200.0)
 
