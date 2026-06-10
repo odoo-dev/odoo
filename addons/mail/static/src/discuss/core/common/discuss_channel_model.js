@@ -151,6 +151,7 @@ export class DiscussChannel extends Record {
         onDelete: (r) => r?.delete(),
         sort: (m1, m2) => m1.id - m2.id,
     });
+    rtc_allow_reactions = fields.Attr(true);
     channel_name_member_ids = fields.Many("discuss.channel.member");
     /** @type {"chat"|"channel"|"group"|"livechat"|"whatsapp"|"ai_chat"|"ai_composer"} */
     channel_type;

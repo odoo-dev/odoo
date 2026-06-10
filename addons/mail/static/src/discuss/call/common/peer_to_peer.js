@@ -57,6 +57,7 @@ const DEFAULT_NOTIFICATION_ROUTE = "/mail/rtc/session/notify_call_members";
  * @property {boolean} isTalking
  * @property {boolean} isCameraOn
  * @property {boolean} isScreenSharingOn
+ * @property {{emoji: string, sequence: number}|undefined} reaction
  */
 
 export class Peer {
@@ -208,6 +209,7 @@ export class PeerToPeer extends EventTarget {
         isTalking: false,
         isCameraOn: false,
         isScreenSharingOn: false,
+        reaction: undefined,
     });
     /** @type {String[]} */
     _iceServers;
@@ -305,6 +307,7 @@ export class PeerToPeer extends EventTarget {
             isTalking: false,
             isCameraOn: false,
             isScreenSharingOn: false,
+            reaction: undefined,
         });
     }
     /**

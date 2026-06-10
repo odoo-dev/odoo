@@ -17,10 +17,11 @@ import { useService } from "@web/core/utils/hooks";
 export class QuickReactionMenu extends Component {
     static template = "mail.QuickReactionMenu";
     static props = {
-        action: Object,
+        action: { type: Object, optional: true },
         classNames: { type: Object, optional: true },
-        message: Object,
+        message: { type: Object, optional: true },
         messageActive: { type: Boolean, optional: true },
+        onSelect: { type: Function, optional: true },
     };
     static components = { Dropdown };
     static DEFAULT_EMOJIS = ["👍", "❤️", "🤣", "😯", "😅", "🙏"];
@@ -40,6 +41,9 @@ export class QuickReactionMenu extends Component {
         );
         this.dropdown = useDropdownState({
             onClose: () => {
+                if (!this.props.message) {
+                    return;
+                }
                 const currentThread = this.env.getCurrentThread?.();
                 if (!currentThread || currentThread.notEq(this.props.message.thread)) {
                     return;
@@ -80,7 +84,7 @@ export class QuickReactionMenu extends Component {
     onClick() {
         this.loadEmoji();
         if (this.ui.isSmall) {
-            this.props.action.onSelected();
+            this.props.action?.onSelected?.();
         } else {
             this.picker.close();
             if (this.dropdown.isOpen) {
@@ -92,34 +96,50 @@ export class QuickReactionMenu extends Component {
     }
 
     toggleReaction(emoji) {
-        const reaction = this.props.message.reactions.find(
-            (r) => r.content === emoji && this.props.message.effectiveSelf.in(r.personas)
-        );
-        if (reaction) {
-            reaction.remove();
+        if (this.props.onSelect) {
+            this.props.onSelect(emoji);
         } else {
-            this.props.message.react(emoji);
-            this.frequentEmojiService.incrementEmojiUsage(emoji);
+            const reaction = this.props.message.reactions.find(
+                (r) => r.content === emoji && this.props.message.effectiveSelf.in(r.personas)
+            );
+            if (reaction) {
+                reaction.remove();
+            } else {
+                this.props.message.react(emoji);
+                this.frequentEmojiService.incrementEmojiUsage(emoji);
+            }
         }
-        this.dropdown.close();
-        this.picker.close();
+        if (this.props.message) {
+            this.dropdown.close();
+            this.picker.close();
+        }
     }
 
     get attClass() {
         const invisible =
+            this.props.message &&
             typeof this.props.messageActive === "boolean" &&
             !this.props.messageActive &&
             !this.dropdown.isOpen &&
             !this.picker.isOpen;
-        return {
+        const classes = {
             ...this.props.classNames,
             "o-open": this.dropdown.isOpen,
             invisible,
             visible: !invisible,
         };
+        if (this.props.action) {
+            for (const tag of this.props.action.tags || []) {
+                classes[`o-tag-${tag}`] = true;
+            }
+        }
+        return classes;
     }
 
     reactedBySelf(emoji) {
+        if (!this.props.message) {
+            return false;
+        }
         return this.props.message.reactions.some(
             (r) => r.content === emoji && this.props.message.effectiveSelf.in(r.personas)
         );

@@ -4,6 +4,7 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { QuickVoiceSettings } from "@mail/discuss/call/common/quick_voice_settings";
 import { QuickVideoSettings } from "@mail/discuss/call/common/quick_video_settings";
+import { QuickReactionMenu } from "@mail/core/common/quick_reaction_menu";
 import { attClassObjectToString } from "@mail/utils/common/format";
 import { CALL_PROMOTE_FULLSCREEN } from "@mail/discuss/call/common/discuss_channel_model_patch";
 
@@ -157,6 +158,38 @@ registerCallAction("raise-hand", {
     sequence: 50,
     sequenceGroup: 200,
     tags: ACTION_TAGS.CALL_ACTION_TRACKED,
+});
+registerCallAction("send-reaction", {
+    condition: ({ owner, channel }) =>
+        owner.env.inMeetingView && channel?.isSelfInCall && channel.rtc_allow_reactions,
+    component: QuickReactionMenu,
+    componentProps: ({ action }) => ({
+        action,
+        onSelect: (emoji) => action.store.rtc.sendReaction(emoji),
+        classNames: {
+            "o-mail-ActionList-button btn btn-group-item position-relative btn-secondary o-hasBtnBg o-inline": true,
+            "px-2 o-py-2_5": action.store.rtc.isFullscreen,
+            "o-p-0_5": !action.store.rtc.isFullscreen,
+        },
+    }),
+    icon: "fa fa-smile-o fa-fw fa-lg",
+    name: _t("Send Reaction"),
+    sequence: 55,
+    sequenceGroup: 200,
+    tags: ACTION_TAGS.CALL_ACTION_TRACKED,
+});
+registerCallAction("toggle-reactions", {
+    condition: ({ channel }) =>
+        channel?.isSelfInCall && ["owner", "admin"].includes(channel.self_member_id?.channel_role),
+    name: ({ channel }) =>
+        channel.rtc_allow_reactions ? _t("Disable Reactions") : _t("Enable Reactions"),
+    icon: "fa fa-smile-o",
+    onSelected: ({ channel, store }) =>
+        store.env.services.orm.call("discuss.channel", "action_rtc_toggle_reactions", [
+            [channel.id],
+        ]),
+    sequence: 85,
+    tags: ACTION_TAGS.CALL_LAYOUT,
 });
 registerCallAction("share-screen", {
     condition: ({ channel }) => channel?.isSelfInCall && !isMobileOS(),

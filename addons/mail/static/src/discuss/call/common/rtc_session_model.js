@@ -16,6 +16,7 @@ import { fields, Record } from "@mail/model/export";
  * @property {boolean} [isRaisingHand]
  * @property {boolean} [isCameraOn]
  * @property {boolean} [isScreenSharingOn]
+ * @property {{emoji: string, sequence: number}} [reaction]
  */
 
 export class RtcSession extends Record {
@@ -161,6 +162,9 @@ export class RtcSession extends Record {
     peerConnection;
     /** @type {Date|undefined} */
     raisingHand;
+    /** @type {{emoji: string, sequence: number}|undefined} */
+    reaction = fields.Attr(undefined);
+    lastReactionSequence = fields.Attr(undefined);
     videoComponentCount = 0;
     /** @type {Map<import("@mail/discuss/call/common/rtc_service").VideoType, MediaStream>} */
     videoStreams = new Map();
@@ -179,7 +183,7 @@ export class RtcSession extends Record {
     logStep;
 
     get channel() {
-        return this.channel_member_id?.channel_id?.channel;
+        return this.channel_member_id?.channel_id;
     }
 
     get isMute() {
@@ -217,6 +221,7 @@ export class RtcSession extends Record {
             isTalking: this.isTalking,
             isCameraOn: this.is_camera_on,
             isScreenSharingOn: this.is_screen_sharing_on,
+            reaction: this.reaction,
         };
     }
 

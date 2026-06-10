@@ -21,6 +21,9 @@ export class DiscussCoreCommon {
             const channel = this.store["discuss.channel"].insert(payload.id);
             this._handleNotificationChannelDelete(channel, metadata);
         });
+        this.busService.subscribe("discuss.channel/rtc_allow_reactions", (payload) => {
+            this.store.insert(payload);
+        });
         this.busService.subscribe("discuss.channel/new_message", (payload, metadata) => {
             this.store.insert(payload.store_data);
             this._handleNotificationNewMessage(payload, metadata);

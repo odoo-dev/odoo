@@ -3,6 +3,53 @@ $meeting-view-bg: #111827;
     background-color: $meeting-view-bg;
 }
 
+.o-mail-Meeting-reactions {
+    z-index: 1;
+}
+
+.o-mail-Meeting-reaction {
+    animation: o-mail-Meeting-reactionFloat 2.6s cubic-bezier(.2, .8, .2, 1) forwards;
+    bottom: 1.75rem;
+    left: var(--reaction-left);
+    max-width: 8rem;
+    transform: translateX(-50%);
+}
+
+.o-mail-Meeting-reactionEmoji {
+    filter: drop-shadow(0 .2rem .5rem rgba($black, .35));
+    font-size: clamp(2.75rem, 6vw, 5rem);
+}
+
+.o-mail-Meeting-reactionName {
+    display: inline-block !important;
+    max-width: 7.5rem;
+    padding: .15rem .55rem;
+    border-radius: 1rem;
+    background-color: rgba($black, .72);
+    box-shadow: 0 .2rem .75rem rgba($black, .35);
+    font-size: .75rem;
+    line-height: 1.15;
+}
+
+@keyframes o-mail-Meeting-reactionFloat {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, 1.2rem) scale(.7);
+    }
+    10% {
+        opacity: 1;
+        transform: translate(-50%, 0) scale(1.08);
+    }
+    22% {
+        opacity: 1;
+        transform: translate(-50%, -.7rem) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--reaction-sway)), -11rem) scale(1.12);
+    }
+}
+
 .o-overlay-item:has(.o-mail-Meeting) {
     // When both the meeting view and another overlay are open (e.g. message delete dialog,
     // call permission, etc.), only the last one opened is visible because they share the same

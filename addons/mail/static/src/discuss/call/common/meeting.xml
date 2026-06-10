@@ -3,8 +3,14 @@
     <t t-name="mail.Meeting">
         <div t-if="this.store.rtc.channel" class="o-mail-Meeting h-100 w-100 d-flex flex-column" t-att-class="{'o-fullscreen': this.store.rtc.isFullscreen, 'p-1': !this.ui.isSmall, 'pb-3': !this.ui.iSmall and !this.props.isPip}" t-att-data-active="this.store.meetingViewOpened">
             <div class="d-flex flex-grow-1 h-100 o-min-height-0 gap-1 position-relative">
-                <div class="o-mail-Meeting-callContainer h-100 flex-grow-1 min-w-0" t-att-class="{'d-none': this.ui.isSmall and this.threadActions.activeAction?.actionPanelComponentCondition, 'pb-0': this.ui.isSmall}">
+                <div class="o-mail-Meeting-callContainer h-100 flex-grow-1 min-w-0 position-relative overflow-hidden" t-att-class="{'d-none': this.ui.isSmall and this.threadActions.activeAction?.actionPanelComponentCondition, 'pb-0': this.ui.isSmall}">
                     <Call hasOverlay="false" isPip="this.props.isPip"/>
+                    <div class="o-mail-Meeting-reactions position-absolute top-0 start-0 w-100 h-100 pe-none overflow-hidden">
+                        <div t-foreach="this.reactions" t-as="reaction" t-key="reaction.id" class="o-mail-Meeting-reaction position-absolute text-center" t-att-title="reaction.name" t-attf-style="--reaction-left: {{ reaction.x }}%; --reaction-sway: {{ reaction.sway }}px;">
+                            <span class="o-mail-Meeting-reactionEmoji d-block lh-1" t-out="reaction.emoji"/>
+                            <span class="o-mail-Meeting-reactionName d-block text-truncate text-white small" t-out="reaction.name"/>
+                        </div>
+                    </div>
                 </div>
                 <div t-if="this.threadActions.activeAction?.actionPanelComponentCondition" t-attf-class="{{ this.threadActions.activeAction.actionPanelOuterClass }}" class="o-mail-DiscussContent-panelContainer o-mail-discussSidebarBgColor h-100 border-start border-dark o-border-opacity-15 flex-shrink-0 rounded-2" t-att-class="{ 'w-100': this.ui.isSmall }">
                     <t t-component="this.threadActions.activeAction.actionPanelComponent" t-props="this.threadActions.activeAction.actionPanelComponentProps"/>

@@ -45,6 +45,7 @@ const getSequence = () => sequence++;
  * @property {boolean} [is_deaf]
  * @property {boolean} [raisingHand]
  * @property {boolean} [pip]
+ * @property {string} [reaction]
  */
 
 /**
@@ -319,6 +320,8 @@ export class Rtc extends Record {
     notifications = proxy(new Map());
     /** @type {Map<string, number>} timeoutId by notificationId for call notifications */
     timeouts = new Map();
+    reactionSequence = 0;
+    reactionClearTimeout;
     /** @type {Map<number, number>} timeoutId by sessionId for download pausing delay */
     downloadTimeouts = new Map();
     /** @type {{urls: string[]}[]} */
@@ -756,6 +759,44 @@ export class Rtc extends Record {
         } else {
             this.removeCallNotification(notificationId);
         }
+    }
+
+    /**
+     * @param {import("models").RtcSession} session
+     * @param {{emoji: string, sequence: number}} reaction
+     */
+    onRemoteReaction(session, reaction) {
+        if (!this.localChannel?.rtc_allow_reactions) {
+            return;
+        }
+        if (!reaction?.emoji || session.lastReactionSequence === reaction.sequence) {
+            return;
+        }
+        session.lastReactionSequence = reaction.sequence;
+        this.showReaction(session, reaction.emoji);
+    }
+
+    /**
+     * @param {import("models").RtcSession} session
+     * @param {string} emoji
+     */
+    showReaction(session, emoji) {
+        if (!session || !emoji) {
+            return;
+        }
+        const name =
+            session && session.eq && session.eq(this.selfSession)
+                ? _t("You")
+                : session?.name || _t("Anonymous");
+        this.store.env.bus.trigger("RTC-SERVICE:REACTION", {
+            reaction: {
+                emoji,
+                id: `${session.id}_${Date.now()}_${Math.random()}`,
+                name,
+                session,
+                channelId: session.channel?.id || this.channel?.id,
+            },
+        });
     }
 
     /**
@@ -1205,6 +1246,9 @@ export class Rtc extends Record {
                     }
                     promises.push(this.raiseHand(value));
                     break;
+                case "reaction":
+                    promises.push(this.sendReaction(value));
+                    break;
                 case "pip":
                     if (value === this.isPipMode) {
                         break;
@@ -1278,8 +1322,14 @@ export class Rtc extends Record {
      * @param {String} param0.detail.name
      * @param {any} param0.detail.payload
      */
-    async _handleNetworkUpdates({ detail: { name, payload } }) {
+    async _handleNetworkUpdates({ detail }) {
         if (!this.localChannel) {
+            return;
+        }
+        const { name, payload } = detail;
+        if (!name) {
+            // P2P format: detail is { [sessionId]: info } directly
+            this.updateSessionInfo(detail);
             return;
         }
         switch (name) {
@@ -1445,18 +1495,32 @@ export class Rtc extends Record {
                 const session = await this.store["discuss.channel.rtc.session"].getWhenReady(
                     Number(id)
                 );
-                if (!session || session.eq(this.localSession) || !this.channel) {
+                if (!session) {
+                    return;
+                }
+                if (!this.channel && !this._remotelyHostedChannelId) {
+                    return;
+                }
+                if (session.eq(this.localSession)) {
                     return;
                 }
                 // `isRaisingHand` is turned into the Date `raisingHand`
                 this.setRemoteRaiseHand(session, info.isRaisingHand);
-                assignDefined(session, {
+                this.onRemoteReaction(session, info.reaction);
+                const values = {
                     is_muted: info.isSelfMuted ?? info.is_muted,
                     is_deaf: info.isDeaf ?? info.is_deaf,
                     isTalking: info.isTalking,
                     is_camera_on: info.isCameraOn ?? info.is_camera_on,
                     is_screen_sharing_on: info.isScreenSharingOn ?? info.is_screen_sharing_on,
-                });
+                };
+                if (
+                    info.reaction &&
+                    (!session.reaction || session.reaction.sequence < info.reaction.sequence)
+                ) {
+                    values.reaction = info.reaction;
+                }
+                assignDefined(session, values);
             })();
         }
     }
@@ -1852,6 +1916,54 @@ export class Rtc extends Record {
         }
         this.localSession.raisingHand = raise ? new Date() : undefined;
         await this._updateInfo();
+    }
+
+    /**
+     * @param {string} emoji
+     */
+    async sendReaction(emoji) {
+        if (!this.localChannel?.rtc_allow_reactions) {
+            return;
+        }
+        if (!emoji) {
+            return;
+        }
+        if (this.isRemote) {
+            this._remoteAction({ reaction: emoji });
+            this.showReaction(this.selfSession, emoji);
+            return;
+        }
+        if (!this.localSession || !this.localChannel) {
+            return;
+        }
+        const sequence = Date.now();
+        this.localSession.reaction = { emoji, sequence };
+        this.localSession.lastReactionSequence = sequence;
+        this.showReaction(this.localSession, emoji);
+        if (this.isHost) {
+            this._updateInfo();
+            this.network?.sfu?.updateInfo(toRaw(this.formatInfo()), { immediate: true });
+            // Mirroring through RPC for participants without data channel
+            rpc(
+                "/mail/rtc/session/update_and_broadcast",
+                {
+                    session_id: this.localSession.id,
+                    values: { reaction: this.localSession.reaction },
+                },
+                { silent: true }
+            );
+        }
+        browser.clearTimeout(this.reactionClearTimeout);
+        const reactionSequence = this.localSession.reaction.sequence;
+        this.reactionClearTimeout = browser.setTimeout(() => {
+            if (this.localSession?.reaction?.sequence === reactionSequence) {
+                this.localSession.reaction = undefined;
+                this._updateInfo();
+            }
+            if (this.p2pService?._localInfo?.reaction?.sequence === reactionSequence) {
+                this.p2pService._localInfo.reaction = undefined;
+            }
+        }, 3000);
     }
 
     /**
@@ -2443,6 +2555,7 @@ export const rtcService = {
     start(env, services) {
         const store = env.services["mail.store"];
         const rtc = store.rtc;
+        rtc.env = env;
         rtc.pipService = services["discuss.pip_service"];
         rtc.registerOnChange(rtc.pipService.state, "active", () => {
             const isPipMode = rtc.pipService.state.active;
@@ -2523,7 +2636,14 @@ export const rtcService = {
         services["bus_service"].subscribe(
             "discuss.channel.rtc.session/update_and_broadcast",
             (payload) => {
-                const { store_data, channelId } = payload;
+                const { store_data, channelId, reaction } = payload;
+                if (reaction) {
+                    const sessions = store_data["discuss.channel.rtc.session"] || [];
+                    for (const sessionValues of sessions) {
+                        const sessionId = sessionValues.id;
+                        rtc.updateSessionInfo({ [sessionId]: { reaction } });
+                    }
+                }
                 /**
                  * If this event comes from the channel of the current call, information is shared in real time
                  * through the peer to peer connection. So we do not use this less accurate broadcast.

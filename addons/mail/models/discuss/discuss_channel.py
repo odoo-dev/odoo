@@ -97,6 +97,7 @@ class DiscussChannel(models.Model):
     sfu_channel_uuid = fields.Char(groups="base.group_system")
     sfu_server_url = fields.Char(groups="base.group_system")
     rtc_session_ids = fields.One2many('discuss.channel.rtc.session', 'channel_id', groups="base.group_system")
+    rtc_allow_reactions = fields.Boolean("Allow Reactions", default=True)
     call_history_ids = fields.One2many("discuss.call.history", "channel_id")
     is_member = fields.Boolean("Is Member", compute="_compute_is_member", search="_search_is_member", compute_sudo=True)
     # sudo: discuss.channel - sudo for performance, self member can be accessed on accessible channel
@@ -1296,6 +1297,7 @@ class DiscussChannel(models.Model):
             "_store_member_fields",
         )._build_result()
         res.attr("avatar_cache_key", predicate=is_channel_or_group)
+        res.attr("rtc_allow_reactions")
         # sudo: discuss.category - guests can read categories of accessible channels
         res.one("discuss_category_id", "_store_category_fields", sudo=True)
         res.attr("channel_type")
@@ -1685,3 +1687,13 @@ class DiscussChannel(models.Model):
         else:
             msg = _("You are alone in this channel.")
         self.env.user._bus_send_transient_message(self, msg)
+
+    def action_rtc_toggle_reactions(self):
+        self.ensure_one()
+        if self.is_readonly and not self.can_self_edit_readonly_channel:
+            raise UserError(self.env._("You cannot toggle reactions in a read-only channel."))
+        # Only owners/admins or the creator can toggle?
+        # For now, let's keep it simple: anybody with write access to the channel metadata
+        # (which essentially means they are in the group or are admins).
+        self.rtc_allow_reactions = not self.rtc_allow_reactions
+        Store(self, notification_type="discuss.channel/rtc_allow_reactions").add(self, ["rtc_allow_reactions"])
