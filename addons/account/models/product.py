@@ -3,7 +3,7 @@ from difflib import SequenceMatcher
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import ValidationError
 from odoo.fields import Domain
-from odoo.tools import format_amount, frozendict, float_round
+from odoo.tools import format_amount, frozendict
 from odoo.tools.misc import split_every
 from odoo.tools.constants import PREFETCH_MAX
 
@@ -409,16 +409,16 @@ class ProductProduct(models.Model):
         apply_document_tax_mode = (not line.price_unit_json and not price) or (line.document_tax_mode != line.company_id.account_price_include) or (line.price_unit_json and line.price_unit_json['document_tax_mode'] != line.document_tax_mode)
 
         # Adapt the fiscal position here only when a new product is set on the line and the fiscal position set is not domestic
-        apply_fiscal_position = (new_product_set and line_parent_id.fiscal_position_id and line_parent_id.fiscal_position_id != line.company_id.domestic_fiscal_position_id) or (
-            line.price_unit_json and line.price_unit_json.get('fpos_id', False) and line.price_unit_json['fpos_id'] != line_parent_id.fiscal_position_id.id
+        apply_fiscal_position = (new_product_set and line_parent_id.fiscal_position_id != line.company_id.domestic_fiscal_position_id) or (
+            not is_account_move and price and line.price_unit_json and line_parent_id.fiscal_position_id and line_parent_id.fiscal_position_id != line.company_id.domestic_fiscal_position_id
         )
 
-        # When a new product is set on the line and no price param is provided it means we can use the default values
-        # from the product in _get_tax_included_unit_price.
+        # When a new product is set on the line it means we can use the default values from the product in _get_tax_included_unit_price.
         # For sale.order and purchase.order when the fiscal position is changed we also start the computation from the default values
-        if (is_account_move and new_product_set) or (not is_account_move and apply_fiscal_position):
-            product_values = None
-            apply_uom = apply_document_tax_mode = True
+        if new_product_set or (price and apply_fiscal_position):
+            product_values = None  # this will lead to the use of default_values
+            apply_document_tax_mode = True
+            apply_uom = is_account_move  # for sale/purchase.order if the price is given, the uom has already been applied
         # When we cannot use the default values we need to prepare the product_values as a screenshot of the state right
         # before the change that has triggered the price_unit compute leading up to this method
         else:
@@ -442,7 +442,7 @@ class ProductProduct(models.Model):
         return product._get_tax_included_unit_price(
             product_price_unit=price,
             company=line.company_id,
-            currency=line.currency_id,
+            currency=line.currency_id if is_account_move else None,
             document_date=line_date,
             document_type=document_type,
             fiscal_position=line_parent_id.fiscal_position_id if apply_fiscal_position else None,
@@ -459,7 +459,8 @@ class ProductProduct(models.Model):
         """ Helper to get the price unit from different models.
             This is needed to compute the same unit price in different models (sale order, account move, etc.) with same parameters.
         """
-        self == self.env['product.product'] or self.ensure_one()
+        if self:
+            self.ensure_one()
 
         if not product_values:
             product_values = self._get_default_product_values(company, document_type)

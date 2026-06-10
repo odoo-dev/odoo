@@ -2901,7 +2901,7 @@ class AccountTax(models.Model):
                 for tax_data in taxes_data:
                     tax = tax_data['tax']
                     involved_taxes |= tax
-                    involved_price_include.add(tax._is_price_included(base_line['document_tax_mode']))
+                    involved_price_include.add(tax_data['price_include'])
 
             # Compute the display base amounts.
             if set(involved_taxes.mapped('amount_type')) == {'fixed'}:

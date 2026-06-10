@@ -628,7 +628,7 @@ class SaleOrderLine(models.Model):
         for line in self:
             line.allowed_uom_ids = line.product_id._get_available_uoms()
 
-    @api.depends("product_id", "company_id", "document_tax_mode")
+    @api.depends("product_id", "company_id")
     def _compute_tax_ids(self):
         lines_by_company = defaultdict(lambda: self.env["sale.order.line"])
         cached_taxes = {}
@@ -704,10 +704,10 @@ class SaleOrderLine(models.Model):
                 price = None if line.price_unit else line._get_display_price()
 
                 product_change = line.price_unit_json and line.price_unit_json['product_id'] != line.product_id.id
-                quantity_price_change = line.price_unit_json and line.product_id and line.price_unit_json['pricelist_price'] != line._get_pricelist_price()
                 fpos_change = line.price_unit_json and line.product_id and line.price_unit_json['fpos_id'] != line.order_id.fiscal_position_id.id
+                display_price_change = line.price_unit_json and line.product_id and line.price_unit_json['display_price'] != self._convert_to_uom_unit(line._get_display_price())
 
-                if product_change or quantity_price_change or fpos_change:
+                if product_change or fpos_change or display_price_change or line.env.context.get("recompute_from_display_price", False):
                     price = line._get_display_price()
                     line.price_unit_json = None
 
@@ -719,8 +719,11 @@ class SaleOrderLine(models.Model):
                 'product_id': line.product_id.id,
                 'document_tax_mode': line.document_tax_mode,
                 'fpos_id': line.order_id.fiscal_position_id.id,
-                'pricelist_price': line._get_pricelist_price() if line.product_id else None,
+                'display_price': self._convert_to_uom_unit(line._get_display_price()) if line.product_id else None,
             }
+
+    def _convert_to_uom_unit(self, price):
+        return self.product_uom_id[:1]._compute_price(price, self.env.ref('uom.product_uom_unit'))
 
     @api.depends("is_storable", "product_uom_qty", "qty_delivered", "state", "product_uom_id")
     def _compute_display_qty_widget(self):
