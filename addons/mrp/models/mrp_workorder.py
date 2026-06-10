@@ -809,11 +809,8 @@ class MrpWorkorder(models.Model):
         self.ensure_one()
         if not self.workcenter_id:
             return self.duration_expected
-        bom = self.operation_id.bom_id or self.production_bom_id
-        bom_capacity = bom.product_uom_id._compute_quantity(bom.product_qty, self.product_uom_id)
+        bom_capacity = self.operation_id.bom_id.product_uom_id._compute_quantity(self.production_bom_id.product_qty, self.product_uom_id)
         capacity, setup, cleanup = self.workcenter_id._get_capacity(self.product_id, self.product_uom_id, bom_capacity or 1)
-        if bom.product_qty == 1 and bom.product_uom_id != self.product_id.uom_id:
-            capacity = max(capacity, bom_capacity)
         if not self.operation_id:
             duration_expected_working = (self.duration_expected - setup - cleanup) * self.workcenter_id.time_efficiency / 100.0
             if duration_expected_working < 0:
@@ -831,8 +828,6 @@ class MrpWorkorder(models.Model):
             if duration_expected_working < 0:
                 duration_expected_working = 0
             capacity, setup, cleanup = alternative_workcenter._get_capacity(self.product_id, self.product_uom_id, bom_capacity or 1)
-            if bom.product_qty == 1 and bom.product_uom_id != self.product_id.uom_id:
-                capacity = max(capacity, bom_capacity)
             cycle_number = float_round(qty_production / capacity, precision_digits=0, rounding_method='UP')
             return setup + cleanup + cycle_number * duration_expected_working * 100.0 / alternative_workcenter.time_efficiency
         time_cycle = self.operation_id.time_cycle

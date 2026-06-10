@@ -91,8 +91,6 @@ class MrpRoutingWorkcenter(models.Model):
                 total_duration += item['duration']
                 bom_capacity = operation.bom_id.product_uom_id._compute_quantity(operation.bom_id.product_qty, item.product_uom_id)
                 capacity, _setup, _cleanup = item['workcenter_id']._get_capacity(item.product_id, item.product_uom_id, bom_capacity or 1)
-                if operation.bom_id.product_qty == 1 and operation.bom_id.product_uom_id != item.product_id.uom_id:
-                    capacity = max(capacity, bom_capacity)
                 cycle_number += float_round((item['qty_produced'] / capacity), precision_digits=0, rounding_method='UP')
             if cycle_number:
                 operation.time_cycle = total_duration / cycle_number
@@ -111,8 +109,6 @@ class MrpRoutingWorkcenter(models.Model):
             unit = self.env.context.get('unit', operation.bom_id.product_uom_id)
             bom_capacity = operation.bom_id.product_uom_id._compute_quantity(operation.bom_id.product_qty, unit)
             capacity, setup, cleanup = workcenter._get_capacity(product, unit, bom_capacity or 1)
-            if operation.bom_id.product_qty == 1 and operation.bom_id.product_uom_id != product.uom_id:
-                capacity = max(capacity, bom_capacity)
             operation.cycle_number = float_round(quantity / capacity, precision_digits=0, rounding_method="UP")
             operation.time_total = setup + cleanup + operation.cycle_number * operation.time_cycle * 100.0 / (workcenter.time_efficiency or 100.0)
             operation.show_time_total = operation.cycle_number > 1 or not float_is_zero(setup + cleanup, precision_digits=0)
