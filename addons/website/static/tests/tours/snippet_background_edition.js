@@ -60,10 +60,23 @@ function addCheck(steps, checkX, checkNoX, xType, noSwitch = false) {
     };
     if (!noSwitch) {
         steps.push(switchTo(xType, name));
-    }
-    if (!selectorCheckX && selectorCheckNoX) {
+        // After switching tabs, Owl re-renders child components asynchronously.
+        // The tab button is always present (just clicked), so use it as the
+        // trigger and poll via waitUntil until both the element exists in the
+        // rendered tab content and has the correct selection state.
+        const colorCode = checkX || checkNoX;
+        const expectedSelected = Boolean(checkX);
         steps.push({
-            trigger: selectorCheckNoX,
+            trigger: `.o_popover`,
+            async run({ waitUntil }) {
+                await waitUntil(
+                    () => {
+                        const el = document.querySelector(`[data-color="${colorCode}"]`);
+                        return el && el.classList.contains("selected") === expectedSelected;
+                    },
+                    { timeout: 10000 }
+                );
+            },
         });
     }
     steps.push(step);
@@ -124,7 +137,6 @@ function updateAndCheckCustomGradient({ updateStep, checkGradient }) {
 registerWebsitePreviewTour(
     "snippet_background_edition",
     {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         edition: true,
     },
     () => [
