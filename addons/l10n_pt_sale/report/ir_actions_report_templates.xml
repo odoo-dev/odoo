@@ -15,7 +15,7 @@
                 <span t-out="pt_line_tax_exemption_reasons"/>
             </t>
         </xpath>
-        <xpath expr="//div[@t-if='not doc.signature']" position="before">
+        <xpath expr="//div[contains(@t-if,'not doc.signature')]" position="before">
             <t t-set="pt_tax_exemption_reasons" t-value="doc._l10n_pt_get_vat_exemptions_reasons()"/>
             <t t-if="doc.company_id.account_fiscal_country_id.code == 'PT' and pt_tax_exemption_reasons">
                 <div><strong>Motivos de isenção de IVA:</strong></div>
