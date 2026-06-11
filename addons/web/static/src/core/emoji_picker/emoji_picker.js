@@ -1,20 +1,19 @@
 import { markEventHandled } from "@web/core/utils/misc";
-import {
-    useComponent,
-    useExternalListener,
-    useLayoutEffect,
-    useRef,
-} from "@web/owl2/utils";
+import { useComponent, useExternalListener, useRef } from "@web/owl2/utils";
 
 import {
     App,
     Component,
+    computed,
     onMounted,
     onPatched,
     onWillPatch,
     onWillStart,
     onWillUnmount,
     proxy,
+    signal,
+    types as t,
+    useEffect,
     xml,
 } from "@odoo/owl";
 
@@ -65,18 +64,49 @@ export class EmojiPicker extends Component {
     lastSearchTerm;
     keyboardNavigated = false;
 
+    emojiMatrix = computed(() => {
+        void this.categoryId();
+        void this.searchTerm();
+        if (!emojiLoader.loaded || !this.gridRef()) {
+            return [];
+        }
+        const emojiEls = Array.from(this.gridRef().querySelectorAll(".o-Emoji"));
+        const emojiRects = emojiEls.map((el) => el.getBoundingClientRect());
+        const matrix = [];
+        for (const [index, pos] of emojiRects.entries()) {
+            const emojiIndex = emojiEls[index].dataset.index;
+            if (matrix.length === 0 || pos.top > emojiRects[index - 1].top) {
+                matrix.push([]);
+            }
+            matrix.at(-1).push(parseInt(emojiIndex));
+        }
+        return matrix;
+    });
+
+    searchTerm = signal(this.props.initialSearchTerm ?? "", { type: t.string() });
+    categoryId = signal(null, { type: t.or([t.number(), t.literal(null)]) });
+    hoveredEmoji = signal(null, { type: t.or([t.object(), t.literal(null)]) }); // Emoji | null
+    activeEmojiIndex = signal(0, { type: t.number() });
+
+    gridRef = signal(null, { type: t.ref() });
+    emojiNavbarRepr = signal(null, { type: t.or([t.array(), t.literal(null)]) });
+
+    recentEmojis = computed(() => {
+        const recent = Object.entries(this.frequentEmojiService.all)
+            .sort(([, usage_1], [, usage_2]) => usage_2 - usage_1)
+            .map(([codepoints]) => emojiLoader.map.get(codepoints));
+        if (this.searchTerm() && recent.length > 0) {
+            return fuzzyLookup(this.searchTerm(), recent, (emoji) =>
+                [emoji.name].concat(emoji.keywords, emoji.emoticons, emoji.shortcodes)
+            );
+        }
+        return recent.slice(0, 42);
+    });
+
     setup() {
-        this.gridRef = useRef("emoji-grid");
         this.navbarRef = useRef("navbar");
         this.ui = useService("ui");
         this.isMobileOS = isMobileOS();
-        this.state = proxy({
-            activeEmojiIndex: 0,
-            categoryId: null,
-            searchTerm: this.props.initialSearchTerm ?? "",
-            /** @type {Emoji | undefined} */
-            hoveredEmoji: undefined,
-        });
         this.frequentEmojiService = useService("frequent_emoji");
         const loadEmoji = useLoadEmoji();
         useAutofocus();
@@ -88,9 +118,11 @@ export class EmojiPicker extends Component {
                 title: "🕓",
                 sortId: 0,
             };
-            this.state.categoryId = this.recentEmojis.length
-                ? this.recentCategory.sortId
-                : emojiLoader.categories[0].sortId;
+            this.categoryId.set(
+                this.recentEmojis().length
+                    ? this.recentCategory.sortId
+                    : emojiLoader.categories[0].sortId
+            );
         });
         onMounted(() => {
             if (!emojiLoader.loaded) {
@@ -101,9 +133,9 @@ export class EmojiPicker extends Component {
             this.adaptNavbar();
             this.highlightActiveCategory();
             if (this.props.storeScroll) {
-                this.gridRef.el.scrollTop = this.props.storeScroll.get();
+                this.gridRef().scrollTop = this.props.storeScroll.get();
             }
-            this.state.hoveredEmoji = this.activeEmoji;
+            this.hoveredEmoji.set(this.activeEmoji);
         });
         onPatched(() => {
             if (!emojiLoader.loaded) {
@@ -112,8 +144,8 @@ export class EmojiPicker extends Component {
             if (this.shouldScrollElem) {
                 this.shouldScrollElem = false;
                 const getElement = () =>
-                    this.gridRef.el.querySelector(
-                        `.o-EmojiPicker-category[data-category="${this.state.categoryId}"`
+                    this.gridRef().querySelector(
+                        `.o-EmojiPicker-category[data-category="${this.categoryId()}"`
                     );
                 const elem = getElement();
                 if (elem) {
@@ -123,49 +155,38 @@ export class EmojiPicker extends Component {
                 }
             }
         });
-        useLayoutEffect(
-            () => this.updateEmojiPickerRepr(),
-            () => [this.state.categoryId, this.state.searchTerm]
-        );
-        useLayoutEffect(
-            (el) => {
-                const gridEl = this.gridRef.el;
-                const activeEl = gridEl?.querySelector(".o-Emoji.o-active");
-                if (!gridEl) {
-                    return;
-                }
-                if (activeEl && this.keyboardNavigated && !isElementVisible(activeEl, gridEl)) {
-                    activeEl.scrollIntoView({ block: "center", behavior: "instant" });
-                    this.keyboardNavigated = false;
-                }
-                this.state.hoveredEmoji = this.activeEmoji;
-            },
-            () => [this.state.activeEmojiIndex, this.gridRef.el]
-        );
-        useLayoutEffect(
-            () => {
-                if (!this.gridRef.el) {
-                    return;
-                }
-                if (this.searchTerm) {
-                    this.gridRef.el.scrollTop = 0;
-                    this.state.categoryId = null;
-                } else {
-                    if (this.lastSearchTerm) {
-                        this.gridRef.el.scrollTop = 0;
-                    }
-                    this.highlightActiveCategory();
-                }
-                this.lastSearchTerm = this.searchTerm;
-            },
-            () => [this.searchTerm]
-        );
-        onWillUnmount(() => {
-            this.navbarResizeObserver?.disconnect();
-            if (!this.gridRef.el) {
+        useEffect(() => {
+            if (!this.gridRef()) {
                 return;
             }
-            this.props.storeScroll?.set(this.gridRef.el.scrollTop);
+            const active = this.gridRef().querySelector(".o-Emoji.o-active");
+            if (active && this.keyboardNavigated && !isElementVisible(active, this.gridRef())) {
+                active.scrollIntoView({ block: "center", behavior: "instant" });
+                this.keyboardNavigated = false;
+            }
+            this.hoveredEmoji.set(this.activeEmoji);
+        });
+        useEffect(() => {
+            if (!this.gridRef()) {
+                return;
+            }
+            if (this.searchTerm()) {
+                this.gridRef().scrollTop = 0;
+                this.categoryId.set(null);
+            } else {
+                if (this.lastSearchTerm) {
+                    this.gridRef().scrollTop = 0;
+                }
+                this.highlightActiveCategory();
+            }
+            this.lastSearchTerm = this.searchTerm();
+        });
+        onWillUnmount(() => {
+            this.navbarResizeObserver?.disconnect();
+            if (!this.gridRef()) {
+                return;
+            }
+            this.props.storeScroll?.set(this.gridRef().scrollTop);
         });
     }
 
@@ -187,7 +208,7 @@ export class EmojiPicker extends Component {
         );
         const repr = [];
         let panel = [];
-        const allCategories = this.getAllCategories(this.recentEmojis);
+        const allCategories = this.getAllCategories(this.recentEmojis());
         for (const category of allCategories) {
             if (
                 panel.length === maxAvailableNavbarItemAmountAtOnce - 1 &&
@@ -210,39 +231,15 @@ export class EmojiPicker extends Component {
             }
             repr.push(panel);
         }
-        this.state.emojiNavbarRepr = repr;
+        this.emojiNavbarRepr.set(repr);
     }
 
     get emojisLoaded() {
         return emojiLoader.loaded;
     }
 
-    get searchTerm() {
-        return this.props.state ? this.props.state.searchTerm : this.state.searchTerm;
-    }
-
-    set searchTerm(value) {
-        if (this.props.state) {
-            this.props.state.searchTerm = value;
-        } else {
-            this.state.searchTerm = value;
-        }
-    }
-
-    get recentEmojis() {
-        const recent = Object.entries(this.frequentEmojiService.all)
-            .sort(([, usage_1], [, usage_2]) => usage_2 - usage_1)
-            .map(([codepoints]) => emojiLoader.map.get(codepoints));
-        if (this.searchTerm && recent.length > 0) {
-            return fuzzyLookup(this.searchTerm, recent, (emoji) =>
-                [emoji.name].concat(emoji.keywords, emoji.emoticons, emoji.shortcodes)
-            );
-        }
-        return recent.slice(0, 42);
-    }
-
     get placeholder() {
-        return this.state.hoveredEmoji?.shortcodes.join(" ") ?? _t("Search emoji");
+        return this.hoveredEmoji()?.shortcodes.join(" ") ?? _t("Search emoji");
     }
 
     /**
@@ -250,7 +247,7 @@ export class EmojiPicker extends Component {
      * @param {Emoji} emoji
      */
     onMouseenterEmoji(ev, emoji) {
-        this.state.hoveredEmoji = emoji;
+        this.hoveredEmoji.set(emoji);
     }
 
     /**
@@ -258,7 +255,7 @@ export class EmojiPicker extends Component {
      * @param {Emoji} emoji
      */
     onMouseleaveEmoji(ev, emoji) {
-        this.state.hoveredEmoji = this.activeEmoji;
+        this.hoveredEmoji.set(this.activeEmoji);
     }
 
     /**
@@ -269,57 +266,35 @@ export class EmojiPicker extends Component {
     }
 
     onClickToNextCategories() {
-        const panelIndex = this.state.emojiNavbarRepr.findIndex((p) =>
-            p.includes(this.state.categoryId)
-        );
-        this.selectCategory(this.state.emojiNavbarRepr[panelIndex + 1][1]);
+        const repr = this.emojiNavbarRepr();
+        const panelIndex = repr.findIndex((p) => p.includes(this.categoryId()));
+        this.selectCategory(repr[panelIndex + 1][1]);
     }
 
     onClickToPreviousCategories() {
-        const panelIndex = this.state.emojiNavbarRepr.findIndex((p) =>
-            p.includes(this.state.categoryId)
-        );
-        this.selectCategory(this.state.emojiNavbarRepr[panelIndex - 1].at(-2));
-    }
-
-    /**
-     * Builds the representation of the emoji picker (a 2D matrix of emojis)
-     * from the current DOM state. This is necessary to handle keyboard
-     * navigation of the emoji picker.
-     */
-    updateEmojiPickerRepr() {
-        if (!emojiLoader.loaded) {
-            return;
-        }
-        const emojiEls = Array.from(this.gridRef.el.querySelectorAll(".o-Emoji"));
-        const emojiRects = emojiEls.map((el) => el.getBoundingClientRect());
-        this.emojiMatrix = [];
-        for (const [index, pos] of emojiRects.entries()) {
-            const emojiIndex = emojiEls[index].dataset.index;
-            if (this.emojiMatrix.length === 0 || pos.top > emojiRects[index - 1].top) {
-                this.emojiMatrix.push([]);
-            }
-            this.emojiMatrix.at(-1).push(parseInt(emojiIndex));
-        }
+        const repr = this.emojiNavbarRepr();
+        const panelIndex = repr.findIndex((p) => p.includes(this.categoryId()));
+        this.selectCategory(repr[panelIndex - 1].at(-2));
     }
 
     /**
      * @param {string} key
      */
     handleNavigation(key) {
-        const currentIdx = this.state.activeEmojiIndex;
+        const emojiMatrix = this.emojiMatrix();
+        const currentIdx = this.activeEmojiIndex();
         let currentRow = -1;
         let currentCol = -1;
-        const rowIdx = this.emojiMatrix.findIndex((row) => row.includes(currentIdx));
+        const rowIdx = emojiMatrix.findIndex((row) => row.includes(currentIdx));
         if (rowIdx !== -1) {
             currentRow = rowIdx;
-            currentCol = this.emojiMatrix[currentRow].indexOf(currentIdx);
+            currentCol = emojiMatrix[currentRow].indexOf(currentIdx);
         }
         let newIdx;
         switch (key) {
             case "ArrowDown": {
-                const rowBelow = this.emojiMatrix[currentRow + 1];
-                const rowBelowBelow = this.emojiMatrix[currentRow + 2];
+                const rowBelow = emojiMatrix[currentRow + 1];
+                const rowBelowBelow = emojiMatrix[currentRow + 2];
                 if (rowBelow?.length <= currentCol && rowBelowBelow?.length >= currentCol) {
                     newIdx = rowBelowBelow?.[currentCol];
                 } else {
@@ -328,8 +303,8 @@ export class EmojiPicker extends Component {
                 break;
             }
             case "ArrowUp": {
-                const rowAbove = this.emojiMatrix[currentRow - 1];
-                const rowAboveAbove = this.emojiMatrix[currentRow - 2];
+                const rowAbove = emojiMatrix[currentRow - 1];
+                const rowAboveAbove = emojiMatrix[currentRow - 2];
                 if (rowAbove?.length <= currentCol && rowAboveAbove?.length >= currentCol) {
                     newIdx = rowAboveAbove?.[currentCol];
                 } else {
@@ -339,31 +314,31 @@ export class EmojiPicker extends Component {
             }
             case "ArrowRight": {
                 const colRight = currentCol + 1;
-                if (colRight === this.emojiMatrix[currentRow]?.length) {
-                    const rowBelowRight = this.emojiMatrix[currentRow + 1];
+                if (colRight === emojiMatrix[currentRow]?.length) {
+                    const rowBelowRight = emojiMatrix[currentRow + 1];
                     newIdx = rowBelowRight?.[0];
                 } else {
-                    newIdx = this.emojiMatrix[currentRow]?.[colRight];
+                    newIdx = emojiMatrix[currentRow]?.[colRight];
                 }
                 break;
             }
             case "ArrowLeft": {
                 const colLeft = currentCol - 1;
                 if (colLeft < 0) {
-                    const rowAboveLeft = this.emojiMatrix[currentRow - 1];
-                    newIdx = rowAboveLeft?.[rowAboveLeft.length - 1] ?? this.state.activeEmojiIndex;
+                    const rowAboveLeft = emojiMatrix[currentRow - 1];
+                    newIdx = rowAboveLeft?.[rowAboveLeft.length - 1] ?? this.activeEmojiIndex();
                 } else {
-                    newIdx = this.emojiMatrix[currentRow][colLeft];
+                    newIdx = emojiMatrix[currentRow][colLeft];
                 }
                 break;
             }
         }
-        this.state.activeEmojiIndex = newIdx ?? this.state.activeEmojiIndex;
+        this.activeEmojiIndex.set(newIdx ?? this.activeEmojiIndex());
     }
 
     get activeEmoji() {
-        const activeCodepoints = this.gridRef.el.querySelector(
-            `.o-EmojiPicker-content .o-Emoji[data-index="${this.state.activeEmojiIndex}"]`
+        const activeCodepoints = this.gridRef()?.querySelector(
+            `.o-EmojiPicker-content .o-Emoji[data-index="${this.activeEmojiIndex()}"]`
         )?.dataset.codepoints;
         return emojiLoader.map.get(activeCodepoints);
     }
@@ -382,9 +357,9 @@ export class EmojiPicker extends Component {
                 break;
             case "Enter":
                 ev.preventDefault();
-                this.gridRef.el
+                this.gridRef()
                     ?.querySelector(
-                        `.o-EmojiPicker-content .o-Emoji[data-index="${this.state.activeEmojiIndex}"]`
+                        `.o-EmojiPicker-content .o-Emoji[data-index="${this.activeEmojiIndex()}"]`
                     )
                     ?.click();
                 break;
@@ -408,13 +383,14 @@ export class EmojiPicker extends Component {
      * @param {Emoji[]} recentEmojis passed as argument as to not recompute `this.recentEmojis`
      */
     getCurrentNavbarPanel(recentEmojis) {
-        if (!this.state.emojiNavbarRepr) {
+        const repr = this.emojiNavbarRepr();
+        if (!repr) {
             return this.getAllCategories(recentEmojis).map((c) => c.sortId);
         }
-        if (this.state.categoryId === null || Number.isNaN(this.state.categoryId)) {
-            return this.state.emojiNavbarRepr[0];
+        if (this.categoryId() === null || Number.isNaN(this.categoryId())) {
+            return repr[0];
         }
-        return this.state.emojiNavbarRepr.find((panel) => panel.includes(this.state.categoryId));
+        return repr.find((panel) => panel.includes(this.categoryId()));
     }
 
     /**
@@ -422,11 +398,11 @@ export class EmojiPicker extends Component {
      */
     getEmojis(recentEmojis) {
         let emojisToDisplay = emojiLoader.emojis;
-        if (recentEmojis.length > 0 && this.searchTerm) {
+        if (recentEmojis.length > 0 && this.searchTerm()) {
             emojisToDisplay = emojisToDisplay.filter((emoji) => !recentEmojis.includes(emoji));
         }
-        if (this.searchTerm.length > 0) {
-            return fuzzyLookup(this.searchTerm, emojisToDisplay, (emoji) =>
+        if (this.searchTerm().length > 0) {
+            return fuzzyLookup(this.searchTerm(), emojisToDisplay, (emoji) =>
                 [emoji.name].concat(emoji.keywords, emoji.emoticons, emoji.shortcodes)
             );
         }
@@ -437,8 +413,8 @@ export class EmojiPicker extends Component {
      * @param {string} categoryId
      */
     selectCategory(categoryId) {
-        this.searchTerm = "";
-        this.state.categoryId = categoryId;
+        this.searchTerm.set("");
+        this.categoryId.set(categoryId);
         this.shouldScrollElem = true;
     }
 
@@ -454,22 +430,22 @@ export class EmojiPicker extends Component {
         }
         this.frequentEmojiService.incrementEmojiUsage(codepoints);
         if (resetOnSelect) {
-            this.gridRef.el.scrollTop = 0;
+            this.gridRef().scrollTop = 0;
             this.props.close?.();
             this.props.onClose?.();
         }
     }
 
     highlightActiveCategory() {
-        if (!this.gridRef || !this.gridRef.el) {
+        if (!this.gridRef || !this.gridRef()) {
             return;
         }
-        const coords = this.gridRef.el.getBoundingClientRect();
+        const coords = this.gridRef().getBoundingClientRect();
         const res = document.elementFromPoint(coords.x + 10, coords.y + 10);
         if (!res) {
             return;
         }
-        this.state.categoryId = parseInt(res.dataset.category);
+        this.categoryId.set(parseInt(res.dataset.category));
     }
 }
 
