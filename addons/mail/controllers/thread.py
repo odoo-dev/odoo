@@ -17,6 +17,11 @@ class ThreadController(http.Controller):
     # ------------------------------------------------------------
 
     @classmethod
+    def _prepare_share_context(cls, thread, access_params=None):
+        """To override to update the context before accessing shared content if needed."""
+        return
+
+    @classmethod
     def _get_message_with_access(cls, message_id, mode="read", **kwargs):
         """ Simplified getter that filters access params only, making model methods
         using strong parameters. """

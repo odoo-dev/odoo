@@ -28,6 +28,24 @@ class PortalThreadController(ThreadController):
                 return True
         return super()._can_edit_message(message, hash=hash, pid=pid, token=token, **kwargs)
 
+    @classmethod
+    def _prepare_share_context(cls, thread, access_params=None):
+        super()._prepare_share_context(thread, access_params=access_params)
+        if access_params and (
+            portal_partner := get_portal_partner(
+                thread,
+                _hash=access_params.get("hash"),
+                pid=access_params.get("pid"),
+                token=access_params.get("token"),
+            )
+        ):
+            request.update_context(
+                portal_data={
+                    "portal_partner": portal_partner,
+                    "portal_thread": thread,
+                }
+            )
+
 
 class PortalWebClientController(WebclientController):
     @store_handler("/portal/chatter_init", audience="everyone", readonly=False)
@@ -102,21 +120,3 @@ class PortalWebClientController(WebclientController):
             predicate=lambda t: t in portal_partner_by_thread,
             value=portal_partner_by_thread.get,
         )
-
-    @classmethod
-    def _prepare_fetch_context(cls, thread, access_params=None):
-        super()._prepare_fetch_context(thread, access_params=access_params)
-        if access_params and (
-            portal_partner := get_portal_partner(
-                thread,
-                _hash=access_params.get("hash"),
-                pid=access_params.get("pid"),
-                token=access_params.get("token"),
-            )
-        ):
-            request.update_context(
-                portal_data={
-                    "portal_partner": portal_partner,
-                    "portal_thread": thread,
-                }
-            )

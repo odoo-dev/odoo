@@ -23,10 +23,12 @@ class MessageMailLinkPreview(models.Model):
     def _bus_channels(self):
         return self.message_id._bus_channels()
 
-    def _hide_and_notify(self):
+    def _hide_and_notify(self, store: Store = None):
         if not self:
             return
         self.is_hidden = True
+        if store is not None:
+            store.delete(self)
         for message_link_preview in self:
             Store(bus_channel=self).delete(message_link_preview)
 

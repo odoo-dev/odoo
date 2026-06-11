@@ -348,6 +348,61 @@ class MailControllerThreadCommon(MailControllerCommon):
             self.assertEqual(len(self._message_fetch(record, route_kw)["mail.message"]), len(messages))
 
 
+class MailControllerLinkPreviewCommon(MailControllerCommon):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.link_preview = cls.env["mail.link.preview"].create(
+            {"source_url": "https://example.com"}
+        )
+
+    def _execute_subtests(self, message, subtests, allowed):
+        # sudo: mail.message.link.preview - reading link previews for testing purposes
+        mlp = message.sudo().message_link_preview_ids
+        if not mlp:
+            mlp = self.env["mail.message.link.preview"].create(
+                {
+                    "link_preview_id": self.link_preview.id,
+                    "message_id": message.id,
+                }
+            )
+        for user_data, *args in subtests:
+            route_kw = args[0] if args else {}
+            user, guest = self._authenticate_pseudo_user(user_data)
+            mlp.write({"is_hidden": False})
+            with self.subTest(user=user.name, guest=guest.name, allowed=allowed, route_kw=route_kw):
+                fetch_result = self._fetch_link_preview(message, route_kw)
+                hide_result = self._hide_link_preview(mlp.ids, route_kw)
+                if allowed:
+                    self.assertEqual(fetch_result["mail.message.link.preview"][0]["id"], mlp.id)
+                    self.assertEqual(
+                        hide_result["mail.message.link.preview"][0],
+                        {"_DELETE": True, "id": mlp.id},
+                    )
+                else:
+                    self.assertIsNone(fetch_result)
+                    self.assertIsNone(hide_result)
+
+    def _fetch_link_preview(self, message, route_kw):
+        return self.make_jsonrpc_request(
+            route="/mail/link_preview",
+            params={
+                "message_id": message.id,
+                **({"access_params": route_kw} if route_kw else {}),
+            },
+        )
+
+    def _hide_link_preview(self, message_link_preview_ids, route_kw):
+        return self.make_jsonrpc_request(
+            route="/mail/link_preview/hide",
+            params={
+                "message_link_preview_ids": message_link_preview_ids,
+                **({"access_params": route_kw} if route_kw else {}),
+            },
+        )
+
+
 class MailControllerUpdateCommon(MailControllerCommon):
 
     @classmethod

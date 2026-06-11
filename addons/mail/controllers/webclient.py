@@ -165,7 +165,7 @@ class WebclientController(ThreadController):
             mode="read",
             **(access_params or {}),
         ):
-            self._prepare_fetch_context(thread, access_params)
+            self._prepare_share_context(thread, access_params)
             messages = self._resolve_messages(
                 store,
                 domain=self._get_fetch_domain(thread, share_only, **params),
@@ -257,11 +257,6 @@ class WebclientController(ThreadController):
             ),
         )
         return messages
-
-    @classmethod
-    def _prepare_fetch_context(cls, thread, access_params=None):
-        """To override to update the context before fetching thread messages if needed."""
-        return
 
     @classmethod
     def _get_fetch_domain(cls, thread, share_only=False, **params):

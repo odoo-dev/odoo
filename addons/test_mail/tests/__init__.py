@@ -2,6 +2,7 @@
 
 from . import test_controller_attachment
 from . import test_controller_binary
+from . import test_controller_link_preview
 from . import test_controller_thread
 from . import test_invite
 from . import test_ir_actions

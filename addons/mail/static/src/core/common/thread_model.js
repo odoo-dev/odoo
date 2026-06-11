@@ -829,7 +829,18 @@ export class Thread extends Record {
         // to avoid flickering.
         tmpMsg?.delete();
         if (message.hasLink && this.store.hasLinkPreviewFeature) {
-            rpc("/mail/link_preview", { message_id: message.id }, { silent: true });
+            this.store.insert(
+                await rpc(
+                    "/mail/link_preview",
+                    {
+                        message_id: message.id,
+                        ...(Object.keys(this.rpcParams).length > 0 && {
+                            access_params: this.rpcParams,
+                        }),
+                    },
+                    { silent: true }
+                )
+            );
         }
         return message;
     }

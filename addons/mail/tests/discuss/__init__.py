@@ -14,6 +14,7 @@ from . import test_discuss_channel_readonly
 from . import test_discuss_mail_presence
 from . import test_discuss_mention_suggestions
 from . import test_discuss_message_update_controller
+from . import test_discuss_link_preview_controller
 from . import test_discuss_reaction_controller
 from . import test_discuss_res_role
 from . import test_discuss_sub_channels

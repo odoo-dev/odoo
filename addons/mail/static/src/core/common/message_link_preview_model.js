@@ -16,8 +16,15 @@ export class MessageLinkPreview extends Record {
         return this.message_id.message_link_preview_ids.length > 1;
     }
 
-    hide() {
-        rpc("/mail/link_preview/hide", { message_link_preview_ids: [this.id] });
+    async hide() {
+        this.store.insert(
+            await rpc("/mail/link_preview/hide", {
+                message_link_preview_ids: [this.id],
+                ...(Object.keys(this.message_id.thread?.rpcParams ?? {}).length > 0 && {
+                    access_params: this.message_id.thread.rpcParams,
+                }),
+            })
+        );
     }
 }
 
