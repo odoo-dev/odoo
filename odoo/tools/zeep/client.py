@@ -4,12 +4,25 @@ from decimal import Decimal
 from datetime import date, datetime, timedelta
 from requests import Response
 from types import SimpleNamespace, FunctionType
+from zeep.cache import InMemoryCache
 
 
 TIMEOUT = 30
 SERIALIZABLE_TYPES = (
     type(None), bool, int, float, str, bytes, tuple, list, dict, Decimal, date, datetime, timedelta, Response
 )
+
+
+class OdooCache(InMemoryCache):
+    """Zeep cache backed by Odoo's ORM cache."""
+
+    def __init__(self, company, timeout=3600):
+        super().__init__(timeout=timeout)
+        self.company = company
+
+    @property
+    def _cache(self):
+        return self.company._get_zeep_cache()
 
 
 class Client:
@@ -21,6 +34,9 @@ class Client:
     """
     def __init__(self, *args, **kwargs):
         transport = kwargs.setdefault('transport', zeep.Transport())
+        company = kwargs.pop('company', None)
+        if company and transport.cache is None:
+            transport.cache = OdooCache(company)
         # The timeout for loading wsdl and xsd documents.
         transport.load_timeout = kwargs.pop('timeout', None) or transport.load_timeout or TIMEOUT
         # The timeout for operations (POST/GET)

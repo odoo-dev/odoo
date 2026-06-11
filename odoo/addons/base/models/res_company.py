@@ -538,3 +538,8 @@ class ResCompany(models.CachedModel):
                 existing = self.env['ir.default'].with_user(SUPERUSER_ID).with_company(company)._get_model_defaults(target_model).get(target_fname)
                 if existing is None:
                     company[fname] = field.default(company)
+
+    @api.ormcache('self.id', cache='stable')
+    def _get_zeep_cache(self):
+        """Return the mutable cache bucket used by ``odoo.tools.zeep`` for XSDs/WSDLs"""
+        return {}

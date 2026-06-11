@@ -214,7 +214,7 @@ class L10nEsEdiSiiDocument(models.Model):
                 session.cert = company.l10n_es_sii_certificate_id
                 session.mount('https://', CertificateAdapter(ciphers=EUSKADI_CIPHERS))
 
-                client = zeep.Client(connection_vals['url'], operation_timeout=30, timeout=30, session=session)
+                client = zeep.Client(connection_vals['url'], operation_timeout=30, timeout=30, session=session, company=company)
 
                 is_sale = document.move_id.is_sale_document()
                 service_name = 'SuministroFactEmitidas' if is_sale else 'SuministroFactRecibidas'

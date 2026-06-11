@@ -50,7 +50,7 @@ def _get_zeep_operation(company, operation):
     wsdl = company._l10n_es_edi_verifactu_get_endpoints()['wsdl']
     client = zeep.Client(
         wsdl['url'], session=session, settings=settings,
-        operation_timeout=20, timeout=20,
+        operation_timeout=20, timeout=20, company=company,
     )
 
     if operation == 'registration':
