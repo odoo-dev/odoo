@@ -106,23 +106,28 @@ class AccountMove(models.Model):
     def _compute_sql_l10n_es_edi_is_required(self, table):
         is_invoice = SQL("%s IN ('out_invoice', 'out_refund', 'in_invoice', 'in_refund')", table.move_type)
         is_purchase = SQL("%s IN ('in_invoice', 'in_refund')", table.move_type)
-        has_sii_tax = SQL("""
-            EXISTS (
-                SELECT 1
+        has_sii_tax = table._make_alias('has_sii_tax')
+        table._query.add_join(
+            kind='LEFT JOIN LATERAL',
+            alias=has_sii_tax,
+            table=SQL("""(
+                SELECT TRUE AS value
                   FROM account_move_line line
                   JOIN account_move_line_account_tax_rel tax_rel ON tax_rel.account_move_line_id = line.id
                   JOIN account_tax tax ON tax.id = tax_rel.account_tax_id
                  WHERE line.move_id = %(move_id)s
-                   AND line.display_type IN ('product', 'line_section', 'line_subsection', 'line_note')
+                   AND line.display_type = 'product'
                    AND tax.l10n_es_type IS NOT NULL
                    AND tax.l10n_es_type != 'ignore'
-            )
-        """, move_id=table.id)
-        return SQL(
+                 LIMIT 1
+            )""", move_id=table.id),
+            condition=SQL("TRUE"),
+        )
+        sq = SQL(
             """CASE WHEN %(is_invoice)s
                       AND %(country_code)s = 'ES'
                       AND NULLIF(%(sii_tax_agency)s, '') IS NOT NULL
-                      AND (NOT %(is_purchase)s OR %(has_sii_tax)s)
+                      AND (NOT %(is_purchase)s OR %(has_sii_tax)s IS TRUE)
                  THEN TRUE
                  ELSE FALSE
                 END""",
@@ -130,8 +135,10 @@ class AccountMove(models.Model):
             country_code=table.company_id.account_fiscal_country_id.code,
             sii_tax_agency=table.company_id.l10n_es_sii_tax_agency,
             is_purchase=is_purchase,
-            has_sii_tax=has_sii_tax,
+            has_sii_tax=has_sii_tax.value,
         )
+        print(sq)
+        return sq
 
     def _compute_sql_l10n_es_edi_sii_state(self, table):
         is_required = self._compute_sql_l10n_es_edi_is_required(table)
@@ -152,7 +159,7 @@ class AccountMove(models.Model):
                    AND doc.state IN ('accepted', 'accepted_with_errors')
             )
         """, move_id=table.id)
-        return SQL(
+        sq = SQL(
             """CASE
                 WHEN NOT %(is_required)s THEN NULL
                 WHEN %(latest_doc_state)s IS NULL THEN 'to_send'
@@ -165,6 +172,8 @@ class AccountMove(models.Model):
             latest_doc_state=latest_doc_state,
             has_accepted_doc=has_accepted_doc,
         )
+        print(sq)
+        return sq
 
     @api.depends('l10n_es_edi_is_required', 'l10n_es_edi_sii_state')
     def _compute_need_cancel_request(self):
