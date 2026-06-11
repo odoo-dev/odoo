@@ -644,7 +644,11 @@ class HrVersion(models.Model):
                 return False
             return op(date_end, value)
 
-        all_versions = self.search([('company_id', 'in', self.env.companies.ids)])
+        # Fetch only the 3 fields needed to compute date_end (avoiding loading full records).
+        all_versions = self.search_fetch(
+            [('company_id', 'in', self.env.companies.ids)],
+            ['employee_id', 'date_version', 'contract_date_end'],
+        )
         matching_ids = []
 
         next_version_map = {}
