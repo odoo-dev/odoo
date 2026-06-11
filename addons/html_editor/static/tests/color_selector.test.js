@@ -754,7 +754,7 @@ test("should be able to select farthest-corner option in radial gradient", async
 });
 
 test.tags("desktop");
-test("should be able to show preview when hovering radial type button", async () => {
+test.debug("should be able to show preview when hovering radial type button", async () => {
     const gradientBefore = `radial-gradient(circle closest-side at 25% 25%, rgb(223, 124, 196) 0%, rgb(108, 53, 130) 100%)`;
     const gradientAfter = `radial-gradient(circle farthest-side at 25% 25%, rgb(223, 124, 196) 0%, rgb(108, 53, 130) 100%)`;
 
@@ -780,7 +780,7 @@ test("should be able to show preview when hovering radial type button", async ()
     expect(getContent(el)).toBe(
         `<p>a<font style="background-image: ${gradientAfter}; background-color: transparent;">[bcd]</font>e</p>`
     );
-    expect("button[title='Extend to the farthest side']").not.toHaveClass("active");
+    expect("button[data-title-backup='Extend to the farthest side']").not.toHaveClass("active");
 
     // Hover out
     await hover(".o-we-toolbar .o-select-color-foreground");
@@ -794,7 +794,7 @@ test("should be able to show preview when hovering radial type button", async ()
     // Hover again, click and hover out
     await hover("button[title='Extend to the farthest side']");
     await animationFrame();
-    await click("button[title='Extend to the farthest side']");
+    await click("button[data-title-backup='Extend to the farthest side']");
     await animationFrame();
     await hover(".o-we-toolbar .o-select-color-foreground");
     await animationFrame();
