@@ -173,6 +173,7 @@ class AccountMove(models.Model):
             has_accepted_doc=has_accepted_doc,
         )
         print(sq)
+        import pdb; pdb.set_trace()
         return sq
 
     @api.depends('l10n_es_edi_is_required', 'l10n_es_edi_sii_state')
