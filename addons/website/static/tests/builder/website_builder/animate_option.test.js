@@ -512,7 +512,7 @@ describe("animate text in toolbar", () => {
         await contains("button[title='Animate Text']").click();
         expect("div[data-class-action=o_animate]").toHaveCount(1);
 
-        await contains("button[title='Animate Text']").click();
+        await contains("button[data-tooltip='Animate Text']").click();
         expect("div[data-class-action=o_animate]").toHaveCount(1);
     });
 

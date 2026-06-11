@@ -123,19 +123,19 @@ test("set cover image position", async () => {
 
     // Set image position to left
     await click("[data-action-id='setCoverImagePosition'][title='Left']");
-    await waitFor("[data-action-id='setCoverImagePosition'][title='Left'].active");
+    await waitFor("[data-action-id='setCoverImagePosition'][data-tooltip='Left'].active");
     expect(":iframe .s_card").toHaveClass(["o_card_img_horizontal", "flex-lg-row"]);
     expect(":iframe .s_card .o_card_img").toHaveClass("rounded-start");
 
     // Set image position to right
     await click("[data-action-id='setCoverImagePosition'][title='Right']");
-    await waitFor("[data-action-id='setCoverImagePosition'][title='Right'].active");
+    await waitFor("[data-action-id='setCoverImagePosition'][data-tooltip='Right'].active");
     expect(":iframe .s_card").toHaveClass(["o_card_img_horizontal", "flex-lg-row-reverse"]);
     expect(":iframe .s_card .o_card_img").toHaveClass("rounded-end");
 
     // Set image position to bottom
     await click("[data-action-id='setCoverImagePosition'][title='Bottom']");
-    await waitFor("[data-action-id='setCoverImagePosition'][title='Bottom'].active");
+    await waitFor("[data-action-id='setCoverImagePosition'][data-tooltip='Bottom'].active");
     expect(":iframe .s_card").toHaveClass(["o_card_img_bottom", "flex-column-reverse"]);
     expect(":iframe .s_card").not.toHaveClass([
         "o_card_img_horizontal",
@@ -217,7 +217,7 @@ test("ratios supported for vertical images", async () => {
     }
     // Set image position to bottom
     await click("[data-action-id='setCoverImagePosition'][title='Bottom']");
-    await waitFor("[data-action-id='setCoverImagePosition'][title='Bottom'].active");
+    await waitFor("[data-action-id='setCoverImagePosition'][data-tooltip='Bottom'].active");
     await openRatioDropdownMenu();
     expect(":iframe .s_card").toHaveClass("o_card_img_bottom");
     expect(`.dropdown-menu [data-class-action='']`).toHaveCount(1); // Default image ratio
@@ -226,7 +226,7 @@ test("ratios supported for vertical images", async () => {
     }
     // Set image position to left
     await click("[data-action-id='setCoverImagePosition'][title='Left']");
-    await waitFor("[data-action-id='setCoverImagePosition'][title='Left'].active");
+    await waitFor("[data-action-id='setCoverImagePosition'][data-tooltip='Left'].active");
     expect(":iframe .s_card").toHaveClass(["o_card_img_horizontal", "flex-lg-row"]);
     await openRatioDropdownMenu();
     // When cover image is left or right, only default and square ratios are available
@@ -246,7 +246,7 @@ test("set cover image width", async () => {
     expect("[data-label='Width']").toHaveCount(0);
     // Width option still not available when image is on bottom
     await click("[data-action-id='setCoverImagePosition'][title='Bottom']");
-    await waitFor("[data-action-id='setCoverImagePosition'][title='Bottom'].active");
+    await waitFor("[data-action-id='setCoverImagePosition'][data-tooltip='Bottom'].active");
     expect("[data-label='Width']").toHaveCount(0);
     // Set image position to left
     await click("[data-action-id='setCoverImagePosition'][title='Left']");

@@ -2,10 +2,26 @@ import { expect, test } from "@odoo/hoot";
 import { click, drag, hover, leave, pointerDown, pointerUp, queryOne } from "@odoo/hoot-dom";
 import { advanceTime, animationFrame, mockTouch, runAllTimers } from "@odoo/hoot-mock";
 import { Component, xml, proxy } from "@odoo/owl";
-import { makeMockEnv, mockService, mountWithCleanup } from "@web/../tests/web_test_helpers";
+import {
+    getMockEnv,
+    makeMockEnv,
+    mockService,
+    mountWithCleanup,
+} from "@web/../tests/web_test_helpers";
 
 import { popoverService } from "@web/core/popover/popover_service";
 import { OPEN_DELAY, SHOW_AFTER_DELAY } from "@web/core/tooltip/tooltip_service";
+
+const triggerTooltip = async (selector) => {
+    if (getMockEnv().isSmall) {
+        await pointerDown(selector);
+        await advanceTime(SHOW_AFTER_DELAY);
+        await advanceTime(OPEN_DELAY);
+    } else {
+        await hover(selector);
+        await runAllTimers();
+    }
+};
 
 test.tags("desktop");
 test("basic rendering", async () => {
@@ -422,4 +438,53 @@ test("tooltip from and to child element", async () => {
     await advanceTime(SHOW_AFTER_DELAY);
     await advanceTime(OPEN_DELAY);
     expect(".o_popover").toHaveCount(0);
+});
+
+test("tooltip from the title attribute", async () => {
+    class MyComponent extends Component {
+        static props = ["*"];
+        static template = xml`
+        <div class="parent text-danger text-muted" title="parent">
+            <i class="fa fa-fw fa-exclamation-circle text-danger me-1" />
+            Toto
+        </div>`;
+    }
+    await mountWithCleanup(MyComponent);
+    expect(".o_popover").toHaveCount(0);
+    await triggerTooltip(".parent");
+    expect(".o_popover").toHaveCount(1);
+    expect(".o_popover").toHaveText("parent");
+});
+
+test("tooltip should be taken from the deepest child element", async () => {
+    class MyComponent extends Component {
+        static props = ["*"];
+        static template = xml`
+        <div class="parent text-danger text-muted" data-tooltip="parent">
+            <i class="fa fa-fw fa-exclamation-circle text-danger me-1" />
+            <span class="child" title="Cedric Lards Ennais">Cedric Lards Ennais</span>
+        </div>`;
+    }
+    await mountWithCleanup(MyComponent);
+    expect(".o_popover").toHaveCount(0);
+    await triggerTooltip(".child");
+    expect(".o_popover").toHaveCount(1);
+    expect(".o_popover").toHaveText("Cedric Lards Ennais");
+});
+
+test("tooltip should be switch from the deepest child to the parent element", async () => {
+    class MyComponent extends Component {
+        static props = ["*"];
+        static template = xml`
+        <div class="parent text-truncate text-danger text-muted" data-tooltip="Romain Lebor Rain">
+            <i class="fa fa-fw fa-exclamation-circle text-danger me-1" />
+            <span class="child" title="Cedric Lards Ennais">Cedric Lards Ennais</span>
+        </div>`;
+    }
+    await mountWithCleanup(MyComponent);
+    expect(".o_popover").toHaveCount(0);
+    await triggerTooltip(".child");
+    expect(".o_popover").toHaveText("Cedric Lards Ennais");
+    await triggerTooltip(".parent");
+    expect(".o_popover").toHaveText("Romain Lebor Rain");
 });

@@ -40,13 +40,13 @@ const insertPre = async (editor) => {
 const changeLanguage = async (textarea, from, to) => {
     await click(textarea);
     // Code Toolbar should open.
-    await waitFor(`.o_code_toolbar button[name='language'][title='${from}']`);
-    await click(`.o_code_toolbar button[name='language'][title='${from}']`);
+    await waitFor(`.o_code_toolbar button[name='language'][data-tooltip='${from}']`);
+    await click(`.o_code_toolbar button[name='language'][data-tooltip='${from}']`);
     // Language selector dropdown should open.
     await waitFor(`.o_language_selector .o-dropdown-item[name='${to}']`);
     await click(`.o_language_selector .o-dropdown-item[name='${to}']`);
     // Code Toolbar should show the new language name.
-    await waitFor(`.o_code_toolbar button[name='language'][title='${to}']`);
+    await waitFor(`.o_code_toolbar button[name='language'][data-tooltip='${to}']`);
     await animationFrame(); // wait for effect
 };
 
@@ -1282,9 +1282,9 @@ test("should keep textarea focused when changing code block language", async () 
     const from = "Plain Text";
     const to = "Javascript";
     // Wait until the language selector button is available in the toolbar
-    await waitFor(`.o_code_toolbar button[name='language'][title='${from}']`);
+    await waitFor(`.o_code_toolbar button[name='language'][data-tooltip='${from}']`);
     const dropdownButton = document.querySelector(
-        `.o_code_toolbar button[name='language'][title='${from}']`
+        `.o_code_toolbar button[name='language'][data-tooltip='${from}']`
     );
     // Explicitly focus the dropdown button before opening it
     dropdownButton.focus();
@@ -1293,7 +1293,7 @@ test("should keep textarea focused when changing code block language", async () 
     await waitFor(`.o_language_selector .o-dropdown-item[name='${to}']`);
     await click(`.o_language_selector .o-dropdown-item[name='${to}']`);
     // Code Toolbar should show the new language name.
-    await waitFor(`.o_code_toolbar button[name='language'][title='${to}']`);
+    await waitFor(`.o_code_toolbar button[name='language'][data-tooltip='${to}']`);
     // Ensure focus is restored to the textarea after the dropdown closes
     expect(document.activeElement).toBe(textarea);
 });

@@ -97,7 +97,7 @@ const TOOLBAR = (language) =>
     unformat(
         `<div class="o_code_toolbar">
         <div data-prevent-closing-overlay="true">
-            <button class="btn o-dropdown dropdown-toggle dropdown" name="language" title="${language}" aria-expanded="false">
+            <button class="btn o-dropdown dropdown-toggle dropdown" name="language" data-tooltip="${language}" aria-expanded="false">
                 <span class="px-1">${language}</span>
                 <i class="fa fa-caret-down"></i>
             </button>
@@ -105,11 +105,11 @@ const TOOLBAR = (language) =>
                 <span class="mx-1 fa fa-clipboard"></span>
                 <span>Copy</span>
             </button>
-            <button class="text-nowrap btn" name="wrap" title="Wrap the code">
+            <button class="text-nowrap btn" name="wrap" data-tooltip="Wrap the code">
                 <span class="mx-1 fa fa-level-down fa-rotate-90"></span>
                 <span>Wrap</span>
             </button>
-            <button class="text-nowrap btn"><span class="mx-1 fa fa-paragraph" title="Convert to paragraph"></span></button>
+            <button class="text-nowrap btn"><span class="mx-1 fa fa-paragraph" data-tooltip="Convert to paragraph"></span></button>
         </div>
     </div>`
     );

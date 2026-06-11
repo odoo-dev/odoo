@@ -642,7 +642,7 @@ test("gradient picker should be closed by default when switching gradient tab", 
     await click("button[title='Define a custom gradient']");
     await animationFrame();
     expect(".o_colorpicker_widget").toHaveCount(1);
-    await click("button[title='Define a custom gradient']"); // Should be toggleable
+    await click("button[data-tooltip='Define a custom gradient']"); // Should be toggleable
     await animationFrame();
     expect(".o_colorpicker_widget").toHaveCount(0);
 });
@@ -750,7 +750,7 @@ test("should be able to select farthest-corner option in radial gradient", async
     expect("button[title='Extend to the farthest corner']").toHaveCount(1);
     await click("button[title='Extend to the farthest corner']");
     await animationFrame();
-    expect("button[title='Extend to the farthest corner']").toHaveClass("active");
+    expect("button[data-tooltip='Extend to the farthest corner']").toHaveClass("active");
 });
 
 test.tags("desktop");
@@ -780,7 +780,7 @@ test("should be able to show preview when hovering radial type button", async ()
     expect(getContent(el)).toBe(
         `<p>a<font style="background-image: ${gradientAfter}; background-color: transparent;">[bcd]</font>e</p>`
     );
-    expect("button[title='Extend to the farthest side']").not.toHaveClass("active");
+    expect("button[data-tooltip='Extend to the farthest side']").not.toHaveClass("active");
 
     // Hover out
     await hover(".o-we-toolbar .o-select-color-foreground");
@@ -789,12 +789,12 @@ test("should be able to show preview when hovering radial type button", async ()
     expect(getContent(el)).toBe(
         `<p>a<font style="background-image: ${gradientBefore}; background-color: transparent;">[bcd]</font>e</p>`
     );
-    expect("button[title='Extend to the farthest side']").not.toHaveClass("active");
+    expect("button[data-tooltip='Extend to the farthest side']").not.toHaveClass("active");
 
     // Hover again, click and hover out
-    await hover("button[title='Extend to the farthest side']");
+    await hover("button[data-tooltip='Extend to the farthest side']");
     await animationFrame();
-    await click("button[title='Extend to the farthest side']");
+    await click("button[data-tooltip='Extend to the farthest side']");
     await animationFrame();
     await hover(".o-we-toolbar .o-select-color-foreground");
     await animationFrame();
@@ -803,7 +803,7 @@ test("should be able to show preview when hovering radial type button", async ()
     expect(getContent(el)).toBe(
         `<p>a<font style="background-image: ${gradientAfter}; background-color: transparent;">[bcd]</font>e</p>`
     );
-    expect("button[title='Extend to the farthest side']").toHaveClass("active");
+    expect("button[data-tooltip='Extend to the farthest side']").toHaveClass("active");
 });
 
 test("solid tab color navigation using keys", async () => {

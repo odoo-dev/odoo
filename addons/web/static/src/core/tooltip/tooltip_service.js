@@ -42,6 +42,7 @@ import { whenReady } from "@odoo/owl";
 export const OPEN_DELAY = 400;
 export const CLOSE_DELAY = 200;
 export const SHOW_AFTER_DELAY = 250;
+const TOOLTIP_SELECTOR = "[data-tooltip], [data-tooltip-template], [title]";
 
 export const tooltipService = {
     dependencies: ["popover"],
@@ -114,6 +115,10 @@ export const tooltipService = {
             }
 
             target = el;
+            const title = target.title;
+            if (title && !target.dataset.tooltip) {
+                target.dataset.tooltip = title;
+            }
             // Prevent title from showing on a parent at the same time
             target.title = "";
             const timeoutDelay = isHelpNode(el) ? 0 : delay;
@@ -143,7 +148,7 @@ export const tooltipService = {
             if (el.nodeType === Node.TEXT_NODE) {
                 return;
             }
-            const element = el.closest("[data-tooltip], [data-tooltip-template]");
+            const element = el.closest(TOOLTIP_SELECTOR);
             if (element && element === target) {
                 return;
             }
@@ -152,7 +157,7 @@ export const tooltipService = {
             } else if (element) {
                 const dataset = element.dataset;
                 const params = {
-                    tooltip: dataset.tooltip,
+                    tooltip: dataset.tooltip || element.title,
                     template: dataset.tooltipTemplate,
                     position: dataset.tooltipPosition,
                 };
@@ -209,6 +214,21 @@ export const tooltipService = {
             }, timeoutDelay);
         }
 
+        function onTouchCancelEnd(ev) {
+            if (isHelpNode(ev.target)) {
+                ev.preventDefault();
+                return;
+            }
+            if (ev.target.closest(TOOLTIP_SELECTOR)) {
+                if (!ev.target.dataset.tooltipTouchTapToShow) {
+                    browser.clearTimeout(showTimer);
+                    showTimer = null;
+                    browser.clearTimeout(openTooltipTimeout);
+                    openTooltipTimeout = null;
+                }
+            }
+        }
+
         whenReady(() => {
             // Regularly check that the target is still in the DOM and if not, close the tooltip
             browser.setInterval(() => {
@@ -219,31 +239,8 @@ export const tooltipService = {
 
             if (hasTouch()) {
                 document.body.addEventListener("touchstart", onTouchStart);
-
-                document.body.addEventListener("touchend", (ev) => {
-                    if (isHelpNode(ev.target)) {
-                        ev.preventDefault();
-                        return;
-                    }
-                    if (ev.target.closest("[data-tooltip], [data-tooltip-template]")) {
-                        if (!ev.target.dataset.tooltipTouchTapToShow) {
-                            browser.clearTimeout(showTimer);
-                            browser.clearTimeout(openTooltipTimeout);
-                        }
-                    }
-                });
-                document.body.addEventListener("touchcancel", (ev) => {
-                    if (isHelpNode(ev.target)) {
-                        ev.preventDefault();
-                        return;
-                    }
-                    if (ev.target.closest("[data-tooltip], [data-tooltip-template]")) {
-                        if (!ev.target.dataset.tooltipTouchTapToShow) {
-                            browser.clearTimeout(showTimer);
-                            browser.clearTimeout(openTooltipTimeout);
-                        }
-                    }
-                });
+                document.body.addEventListener("touchend", onTouchCancelEnd);
+                document.body.addEventListener("touchcancel", onTouchCancelEnd);
             }
 
             // Listen (using event delegation) to "mouseenter" events to open the tooltip if any

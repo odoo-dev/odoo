@@ -66,7 +66,7 @@ test("image should show actual width if set to default size", async () => {
     await animationFrame();
     await click(".image_size_selector .dropdown-item:contains('Default')");
     await animationFrame();
-    expect(queryOne(".o-we-toolbar .dropdown-toggle[title='Resize image']")).toHaveText(
+    expect(queryOne(".o-we-toolbar .dropdown-toggle[data-tooltip='Resize image']")).toHaveText(
         queryOne("img").getBoundingClientRect().width + "px"
     );
 });
@@ -100,28 +100,28 @@ test("Can change the padding of an image", async () => {
     await animationFrame();
     expect("img").toHaveClass("p-1");
 
-    await click(".o-we-toolbar .dropdown-toggle[title='Set image padding']");
+    await click(".o-we-toolbar .dropdown-toggle[data-tooltip='Set image padding']");
     await animationFrame();
     await click(".o-dropdown--menu span:contains('Medium')");
     await animationFrame();
     expect("img").not.toHaveClass("p-1");
     expect("img").toHaveClass("p-2");
 
-    await click(".o-we-toolbar .dropdown-toggle[title='Set image padding']");
+    await click(".o-we-toolbar .dropdown-toggle[data-tooltip='Set image padding']");
     await animationFrame();
     await click(".o-dropdown--menu span:contains('Large')");
     await animationFrame();
     expect("img").not.toHaveClass("p-2");
     expect("img").toHaveClass("p-3");
 
-    await click(".o-we-toolbar .dropdown-toggle[title='Set image padding']");
+    await click(".o-we-toolbar .dropdown-toggle[data-tooltip='Set image padding']");
     await animationFrame();
     await click(".o-dropdown--menu span:contains('XL')");
     await animationFrame();
     expect("img").not.toHaveClass("p-3");
     expect("img").toHaveClass("p-5");
 
-    await click(".o-we-toolbar .dropdown-toggle[title='Set image padding']");
+    await click(".o-we-toolbar .dropdown-toggle[data-tooltip='Set image padding']");
     await animationFrame();
     await click(".o-dropdown--menu span:contains('None')");
     await animationFrame();
@@ -398,14 +398,14 @@ test("change image's alignment to 'Wrap text' then 'Break text' then 'Inline'", 
     expect("img").toHaveClass("float-start");
     expect("img").not.toHaveClass("d-block");
 
-    await click(".o-we-toolbar button[title='Set image alignment']");
+    await click(".o-we-toolbar button[data-tooltip='Set image alignment']");
     await animationFrame();
     await click(".o-we-toolbar-dropdown .btn[title='Break text']");
     await animationFrame();
     expect("img").not.toHaveClass("float-start");
     expect("img").toHaveClass("d-block");
 
-    await click(".o-we-toolbar button[title='Set image alignment']");
+    await click(".o-we-toolbar button[data-tooltip='Set image alignment']");
     await animationFrame();
     await click(".o-we-toolbar-dropdown .btn[title='Inline']");
     await animationFrame();
