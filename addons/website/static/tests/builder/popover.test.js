@@ -88,9 +88,10 @@ test("Floating toolbar visual consistency and usability", async () => {
     expect(animationPopover).not.toHaveClass("o-hb-select-dropdown");
 
     // Verify highlight picker grid is scrollable and scrollbar is hidden
-    await pointerDown(".o-we-toolbar button[title='Apply highlight']");
+    const applyHighlightNode = queryOne(".o-we-toolbar button[title='Apply highlight']");
+    await pointerDown(applyHighlightNode);
     await waitForNone(".o_popover:has([data-action-value='onAppearance'])");
-    await pointerUp(".o-we-toolbar button[title='Apply highlight']");
+    await pointerUp(applyHighlightNode);
     const textHighlightPopover = await waitFor(".o_popover .grid");
     expect(textHighlightPopover).toHaveStyle({ overflow: "auto", scrollbarWidth: "thin" });
 

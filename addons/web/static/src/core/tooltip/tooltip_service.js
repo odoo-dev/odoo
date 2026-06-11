@@ -42,6 +42,7 @@ import { whenReady } from "@odoo/owl";
 export const OPEN_DELAY = 400;
 export const CLOSE_DELAY = 200;
 export const SHOW_AFTER_DELAY = 250;
+const SELECTOR_TOOLTIP = "[data-tooltip], [data-tooltip-template], [title]";
 
 export const tooltipService = {
     dependencies: ["popover"],
@@ -51,6 +52,7 @@ export const tooltipService = {
         let showTimer;
         let target = null;
         const elementsWithTooltips = new WeakMap();
+        const titlesToRestore = new Map();
 
         /**
          * Detect if the current node is the `sup` tooltip node
@@ -69,12 +71,21 @@ export const tooltipService = {
          */
         function cleanup() {
             target = null;
-            browser.clearTimeout(openTooltipTimeout);
-            openTooltipTimeout = null;
+            openTooltipClearTimeout();
             if (closeTooltip) {
                 closeTooltip();
                 closeTooltip = null;
             }
+        }
+
+        function openTooltipClearTimeout() {
+            const titleRestoreFn = titlesToRestore.get(openTooltipTimeout);
+            if (titleRestoreFn) {
+                titleRestoreFn();
+                titlesToRestore.delete(openTooltipTimeout);
+            }
+            browser.clearTimeout(openTooltipTimeout);
+            openTooltipTimeout = null;
         }
 
         /**
@@ -115,6 +126,7 @@ export const tooltipService = {
 
             target = el;
             // Prevent title from showing on a parent at the same time
+            const title = el.title || "";
             target.title = "";
             const timeoutDelay = isHelpNode(el) ? 0 : delay;
             openTooltipTimeout = browser.setTimeout(() => {
@@ -128,6 +140,11 @@ export const tooltipService = {
                     );
                 }
             }, timeoutDelay);
+            titlesToRestore.set(openTooltipTimeout, () => {
+                if (el) {
+                    el.title = title;
+                }
+            });
         }
 
         /**
@@ -143,7 +160,7 @@ export const tooltipService = {
             if (el.nodeType === Node.TEXT_NODE) {
                 return;
             }
-            const element = el.closest("[data-tooltip], [data-tooltip-template]");
+            const element = el.closest(SELECTOR_TOOLTIP);
             if (element && element === target) {
                 return;
             }
@@ -152,7 +169,7 @@ export const tooltipService = {
             } else if (element) {
                 const dataset = element.dataset;
                 const params = {
-                    tooltip: dataset.tooltip,
+                    tooltip: dataset.tooltip || element.title,
                     template: dataset.tooltipTemplate,
                     position: dataset.tooltipPosition,
                 };
@@ -225,10 +242,10 @@ export const tooltipService = {
                         ev.preventDefault();
                         return;
                     }
-                    if (ev.target.closest("[data-tooltip], [data-tooltip-template]")) {
+                    if (ev.target.closest(SELECTOR_TOOLTIP)) {
                         if (!ev.target.dataset.tooltipTouchTapToShow) {
                             browser.clearTimeout(showTimer);
-                            browser.clearTimeout(openTooltipTimeout);
+                            openTooltipClearTimeout();
                         }
                     }
                 });
@@ -237,10 +254,10 @@ export const tooltipService = {
                         ev.preventDefault();
                         return;
                     }
-                    if (ev.target.closest("[data-tooltip], [data-tooltip-template]")) {
+                    if (ev.target.closest(SELECTOR_TOOLTIP)) {
                         if (!ev.target.dataset.tooltipTouchTapToShow) {
                             browser.clearTimeout(showTimer);
-                            browser.clearTimeout(openTooltipTimeout);
+                            openTooltipClearTimeout();
                         }
                     }
                 });

@@ -775,12 +775,13 @@ test("should be able to show preview when hovering radial type button", async ()
     expect("button[title='Extend to the farthest corner']").toHaveCount(1);
 
     // Hover for preview
-    await hover("button[title='Extend to the farthest side']");
+    const btnExtendToTheFarthestSide = queryOne("button[title='Extend to the farthest side']");
+    await hover(btnExtendToTheFarthestSide);
     await animationFrame();
     expect(getContent(el)).toBe(
         `<p>a<font style="background-image: ${gradientAfter}; background-color: transparent;">[bcd]</font>e</p>`
     );
-    expect("button[title='Extend to the farthest side']").not.toHaveClass("active");
+    expect(btnExtendToTheFarthestSide).not.toHaveClass("active");
 
     // Hover out
     await hover(".o-we-toolbar .o-select-color-foreground");
@@ -789,12 +790,12 @@ test("should be able to show preview when hovering radial type button", async ()
     expect(getContent(el)).toBe(
         `<p>a<font style="background-image: ${gradientBefore}; background-color: transparent;">[bcd]</font>e</p>`
     );
-    expect("button[title='Extend to the farthest side']").not.toHaveClass("active");
+    expect(btnExtendToTheFarthestSide).not.toHaveClass("active");
 
     // Hover again, click and hover out
-    await hover("button[title='Extend to the farthest side']");
+    await hover(btnExtendToTheFarthestSide);
     await animationFrame();
-    await click("button[title='Extend to the farthest side']");
+    await click(btnExtendToTheFarthestSide);
     await animationFrame();
     await hover(".o-we-toolbar .o-select-color-foreground");
     await animationFrame();
@@ -803,7 +804,7 @@ test("should be able to show preview when hovering radial type button", async ()
     expect(getContent(el)).toBe(
         `<p>a<font style="background-image: ${gradientAfter}; background-color: transparent;">[bcd]</font>e</p>`
     );
-    expect("button[title='Extend to the farthest side']").toHaveClass("active");
+    expect(btnExtendToTheFarthestSide).toHaveClass("active");
 });
 
 test("solid tab color navigation using keys", async () => {
