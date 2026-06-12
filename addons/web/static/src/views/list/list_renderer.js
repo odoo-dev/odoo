@@ -46,6 +46,7 @@ import { ActionHelper } from "@web/views/action_helper";
 import { GroupConfigMenu } from "@web/views/view_components/group_config_menu";
 import { MultiCurrencyPopover } from "@web/views/view_components/multi_currency_popover";
 import { odoomark } from "@web/core/utils/html";
+import { SELECTOR_TOOLTIP } from "@web/core/tooltip/tooltip_service";
 
 /**
  * @typedef {import('@web/model/relational_model/dynamic_list').DynamicList} DynamicList
@@ -301,6 +302,7 @@ export class ListRenderer extends Component {
         useExternalListener(window, "blur", (ev) => {
             this.shiftKeyMode = false;
         });
+        onMounted(() => this._removeTooltipFromTBody());
         onPatched(async () => {
             // HACK: we need to wait for the next tick to be sure that the Field components are patched.
             // OWL don't wait the patch for the children components if the children trigger a patch by himself.
@@ -322,6 +324,7 @@ export class ListRenderer extends Component {
             }
             this.cellToFocus = null;
             this.lastEditedCell = null;
+            this._removeTooltipFromTBody();
         });
         this.isRTL = localization.direction === "rtl";
         this.dialogClose = [];
@@ -334,6 +337,17 @@ export class ListRenderer extends Component {
         this.notificationService.add(_t("Please save your changes first"), {
             type: "danger",
         });
+    }
+
+    _removeTooltipFromTBody() {
+        const tbody = this.tableRef?.el?.querySelector("tbody");
+        if (tbody) {
+            for (const tooltip of tbody.querySelectorAll(SELECTOR_TOOLTIP)) {
+                tooltip.title = "";
+                tooltip.dataset.tooltipTemplate = "";
+                tooltip.dataset.tooltip = "";
+            }
+        }
     }
 
     getActiveColumns() {

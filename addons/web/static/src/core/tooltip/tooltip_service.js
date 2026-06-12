@@ -42,7 +42,7 @@ import { whenReady } from "@odoo/owl";
 export const OPEN_DELAY = 400;
 export const CLOSE_DELAY = 200;
 export const SHOW_AFTER_DELAY = 250;
-const SELECTOR_TOOLTIP = "[data-tooltip], [data-tooltip-template], [title]";
+export const SELECTOR_TOOLTIP = "[data-tooltip], [data-tooltip-template], [title]";
 
 export const tooltipService = {
     dependencies: ["popover"],
