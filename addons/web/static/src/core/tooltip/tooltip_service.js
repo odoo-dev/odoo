@@ -226,6 +226,19 @@ export const tooltipService = {
             }, timeoutDelay);
         }
 
+        function onTouchEndCancel(ev) {
+            if (isHelpNode(ev.target)) {
+                ev.preventDefault();
+                return;
+            }
+            if (ev.target.closest(SELECTOR_TOOLTIP)) {
+                if (!ev.target.dataset.tooltipTouchTapToShow) {
+                    browser.clearTimeout(showTimer);
+                    openTooltipClearTimeout();
+                }
+            }
+        }
+
         whenReady(() => {
             // Regularly check that the target is still in the DOM and if not, close the tooltip
             browser.setInterval(() => {
@@ -236,31 +249,8 @@ export const tooltipService = {
 
             if (hasTouch()) {
                 document.body.addEventListener("touchstart", onTouchStart);
-
-                document.body.addEventListener("touchend", (ev) => {
-                    if (isHelpNode(ev.target)) {
-                        ev.preventDefault();
-                        return;
-                    }
-                    if (ev.target.closest(SELECTOR_TOOLTIP)) {
-                        if (!ev.target.dataset.tooltipTouchTapToShow) {
-                            browser.clearTimeout(showTimer);
-                            openTooltipClearTimeout();
-                        }
-                    }
-                });
-                document.body.addEventListener("touchcancel", (ev) => {
-                    if (isHelpNode(ev.target)) {
-                        ev.preventDefault();
-                        return;
-                    }
-                    if (ev.target.closest(SELECTOR_TOOLTIP)) {
-                        if (!ev.target.dataset.tooltipTouchTapToShow) {
-                            browser.clearTimeout(showTimer);
-                            openTooltipClearTimeout();
-                        }
-                    }
-                });
+                document.body.addEventListener("touchend", onTouchEndCancel);
+                document.body.addEventListener("touchcancel", onTouchEndCancel);
             }
 
             // Listen (using event delegation) to "mouseenter" events to open the tooltip if any
