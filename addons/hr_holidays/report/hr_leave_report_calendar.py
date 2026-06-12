@@ -131,3 +131,16 @@ class HrLeaveReportCalendar(models.Model):
         else:
             # If the user is not a leave manager, raise an error
             raise ValidationError(self.env._("You are not allowed to refuse this leave request."))
+
+    # @api.model
+    # def get_overview_action_context(self):
+    #     employee_count = self.env['hr.employee'].sudo().search_count([('company_id', 'in', self.env.companies.ids)])
+    #     context = {}
+    #     if employee_count < 50:
+    #         return context
+    #     has_subordinates = bool(self.env.user.employee_id.child_ids)
+    #     context.update({
+    #         'search_default_my_team': has_subordinates,
+    #         'search_default_department': not has_subordinates,
+    #     })
+    #     return context
