@@ -123,7 +123,7 @@ class AccountMove(models.Model):
             )""", move_id=table.id),
             condition=SQL("TRUE"),
         )
-        sq = SQL(
+        return SQL(
             """CASE WHEN %(is_invoice)s
                       AND %(country_code)s = 'ES'
                       AND NULLIF(%(sii_tax_agency)s, '') IS NOT NULL
@@ -137,29 +137,36 @@ class AccountMove(models.Model):
             is_purchase=is_purchase,
             has_sii_tax=has_sii_tax.value,
         )
-        print(sq)
-        return sq
 
     def _compute_sql_l10n_es_edi_sii_state(self, table):
         is_required = self._compute_sql_l10n_es_edi_is_required(table)
-        latest_doc_state = SQL("""
-            (
+        latest_doc = table._make_alias('latest_sii_doc')
+        table._query.add_join(
+            kind='LEFT JOIN LATERAL',
+            alias=latest_doc,
+            table=SQL("""(
                 SELECT doc.state
                   FROM l10n_es_edi_sii_document doc
                  WHERE doc.move_id = %(move_id)s
               ORDER BY doc.create_date DESC, doc.id DESC
                  LIMIT 1
-            )
-        """, move_id=table.id)
-        has_accepted_doc = SQL("""
-            EXISTS (
-                SELECT 1
+            )""", move_id=table.id),
+            condition=SQL("TRUE"),
+        )
+        accepted_doc = table._make_alias('accepted_sii_doc')
+        table._query.add_join(
+            kind='LEFT JOIN LATERAL',
+            alias=accepted_doc,
+            table=SQL("""(
+                SELECT TRUE AS value
                   FROM l10n_es_edi_sii_document doc
                  WHERE doc.move_id = %(move_id)s
                    AND doc.state IN ('accepted', 'accepted_with_errors')
-            )
-        """, move_id=table.id)
-        sq = SQL(
+                 LIMIT 1
+            )""", move_id=table.id),
+            condition=SQL("TRUE"),
+        )
+        return SQL(
             """CASE
                 WHEN NOT %(is_required)s THEN NULL
                 WHEN %(latest_doc_state)s IS NULL THEN 'to_send'
@@ -169,12 +176,9 @@ class AccountMove(models.Model):
                 ELSE 'to_send'
                END""",
             is_required=is_required,
-            latest_doc_state=latest_doc_state,
-            has_accepted_doc=has_accepted_doc,
+            latest_doc_state=latest_doc.state,
+            has_accepted_doc=accepted_doc.value,
         )
-        print(sq)
-        import pdb; pdb.set_trace()
-        return sq
 
     @api.depends('l10n_es_edi_is_required', 'l10n_es_edi_sii_state')
     def _compute_need_cancel_request(self):
