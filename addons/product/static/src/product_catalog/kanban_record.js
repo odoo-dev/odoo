@@ -3,6 +3,7 @@ import { useSubEnv } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { useDebounced } from "@web/core/utils/timing";
 import { KanbanRecord } from "@web/views/kanban/kanban_record";
+import { useSetupAction } from "@web/webclient/actions/action_hook";
 import { ProductCatalogOrderLine } from "./order_line/order_line";
 
 export class ProductCatalogKanbanRecord extends KanbanRecord {
@@ -17,6 +18,14 @@ export class ProductCatalogKanbanRecord extends KanbanRecord {
         this.rpc = useService("rpc");
         this.debouncedUpdateQuantity = useDebounced(this._updateQuantity, 500, {
             execBeforeUnmount: true,
+        });
+
+        this._pendingUpdate = Promise.resolve();
+        useSetupAction({
+            beforeLeave: () => {
+                this.debouncedUpdateQuantity.cancel(true);
+                return this._pendingUpdate;
+            },
         });
 
         useSubEnv({
@@ -65,7 +74,16 @@ export class ProductCatalogKanbanRecord extends KanbanRecord {
     }
 
     _updateQuantityAndGetPrice() {
-        return this.rpc("/product/catalog/update_order_line_info", this._getUpdateQuantityAndGetPrice());
+        // Chain RPC calls to ensure that each request is completed before starting the next one.
+        // This prevents race conditions and ensures the server processes updates sequentially.
+        const nextPromise = this._pendingUpdate.then(() =>
+            this.env.services.rpc(
+                "/product/catalog/update_order_line_info",
+                this._getUpdateQuantityAndGetPrice()
+            )
+        );
+        this._pendingUpdate = nextPromise.catch(() => {});
+        return nextPromise;
     }
 
     _getUpdateQuantityAndGetPrice() {
