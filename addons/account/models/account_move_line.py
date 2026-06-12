@@ -406,7 +406,11 @@ class AccountMoveLine(models.Model):
     # === Price fields === #
     price_unit = fields.Float(
         string='Unit Price',
-        compute="_compute_price_unit", store=True, readonly=False, precompute=True,
+        compute='_compute_price_unit',
+        inverse='_inverse_price_unit',
+        store=True,
+        readonly=False,
+        precompute=True,
         min_display_digits='Product Price',
     )
     # Technical field storing last computed values for price_unit computation.
@@ -1125,33 +1129,56 @@ class AccountMoveLine(models.Model):
             line.price_subtotal = base_line['tax_details']['total_excluded_currency']
             line.price_total = base_line['tax_details']['total_included_currency']
 
+    def _adapt_price_unit(self):
+        self.ensure_one()
+
+        if (
+            not self.move_id.is_invoice(include_receipts=True)
+            or self.display_type != 'product'
+            or (
+                self.is_imported
+                and self.price_unit_json
+                and self.document_tax_mode == self.price_unit_json['document_tax_mode']
+            )
+        ):
+            return
+        base_line = self.move_id._prepare_product_base_line_for_taxes_computation(self)
+        if base_line['special_type']:
+            return
+
+        if self.move_id.is_sale_document(include_receipts=True):
+            document_type = 'sale'
+        else:
+            document_type = 'purchase'
+
+        return self.env['product.product']._adapt_price_unit(
+            document_type=document_type,
+            company=self.company_id or self.env.company,
+            product=self.product_id,
+            uom=self.product_uom_id,
+            taxes=self.tax_ids,
+            price_unit=self.price_unit,
+            currency=self.currency_id,
+            document_date=self.date,
+            fiscal_position=self.move_id.fiscal_position_id,
+            document_tax_mode=self.move_id.document_tax_mode,
+            price_unit_json=self.price_unit_json,
+        )
+
     @api.depends('product_id', 'product_uom_id', 'document_tax_mode')
     def _compute_price_unit(self):
         for line in self:
-            if (
-                line.display_type in ('line_section', 'line_subsection', 'line_note')
-                or (line.is_imported and line.price_unit_json and line.document_tax_mode == line.price_unit_json['document_tax_mode'])
-                or (line in (line._get_downpayment_lines() | line._get_discount_lines()))
-            ):
-                continue
+            if price_unit_json := line._adapt_price_unit():
+                line.price_unit_json = price_unit_json
+                line.price_unit = line.price_unit_json['price_unit']
 
-            if line.move_id.is_sale_document(include_receipts=True):
-                document_type = 'sale'
-            elif line.move_id.is_purchase_document(include_receipts=True):
-                document_type = 'purchase'
-            else:
-                document_type = 'other'
+    @api.onchange('price_unit')
+    def _inverse_price_unit(self):
+        for line in self:
+            if price_unit_json := line._adapt_price_unit():
+                line.price_unit_json = price_unit_json
 
-            product = line.product_id or self.env['product.product']
-            line.price_unit = product._get_line_price_unit(line, document_type)
-            line.price_unit_json = {
-                'price_unit': line.price_unit,
-                'uom_id': line.product_uom_id.id,
-                'product_id': line.product_id.id,
-                'document_tax_mode': line.document_tax_mode,
-            }
-
-    @api.depends('product_id', 'product_uom_id')
+    @api.depends('product_id')
     def _compute_tax_ids(self):
         for line in self:
             if line.display_type in ('line_section', 'line_subsection', 'line_note', 'payment_term', 'cogs') or line.is_imported:
