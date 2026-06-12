@@ -118,7 +118,10 @@ export const tooltipService = {
          * @param {number} [param1.delay] delay after which the popover should
          *  open
          */
-        function openTooltip(el, { tooltip = "", template, info, position, delay = OPEN_DELAY }) {
+        function openTooltip(
+            el,
+            { tooltip = "", template, info, position = "top", delay = OPEN_DELAY }
+        ) {
             cleanup();
             if (!tooltip && !template) {
                 return;
@@ -211,6 +214,18 @@ export const tooltipService = {
                 cleanup();
             }
         }
+
+        /**
+         *
+         * @param {TouchEvent.prototype.target} node a "touchstart" event
+         * @return { HTMLElement | undefined }
+         */
+        function directChildTooltip(node) {
+            if (node?.children?.length && node.tagName === "LABEL") {
+                return Array.from(node.children).find(({ tagName }) => tagName === "SUP");
+            }
+        }
+
         /**
          * Checks whether there is a tooltip registered on the event target, and
          * if there is, creates a timeout to open the corresponding tooltip
@@ -222,7 +237,7 @@ export const tooltipService = {
             cleanup();
             const timeoutDelay = isHelpNode(ev.target) ? 0 : SHOW_AFTER_DELAY;
             showTimer = browser.setTimeout(() => {
-                openElementsTooltip(ev.target);
+                openElementsTooltip(directChildTooltip(ev.target) ?? ev.target);
             }, timeoutDelay);
         }
 
@@ -231,7 +246,7 @@ export const tooltipService = {
                 ev.preventDefault();
                 return;
             }
-            if (ev.target.closest(SELECTOR_TOOLTIP)) {
+            if ((directChildTooltip(ev.target) ?? ev.target).closest(SELECTOR_TOOLTIP)) {
                 if (!ev.target.dataset.tooltipTouchTapToShow) {
                     browser.clearTimeout(showTimer);
                     openTooltipClearTimeout();
