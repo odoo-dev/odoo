@@ -438,7 +438,7 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
 
         document.document_tax_mode = 'tax_excluded'
         # Unlike the overidden tax, the default tax will impact the price_unit
-        expected_price_unit = 909.09 if document_type == 'purchase_order' else 909.0909090909092
+        expected_price_unit = 909.09 if document_type == 'purchase_order' else 909.0909090909091
         self.assertEqual(line.price_unit, expected_price_unit)
         self.assertRecordValues(document, document_expected_values)
 
@@ -645,3 +645,163 @@ class TestAccountMoveTaxMode(TestDocumentTaxModeCommon):
         invoice.document_tax_mode = 'tax_included'
         self.assertEqual(line.price_unit, 1100)
         self.assertRecordValues(invoice, invoice_expected_values)
+
+    def test_product_flow(self):
+        invoice = self._create_invoice_one_line(price_unit=2000.0)
+
+        tax_15 = self.percent_tax(15)
+        product = self._create_product(lst_price=1000.0, taxes_id=tax_15)
+        invoice.invoice_line_ids.product_id = product
+        self.assertRecordValues(invoice.invoice_line_ids, [{'price_unit': 1000.0}])
+
+        invoice.document_tax_mode = 'tax_included'
+        self.assertRecordValues(invoice.invoice_line_ids, [{'price_unit': 1150.0}])
+
+        product = self._create_product(lst_price=2000.0, taxes_id=tax_15)
+        invoice.invoice_line_ids.product_id = product
+        self.assertRecordValues(invoice.invoice_line_ids, [{'price_unit': 2300.0}])
+
+        invoice.document_tax_mode = 'tax_excluded'
+        self.assertRecordValues(invoice.invoice_line_ids, [{'price_unit': 2000.0}])
+
+        invoice.invoice_line_ids.product_id = None
+        self.assertRecordValues(invoice.invoice_line_ids, [{'price_unit': 2000.0}])
+
+        invoice.document_tax_mode = 'tax_included'
+        self.assertRecordValues(invoice.invoice_line_ids, [{'price_unit': 2300.0}])
+
+    def test_product_uom_flow(self):
+        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_dozen = self.env.ref('uom.product_uom_dozen')
+        tax_15 = self.percent_tax(15)
+        product = self._create_product(lst_price=1000.0, taxes_id=tax_15)
+        invoice = self._create_invoice_one_line(product_id=product)
+        self.assertRecordValues(invoice, [{'document_tax_mode': 'tax_excluded'}])
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1000.0,
+            'product_uom_id': uom_unit.id,
+        }])
+
+        invoice.document_tax_mode = 'tax_included'
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1150.0,
+            'product_uom_id': uom_unit.id,
+        }])
+
+        # Change the price.
+        invoice.invoice_line_ids.price_unit = 1200
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1200.0,
+            'product_uom_id': uom_unit.id,
+        }])
+
+        # Change the UOM.
+        invoice.invoice_line_ids.product_uom_id = uom_dozen
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 14400.0,
+            'product_uom_id': uom_dozen.id,
+        }])
+
+        # Change the price AND the UOM together.
+        invoice.invoice_line_ids.write({
+            'product_uom_id': uom_unit.id,
+            'price_unit': 1400.0,
+        })
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1400.0,
+            'product_uom_id': uom_unit.id,
+        }])
+
+        # Change back the document_tax_mode.
+        invoice.document_tax_mode = 'tax_excluded'
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1217.391304347826,
+            'product_uom_id': uom_unit.id,
+        }])
+
+        # Check with falsy UOM.
+        invoice.invoice_line_ids.product_uom_id = False
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1217.391304347826,
+            'product_uom_id': False,
+        }])
+        invoice.invoice_line_ids.product_uom_id = uom_dozen
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 14608.695652173912,
+            'product_uom_id': uom_dozen.id,
+        }])
+
+    def test_changing_tax_with_manual_price_unit(self):
+        tax_15 = self.percent_tax(15)
+        product = self._create_product(lst_price=1000.0, taxes_id=tax_15)
+        invoice = self._create_invoice_one_line(product_id=product, price_unit=2000.0, tax_ids=tax_15)
+        self.assertRecordValues(invoice, [{'document_tax_mode': 'tax_excluded'}])
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 2000.0,
+            'tax_ids': tax_15.ids,
+        }])
+
+        # Change the tax but the manual price unit remains.
+        tax_20 = self.percent_tax(20)
+        invoice.invoice_line_ids.tax_ids = [Command.set(tax_20.ids)]
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 2000.0,
+            'tax_ids': tax_20.ids,
+        }])
+
+    def test_document_tax_mode_changes(self):
+        # Start with an invoice having a product.
+        tax_10 = self.percent_tax(10)
+        tax_15 = self.percent_tax(15)
+        product = self._create_product(lst_price=1000.0, taxes_id=tax_10)
+        uom_unit = self.env.ref('uom.product_uom_unit')
+        invoice = self._create_invoice_one_line(product_id=product, tax_ids=tax_15)
+        self.assertRecordValues(invoice, [{'document_tax_mode': 'tax_excluded'}])
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1000.0,
+            'product_uom_id': uom_unit.id,
+            'tax_ids': tax_15.ids,
+        }])
+
+        invoice.document_tax_mode = 'tax_included'
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1150.0,
+            'product_uom_id': uom_unit.id,
+        }])
+
+        # Change the tax.
+        tax_20 = self.percent_tax(20)
+        invoice.invoice_line_ids.tax_ids = [Command.set(tax_20.ids)]
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1150.0,
+            'product_uom_id': uom_unit.id,
+            'tax_ids': tax_20.ids,
+        }])
+
+        # Change the UOM.
+        uom_dozen = self.env.ref('uom.product_uom_dozen')
+        invoice.invoice_line_ids.product_uom_id = uom_dozen
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 13800.0,
+            'product_uom_id': uom_dozen.id,
+            'tax_ids': tax_20.ids,
+        }])
+
+        # Customize the price and change back the UOM.
+        invoice.invoice_line_ids.write({
+            'product_uom_id': uom_unit.id,
+            'price_unit': 1400.0,
+        })
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1400.0,
+            'product_uom_id': uom_unit.id,
+            'tax_ids': tax_20.ids,
+        }])
+
+        # Change back the document_tax_mode.
+        invoice.document_tax_mode = 'tax_excluded'
+        self.assertRecordValues(invoice.invoice_line_ids, [{
+            'price_unit': 1166.6666666666665,
+            'product_uom_id': uom_unit.id,
+            'tax_ids': tax_20.ids,
+        }])
