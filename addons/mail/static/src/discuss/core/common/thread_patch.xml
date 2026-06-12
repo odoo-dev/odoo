@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-inherit="mail.Thread" t-inherit-mode="extension">
+        <xpath expr="//t[@t-elif='this.isInErrorState']" position="after">
+            <t t-elif="this.showStartMessage" t-call="mail.Thread.startMessage"/>
+        </xpath>
+        <xpath expr="//t[@name='empty-message']" position="replace">
+            <t t-if="showStartMessage" t-call="mail.Thread.startMessage"/>
+            <div t-else="" class="d-flex flex-column align-items-center">
+                <span class="fs-1" style="filter: grayscale(1);">😶</span>
+                <span>The conversation is empty.</span>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('o-mail-Thread-empty')]" position="attributes">
+            <attribute name="t-att-class">{
+                    'p-4': this.props.showEmptyMessage and !this.showStartMessage,
+                    'align-items-start justify-content-end': this.showStartMessage,
+                    'align-items-center justify-content-center opacity-75': !this.showStartMessage
+            }</attribute>
+        </xpath>
+
         <xpath expr="//div[hasclass('o-mail-Thread')]" position="before">
             <span t-if="!this.env.inChatter and this.channel?.showUnreadBanner" class="o-mail-Thread-banner d-flex cursor-pointer shadow-sm smaller o-fw-600 border border-warning">
                 <t t-set="alertClass" t-value="'alert alert-warning m-0 border-start-0 o-mail-Thread-bannerHover py-1 rounded-0'"/>
@@ -8,5 +26,24 @@
                 <span t-attf-class="{{ alertClass }}" t-on-click="() => this.props.thread.markAsRead()">Mark as Read<i class="ms-2 fa fa-check-square"/></span>
             </span>
         </xpath>
+    </t>
+
+    <t t-name="mail.Thread.startMessage">
+        <div class="pt-4" t-att-class="{ 'px-3': this.env.inChatWindow, 'px-2': this.env.inDiscussApp or this.env.inMeetingChat }">
+            <div class="d-flex gap-2 lh-sm" t-att-class="{
+                'mt-2 mb-1': !this.channel?.parent_channel_id,
+                'mt-1': this.channel?.parent_channel_id,
+            }">
+                <div class="o-mail-Thread-avatar" t-att-class="{
+                    'o-mail-Thread-avatarChatWindow mt-1': this.env.inChatWindow,
+                    'mt-2': !this.env.inChatWindow,
+                }">
+                    <img t-if="!this.channel?.parent_channel_id" class="rounded-3 object-fit-cover" t-att-src="this.channel.avatarUrl" alt="Thread Image"/>
+                    <i t-else="" class="fa fa-comments-o text-muted" role="presentation"/>
+                </div>
+                <div role="heading" aria-level="1" class="text-break" t-att-class="{ 'fs-1': !this.env.inChatWindow, 'fs-3': this.env.inChatWindow }" t-out="this.startMessageTitle"/>
+            </div>
+            <p class="text-muted mb-0 small text-break" t-out="this.startMessageSubtitle"/>
+        </div>
     </t>
 </templates>

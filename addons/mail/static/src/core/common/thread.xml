@@ -10,7 +10,6 @@
                 <t t-if="this.props.order === 'asc'">
                     <t t-if="this.showLoadOlder" t-call="mail.Thread.loadOlder"/>
                     <t t-elif="this.isInErrorState" t-call="mail.Thread.loadingError"/>
-                    <t t-elif="this.showStartMessage" t-call="mail.Thread.startMessage"/>
                 </t>
                 <span t-else="" class="pt-1" t-custom-ref="load-newer"/>
                 <t t-set="messages" t-value="this.orderedMessages"/>
@@ -48,19 +47,10 @@
             </div>
         </t>
         <t t-else="">
-            <div class="o-mail-Thread-empty d-flex flex-column h-100"
-                t-att-class="{
-                    'p-4': this.props.showEmptyMessage and !this.showStartMessage,
-                    'align-items-start justify-content-end': this.showStartMessage,
-                    'align-items-center justify-content-center opacity-75': !this.showStartMessage
-                }">
+            <div class="o-mail-Thread-empty d-flex flex-column align-items-center justify-content-center text-muted h-100 opacity-75" t-att-class="{'p-4': this.props.showEmptyMessage}">
                 <t t-if="this.props.thread.isLoaded and this.props.showEmptyMessage">
                     <t name="empty-message">
-                        <t t-if="this.showStartMessage" t-call="mail.Thread.startMessage"/>
-                        <div t-else="" class="d-flex flex-column align-items-center">
-                            <span class="fs-1" style="filter: grayscale(1);">😶</span>
-                            <span>No messages yet.</span>
-                        </div>
+                        <t t-call="mail.Thread.emptyMessage"/>
                     </t>
                 </t>
             </div>
@@ -75,6 +65,13 @@
 
 <t t-name="mail.Thread.loadOlder">
     <button class="btn btn-link" t-att-class="{ 'opacity-0': !this.mountedAndLoaded }" t-on-click="this.onClickLoadOlder" t-custom-ref="load-older">Load More</button>
+</t>
+
+<t t-name="mail.Thread.emptyMessage">
+    <div t-else="" class="d-flex flex-column align-items-center">
+        <span class="fs-1" style="filter: grayscale(1);">😶</span>
+        <span>No messages yet.</span>
+    </div>
 </t>
 
 <t t-name="mail.Thread.loadingError">
@@ -101,24 +98,5 @@
     <span class="badge rounded-pill o-discuss-badge flex-shrink-0 bg-inherit d-flex align-items-center justify-content-center" t-attf-class="{{ badgeClass }}" t-att-style="'margin: 0px; background-color: inherit !important;' + (floating ? 'padding: 1px;' : 'padding: 0px;')">
         <span class="rounded-pill o-innerBadge" t-attf-class="{{ counterClass }}" t-out="counter" style="top: 0 !important;"/>
     </span>
-</t>
-
-<t t-name="mail.Thread.startMessage">
-    <div class="pt-4" t-att-class="{ 'px-3': this.env.inChatWindow, 'px-2': this.env.inDiscussApp or this.env.inMeetingChat }">
-        <div class="d-flex gap-2 lh-sm" t-att-class="{
-            'mt-2 mb-1': !this.channel?.parent_channel_id,
-            'mt-1': this.channel?.parent_channel_id,
-        }">
-            <div class="o-mail-Thread-avatar" t-att-class="{
-                'o-mail-Thread-avatarChatWindow mt-1': this.env.inChatWindow,
-                'mt-2': !this.env.inChatWindow,
-            }">
-                <img t-if="!this.channel?.parent_channel_id" class="rounded-3 object-fit-cover" t-att-src="this.channel.avatarUrl" alt="Thread Image"/>
-                <i t-else="" class="fa fa-comments-o text-muted" role="presentation"/>
-            </div>
-            <div role="heading" aria-level="1" class="text-break" t-att-class="{ 'fs-1': !this.env.inChatWindow, 'fs-3': this.env.inChatWindow }" t-out="this.startMessageTitle"/>
-        </div>
-        <p class="text-muted mb-0 small text-break" t-out="this.startMessageSubtitle"/>
-    </div>
 </t>
 </templates>

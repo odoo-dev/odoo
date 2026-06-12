@@ -76,5 +76,48 @@ const threadPatch = {
         });
         this.messageHighlight?.highlightMessage(this.props.thread.firstUnreadMessage);
     },
+
+    get showStartMessage() {
+        return (
+            this.state.mountedAndLoaded &&
+            !this.props.thread.loadOlder &&
+            ["channel", "group", "chat"].includes(this.channel?.channel_type)
+        );
+    },
+
+    get startMessageTitle() {
+        const channelName = this.channel?.displayName;
+        if (this.channel?.parent_channel_id) {
+            return channelName;
+        }
+        if (this.channel?.channel_type === "channel") {
+            return _t("Welcome to #%(channelName)s!", { channelName });
+        }
+        return this.channel.displayName;
+    },
+
+    get startMessageSubtitle() {
+        if (this.channel?.parent_channel_id) {
+            const authorName = Object.values(this.store["res.partner"].records).find((partner) =>
+                partner.main_user_id?.eq(this.props.thread.channel.create_uid)
+            )?.name;
+            if (authorName) {
+                return _t("Started by %(authorName)s", { authorName });
+            }
+        }
+        if (this.channel?.channel_type === "channel") {
+            return _t("This is the start of the #%(channelName)s channel", {
+                channelName: this.channel.name,
+            });
+        }
+        if (this.channel?.channel_type === "group") {
+            return _t("This is the start of %(conversationName)s group", {
+                conversationName: this.channel.displayName,
+            });
+        }
+        return _t("This is the start of your direct chat with %(userName)s", {
+            userName: this.channel.displayName,
+        });
+    },
 };
 patch(Thread.prototype, threadPatch);
