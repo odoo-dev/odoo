@@ -77,6 +77,7 @@ class StockPicking(models.Model):
                 production.qty_producing = production.product_qty
                 production._set_qty_producing()
             productions[:len_amounts].subcontracting_has_been_recorded = True
+            move.picking_id._relink_subcontract_backorder_productions(move, productions[len_amounts:])
 
         for picking in self:
             productions_to_done = picking._get_subcontract_production()._subcontracting_filter_to_done()
@@ -96,6 +97,42 @@ class StockPicking(models.Model):
             production_moves.move_line_ids.write({'date': minimum_date - timedelta(seconds=1)})
 
         return res
+
+    def _create_backorder(self):
+        res = super()._create_backorder()
+        # When a backorder picking is created, subcontract MOs that were pre-recorded
+        # (e.g. via _auto_record_components triggered by setting done qty before validation)
+        # already have their backorder MOs pointing to the original picking's move via
+        # _get_backorder_move_vals. Re-link those backorder MOs to the new backorder picking's move.
+        for picking in self:
+            for move in picking.move_ids.filtered('is_subcontract'):
+                all_productions = move._get_subcontract_production()
+                recorded = all_productions.filtered(lambda p: p._has_been_recorded())
+                # Only act when pre-recording already happened (Scenario B).
+                # Without pre-recording there are no backorder MOs yet; the split
+                # is handled later in the _action_done loop (Scenario A).
+                if not recorded:
+                    continue
+                picking._relink_subcontract_backorder_productions(move, all_productions - recorded)
+        return res
+
+    def _relink_subcontract_backorder_productions(self, move, backorder_productions):
+        """Point backorder MOs' finished moves to the corresponding move on the backorder picking.
+
+        _get_backorder_move_vals copies move_dest_ids from the original MO to any backorder MO
+        created by _split_productions, leaving them pointing to the original picking's move.
+        This method corrects that by re-linking them to the backorder picking's move.
+        """
+        if not backorder_productions:
+            return
+        backorder_move = self.backorder_ids.move_ids.filtered(
+            lambda m: m.is_subcontract and m.product_id == move.product_id
+        )
+        if not backorder_move:
+            return
+        for bo_prod in backorder_productions:
+            bo_finished_move = bo_prod.move_finished_ids.filtered(lambda m: m.product_id == bo_prod.product_id)
+            bo_finished_move.move_dest_ids = backorder_move
 
     def action_record_components(self):
         self.ensure_one()

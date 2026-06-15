@@ -762,10 +762,18 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         process_picking(picking, 1.25)
 
         backorder01 = picking.backorder_ids
+        bo01_mo = backorder01._get_subcontract_production().filtered(lambda mo: not mo._has_been_recorded())
+        self.assertEqual(len(bo01_mo), 1)
+        self.assertEqual(bo01_mo.incoming_picking, backorder01,
+            "backorder MO should link to the backorder picking, not the original")
         process_picking(backorder01, 1)
 
         backorder02 = backorder01.backorder_ids
         self.assertEqual(backorder02.move_ids.quantity, 2.75)
+        bo02_mo = backorder02._get_subcontract_production().filtered(lambda mo: not mo._has_been_recorded())
+        self.assertEqual(len(bo02_mo), 1)
+        self.assertEqual(bo02_mo.incoming_picking, backorder02,
+            "backorder MO should link to the backorder picking, not the original")
 
         self.assertEqual(self.env['mrp.production'].search_count([('bom_id', '=', bom.id)]), 3)
 
@@ -820,10 +828,18 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         backorder01 = process_picking_with_backorder(picking, 1)
         check_quants(product=finished, stock_qty=1, sub_qty=0, prod_qty=-1)
         check_quants(product=component, stock_qty=0, sub_qty=-1, prod_qty=1)
+        bo01_mo = backorder01._get_subcontract_production().filtered(lambda mo: not mo._has_been_recorded())
+        self.assertEqual(len(bo01_mo), 1)
+        self.assertEqual(bo01_mo.incoming_picking, backorder01,
+            "backorder MO should link to the backorder picking, not the original")
 
         backorder02 = process_picking_with_backorder(backorder01, 2)
         check_quants(product=finished, stock_qty=3, sub_qty=0, prod_qty=-3)
         check_quants(product=component, stock_qty=0, sub_qty=-3, prod_qty=3)
+        bo02_mo = backorder02._get_subcontract_production().filtered(lambda mo: not mo._has_been_recorded())
+        self.assertEqual(len(bo02_mo), 1)
+        self.assertEqual(bo02_mo.incoming_picking, backorder02,
+            "backorder MO should link to the backorder picking, not the original")
 
         process_picking_with_backorder(backorder02, 3)
         check_quants(product=finished, stock_qty=6, sub_qty=0, prod_qty=-6)
