@@ -1,11 +1,11 @@
-import { Component, onWillStart, proxy } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, onWillStart, plugin, proxy } from "@odoo/owl";
 
 import { useSpreadsheetNotificationStore } from "@spreadsheet/hooks";
 
 import * as spreadsheet from "@odoo/o-spreadsheet";
 import { Spreadsheet, Model } from "@odoo/o-spreadsheet";
 import { registry } from "@web/core/registry";
+import { HttpPlugin } from "@web/core/network/http_plugin";
 
 export class PublicDashboard extends Component {
     static template = "spreadsheet_dashboard.PublicDashboard";
@@ -17,7 +17,7 @@ export class PublicDashboard extends Component {
 
     setup() {
         useSpreadsheetNotificationStore();
-        this.http = useService("http");
+        this.http = plugin(HttpPlugin);
         this.state = proxy({
             isFilterShown: false,
         });

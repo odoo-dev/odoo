@@ -1,8 +1,9 @@
 import { _t } from "@web/core/l10n/translation";
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useAutofocus } from "@web/core/utils/hooks";
 import { debounce } from "@web/core/utils/timing";
+import { HttpPlugin } from "@web/core/network/http_plugin";
 
-import { Component, onMounted, props, proxy, signal, t } from "@odoo/owl";
+import { Component, onMounted, plugin, props, proxy, signal, t } from "@odoo/owl";
 import { Switch } from "@html_editor/components/switch/switch";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 
@@ -74,7 +75,7 @@ export class VideoSelector extends Component {
     urlInputRef = signal(null);
 
     setup() {
-        this.http = useService("http");
+        this.http = plugin(HttpPlugin);
 
         this.state = proxy({
             options: {},

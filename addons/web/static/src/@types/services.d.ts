@@ -12,7 +12,7 @@ declare module "services" {
     import { hotkeyService } from "@web/core/hotkeys/hotkey_service";
     import { localizationService } from "@web/core/l10n/localization_service";
     import { nameService } from "@web/core/name_service";
-    import { httpService } from "@web/core/network/http_service";
+    import { httpService } from "@web/core/network/http_plugin";
     import { notificationService } from "@web/core/notifications/notification_service";
     import { offlineService } from "@web/core/offline/offline_service";
     import { ormService } from "@web/core/orm_plugin";

@@ -1,10 +1,11 @@
-import { Component, proxy } from "@odoo/owl";
+import { Component, plugin, proxy } from "@odoo/owl";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { checkFileSize } from "@web/core/utils/files";
 import { Record } from "@web/model/record";
 import { Field } from "@web/views/fields/field";
 import { FormViewDialog } from "@web/views/view_dialogs/form_view_dialog";
+import { HttpPlugin } from "@web/core/network/http_plugin";
 
 export class ShareTargetItem extends Component {
     static template = "web.ShareTargetItem";
@@ -19,7 +20,7 @@ export class ShareTargetItem extends Component {
         super.setup();
         this.action = useService("action");
         this.dialog = useService("dialog");
-        this.http = useService("http");
+        this.http = plugin(HttpPlugin);
         this.notification = useService("notification");
         this.orm = useService("orm");
 

@@ -1,8 +1,9 @@
-import { props, proxy, t } from "@odoo/owl";
+import { plugin, props, proxy, t } from "@odoo/owl";
 import { useLayoutEffect, useRef } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 import { Domain } from "@web/core/domain";
 import { useBus, useRefListener, useService } from '@web/core/utils/hooks';
+import { HttpPlugin } from "@web/core/network/http_plugin";
 
 export const ExpenseDocumentDropZone = (T, parentProps) => class ExpenseDocumentDropZone extends T {
     props = props({
@@ -73,7 +74,7 @@ export const AbstractExpenseDocumentUpload = (T) => class AbstractExpenseDocumen
         this.actionService = useService('action');
         this.notification = useService('notification');
         this.orm = useService("orm");
-        this.http = useService("http");
+        this.http = plugin(HttpPlugin);
         this.createdExpenseIds = [];
     }
 

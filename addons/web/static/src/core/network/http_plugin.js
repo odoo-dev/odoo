@@ -44,7 +44,7 @@ export async function post(route, params = {}, readMethod = "json") {
     return response[readMethod]();
 }
 
-class HttpPlugin extends Plugin {
+export class HttpPlugin extends Plugin {
     get = get;
     post = post;
 }

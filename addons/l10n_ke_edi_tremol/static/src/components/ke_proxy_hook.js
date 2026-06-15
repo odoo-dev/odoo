@@ -1,7 +1,8 @@
-import { proxy } from "@odoo/owl";
+import { plugin, proxy } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
+import { HttpPlugin } from "@web/core/network/http_plugin";
 
 export function useKEProxy({onAllSent}) {
     onAllSent = onAllSent || (() => {});
@@ -11,7 +12,7 @@ export function useKEProxy({onAllSent}) {
         message: "",
     });
     const orm = useService("orm");
-    const http = useService("http");
+    const http = plugin(HttpPlugin);
 
     /**
      * Send each of the invoices provided to the proxy connected to the fiscal device. The proxy should return

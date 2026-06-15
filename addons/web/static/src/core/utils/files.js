@@ -2,6 +2,8 @@ import { humanNumber } from "@web/core/utils/numbers";
 import { useService } from "@web/core/utils/hooks";
 import { session } from "@web/session";
 import { _t } from "@web/core/l10n/translation";
+import { plugin } from "@odoo/owl";
+import { HttpPlugin } from "@web/core/network/http_plugin";
 
 export const DEFAULT_MAX_FILE_SIZE = 128 * 1024 * 1024;
 
@@ -33,7 +35,7 @@ export function checkFileSize(fileSize, notificationService) {
  * @returns {function}
  */
 export function useFileUploader() {
-    const http = useService("http");
+    const http = plugin(HttpPlugin);
     const notification = useService("notification");
     /**
      * @param {string} route

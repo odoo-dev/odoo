@@ -15,8 +15,9 @@ import {
     removeTextHighlight,
     getObservedEls,
 } from "@website/js/highlight_utils";
-import { Component, onWillStart, onMounted, props, status, proxy, t } from "@odoo/owl";
+import { Component, onWillStart, onMounted, plugin, props, status, proxy, t } from "@odoo/owl";
 import { onceAllImagesLoaded } from "@website/utils/images";
+import { HttpPlugin } from "@web/core/network/http_plugin";
 
 const NO_OP = () => {};
 
@@ -481,7 +482,7 @@ export class AddPageDialog extends Component {
         this.switchLabel = _t("Add to menu");
         this.website = useService("website");
         this.dialogs = useService("dialog");
-        this.http = useService("http");
+        this.http = plugin(HttpPlugin);
         this.action = useService("action");
 
         this.cssLinkEls = undefined;

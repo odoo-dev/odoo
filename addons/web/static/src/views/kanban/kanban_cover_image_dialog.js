@@ -1,8 +1,9 @@
 import { Dialog } from "@web/core/dialog/dialog";
 import { FileInput } from "@web/core/file_input/file_input";
+import { HttpPlugin } from "@web/core/network/http_plugin";
 import { useService } from "@web/core/utils/hooks";
 
-import { Component, onWillStart, proxy } from "@odoo/owl";
+import { Component, onWillStart, plugin, proxy } from "@odoo/owl";
 
 let nextDialogId = 1;
 
@@ -13,7 +14,7 @@ export class KanbanCoverImageDialog extends Component {
     setup() {
         this.id = `o_cover_image_upload_${nextDialogId++}`;
         this.orm = useService("orm");
-        this.http = useService("http");
+        this.http = plugin(HttpPlugin);
         const { record, fieldName } = this.props;
         const attachment = record.data[fieldName];
         this.state = proxy({
