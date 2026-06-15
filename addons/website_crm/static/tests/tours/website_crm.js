@@ -1,8 +1,8 @@
 import { registry } from "@web/core/registry";
 import {
     clickOnSave,
-    registerWebsitePreviewTour,
-} from '@website/js/tours/tour_utils';
+    waitForEditMode,
+} from "@website/js/tours/tour_utils";
 
 function setFormActionToCreateOpportunity() {
     return [
@@ -28,20 +28,17 @@ function setFormActionToCreateOpportunity() {
     ];
 }
 
-registerWebsitePreviewTour(
-    "website_crm_pre_tour",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_crm_pre_tour", {
+    steps: () => [
+        waitForEditMode,
         ...setFormActionToCreateOpportunity(),
         ...clickOnSave(),
         {
             content: "Ensure form model has changed and page reload is done after save",
             trigger: ":iframe section.s_website_form form[data-model_name='crm.lead']",
         },
-    ]
-);
+    ],
+});
 
 registry.category("web_tour.tours").add('website_crm_tour', {
     steps: () => [{
@@ -104,12 +101,9 @@ registry.category("web_tour.tours").add('website_crm_catch_logged_partner_info_t
 }]});
 
 
-registerWebsitePreviewTour(
-    "website_crm_form_properties",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_crm_form_properties", {
+    steps: () => [
+        waitForEditMode,
         ...setFormActionToCreateOpportunity(),
         {
             content: "Open Sales Team select",
@@ -147,5 +141,5 @@ registerWebsitePreviewTour(
             trigger: "body:not(:has(.o_error_dialog))",
             run: "click",
         },
-    ]
-);
+    ],
+});

@@ -1,25 +1,23 @@
 /** @odoo-module */
 
 import { delay } from "@web/core/utils/concurrency";
+import { registry } from "@web/core/registry";
 import {
     insertSnippet,
     clickOnSnippet,
     changeOption,
     clickOnEditAndWaitEditMode,
     clickOnSave,
-    registerWebsitePreviewTour,
     goBackToBlocks,
     unfoldOptionsGroup,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 const carouselInnerSelector = ":iframe .carousel-inner";
 
-registerWebsitePreviewTour(
-    "carousel_content_removal",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("carousel_content_removal", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_carousel",
             name: "Carousel",
@@ -61,8 +59,8 @@ registerWebsitePreviewTour(
                 ":iframe .s_quotes_carousel_wrapper .carousel-item.active:not(:has(.s_blockquote))",
             content: "Check that the blockquote has been removed and the carousel item is empty.",
         },
-    ]
-);
+    ],
+});
 
 const checkSlides = (number, position) => {
     const nSlide = (n) => `div.carousel-item:eq(${n})`;
@@ -79,12 +77,9 @@ const checkSlides = (number, position) => {
     };
 };
 
-registerWebsitePreviewTour(
-    "snippet_carousel",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_carousel", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ id: "s_carousel", name: "Carousel", groupName: "Intro" }),
         ...clickOnSnippet(".carousel .carousel-item.active"),
         // Slide to the right.
@@ -162,8 +157,8 @@ registerWebsitePreviewTour(
             run: "click",
         },
         checkSlides(4, 3),
-    ]
-);
+    ],
+});
 
 const setSlideUrl = (urlText, matchText) => [
     {
@@ -183,13 +178,10 @@ const checkSlideNotClickable = () => ({
     trigger: ":iframe .carousel-item.active:not(.clickable-slide):not(:has(a.slide-link))",
 });
 
-registerWebsitePreviewTour(
-    "snippet_carousel_clickable_slides",
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_carousel_clickable_slides", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ id: "s_carousel", name: "Carousel", groupName: "Intro" }),
         ...clickOnSnippet(".carousel .carousel-item.active"),
 
@@ -251,5 +243,5 @@ registerWebsitePreviewTour(
 
         ...clickOnSave(),
         checkSlideNotClickable(),
-    ]
-);
+    ],
+});

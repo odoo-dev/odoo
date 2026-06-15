@@ -1,16 +1,14 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
     changeImageShape,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "website_media_dialog_undraw",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_media_dialog_undraw", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_image",
             name: "Text - Image",
@@ -36,15 +34,12 @@ registerWebsitePreviewTour(
                 "Ensure all images are loaded to avoid CORS is misconfigured on the API server, image will be treated as non-dynamic.",
             trigger: ".modal .o_load_done_msg",
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_media_dialog_external_library",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_media_dialog_external_library", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_image",
             name: "Text - Image",
@@ -115,15 +110,12 @@ registerWebsitePreviewTour(
             trigger: ".o_notification_manager .o_notification",
         },
         ...clickOnSave(),
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_media_dialog_icons",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_media_dialog_icons", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_social_media",
             name: "Social Media",
@@ -157,15 +149,12 @@ registerWebsitePreviewTour(
             trigger: ":iframe .s_social_media .fa-instagram",
         },
         ...clickOnSave(),
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_media_dialog_image_shape",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_media_dialog_image_shape", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_image",
             name: "Text - Image",
@@ -198,15 +187,12 @@ registerWebsitePreviewTour(
             content: "Checks that the icon doesn't have a shape",
             trigger: ":iframe .s_text_image .fa-heart:not([data-shape])",
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_media_dialog_insert_media",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_media_dialog_insert_media", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_block",
             name: "Text",
@@ -250,15 +236,12 @@ registerWebsitePreviewTour(
             content: "Verify that the icon was inserted",
             trigger: ":iframe .s_text_block p > span.fa",
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_media_dialog_insert_file",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_media_dialog_insert_file", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_block",
             name: "Text",
@@ -308,5 +291,5 @@ registerWebsitePreviewTour(
             content: "Verify that the dialog opened on the Documents tab",
             trigger: ".o_select_media_dialog button.nav-link.active:contains('Documents')",
         },
-    ]
-);
+    ],
+});

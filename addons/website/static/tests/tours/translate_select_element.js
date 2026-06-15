@@ -1,8 +1,9 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditModeInTranslatedPage,
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 function changeLanguageAndOpenTranslateMode() {
@@ -30,12 +31,9 @@ function changeLanguageAndOpenTranslateMode() {
     ];
 }
 
-registerWebsitePreviewTour(
-    "translate_select_element",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("translate_select_element", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_title_form",
             name: "Title - Form",
@@ -94,5 +92,5 @@ registerWebsitePreviewTour(
             trigger:
                 ":iframe .o_translation_select span[data-oe-translation-state=to_translate]:contains('Second option')",
         },
-    ]
-);
+    ],
+});

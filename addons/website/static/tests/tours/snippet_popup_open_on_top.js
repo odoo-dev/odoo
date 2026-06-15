@@ -1,18 +1,16 @@
+import { registry } from "@web/core/registry";
 /** @odoo-module **/
 
 import {
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
     unfoldOptionsGroup,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "snippet_popup_open_on_top",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_popup_open_on_top", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             name: "Popup",
             id: "s_popup",
@@ -60,5 +58,5 @@ registerWebsitePreviewTour(
                 }
             },
         },
-    ]
-);
+    ],
+});

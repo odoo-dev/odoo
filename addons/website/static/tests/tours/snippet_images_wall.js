@@ -1,8 +1,5 @@
-import {
-    clickOnSnippet,
-    insertSnippet,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { clickOnSnippet, insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
 
 const wallRaceConditionClass = "image_wall_race_condition";
 const preventRaceConditionSteps = [
@@ -54,12 +51,9 @@ const reselectSignImageSteps = [
     ...selectSignImageStep,
 ];
 
-registerWebsitePreviewTour(
-    "snippet_images_wall",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_images_wall", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_images_wall",
             name: "Images Wall",
@@ -139,5 +133,5 @@ registerWebsitePreviewTour(
             trigger:
                 ":iframe .s_image_gallery .o_masonry_col:nth-child(3):has(img[data-index='5'][src*='set_2_square_md_6'])",
         },
-    ]
-);
+    ],
+});

@@ -1,17 +1,15 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
     selectFullText,
     clickToolbarButton,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "translate_text_options",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("translate_text_options", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_block",
             name: "Text",
@@ -122,5 +120,5 @@ registerWebsitePreviewTour(
             content: "Check that the highlight effect was correctly translated",
             trigger: ":iframe .s_text_block:has(.o_text_highlight_jagged)",
         },
-    ]
-);
+    ],
+});

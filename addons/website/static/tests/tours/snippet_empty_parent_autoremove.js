@@ -1,8 +1,9 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
     changeBackgroundShape,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 function removeSelectedBlock() {
@@ -13,12 +14,9 @@ function removeSelectedBlock() {
     };
 }
 
-registerWebsitePreviewTour(
-    "snippet_empty_parent_autoremove",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_empty_parent_autoremove", {
+    steps: () => [
+        waitForEditMode,
         // Base case: remove both columns from text - image
         ...insertSnippet({
             id: "s_text_image",
@@ -75,5 +73,5 @@ registerWebsitePreviewTour(
             content: "Check that #wrap is empty",
             trigger: ":iframe #wrap:empty",
         },
-    ]
-);
+    ],
+});

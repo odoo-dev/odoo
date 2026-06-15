@@ -3,9 +3,10 @@ import {
     clickOnSave,
     insertSnippet,
     goToTheme,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 import { editorsWeakMap, setSelection } from "@html_editor/../tests/tours/helpers/editor";
+import { registry } from "@web/core/registry";
 
 function installParseltongueAndOpenLangDropdown() {
     return [
@@ -52,12 +53,9 @@ function installParseltongueAndOpenLangDropdown() {
     ];
 }
 
-registerWebsitePreviewTour(
-    "rte_translator",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("rte_translator", {
+    steps: () => [
+        waitForEditMode,
         ...installParseltongueAndOpenLangDropdown(),
         {
             content: "go to english version",
@@ -432,13 +430,9 @@ registerWebsitePreviewTour(
             content: "Check that the editor is not showing translated content (2)",
             trigger: ":iframe body:not(.rte_translator_error)",
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "multiple_websites_add_language",
-    {
-        edition: true,
-    },
-    () => [...installParseltongueAndOpenLangDropdown()]
-);
+registry.category("web_tour.tours").add("multiple_websites_add_language", {
+    steps: () => [waitForEditMode, ...installParseltongueAndOpenLangDropdown()],
+});

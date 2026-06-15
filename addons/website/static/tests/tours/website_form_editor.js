@@ -4,12 +4,13 @@ import {
     clickOnSave,
     insertSnippet,
     goBackToBlocks,
-    registerWebsitePreviewTour,
     changeOptionInPopover,
     unfoldOptionsGroup,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 import { stepUtils } from "@web_tour/tour_utils";
 import { editorsWeakMap } from "@html_editor/../tests/tours/helpers/editor";
+import { registry } from "@web/core/registry";
 
 // Visibility possible values:
 const VISIBLE = "None";
@@ -178,13 +179,10 @@ const compareIds = ({ content, firstElSelector, secondElSelector, errorMessage }
     },
 });
 
-registerWebsitePreviewTour(
-    "website_form_editor_tour",
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_form_editor_tour", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
+    steps: () => [
+        waitForEditMode,
         // Drop a form builder snippet and configure it
         ...insertSnippet({
             id: "s_title_form",
@@ -911,8 +909,8 @@ registerWebsitePreviewTour(
             // We have to this that way because the input type = hidden.
             trigger: ':iframe form:has(input[name="email_to"][value="test@test.test"])',
         },
-    ]
-);
+    ],
+});
 
 function editContactUs(steps) {
     return [
@@ -929,28 +927,23 @@ function editContactUs(steps) {
     ];
 }
 
-registerWebsitePreviewTour(
-    "website_form_contactus_edition_with_email",
-    {
-        edition: true,
-    },
-    () =>
-        editContactUs([
+registry.category("web_tour.tours").add("website_form_contactus_edition_with_email", {
+    steps: () => [
+        waitForEditMode,
+        ...editContactUs([
             ...unfoldOptionsGroup("Form"),
             {
                 content: "Change the Recipient Email",
                 trigger: "div[data-label='Recipient Emails'] input",
                 run: "edit test@test.test",
             },
-        ])
-);
-registerWebsitePreviewTour(
-    "website_form_contactus_edition_no_email",
-    {
-        edition: true,
-    },
-    () =>
-        editContactUs([
+        ]),
+    ],
+});
+registry.category("web_tour.tours").add("website_form_contactus_edition_no_email", {
+    steps: () => [
+        waitForEditMode,
+        ...editContactUs([
             ...unfoldOptionsGroup("Form"),
             {
                 content: "Change a random option",
@@ -962,15 +955,13 @@ registerWebsitePreviewTour(
                 trigger:
                     "div[data-label='Recipient Emails'] input:value('website_form_contactus_edition_no_email@mail.com')",
             },
-        ])
-);
+        ]),
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_form_conditional_required_checkboxes",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_form_conditional_required_checkboxes", {
+    steps: () => [
+        waitForEditMode,
         // Create a form with two checkboxes: the second one required but
         // invisible when the first one is checked. Basically this should allow
         // to have: both checkboxes are visible by default but the form can
@@ -1117,31 +1108,26 @@ registerWebsitePreviewTour(
             content: "Check the form was again sent (success page without form)",
             trigger: ':iframe body:not(:has([data-snippet="s_website_form"])) .fa-paper-plane',
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_form_contactus_change_random_option",
-    {
-        edition: true,
-    },
-    () =>
-        editContactUs([
+registry.category("web_tour.tours").add("website_form_contactus_change_random_option", {
+    steps: () => [
+        waitForEditMode,
+        ...editContactUs([
             ...unfoldOptionsGroup("Form"),
             {
                 content: "Change a random option",
                 trigger: "[data-action-id='setMark'] input",
                 run: "edit **",
             },
-        ])
-);
+        ]),
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_form_nested_forms",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_form_nested_forms", {
+    steps: () => [
+        waitForEditMode,
         {
             trigger: ".o-website-builder_sidebar .o_snippets_container .o_snippet",
         },
@@ -1157,16 +1143,13 @@ registerWebsitePreviewTour(
                 ":iframe form[action='/my/address/submit']:not(:has([data-snippet='s_website_form']))",
             run: () => null,
         },
-    ]
-);
+    ],
+});
 
 // Check that the editable form content is actually editable.
-registerWebsitePreviewTour(
-    "website_form_editable_content",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_form_editable_content", {
+    steps: () => [
+        waitForEditMode,
         {
             trigger: ".o-snippets-menu div.o_snippet",
         },
@@ -1225,15 +1208,12 @@ registerWebsitePreviewTour(
             run: "click",
         },
         ...clickOnSave(),
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_form_special_characters",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_form_special_characters", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_title_form",
             name: "Title - Form",
@@ -1267,15 +1247,12 @@ registerWebsitePreviewTour(
             content: "Check the form was again sent (success page without form)",
             trigger: ":iframe body:not(:has([data-snippet='s_website_form'])) .fa-paper-plane",
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_form_duplicate_field_ids",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_form_duplicate_field_ids", {
+    steps: () => [
+        waitForEditMode,
         // Fields in two form snippet should have unique IDs
         {
             content: "Drop a form snippet",
@@ -1372,5 +1349,5 @@ registerWebsitePreviewTour(
             secondElSelector: ".s_title_form [data-name='Field']:nth-of-type(3) input[name='name']",
             errorMessage: "Original and cloned fields have the same ID",
         }),
-    ]
-);
+    ],
+});

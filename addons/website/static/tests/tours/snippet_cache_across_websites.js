@@ -1,16 +1,14 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
-    registerWebsitePreviewTour,
     testSwitchWebsite,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "snippet_cache_across_websites",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_cache_across_websites", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Click on the Custom category block",
             trigger:
@@ -41,5 +39,5 @@ registerWebsitePreviewTour(
             content: "Check that the custom snippet category is not here",
             trigger: ".o-website-builder_sidebar:not(:has(.o_snippet[name='Custom']))",
         },
-    ]
-);
+    ],
+});

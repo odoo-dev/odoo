@@ -1,9 +1,10 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 // TODO: Remove following steps once fix of task-3212519 is done.
@@ -50,8 +51,7 @@ const replaceIconByImage = function (url) {
         },
         {
             content: "Select the image",
-            trigger:
-                ".o_select_media_dialog .o_button_area[aria-label='landscape_md_1.jpg']",
+            trigger: ".o_select_media_dialog .o_button_area[aria-label='landscape_md_1.jpg']",
             run: "click",
         },
         ...preventRaceConditionStep,
@@ -91,12 +91,9 @@ const addNewSocialNetwork = function (optionIndex, url, replaceIcon = false) {
     ];
 };
 
-registerWebsitePreviewTour(
-    "snippet_social_media",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_social_media", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ id: "s_social_media", name: "Social Media" }),
         ...clickOnSnippet({ id: "s_social_media", name: "Social Media" }),
         ...addNewSocialNetwork(8, "https://www.youtu.be/y7TlnAv6cto"),
@@ -226,5 +223,5 @@ registerWebsitePreviewTour(
                 ":has(a:eq(10)[href='https://facebook.com']:has(img))",
         },
         ...clickOnSave(),
-    ]
-);
+    ],
+});

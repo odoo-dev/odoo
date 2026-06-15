@@ -1,3 +1,4 @@
+import { registry } from "@web/core/registry";
 /** @odoo-module */
 
 import {
@@ -5,8 +6,8 @@ import {
     clickOnSave,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
     clickOnEditAndWaitEditMode,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 const blogPostsSnippet = {
@@ -36,12 +37,9 @@ const isSnippetHidden = () => [
     ...isSnippetVisible(true),
 ];
 
-registerWebsitePreviewTour(
-    "blog_posts_dynamic_snippet_edit",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("blog_posts_dynamic_snippet_edit", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet(blogPostsSnippet),
         ...clickOnSnippet({ ...blogPostsSnippet, id: "s_blog_posts" }),
         ...changeOptionInPopover("Blog Posts", "Blogs", "aaa Blog Test"),
@@ -53,15 +51,19 @@ registerWebsitePreviewTour(
         ...isSnippetVisible(true),
         ...clickOnSave(),
         ...isSnippetVisible(),
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour("blog_posts_dynamic_snippet_empty", {}, isSnippetHidden);
+registry.category("web_tour.tours").add("blog_posts_dynamic_snippet_empty", {
+    steps: isSnippetHidden,
+});
 
-registerWebsitePreviewTour("blog_posts_dynamic_snippet_misconfigured", {}, () => [
-    ...isSnippetHidden(),
-    {
-        content: "Check that the snippet 'missing option' warning is visible",
-        trigger: ":iframe .s_dynamic_snippet_blog_posts .missing_option_warning",
-    },
-]);
+registry.category("web_tour.tours").add("blog_posts_dynamic_snippet_misconfigured", {
+    steps: () => [
+        ...isSnippetHidden(),
+        {
+            content: "Check that the snippet 'missing option' warning is visible",
+            trigger: ":iframe .s_dynamic_snippet_blog_posts .missing_option_warning",
+        },
+    ],
+});

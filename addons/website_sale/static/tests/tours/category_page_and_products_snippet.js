@@ -2,10 +2,10 @@ import { registry } from "@web/core/registry";
 import {
     clickOnSave,
     clickOnEditAndWaitEditMode,
-    registerWebsitePreviewTour,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour("website_sale.category_page_and_products_snippet_edition", {}, () => [
+registry.category("web_tour.tours").add("website_sale.category_page_and_products_snippet_edition", {
+    steps: () => [
     {
         content: "Navigate to category",
         trigger: ':iframe .o_wsale_filmstrip > li:contains("Test Category") > a',
@@ -49,7 +49,8 @@ registerWebsitePreviewTour("website_sale.category_page_and_products_snippet_edit
         run: "click",
     },
     ...clickOnSave(),
-]);
+],
+});
 
 registry.category("web_tour.tours").add("website_sale.category_page_and_products_snippet_use", {
     steps: () => [

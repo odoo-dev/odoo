@@ -1,11 +1,9 @@
-import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "website_image_quality",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_image_quality", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_image",
             name: "Text - Image",
@@ -54,5 +52,5 @@ registerWebsitePreviewTour(
             trigger:
                 ".o_customize_tab [data-container-title='Image'] span[title='Size']:contains('22.8')",
         },
-    ]
-);
+    ],
+});

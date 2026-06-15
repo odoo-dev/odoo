@@ -1,11 +1,9 @@
-import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "snippet_image",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_image", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ id: "s_image", name: "Image" }, { ignoreLoading: true }),
         {
             content: "Verify if the media dialog opens",
@@ -44,5 +42,5 @@ registerWebsitePreviewTour(
             content: "Check that the image and the image placeholder have been removed",
             trigger: ":iframe footer:not(:has(.s_image > svg)):not(:has(img.o_we_custom_image))",
         },
-    ]
-);
+    ],
+});

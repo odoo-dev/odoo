@@ -1,11 +1,8 @@
-import {
-    insertSnippet,
-    registerWebsitePreviewTour,
-    unfoldOptionsGroup,
-} from "@website/js/tours/tour_utils";
+import { insertSnippet, unfoldOptionsGroup, waitForEditMode } from "@website/js/tours/tour_utils";
 
 import { FileSelectorControlPanel } from "@html_editor/main/media/media_dialog/file_selector";
 import { patch } from "@web/core/utils/patch";
+import { registry } from "@web/core/registry";
 
 let patchWithError = false;
 const patchMediaDialog = () =>
@@ -82,12 +79,9 @@ const setupSteps = function () {
 const formatErrorMsg =
     "format is not supported. Try with: .gif, .jpe, .jpeg, .jpg, .png, .svg, .webp";
 
-registerWebsitePreviewTour(
-    "test_image_upload_progress",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("test_image_upload_progress", {
+    steps: () => [
+        waitForEditMode,
         ...setupSteps(),
         // 1. Check multi image upload
         {
@@ -223,15 +217,12 @@ registerWebsitePreviewTour(
                 unpatchMediaDialog();
             },
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "test_image_upload_progress_unsplash",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("test_image_upload_progress_unsplash", {
+    steps: () => [
+        waitForEditMode,
         ...setupSteps(),
         // 1. Check multi image upload
         {
@@ -272,5 +263,5 @@ registerWebsitePreviewTour(
                 unpatchMediaDialog();
             },
         },
-    ]
-);
+    ],
+});

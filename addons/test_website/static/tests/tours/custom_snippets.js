@@ -1,4 +1,5 @@
-import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
 /**
  * The purpose of this tour is to check the custom snippets flow:
@@ -19,12 +20,9 @@ import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tou
  * -> ensure it was deleted
  */
 
-registerWebsitePreviewTour(
-    "test_custom_snippet",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("test_custom_snippet", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_banner",
             name: "Banner",
@@ -105,5 +103,5 @@ registerWebsitePreviewTour(
             content: "Ensure custom snippet disappeared",
             trigger: ":iframe .o_add_snippets_preview:not(:has(section[data-name='Bruce Banner']))",
         },
-    ]
-);
+    ],
+});

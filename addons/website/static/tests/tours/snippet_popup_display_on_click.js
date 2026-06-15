@@ -3,20 +3,18 @@ import {
     clickOnElement,
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
     openLinkPopup,
     unfoldOptionsGroup,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 import { browser } from "@web/core/browser/browser";
+import { registry } from "@web/core/registry";
 
 const oldWriteText = browser.navigator.clipboard.writeText;
 
-registerWebsitePreviewTour(
-    "snippet_popup_display_on_click",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_popup_display_on_click", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ id: "s_text_image", name: "Image - Text", groupName: "Content" }),
         ...insertSnippet({ id: "s_popup", name: "Popup", groupName: "Content" }),
         {
@@ -118,5 +116,5 @@ registerWebsitePreviewTour(
             content: "Verify that the popup opens when the homepage page loads.",
             trigger: ":iframe .s_popup .modal[id='Win-%2420'].show",
         },
-    ]
-);
+    ],
+});

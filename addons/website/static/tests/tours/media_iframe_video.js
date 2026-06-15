@@ -1,11 +1,9 @@
-import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "website_media_iframe_video",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_media_iframe_video", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_image",
             name: "Text - Image",
@@ -113,5 +111,5 @@ registerWebsitePreviewTour(
                 }
             },
         },
-    ]
-);
+    ],
+});

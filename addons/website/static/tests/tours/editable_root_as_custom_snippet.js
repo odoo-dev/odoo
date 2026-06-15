@@ -1,19 +1,17 @@
+import { registry } from "@web/core/registry";
 import {
     changeOption,
     clickOnEditAndWaitEditMode,
     clickOnSave,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
     goBackToBlocks,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "editable_root_as_custom_snippet",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("editable_root_as_custom_snippet", {
+    steps: () => [
+        waitForEditMode,
         ...clickOnSnippet(
             ".s_title.o_savable.custom[data-oe-model][data-oe-id][data-oe-field][data-oe-xpath]"
         ),
@@ -40,5 +38,5 @@ registerWebsitePreviewTour(
             trigger:
                 ":iframe #wrap .s_title.custom:not([data-oe-model]):not([data-oe-id]):not([data-oe-field]):not([data-oe-xpath]):not(.o_savable)",
         },
-    ]
-);
+    ],
+});

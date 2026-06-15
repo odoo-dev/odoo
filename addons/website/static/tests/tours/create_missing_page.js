@@ -1,16 +1,14 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnSnippet,
-    registerWebsitePreviewTour,
     changeOption,
     clickOnSave,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "create_missing_page",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("create_missing_page", {
+    steps: () => [
+        waitForEditMode,
         ...clickOnSnippet({ id: "o_header_standard", name: "Header" }),
         changeOption("Header", "[aria-label='Open menu editor']"),
         {
@@ -195,5 +193,5 @@ registerWebsitePreviewTour(
             content: "Wait to land on '/sea-hotel' page",
             trigger: ':iframe a[href="/sea-hotel"].nav-link.active',
         },
-    ]
-);
+    ],
+});

@@ -6,41 +6,41 @@ import {
     clickOnSave,
     getClientActionUrl,
     insertSnippet,
-    registerWebsitePreviewTour,
     testSwitchWebsite,
 } from "@website/js/tours/tour_utils";
 import { stepUtils } from "@web_tour/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour("snippet_translation", {}, () => [
-    stepUtils.goToUrl(getClientActionUrl()),
-    {
-        content: "Wait for website preview and check language",
-        trigger: ":iframe html:has(body:contains(welcome to your)):has(.o_top_fixed_element)",
-        run: () => {
-            if (localization.code !== "fu_GB") {
-                console.error("the user language is not properly set");
-            } else {
-                translatedTermsGlobal["Save"] = "Save in fu_GB";
-            }
+registry.category("web_tour.tours").add("snippet_translation", {
+    steps: () => [
+        stepUtils.goToUrl(getClientActionUrl()),
+        {
+            content: "Wait for website preview and check language",
+            trigger: ":iframe html:has(body:contains(welcome to your)):has(.o_top_fixed_element)",
+            run: () => {
+                if (localization.code !== "fu_GB") {
+                    console.error("the user language is not properly set");
+                } else {
+                    translatedTermsGlobal["Save"] = "Save in fu_GB";
+                }
+            },
         },
-    },
-    ...clickOnEditAndWaitEditMode(),
-    ...insertSnippet({ id: "s_cover", name: "Cover", groupName: "Intro" }),
-    {
-        content: "Check that contact us contain Parseltongue",
-        trigger: ':iframe .s_cover .btn-outline-secondary:contains("Contact us in Parseltongue")',
-    },
-    {
-        content: "Check that the save button contains 'in fu_GB'",
-        trigger: '.btn[data-action="save"]:contains("Save in fu_GB")',
-    },
-]);
-registerWebsitePreviewTour(
-    "snippet_translation_changing_lang",
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-    },
-    () => [
+        ...clickOnEditAndWaitEditMode(),
+        ...insertSnippet({ id: "s_cover", name: "Cover", groupName: "Intro" }),
+        {
+            content: "Check that contact us contain Parseltongue",
+            trigger:
+                ':iframe .s_cover .btn-outline-secondary:contains("Contact us in Parseltongue")',
+        },
+        {
+            content: "Check that the save button contains 'in fu_GB'",
+            trigger: '.btn[data-action="save"]:contains("Save in fu_GB")',
+        },
+    ],
+});
+registry.category("web_tour.tours").add("snippet_translation_changing_lang", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
+    steps: () => [
         stepUtils.goToUrl(getClientActionUrl()),
         stepUtils.waitIframeIsReady(),
         {
@@ -94,42 +94,48 @@ registerWebsitePreviewTour(
             trigger:
                 ':iframe .s_cover .btn-outline-secondary:contains("Contact us in Parseltongue")',
         },
-    ]
-);
-registerWebsitePreviewTour("snippet_translation_switching_website", {}, () => [
-    stepUtils.goToUrl(getClientActionUrl()),
-    ...clickOnEditAndWaitEditModeInTranslatedPage(),
-    ...insertSnippet({ id: "s_cover", name: "Cover", groupName: "Intro" }),
-    {
-        content: "Check that contact us contain Parseltongue",
-        trigger: ":iframe .s_cover .btn-outline-secondary:contains('Contact us in Parseltongue')",
-    },
-    ...clickOnSave(),
-    ...testSwitchWebsite("website fu_GB"),
-    ...clickOnEditAndWaitEditMode(),
-    ...insertSnippet({ id: "s_cover", name: "Cover", groupName: "Intro" }),
-    {
-        content: "Check that contact us contain Fake User Lang",
-        trigger: ":iframe .s_cover .btn-outline-secondary:contains('Fake User Lang')",
-    },
-]);
-registerWebsitePreviewTour("snippet_dialog_rtl", {}, () => [
-    stepUtils.goToUrl(getClientActionUrl()),
-    ...clickOnEditAndWaitEditMode(),
-    {
-        trigger: ".o_builder_sidebar_open",
-    },
-    {
-        content: "Select a category snippet to show the snippet dialog",
-        trigger: `.o_block_tab:not(.o_we_ongoing_insertion) #snippet_groups .o_snippet[name="Intro"].o_draggable .o_snippet_thumbnail_area`,
-        run: "click",
-    },
-    {
-        content: "Check that the snippets preview is in rtl",
-        trigger: ":iframe .o_snippets_preview_row[dir=rtl]",
-    },
-    {
-        content: "Check that web.assets_frontend CSS bundle is in rtl",
-        trigger: ":iframe link[type='text/css'][href*='/web.assets_frontend.rtl']:not(:visible)",
-    },
-]);
+    ],
+});
+registry.category("web_tour.tours").add("snippet_translation_switching_website", {
+    steps: () => [
+        stepUtils.goToUrl(getClientActionUrl()),
+        ...clickOnEditAndWaitEditModeInTranslatedPage(),
+        ...insertSnippet({ id: "s_cover", name: "Cover", groupName: "Intro" }),
+        {
+            content: "Check that contact us contain Parseltongue",
+            trigger:
+                ":iframe .s_cover .btn-outline-secondary:contains('Contact us in Parseltongue')",
+        },
+        ...clickOnSave(),
+        ...testSwitchWebsite("website fu_GB"),
+        ...clickOnEditAndWaitEditMode(),
+        ...insertSnippet({ id: "s_cover", name: "Cover", groupName: "Intro" }),
+        {
+            content: "Check that contact us contain Fake User Lang",
+            trigger: ":iframe .s_cover .btn-outline-secondary:contains('Fake User Lang')",
+        },
+    ],
+});
+registry.category("web_tour.tours").add("snippet_dialog_rtl", {
+    steps: () => [
+        stepUtils.goToUrl(getClientActionUrl()),
+        ...clickOnEditAndWaitEditMode(),
+        {
+            trigger: ".o_builder_sidebar_open",
+        },
+        {
+            content: "Select a category snippet to show the snippet dialog",
+            trigger: `.o_block_tab:not(.o_we_ongoing_insertion) #snippet_groups .o_snippet[name="Intro"].o_draggable .o_snippet_thumbnail_area`,
+            run: "click",
+        },
+        {
+            content: "Check that the snippets preview is in rtl",
+            trigger: ":iframe .o_snippets_preview_row[dir=rtl]",
+        },
+        {
+            content: "Check that web.assets_frontend CSS bundle is in rtl",
+            trigger:
+                ":iframe link[type='text/css'][href*='/web.assets_frontend.rtl']:not(:visible)",
+        },
+    ],
+});

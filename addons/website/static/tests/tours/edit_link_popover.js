@@ -1,11 +1,12 @@
 import {
     insertSnippet,
-    registerWebsitePreviewTour,
     openLinkPopup,
     clickToolbarButton,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 import { browser } from "@web/core/browser/browser";
 import { patch } from "@web/core/utils/patch";
+import { registry } from "@web/core/registry";
 
 const FIRST_PARAGRAPH =
     ":iframe #wrap .s_text_image p:not([data-selection-placeholder]):nth-child(2)";
@@ -29,13 +30,10 @@ const editLinkAndApply = (url) => [
     },
 ];
 
-registerWebsitePreviewTour(
-    "edit_link_popover",
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("edit_link_popover", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
+    steps: () => [
+        waitForEditMode,
         // 1. Test links in page content (web_editor)
         ...insertSnippet({
             id: "s_text_image",
@@ -212,5 +210,5 @@ registerWebsitePreviewTour(
             content: "Ensure that link is opened correctly in edit mode",
             trigger: ".new_backend_window_opened",
         },
-    ]
-);
+    ],
+});

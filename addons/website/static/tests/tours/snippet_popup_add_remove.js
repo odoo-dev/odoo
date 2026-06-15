@@ -1,16 +1,14 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "snippet_popup_add_remove",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_popup_add_remove", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             name: "Popup",
             id: "s_popup",
@@ -85,5 +83,5 @@ registerWebsitePreviewTour(
             content: "The invisible elements panel should also be removed.",
             trigger: ".o-snippets-menu:not(:has(.o_we_invisible_el_panel)",
         },
-    ]
-);
+    ],
+});

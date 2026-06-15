@@ -1,17 +1,15 @@
+import { registry } from "@web/core/registry";
 import {
     changeBackgroundColor,
     changeOption,
     clickOnEditAndWaitEditMode,
     clickOnSave,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "website_sale.shop_editor",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_sale.shop_editor", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Click on pricelist dropdown",
             trigger: ":iframe div.o_pricelist_dropdown a[data-bs-toggle=dropdown]",
@@ -40,15 +38,12 @@ registerWebsitePreviewTour(
                 ":iframe div.o_pricelist_dropdown a[data-bs-toggle=dropdown][aria-expanded=true]",
             content: "Check pricelist dropdown opened",
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_sale.shop_editor_set_product_ribbon",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_sale.shop_editor_set_product_ribbon", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Click on first product",
             trigger: ":iframe .oe_product:first",
@@ -69,15 +64,12 @@ registerWebsitePreviewTour(
             content: "Check that the ribbon was properly saved",
             trigger: ':iframe .oe_product:first .o_ribbons:contains("Sale")',
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_sale.shop_editor_create_and_set_product_ribbon",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_sale.shop_editor_create_and_set_product_ribbon", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Click on first product",
             trigger: ":iframe .oe_product:first",
@@ -114,15 +106,12 @@ registerWebsitePreviewTour(
             trigger:
                 ":iframe .oe_product:first .o_ribbons:contains('New Ribbon')[style*='#FF9C00'][style*='purple']",
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "shop_editor_no_alternative_products_visibility_tour",
-    {
-        edition: false,
-    },
-    () => [
+registry.category("web_tour.tours").add("shop_editor_no_alternative_products_visibility_tour", {
+    edition: false,
+    steps: () => [
         {
             content: "Select the product with alternative products",
             trigger: ':iframe .oe_product_cart[aria-label="product_with_alternative"] a',
@@ -160,5 +149,5 @@ registerWebsitePreviewTour(
             content: "Ensure alternative products section is hidden",
             trigger: ":iframe .s_dynamic_snippet_products:not(:visible)",
         },
-    ]
-);
+    ],
+});

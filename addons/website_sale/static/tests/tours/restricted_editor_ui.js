@@ -1,7 +1,8 @@
 import { stepUtils } from "@web_tour/tour_utils";
-import { registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour("website_sale.restricted_editor_ui", {}, () => [
+registry.category("web_tour.tours").add("website_sale.restricted_editor_ui", {
+    steps: () => [
     {
         content: "Open the site menu to check what is inside",
         trigger: '[data-menu-xmlid="website.menu_site"]',
@@ -47,4 +48,5 @@ registerWebsitePreviewTour("website_sale.restricted_editor_ui", {}, () => [
         content: "Check that you landed on a form view and that the record was unpublished",
         trigger: '.o-form-buttonbox [name="is_published"] .fa-globe.text-danger',
     },
-]);
+],
+});

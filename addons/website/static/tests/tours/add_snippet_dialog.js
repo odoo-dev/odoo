@@ -1,11 +1,9 @@
-import { registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "website_add_snippet_dialog",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_add_snippet_dialog", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Click on any snippet to open the 'Insert Snippet' dialog.",
             trigger: ".o_snippets_container_body div.o_snippet button",
@@ -26,5 +24,5 @@ registerWebsitePreviewTour(
             trigger:
                 "p:contains('Oops! No snippets found.'), p:contains('Take a look at the search bar, there might be a small typo!')",
         },
-    ]
-);
+    ],
+});

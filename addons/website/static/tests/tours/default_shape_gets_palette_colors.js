@@ -1,16 +1,14 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
     changeBackgroundShape,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "default_shape_gets_palette_colors",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("default_shape_gets_palette_colors", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_image",
             name: "Text - Image",
@@ -35,5 +33,5 @@ registerWebsitePreviewTour(
                 }
             },
         },
-    ]
-);
+    ],
+});

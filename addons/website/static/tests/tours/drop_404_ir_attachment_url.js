@@ -1,16 +1,10 @@
-import {
-    insertSnippet,
-    registerWebsitePreviewTour,
-    changeImageShape,
-} from "@website/js/tours/tour_utils";
+import { insertSnippet, changeImageShape, waitForEditMode } from "@website/js/tours/tour_utils";
 import { onceAllImagesLoaded } from "@website/utils/images";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "drop_404_ir_attachment_url",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("drop_404_ir_attachment_url", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_404_snippet",
             name: "404 Snippet",
@@ -50,5 +44,5 @@ registerWebsitePreviewTour(
                 }
             },
         },
-    ]
-);
+    ],
+});

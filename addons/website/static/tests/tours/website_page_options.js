@@ -1,17 +1,15 @@
+import { registry } from "@web/core/registry";
 import {
     changeOptionInPopover,
     clickOnEditAndWaitEditMode,
     clickOnSave,
     clickOnSnippet,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "website_page_options",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_page_options", {
+    steps: () => [
+        waitForEditMode,
         ...clickOnSnippet({ id: "o_header_standard", name: "Header" }),
         ...changeOptionInPopover("Header", "Header Position", "Over the content"),
         // It's important to test saving right after changing that option only as
@@ -107,8 +105,8 @@ registerWebsitePreviewTour(
             content: "Check that the footer is hidden",
             trigger: ":iframe #wrapwrap:has(.o_footer.d-none.o_snippet_invisible)",
         },
-    ]
-);
+    ],
+});
 
 const breadcrumb = { id: "o_page_breadcrumb", name: "Breadcrumb" };
 let selectedGradient = null;
@@ -134,12 +132,9 @@ function openBackgroundColorPicker(type, selector) {
     ];
 }
 
-registerWebsitePreviewTour(
-    "website_page_breadcrumb",
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-    },
-    () => [
+registry.category("web_tour.tours").add("website_page_breadcrumb", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
+    steps: () => [
         {
             content: "Open the Site Menu",
             trigger: "button[data-menu-xmlid='website.menu_site']",
@@ -279,5 +274,5 @@ registerWebsitePreviewTour(
             content: "Verify that the breadcrumb is hidden",
             trigger: ":iframe main:has(div.o_page_breadcrumb.d-none.o_snippet_invisible)",
         },
-    ]
-);
+    ],
+});

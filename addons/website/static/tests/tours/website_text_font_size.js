@@ -1,10 +1,11 @@
 import {
     insertSnippet,
     goToTheme,
-    registerWebsitePreviewTour,
     clickToolbarButton,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 import { FONT_SIZE_CLASSES } from "@html_editor/utils/formatting";
+import { registry } from "@web/core/registry";
 
 const classNameInfo = new Map();
 classNameInfo.set("display-1-fs", {
@@ -209,17 +210,14 @@ function getAllFontSizesTestSteps() {
     return steps;
 }
 
-registerWebsitePreviewTour(
-    "website_text_font_size",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_text_font_size", {
+    steps: () => [
+        waitForEditMode,
         ...getAllFontSizesTestSteps(),
         // The last step has to be a check.
         {
             content: "Verify that the text block has been deleted",
             trigger: ":iframe #wrap:not(:has(.s_text_block))",
         },
-    ]
-);
+    ],
+});

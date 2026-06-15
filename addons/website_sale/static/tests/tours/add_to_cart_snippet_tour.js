@@ -4,10 +4,11 @@ import {
     clickOnSave,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
     changeOptionInPopover,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 import { assertCartContains } from '@website_sale/js/tours/tour_utils';
+import { registry } from "@web/core/registry";
 
 
 function editAddToCartSnippet() {
@@ -31,13 +32,10 @@ function checkButtonIsDisabled() {
     };
 }
 
-registerWebsitePreviewTour(
-    'website_sale.add_to_cart_snippet',
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add('website_sale.add_to_cart_snippet', {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ name: 'Add to Cart Button' }),
 
         // Basic product with no variants
@@ -110,4 +108,4 @@ registerWebsitePreviewTour(
         ...assertCartContains({ productName: 'Product Yes Variant 1', combinationName: 'Red', backend: true }),
         ...assertCartContains({ productName: 'Product Yes Variant 2', combinationName: 'Pink', backend: true }),
     ],
-);
+});

@@ -1,12 +1,10 @@
-import { clickOnSave, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { clickOnSave, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
 // As admin, add a YouTube video iframe in a `sanitize_overridable` HTML field.
-registerWebsitePreviewTour(
-    "website_designer_iframe_video",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_designer_iframe_video", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "As administrator, add a video block to the description field",
             trigger: `.o_block_tab:not(.o_we_ongoing_insertion) #snippet_content .o_snippet[name="Video"].o_draggable .o_snippet_thumbnail`,
@@ -27,17 +25,14 @@ registerWebsitePreviewTour(
             content: "Check that the video was correctly saved",
             trigger: ":iframe .media_iframe_video[data-embed-url*='G8b4UZIcTfg']",
         },
-    ]
-);
+    ],
+});
 
 // Check that a restricted editor can edit the field content (even with
 // a video iframe).
-registerWebsitePreviewTour(
-    "website_restricted_editor_iframe_video",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_restricted_editor_iframe_video", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Check that the video iframe was correctly restored after saving the changes",
             trigger:
@@ -54,5 +49,5 @@ registerWebsitePreviewTour(
             trigger:
                 ":iframe .o_test_website_description:contains('I can still edit the HTML field')",
         },
-    ]
-);
+    ],
+});

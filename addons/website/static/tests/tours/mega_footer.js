@@ -1,18 +1,16 @@
+import { registry } from "@web/core/registry";
 import {
     changeOptionInPopover,
     clickOnEditAndWaitEditMode,
     clickOnSave,
     clickOnSnippet,
     clickToolbarButton,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "mega_footer",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("mega_footer", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Mark the current footer (to tell when it is gone)",
             trigger: ":iframe footer",
@@ -39,5 +37,5 @@ registerWebsitePreviewTour(
             content: "The company name at the bottom of the footer has the new content",
             trigger: ":iframe .o_footer_copyright span strong",
         },
-    ]
-);
+    ],
+});

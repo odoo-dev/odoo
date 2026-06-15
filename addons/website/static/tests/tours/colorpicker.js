@@ -1,8 +1,9 @@
+import { registry } from "@web/core/registry";
 import {
     insertSnippet,
     clickOnSave,
     clickOnEditAndWaitEditMode,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 function selectColorpickerSwitchPanel(type) {
@@ -40,12 +41,9 @@ function checkBackgroundColorWithHEX(hexCode) {
     ];
 }
 
-registerWebsitePreviewTour(
-    "website_background_colorpicker",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_background_colorpicker", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_block",
             name: "Text",
@@ -80,5 +78,5 @@ registerWebsitePreviewTour(
         ...clickOnEditAndWaitEditMode(),
         ...selectColorpickerSwitchPanel("Custom"),
         ...checkBackgroundColorWithHEX("#000000"),
-    ]
-);
+    ],
+});

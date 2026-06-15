@@ -2,7 +2,6 @@ import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
-    registerWebsitePreviewTour,
 } from "@website/js/tours/tour_utils";
 import { stepUtils } from "@web_tour/tour_utils";
 
@@ -72,7 +71,8 @@ registry.category("web_tour.tours").add('website_hr_recruitment_tour', {
     }),
 ]});
 
-registerWebsitePreviewTour('website_hr_recruitment_tour_edit_form', {}, () => [
+registry.category("web_tour.tours").add('website_hr_recruitment_tour_edit_form', {
+    steps: () => [
     stepUtils.waitIframeIsReady(),
 {
     content: 'Go to the Guru job page',
@@ -157,4 +157,5 @@ registerWebsitePreviewTour('website_hr_recruitment_tour_edit_form', {}, () => [
         }
     },
 },
-]);
+],
+});

@@ -1,16 +1,14 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
-    registerWebsitePreviewTour,
     changeOptionInPopover,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "test_form_conditional_visibility_record_field",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("test_form_conditional_visibility_record_field", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Select name field",
             trigger: ":iframe .s_website_form .s_website_form_input[name=name]",
@@ -54,5 +52,5 @@ registerWebsitePreviewTour(
             content: "Name field is shown",
             trigger: ":iframe .s_website_form:has(.s_website_form_field_hidden_if:not(.d-none))",
         },
-    ]
-);
+    ],
+});

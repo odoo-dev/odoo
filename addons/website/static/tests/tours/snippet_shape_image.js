@@ -1,11 +1,9 @@
-import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "snippet_shape_image",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_shape_image", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ id: "s_shape_image", name: "Shape image", groupName: "Content" }),
         {
             content: "Click on the image",
@@ -21,5 +19,5 @@ registerWebsitePreviewTour(
             content: "Very if shape is removed",
             trigger: ":iframe .s_shape_image img:not([data-shape])",
         },
-    ]
-);
+    ],
+});

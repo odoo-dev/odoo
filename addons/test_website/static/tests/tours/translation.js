@@ -2,10 +2,10 @@ import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
 } from "@website/js/tours/tour_utils";
 import { stepUtils } from "@web_tour/tour_utils";
 import { translationIsReady } from "@web/core/l10n/translation";
+import { registry } from "@web/core/registry";
 
 function createNewPage() {
     return [
@@ -189,23 +189,17 @@ const ensureEnSite = {
     trigger: ":iframe .o_main_nav:contains(Home)",
 };
 
-registerWebsitePreviewTour("translation_single_language_fr_user_fr_site", {}, () => [
-    ensureFrUser,
-    ensureFrSite,
-    ...singleLanguage(),
-]);
+registry.category("web_tour.tours").add("translation_single_language_fr_user_fr_site", {
+    steps: () => [ensureFrUser, ensureFrSite, ...singleLanguage()],
+});
 
-registerWebsitePreviewTour("translation_single_language_en_user_fr_site", {}, () => [
-    ensureEnUser,
-    ensureFrSite,
-    ...singleLanguage(),
-]);
+registry.category("web_tour.tours").add("translation_single_language_en_user_fr_site", {
+    steps: () => [ensureEnUser, ensureFrSite, ...singleLanguage()],
+});
 
-registerWebsitePreviewTour("translation_single_language_fr_user_en_site", {}, () => [
-    ensureFrUser,
-    ensureEnSite,
-    ...singleLanguage(),
-]);
+registry.category("web_tour.tours").add("translation_single_language_fr_user_en_site", {
+    steps: () => [ensureFrUser, ensureEnSite, ...singleLanguage()],
+});
 
 function switchLanguage(lang, timeout = 50000) {
     return [
@@ -449,26 +443,18 @@ function multiLanguage(mainLanguage, secondLanguage) {
     ];
 }
 
-registerWebsitePreviewTour("translation_multi_language_fr_user_fr_en_site", {}, () => [
-    ensureFrUser,
-    ensureFrSite,
-    ...multiLanguage("fr", "en"),
-]);
+registry.category("web_tour.tours").add("translation_multi_language_fr_user_fr_en_site", {
+    steps: () => [ensureFrUser, ensureFrSite, ...multiLanguage("fr", "en")],
+});
 
-registerWebsitePreviewTour("translation_multi_language_fr_user_en_fr_site", {}, () => [
-    ensureFrUser,
-    ensureEnSite,
-    ...multiLanguage("en", "fr"),
-]);
+registry.category("web_tour.tours").add("translation_multi_language_fr_user_en_fr_site", {
+    steps: () => [ensureFrUser, ensureEnSite, ...multiLanguage("en", "fr")],
+});
 
-registerWebsitePreviewTour("translation_multi_language_en_user_fr_en_site", {}, () => [
-    ensureEnUser,
-    ensureFrSite,
-    ...multiLanguage("fr", "en"),
-]);
+registry.category("web_tour.tours").add("translation_multi_language_en_user_fr_en_site", {
+    steps: () => [ensureEnUser, ensureFrSite, ...multiLanguage("fr", "en")],
+});
 
-registerWebsitePreviewTour("translation_multi_language_en_user_en_fr_site", {}, () => [
-    ensureEnUser,
-    ensureEnSite,
-    ...multiLanguage("en", "fr"),
-]);
+registry.category("web_tour.tours").add("translation_multi_language_en_user_en_fr_site", {
+    steps: () => [ensureEnUser, ensureEnSite, ...multiLanguage("en", "fr")],
+});

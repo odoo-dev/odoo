@@ -1,11 +1,9 @@
-import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "website_popup_visibility_option",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_popup_visibility_option", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_popup",
             name: "Popup",
@@ -29,5 +27,5 @@ registerWebsitePreviewTour(
             content: "Check that the banner is invisible.",
             trigger: "ul .o_we_invisible_entry i.fa-eye-slash",
         },
-    ]
-);
+    ],
+});

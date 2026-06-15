@@ -1,10 +1,11 @@
 import { areCssValuesEqual } from "@html_builder/utils/utils_css";
+import { registry } from "@web/core/registry";
 import {
     changeOptionInPopover,
     clickOnEditAndWaitEditMode,
     clickOnSave,
     goToTheme,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 const TARGET_FONT_SIZE = 20; // The max to not be impacted by the responsive font size system
@@ -45,12 +46,9 @@ const checkBodyColor = function () {
     }
 };
 
-registerWebsitePreviewTour(
-    "website_style_edition",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_style_edition", {
+    steps: () => [
+        waitForEditMode,
         ...goToTheme(),
         {
             content: "Change font size",
@@ -221,5 +219,5 @@ registerWebsitePreviewTour(
             content: "Image controls should be hidden",
             trigger: ".o_theme_tab :not(:has(button[data-action-id='replaceBodyBgImage'])",
         },
-    ]
-);
+    ],
+});

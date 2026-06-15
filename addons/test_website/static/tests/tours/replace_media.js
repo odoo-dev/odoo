@@ -1,10 +1,7 @@
 import { patch } from "@web/core/utils/patch";
 import { VideoSelector } from "@html_editor/main/media/media_dialog/video_selector";
-import {
-    insertSnippet,
-    registerWebsitePreviewTour,
-    changeImageShape,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { insertSnippet, changeImageShape, waitForEditMode } from "@website/js/tours/tour_utils";
 
 const videoId = "Dpq87YCHmJc";
 const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
@@ -13,12 +10,9 @@ const embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1&rel=0`;
 /**
  * The purpose of this tour is to check the media replacement flow.
  */
-registerWebsitePreviewTour(
-    "test_replace_media",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("test_replace_media", {
+    steps: () => [
+        waitForEditMode,
         {
             trigger: "body",
             run: function () {
@@ -177,5 +171,5 @@ registerWebsitePreviewTour(
             content: "ensure icon block is still displayed",
             trigger: ".o_customize_tab [data-container-title='Icon']",
         },
-    ]
-);
+    ],
+});

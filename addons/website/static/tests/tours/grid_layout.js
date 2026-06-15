@@ -1,9 +1,10 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnSave,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
     goBackToBlocks,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 const snippet = {
@@ -12,12 +13,9 @@ const snippet = {
     groupName: "Content",
 };
 
-registerWebsitePreviewTour(
-    "website_replace_grid_image",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_replace_grid_image", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet(snippet),
         {
             // TODO: should check if o_loading_screen is not present (TO check with PIPU)
@@ -37,8 +35,7 @@ registerWebsitePreviewTour(
         },
         {
             content: "Pick new image",
-            trigger:
-                '.o_select_media_dialog .o_button_area[aria-label="landscape_md_1.jpg"]',
+            trigger: '.o_select_media_dialog .o_button_area[aria-label="landscape_md_1.jpg"]',
             run: "click",
         },
         goBackToBlocks(),
@@ -62,10 +59,9 @@ registerWebsitePreviewTour(
         },
         {
             content: "Pick new image",
-            trigger:
-                '.o_select_media_dialog .o_button_area[aria-label="landscape_md_1.jpg"]',
+            trigger: '.o_select_media_dialog .o_button_area[aria-label="landscape_md_1.jpg"]',
             run: "click",
         },
         ...clickOnSave(),
-    ]
-);
+    ],
+});

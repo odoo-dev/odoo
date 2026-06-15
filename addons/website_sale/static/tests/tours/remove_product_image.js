@@ -1,8 +1,8 @@
 import { stepUtils } from "@web_tour/tour_utils";
+import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
-    registerWebsitePreviewTour,
 } from "@website/js/tours/tour_utils";
 
 const clickOnImgAndWaitForLoad = [
@@ -30,7 +30,8 @@ const enterEditModeOfTestProduct = () => [
     ...clickOnEditAndWaitEditMode(),
 ];
 
-registerWebsitePreviewTour("website_sale.add_and_remove_main_product_image_no_variant", {}, () => [
+registry.category("web_tour.tours").add("website_sale.add_and_remove_main_product_image_no_variant", {
+    steps: () => [
     ...enterEditModeOfTestProduct(),
     {
         content: "Double click on the product image",
@@ -62,8 +63,10 @@ registerWebsitePreviewTour("website_sale.add_and_remove_main_product_image_no_va
         content: "Check that the snippet editor is not visible",
         trigger: ".o_customize_tab:not(:has([data-container-title='Image']))",
     },
-]);
-registerWebsitePreviewTour("website_sale.remove_main_product_image_with_variant", {}, () => [
+],
+});
+registry.category("web_tour.tours").add("website_sale.remove_main_product_image_with_variant", {
+    steps: () => [
     ...enterEditModeOfTestProduct(),
     ...clickOnImgAndWaitForLoad,
     ...clickOnSave(),
@@ -84,4 +87,5 @@ registerWebsitePreviewTour("website_sale.remove_main_product_image_with_variant"
         content: "Check that the snippet editor is not visible",
         trigger: ".o_customize_tab:not(:has([data-container-title='Image']))",
     },
-]);
+],
+});

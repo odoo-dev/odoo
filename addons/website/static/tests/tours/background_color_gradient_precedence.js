@@ -1,15 +1,13 @@
+import { registry } from "@web/core/registry";
 import {
     changeBackgroundColor,
     clickOnSnippet,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "background_color_gradient_precedence",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("background_color_gradient_precedence", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Verify that the correct gradient has been applied",
             trigger: ":iframe .o_header_standard nav",
@@ -48,5 +46,5 @@ registerWebsitePreviewTour(
                 }
             },
         },
-    ]
-);
+    ],
+});

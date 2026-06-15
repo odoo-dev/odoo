@@ -3,37 +3,30 @@ import {
     clickOnSave,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
-} from '@website/js/tours/tour_utils';
+    waitForEditMode,
+} from "@website/js/tours/tour_utils";
 import { goToCart } from '@website_sale/js/tours/tour_utils';
+import { registry } from "@web/core/registry";
 
 const productsSnippet = { id: "s_dynamic_snippet_products", name: "Products", groupName: "Catalog" };
 
-registerWebsitePreviewTour(
-    'website_sale.snippet_products',
-    {
-        edition: true,
-    },
-    () => {
-        return [
-            ...insertSnippet(productsSnippet),
-            ...clickOnSnippet(productsSnippet),
-            ...clickOnSave(),
-            {
-                trigger: ":iframe .s_dynamic_snippet_products .o_carousel_product_card button[name='add_to_cart']:not(:visible)",
-                run: 'click',
-            },
-            goToCart({ backend: true, expectUnloadPage: false }),
-        ]
-    }
-);
+registry.category("web_tour.tours").add('website_sale.snippet_products', {
+    steps: () => [
+        waitForEditMode,
+        ...insertSnippet(productsSnippet),
+        ...clickOnSnippet(productsSnippet),
+        ...clickOnSave(),
+        {
+            trigger: ":iframe .s_dynamic_snippet_products .o_carousel_product_card button[name='add_to_cart']:not(:visible)",
+            run: 'click',
+        },
+        goToCart({ backend: true, expectUnloadPage: false }),
+    ],
+});
 
-registerWebsitePreviewTour(
-    'website_sale.products_snippet_recently_viewed',
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add('website_sale.products_snippet_recently_viewed', {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet(productsSnippet),
         ...clickOnSnippet(productsSnippet),
         ...changeOptionInPopover("Products", "Filter", "Recently Viewed"),
@@ -51,5 +44,5 @@ registerWebsitePreviewTour(
             trigger: ':iframe .s_dynamic_snippet_products .o_carousel_product_card .js_remove',
             run: 'click',
         },
-    ]
-);
+    ],
+});

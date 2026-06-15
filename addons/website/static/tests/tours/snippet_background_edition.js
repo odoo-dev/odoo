@@ -1,4 +1,5 @@
 import { backgroundImageCssToParts } from "@html_editor/utils/image";
+import { registry } from "@web/core/registry";
 import {
     changeBackgroundColor,
     changeOption,
@@ -6,7 +7,7 @@ import {
     clickOnSave,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 const snippets = [
@@ -121,13 +122,10 @@ function updateAndCheckCustomGradient({ updateStep, checkGradient }) {
     return steps;
 }
 
-registerWebsitePreviewTour(
-    "snippet_background_edition",
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_background_edition", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet(snippets[0]),
         ...clickOnSnippet(snippets[0]),
 
@@ -452,5 +450,5 @@ registerWebsitePreviewTour(
             content:
                 "All color classes and properties should have been removed and image should still be applied",
         },
-    ]
-);
+    ],
+});

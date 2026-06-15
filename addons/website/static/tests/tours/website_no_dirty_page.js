@@ -1,9 +1,10 @@
 import { browser } from "@web/core/browser/browser";
+import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 const makeSteps = (steps = []) => [
@@ -60,21 +61,14 @@ const makeSteps = (steps = []) => [
     },
 ];
 
-registerWebsitePreviewTour(
-    "website_no_action_no_dirty_page",
-    {
-        edition: true,
-    },
-    () => makeSteps()
-);
+registry.category("web_tour.tours").add("website_no_action_no_dirty_page", {
+    steps: () => [waitForEditMode, ...makeSteps()],
+});
 
-registerWebsitePreviewTour(
-    "website_no_dirty_page",
-    {
-        edition: true,
-    },
-    () =>
-        makeSteps([
+registry.category("web_tour.tours").add("website_no_dirty_page", {
+    steps: () => [
+        waitForEditMode,
+        ...makeSteps([
             {
                 // This has been known to mark the page as dirty because of the
                 // "drag the column on image move" feature.
@@ -111,15 +105,13 @@ registerWebsitePreviewTour(
                     return actions.click();
                 },
             },
-        ])
-);
+        ]),
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_no_dirty_lazy_image",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_no_dirty_lazy_image", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_image",
             name: "Text - Image",
@@ -162,5 +154,5 @@ registerWebsitePreviewTour(
             content: "Check previous step went through correctly about dirty flags",
             trigger: ":iframe #wrap.o_dirty_as_expected",
         },
-    ]
-);
+    ],
+});

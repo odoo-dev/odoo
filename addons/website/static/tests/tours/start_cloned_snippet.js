@@ -1,15 +1,8 @@
-import {
-    clickOnSnippet,
-    registerWebsitePreviewTour,
-    insertSnippet,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { clickOnSnippet, insertSnippet } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "website_start_cloned_snippet",
-    {
-        edition: true,
-    },
-    () => {
+registry.category("web_tour.tours").add("website_start_cloned_snippet", {
+    steps: () => {
         const countdownSnippet = {
             name: "Countdown",
             id: "s_countdown",
@@ -39,5 +32,5 @@ registerWebsitePreviewTour(
                 },
             },
         ];
-    }
-);
+    },
+});

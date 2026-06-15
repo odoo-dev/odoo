@@ -1,15 +1,9 @@
-import {
-    clickOnSave,
-    insertSnippet,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { clickOnSave, insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "snippet_version_1",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_version_1", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_test_snip",
             name: "Test snip",
@@ -52,5 +46,5 @@ registerWebsitePreviewTour(
             },
         },
         ...clickOnSave(),
-    ]
-);
+    ],
+});

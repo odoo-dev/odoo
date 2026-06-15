@@ -1,12 +1,10 @@
 import { stepUtils } from "@web_tour/tour_utils";
-import { clickOnSave, goToTheme, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { clickOnSave, goToTheme, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "hide_sidebar_header",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("hide_sidebar_header", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Click on the header",
             trigger: ":iframe #o_main_nav",
@@ -57,5 +55,5 @@ registerWebsitePreviewTour(
             },
         },
         ...clickOnSave(),
-    ]
-);
+    ],
+});

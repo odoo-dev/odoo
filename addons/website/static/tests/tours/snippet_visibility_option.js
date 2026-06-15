@@ -1,16 +1,14 @@
+import { registry } from "@web/core/registry";
 import {
     insertSnippet,
     clickOnSave,
     clickOnEditAndWaitEditMode,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "snippet_visibility_option",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_visibility_option", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_popup",
             name: "Popup",
@@ -108,5 +106,5 @@ registerWebsitePreviewTour(
         {
             trigger: "li li .o_we_invisible_entry i.fa-eye-slash",
         },
-    ]
-);
+    ],
+});

@@ -1,10 +1,10 @@
 import {
     insertSnippet,
-    registerWebsitePreviewTour,
     clickOnEditAndWaitEditMode,
     clickOnSave,
 } from "@website/js/tours/tour_utils";
 import { editorsWeakMap } from "@html_editor/../tests/tours/helpers/editor";
+import { registry } from "@web/core/registry";
 
 function websiteCreateEventTourSteps() {
     return [
@@ -112,7 +112,9 @@ function websiteEditEventTourSteps() {
     ];
 }
 
-registerWebsitePreviewTour("website_event_tour", {}, () => [
+registry.category("web_tour.tours").add("website_event_tour", {
+    steps: () => [
     ...websiteCreateEventTourSteps(),
     ...websiteEditEventTourSteps(),
-]);
+],
+});

@@ -1,4 +1,5 @@
-import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
 /**
  * The purpose of this tour is to check the link on image flow.
@@ -27,12 +28,9 @@ const selectImageSteps = [
     },
 ];
 
-registerWebsitePreviewTour(
-    "test_image_link",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("test_image_link", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_image",
             name: "Text - Image",
@@ -103,5 +101,5 @@ registerWebsitePreviewTour(
             content: "check popover content has no URL",
             trigger: ".o-we-linkpopover .o_we_href_input_link:value()",
         },
-    ]
-);
+    ],
+});

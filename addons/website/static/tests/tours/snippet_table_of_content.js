@@ -1,10 +1,11 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
     insertSnippet,
     goBackToBlocks,
-    registerWebsitePreviewTour,
     unfoldOptionsGroup,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 const scrollToHeading = function (position) {
@@ -23,12 +24,9 @@ const checkTOCNavBar = function (tocPosition, activeHeaderPosition) {
     };
 };
 
-registerWebsitePreviewTour(
-    "snippet_table_of_content",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_table_of_content", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ id: "s_table_of_content", name: "Table of Content", groupName: "Text" }),
         // Add a banner snippet at the end of the page to avoid an edge case
         // with the table of content: When the table of content is the last
@@ -126,5 +124,5 @@ registerWebsitePreviewTour(
             content: "The desktop TOC should not be visible on mobile",
             trigger: ":iframe .s_table_of_content.o_snippet_mobile_invisible:not(:visible)",
         },
-    ]
-);
+    ],
+});

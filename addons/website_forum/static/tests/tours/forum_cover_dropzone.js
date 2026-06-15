@@ -1,11 +1,9 @@
-import { registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "forum_cover_dropzone",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("forum_cover_dropzone", {
+    steps: () => [
+        waitForEditMode,
         // Add a snippet on click.
         {
             content: "Click on the Text snippet group.",
@@ -55,5 +53,5 @@ registerWebsitePreviewTour(
             trigger:
                 "p:contains('Oops! No snippets found.'), p:contains('Take a look at the search bar, there might be a small typo!')",
         },
-    ]
-);
+    ],
+});

@@ -1,16 +1,14 @@
+import { registry } from "@web/core/registry";
 import {
-    registerWebsitePreviewTour,
     insertSnippet,
     changeOption,
     clickOnSnippet,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "snippet_tabs",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_tabs", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_tabs",
             name: "Tabs",
@@ -31,5 +29,5 @@ registerWebsitePreviewTour(
             content: "Check there are 3 tab panes",
             trigger: ":iframe .s_tabs .s_tabs_content .tab-pane:count(3)",
         },
-    ]
-);
+    ],
+});

@@ -1,3 +1,4 @@
+import { registry } from "@web/core/registry";
 import {
     addMedia,
     changeOption,
@@ -5,19 +6,16 @@ import {
     clickOnSave,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
     changeOptionInPopover,
     clickOnEditAndWaitEditMode,
     assertCssVariable,
     unfoldOptionsGroup,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "snippet_image_gallery",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_image_gallery", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ id: "s_images_wall", name: "Images Wall", groupName: "Images" }),
         ...clickOnSave(),
         {
@@ -29,15 +27,12 @@ registerWebsitePreviewTour(
             content: "Check that the modal has opened properly",
             trigger: ":iframe .o_image_lightbox img",
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "snippet_image_gallery_remove",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_image_gallery_remove", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_image_gallery",
             name: "Image Gallery",
@@ -88,15 +83,12 @@ registerWebsitePreviewTour(
             content: "Check that the Image Gallery snippet has been removed",
             trigger: ":iframe #wrap:not(:has(.s_image_gallery))",
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "snippet_image_gallery_reorder",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_image_gallery_reorder", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_image_gallery",
             name: "Image Gallery",
@@ -170,15 +162,12 @@ registerWebsitePreviewTour(
             run: "click",
         },
         assertCssVariable("height", "400px", ":iframe .s_image_gallery"),
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "snippet_image_gallery_thumbnail_update",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_image_gallery_thumbnail_update", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_image_gallery",
             name: "Image Gallery",
@@ -250,5 +239,5 @@ registerWebsitePreviewTour(
             trigger:
                 ":iframe .s_image_gallery div.carousel-indicators button:nth-child(2) img[src*='data:image/svg+xml']",
         },
-    ]
-);
+    ],
+});

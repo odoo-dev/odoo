@@ -1,9 +1,6 @@
-import {
-    clickOnSave,
-    getClientActionUrl,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { clickOnSave, getClientActionUrl } from "@website/js/tours/tour_utils";
 import { stepUtils } from "@web_tour/tour_utils";
+import { registry } from "@web/core/registry";
 
 const openPagePropertiesDialog = [
     {
@@ -308,41 +305,43 @@ function testWebsitePageProperties() {
     return steps;
 }
 
-registerWebsitePreviewTour("website_page_properties_common", {}, () => [
-    ...testCommonProperties("/test_view", false).finalize(),
-]);
+registry.category("web_tour.tours").add("website_page_properties_common", {
+    steps: () => [...testCommonProperties("/test_view", false).finalize()],
+});
 
-registerWebsitePreviewTour("website_page_properties_can_publish", {}, () => [
-    ...testCommonProperties("/test_website/model_item/1", true).finalize(),
-]);
+registry.category("web_tour.tours").add("website_page_properties_can_publish", {
+    steps: () => [...testCommonProperties("/test_website/model_item/1", true).finalize()],
+});
 
-registerWebsitePreviewTour("website_page_properties_website_page", {}, () => [
-    ...openCreatePageDialog,
-    {
-        content: "Use blank template",
-        trigger: ".o_website_page_templates_dialog [data-name='add_blank_page']",
-        run: "click",
-    },
-    {
-        content: "Name page",
-        trigger: ".modal-body input",
-        run: "edit New Page",
-    },
-    {
-        content: "Don't add to menu",
-        trigger: ".modal-body .o_switch",
-        run: "click",
-    },
-    {
-        content: "Click on Create button",
-        trigger: ".modal-footer .btn-primary",
-        run: "click",
-    },
-    {
-        content: "Wait for editor to open",
-        trigger: ":iframe body.editor_enable",
-        timeout: 30000,
-    },
-    ...clickOnSave(),
-    ...testWebsitePageProperties().finalize(),
-]);
+registry.category("web_tour.tours").add("website_page_properties_website_page", {
+    steps: () => [
+        ...openCreatePageDialog,
+        {
+            content: "Use blank template",
+            trigger: ".o_website_page_templates_dialog [data-name='add_blank_page']",
+            run: "click",
+        },
+        {
+            content: "Name page",
+            trigger: ".modal-body input",
+            run: "edit New Page",
+        },
+        {
+            content: "Don't add to menu",
+            trigger: ".modal-body .o_switch",
+            run: "click",
+        },
+        {
+            content: "Click on Create button",
+            trigger: ".modal-footer .btn-primary",
+            run: "click",
+        },
+        {
+            content: "Wait for editor to open",
+            trigger: ":iframe body.editor_enable",
+            timeout: 30000,
+        },
+        ...clickOnSave(),
+        ...testWebsitePageProperties().finalize(),
+    ],
+});

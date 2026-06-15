@@ -1,15 +1,9 @@
-import {
-    clickOnSave,
-    insertSnippet,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { clickOnSave, insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "website_multi_edition",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_multi_edition", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "Check the current page has not the elements that will be added",
             trigger: ":iframe body:not(:has(.s_text_image)):not(:has(.s_hr))",
@@ -38,5 +32,5 @@ registerWebsitePreviewTour(
             content: "Check that the footer was properly saved",
             trigger: ":iframe footer .s_hr",
         },
-    ]
-);
+    ],
+});

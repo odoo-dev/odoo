@@ -1,14 +1,15 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnEditAndWaitEditMode,
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
     unfoldOptionsGroup,
-} from '@website/js/tours/tour_utils';
+    waitForEditMode,
+} from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour('snippet_newsletter_block_with_edit', {
-    edition: true,
-}, () => [
+registry.category("web_tour.tours").add('snippet_newsletter_block_with_edit', {
+    steps: () => [
+    waitForEditMode,
     // Put a Newsletter block.
     ...insertSnippet({
         id: 's_newsletter_block',
@@ -57,4 +58,5 @@ registerWebsitePreviewTour('snippet_newsletter_block_with_edit', {
         run: "click",
     },
     ...clickOnSave(),
-]);
+],
+});

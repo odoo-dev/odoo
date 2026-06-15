@@ -1,8 +1,5 @@
-import {
-    changeOption,
-    insertSnippet,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { changeOption, insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
 
 const THEME_DOC = document.querySelector("iframe")?.contentDocument || document;
 const THEME_STYLE = THEME_DOC.defaultView.getComputedStyle(THEME_DOC.documentElement);
@@ -24,12 +21,9 @@ async function assertSvgColors(img, color1, color2, errorMessage) {
     }
 }
 
-registerWebsitePreviewTour(
-    "website_dynamic_svg_theme_colors",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_dynamic_svg_theme_colors", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_image",
             name: "Text - Image",
@@ -99,5 +93,5 @@ registerWebsitePreviewTour(
                 );
             },
         },
-    ]
-);
+    ],
+});

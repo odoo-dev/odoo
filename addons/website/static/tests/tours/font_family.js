@@ -1,12 +1,10 @@
-import { registerWebsitePreviewTour, goToTheme } from "@website/js/tours/tour_utils";
+import { goToTheme, waitForEditMode } from "@website/js/tours/tour_utils";
 import { patch } from "@web/core/utils/patch";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "website_font_family",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_font_family", {
+    steps: () => [
+        waitForEditMode,
         ...goToTheme(),
         {
             content: "Click on the heading font family selector",
@@ -82,5 +80,5 @@ registerWebsitePreviewTour(
             content: "Check that the 3 previews are correctly set in the modal",
             trigger: `.modal div[style='font-family: "Second test font";']:count(3)`,
         },
-    ]
-);
+    ],
+});

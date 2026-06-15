@@ -1,8 +1,5 @@
-import {
-    clickOnSnippet,
-    insertSnippet,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { clickOnSnippet, insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
 
 const snippets = [
     { id: "s_popup", name: "Popup", groupName: "Content" },
@@ -10,12 +7,9 @@ const snippets = [
     { customID: "s_popup", name: "Custom Popup", groupName: "Custom" },
 ];
 
-registerWebsitePreviewTour(
-    "custom_popup_snippet",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("custom_popup_snippet", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet(snippets[0]),
         ...clickOnSnippet(snippets[1]),
         {
@@ -33,5 +27,5 @@ registerWebsitePreviewTour(
             content: "check whether new custom popup is visible or not.",
             trigger: ":iframe section[data-snippet='s_banner']",
         },
-    ]
-);
+    ],
+});

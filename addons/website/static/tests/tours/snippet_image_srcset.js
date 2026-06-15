@@ -1,15 +1,9 @@
-import {
-    clickOnSave,
-    insertSnippet,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { clickOnSave, insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "website_image_srcset",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_image_srcset", {
+    steps: () => [
+        waitForEditMode,
         // Use a snippet whose default image is wide enough for responsive
         // derivatives (see saveModifiedImage: needs width > ~750 / 0.85).
         ...insertSnippet({
@@ -54,5 +48,5 @@ registerWebsitePreviewTour(
                 }
             },
         },
-    ]
-);
+    ],
+});

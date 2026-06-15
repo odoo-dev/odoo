@@ -1,20 +1,18 @@
+import { registry } from "@web/core/registry";
 import {
     changeOptionInPopover,
     clickOnEditAndWaitEditMode,
     clickOnSave,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 const coverSnippet = { id: "s_cover", name: "Cover", groupName: "Intro" };
 
-registerWebsitePreviewTour(
-    "test_parallax",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("test_parallax", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet(coverSnippet),
         ...clickOnSnippet(coverSnippet),
         ...changeOptionInPopover("Cover", "Filter", "Blur"),
@@ -65,5 +63,5 @@ registerWebsitePreviewTour(
             content: "The parallax should not add o_dirty when entering edit mode",
             trigger: ":iframe #wrap:not(.o_dirty)",
         },
-    ]
-);
+    ],
+});

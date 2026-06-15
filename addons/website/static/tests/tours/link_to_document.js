@@ -1,9 +1,6 @@
-import {
-    insertSnippet,
-    openLinkPopup,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { insertSnippet, openLinkPopup, waitForEditMode } from "@website/js/tours/tour_utils";
 import { patch } from "@web/core/utils/patch";
+import { registry } from "@web/core/registry";
 
 // Opening the system's file selector is not possible programmatically, so we
 // mock the upload service.
@@ -47,13 +44,10 @@ const saveLinkPopup = () => [
  * The purpose of this tour is to check the Linktools to create a link to an
  * uploaded document.
  */
-registerWebsitePreviewTour(
-    "test_link_to_document",
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("test_link_to_document", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             name: "Banner",
             id: "s_banner",
@@ -101,5 +95,5 @@ registerWebsitePreviewTour(
             content: "Check if auto-download is disabled",
             trigger: ":iframe #wrap .s_banner a:nth-child(1):not([href$='download=true'])",
         },
-    ]
-);
+    ],
+});

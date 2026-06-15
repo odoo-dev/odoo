@@ -1,11 +1,9 @@
-import { goToTheme, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { goToTheme, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "website_snippets_menu_tabs",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_snippets_menu_tabs", {
+    steps: () => [
+        waitForEditMode,
         ...goToTheme(),
         {
             trigger: "div[data-container-title='Website'] div.we-bg-options-container",
@@ -30,5 +28,5 @@ registerWebsitePreviewTour(
             content: "Verify that the customize panel is not empty.",
             trigger: ".o_theme_tab .options-container",
         },
-    ]
-);
+    ],
+});

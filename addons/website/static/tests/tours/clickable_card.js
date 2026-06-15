@@ -1,3 +1,4 @@
+import { registry } from "@web/core/registry";
 import {
     insertSnippet,
     changeOption,
@@ -5,15 +6,12 @@ import {
     clickOnSave,
     clickOnElement,
     openLinkPopup,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "clickable_card",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("clickable_card", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ id: "s_title", name: "Title", groupName: "Text" }),
         {
             content: "Drag a Card into the Title section",
@@ -126,5 +124,5 @@ registerWebsitePreviewTour(
                 });
             },
         },
-    ]
-);
+    ],
+});

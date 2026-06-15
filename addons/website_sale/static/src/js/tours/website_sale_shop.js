@@ -2,12 +2,13 @@ import { _t } from "@web/core/l10n/translation";
 import {
     goBackToBlocks,
     insertSnippet,
-    registerWebsitePreviewTour,
 } from "@website/js/tours/tour_utils";
 
 import { markup } from "@odoo/owl";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour("website_sale.onboarding_tour", {}, () => [
+registry.category("web_tour.tours").add("website_sale.onboarding_tour", {
+    steps: () => [
     {
         trigger: ":iframe .o_wsale_products_page",
     },
@@ -109,4 +110,5 @@ registerWebsitePreviewTour("website_sale.onboarding_tour", {}, () => [
         tooltipPosition: "bottom",
         // Just check during test mode. Otherwise, clicking it will result to random error on loading the Chart.js script.
     },
-]);
+],
+});

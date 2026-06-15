@@ -1,6 +1,6 @@
-import {
-    clickOnEditAndWaitEditMode,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { clickOnEditAndWaitEditMode } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour("restricted_editor", {}, () => [...clickOnEditAndWaitEditMode()]);
+registry.category("web_tour.tours").add("restricted_editor", {
+    steps: () => [...clickOnEditAndWaitEditMode()],
+});

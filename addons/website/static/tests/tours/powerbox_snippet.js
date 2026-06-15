@@ -1,15 +1,9 @@
-import {
-    clickOnSnippet,
-    insertSnippet,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { clickOnSnippet, insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "website_powerbox_snippet",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_powerbox_snippet", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_block",
             name: "Text",
@@ -47,15 +41,12 @@ registerWebsitePreviewTour(
             content: "Check if s_alert snipept is inserted",
             trigger: ":iframe .s_alert",
         },
-    ]
-);
+    ],
+});
 
-registerWebsitePreviewTour(
-    "website_powerbox_keyword",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_powerbox_keyword", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_text_block",
             name: "Text",
@@ -136,5 +127,5 @@ registerWebsitePreviewTour(
             content: "Check if s_alert snippet is inserted",
             trigger: ":iframe .s_alert",
         },
-    ]
-);
+    ],
+});

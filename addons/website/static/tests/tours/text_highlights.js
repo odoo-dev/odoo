@@ -1,9 +1,6 @@
-import {
-    insertSnippet,
-    registerWebsitePreviewTour,
-    clickToolbarButton,
-} from "@website/js/tours/tour_utils";
+import { insertSnippet, clickToolbarButton, waitForEditMode } from "@website/js/tours/tour_utils";
 import { editorsWeakMap } from "@html_editor/../tests/tours/helpers/editor";
+import { registry } from "@web/core/registry";
 
 function applyHighlight(target, targetName, highlight) {
     return [
@@ -28,12 +25,9 @@ function countLines(el) {
     return lines.size;
 }
 
-registerWebsitePreviewTour(
-    "text_highlights",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("text_highlights", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_title",
             name: "Title",
@@ -143,5 +137,5 @@ registerWebsitePreviewTour(
             trigger:
                 ":iframe .s_cover p:has(strong:contains(Text content line A) + br + i:contains(Text content line B))",
         },
-    ]
-);
+    ],
+});

@@ -1,15 +1,13 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "snippet_newsletter_popup_edition",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_newsletter_popup_edition", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_newsletter_subscribe_popup",
             name: "Newsletter Popup",
@@ -24,5 +22,5 @@ registerWebsitePreviewTour(
             content: "Check the modal has been saved, closed",
             trigger: ":iframe body:has(.o_newsletter_popup:not(:visible) .modal)",
         },
-    ]
-);
+    ],
+});

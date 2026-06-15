@@ -1,8 +1,5 @@
-import {
-    insertSnippet,
-    registerWebsitePreviewTour,
-    clickToolbarButton,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { insertSnippet, clickToolbarButton, waitForEditMode } from "@website/js/tours/tour_utils";
 
 function setTextAnimation(trigger, value) {
     return [
@@ -25,12 +22,9 @@ function setTextAnimation(trigger, value) {
     ];
 }
 
-registerWebsitePreviewTour(
-    "text_animations",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("text_animations", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_cover",
             name: "Cover",
@@ -56,5 +50,5 @@ registerWebsitePreviewTour(
             content: "Check that the animation was applied",
             trigger: ":iframe .s_cover:has(span.o_animated_text)",
         },
-    ]
-);
+    ],
+});

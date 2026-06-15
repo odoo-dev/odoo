@@ -1,16 +1,14 @@
 /** @odoo-module **/
 
-import { insertSnippet, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { insertSnippet, waitForEditMode } from "@website/js/tours/tour_utils";
 import { patch } from "@web/core/utils/patch";
 import { Vimeo } from "@html_editor/main/media/video/providers/vimeo";
+import { registry } from "@web/core/registry";
 
 let unpatchThumbnailUrl;
-registerWebsitePreviewTour(
-    "snippet_background_video",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_background_video", {
+    steps: () => [
+        waitForEditMode,
         {
             // Avoid fetch error on the runbot.
             content: " patch the thumbnail url getter",
@@ -65,5 +63,5 @@ registerWebsitePreviewTour(
             trigger: "body",
             run: () => unpatchThumbnailUrl(),
         },
-    ]
-);
+    ],
+});

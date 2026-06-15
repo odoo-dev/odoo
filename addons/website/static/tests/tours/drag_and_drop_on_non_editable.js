@@ -1,15 +1,9 @@
-import {
-    insertSnippet,
-    goBackToBlocks,
-    registerWebsitePreviewTour,
-} from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
+import { insertSnippet, goBackToBlocks, waitForEditMode } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "test_drag_and_drop_on_non_editable",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("test_drag_and_drop_on_non_editable", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_company_team",
             name: "Team",
@@ -40,5 +34,5 @@ registerWebsitePreviewTour(
                 "Verify that the Text Highlight building block isn't in a non editable element.",
             trigger: ":iframe .s_company_team :not(.o_not_editable) > .s_text_highlight",
         },
-    ]
-);
+    ],
+});

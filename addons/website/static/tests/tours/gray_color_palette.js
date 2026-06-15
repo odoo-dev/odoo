@@ -1,4 +1,5 @@
-import { goToTheme, registerWebsitePreviewTour, clickOnSave } from "@website/js/tours/tour_utils";
+import { goToTheme, clickOnSave, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
 function waitForCSSReload() {
     return [
@@ -9,12 +10,9 @@ function waitForCSSReload() {
     ];
 }
 
-registerWebsitePreviewTour(
-    "website_gray_color_palette",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_gray_color_palette", {
+    steps: () => [
+        waitForEditMode,
         ...goToTheme(),
         {
             content: "Open the theme color slider",
@@ -60,5 +58,5 @@ registerWebsitePreviewTour(
                 }
             },
         },
-    ]
-);
+    ],
+});

@@ -1,9 +1,10 @@
+import { registry } from "@web/core/registry";
 import {
     changeOption,
     insertSnippet,
     goBackToBlocks,
-    registerWebsitePreviewTour,
     unfoldOptionsGroup,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
 const snippets = [
@@ -54,13 +55,10 @@ const scrollIntoView = (selector) => ({
     },
 });
 
-registerWebsitePreviewTour(
-    "snippet_popup_and_scrollbar",
-    {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_popup_and_scrollbar", {
+    undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet(snippets[1]), // Media List
         ...insertSnippet(snippets[0]), // Popup
         checkScrollbar(false),
@@ -203,5 +201,5 @@ registerWebsitePreviewTour(
             run: "click",
         },
         checkScrollbar(true),
-    ]
-);
+    ],
+});

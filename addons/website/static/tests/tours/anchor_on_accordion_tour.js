@@ -1,19 +1,16 @@
 import {
     insertSnippet,
-    registerWebsitePreviewTour,
     clickOnSave,
     goBackToBlocks,
     clickToolbarButton,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "anchor_behaviour_on_accordion_same_tab",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("anchor_behaviour_on_accordion_same_tab", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             id: "s_accordion",
             name: "Accordion",
@@ -72,8 +69,8 @@ registerWebsitePreviewTour(
             content: "Check that the accordion item's content is visible",
             trigger: ":iframe .s_accordion .accordion-item:first-child .accordion-collapse.show",
         },
-    ]
-);
+    ],
+});
 
 registry.category("web_tour.tours").add("anchor_behaviour_on_accordion_new_tab", {
     steps: () => [

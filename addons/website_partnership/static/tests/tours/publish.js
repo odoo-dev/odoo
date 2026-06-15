@@ -1,16 +1,16 @@
 /** @odoo-module **/
 
-import { registerWebsitePreviewTour } from '@website/js/tours/tour_utils';
 
 import { stepUtils } from "@web_tour/tour_utils";
+import { registry } from "@web/core/registry";
 /**
  * The purpose of these tours is to check whether Publish can or cannot be
  * used by the given current user.
  */
 
-registerWebsitePreviewTour('test_can_publish_partner', {
+registry.category("web_tour.tours").add('test_can_publish_partner', {
     edition: false,
-}, () => [
+    steps: () => [
     stepUtils.waitIframeIsReady(),
 {
     content: 'Open grade filter',
@@ -38,11 +38,12 @@ registerWebsitePreviewTour('test_can_publish_partner', {
 }, {
     content: "Wait for Publish",
     trigger: '.o_menu_systray .o_menu_systray_item.o_website_publish_container:contains("Published"):not([data-processing])',
-}]);
+}],
+});
 
-registerWebsitePreviewTour('test_cannot_publish_partner', {
+registry.category("web_tour.tours").add('test_cannot_publish_partner', {
     edition: false,
-}, () => [
+    steps: () => [
     stepUtils.waitIframeIsReady(),
 {
     content: 'Open grade filter',
@@ -67,4 +68,5 @@ registerWebsitePreviewTour('test_cannot_publish_partner', {
 }, {
     content: 'Check there is no Publish/Unpublish',
     trigger: '.o_menu_systray:has(.o_website_edit_in_backend > a):not(:has(.o_menu_systray_item.o_website_publish_container))',
-}]);
+}],
+});

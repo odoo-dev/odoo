@@ -2,19 +2,17 @@ import {
     insertSnippet,
     goBackToBlocks,
     goToTheme,
-    registerWebsitePreviewTour,
     clickToolbarButton,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 import { rgbToHex } from "@web/core/utils/colors";
+import { registry } from "@web/core/registry";
 
 const WEBSITE_MAIN_COLOR = "#ABCDEF";
 
-registerWebsitePreviewTour(
-    "website_text_edition",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_text_edition", {
+    steps: () => [
+        waitForEditMode,
         ...goToTheme(),
         {
             content: "Open colorpicker to change website main color",
@@ -71,5 +69,5 @@ registerWebsitePreviewTour(
                 }
             },
         },
-    ]
-);
+    ],
+});

@@ -1,17 +1,15 @@
+import { registry } from "@web/core/registry";
 import {
     changeOption,
     clickOnSnippet,
     insertSnippet,
-    registerWebsitePreviewTour,
     changeOptionInPopover,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "snippet_countdown",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_countdown", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({ id: "s_countdown", name: "Countdown", groupName: "Content" }),
         ...clickOnSnippet({ id: "s_countdown", name: "Countdown" }),
         ...changeOptionInPopover("Countdown", "At The End", "Message + Timer"),
@@ -54,5 +52,5 @@ registerWebsitePreviewTour(
             content: "Check that the message is still displayed",
             trigger: ":iframe .s_countdown .s_picture",
         },
-    ]
-);
+    ],
+});

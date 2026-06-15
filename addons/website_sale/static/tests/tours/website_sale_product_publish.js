@@ -1,8 +1,9 @@
+import { registry } from "@web/core/registry";
 /** @odoo-module **/
 
-import { registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour("product_unpublished_without_category", {}, () => [
+registry.category("web_tour.tours").add("product_unpublished_without_category", {
+    steps: () => [
     {
         trigger: "body:not(:has(.o_new_content_menu_choices)) .o_new_content_container > button",
         run: "click",
@@ -25,9 +26,11 @@ registerWebsitePreviewTour("product_unpublished_without_category", {}, () => [
     {
         trigger: ':iframe body:has(h1:contains("Product Without Category"))',
     },
-]);
+],
+});
 
-registerWebsitePreviewTour("product_published_with_category", {}, () => [
+registry.category("web_tour.tours").add("product_published_with_category", {
+    steps: () => [
     {
         trigger: "body:not(:has(.o_new_content_menu_choices)) .o_new_content_container > button",
         run: "click",
@@ -61,4 +64,5 @@ registerWebsitePreviewTour("product_published_with_category", {}, () => [
     {
         trigger: ':iframe body:has(h1:contains("Product With Category"))',
     },
-]);
+],
+});

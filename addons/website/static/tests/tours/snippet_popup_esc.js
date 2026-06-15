@@ -1,16 +1,14 @@
+import { registry } from "@web/core/registry";
 import {
     clickOnSave,
     insertSnippet,
-    registerWebsitePreviewTour,
     unfoldOptionsGroup,
+    waitForEditMode,
 } from "@website/js/tours/tour_utils";
 
-registerWebsitePreviewTour(
-    "snippet_popup_esc",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("snippet_popup_esc", {
+    steps: () => [
+        waitForEditMode,
         ...insertSnippet({
             name: "Popup",
             id: "s_popup",
@@ -53,5 +51,5 @@ registerWebsitePreviewTour(
             content: "Verify the popup is closed",
             trigger: ":iframe .s_popup .modal:not(.show)",
         },
-    ]
-);
+    ],
+});

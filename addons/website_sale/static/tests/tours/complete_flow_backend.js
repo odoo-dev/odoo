@@ -1,11 +1,9 @@
-import { clickOnSave, registerWebsitePreviewTour } from "@website/js/tours/tour_utils";
+import { clickOnSave, waitForEditMode } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
-registerWebsitePreviewTour(
-    "website_sale.enable_extra_info",
-    {
-        edition: true,
-    },
-    () => [
+registry.category("web_tour.tours").add("website_sale.enable_extra_info", {
+    steps: () => [
+        waitForEditMode,
         {
             content: "open customize tab",
             trigger: "[data-name='customize']",
@@ -24,5 +22,5 @@ registerWebsitePreviewTour(
             trigger: ":iframe .o_wizard [name=step_name]:contains(extra)",
         },
         ...clickOnSave(),
-    ]
-);
+    ],
+});
