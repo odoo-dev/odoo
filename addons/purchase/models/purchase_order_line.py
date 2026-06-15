@@ -486,36 +486,34 @@ class PurchaseOrderLine(models.Model):
             # If not seller, use the standard price. It needs a proper currency conversion.
             if not line.selected_seller_id:
                 line.discount = 0
-                currency = line.product_id.cost_currency_id
-                price_unit = line.product_id.standard_price
-                seller_price_change = line.price_unit_json and line.price_unit_json['seller_price']
             elif line.selected_seller_id:
-                price_unit = line.selected_seller_id.price
-                currency = line.selected_seller_id.currency_id
                 line.discount = line.selected_seller_id.discount or 0.0
-                # In order to make sure that when the selected seller or their set price changes the price is adapted
-                seller_price_change = line.price_unit_json['seller_price'] != line.selected_seller_id.price if line.price_unit_json else False
 
             # Cases in which we need to get values from the product: at the creation of the line or when the product is changed
-            if not line.price_unit_json or (line.price_unit_json and line.price_unit_json['product_id'] != line.product_id.id):
-                line.price_unit = 0.0
-                line.price_unit_json = {}
+            if not line.price_unit_json or (line.price_unit_json and line.price_unit_json['product'] != line.product_id.id):
                 line._compute_tax_id()
                 line._suggest_quantity()
 
-            # When price_unit is set to None _get_line_price_unit will fall back on the price on the line
-            price_unit = currency._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
-            price_unit = None if line.price_unit and not seller_price_change else price_unit
-            price_unit = line.product_id._get_line_price_unit(line, 'purchase', price_unit)
-            line.price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
+            line.price_unit_json = line._adapt_price_unit()
+            line.price_unit = float_round(line.price_unit_json['price_unit'], precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
 
-            line.price_unit_json = {
-                'price_unit': line.price_unit,
-                'uom_id': line.uom_id.id,
-                'product_id': line.product_id.id,
-                'document_tax_mode': line.document_tax_mode,
-                'seller_price': line.selected_seller_id.price if line.selected_seller_id else None,
-            }
+    def _adapt_price_unit(self):
+        self.ensure_one()
+        return self.env['product.product']._adapt_price_unit(
+            document_type='purchase',
+            company=self.company_id or self.env.company,
+            product=self.product_id,
+            uom=self.uom_id,
+            taxes=self.tax_ids,
+            seller_price=self.selected_seller_id.price if self.selected_seller_id else None,
+            currency_to_adapt=self.selected_seller_id.currency_id if self.selected_seller_id else self.product_id.cost_currency_id,
+            price_unit=self.price_unit,
+            currency=self.currency_id,
+            document_date=self.date_order,
+            fiscal_position=self.order_id.fiscal_position_id,
+            document_tax_mode=self.order_id.document_tax_mode,
+            price_unit_json=self.price_unit_json,
+        )
 
     @api.depends('product_id')
     def _compute_translated_product_name(self):
@@ -663,6 +661,7 @@ class PurchaseOrderLine(models.Model):
             'quantity': -self.qty_to_invoice if move and move.move_type == 'in_refund' else self.qty_to_invoice,
             'discount': self.discount,
             'price_unit': self.currency_id._convert(self.price_unit, aml_currency, self.company_id, date, round=False),
+            'price_unit_json': self.price_unit_json,
             'tax_ids': [(6, 0, self.tax_ids.ids)],
             'purchase_line_id': self.id,
             'is_downpayment': self.is_downpayment,

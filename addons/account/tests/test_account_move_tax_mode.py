@@ -53,7 +53,7 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
             name='Test Company (Tax Mode: Tax Included)',
             account_price_include='tax_included',
         )
-        cls.test_product_b = cls.env['product.product'].with_company(cls.company_tax_included.id).create({
+        cls.test_product_b = cls.env['product.product'].with_company(cls.company_tax_included).create({
             'name': 'Test Product B',
             'list_price': 1000.0,
             'standard_price': 1000.0,
@@ -311,7 +311,7 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
 
         # Product with tax excluded overriden tax
         self.tax_10_override_exclude.write({'company_id': self.company_tax_included})
-        product_with_tax_excluded_override_tax = self.env['product.product'].create({
+        product_with_tax_excluded_override_tax = self.env['product.product'].with_company(self.company_tax_included).create({
             'name': 'Product (with override tax excluded)',
             price_field_name: 1000.0,
             taxes_field_name: [Command.set([self.tax_10_override_exclude.id])],
@@ -336,7 +336,7 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
 
         # Product with tax included overriden tax
         self.tax_10_override_include.write({'company_id': self.company_tax_included})
-        product_with_tax_included_override_tax = self.env['product.product'].create({
+        product_with_tax_included_override_tax = self.env['product.product'].with_company(self.company_tax_included).create({
             'name': 'Product (with override tax included)',
             price_field_name: 1000.0,
             taxes_field_name: [Command.set([self.tax_10_override_include.id])],
@@ -417,7 +417,7 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
             'company_id': self.company_tax_included.id,
             'include_base_amount': False,
         })
-        product_with_tax_excluded_override_tax = self.env['product.product'].create({
+        product_with_tax_excluded_override_tax = self.env['product.product'].with_company(self.company_tax_included).create({
             'name': 'Product (with override tax excluded)',
             price_field_name: 1000.0,
             taxes_field_name: [Command.set([self.tax_10_override_exclude.id, self.tax_10_default.id])],
@@ -444,7 +444,7 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
 
         # Product with tax included overriden tax + default tax
         self.tax_10_override_include.write({'company_id': self.company_tax_included})
-        product_with_tax_included_override_tax = self.env['product.product'].create({
+        product_with_tax_included_override_tax = self.env['product.product'].with_company(self.company_tax_included).create({
             'name': 'Product (with override tax included)',
             price_field_name: 1000.0,
             taxes_field_name: [Command.set([self.tax_10_override_include.id, self.tax_10_default.id])],
@@ -510,7 +510,7 @@ class TestDocumentTaxModeCommon(AccountTestInvoicingCommon):
         self.assertRecordValues(document, document_expected_values)
 
         # Even if the price_unit is manually changed,
-        # switching the tax mode will reset the values of the taxes to the ones on the product
+        # the fiscal position keeps being applied with the new tax
         line.price_unit = 2400
         document_expected_values = [{
             'amount_tax': 400,

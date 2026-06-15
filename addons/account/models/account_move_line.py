@@ -1163,6 +1163,7 @@ class AccountMoveLine(models.Model):
             fiscal_position=self.move_id.fiscal_position_id,
             document_tax_mode=self.move_id.document_tax_mode,
             price_unit_json=self.price_unit_json,
+            is_account_move=True,
         )
 
     @api.depends('product_id', 'product_uom_id', 'document_tax_mode')
