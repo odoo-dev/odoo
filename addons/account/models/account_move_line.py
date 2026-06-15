@@ -1142,6 +1142,7 @@ class AccountMoveLine(models.Model):
             )
         ):
             return
+
         base_line = self.move_id._prepare_product_base_line_for_taxes_computation(self)
         if base_line['special_type']:
             return
@@ -1151,19 +1152,20 @@ class AccountMoveLine(models.Model):
         else:
             document_type = 'purchase'
 
+        company = self.company_id or self.env.company
+        currency = self.currency_id or company.currency_id
         return self.env['product.product']._adapt_price_unit(
             document_type=document_type,
-            company=self.company_id or self.env.company,
+            company=company,
             product=self.product_id,
             uom=self.product_uom_id,
             taxes=self.tax_ids,
             price_unit=self.price_unit,
-            currency=self.currency_id,
-            document_date=self.date,
+            currency=currency,
+            document_date=self.date or fields.Date.context_today(self),
             fiscal_position=self.move_id.fiscal_position_id,
             document_tax_mode=self.move_id.document_tax_mode,
             price_unit_json=self.price_unit_json,
-            is_account_move=True,
         )
 
     @api.depends('product_id', 'product_uom_id', 'document_tax_mode')
@@ -1177,6 +1179,7 @@ class AccountMoveLine(models.Model):
     def _inverse_price_unit(self):
         for line in self:
             if price_unit_json := line._adapt_price_unit():
+                price_unit_json['price_unit'] = line.price_unit
                 line.price_unit_json = price_unit_json
 
     @api.depends('product_id')

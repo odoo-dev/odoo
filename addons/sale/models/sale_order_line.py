@@ -217,6 +217,7 @@ class SaleOrderLine(models.Model):
     price_unit = fields.Float(
         string="Unit Price",
         compute="_compute_price_unit",
+        inverse="_inverse_price_unit",
         min_display_digits="Product Price",
         store=True,
         readonly=False,
@@ -681,49 +682,111 @@ class SaleOrderLine(models.Model):
                     **line._get_pricelist_kwargs(),
                 )
 
+    def _adapt_price_unit(self, manual_price_unit=None):
+        self.ensure_one()
+        if (
+            self._is_delivery()
+            or self.qty_invoiced > 0
+            or (self.product_id.reinvoice_policy == "cost" and self.is_expense)
+        ):
+            return
+
+        base_line = self._prepare_base_line_for_taxes_computation()
+        if base_line['special_type']:
+            return
+
+        company = self.company_id or self.env.company
+        currency = self.currency_id or company.currency_id
+        Product = self.env['product.product']
+        new_dependency_values = {
+            'document_type': 'sale',
+            'company': company,
+            'product': self.product_id,
+            'uom': self.product_uom_id,
+            'taxes': self.tax_ids,
+            'price_unit': self.price_unit,
+            'currency': currency,
+            'document_date': self.order_id.date_order or fields.Date.context_today(self),
+            'fiscal_position': self.order_id.fiscal_position_id,
+            'document_tax_mode': self.order_id.document_tax_mode,
+        }
+        previous_dependency_values = Product._unserialize_price_unit_json(self.price_unit_json)
+
+        def has_changed(field):
+            return Product._price_unit_json_dependency_has_changed(previous_dependency_values, new_dependency_values, field)
+
+        new_default_price_unit_values = Product._adapt_price_unit_to(
+            document_type='sale',
+            company=company,
+            price_unit=self._get_display_price(),
+            from_product=self.product_id,
+            to_product=self.product_id,
+            from_uom=self.pricelist_item_id.uom_id,
+            to_uom=self.product_uom_id,
+            from_taxes=self.product_id.taxes_id._filter_taxes_by_company(company),
+            to_taxes=self.tax_ids,
+            from_document_tax_mode=company.account_price_include,
+            to_document_tax_mode=new_dependency_values['document_tax_mode'],
+            from_fiscal_position=None,
+            to_fiscal_position=new_dependency_values['fiscal_position'],
+        )
+
+        if manual_price_unit is not None:
+            price_unit_json = Product._adapt_price_unit(**{
+                **new_dependency_values,
+                'price_unit': manual_price_unit,
+                'price_unit_json': self.price_unit_json,
+                'manual_price_unit': manual_price_unit,
+            })
+            price_unit_json['default_price_unit'] = new_default_price_unit_values['price_unit']
+            return price_unit_json
+
+        price_unit_json = Product._adapt_price_unit(**{
+            **new_dependency_values,
+            'price_unit': self.price_unit,
+            'price_unit_json': self.price_unit_json,
+        })
+
+        if not previous_dependency_values or has_changed('product'):
+            new_default_price_unit_values['default_price_unit'] = new_default_price_unit_values['price_unit']
+            if not new_dependency_values['product'] or self.price_unit:
+                price_unit_json['default_price_unit'] = price_unit_json['price_unit']
+                return price_unit_json
+            else:
+                return Product._serialize_price_unit_json(new_default_price_unit_values)
+
+        previous_default_price_unit_values = Product._adapt_price_unit_to(
+            document_type='sale',
+            company=company,
+            price_unit=previous_dependency_values['default_price_unit'],
+            from_uom=previous_dependency_values.get('uom'),
+            to_uom=self.product_uom_id,
+            from_taxes=previous_dependency_values.get('taxes'),
+            to_taxes=self.tax_ids,
+            from_document_tax_mode=previous_dependency_values.get('document_tax_mode'),
+            to_document_tax_mode=new_dependency_values['document_tax_mode'],
+            from_fiscal_position=previous_dependency_values.get('fiscal_position'),
+            to_fiscal_position=new_dependency_values['fiscal_position'],
+        )
+        if previous_default_price_unit_values['price_unit'] == new_default_price_unit_values['price_unit']:
+            price_unit_json['default_price_unit'] = new_default_price_unit_values['price_unit']
+            return price_unit_json
+
+        new_default_price_unit_values['default_price_unit'] = new_default_price_unit_values['price_unit']
+        return Product._serialize_price_unit_json(new_default_price_unit_values)
+
     @api.depends("product_id", "product_uom_id", "product_uom_qty", "document_tax_mode")
     def _compute_price_unit(self):
         for line in self:
-            # Don't compute the price for deleted lines or lines for which the
-            # price unit doesn't come from the product.
-            if not line.order_id or line.is_downpayment or line._is_global_discount() or line._is_delivery():
-                continue
+            if price_unit_json := line._adapt_price_unit():
+                line.price_unit_json = price_unit_json
+                line.price_unit = line.price_unit_json['price_unit']
 
-            # check if the price has been manually set or there is already invoiced amount.
-            # if so, the price shouldn't change as it might have been manually edited.
-            if (
-                line.qty_invoiced > 0
-                or (line.product_id.reinvoice_policy == "cost" and line.is_expense)
-            ):
-                continue
-            line = line.with_context(sale_write_from_compute=True)
-            if not line.product_uom_id or not line.product_id:
-                line.price_unit = 0.0
-            else:
-                # When price is set to None _get_line_price_unit will fall back on the price on the line
-                price = None if line.price_unit else line._get_display_price()
-
-                product_change = line.price_unit_json and line.price_unit_json['product_id'] != line.product_id.id
-                fpos_change = line.price_unit_json and line.product_id and line.price_unit_json['fpos_id'] != line.order_id.fiscal_position_id.id
-                display_price_change = line.price_unit_json and line.product_id and line.price_unit_json['display_price'] != self._convert_to_uom_unit(line._get_display_price())
-
-                if product_change or fpos_change or display_price_change or line.env.context.get("recompute_from_display_price", False):
-                    price = line._get_display_price()
-                    line.price_unit_json = None
-
-                line.price_unit = line.product_id._get_line_price_unit(line, 'sale', price)
-
-            line.price_unit_json = {
-                'price_unit': line.price_unit,
-                'uom_id': line.product_uom_id.id,
-                'product_id': line.product_id.id,
-                'document_tax_mode': line.document_tax_mode,
-                'fpos_id': line.order_id.fiscal_position_id.id,
-                'display_price': self._convert_to_uom_unit(line._get_display_price()) if line.product_id else None,
-            }
-
-    def _convert_to_uom_unit(self, price):
-        return self.product_uom_id[:1]._compute_price(price, self.env.ref('uom.product_uom_unit'))
+    @api.onchange('price_unit')
+    def _inverse_price_unit(self):
+        for line in self:
+            if price_unit_json := line._adapt_price_unit(manual_price_unit=line.price_unit):
+                line.price_unit_json = price_unit_json
 
     @api.depends("is_storable", "product_uom_qty", "qty_delivered", "state", "product_uom_id")
     def _compute_display_qty_widget(self):
@@ -798,7 +861,8 @@ class SaleOrderLine(models.Model):
         :rtype: float
         """
         self.ensure_one()
-        self.product_id.ensure_one()
+        if not self.product_id:
+            return self.price_unit
 
         return self.pricelist_item_id._compute_price(
             product=self.product_id.with_context(**self._get_product_price_context()),
