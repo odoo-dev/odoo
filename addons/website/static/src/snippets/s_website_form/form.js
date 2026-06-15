@@ -6,7 +6,7 @@ import { ReCaptcha } from "@google_recaptcha/js/recaptcha";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { formatList } from "@web/core/l10n/utils";
-import { post } from "@web/core/network/http_service";
+import { post } from "@web/core/network/http_plugin";
 import { user } from "@web/core/user";
 import { delay } from "@web/core/utils/concurrency";
 import { session } from "@web/session";

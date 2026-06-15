@@ -1,4 +1,6 @@
+import { plugin, Plugin } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
+import { services } from "@web/core/services";
 import { registry } from "../registry";
 
 function checkResponseStatus(response) {
@@ -36,16 +38,21 @@ export async function post(route, params = {}, readMethod = "json") {
         method: "POST",
     });
     checkResponseStatus(response);
-    if ( readMethod === "url" ) {
+    if (readMethod === "url") {
         return response.url;
     }
     return response[readMethod]();
 }
 
+class HttpPlugin extends Plugin {
+    get = get;
+    post = post;
+}
+services.add(HttpPlugin);
+
 export const httpService = {
     start() {
-        return { get, post };
+        return plugin(HttpPlugin);
     },
 };
-
 registry.category("services").add("http", httpService);

@@ -32,7 +32,7 @@ import { isBrowserChrome, isBrowserMicrosoftEdge } from "@web/core/browser/featu
 import { router } from "@web/core/browser/router";
 import { getScrollingElement } from "@web/core/utils/scrolling";
 import { CreatePageMessage } from "./create_page_message";
-import { post } from "@web/core/network/http_service";
+import { post } from "@web/core/network/http_plugin";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 
@@ -528,7 +528,12 @@ export class WebsiteBuilderClientAction extends Component {
     }
 
     get websiteId() {
-        return this.props.websiteId || router.current.website_id || this.websiteService.currentWebsiteId || false;
+        return (
+            this.props.websiteId ||
+            router.current.website_id ||
+            this.websiteService.currentWebsiteId ||
+            false
+        );
     }
 
     waitForIframeReady() {

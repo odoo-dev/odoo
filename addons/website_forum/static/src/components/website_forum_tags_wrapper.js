@@ -1,5 +1,5 @@
 import { Component, onWillStart, props, proxy, t } from "@odoo/owl";
-import { get } from "@web/core/network/http_service";
+import { get } from "@web/core/network/http_plugin";
 import { SelectMenu } from "@web/core/select_menu/select_menu";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
