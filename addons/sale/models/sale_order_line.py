@@ -682,7 +682,7 @@ class SaleOrderLine(models.Model):
                     **line._get_pricelist_kwargs(),
                 )
 
-    def _adapt_price_unit(self, manual_price_unit=None):
+    def _adapt_price_unit(self, keep_line_price_unit_value=False):
         def export(values):
             return (
                 values['price_unit'],
@@ -739,7 +739,7 @@ class SaleOrderLine(models.Model):
             Product._adapt_document_values_to_uom(display_price_previous_document_values, self.product_uom_id)
             previous_display_price = display_price_previous_document_values['price_unit']
 
-        if manual_price_unit is not None:
+        if keep_line_price_unit_value:
             mode = 'manual_price_unit'
         elif display_price == previous_display_price:
             mode = 'continue_with_current_price_unit'
@@ -756,7 +756,7 @@ class SaleOrderLine(models.Model):
             previous_document_values['uom'] = self.product_uom_id
             previous_document_values['currency'] = currency
         elif mode == 'manual_price_unit':
-            previous_document_values['price_unit'] = manual_price_unit
+            previous_document_values['price_unit'] = self.price_unit
         Product._adapt_document_values_to_fiscal_position(previous_document_values, self.order_id.fiscal_position_id)
         if mode in ('manual_price_unit', 'continue_with_current_price_unit'):
             Product._adapt_document_values_to_currency(previous_document_values, currency)
@@ -775,7 +775,7 @@ class SaleOrderLine(models.Model):
     @api.onchange('price_unit')
     def _inverse_price_unit(self):
         for line in self:
-            price_unit_json = line._adapt_price_unit(manual_price_unit=line.price_unit)[1]
+            price_unit_json = line._adapt_price_unit(keep_line_price_unit_value=True)[1]
             if price_unit_json:
                 line.price_unit_json = self.env['product.product']._serialize_price_unit_json(price_unit_json)
 

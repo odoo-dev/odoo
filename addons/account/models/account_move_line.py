@@ -1129,7 +1129,7 @@ class AccountMoveLine(models.Model):
             line.price_subtotal = base_line['tax_details']['total_excluded_currency']
             line.price_total = base_line['tax_details']['total_included_currency']
 
-    def _adapt_price_unit(self, manual_price_unit=None):
+    def _adapt_price_unit(self, keep_line_price_unit_value=False):
         def export(values):
             return (
                 values['price_unit'],
@@ -1180,8 +1180,8 @@ class AccountMoveLine(models.Model):
             'document_tax_mode': price_unit_json.get('document_tax_mode', False),
         }
         Product._adapt_document_values_to_product(previous_document_values, self.product_id)
-        if manual_price_unit is not None:
-            previous_document_values['price_unit'] = manual_price_unit
+        if keep_line_price_unit_value:
+            previous_document_values['price_unit'] = self.price_unit
         Product._adapt_document_values_to_fiscal_position(previous_document_values, self.move_id.fiscal_position_id)
         Product._adapt_document_values_to_currency(previous_document_values, currency)
         Product._adapt_document_values_to_taxes(previous_document_values, self.tax_ids)
@@ -1198,7 +1198,7 @@ class AccountMoveLine(models.Model):
     @api.onchange('price_unit')
     def _inverse_price_unit(self):
         for line in self:
-            price_unit_json = line._adapt_price_unit(manual_price_unit=line.price_unit)[1]
+            price_unit_json = line._adapt_price_unit(keep_line_price_unit_value=True)[1]
             line.price_unit_json = self.env['product.product']._serialize_price_unit_json(price_unit_json)
 
     @api.depends('product_id')

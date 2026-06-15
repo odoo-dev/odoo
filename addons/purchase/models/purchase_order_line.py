@@ -295,7 +295,7 @@ class PurchaseOrderLine(models.Model):
             else:
                 line.qty_received_manual = 0.0
 
-    @api.depends('product_id', 'product_id.seller_ids', 'partner_id', 'product_qty', 'order_id.date_order', 'uom_id')
+    @api.depends('product_id', 'product_id.seller_ids', 'partner_id', 'product_qty', 'order_id.date_order', 'uom_id', 'company_id')
     def _compute_selected_seller_id(self):
         for line in self:
             if line.product_id:
@@ -450,23 +450,68 @@ class PurchaseOrderLine(models.Model):
             line.allowed_uom_ids = line.product_id._get_available_uoms() | seller_uom
 
     def _adapt_price_unit(self, keep_line_price_unit_value=False):
+        def export(values):
+            return (
+                values['price_unit'],
+                {
+                    'product': values['product'],
+                    'uom': values['uom'],
+                    'currency': values['currency'],
+                    'fiscal_position': values['fiscal_position'],
+                    'document_tax_mode': values['document_tax_mode'],
+                    'seller_price': values['seller_price'],
+                },
+            )
+
         self.ensure_one()
-        return self.env['product.product']._adapt_price_unit(
-            document_type='purchase',
-            company=self.company_id or self.env.company,
-            product=self.product_id,
-            uom=self.uom_id,
-            taxes=self.tax_ids,
-            seller_price=self.selected_seller_id.price if self.selected_seller_id else None,
-            currency_to_adapt=self.selected_seller_id.currency_id if self.selected_seller_id else self.product_id.cost_currency_id,
-            price_unit=self.price_unit,
-            currency=self.currency_id,
-            document_date=self.date_order,
-            fiscal_position=self.order_id.fiscal_position_id,
-            document_tax_mode=self.order_id.document_tax_mode,
-            price_unit_json=self.price_unit_json,
-            keep_line_price_unit_value=keep_line_price_unit_value,
-        )
+
+        company = self.company_id or self.env.company
+        currency = self.currency_id or company.currency_id
+        Product = self.env['product.product']
+
+        price_unit_json = Product._unserialize_price_unit_json(self.price_unit_json)
+        previous_document_values = {
+            'document_type': 'purchase',
+            'company': company,
+            'document_date': self.order_id.date_order or fields.Date.context_today(self),
+
+            'price_unit': self.price_unit,
+            'product': price_unit_json.get('product', False),
+            'uom': price_unit_json.get('uom', False),
+            'taxes': price_unit_json.get('taxes', []),
+            'currency': price_unit_json.get('currency', False),
+            'fiscal_position': price_unit_json.get('fiscal_position', False),
+            'document_tax_mode': price_unit_json.get('document_tax_mode', False),
+        }
+
+        seller_price = self.selected_seller_id.with_company(company).price if self.selected_seller_id else self.product_id.with_company(company).standard_price
+        previous_seller_price = price_unit_json.get('seller_price')
+
+        if keep_line_price_unit_value:
+            mode = 'manual_price_unit'
+        elif seller_price == previous_seller_price:
+            mode = 'continue_with_current_price_unit'
+        else:
+            mode = 'reload_from_seller_price'
+
+        if mode == 'reload_from_seller_price':
+            previous_document_values['product'] = False
+        Product._adapt_document_values_to_product(previous_document_values, self.product_id)
+        if mode == 'reload_from_seller_price':
+            previous_document_values['price_unit'] = seller_price
+            previous_document_values['uom'] = self.uom_id
+            previous_document_values['currency'] = self.selected_seller_id.currency_id if self.selected_seller_id else self.product_id.cost_currency_id
+            Product._adapt_document_values_to_fiscal_position(previous_document_values, self.order_id.fiscal_position_id)
+        elif mode == 'manual_price_unit':
+            previous_document_values['price_unit'] = self.price_unit
+        Product._adapt_document_values_to_fiscal_position(previous_document_values, self.order_id.fiscal_position_id)
+        if mode in ('manual_price_unit', 'continue_with_current_price_unit'):
+            Product._adapt_document_values_to_currency(previous_document_values, currency)
+            Product._adapt_document_values_to_taxes(previous_document_values, self.tax_ids)
+            Product._adapt_document_values_to_uom(previous_document_values, self.uom_id)
+        Product._adapt_document_values_to_document_tax_mode(previous_document_values, self.order_id.document_tax_mode)
+        previous_document_values['seller_price'] = seller_price
+        return export(previous_document_values)
 
     @api.depends('product_qty', 'uom_id', 'company_id', 'order_id.partner_id', 'document_tax_mode', 'product_id')
     def _compute_price_unit_and_date_planned_and_name(self):
@@ -513,14 +558,16 @@ class PurchaseOrderLine(models.Model):
                 line._compute_tax_id()
                 line._suggest_quantity()
 
-            line.price_unit_json = line._adapt_price_unit()
-            line.price_unit = float_round(line.price_unit_json['price_unit'], precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
+            price_unit, price_unit_json = line._adapt_price_unit()
+            line.price_unit_json = self.env['product.product']._serialize_price_unit_json(price_unit_json)
+            line.price_unit = float_round(price_unit, precision_digits=max(line.currency_id.decimal_places, self.env['decimal.precision'].precision_get('Product Price')))
 
     @api.onchange('price_unit')
     def _inverse_price_unit(self):
         for line in self:
-            if price_unit_json := line._adapt_price_unit(keep_line_price_unit_value=True):
-                line.price_unit_json = price_unit_json
+            price_unit_json = line._adapt_price_unit(keep_line_price_unit_value=True)[1]
+            if price_unit_json:
+                line.price_unit_json = self.env['product.product']._serialize_price_unit_json(price_unit_json)
 
     @api.depends('product_id')
     def _compute_translated_product_name(self):
