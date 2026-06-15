@@ -13,6 +13,8 @@ import {
     watchListeners,
 } from "@odoo/hoot";
 
+import { formatTime } from "@web/../lib/hoot/hoot_utils";
+
 import { mockAssetsFactory } from "./mock_assets.hoot";
 import { mockBrowserFactory } from "./mock_browser.hoot";
 import { mockCurrencyFactory } from "./mock_currency.hoot";
@@ -360,7 +362,9 @@ async function __gcAndLogMemory(label, testCount) {
     textarea.remove();
 
     // Run garbage collection
+    const gcStart = performance.now();
     await window.gc({ type: "major", execution: "async" });
+    gcTotalMs += performance.now() - gcStart;
 
     // Log memory usage
     const logs = [
@@ -558,6 +562,7 @@ const sortedModuleNames = [];
 let dependencyBatch = [];
 /** @type {Promise<Record<string, string[]>> | null} */
 let dependencyBatchPromise = null;
+let gcTotalMs = 0;
 let nextRpcId = 1e9;
 
 //-----------------------------------------------------------------------------
@@ -735,6 +740,9 @@ export async function runTests(options) {
     }
 
     await __gcAndLogMemory("tests done");
+    if (gcTotalMs) {
+        console.log("[MEMINFO] Total GC time:", formatTime(gcTotalMs));
+    }
 }
 
 /**
