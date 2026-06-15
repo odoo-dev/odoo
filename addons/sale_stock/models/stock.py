@@ -20,7 +20,7 @@ class StockMove(models.Model):
     def _compute_packaging_uom_id(self):
         super()._compute_packaging_uom_id()
         for move in self:
-            if move.sale_line_id:
+            if move.sale_line_id and move.product_id == move.sale_line_id.product_id:
                 move.packaging_uom_id = move.sale_line_id.product_uom_id
 
     @api.depends('sale_line_id')
