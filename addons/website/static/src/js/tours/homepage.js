@@ -1,11 +1,14 @@
 import {
     changeBackgroundColor,
+    clickOnEditAndWaitEditMode,
+    clickOnSave,
     clickOnSnippet,
     clickOnText,
-    insertSnippet,
     goBackToBlocks,
-    registerThemeHomepageTour,
+    goToTheme,
+    insertSnippet,
 } from "@website/js/tours/tour_utils";
+import { registry } from "@web/core/registry";
 
 const snippets = [
     {
@@ -50,18 +53,23 @@ const snippets = [
     },
 ];
 
-registerThemeHomepageTour("homepage", () => [
-    ...insertSnippet(snippets[0], { position: "top" }),
-    ...clickOnText(snippets[0], "h1"),
-    goBackToBlocks(),
-    ...insertSnippet(snippets[1]),
-    ...insertSnippet(snippets[2]),
-    ...clickOnSnippet(snippets[2], "top"),
-    changeBackgroundColor(),
-    goBackToBlocks(),
-    ...insertSnippet(snippets[3]),
-    ...insertSnippet(snippets[4], { position: "top" }),
-    ...insertSnippet(snippets[5]),
-    ...insertSnippet(snippets[6]),
-    ...insertSnippet(snippets[7]),
-]);
+registry.category("web_tour.tours").add("homepage", {
+    steps: () => [
+        ...clickOnEditAndWaitEditMode(),
+        ...insertSnippet(snippets[0], { position: "top" }),
+        ...clickOnText(snippets[0], "h1"),
+        goBackToBlocks(),
+        ...insertSnippet(snippets[1]),
+        ...insertSnippet(snippets[2]),
+        ...clickOnSnippet(snippets[2], "top"),
+        changeBackgroundColor(),
+        goBackToBlocks(),
+        ...insertSnippet(snippets[3]),
+        ...insertSnippet(snippets[4], { position: "top" }),
+        ...insertSnippet(snippets[5]),
+        ...insertSnippet(snippets[6]),
+        ...insertSnippet(snippets[7]),
+        ...goToTheme(),
+        ...clickOnSave(),
+    ],
+});

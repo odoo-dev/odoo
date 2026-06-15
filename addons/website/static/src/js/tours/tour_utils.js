@@ -503,24 +503,6 @@ export function registerWebsitePreviewTour(name, options, steps) {
     });
 }
 
-export function registerThemeHomepageTour(name, steps) {
-    if (typeof steps !== "function") {
-        throw new Error(`tour.steps has to be a function that returns TourStep[]`);
-    }
-    return registerWebsitePreviewTour(
-        "homepage", // it overrides the community tour with the associated theme tour
-        {},
-        () => [
-            ...clickOnEditAndWaitEditMode(),
-            // FIXME(?) this should probably reuse the prepend_trigger function
-            // so that we do check that we are really on the homepage.
-            ...steps(),
-            ...goToTheme(),
-            ...clickOnSave(),
-        ]
-    );
-}
-
 /**
  * Switches to a different website by clicking on the website switcher.
  *
