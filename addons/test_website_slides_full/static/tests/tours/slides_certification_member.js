@@ -133,7 +133,7 @@ var profileSteps = [{
     expectUnloadPage: true,
 }, {
     content: 'eLearning: access user profile',
-    trigger: '.o_wslides_home_aside_loggedin a:contains("View")',
+    trigger: '.o_wslides_home_nav a.stretched-link[href*="/profile/user/"]',
     run: "click",
     expectUnloadPage: true,
 }, {

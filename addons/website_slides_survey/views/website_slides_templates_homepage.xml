@@ -1,27 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <template id="courses_search_bar_inherit_survey" inherit_id="website_slides.courses_search_bar">
-            <xpath expr="//div[@id='navbarTagGroups']//ul" position="inside">
-                <li class="order-first">
-                    <a t-if="search_slide_category != 'certification'" class="btn btn-light"
-                    t-att-href="slide_query_url(tag=slugify_tags(search_tags.ids), my=search_my, search=search_term, slide_category='certification')">
-                        <t t-call="website_slides_survey.o_wss_certification_icon"/>
-                        <span class="ms-1">Certifications</span>
-                    </a>
-                </li>
+        <template id="courses_filter_sidebar_inherit_survey" inherit_id="website_slides.courses_filter_sidebar">
+            <xpath expr="//div[hasclass('o_wslides_filter_sidebar')]" position="inside">
+                <div class="accordion-item">
+                    <div class="accordion-header mb-0">
+                        <button t-attf-class="accordion-button px-0 bg-transparent shadow-none #{'collapsed' if search_slide_category != 'certification' else ''}"
+                            type="button" data-bs-toggle="collapse" data-bs-target="#o_wslides_filter_certification"
+                            t-att-aria-expanded="'true' if search_slide_category == 'certification' else 'false'"
+                            aria-controls="o_wslides_filter_certification">
+                            <b>Type</b>
+                        </button>
+                    </div>
+                    <div id="o_wslides_filter_certification"
+                        t-attf-class="accordion-collapse collapse #{'show' if search_slide_category == 'certification' else ''}">
+                        <div class="mb-3">
+                            <div t-att-data-post="slide_query_url(tag=slugify_tags(search_tags.ids), my=search_my, search=search_term, slide_category='' if search_slide_category == 'certification' else 'certification', prevent_redirect=True)"
+                                class="post_link form-check mb-1 cursor-pointer">
+                                <input class="form-check-input pe-none" type="checkbox"
+                                    id="o_wslides_filter_certification_cb"
+                                    t-att-checked="search_slide_category == 'certification'"/>
+                                <label class="form-check-label w-100 cursor-pointer d-flex align-items-center gap-1"
+                                    for="o_wslides_filter_certification_cb">
+                                    <t t-call="website_slides_survey.o_wss_certification_icon"/>
+                                    Certifications
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </template>
+
+        <template id="courses_home_offcanvas_inherit_survey" inherit_id="website_slides.courses_home">
+            <xpath expr="//div[@id='o_wslides_mobile_price']/.." position="before">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button t-attf-class="accordion-button #{'collapsed' if search_slide_category != 'certification' else ''}" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#o_wslides_mobile_certification"
+                            t-att-aria-expanded="'true' if search_slide_category == 'certification' else 'false'"
+                            aria-controls="o_wslides_mobile_certification">
+                            Type
+                        </button>
+                    </h2>
+                    <div id="o_wslides_mobile_certification"
+                        t-attf-class="accordion-collapse collapse #{'show' if search_slide_category == 'certification' else ''}">
+                        <div class="accordion-body pt-0">
+                            <div t-att-data-post="slide_query_url(tag=slugify_tags(search_tags.ids), my=search_my, search=search_term, slide_category='' if search_slide_category == 'certification' else 'certification', prevent_redirect=True)"
+                                class="post_link form-check mb-1 cursor-pointer">
+                                <input class="form-check-input pe-none" type="checkbox"
+                                    id="o_wslides_mobile_filter_certification_cb"
+                                    t-att-checked="search_slide_category == 'certification'"/>
+                                <label class="form-check-label w-100 cursor-pointer d-flex align-items-center gap-1"
+                                    for="o_wslides_mobile_filter_certification_cb">
+                                    <t t-call="website_slides_survey.o_wss_certification_icon"/>
+                                    Certifications
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </xpath>
         </template>
 
         <template id="course_card_inherit_survey" inherit_id="website_slides.course_card">
-            <xpath expr="//div/div" position="after">
-                <div t-if="channel.nbr_certification > 0" class="position-absolute py-1 px-2 h5" style="right:0; top:0">
+            <xpath expr="//div[hasclass('o_wslides_background_image')]" position="after">
+                <div t-if="channel.nbr_certification > 0" class="position-absolute top-0 start-0 m-2">
                     <t t-call="website_slides_survey.o_wss_certification_icon"/>
                 </div>
             </xpath>
         </template>
 
-        <template id="courses_search_results_inherit_survey" inherit_id="website_slides.courses_search_results">
+        <template id="courses_catalog_inherit_survey" inherit_id="website_slides.courses_catalog">
             <xpath expr="//t[@t-call='website_slides.courses_search_tags']" position="before">
                 <t t-if="search_slide_category == 'certification'">
                     <span class="align-items-baseline border d-inline-flex ps-2 rounded mb-2">

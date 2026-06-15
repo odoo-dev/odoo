@@ -425,7 +425,7 @@ class WebsiteSlides(WebsiteProfile):
             return request.redirect(f"/slides?{keep_query('*')}")
         return request.render('website_slides.courses_home', render_values)
 
-    def slides_channel_values(self, slide_category=None, slug_tags=None, my=0, page=None, page_size=12, **post):
+    def slides_channel_values(self, slide_category=None, slug_tags=None, my=0, page=None, page_size=12, price=None, min_rating=None, my_filter='', **post):
         """ Home page displaying a list of courses displayed according to some
         criterion and search terms.
 
@@ -439,6 +439,10 @@ class WebsiteSlides(WebsiteProfile):
           :param dict post: post parameters, including
           :param int|None page: The current page number. Set to None to disable pagination (default).
           :param int page_size: number of element per page
+          :param string price: comma-separated 'free' and/or 'paid' to filter by enroll type
+          :param string min_rating: minimum average star rating (e.g. '4.5')
+          :param string my_filter: when 'my' is active, sub-filter by enrollment status:
+           'in_progress', 'not_started', or 'completed'
 
            * ``search``: filter on course description / name;
         """
@@ -451,9 +455,51 @@ class WebsiteSlides(WebsiteProfile):
         options = self._get_slide_channel_search_options(**search_args)
         search = post.get('search')
         order = self._channel_order_by_criterion.get(post.get('sorting'))
+        valid_prices = ('free', 'paid')
+        price_list = list(dict.fromkeys(
+            f for f in (price or '').split(',') if f in valid_prices
+        ))
+        # Both free and paid selected is equivalent to no price filter.
+        has_price_filter = len(price_list) == 1
+        # When price/rating filters are active we need the full result set before
+        # slicing so that pagination counts are correct after filtering.
+        has_custom_filter = has_price_filter or min_rating
         search_count, details, fuzzy_search_term = self.env.website._search_with_fuzzy(
-            'slide_channel', search, offset=0, limit=page * page_size if page else 1000, order=order, options=options)
+            'slide_channel', search, offset=0,
+            limit=10000 if has_custom_filter else (page * page_size if page else 1000),
+            order=order, options=options)
         channels_all = details[0].get('results', request.env['slide.channel'])
+
+        if price_list == ['free']:
+            channels_all = channels_all.filtered(lambda c: c.enroll != 'payment')
+        elif price_list == ['paid']:
+            channels_all = channels_all.filtered(lambda c: c.enroll == 'payment')
+
+        min_rating_float = None
+        if min_rating:
+            try:
+                min_rating_float = float(min_rating)
+                channels_all = channels_all.filtered(lambda c: c.rating_avg_stars >= min_rating_float)
+            except (ValueError, TypeError):
+                min_rating_float = None
+
+        if has_custom_filter:
+            search_count = len(channels_all)
+
+        valid_statuses = ('in_progress', 'not_started', 'completed')
+        my_filter_list = [f for f in (my_filter or '').split(',') if f in valid_statuses]
+        if my and my_filter_list:
+            def _status_matches(c, filters=my_filter_list):
+                if 'in_progress' in filters and c.completion and not c.completed:
+                    return True
+                if 'not_started' in filters and not c.completion and not c.completed:
+                    return True
+                if 'completed' in filters and c.completed:
+                    return True
+                return False
+            channels_all = channels_all.filtered(_status_matches)
+            search_count = len(channels_all)
+
         channels = channels_all[(page - 1) * page_size:page * page_size] if page else channels_all
         tag_groups = request.env['slide.channel.tag.group'].search(
             ['&', ('tag_ids', '!=', False), ('website_published', '=', True)])
@@ -467,7 +513,7 @@ class WebsiteSlides(WebsiteProfile):
         render_values = self._slide_render_context_base()
         render_values.update(self._prepare_user_values(**post))
         render_values.update(self._slides_channel_user_values(
-            compute_channels_my=not self._has_slide_channel_search(**search_args)))
+            compute_channels_my=bool(my) or not self._has_slide_channel_search(**search_args)))
         render_values.update({
             'channels': channels,
             'tag_groups': tag_groups,
@@ -475,11 +521,17 @@ class WebsiteSlides(WebsiteProfile):
             'original_search': fuzzy_search_term and search,
             'search_slide_category': slide_category,
             'search_my': my,
+            'search_my_filter': my_filter,
             'search_tags': search_tags,
             'search_count': search_count,
+            'search_price': ','.join(price_list) if price_list else None,
+            'search_min_rating': min_rating_float,
             'top3_users': self._get_top3_users(),
             'slugify_tags': self._slugify_tags,
-            'slide_query_url': QueryURL('/slides', ['tag']),
+            # Sticky defaults so that price/rating survive tag and search navigation.
+            'slide_query_url': QueryURL('/slides', ['tag'],
+                price=','.join(price_list) if price_list else '',
+                min_rating=str(min_rating_float) if min_rating_float else ''),
             'pager': self.env.website.pager(
                 url=request.httprequest.path.partition('/page/')[0],
                 url_args=request.httprequest.args.to_dict(),

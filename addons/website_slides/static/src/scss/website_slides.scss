@@ -161,6 +161,15 @@ $o-wslides-fs-side-width: 300px;
         margin-left: auto;
         margin-right: auto;
     }
+
+    // Needed to remove the margin-bottom of the HTML field
+    small[name="o_wslides_course_description"] {
+        margin-bottom: $spacer;
+
+        p {
+            margin-bottom: 0;
+        }
+    }
 }
 
 // New course page
