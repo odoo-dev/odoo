@@ -217,6 +217,7 @@ class SaleOrderLine(models.Model):
     price_unit = fields.Float(
         string="Unit Price",
         compute="_compute_price_unit",
+        inverse='_inverse_price_unit',
         min_display_digits="Product Price",
         store=True,
         readonly=False,
@@ -681,6 +682,25 @@ class SaleOrderLine(models.Model):
                     **line._get_pricelist_kwargs(),
                 )
 
+    def _adapt_price_unit(self, keep_line_price_unit_value=False):
+        self.ensure_one()
+        return self.env['product.product']._adapt_price_unit(
+            document_type='sale',
+            company=self.company_id or self.env.company,
+            product=self.product_id,
+            uom=self.product_uom_id,
+            taxes=self.tax_ids,
+            display_price=self._get_display_price() if self.product_id else None,
+            currency_to_adapt=self.product_id.currency_id,
+            price_unit=self.price_unit,
+            currency=self.currency_id,
+            document_date=self.order_id.date_order,
+            fiscal_position=self.order_id.fiscal_position_id,
+            document_tax_mode=self.order_id.document_tax_mode,
+            price_unit_json=self.price_unit_json,
+            keep_line_price_unit_value=keep_line_price_unit_value,
+        )
+
     @api.depends("product_id", "product_uom_id", "product_uom_qty", "document_tax_mode")
     def _compute_price_unit(self):
         for line in self:
@@ -700,27 +720,14 @@ class SaleOrderLine(models.Model):
             if not line.product_uom_id or not line.product_id:
                 line.price_unit = 0.0
             else:
-                # When price is set to None _get_line_price_unit will fall back on the price on the line
-                price = None if line.price_unit else line._get_display_price()
+                line.price_unit_json = line._adapt_price_unit()
+                line.price_unit = line.price_unit_json['price_unit']
 
-                product_change = line.price_unit_json and line.price_unit_json['product_id'] != line.product_id.id
-                fpos_change = line.price_unit_json and line.product_id and line.price_unit_json['fpos_id'] != line.order_id.fiscal_position_id.id
-                display_price_change = line.price_unit_json and line.product_id and line.price_unit_json['display_price'] != self._convert_to_uom_unit(line._get_display_price())
-
-                if product_change or fpos_change or display_price_change or line.env.context.get("recompute_from_display_price", False):
-                    price = line._get_display_price()
-                    line.price_unit_json = None
-
-                line.price_unit = line.product_id._get_line_price_unit(line, 'sale', price)
-
-            line.price_unit_json = {
-                'price_unit': line.price_unit,
-                'uom_id': line.product_uom_id.id,
-                'product_id': line.product_id.id,
-                'document_tax_mode': line.document_tax_mode,
-                'fpos_id': line.order_id.fiscal_position_id.id,
-                'display_price': self._convert_to_uom_unit(line._get_display_price()) if line.product_id else None,
-            }
+    @api.onchange('price_unit')
+    def _inverse_price_unit(self):
+        for line in self:
+            if price_unit_json := line._adapt_price_unit(keep_line_price_unit_value=True):
+                line.price_unit_json = price_unit_json
 
     def _convert_to_uom_unit(self, price):
         return self.product_uom_id[:1]._compute_price(price, self.env.ref('uom.product_uom_unit'))

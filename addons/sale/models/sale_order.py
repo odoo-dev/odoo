@@ -1188,6 +1188,7 @@ class SaleOrder(models.Model):
     def _compute_has_overages(self):
         for order in self:
             order.has_overages = any(line.qty_overage for line in order.order_line)
+
     @api.depends('company_id')
     def _compute_document_tax_mode(self):
         for order in self:

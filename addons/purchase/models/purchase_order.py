@@ -1421,9 +1421,10 @@ class PurchaseOrder(models.Model):
                 # _origin check always passes and skips price recomputation
                 # when there's no vendor pricelist. Convert the price manually.
                 if not pol.selected_seller_id:
-                    pol.price_unit = pol.technical_price_unit = old_uom._compute_price(
+                    pol.price_unit = pol.price_unit_json['price_unit'] = old_uom._compute_price(
                         pol.price_unit, pol.uom_id
                     )
+                    pol.price_unit_json['uom'] = pol.uom_id
             if quantity != 0:
                 pol.product_qty = quantity
             elif self.state in ['draft', 'sent']:

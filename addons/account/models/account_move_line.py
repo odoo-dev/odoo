@@ -1129,7 +1129,7 @@ class AccountMoveLine(models.Model):
             line.price_subtotal = base_line['tax_details']['total_excluded_currency']
             line.price_total = base_line['tax_details']['total_included_currency']
 
-    def _adapt_price_unit(self):
+    def _adapt_price_unit(self, keep_line_price_unit_value=False):
         self.ensure_one()
 
         if (
@@ -1163,6 +1163,8 @@ class AccountMoveLine(models.Model):
             fiscal_position=self.move_id.fiscal_position_id,
             document_tax_mode=self.move_id.document_tax_mode,
             price_unit_json=self.price_unit_json,
+            is_account_move=True,
+            keep_line_price_unit_value=keep_line_price_unit_value,
         )
 
     @api.depends('product_id', 'product_uom_id', 'document_tax_mode')
@@ -1175,7 +1177,7 @@ class AccountMoveLine(models.Model):
     @api.onchange('price_unit')
     def _inverse_price_unit(self):
         for line in self:
-            if price_unit_json := line._adapt_price_unit():
+            if price_unit_json := line._adapt_price_unit(keep_line_price_unit_value=True):
                 line.price_unit_json = price_unit_json
 
     @api.depends('product_id')
