@@ -1129,9 +1129,21 @@ class AccountMoveLine(models.Model):
             line.price_subtotal = base_line['tax_details']['total_excluded_currency']
             line.price_total = base_line['tax_details']['total_included_currency']
 
-    def _adapt_price_unit(self, keep_line_price_unit_value=False):
-        self.ensure_one()
+    def _adapt_price_unit(self, manual_price_unit=None):
+        def export(values):
+            return (
+                values['price_unit'],
+                {
+                    'product': values['product'],
+                    'uom': values['uom'],
+                    'currency': values['currency'],
+                    'fiscal_position': values['fiscal_position'],
+                    'document_tax_mode': values['document_tax_mode'],
+                },
+            )
 
+        self.ensure_one()
+        base_line = self.move_id._prepare_product_base_line_for_taxes_computation(self)
         if (
             not self.move_id.is_invoice(include_receipts=True)
             or self.display_type != 'product'
@@ -1140,45 +1152,54 @@ class AccountMoveLine(models.Model):
                 and self.price_unit_json
                 and self.document_tax_mode == self.price_unit_json['document_tax_mode']
             )
+            or base_line['special_type']
         ):
-            return
-        base_line = self.move_id._prepare_product_base_line_for_taxes_computation(self)
-        if base_line['special_type']:
-            return
+            return self.price_unit, None
 
         if self.move_id.is_sale_document(include_receipts=True):
             document_type = 'sale'
         else:
             document_type = 'purchase'
 
-        return self.env['product.product']._adapt_price_unit(
-            document_type=document_type,
-            company=self.company_id or self.env.company,
-            product=self.product_id,
-            uom=self.product_uom_id,
-            taxes=self.tax_ids,
-            price_unit=self.price_unit,
-            currency=self.currency_id,
-            document_date=self.date,
-            fiscal_position=self.move_id.fiscal_position_id,
-            document_tax_mode=self.move_id.document_tax_mode,
-            price_unit_json=self.price_unit_json,
-            is_account_move=True,
-            keep_line_price_unit_value=keep_line_price_unit_value,
-        )
+        company = self.company_id or self.env.company
+        currency = self.currency_id or company.currency_id
+        Product = self.env['product.product']
+
+        price_unit_json = Product._unserialize_price_unit_json(self.price_unit_json)
+        previous_document_values = {
+            'document_type': document_type,
+            'company': company,
+            'document_date': self.date or fields.Date.context_today(self),
+
+            'price_unit': self.price_unit,
+            'product': price_unit_json.get('product', False),
+            'uom': price_unit_json.get('uom', False),
+            'taxes': price_unit_json.get('taxes', []),
+            'currency': price_unit_json.get('currency', False),
+            'fiscal_position': price_unit_json.get('fiscal_position', False),
+            'document_tax_mode': price_unit_json.get('document_tax_mode', False),
+        }
+        Product._adapt_document_values_to_product(previous_document_values, self.product_id)
+        if manual_price_unit is not None:
+            previous_document_values['price_unit'] = manual_price_unit
+        Product._adapt_document_values_to_fiscal_position(previous_document_values, self.move_id.fiscal_position_id)
+        Product._adapt_document_values_to_currency(previous_document_values, currency)
+        Product._adapt_document_values_to_taxes(previous_document_values, self.tax_ids)
+        Product._adapt_document_values_to_uom(previous_document_values, self.product_uom_id)
+        Product._adapt_document_values_to_document_tax_mode(previous_document_values, self.move_id.document_tax_mode)
+        return export(previous_document_values)
 
     @api.depends('product_id', 'product_uom_id', 'document_tax_mode')
     def _compute_price_unit(self):
         for line in self:
-            if price_unit_json := line._adapt_price_unit():
-                line.price_unit_json = price_unit_json
-                line.price_unit = line.price_unit_json['price_unit']
+            line.price_unit, price_unit_json = line._adapt_price_unit()
+            line.price_unit_json = self.env['product.product']._serialize_price_unit_json(price_unit_json)
 
     @api.onchange('price_unit')
     def _inverse_price_unit(self):
         for line in self:
-            if price_unit_json := line._adapt_price_unit(keep_line_price_unit_value=True):
-                line.price_unit_json = price_unit_json
+            price_unit_json = line._adapt_price_unit(manual_price_unit=line.price_unit)[1]
+            line.price_unit_json = self.env['product.product']._serialize_price_unit_json(price_unit_json)
 
     @api.depends('product_id')
     def _compute_tax_ids(self):

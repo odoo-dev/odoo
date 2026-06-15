@@ -180,10 +180,11 @@ class TestSalePrices(SaleCommon):
             ]
         )
 
-        order_lines = order.order_line
-        self.assertEqual(order_lines[0].price_unit, 80.0)
-        self.assertEqual(order_lines[1].price_unit, 75.0)
-        self.assertEqual(order_lines[2].price_unit, 100.0)
+        self.assertRecordValues(order.order_line, [
+            {'price_unit': 80.0},
+            {'price_unit': 75.0},
+            {'price_unit': 100.0},
+        ])
 
     def test_no_pricelist_rules(self):
         """Check currencies and uom conversions when no pricelist rule is available."""
@@ -373,7 +374,8 @@ class TestSalePrices(SaleCommon):
                 self.assertAlmostEqual(line_form.price_unit, 0.55)
 
     def test_compute_price_unit_no_currency(self):
-        new_order = self.env["sale.order"].new({
+        new_order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
             "currency_id": False,
             "pricelist_id": False,
             "order_line": [Command.create({"product_id": self.product.id})],
@@ -386,7 +388,7 @@ class TestSalePrices(SaleCommon):
         self.assertEqual(new_line.price_unit, new_price, "Manual unit price shouldn't change")
 
         new_order._recompute_prices()
-        self.assertEqual(new_line.price_unit, self.product.list_price)
+        self.assertEqual(new_line.price_unit, new_price)
 
     def test_multi_currency_discount(self):
         """Verify the currency used for pricelist price & discount computation."""
@@ -579,7 +581,6 @@ class TestSalePrices(SaleCommon):
             "order_id": self.sale_order.id,
         })
         self.assertEqual(so_line.price_unit, 0.0)
-        self.assertEqual(so_line.price_unit_json['price_unit'], 0.0)
 
         with Form(so_line) as so_line:
             so_line.price_unit = 10.0

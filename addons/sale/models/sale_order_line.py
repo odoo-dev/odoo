@@ -217,7 +217,7 @@ class SaleOrderLine(models.Model):
     price_unit = fields.Float(
         string="Unit Price",
         compute="_compute_price_unit",
-        inverse='_inverse_price_unit',
+        inverse="_inverse_price_unit",
         min_display_digits="Product Price",
         store=True,
         readonly=False,
@@ -682,55 +682,102 @@ class SaleOrderLine(models.Model):
                     **line._get_pricelist_kwargs(),
                 )
 
-    def _adapt_price_unit(self, keep_line_price_unit_value=False):
+    def _adapt_price_unit(self, manual_price_unit=None):
+        def export(values):
+            return (
+                values['price_unit'],
+                {
+                    'product': values['product'],
+                    'uom': values['uom'],
+                    'currency': values['currency'],
+                    'fiscal_position': values['fiscal_position'],
+                    'document_tax_mode': values['document_tax_mode'],
+                    'display_price': values['display_price'],
+                },
+            )
+
         self.ensure_one()
-        return self.env['product.product']._adapt_price_unit(
-            document_type='sale',
-            company=self.company_id or self.env.company,
-            product=self.product_id,
-            uom=self.product_uom_id,
-            taxes=self.tax_ids,
-            display_price=self._get_display_price() if self.product_id else None,
-            currency_to_adapt=self.product_id.currency_id,
-            price_unit=self.price_unit,
-            currency=self.currency_id,
-            document_date=self.order_id.date_order,
-            fiscal_position=self.order_id.fiscal_position_id,
-            document_tax_mode=self.order_id.document_tax_mode,
-            price_unit_json=self.price_unit_json,
-            keep_line_price_unit_value=keep_line_price_unit_value,
-        )
+        base_line = self._prepare_base_line_for_taxes_computation()
+        if (
+            self._is_delivery()
+            or self.qty_invoiced > 0
+            or (self.product_id.reinvoice_policy == "cost" and self.is_expense)
+            or base_line['special_type']
+        ):
+            return self.price_unit, None
+
+        company = self.company_id or self.env.company
+        currency = self.currency_id or company.currency_id
+        Product = self.env['product.product']
+
+        price_unit_json = Product._unserialize_price_unit_json(self.price_unit_json)
+        previous_document_values = {
+            'document_type': 'sale',
+            'company': company,
+            'document_date': self.order_id.date_order or fields.Date.context_today(self),
+
+            'price_unit': self.price_unit,
+            'product': price_unit_json.get('product', False),
+            'uom': price_unit_json.get('uom', False),
+            'taxes': price_unit_json.get('taxes', []),
+            'currency': price_unit_json.get('currency', False),
+            'fiscal_position': price_unit_json.get('fiscal_position', False),
+            'document_tax_mode': price_unit_json.get('document_tax_mode', False),
+        }
+
+        # 'display_price' is the new default price unit.
+        # 'previous_display_price' is the default price unit used to compute the current values in 'price_unit_json'.
+        # Since 'previous_display_price' might have been computed with another UOM, we need to update it to be able
+        # to compare it with 'display_price'.
+        display_price = self._get_display_price()
+        previous_display_price = price_unit_json.get('display_price')
+        if previous_display_price is not None:
+            display_price_previous_document_values = {
+                'uom': previous_document_values['uom'],
+                'price_unit': previous_display_price,
+            }
+            Product._adapt_document_values_to_uom(display_price_previous_document_values, self.product_uom_id)
+            previous_display_price = display_price_previous_document_values['price_unit']
+
+        if manual_price_unit is not None:
+            mode = 'manual_price_unit'
+        elif display_price == previous_display_price:
+            mode = 'continue_with_current_price_unit'
+        else:
+            mode = 'reload_from_display_price'
+
+        if mode == 'reload_from_display_price':
+            previous_document_values['product'] = False
+            previous_document_values['uom'] = self.product_uom_id
+            previous_document_values['currency'] = currency
+        Product._adapt_document_values_to_product(previous_document_values, self.product_id)
+        if mode == 'reload_from_display_price':
+            previous_document_values['price_unit'] = display_price
+            previous_document_values['uom'] = self.product_uom_id
+            previous_document_values['currency'] = currency
+        elif mode == 'manual_price_unit':
+            previous_document_values['price_unit'] = manual_price_unit
+        Product._adapt_document_values_to_fiscal_position(previous_document_values, self.order_id.fiscal_position_id)
+        if mode in ('manual_price_unit', 'continue_with_current_price_unit'):
+            Product._adapt_document_values_to_currency(previous_document_values, currency)
+            Product._adapt_document_values_to_taxes(previous_document_values, self.tax_ids)
+            Product._adapt_document_values_to_uom(previous_document_values, self.product_uom_id)
+        Product._adapt_document_values_to_document_tax_mode(previous_document_values, self.order_id.document_tax_mode)
+        previous_document_values['display_price'] = display_price
+        return export(previous_document_values)
 
     @api.depends("product_id", "product_uom_id", "product_uom_qty", "document_tax_mode")
     def _compute_price_unit(self):
         for line in self:
-            # Don't compute the price for deleted lines or lines for which the
-            # price unit doesn't come from the product.
-            if not line.order_id or line.is_downpayment or line._is_global_discount() or line._is_delivery():
-                continue
-
-            # check if the price has been manually set or there is already invoiced amount.
-            # if so, the price shouldn't change as it might have been manually edited.
-            if (
-                line.qty_invoiced > 0
-                or (line.product_id.reinvoice_policy == "cost" and line.is_expense)
-            ):
-                continue
-            line = line.with_context(sale_write_from_compute=True)
-            if not line.product_uom_id or not line.product_id:
-                line.price_unit = 0.0
-            else:
-                line.price_unit_json = line._adapt_price_unit()
-                line.price_unit = line.price_unit_json['price_unit']
+            line.price_unit, price_unit_json = line._adapt_price_unit()
+            line.price_unit_json = self.env['product.product']._serialize_price_unit_json(price_unit_json)
 
     @api.onchange('price_unit')
     def _inverse_price_unit(self):
         for line in self:
-            if price_unit_json := line._adapt_price_unit(keep_line_price_unit_value=True):
-                line.price_unit_json = price_unit_json
-
-    def _convert_to_uom_unit(self, price):
-        return self.product_uom_id[:1]._compute_price(price, self.env.ref('uom.product_uom_unit'))
+            price_unit_json = line._adapt_price_unit(manual_price_unit=line.price_unit)[1]
+            if price_unit_json:
+                line.price_unit_json = self.env['product.product']._serialize_price_unit_json(price_unit_json)
 
     @api.depends("is_storable", "product_uom_qty", "qty_delivered", "state", "product_uom_id")
     def _compute_display_qty_widget(self):
@@ -805,7 +852,8 @@ class SaleOrderLine(models.Model):
         :rtype: float
         """
         self.ensure_one()
-        self.product_id.ensure_one()
+        if not self.product_id:
+            return self.price_unit
 
         return self.pricelist_item_id._compute_price(
             product=self.product_id.with_context(**self._get_product_price_context()),
