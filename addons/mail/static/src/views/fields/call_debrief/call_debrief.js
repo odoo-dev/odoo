@@ -57,6 +57,9 @@ export class CallDebrief extends Component {
         // Tracks active record ID to bypass this.props update lag during async paging
         this.activeResId = this.props.record.resId;
 
+        this.virtualClockId = null;
+        this.lastClockTime = null;
+
         onWillStart(() => this._loadData(this.props));
 
         onWillUpdateProps(async (nextProps) => {
@@ -81,6 +84,7 @@ export class CallDebrief extends Component {
 
         onWillUnmount(() => {
             clearTimeout(this.feedbackTimeout);
+            this._stopVirtualClock();
         });
 
         // Effect for hardware media synchronization
@@ -92,6 +96,44 @@ export class CallDebrief extends Component {
                 media.muted = this.state.isMuted;
             }
         });
+    }
+
+    _startVirtualClock() {
+        if (this.virtualClockId) {
+            return;
+        }
+        this.lastClockTime = performance.now();
+        const tick = (now) => {
+            if (!this.state.isPlaying) {
+                this.virtualClockId = null;
+                return;
+            }
+            const delta = (now - this.lastClockTime) / 1000;
+            this.lastClockTime = now;
+
+            if (!this.state.currentSegment) {
+                this.state.currentTime += delta * this.state.playbackRate;
+                if (this.state.currentTime >= this.callDurationSeconds) {
+                    this.state.currentTime = this.callDurationSeconds;
+                    this._pause(_t("End of Media"));
+                } else {
+                    const targetSegment = this._findTargetSegment(this.state.currentTime);
+                    if (targetSegment && targetSegment.startSec <= this.state.currentTime) {
+                        this.setPlaybackTime({ timestamp: this.state.currentTime, play: true });
+                    }
+                }
+            }
+
+            this.virtualClockId = requestAnimationFrame(tick);
+        };
+        this.virtualClockId = requestAnimationFrame(tick);
+    }
+
+    _stopVirtualClock() {
+        if (this.virtualClockId) {
+            cancelAnimationFrame(this.virtualClockId);
+            this.virtualClockId = null;
+        }
     }
 
     get hasMedia() {
@@ -136,12 +178,14 @@ export class CallDebrief extends Component {
         this.state.mediaSegments = [];
         this.state.currentSegment = undefined;
         this.state.currentTime = 0;
+        this._stopVirtualClock();
     }
 
     async _loadData(props) {
         const initialResId = props.record.resId;
         this.state.error = "";
         this.state.isPlaying = false;
+        this._stopVirtualClock();
         this.state.currentSegment = undefined;
         this.state.mediaSegments = [];
 
@@ -313,27 +357,30 @@ export class CallDebrief extends Component {
             // Reached the end of all available media
             if (this.state.currentSegment) {
                 this._pause(false);
+                this.state.currentSegment = undefined;
             }
             return;
         }
 
-        // If we fell into a break between recordings
-        // todo Maybe implement a virtual clock, it'd continue playing during silence
         if (!artifactId && targetSegment.startSec > timestamp) {
-            const gap = targetSegment.startSec - timestamp;
-            if (gap < 2.0) {
-                // Snap to the start of the next segment for small technical gaps
-                this.state.currentTime = targetSegment.startSec;
-            } else {
-                // For larger gaps, pause and remain at the current time without snapping
-                this._pause(false);
-                this.state.currentSegment = undefined;
-                return;
+            this.state.currentSegment = undefined;
+            this._pauseMediaOnly();
+            if (autoplay) {
+                this.state.isPlaying = true;
+                this._startVirtualClock();
             }
+            return;
         }
 
         const relativeTime = Math.max(0, this.state.currentTime - targetSegment.startSec);
         this._alignMediaElement(targetSegment, relativeTime, autoplay, options);
+    }
+
+    _pauseMediaOnly() {
+        const mediaPlayer = this.mediaPlayer();
+        if (mediaPlayer) {
+            mediaPlayer.pause();
+        }
     }
 
     /**
@@ -341,11 +388,9 @@ export class CallDebrief extends Component {
      * @param {string|false} feedback - The text to display. Pass false to suppress feedback.
      */
     _pause(feedback = _t("Pause")) {
-        const mediaPlayer = this.mediaPlayer();
-        if (mediaPlayer) {
-            mediaPlayer.pause();
-        }
+        this._pauseMediaOnly();
         this.state.isPlaying = false;
+        this._stopVirtualClock();
         if (feedback) {
             this.showFeedback(feedback);
         }
@@ -380,28 +425,12 @@ export class CallDebrief extends Component {
             return;
         }
         this.isSwitchingSegment = true;
-
-        const currentIndex = this.state.mediaSegments.indexOf(this.state.currentSegment);
-        if (currentIndex < this.state.mediaSegments.length - 1) {
-            const nextSegment = this.state.mediaSegments[currentIndex + 1];
-            const gap = nextSegment.startSec - this.state.currentSegment.endSec;
-            if (gap < 2.0) {
-                this.setPlaybackTime({
-                    timestamp: nextSegment.startSec,
-                    play: true,
-                    artifactId: nextSegment.id,
-                });
-            } else {
-                // Large gap: pause at the end of the current segment
-                this.setPlaybackTime({
-                    timestamp: this.state.currentSegment.endSec,
-                    play: false,
-                });
-                this.isSwitchingSegment = false;
-            }
-        } else {
-            this._pause(false);
-            this.isSwitchingSegment = false;
+        this.state.currentTime = this.state.currentSegment.endSec;
+        this.state.currentSegment = undefined;
+        this.isSwitchingSegment = false;
+        
+        if (this.state.isPlaying) {
+            this._startVirtualClock();
         }
     }
 

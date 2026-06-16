@@ -1,4 +1,4 @@
-import { Component, onWillUnmount, props, signal } from "@odoo/owl";
+import { Component, useListener, props, signal } from "@odoo/owl";
 import { formatFloatTime } from "@web/views/fields/formatters";
 
 export class CallDebriefTimeline extends Component {
@@ -23,10 +23,8 @@ export class CallDebriefTimeline extends Component {
         this.onDragMove = this.onDragMove.bind(this);
         this.onDragEnd = this.onDragEnd.bind(this);
 
-        onWillUnmount(() => {
-            window.removeEventListener("mousemove", this.onDragMove);
-            window.removeEventListener("mouseup", this.onDragEnd);
-        });
+        useListener(window, "mousemove", this.onDragMove);
+        useListener(window, "mouseup", this.onDragEnd);
     }
 
     formatDuration(seconds) {
@@ -67,8 +65,6 @@ export class CallDebriefTimeline extends Component {
         ev.stopPropagation();
         ev.preventDefault(); // Prevents defualt text selection
         this.isDragging = true;
-        window.addEventListener("mousemove", this.onDragMove);
-        window.addEventListener("mouseup", this.onDragEnd);
         this._updateSeek(ev);
     }
 
@@ -89,8 +85,6 @@ export class CallDebriefTimeline extends Component {
             ev.stopPropagation();
         }
         this.isDragging = false;
-        window.removeEventListener("mousemove", this.onDragMove);
-        window.removeEventListener("mouseup", this.onDragEnd);
     }
 
     _getTimestampFromClientX(clientX) {
