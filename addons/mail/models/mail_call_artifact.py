@@ -70,10 +70,7 @@ class MailCallArtifact(models.Model):
 
     def _check_artifacts_overlap(self, artifacts):
         """Check if the provided artifacts overlap in time"""
-        candidates = sorted(
-            (a for a in artifacts if a._is_overlap_candidate()),
-            key=lambda x: x.start_ms,
-        )
+        candidates = artifacts.filtered(lambda a: a._is_overlap_candidate()).sorted('start_ms')
         for i in range(len(candidates) - 1):
             if candidates[i].end_ms > candidates[i + 1].start_ms:
                 raise ValidationError(self.env._("Media artifacts overlap."))
