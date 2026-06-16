@@ -40,11 +40,9 @@
                     <div class="o_speed_selector_group d-flex align-items-center me-2" title="Playback Speed (&lt;, &gt;)">
                         <label for="playbackRateSelect" class="form-label small mb-0 me-1">Speed</label>
                         <select id="playbackRateSelect" class="form-select form-select-sm" t-on-change="(ev) => this.props.onSetPlaybackRate(ev)">
-                            <t t-foreach="this.props.playbackRates" t-as="rate" t-key="rate">
-                                <option t-att-value="rate" t-att-selected="this.props.playbackRate === rate ? 'selected' : null">
-                                    <t t-out="rate"/>x
-                                </option>
-                            </t>
+                            <option t-foreach="this.props.playbackRates" t-as="rate" t-key="rate" t-att-value="rate" t-att-selected="this.props.playbackRate === rate ? 'selected' : null">
+                                <t t-out="rate"/>x
+                            </option>
                         </select>
                     </div>
                     <div t-if="this.props.media" class="o-CallDebrief-download-separator">

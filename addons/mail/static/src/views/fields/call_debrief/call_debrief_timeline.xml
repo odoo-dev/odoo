@@ -8,12 +8,9 @@
             </div>
             <div class="o-CallDebriefTimeline" t-ref="this.timeline" t-on-mousedown="this.onDragStart">
                 <div class="o-CallDebriefTimeline-track">
-                    <t t-if="this.props.mediaSegments">
-                        <t t-foreach="this.props.mediaSegments" t-as="segment" t-key="segment.id">
-                            <div class="o-CallDebriefTimeline-media-segment"
-                                 t-att-style="this._stylePositionMediaSegment(segment)"/>
-                        </t>
-                    </t>
+                    <div t-if="this.props.mediaSegments" t-foreach="this.props.mediaSegments" t-as="segment" t-key="segment.id"
+                         class="o-CallDebriefTimeline-media-segment"
+                         t-att-style="this._stylePositionMediaSegment(segment)"/>
                 </div>
 
                 <!-- Playhead (rendered on top of everything) -->
