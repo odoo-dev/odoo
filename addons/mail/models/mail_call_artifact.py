@@ -79,10 +79,10 @@ class MailCallArtifact(models.Model):
     # Computes
 
     def _compute_media_id(self):
-        attachments = self.env["ir.attachment"].search_fetch([
+        attachments = self.env["ir.attachment"].search([
             ("res_model", "=", self._name),
             ("res_id", "in", self.ids),
-        ], ['res_id'])
+        ])
         attachment_by_res_id = attachments.grouped('res_id')
         for artifact in self:
             artifact.media_id = attachment_by_res_id.get(artifact.id)
