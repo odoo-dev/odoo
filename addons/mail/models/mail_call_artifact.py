@@ -53,9 +53,7 @@ class MailCallArtifact(models.Model):
     def _constrains_artifacts_overlap(self):
         """Check that artifacts within the same call do not overlap."""
         grouped_artifacts = self._get_artifacts_grouped_by_call()
-        for key, artifacts in grouped_artifacts.items():
-            if not key:
-                continue
+        for artifacts in grouped_artifacts.values():
             self._check_artifacts_overlap(artifacts)
 
     def _get_artifacts_grouped_by_call(self):
