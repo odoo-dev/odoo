@@ -4,6 +4,7 @@ export class CallDebriefMediaControls extends Component {
     static template = "mail.CallDebriefMediaControls";
 
     setup() {
+        /** @type {import("@odoo/owl").Signal<boolean>} */
         this.isVolumeSliderVisible = signal(false);
     }
 

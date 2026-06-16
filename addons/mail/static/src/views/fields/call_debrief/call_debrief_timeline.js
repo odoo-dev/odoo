@@ -5,6 +5,7 @@ export class CallDebriefTimeline extends Component {
     static template = "mail.CallDebriefTimeline";
 
     setup() {
+        /** @type {import("@odoo/owl").Signal<HTMLElement>} */
         this.timeline = signal(null);
         this.isDragging = false;
 
