@@ -4,6 +4,7 @@ import {
     onWillUpdateProps,
     onWillUnmount,
     props,
+    useState,
     proxy,
     signal,
     computed,
@@ -45,13 +46,17 @@ export class CallDebrief extends Component {
         this.isMuted = computed(() => this.volume() === 0);
 
         this.orm = useService("orm");
-        this.state = proxy({
+        this.playback = useState({
             currentTime: 0,
-            mediaSegments: [],
-            currentSegment: undefined,
-            error: "",
             isPlaying: false,
             playbackRate: 1,
+        });
+        this.media = useState({
+            mediaSegments: [],
+            currentSegment: undefined,
+        });
+        this.ui = useState({
+            error: "",
             feedback: { text: "", id: Date.now() },
         });
 
@@ -94,7 +99,7 @@ export class CallDebrief extends Component {
         useEffect(() => {
             const media = this.mediaPlayer();
             if (media) {
-                media.playbackRate = this.state.playbackRate;
+                media.playbackRate = this.playback.playbackRate;
                 media.volume = this.volume();
                 media.muted = this.isMuted();
             }
@@ -107,22 +112,22 @@ export class CallDebrief extends Component {
         }
         this.lastClockTime = performance.now();
         const tick = (now) => {
-            if (!this.state.isPlaying) {
+            if (!this.playback.isPlaying) {
                 this.virtualClockId = null;
                 return;
             }
             const delta = (now - this.lastClockTime) / 1000;
             this.lastClockTime = now;
 
-            if (!this.state.currentSegment) {
-                this.state.currentTime += delta * this.state.playbackRate;
-                if (this.state.currentTime >= this.callDurationSeconds) {
-                    this.state.currentTime = this.callDurationSeconds;
+            if (!this.media.currentSegment) {
+                this.playback.currentTime += delta * this.playback.playbackRate;
+                if (this.playback.currentTime >= this.callDurationSeconds) {
+                    this.playback.currentTime = this.callDurationSeconds;
                     this._pause(_t("End of Media"));
                 } else {
-                    const targetSegment = this._findTargetSegment(this.state.currentTime);
-                    if (targetSegment && targetSegment.startSec <= this.state.currentTime) {
-                        this.setPlaybackTime({ timestamp: this.state.currentTime, play: true });
+                    const targetSegment = this._findTargetSegment(this.playback.currentTime);
+                    if (targetSegment && targetSegment.startSec <= this.playback.currentTime) {
+                        this.setPlaybackTime({ timestamp: this.playback.currentTime, play: true });
                     }
                 }
             }
@@ -140,7 +145,7 @@ export class CallDebrief extends Component {
     }
 
     get hasMedia() {
-        return this.state.mediaSegments.length > 0;
+        return this.media.mediaSegments.length > 0;
     }
 
     get hasTimeline() {
@@ -148,7 +153,7 @@ export class CallDebrief extends Component {
     }
 
     get hasVideo() {
-        return this.state.currentSegment?.type === "video";
+        return this.media.currentSegment?.type === "video";
     }
 
     onMediaError() {
@@ -158,7 +163,7 @@ export class CallDebrief extends Component {
 
     _initCallTiming(start, end) {
         if (!start || !end) {
-            this.state.error = _t(
+            this.ui.error = _t(
                 "CallDebrief widget needs start and end datetime from the parent record."
             );
             this._resetState();
@@ -169,7 +174,7 @@ export class CallDebrief extends Component {
 
         const duration = callEndDate.diff(callStartDate, "seconds").seconds;
         if (duration < 0) {
-            this.state.error = _t("Invalid call timing: end date is before start date.");
+            this.ui.error = _t("Invalid call timing: end date is before start date.");
             this._resetState();
             return false;
         }
@@ -178,19 +183,19 @@ export class CallDebrief extends Component {
     }
 
     _resetState() {
-        this.state.mediaSegments = [];
-        this.state.currentSegment = undefined;
-        this.state.currentTime = 0;
+        this.media.mediaSegments = [];
+        this.media.currentSegment = undefined;
+        this.playback.currentTime = 0;
         this._stopVirtualClock();
     }
 
     async _loadData(props) {
         const initialResId = props.record.resId;
-        this.state.error = "";
-        this.state.isPlaying = false;
+        this.ui.error = "";
+        this.playback.isPlaying = false;
         this._stopVirtualClock();
-        this.state.currentSegment = undefined;
-        this.state.mediaSegments = [];
+        this.media.currentSegment = undefined;
+        this.media.mediaSegments = [];
 
         const start = props.record.data[props.callStartDateField];
         const end = props.record.data[props.callEndDateField];
@@ -220,7 +225,7 @@ export class CallDebrief extends Component {
             if (this.activeResId !== initialResId) {
                 return;
             }
-            this.state.error = _t("Could not load call recordings");
+            this.ui.error = _t("Could not load call recordings");
             console.error(e);
             return;
         }
@@ -268,9 +273,9 @@ export class CallDebrief extends Component {
         }
         segments.sort((a, b) => a.startSec - b.startSec);
 
-        this.state.mediaSegments = segments;
+        this.media.mediaSegments = segments;
         if (segments.length > 0) {
-            this.state.currentSegment = segments[0];
+            this.media.currentSegment = segments[0];
         }
 
         return artifacts;
@@ -289,11 +294,11 @@ export class CallDebrief extends Component {
      */
     _findTargetSegment(timestamp, artifactId) {
         if (artifactId) {
-            return this.state.mediaSegments.find((s) => s.id === artifactId);
+            return this.media.mediaSegments.find((s) => s.id === artifactId);
         }
 
         let nextSegment;
-        for (const segment of this.state.mediaSegments) {
+        for (const segment of this.media.mediaSegments) {
             if (timestamp >= segment.startSec && timestamp < segment.endSec) {
                 return segment; // Exact match found
             }
@@ -311,9 +316,9 @@ export class CallDebrief extends Component {
      * Applies the target segment, timeline position, and play state to the <video>/<audio> element.
      */
     _alignMediaElement(targetSegment, relativeTime, autoplay, originalOptions) {
-        if (this.state.currentSegment !== targetSegment) {
+        if (this.media.currentSegment !== targetSegment) {
             this.isSwitchingSegment = true;
-            this.state.currentSegment = targetSegment;
+            this.media.currentSegment = targetSegment;
             this.onMediaLoadedCallback = () => {
                 this.isSwitchingSegment = false;
                 const mediaPlayer = this.mediaPlayer();
@@ -343,14 +348,14 @@ export class CallDebrief extends Component {
      */
     setPlaybackTime(options = {}) {
         const {
-            timestamp = this.state.currentTime,
-            play: autoplay = this.state.isPlaying,
+            timestamp = this.playback.currentTime,
+            play: autoplay = this.playback.isPlaying,
             artifactId,
         } = options;
 
-        this.state.currentTime = timestamp;
+        this.playback.currentTime = timestamp;
 
-        if (!this.state.mediaSegments.length) {
+        if (!this.media.mediaSegments.length) {
             return;
         }
 
@@ -358,24 +363,24 @@ export class CallDebrief extends Component {
 
         if (!targetSegment) {
             // Reached the end of all available media
-            if (this.state.currentSegment) {
+            if (this.media.currentSegment) {
                 this._pause(false);
-                this.state.currentSegment = undefined;
+                this.media.currentSegment = undefined;
             }
             return;
         }
 
         if (!artifactId && targetSegment.startSec > timestamp) {
-            this.state.currentSegment = undefined;
+            this.media.currentSegment = undefined;
             this._pauseMediaOnly();
             if (autoplay) {
-                this.state.isPlaying = true;
+                this.playback.isPlaying = true;
                 this._startVirtualClock();
             }
             return;
         }
 
-        const relativeTime = Math.max(0, this.state.currentTime - targetSegment.startSec);
+        const relativeTime = Math.max(0, this.playback.currentTime - targetSegment.startSec);
         this._alignMediaElement(targetSegment, relativeTime, autoplay, options);
     }
 
@@ -392,7 +397,7 @@ export class CallDebrief extends Component {
      */
     _pause(feedback = _t("Pause")) {
         this._pauseMediaOnly();
-        this.state.isPlaying = false;
+        this.playback.isPlaying = false;
         this._stopVirtualClock();
         if (feedback) {
             this.showFeedback(feedback);
@@ -400,7 +405,7 @@ export class CallDebrief extends Component {
     }
 
     onTimeUpdate(ev) {
-        if (!this.state.currentSegment || ev.target.seeking || this.isSwitchingSegment) {
+        if (!this.media.currentSegment || ev.target.seeking || this.isSwitchingSegment) {
             return;
         }
         if (this.skipNextTimeUpdate) {
@@ -410,13 +415,13 @@ export class CallDebrief extends Component {
 
         const mediaTime = ev.target.currentTime;
         // Pre-emptively switch to next segment to ensure gapless playback
-        if (mediaTime >= this.state.currentSegment.duration - 0.2) {
+        if (mediaTime >= this.media.currentSegment.duration - 0.2) {
             this.onMediaEnded();
             return;
         }
 
-        const globalTime = this.state.currentSegment.startSec + mediaTime;
-        this.state.currentTime = globalTime;
+        const globalTime = this.media.currentSegment.startSec + mediaTime;
+        this.playback.currentTime = globalTime;
     }
 
     /**
@@ -428,11 +433,11 @@ export class CallDebrief extends Component {
             return;
         }
         this.isSwitchingSegment = true;
-        this.state.currentTime = this.state.currentSegment.endSec;
-        this.state.currentSegment = undefined;
+        this.playback.currentTime = this.media.currentSegment.endSec;
+        this.media.currentSegment = undefined;
         this.isSwitchingSegment = false;
         
-        if (this.state.isPlaying) {
+        if (this.playback.isPlaying) {
             this._startVirtualClock();
         }
     }
@@ -445,7 +450,7 @@ export class CallDebrief extends Component {
     }
 
     adjustPlaybackRate(delta) {
-        const currentRate = this.state.playbackRate;
+        const currentRate = this.playback.playbackRate;
         let closestIndex = -1;
         let minDiff = Infinity;
         for (let i = 0; i < this.playbackRates.length; i++) {
@@ -463,36 +468,36 @@ export class CallDebrief extends Component {
         newIndex = Math.max(0, Math.min(newIndex, this.playbackRates.length - 1));
 
         const newRate = this.playbackRates[newIndex];
-        this.state.playbackRate = newRate;
+        this.playback.playbackRate = newRate;
         this.showFeedback(`${newRate}x`);
     }
 
     showFeedback(text) {
-        this.state.feedback = { text, id: Date.now() };
+        this.ui.feedback = { text, id: Date.now() };
         if (this.feedbackTimeout) {
             clearTimeout(this.feedbackTimeout);
         }
         this.feedbackTimeout = setTimeout(() => {
-            this.state.feedback.text = "";
+            this.ui.feedback.text = "";
         }, 750);
     }
 
     play() {
-        if (this.state.currentTime >= this.callDurationSeconds - 0.5) {
+        if (this.playback.currentTime >= this.callDurationSeconds - 0.5) {
             this.showFeedback(_t("End of Media"));
             return;
         }
-        if (this.state.isPlaying) {
+        if (this.playback.isPlaying) {
             return;
         }
         
-        this.state.isPlaying = true;
+        this.playback.isPlaying = true;
         this.showFeedback(_t("Play"));
 
         const media = this.mediaPlayer();
-        if (this.state.currentSegment && media) {
+        if (this.media.currentSegment && media) {
             media.play().catch((e) => {
-                this.state.isPlaying = false;
+                this.playback.isPlaying = false;
                 this.showFeedback(_t("Playback Error"));
             });
         } else {
@@ -501,14 +506,14 @@ export class CallDebrief extends Component {
     }
 
     pause() {
-        if (!this.state.isPlaying) {
+        if (!this.playback.isPlaying) {
             return;
         }
         this._pause();
     }
 
     togglePlay() {
-        if (this.state.isPlaying) {
+        if (this.playback.isPlaying) {
             this.pause();
         } else {
             this.play();
@@ -518,7 +523,7 @@ export class CallDebrief extends Component {
     seekRelative(delta) {
         const newTime = Math.max(
             0,
-            Math.min(this.callDurationSeconds, this.state.currentTime + delta)
+            Math.min(this.callDurationSeconds, this.playback.currentTime + delta)
         );
         this.setPlaybackTime({ timestamp: newTime });
         const direction = delta > 0 ? "+" : "-";
@@ -526,7 +531,7 @@ export class CallDebrief extends Component {
     }
 
     setPlaybackRate(ev) {
-        this.state.playbackRate = parseFloat(ev.target.value);
+        this.playback.playbackRate = parseFloat(ev.target.value);
     }
 
     adjustVolume(delta) {
