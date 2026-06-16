@@ -689,59 +689,6 @@
                                             onSelectVibe="(id) => this.onVibeChange(id)"/>
                     </div>
 
-                    <div class="o_preview_pages_features mb-3 mb-xl-5">
-                        <h3 class="o_preview_selection_label">AUTOMATICALLY CREATE THESE <b>PAGES</b></h3>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="checkHomepage" checked="checked" disabled="disabled"/>
-                            <label class="form-check-label" for="checkHomepage">Homepage</label>
-                        </div>
-                        <t t-foreach="this.pageFeatures" t-as="feature" t-key="feature.id">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox"
-                                       t-attf-id="checkFeature{{feature.id}}"
-                                       t-att-checked="feature.selected"
-                                       t-att-disabled="feature.module_state === 'installed'"
-                                       t-on-change="() => this.toggleFeature(feature.id)"/>
-                                <label class="form-check-label" t-attf-for="checkFeature{{feature.id}}">
-                                    <t t-out="feature.name"/>
-                                </label>
-                            </div>
-                        </t>
-                    </div>
-                    <div class="o_preview_pages_features">
-                        <t t-if="this.serviceFeatures.length">
-                            <h3 class="o_preview_selection_label">BOOST IT WITH AMAZING <b>FEATURES</b></h3>
-                            <div class="grid gap-2" style="max-width: 550px;">
-                                <t t-foreach="this.serviceFeatures" t-as="feature" t-key="feature.id">
-                                    <t t-set='isInstalled' t-value="feature.module_state == 'installed'"/>
-                                    <div class="o_feature_card_container g-col-12 g-col-lg-6" t-if="feature.type != 'empty'">
-                                        <div t-attf-class="position-relative rounded border h-100 {{isInstalled ? 'card_installed' : (feature.selected ? 'border-success' : '')}}"
-                                             t-on-click="() => this.state.toggleFeature(feature.id)"
-                                             t-on-keydown="this.onKeydown"
-                                             tabindex="0"
-                                             style="background: #fff"
-                                             role="button">
-                                            <div class="py-2 px-3 small mb-0">
-                                                <t t-if="isInstalled">
-                                                    <i t-attf-class="o_configurator_feature_status position-absolute top-0 end-0 mt-1 me-1 fa fa-circle text-success" title="Already installed"/>
-                                                </t>
-                                                <t t-else="">
-                                                    <i t-attf-class="o_configurator_feature_status position-absolute top-0 end-0 mt-1 me-1 fa {{feature.selected ? 'fa-circle text-success' : 'fa-circle-o text-300'}}" />
-                                                </t>
-                                                <div t-attf-class="mb-1 card-title d-flex align-items-center {{isInstalled ? 'text-muted' : ''}}">
-                                                    <i t-attf-class="me-2 fa {{feature.icon}} {{isInstalled ? 'text-muted' : (feature.type == 'page' ? 'text-info' : 'text-warning')}}"/>
-                                                    <h4 class="m-0" style="font-size: 15px">
-                                                        <t t-out="feature.name"/>
-                                                    </h4>
-                                                </div>
-                                                <p class="small lh-sm card-text text-muted" t-out="feature.description"/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </t>
-                            </div>
-                        </t>
-                    </div>
                 </div>
 
                 <div class="o_preview_actions pt-3 pb-5">

@@ -1144,59 +1144,13 @@ class Website(models.CachedModel):
             except ValueError as e:
                 logger.warning(e)
 
-        # Configure the features
-        features = self.env['website.configurator.feature'].browse(kwargs.get('selected_features'))
-
-        menu_company = self.env['website.menu']
-        if len(features.filtered('menu_sequence')) > 5 and len(features.filtered('menu_company')) > 1:
-            menu_company = self.env['website.menu'].create({
-                'name': _('Company'),
-                'parent_id': website.menu_id.id,
-                'website_id': website.id,
-                'sequence': 40,
-            })
-
-        pages_views = {}
-        modules = self.env['ir.module.module']
-        module_data = {}
-        for feature in features:
-            add_menu = bool(feature.menu_sequence)
-            if feature.module_id:
-                if feature.module_id.state != 'installed':
-                    modules += feature.module_id
-                if add_menu:
-                    if feature.module_id.name != 'website_blog':
-                        module_data[feature.feature_url] = {'sequence': feature.menu_sequence}
-                    else:
-                        blogs = module_data.setdefault('#blog', [])
-                        blogs.append({'name': feature.name, 'sequence': feature.menu_sequence})
-            elif feature.page_view_id:
-                result = self.env['website'].new_page(
-                    name=feature.name,
-                    add_menu=add_menu,
-                    page_values=dict(url=feature.feature_url, is_published=True),
-                    menu_values=add_menu and {
-                        'url': feature.feature_url,
-                        'sequence': feature.menu_sequence,
-                        'parent_id': feature.menu_company and menu_company.id or website.menu_id.id,
-                    },
-                    template=feature.page_view_id.key
-                )
-                pages_views[feature.iap_page_code] = result['view_id']
-
-        if modules:
-            modules.button_immediate_install()
-
-        self.env['website'].browse(website.id).configurator_set_menu_links(menu_company, module_data)
-
         # Extension hook: allows installed modules (e.g. website_sale, website_blog, ...) to perform
         # additional setup steps on the generated website. This acts as an entry point for modules to
         # customize the website.
         self.env['website'].configurator_addons_apply(**kwargs)
 
-        # We need to refresh the environment of the website because we installed
-        # some new module and we need the overrides of these new menus e.g. for
-        # the call to `get_cta_data`.
+        # Refresh the environment of the website to use addon overrides
+        # (e.g. for the call to `get_cta_data`).
         website = self.env['website'].browse(website.id)
 
         # Update footers links, needs to be done after "Features" addition to go
@@ -1234,15 +1188,12 @@ class Website(models.CachedModel):
             {'theme': theme_name, 'layout': kwargs.get('selected_layout', 'minimalist')}
         )
 
-        # Generate text for the pages
-        requested_pages = set(pages_views.keys()).union({'homepage'})
+        # Generate text for the homepage.  Homepage snippets are derived directly
+        # from the layout assembly XML by _get_layout_homepage_snippets(); the
+        # AI-adapted text is applied client-side at preview time, so the server
+        # only renders the assembled snippets + footer placeholders.
         selected_layout = kwargs.get('selected_layout', 'minimalist')
         selected_vibe   = kwargs.get('selected_vibe') or 'clean'
-        # Non-homepage pages (about_us, our_services, …) still use the
-        # manifest-driven configurator_snippets list.
-        # Homepage snippets are derived directly from the layout assembly XML
-        # by _get_layout_homepage_snippets(), so no homepage key is needed here.
-        configurator_snippets = dict(get_manifest('website')['configurator_snippets'])
         industry = kwargs['industry_name']
 
         IrQweb = self.env['ir.qweb'].with_context(website_id=website.id, lang=website.default_lang_id.code)
@@ -1260,13 +1211,6 @@ class Website(models.CachedModel):
         )
         generated_content = {}
         translated_content = {}
-        for page_code in requested_pages - {'privacy_policy'}:
-            snippet_list = configurator_snippets.get(page_code, [])
-            for snippet in snippet_list:
-                snippet_key = website._get_snippet_view_key(snippet, page_code)
-                html_text_processor, snippet_generated_content, snippet_translated_content = html_text_processor._get_snippet_content(snippet_key)
-                generated_content.update(snippet_generated_content)
-                translated_content.update(snippet_translated_content)
 
         # Extract placeholders from footers
         for footer_id in footer_ids:
@@ -1297,70 +1241,57 @@ class Website(models.CachedModel):
         else:
             logger.info("Skip AI text generation because translation coverage is too low (%s%%)", translated_ratio * 100)
 
-        # Configure the pages
-        for index, page_code in enumerate(requested_pages):
-            if page_code == 'homepage':
-                page_view_id = self.with_context(website_id=website.id).viewref('website.homepage')
-                # Derive snippet list directly from the layout assembly XML so
-                # that per-layout xpaths (Layer 1) and vibe overrides (Layer 3)
-                # are both honoured.  snippet_pairs is a list of
-                # (template_key, base_snippet_name) tuples.
-                snippet_pairs = website._get_layout_homepage_snippets(
-                    selected_layout, selected_vibe
-                )
-            else:
-                page_view_id = self.env['ir.ui.view'].browse(pages_views[page_code])
-                # Non-homepage pages use the generic auto-generated templates.
-                snippet_pairs = [
-                    (website._get_snippet_view_key(s, page_code), s)
-                    for s in configurator_snippets.get(page_code, [])
-                ]
-            rendered_snippets = []
-            nb_snippets = len(snippet_pairs)
-            for i, (snippet_key, snippet) in enumerate(snippet_pairs, start=1):
-                try:
-                    el = html_text_processor._update_snippet_content(generated_content, snippet_key)
+        # Configure the homepage.  snippet_pairs is a list of
+        # (template_key, base_snippet_name) tuples derived from the layout
+        # assembly XML so per-layout xpaths (Layer 1) and vibe overrides
+        # (Layer 3) are both honoured.
+        page_view_id = self.with_context(website_id=website.id).viewref('website.homepage')
+        snippet_pairs = website._get_layout_homepage_snippets(selected_layout, selected_vibe)
+        rendered_snippets = []
+        nb_snippets = len(snippet_pairs)
+        for i, (snippet_key, snippet) in enumerate(snippet_pairs, start=1):
+            try:
+                el = html_text_processor._update_snippet_content(generated_content, snippet_key)
 
-                    # data-snippet identifies the snippet for compatibility code
-                    el.attrib['data-snippet'] = snippet
+                # data-snippet identifies the snippet for compatibility code
+                el.attrib['data-snippet'] = snippet
 
-                    # Theme specific customizations for non-website snippets
-                    theme_customizations = get_manifest(theme_name).get('theme_customizations', {})
-                    customizations = theme_customizations.get(snippet, {})
+                # Theme specific customizations for non-website snippets
+                theme_customizations = get_manifest(theme_name).get('theme_customizations', {})
+                customizations = theme_customizations.get(snippet, {})
 
-                    # Configure non-website snippet with defaults and theme-level customizations.
-                    website._preconfigure_snippet(snippet, el, customizations)
+                # Configure non-website snippet with defaults and theme-level customizations.
+                website._preconfigure_snippet(snippet, el, customizations)
 
-                    # Remove the previews needed for the snippets dialog
-                    dialog_preview_els = el.find_class('s_dialog_preview')
-                    for preview_el in dialog_preview_els:
-                        preview_el.getparent().remove(preview_el)
+                # Remove the previews needed for the snippets dialog
+                dialog_preview_els = el.find_class('s_dialog_preview')
+                for preview_el in dialog_preview_els:
+                    preview_el.getparent().remove(preview_el)
 
-                    # Tweak the shape of the first snippet to connect it
-                    # properly with the header color in some themes
-                    if i == 1:
-                        shape_el = el.xpath("//*[hasclass('o_we_shape')]")
-                        if shape_el:
-                            shape_el[0].attrib['class'] += ' o_header_extra_shape_mapping'
+                # Tweak the shape of the first snippet to connect it
+                # properly with the header color in some themes
+                if i == 1:
+                    shape_el = el.xpath("//*[hasclass('o_we_shape')]")
+                    if shape_el:
+                        shape_el[0].attrib['class'] += ' o_header_extra_shape_mapping'
 
-                    # Tweak the shape of the last snippet to connect it
-                    # properly with the footer color in some themes
-                    if i == nb_snippets:
-                        shape_el = el.xpath("//*[hasclass('o_we_shape')]")
-                        if shape_el:
-                            shape_el[0].attrib['class'] += ' o_footer_extra_shape_mapping'
-                    rendered_snippet = etree.tostring(el, encoding='unicode')
-                    rendered_snippets.append(rendered_snippet)
-                except ValueError as e:
-                    logger.warning(e)
-            page_view_id.save(value=f'<div class="oe_structure">{"".join(rendered_snippets)}</div>',
-                              xpath="(//div[hasclass('oe_structure')])[last()]")
-            # Copy the configurator pages to preserve the original untouched
-            # pages in the landing page category when creating a new page.
-            page_view_id.copy({
-                'key': f"{index}_{page_view_id.key}_configurator_pages_landing",
-                'website_id': website.id,
-            })
+                # Tweak the shape of the last snippet to connect it
+                # properly with the footer color in some themes
+                if i == nb_snippets:
+                    shape_el = el.xpath("//*[hasclass('o_we_shape')]")
+                    if shape_el:
+                        shape_el[0].attrib['class'] += ' o_footer_extra_shape_mapping'
+                rendered_snippet = etree.tostring(el, encoding='unicode')
+                rendered_snippets.append(rendered_snippet)
+            except ValueError as e:
+                logger.warning(e)
+        page_view_id.save(value=f'<div class="oe_structure">{"".join(rendered_snippets)}</div>',
+                          xpath="(//div[hasclass('oe_structure')])[last()]")
+        # Copy the configurator homepage to preserve the original untouched page.
+        page_view_id.copy({
+            'key': f"0_{page_view_id.key}_configurator_pages_landing",
+            'website_id': website.id,
+        })
 
         # Configure the footers
         for key in footer_ids:

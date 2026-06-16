@@ -15,7 +15,6 @@ import { _t } from "@web/core/l10n/translation";
 import { svgToPNG, webpToPNG } from "@website/js/utils";
 import { escapeRegExp } from "@web/core/utils/strings";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
-import { htmlSprintf } from "@web/core/utils/html";
 import { clamp } from "@web/core/utils/numbers";
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
@@ -2646,9 +2645,6 @@ export class ApplyConfiguratorScreen extends Component {
         };
 
         if (themeName !== undefined) {
-            const selectedFeatures = Object.values(this.state.features)
-                .filter((feature) => feature.selected)
-                .map((feature) => feature.id);
             const loadingSteps = [
                 {
                     description: _t("Applying your colors and design..."),
@@ -2662,7 +2658,6 @@ export class ApplyConfiguratorScreen extends Component {
                     description: _t("Generating inspiring text..."),
                     flag: "text",
                 },
-                ...this.getSelectedFeaturesLoadingSteps(selectedFeatures),
                 {
                     title: _t("Finalizing."),
                     description: _t("Activating the last features."),
@@ -2670,12 +2665,10 @@ export class ApplyConfiguratorScreen extends Component {
                 },
             ];
 
-            // Server requests are locked during module installation,
-            // uninstallation, or upgrade (when running without `workers`), so
-            // real-time progress can't be fetched. We simulate it instead.
-            const stopProgressSimulation = this.startConfiguratorProgressSimulation(
-                selectedFeatures.length
-            );
+            // Server requests are locked during the website build (when running
+            // without `workers`), so real-time progress can't be fetched. We
+            // simulate it instead.
+            const stopProgressSimulation = this.startConfiguratorProgressSimulation();
             this.websiteService.showLoader({
                 title: _t("Building your website."),
                 loadingSteps,
@@ -2687,7 +2680,7 @@ export class ApplyConfiguratorScreen extends Component {
             // the server-side SCSS compilation fail with transparent colors.
             const selectedStyleId = this.state.selectedStyle?.id || null;
             const resp = await attemptConfiguratorApply(
-                this.getConfigurationData(selectedFeatures, selectedStyleId, themeName)
+                this.getConfigurationData(selectedStyleId, themeName)
             );
 
             this.props.clearStorage();
@@ -2708,7 +2701,7 @@ export class ApplyConfiguratorScreen extends Component {
         }
     }
 
-    getConfigurationData(selectedFeatures, selectedStyleId, themeName) {
+    getConfigurationData(selectedStyleId, themeName) {
         const style = this.state.selectedStyle;
         const layoutId = this.state.selectedLayout?.id || 'minimalist';
         // Layout config comes from the server-returned preview data (populated when
@@ -2731,7 +2724,6 @@ export class ApplyConfiguratorScreen extends Component {
             footerBg: '',
         };
         return {
-            selected_features: selectedFeatures,
             industry_id: this.state.selectedIndustry.id,
             industry_name: this.state.selectedIndustry.label.toLowerCase(),
             // selected_style / selected_palette: the CSS palette id (e.g. 'soft-04'),
@@ -2789,7 +2781,7 @@ export class ApplyConfiguratorScreen extends Component {
      *                                         progress for.
      * @returns {Function} A cleanup function that stops the simulation.
      */
-    startConfiguratorProgressSimulation(selectedFeaturesCount) {
+    startConfiguratorProgressSimulation(selectedFeaturesCount = 0) {
         const INITIAL_PHASE_END = 30;
         const MODULES_PHASE_END = 90;
 
@@ -2832,74 +2824,6 @@ export class ApplyConfiguratorScreen extends Component {
         }, 500);
 
         return () => clearInterval(intervalId);
-    }
-
-    /**
-     * Returns the list of feature steps with their loading messages.
-     * Each step maps to a `website.configurator.feature` record ID.
-     *
-     * @returns {Object[]} Array of feature step definitions.
-     */
-    get featureSteps() {
-        return [
-            {
-                id: 5,
-                title: _t("Adding features."),
-                name: _t("blog"),
-                description: _t("Enabling your %s."),
-                flag: "generic",
-            },
-            {
-                id: 7,
-                title: _t("Adding features."),
-                name: _t("recruitment platform"),
-                description: _t("Integrating your %s."),
-                flag: "generic",
-            },
-            {
-                id: 8,
-                title: _t("Adding features."),
-                name: _t("online store"),
-                description: _t("Activating your %s."),
-                flag: "generic",
-            },
-            {
-                id: 9,
-                title: _t("Adding features."),
-                name: _t("online appointment system"),
-                description: _t("Configuring your %s."),
-                flag: "generic",
-            },
-            {
-                id: 10,
-                title: _t("Adding features."),
-                name: _t("forum"),
-                description: _t("Setting up your %s."),
-                flag: "generic",
-            },
-            {
-                id: 12,
-                title: _t("Adding features."),
-                name: _t("e-learning platform"),
-                description: _t("Installing your %s."),
-                flag: "generic",
-            },
-        ];
-    }
-
-    /**
-     * Depending on the features selected, returns the right loading steps.
-     *
-     * @param {number[]} [selectedFeatures=[]]
-     * @returns {Object[]} The loading steps filtered by the selected features.
-     */
-    getSelectedFeaturesLoadingSteps(selectedFeatures = []) {
-        return this.featureSteps
-            .filter((step) => selectedFeatures.includes(step.id))
-            .map((step) => {
-                const highlight = markup`<span class="o_website_loader_text_highlight">${step.name}</span>`;
-                return { ...step, description: htmlSprintf(step.description, highlight) };
-            });
     }
 }
 
@@ -3315,18 +3239,6 @@ export class PreviewScreen extends ApplyConfiguratorScreen {
         await this._loadPreview();
     }
 
-    get pageFeatures() {
-        return this.state.getFeatures().filter((f) => f.type === "page");
-    }
-
-    get serviceFeatures() {
-        return this.state.getFeatures().filter((f) => f.type === "app");
-    }
-
-    toggleFeature(featureId) {
-        this.state.toggleFeature(featureId);
-    }
-
     async confirm() {
         await this.applyConfigurator("theme_default");
     }
@@ -3345,25 +3257,14 @@ export class Store {
     getSelectedType(id) { return id && WEBSITE_TYPES[id]; }
     getWebsitePurpose() { return Object.values(WEBSITE_PURPOSES); }
     getSelectedPurpose(id) { return id && WEBSITE_PURPOSES[id]; }
-    getFeatures() { return Object.values(this.features); }
     getPalettes() { return Object.values(this.palettes || {}); }
 
     selectWebsiteType(id) {
-        Object.values(this.features)
-            .filter((feature) => feature.module_state !== "installed")
-            .forEach((feature) => {
-                feature.selected = feature.website_config_preselection.includes(WEBSITE_TYPES[id].name);
-            });
         this.selectedType = id;
     }
 
     selectWebsitePurpose(id) {
         if (!id && this.selectedPurpose) { this.formerSelectedPurpose = this.selectedPurpose; }
-        Object.values(this.features)
-            .filter((feature) => feature.module_state !== "installed")
-            .forEach((feature) => {
-                feature.selected |= id && feature.website_config_preselection.includes(WEBSITE_PURPOSES[id].name);
-            });
         this.selectedPurpose = id;
     }
 
@@ -3398,12 +3299,6 @@ export class Store {
         this.recommendedColors = (color1 && color2)
             ? buildUserPaletteColors(color1, color2)
             : undefined;
-    }
-
-    toggleFeature(featureId) {
-        const feature = this.features[featureId];
-        const isModuleInstalled = feature.module_state === "installed";
-        feature.selected = !feature.selected || isModuleInstalled;
     }
 }
 
@@ -3540,13 +3435,6 @@ export class Configurator extends Component {
             }, localState);
         }
 
-        const features = {};
-        results.features.forEach((feature) => {
-            features[feature.id] = Object.assign({}, feature, { selected: feature.module_state === "installed" });
-            const wtp = features[feature.id]["website_config_preselection"];
-            features[feature.id]["website_config_preselection"] = wtp ? wtp.split(",") : [];
-        });
-
         return Object.assign(r, {
             selectedType: undefined, selectedPurpose: undefined, formerSelectedPurpose: undefined,
             positionings: [], positioningsLoading: false,
@@ -3556,14 +3444,14 @@ export class Configurator extends Component {
             // Per-layout config populated from server preview response.
             // Maps layoutId → { headerTemplate, footerTemplate, headerCc, footerCc }
             layoutConfigs: {},
-            defaultColors: {}, palettes, features, logoAttachmentId: undefined,
+            defaultColors: {}, palettes, logoAttachmentId: undefined,
             recommendedColors: undefined,
         });
     }
 
     updateStorage(state) {
         const newState = JSON.stringify({
-            features: state.features, logo: state.logo, logoAttachmentId: state.logoAttachmentId,
+            logo: state.logo, logoAttachmentId: state.logoAttachmentId,
             recommendedColors: state.recommendedColors,
             selectedIndustry: state.selectedIndustry, selectedStyle: state.selectedStyle,
             selectedVibe: state.selectedVibe, selectedLayout: state.selectedLayout,
