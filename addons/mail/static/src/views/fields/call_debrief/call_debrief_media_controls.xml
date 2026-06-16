@@ -12,7 +12,7 @@
                 <button t-on-click="() => this.props.onSeek(-5)" class="btn btn-secondary btn-sm o-CallDebrief-btn rounded-pill me-1" title="Skip backward (j, ←)">
                     <small>-5s</small>
                 </button>
-                <button t-on-click="this.props.onTogglePlay" class="btn btn-primary btn-sm o-CallDebrief-btn rounded-pill me-1" style="width: 32px;" title="Play/Pause (k, space)">
+                <button t-on-click="this.props.isPlaying ? this.props.onPause : this.props.onPlay" class="btn btn-primary btn-sm o-CallDebrief-btn rounded-pill me-1" style="width: 32px;" title="Play/Pause (k, space)">
                     <i t-att-class="this.props.isPlaying ? 'fa fa-pause' : 'fa fa-play'"/>
                 </button>
                 <button t-on-click="() => this.props.onSeek(5)" class="btn btn-secondary btn-sm o-CallDebrief-btn rounded-pill me-2" title="Skip forward (l, →)">

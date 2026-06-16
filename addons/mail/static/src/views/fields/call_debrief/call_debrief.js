@@ -6,6 +6,7 @@ import {
     props,
     proxy,
     signal,
+    computed,
     useEffect,
 } from "@odoo/owl";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
@@ -37,7 +38,11 @@ export class CallDebrief extends Component {
         this.skipNextTimeUpdate = false;
         this.isSwitchingSegment = false;
 
+        /** @type {import("@odoo/owl").Signal<HTMLMediaElement>} */
         this.mediaPlayer = signal(null);
+
+        this.volume = signal(1);
+        this.isMuted = computed(() => this.volume() === 0);
 
         this.orm = useService("orm");
         this.state = proxy({
@@ -47,8 +52,6 @@ export class CallDebrief extends Component {
             error: "",
             isPlaying: false,
             playbackRate: 1,
-            volume: 1,
-            isMuted: false,
             feedback: { text: "", id: Date.now() },
         });
 
@@ -92,8 +95,8 @@ export class CallDebrief extends Component {
             const media = this.mediaPlayer();
             if (media) {
                 media.playbackRate = this.state.playbackRate;
-                media.volume = this.state.volume;
-                media.muted = this.state.isMuted;
+                media.volume = this.volume();
+                media.muted = this.isMuted();
             }
         });
     }
@@ -474,24 +477,41 @@ export class CallDebrief extends Component {
         }, 750);
     }
 
-    togglePlay() {
-        const media = this.mediaPlayer();
-        if (!media) {
-            return;
-        }
+    play() {
         if (this.state.currentTime >= this.callDurationSeconds - 0.5) {
             this.showFeedback(_t("End of Media"));
             return;
         }
         if (this.state.isPlaying) {
-            this._pause();
-        } else {
+            return;
+        }
+        
+        this.state.isPlaying = true;
+        this.showFeedback(_t("Play"));
+
+        const media = this.mediaPlayer();
+        if (this.state.currentSegment && media) {
             media.play().catch((e) => {
                 this.state.isPlaying = false;
                 this.showFeedback(_t("Playback Error"));
             });
-            this.state.isPlaying = true;
-            this.showFeedback(_t("Play"));
+        } else {
+            this._startVirtualClock();
+        }
+    }
+
+    pause() {
+        if (!this.state.isPlaying) {
+            return;
+        }
+        this._pause();
+    }
+
+    togglePlay() {
+        if (this.state.isPlaying) {
+            this.pause();
+        } else {
+            this.play();
         }
     }
 
@@ -510,22 +530,20 @@ export class CallDebrief extends Component {
     }
 
     adjustVolume(delta) {
-        const newVolume = Math.max(0, Math.min(1, this.state.volume + delta));
-        this.state.volume = newVolume;
-        this.state.isMuted = this.state.volume === 0;
+        this.volume.set(Math.max(0, Math.min(1, this.volume() + delta)));
     }
 
     setVolume(ev) {
-        this.state.volume = parseFloat(ev.target.value);
-        this.state.isMuted = this.state.volume === 0;
+        this.volume.set(parseFloat(ev.target.value));
     }
 
     toggleMute() {
-        this.state.isMuted = !this.state.isMuted;
-        if (!this.state.isMuted && this.state.volume === 0) {
-            this.state.volume = 0.5;
+        if (this.isMuted()) {
+            this.volume.set(0.5);
+        } else {
+            this.volume.set(0);
         }
-        this.showFeedback(this.state.isMuted ? _t("Muted") : _t("Unmuted"));
+        this.showFeedback(this.isMuted() ? _t("Muted") : _t("Unmuted"));
     }
 }
 
