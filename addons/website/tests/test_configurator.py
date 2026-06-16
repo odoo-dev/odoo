@@ -76,8 +76,6 @@ class TestConfiguratorCommon(odoo.tests.HttpCase):
                     }
                 '''
                 }
-            elif '/api/website/2/configurator/recommended_themes' in endpoint:
-                return []
             elif '/api/website/2/configurator/custom_resources/' in endpoint:
                 return {'images': {}}
             elif '/api/olg/1/generate_placeholder' in endpoint:
@@ -92,48 +90,6 @@ class TestConfiguratorCommon(odoo.tests.HttpCase):
 
 @odoo.tests.common.tagged('post_install', '-at_install')
 class TestConfigurator(TestConfiguratorCommon):
-
-    def test_ai_recommend_themes(self):
-        def iap_jsonrpc_mocked_olg(*args, **kwargs):
-            return {
-                'status': 'success',
-                'content': '["theme_clean", "theme_cobalt", "theme_unknown"]',
-            }
-
-        with patch('odoo.addons.iap.tools.iap_tools.iap_jsonrpc', iap_jsonrpc_mocked_olg):
-            themes = self.env['website']._ai_recommend_themes(
-                {
-                    'theme_clean': 'Clean theme',
-                    'theme_cobalt': 'Cobalt theme',
-                },
-                'restaurant',
-                'business',
-                'premium',
-                6,
-            )
-
-        self.assertEqual(themes, ['theme_clean', 'theme_cobalt'])
-
-    def test_ai_recommend_themes_wrong_answer(self):
-        def iap_jsonrpc_mocked_olg(*args, **kwargs):
-            return {
-                'status': 'success',
-                'content': '[{"name": "New Arrivals", "description": "Fresh styles"}]',
-            }
-
-        with patch('odoo.addons.iap.tools.iap_tools.iap_jsonrpc', iap_jsonrpc_mocked_olg):
-            themes = self.env['website']._ai_recommend_themes(
-                {
-                    'theme_clean': 'Clean theme',
-                    'theme_cobalt': 'Cobalt theme',
-                },
-                'restaurant',
-                'business',
-                'premium',
-                6,
-            )
-
-        self.assertEqual(themes, [])
 
     def test_configurator_params_step(self):
         self.start_tour('/website/configurator/2', 'configurator_params_step', login='admin')
