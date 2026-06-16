@@ -2,26 +2,6 @@ import { Component, props, signal } from "@odoo/owl";
 
 export class CallDebriefMediaControls extends Component {
     static template = "mail.CallDebriefMediaControls";
-    static props = {
-        isPlaying: { type: Boolean },
-        volume: { type: Number },
-        isMuted: { type: Boolean },
-        playbackRate: { type: Number },
-        playbackRates: { type: Array },
-        currentTime: { type: Number },
-        totalDuration: { type: Number },
-        media: { type: Object, optional: true },
-        onTogglePlay: { type: Function, optional: true },
-        onPlay: { type: Function, optional: true },
-        onPause: { type: Function, optional: true },
-        onSeek: { type: Function },
-        onSetPlaybackRate: { type: Function },
-        onSetVolume: { type: Function },
-        onToggleMute: { type: Function },
-        feedback: { type: Object, optional: true },
-    };
-
-    props = props();
 
     setup() {
         this.isVolumeSliderVisible = signal(false);

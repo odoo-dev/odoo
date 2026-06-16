@@ -3,18 +3,6 @@ import { formatFloatTime } from "@web/views/fields/formatters";
 
 export class CallDebriefTimeline extends Component {
     static template = "mail.CallDebriefTimeline";
-    static props = {
-        // Total length of the call in seconds.
-        totalDuration: { type: Number },
-        // Array of media segment objects { id, startSec, endSec, duration, ... }
-        mediaSegments: { type: Array, optional: true },
-        // Callback function called when the user clicks/drags to seek: ({ timestamp }) => void
-        onSeek: { type: Function },
-        // The current playback position in global call seconds.
-        currentTime: { type: Number, optional: true },
-    };
-
-    props = props();
 
     setup() {
         this.timeline = signal(null);

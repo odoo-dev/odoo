@@ -1,37 +1,24 @@
 import {
     Component,
-    onWillStart,
-    onWillUpdateProps,
     onWillUnmount,
-    props,
     useState,
     proxy,
     signal,
     computed,
     useEffect,
+    effect,
 } from "@odoo/owl";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { CallDebriefTimeline } from "@mail/views/fields/call_debrief/call_debrief_timeline";
 import { CallDebriefMediaControls } from "@mail/views/fields/call_debrief/call_debrief_media_controls";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 
 export class CallDebrief extends Component {
     static template = "mail.CallDebrief";
     static components = { CallDebriefTimeline, CallDebriefMediaControls };
-
-    static props = {
-        ...standardFieldProps,
-        // The name of the field on the record that stores the call's start datetime.
-        callStartDateField: { type: String },
-        // The name of the field on the record that stores the call's end datetime.
-        callEndDateField: { type: String },
-    };
-
-    props = props();
 
     setup() {
         this.callDurationSeconds = 0;
@@ -68,16 +55,11 @@ export class CallDebrief extends Component {
         this.virtualClockId = null;
         this.lastClockTime = null;
 
-        onWillStart(() => this._loadData(this.props));
-
-        onWillUpdateProps(async (nextProps) => {
-            const hasIdChanged = this.props.record.resId !== nextProps.record.resId;
-            const hasFieldChanged =
-                this.props.record.data[this.props.name] !== nextProps.record.data[nextProps.name];
-            if (hasIdChanged || hasFieldChanged) {
-                this.activeResId = nextProps.record.resId;
-                await this._loadData(nextProps);
-            }
+        effect(() => {
+            const _ = this.props.record.resId;
+            const __ = this.props.record.data[this.props.name];
+            this.activeResId = this.props.record.resId;
+            this._loadData(this.props);
         });
 
         useHotkey("k", () => this.togglePlay(), { global: true });
