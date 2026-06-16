@@ -43,7 +43,7 @@ class MailCallArtifact(models.Model):
     # Constraints
 
     _start_before_end = models.Constraint(
-        "CHECK(start_ms < end_ms)", "End time must be after the start time.",
+        "CHECK(start_ms <= end_ms)", "End time must be after or equal to the start time.",
     )
     _artifact_has_possessor = models.Constraint(
         "CHECK(num_nonnulls(discuss_call_history_id) = 1)", "Artifact must be linked to a call source.",
