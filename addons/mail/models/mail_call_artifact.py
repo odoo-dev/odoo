@@ -21,7 +21,7 @@ class MailCallArtifact(models.Model):
         "ir.attachment", string="Media Attachment", compute="_compute_media_id",
     )
     start_ms = fields.Integer(
-        string="Start (ms)", default=0, required=True,
+        string="Start (ms)", default=0, required=True, index=True,
         help="Offset from the start of the call in milliseconds",
     )
     end_ms = fields.Integer(
