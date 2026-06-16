@@ -86,11 +86,16 @@ export class EmojiPicker extends Component {
     searchTerm = signal(this.props.initialSearchTerm ?? "", { type: t.string() });
     categoryId = signal(null, { type: t.or([t.number(), t.literal(null)]) });
     hoveredEmoji = signal(null, { type: t.or([t.object(), t.literal(null)]) }); // Emoji | null
-    activeEmojiIndex = signal(0, { type: t.number() });
 
     gridRef = signal(null, { type: t.ref() });
     emojiNavbarRepr = signal(null, { type: t.or([t.array(), t.literal(null)]) });
 
+    _navPos = signal({ row: -1, col: -1 });
+    activeEmojiIndex = computed(() => {
+        const matrix = this.emojiMatrix();
+        const { row, col } = this._navPos();
+        return matrix[row]?.[col] ?? 0;
+    });
     recentEmojis = computed(() => {
         const recent = Object.entries(this.frequentEmojiService.all)
             .sort(([, usage_1], [, usage_2]) => usage_2 - usage_1)
@@ -290,15 +295,17 @@ export class EmojiPicker extends Component {
             currentRow = rowIdx;
             currentCol = emojiMatrix[currentRow].indexOf(currentIdx);
         }
-        let newIdx;
+        let newRow = currentRow;
+        let newCol = currentCol;
         switch (key) {
             case "ArrowDown": {
                 const rowBelow = emojiMatrix[currentRow + 1];
                 const rowBelowBelow = emojiMatrix[currentRow + 2];
                 if (rowBelow?.length <= currentCol && rowBelowBelow?.length >= currentCol) {
-                    newIdx = rowBelowBelow?.[currentCol];
-                } else {
-                    newIdx = rowBelow?.[Math.min(currentCol, rowBelow.length - 1)];
+                    newRow = currentRow + 2;
+                } else if (rowBelow) {
+                    newRow = currentRow + 1;
+                    newCol = Math.min(currentCol, rowBelow.length - 1);
                 }
                 break;
             }
@@ -306,9 +313,10 @@ export class EmojiPicker extends Component {
                 const rowAbove = emojiMatrix[currentRow - 1];
                 const rowAboveAbove = emojiMatrix[currentRow - 2];
                 if (rowAbove?.length <= currentCol && rowAboveAbove?.length >= currentCol) {
-                    newIdx = rowAboveAbove?.[currentCol];
-                } else {
-                    newIdx = rowAbove?.[Math.min(currentCol, rowAbove.length - 1)];
+                    newRow = currentRow - 2;
+                } else if (rowAbove) {
+                    newRow = currentRow - 1;
+                    newCol = Math.min(currentCol, rowAbove.length - 1);
                 }
                 break;
             }
@@ -316,9 +324,12 @@ export class EmojiPicker extends Component {
                 const colRight = currentCol + 1;
                 if (colRight === emojiMatrix[currentRow]?.length) {
                     const rowBelowRight = emojiMatrix[currentRow + 1];
-                    newIdx = rowBelowRight?.[0];
+                    if (rowBelowRight) {
+                        newRow = currentRow + 1;
+                        newCol = 0;
+                    }
                 } else {
-                    newIdx = emojiMatrix[currentRow]?.[colRight];
+                    newCol = colRight;
                 }
                 break;
             }
@@ -326,14 +337,17 @@ export class EmojiPicker extends Component {
                 const colLeft = currentCol - 1;
                 if (colLeft < 0) {
                     const rowAboveLeft = emojiMatrix[currentRow - 1];
-                    newIdx = rowAboveLeft?.[rowAboveLeft.length - 1] ?? this.activeEmojiIndex();
+                    if (rowAboveLeft) {
+                        newRow = currentRow - 1;
+                        newCol = rowAboveLeft.length - 1;
+                    }
                 } else {
-                    newIdx = emojiMatrix[currentRow][colLeft];
+                    newCol = colLeft;
                 }
                 break;
             }
         }
-        this.activeEmojiIndex.set(newIdx ?? this.activeEmojiIndex());
+        this._navPos.set({ row: newRow, col: newCol });
     }
 
     get activeEmoji() {
