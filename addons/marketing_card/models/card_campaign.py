@@ -354,7 +354,7 @@ class CardCampaign(models.Model):
 
     def _action_share_get_default_body(self):
         # try to pick a relevant card if users try to visit during preview/test mailings
-        preview_card = self._fetch_or_create_preview_card() if self else self.env['card.card']
+        preview_card = self._fetch_or_create_preview_card()
         return f"""
 <div class="o_layout oe_unremovable oe_unmovable o_empty_theme" data-name="Mailing">
 <style id="design-element"></style>
@@ -376,9 +376,9 @@ class CardCampaign(models.Model):
         <tbody>
             <tr>
                 <td align="center">
-                    <a href="/cards/{preview_card.id or 0}/preview" style="padding-left: 3px !important; padding-right: 3px !important">
-                        <img src="/web/image/card.campaign/{self.id or 0}/image_preview" alt="{_("Card Preview")}" class="img-fluid" style="width: 540px;"
-                            data-original-src="/web/image/card.campaign/{self.id or 0}/image_preview"/>
+                    <a href="/cards/{preview_card.id}/preview" style="padding-left: 3px !important; padding-right: 3px !important">
+                        <img src="/web/image/card.campaign/{self.id}/image_preview" alt="{_("Card Preview")}" class="img-fluid" style="width: 540px;"
+                            data-original-src="/web/image/card.campaign/{self.id}/image_preview"/>
                     </a>
                 </td>
             </tr>
