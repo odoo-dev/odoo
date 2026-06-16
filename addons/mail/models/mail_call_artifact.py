@@ -14,18 +14,28 @@ class MailCallArtifact(models.Model):
 
     # required=False as artifact can also owned by other call models (ensured by constraints)
     discuss_call_history_id = fields.Many2one(
-        "discuss.call.history", string="Discuss Call History",
-        ondelete="cascade", required=False, index=True,
+        "discuss.call.history",
+        string="Discuss Call History",
+        ondelete="cascade",
+        required=False,
+        index=True,
     )
     media_id = fields.Many2one(
-        "ir.attachment", string="Media Attachment", compute="_compute_media_id",
+        "ir.attachment",
+        string="Media Attachment",
+        compute="_compute_media_id",
     )
     start_ms = fields.Integer(
-        string="Start (ms)", default=0, required=True, index=True,
+        string="Start (ms)",
+        default=0,
+        required=True,
+        index=True,
         help="Offset from the start of the call in milliseconds",
     )
     end_ms = fields.Integer(
-        string="End (ms)", default=0, required=True,
+        string="End (ms)",
+        default=0,
+        required=True,
         help="Offset from the start of the call in milliseconds",
     )
 
