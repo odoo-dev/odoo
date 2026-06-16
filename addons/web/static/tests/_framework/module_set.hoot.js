@@ -362,13 +362,17 @@ async function __gcAndLogMemory(label, testCount) {
     textarea.remove();
 
     // Run garbage collection
-    const gcStart = performance.now();
-    await window.gc({ type: "major", execution: "async" });
-    gcTotalMs += performance.now() - gcStart;
+    let garbageCollect = false;
+    if (window.performance.memory.usedJSHeapSize > 500 * 1000 * 1000) {
+        const gcStart = performance.now();
+        await window.gc({ type: "major", execution: "async" });
+        gcTotalMs += performance.now() - gcStart;
+        garbageCollect = true;
+    }
 
     // Log memory usage
     const logs = [
-        `[MEMINFO] ${label} (after GC)`,
+        `[MEMINFO] ${label} ${garbageCollect ? "(after GC)" : "(GC skipped)"}`,
         "- used:",
         window.performance.memory.usedJSHeapSize,
         "- total:",
