@@ -14,7 +14,6 @@
 
 <t t-name="html_builder.ColorPickerButton">
     <button
-        t-att-title="this.props.title"
         class="o_we_color_preview"
         t-custom-ref="colorButton"
         t-att-style="this.props.style"

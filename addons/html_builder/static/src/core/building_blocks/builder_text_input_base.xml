@@ -22,7 +22,6 @@
             t-att-placeholder="this.props.placeholder"
             t-att-data-tooltip="this.props.tooltip"
             t-att-aria-label="this.props.tooltip"
-            t-att-title="this.props.title"
             t-on-change="this.onChange"
             t-on-input="this.onInput"
             t-on-focus="this.onFocus"

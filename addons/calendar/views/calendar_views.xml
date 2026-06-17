@@ -145,11 +145,11 @@
                                     force_save="1" class="d-inline-flex text-truncate" readonly="videocall_source == 'discuss' or not user_can_edit"/>
                                 <button name="clear_videocall_location" type="object" class="btn btn-link py-0"
                                     invisible="not videocall_location or not user_can_edit" context="{'recurrence_update': recurrence_update}">
-                                    <i title="Clear meeting" data-tooltip="Clear meeting" class="fa fa-times"/>
+                                    <i data-tooltip="Clear meeting" class="fa fa-times"/>
                                 </button>
                                 <button name="action_join_video_call" class="btn btn-link py-0" type="object"
                                     invisible="not videocall_location or not user_can_edit">
-                                    <i title="Join Video Call" data-tooltip="Join video call" class="fa fa-sign-in"/>
+                                    <i data-tooltip="Join video call" class="fa fa-sign-in"/>
                                 </button>
                                 <button name="set_discuss_videocall_location" type="object" class="btn btn-link text-nowrap py-0"
                                     invisible="videocall_location or not user_can_edit" context="{'recurrence_update': recurrence_update}">
