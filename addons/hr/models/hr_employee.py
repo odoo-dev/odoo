@@ -216,7 +216,7 @@ class HrEmployee(models.Model):
     }
     """
 
-    permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user", tracking=True)
+    permit_no = fields.Char(readonly=False, related='version_id.permit_no', inherited=True, groups="hr.group_hr_user")
     visa_no = fields.Char('Visa No', groups="hr.group_hr_user", tracking=True)
     visa_expire = fields.Date('Visa Expiration Date', groups="hr.group_hr_user", tracking=True)
     work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user", tracking=True)
