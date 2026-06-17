@@ -59,6 +59,7 @@ class AccountMoveLine(models.Model):
                     account_move_line.id AS tax_line_id,
                     base_line.id AS base_line_id,
                     base_line.id AS src_line_id,
+                    account_move_line.move_id,
                     base_line.balance AS base_amount,
                     base_line.amount_currency AS base_amount_currency
                 FROM %(table_references)s
@@ -116,6 +117,7 @@ class AccountMoveLine(models.Model):
                 SELECT
                     account_move_line.id AS tax_line_id,
                     base_line.id AS base_line_id,
+                    account_move_line.move_id,
                     base_line.balance AS base_amount,
                     base_line.amount_currency AS base_amount_currency
 
@@ -226,6 +228,7 @@ class AccountMoveLine(models.Model):
                     tax_line.id AS tax_line_id,
                     base_line.id AS base_line_id,
                     account_move_line.id AS src_line_id,
+                    tax_line.move_id,
 
                     tax_line.company_id,
                     comp_curr.id AS company_currency_id,
@@ -277,9 +280,11 @@ class AccountMoveLine(models.Model):
                     tax.id = tax_rel.account_tax_id
                 JOIN base_tax_line_mapping tax_line_matching ON
                     tax_line_matching.base_line_id = base_tax_line_mapping.base_line_id
+                    AND tax_line_matching.move_id = base_tax_line_mapping.move_id
                 JOIN account_move_line tax_line ON
                     tax_line.id = tax_line_matching.tax_line_id
                     AND tax_line.tax_line_id = tax_rel.account_tax_id
+                    AND tax_line.move_id = base_tax_line_mapping.move_id
                 JOIN res_currency curr ON
                     curr.id = tax_line.currency_id
                 JOIN res_currency comp_curr ON
@@ -307,6 +312,7 @@ class AccountMoveLine(models.Model):
                     tax_line_id,
                     base_line_id,
                     base_line_id AS src_line_id,
+                    move_id,
                     base_amount,
                     base_amount_currency
                 FROM base_tax_line_mapping
@@ -329,6 +335,7 @@ class AccountMoveLine(models.Model):
                     sub.tax_line_id,
                     sub.base_line_id,
                     sub.src_line_id,
+                    sub.move_id,
 
                     ROUND(
                         COALESCE(SIGN(sub.cumulated_base_amount) * sub.total_tax_amount * ABS(sub.cumulated_base_amount) / NULLIF(sub.total_base_amount, 0.0), 0.0),
@@ -396,6 +403,7 @@ class AccountMoveLine(models.Model):
                     tax_line.tax_repartition_line_id,
 
                     tax_line.company_id,
+                    sub.move_id,
                     tax_line.display_type AS display_type,
                     comp_curr.id AS company_currency_id,
                     comp_curr.decimal_places AS comp_curr_prec,
@@ -441,10 +449,12 @@ class AccountMoveLine(models.Model):
                 FROM base_tax_matching_base_amounts sub
                 JOIN account_move_line tax_line ON
                     tax_line.id = sub.tax_line_id
+                    AND tax_line.move_id = sub.move_id
                 JOIN account_move tax_move ON
                     tax_move.id = tax_line.move_id
                 JOIN account_move_line base_line ON
                     base_line.id = sub.base_line_id
+                    AND base_line.move_id = sub.move_id
                 JOIN account_tax tax ON
                     tax.id = tax_line.tax_line_id
                 JOIN res_currency curr ON
