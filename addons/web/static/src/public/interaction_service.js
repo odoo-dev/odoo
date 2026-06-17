@@ -1,9 +1,9 @@
 import { registry } from "@web/core/registry";
-import { appTranslateFn } from "@web/core/l10n/translation";
 import { Interaction } from "./interaction";
-import { getTemplate } from "@web/core/templates";
 import { PairSet } from "./utils";
 import { Colibri } from "./colibri";
+import { services } from "@web/core/services";
+import { plugin, Plugin, useApp } from "@odoo/owl";
 
 /**
  * Website Core
@@ -25,24 +25,25 @@ import { Colibri } from "./colibri";
  *
  */
 
-class InteractionService {
-    /**
-     *
-     * @param {HTMLElement} el
-     * @param {Object} env
-     */
-    constructor(el, env) {
-        this.Interactions = [];
-        this.el = el;
-        this.isActive = false;
-        // relation el <--> Interaction
-        this.activeInteractions = new PairSet();
-        this.env = env;
-        this.interactions = [];
-        this.roots = [];
-        this.owlApp = null;
-        this.proms = [];
-        this.registry = null;
+export class PublicInteractionPlugin extends Plugin {
+    owlApp = useApp();
+    Interactions = [];
+    isActive = false;
+    // relation el <--> Interaction
+    activeInteractions = new PairSet();
+    interactions = [];
+    roots = [];
+    proms = [];
+    registry = null;
+
+    setup() {
+        this.el = document.querySelector("#wrapwrap") || document.querySelector("body");
+        const Interactions = registry.category("public.interactions").getAll();
+        this.activate(Interactions);
+    }
+
+    get env() {
+        return this.owlApp.env;
     }
 
     /**
@@ -58,20 +59,7 @@ class InteractionService {
     }
 
     prepareRoot(el, C, props, position = "beforeend") {
-        if (!this.owlApp) {
-            const { App } = odoo.loader.modules.get("@odoo/owl");
-            const appConfig = {
-                name: "Odoo Website",
-                getTemplate,
-                env: this.env,
-                dev: this.env.debug,
-                translateFn: appTranslateFn,
-                warnIfNoStaticProps: this.env.debug,
-                translatableAttributes: ["data-tooltip"],
-            };
-            this.owlApp = new App(appConfig);
-        }
-        const root = this.owlApp.createRoot(C, { props, env: this.env });
+        const root = this.owlApp.createRoot(C, { props });
         const rootEl = document.createElement("owl-root");
         rootEl.setAttribute("contenteditable", "false");
         rootEl.dataset.oeProtected = "true";
@@ -221,15 +209,11 @@ class InteractionService {
         return Promise.all(proms);
     }
 }
+services.add(PublicInteractionPlugin);
 
 export const publicInteractionService = {
-    async start(env) {
-        // fallback if #wrapwrap is not present in the dom
-        const el = document.querySelector("#wrapwrap") || document.querySelector("body");
-        const Interactions = registry.category("public.interactions").getAll();
-        const service = new InteractionService(el, env);
-        service.activate(Interactions);
-        return service;
+    start() {
+        return plugin(PublicInteractionPlugin);
     },
 };
 

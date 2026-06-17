@@ -38,6 +38,7 @@ export async function createPublicRoot() {
         translateFn: appTranslateFn,
         translatableAttributes: ["data-tooltip"],
         plugins: services,
+        env,
     });
     await startServices(env, app);
 
