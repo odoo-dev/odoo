@@ -700,4 +700,11 @@ class Meeting(models.Model):
     def _is_microsoft_insertion_blocked(self, sender_user):
         self.ensure_one()
         has_different_owner = self.user_id and self.user_id != sender_user
-        return has_different_owner
+        # An event that belongs to a recurrence already synced with Outlook must never be
+        # inserted as a standalone event: the series master still exists in Outlook, so
+        # inserting it would create a duplicate. This happens when a synced recurrence is
+        # shifted in Outlook: _write_from_microsoft recreates the occurrences locally with
+        # their Microsoft id cleared. Those events are (re)linked to the series instances by
+        # the Microsoft -> Odoo sync instead of being pushed back.
+        belongs_to_synced_recurrence = self.recurrence_id.ms_universal_event_id
+        return bool(has_different_owner or belongs_to_synced_recurrence)

@@ -800,6 +800,147 @@ class TestUpdateEvents(TestCommon):
         self.assertEqual(updated_event.start, new_date)
         self.assertEqual(updated_event.follow_recurrence, False)
 
+    @patch.object(MicrosoftCalendarService, 'insert')
+    def test_synced_recurrence_orphaned_base_event_is_not_reinserted(self, mock_insert):
+        """
+        When a recurrence already synced with Outlook is shifted in time from Outlook, the
+        Microsoft -> Odoo sync (calendar.recurrence._write_from_microsoft) recreates its
+        occurrences locally and clears the Microsoft id of the base event. That orphaned base
+        event must NOT be pushed back to Outlook as a new standalone event: the series master
+        still exists there, so inserting it would create a duplicate of the series (and the
+        occurrences would stay orphaned from it). It is (re)linked to the series instances by
+        the Microsoft -> Odoo sync instead.
+        """
+        mock_insert.return_value = ('NEW_MS_ID', 'NEW_UID')
+
+        # arrange: reproduce the state left by the destructive branch of _write_from_microsoft,
+        # i.e. a recurrence still linked to Outlook whose base event lost its Microsoft link.
+        recurrence = self.recurrence
+        self.assertTrue(recurrence.ms_universal_event_id)
+        base_event = recurrence.base_event_id
+        base_event.with_context(dont_notify=True).write({
+            'microsoft_id': False,
+            'ms_universal_event_id': False,
+            'follow_recurrence': False,
+            'need_sync_m': False,
+        })
+
+        # act: push the user's pending events to Outlook
+        base_event.with_user(self.organizer_user)._sync_odoo2microsoft()
+        self.call_post_commit_hooks()
+
+        # assert: the base event was not re-inserted as a new Outlook event (no duplicate)
+        mock_insert.assert_not_called()
+
+    def test_update_microsoft_recurrence_relinks_orphaned_occurrences_by_timeslot(self):
+        """
+        After a whole-series shift, the occurrences are recreated locally without any Microsoft
+        id and the Outlook instances come back with brand-new ids, so they no longer match any
+        Odoo event by id. _update_microsoft_recurrence must re-link them by timeslot, restoring
+        their microsoft_id and microsoft_recurrence_master_id, instead of leaving them orphaned.
+        """
+        recurrence = self.recurrence
+        master_id = recurrence.microsoft_id
+        base_event = recurrence.base_event_id
+        occurrences = recurrence.calendar_event_ids.sorted('start')
+
+        # arrange: orphan the occurrences and detach the base event, as the destructive
+        # recreate does (base event left with follow_recurrence=False).
+        occurrences.with_context(dont_notify=True).write({
+            'microsoft_id': False,
+            'ms_universal_event_id': False,
+            'microsoft_recurrence_master_id': False,
+            'need_sync_m': False,
+        })
+        base_event.with_context(dont_notify=True).write({'follow_recurrence': False})
+
+        # arrange: the Outlook instances come back at the same timeslots but with new ids
+        instances = MicrosoftEvent([
+            {
+                'id': f'NEWOCC_{i + 1}',
+                'iCalUId': f'NEWOCCU_{i + 1}',
+                'seriesMasterId': master_id,
+                'type': 'occurrence',
+                'start': {'dateTime': occ.start.strftime("%Y-%m-%dT%H:%M:%S.0000000"), 'timeZone': 'UTC'},
+                'end': {'dateTime': occ.stop.strftime("%Y-%m-%dT%H:%M:%S.0000000"), 'timeZone': 'UTC'},
+                'isAllDay': False,
+            }
+            for i, occ in enumerate(occurrences)
+        ])
+
+        # act
+        recurrence._update_microsoft_recurrence(None, instances)
+
+        # assert: every occurrence recovered its Microsoft link and recurrence master id
+        for occ in recurrence.calendar_event_ids:
+            self.assertTrue(occ.microsoft_id, "the occurrence should be re-linked to its Outlook instance")
+            self.assertEqual(occ.microsoft_recurrence_master_id, master_id)
+        # assert: the base event follows the recurrence again
+        self.assertTrue(base_event.follow_recurrence, "the re-linked base event should follow the recurrence")
+
+    @patch.object(MicrosoftCalendarService, 'get_events')
+    def test_update_rrule_of_recurrence_relinks_occurrences_when_ids_reassigned(self, mock_get_events):
+        """
+        D2: the rrule of a synced recurrence is changed from Outlook (here the range is extended,
+        which adds occurrences and changes the rrule UNTIL). The destructive rrule branch of
+        calendar.recurrence._write_from_microsoft recreates the occurrence set locally without any
+        Microsoft id. When Outlook also reassigns the occurrence ids (which happens on a series
+        edit), the recreated occurrences match no Odoo event by id. _update_microsoft_recurrence
+        must re-link them by timeslot so none stays orphaned (empty microsoft_id /
+        microsoft_recurrence_master_id). The base event start is left unchanged so this isolates
+        the rrule branch from the time-shift branch (D1).
+        """
+        nb_of_events = self.recurrent_events_count + 2
+        master = self.recurrent_event_from_outlook_organizer[0]
+        # arrange: same start/stop (no D1), but extend the recurrence range -> rrule UNTIL changes (D2)
+        events = [dict(
+            master,
+            recurrence=dict(
+                master['recurrence'],
+                range=dict(
+                    master['recurrence']['range'],
+                    endDate=(
+                        self.recurrence_end_date + timedelta(days=self.recurrent_event_interval * 2)
+                    ).strftime("%Y-%m-%d"),
+                ),
+            ),
+            lastModifiedDateTime=_modified_date_in_the_future(self.recurrent_base_event),
+        )]
+        # arrange: Outlook returns every occurrence with a brand-new id (ids reassigned on the edit)
+        events += [
+            dict(
+                self.recurrent_event_from_outlook_organizer[1],
+                id=f'NEWOCC_{i + 1}',
+                iCalUId=f'NEWOCCU_{i + 1}',
+                start={
+                    'dateTime': (
+                        self.start_date + timedelta(days=i * self.recurrent_event_interval)
+                    ).strftime("%Y-%m-%dT%H:%M:%S.0000000"),
+                    'timeZone': 'UTC',
+                },
+                end={
+                    'dateTime': (
+                        self.end_date + timedelta(days=i * self.recurrent_event_interval)
+                    ).strftime("%Y-%m-%dT%H:%M:%S.0000000"),
+                    'timeZone': 'UTC',
+                },
+                lastModifiedDateTime=_modified_date_in_the_future(self.recurrent_base_event),
+            )
+            for i in range(nb_of_events)
+        ]
+        mock_get_events.return_value = (MicrosoftEvent(events), None)
+
+        # act
+        self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
+
+        # assert: the recurrence spans the extended range and no occurrence is orphaned
+        recurrence = self.env['calendar.recurrence'].search([('ms_universal_event_id', '=', 'REC456')])
+        occurrences = recurrence.calendar_event_ids
+        self.assertEqual(len(occurrences), nb_of_events, "the rrule change should have grown the occurrence set")
+        for occ in occurrences:
+            self.assertTrue(occ.microsoft_id, "occurrence must be re-linked, not orphaned, after the rrule change")
+            self.assertEqual(occ.microsoft_recurrence_master_id, 'REC123')
+
     @freeze_time('2021-09-22')
     @patch.object(MicrosoftCalendarService, 'get_events')
     def test_update_name_of_one_event_and_future_of_recurrence_from_outlook_organizer_calendar(self, mock_get_events):

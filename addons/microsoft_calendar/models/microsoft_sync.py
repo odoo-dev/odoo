@@ -262,6 +262,21 @@ class MicrosoftSync(models.AbstractModel):
                 odoo_event = self.env['calendar.event'].browse(e.odoo_id(self.env)).exists().with_context(
                     no_mail_to_attendees=True, mail_create_nolog=True
                 )
+                if not odoo_event and event_values.get('start'):
+                    # The occurrence is not mapped to an Odoo event yet. This happens when the
+                    # whole series is shifted in Outlook: the occurrences are recreated locally
+                    # (without any Microsoft id) and the Outlook instances come back with new
+                    # ids, so they match no Odoo event by id. Re-link them by timeslot so they
+                    # recover their microsoft_id and microsoft_recurrence_master_id instead of
+                    # staying orphaned (which would also let the base event be re-inserted as a
+                    # duplicate by the Odoo -> Microsoft sync).
+                    odoo_event = self.calendar_event_ids.filtered(
+                        lambda ev: ev._is_matching_timeslot(event_values['start'], event_values['stop'], e.isAllDay)
+                    ).with_context(no_mail_to_attendees=True, mail_create_nolog=True)
+                    if odoo_event and e.type == "occurrence":
+                        # the destructive recreate left the base event detached
+                        # (follow_recurrence=False); a re-linked occurrence follows the series.
+                        event_values = dict(event_values, follow_recurrence=True)
                 odoo_event.with_context(dont_notify=True).write(dict(event_values, need_sync_m=False))
                 update_events |= odoo_event
 
