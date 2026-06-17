@@ -14,7 +14,7 @@ function selectColorpickerSwitchPanel(type) {
         },
         {
             content: "Click on background-color option",
-            trigger: "div[data-label='Background'] .o_we_color_preview[title='Color']",
+            trigger: "div[data-label='Background'] .o_we_color_preview[data-tooltip='Color']",
             run: "click",
         },
         {
