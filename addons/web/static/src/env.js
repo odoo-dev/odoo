@@ -69,6 +69,7 @@ let startServicesPromise = null;
  * @returns {Promise<void>}
  */
 export async function startServices(env, app) {
+    env.pluginManager = app.pluginManager;
     // we start all plugins first (in particular the localization plugin)
     await app.pluginManager.ready;
     const toStart = new Map();

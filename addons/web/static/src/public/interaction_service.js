@@ -71,6 +71,7 @@ export class PublicInteractionPlugin extends Plugin {
                 translatableAttributes: ["data-tooltip"],
             };
             this.owlApp = new App(appConfig);
+            this.owlApp.pluginManager = this.env.pluginManager;
         }
         const root = this.owlApp.createRoot(C, { props, env: this.env });
         const rootEl = document.createElement("owl-root");
