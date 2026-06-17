@@ -1663,6 +1663,12 @@ class GroupsView(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         groups = super().create(vals_list)
+        _logger.warning(
+            "res.groups.create -> _update_user_groups_view | ids=%s | ...",
+            groups.ids,
+            self._context.get('install_filename'),
+            self.env.registry._init,
+        )
         self._update_user_groups_view()
         # actions.get_bindings() depends on action records
         self.env.registry.clear_cache()
@@ -1676,6 +1682,12 @@ class GroupsView(models.Model):
         # update the "user groups view" only if necessary
         view_values1 = [g[name] for name in VIEW_DEPS if name in values for g in self]
         if view_values0 != view_values1:
+            _logger.warning(
+                "res.groups.create/write/unlink -> _update_user_groups_view | ids=%s | install_filename=%s | registry._init=%s",
+                self.ids,
+                self._context.get('install_filename'),
+                self.env.registry._init,
+            )
             self._update_user_groups_view()
         # actions.get_bindings() depends on action records
         self.env.registry.clear_cache()
@@ -1683,6 +1695,12 @@ class GroupsView(models.Model):
 
     def unlink(self):
         res = super(GroupsView, self).unlink()
+        _logger.warning(
+            "res.groups.create/write/unlink -> _update_user_groups_view | ids=%s | install_filename=%s | registry._init=%s",
+            self.ids,
+            self._context.get('install_filename'),
+            self.env.registry._init,
+        )
         self._update_user_groups_view()
         # actions.get_bindings() depends on action records
         self.env.registry.clear_cache()
@@ -1696,6 +1714,16 @@ class GroupsView(models.Model):
         """ Modify the view with xmlid ``base.user_groups_view``, which inherits
             the user form view, and introduces the reified group fields.
         """
+        import traceback
+        stack = ''.join(traceback.format_stack()[:-1])
+        _logger.warning(
+            "_update_user_groups_view called | install_filename=%s | MODULE_UNINSTALL_FLAG=%s | registry._init=%s | dummy=%s\nStack:\n%s",
+            self._context.get('install_filename'),
+            self._context.get(MODULE_UNINSTALL_FLAG),
+            self.env.registry._init,
+            bool(self._context.get('install_filename') or self._context.get(MODULE_UNINSTALL_FLAG)),
+            stack,
+        )
         # remove the language to avoid translations, it will be handled at the view level
         self = self.with_context(lang=None)
 
@@ -1883,11 +1911,23 @@ class ModuleCategory(models.Model):
     def write(self, values):
         res = super().write(values)
         if "name" in values:
+            _logger.warning(
+                "res.module.category.write/unlink -> _update_user_groups_view | ids=%s | install_filename=%s | registry._init=%s",
+                self.ids,
+                self._context.get('install_filename'),
+                self.env.registry._init,
+            )
             self.env["res.groups"]._update_user_groups_view()
         return res
 
     def unlink(self):
         res = super().unlink()
+        _logger.warning(
+            "res.module.category.write/unlink -> _update_user_groups_view | ids=%s | install_filename=%s | registry._init=%s",
+            self.ids,
+            self._context.get('install_filename'),
+            self.env.registry._init,
+        )
         self.env["res.groups"]._update_user_groups_view()
         return res
 

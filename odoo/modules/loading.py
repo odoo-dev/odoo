@@ -119,6 +119,9 @@ def force_demo(env):
         load_demo(env, package, {}, 'init')
 
     env['ir.module.module'].invalidate_model(['demo'])
+    _logger.warning(
+        "loading.py _update_user_groups_view call | location=force_demo"
+    )
     env['res.groups']._update_user_groups_view()
 
 
@@ -595,6 +598,10 @@ def load_modules(registry, force_demo=False, status=None, update_module=False):
 
         # STEP 6: verify custom views on every model
         if update_module:
+            _logger.warning(
+                "loading.py explicit _update_user_groups_view call | line=122/598 | update_module=%s",
+                update_module
+            )
             env['res.groups']._update_user_groups_view()
             View = env['ir.ui.view']
             for model in registry:
