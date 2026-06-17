@@ -164,11 +164,10 @@ export async function makeMockEnv(partialEnv, options = {}) {
             }
         });
     }
-    const app =
-        options.app ||
-        makeApp({
-            plugins: services,
-        });
+    const app = makeApp({
+        plugins: services,
+        env,
+    });
 
     await startServices(env, app);
 

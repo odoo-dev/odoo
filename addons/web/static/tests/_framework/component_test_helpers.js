@@ -12,7 +12,6 @@ import {
 } from "@web/env";
 import { getMockEnv, makeApp, makeMockEnv } from "./env_test_helpers";
 import { patchWithCleanup } from "./patch_test_helpers";
-import { services } from "@web/core/services";
 
 import { makeMockServer, MockServer } from "./mock_server/mock_server";
 
@@ -155,6 +154,7 @@ export async function mountWithCleanup(ComponentClass, options) {
         await makeMockServer();
     }
 
+    const commonEnv = env || getMockEnv() || (await makeMockEnv());
     const app = makeApp({
         customDirectives,
         getTemplate,
@@ -166,10 +166,8 @@ export async function mountWithCleanup(ComponentClass, options) {
         // The following keys are forced to ensure validation of all tested components
         dev: false,
         test: true,
-        plugins: services,
         warnIfNoStaticProps: true,
     });
-    const commonEnv = env || getMockEnv() || (await makeMockEnv({}, { app }));
     after(() => destroy(app));
 
     const componentRoot = app.createRoot(ComponentClass, {
