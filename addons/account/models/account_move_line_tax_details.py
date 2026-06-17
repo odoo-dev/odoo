@@ -295,7 +295,7 @@ class AccountMoveLine(models.Model):
             ),
 
 
-            base_tax_matching_base_amounts AS (
+            base_tax_matching_base_amounts AS MATERIALIZED (
 
                 /*
                 Build here the full mapping tax lines <=> base lines containing the final base amounts.
@@ -361,8 +361,6 @@ class AccountMoveLine(models.Model):
                         PARTITION BY sub.tax_line_id, sub.src_line_id ORDER BY sub.tax_id, sub.base_line_id
                     ) AS base_amount_currency
                 FROM tax_amount_affecting_base_to_dispatch sub
-                JOIN account_move_line tax_line ON
-                    tax_line.id = sub.tax_line_id
 
                 /*
                 PART 3: In case of the matching failed because the configuration changed or some journal entries
@@ -446,15 +444,31 @@ class AccountMoveLine(models.Model):
                     ) OVER (PARTITION BY tax_line.id) AS total_base_amount_currency,
                     tax_line.amount_currency AS total_tax_amount_currency
 
-                FROM base_tax_matching_base_amounts sub
-                JOIN account_move_line tax_line ON
-                    tax_line.id = sub.tax_line_id
-                    AND tax_line.move_id = sub.move_id
-                JOIN account_move tax_move ON
-                    tax_move.id = tax_line.move_id
-                JOIN account_move_line base_line ON
-                    base_line.id = sub.base_line_id
-                    AND base_line.move_id = sub.move_id
+                FROM (
+                    SELECT *
+                    FROM base_tax_matching_base_amounts
+                    OFFSET 0
+                ) sub
+                JOIN LATERAL (
+                    SELECT *
+                    FROM account_move_line
+                    WHERE id = sub.tax_line_id
+                        AND move_id = sub.move_id
+                    OFFSET 0
+                ) tax_line ON TRUE
+                JOIN LATERAL (
+                    SELECT *
+                    FROM account_move
+                    WHERE id = tax_line.move_id
+                    OFFSET 0
+                ) tax_move ON TRUE
+                JOIN LATERAL (
+                    SELECT *
+                    FROM account_move_line
+                    WHERE id = sub.base_line_id
+                        AND move_id = sub.move_id
+                    OFFSET 0
+                ) base_line ON TRUE
                 JOIN account_tax tax ON
                     tax.id = tax_line.tax_line_id
                 JOIN res_currency curr ON
