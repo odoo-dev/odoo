@@ -1,4 +1,4 @@
-import { after, destroy, getFixture, queryFirst, queryOne } from "@odoo/hoot";
+import { after, getFixture, queryFirst, queryOne } from "@odoo/hoot";
 import { App, Component, onWillDestroy, xml } from "@odoo/owl";
 import { appTranslateFn } from "@web/core/l10n/translation";
 import { MainComponentsContainer } from "@web/core/main_components_container";
@@ -10,7 +10,7 @@ import {
     customDirectives as defaultCustomDirectives,
     globalValues as defaultGlobalValues,
 } from "@web/env";
-import { getMockEnv, makeApp, makeMockEnv } from "./env_test_helpers";
+import { getMockEnv, makeApp } from "./env_test_helpers";
 import { patchWithCleanup } from "./patch_test_helpers";
 
 import { makeMockServer, MockServer } from "./mock_server/mock_server";
@@ -154,8 +154,7 @@ export async function mountWithCleanup(ComponentClass, options) {
         await makeMockServer();
     }
 
-    const commonEnv = env || getMockEnv() || (await makeMockEnv());
-    const app = makeApp({
+    const app = await makeApp({
         customDirectives,
         getTemplate,
         globalValues,
@@ -167,11 +166,11 @@ export async function mountWithCleanup(ComponentClass, options) {
         dev: false,
         test: true,
         warnIfNoStaticProps: true,
+        env,
     });
-    after(() => destroy(app));
 
     const componentRoot = app.createRoot(ComponentClass, {
-        env: Object.assign(Object.create(commonEnv), componentEnv),
+        env: Object.assign(Object.create(app.env), componentEnv),
         props,
     });
     /** @type {InstanceType<C>} */
@@ -179,7 +178,7 @@ export async function mountWithCleanup(ComponentClass, options) {
 
     if (!noMainContainer && !hasMainComponent) {
         const mainContainerRoot = app.createRoot(MainComponentsContainer, {
-            env: Object.assign(Object.create(commonEnv), containerEnv),
+            env: Object.assign(Object.create(app.env), containerEnv),
             props: {},
         });
         await mainContainerRoot.mount(targetEl);

@@ -1,4 +1,4 @@
-import { after, afterEach, beforeEach, destroy, registerDebugInfo } from "@odoo/hoot";
+import { after, afterEach, beforeEach, registerDebugInfo } from "@odoo/hoot";
 import { animationFrame } from "@odoo/hoot-mock";
 import { startRouter } from "@web/core/browser/router";
 import { createDebugContext } from "@web/core/debug/debug_context";
@@ -54,58 +54,6 @@ let currentEnv = null;
 beforeEach(() => registerRegistryForCleanup(registry));
 afterEach(() => restoreRegistry(registry));
 
-//-----------------------------------------------------------------------------
-// Exports
-//-----------------------------------------------------------------------------
-
-let currentPluginManager = null;
-beforeEach(() => (currentPluginManager = null));
-
-export function makeApp(config) {
-    if (!currentPluginManager) {
-        const app = new App(config);
-        currentPluginManager = app.pluginManager;
-        after(() => destroy(app));
-        return app;
-    }
-    const _config = { ...config };
-    _config.plugins = undefined; // shadow plugins to remove them
-    const app = new App(_config);
-    // note that this is gefoireux... pluginmanager could have been
-    // instantiated with a specific config, which is different from the
-    // config in _config.
-    app.pluginManager = currentPluginManager;
-    // this is also gefoireux... it kind of works if we have 2 Apps, but
-    // not if we have more
-    currentPluginManager.app = app;
-    after(() => destroy(app));
-    return app;
-}
-
-/**
- * Empties the given registry.
- *
- * @param {Registry} registry
- */
-export function clearRegistry(registry) {
-    registry.content = {};
-    registry.elements = null;
-    registry.entries = null;
-}
-
-export function getMockEnv() {
-    return currentEnv;
-}
-
-/**
- * @template {keyof Services} T
- * @param {T} name
- * @returns {Services[T]}
- */
-export function getService(name) {
-    return currentEnv.services[name];
-}
-
 /**
  * Makes a mock environment along with a mock server
  *
@@ -114,7 +62,7 @@ export function getService(name) {
  *  makeNew?: boolean;
  * }} [options]
  */
-export async function makeMockEnv(partialEnv, options = {}) {
+async function _makeMockEnv(partialEnv, options = {}) {
     if (currentEnv && !options?.makeNew) {
         throw new Error(
             `cannot create mock environment: a mock environment has already been declared`
@@ -164,13 +112,59 @@ export async function makeMockEnv(partialEnv, options = {}) {
             }
         });
     }
-    const app = makeApp({
-        plugins: services,
-        env,
-    });
 
+    return env;
+}
+
+//-----------------------------------------------------------------------------
+// Exports
+//-----------------------------------------------------------------------------
+
+export async function makeApp(config) {
+    const env = config.env || getMockEnv() || (await _makeMockEnv());
+    const app = new App({ plugins: services, ...config, env });
+    after(() => app.destroy());
     await startServices(env, app);
+    return app;
+}
 
+/**
+ * Empties the given registry.
+ *
+ * @param {Registry} registry
+ */
+export function clearRegistry(registry) {
+    registry.content = {};
+    registry.elements = null;
+    registry.entries = null;
+}
+
+export function getMockEnv() {
+    return currentEnv;
+}
+
+/**
+ * @template {keyof Services} T
+ * @param {T} name
+ * @returns {Services[T]}
+ */
+export function getService(name) {
+    return currentEnv.services[name];
+}
+
+/**
+ * Makes a mock environment along with a mock server
+ *
+ * @param {Partial<OdooEnv>} [partialEnv]
+ * @param {{
+ *  makeNew?: boolean;
+ * }} [options]
+ */
+export async function makeMockEnv(partialEnv, options = {}) {
+    const env = await _makeMockEnv(partialEnv, options);
+    const app = new App({ plugins: services, env });
+    after(() => app.destroy());
+    await startServices(env, app);
     return env;
 }
 

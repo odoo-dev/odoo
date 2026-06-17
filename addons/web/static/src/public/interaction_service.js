@@ -1,9 +1,12 @@
+import { plugin, Plugin } from "@odoo/owl";
+import { appTranslateFn } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { services } from "@web/core/services";
+import { getTemplate } from "@web/core/templates";
+import { useChildEnv } from "@web/owl2/utils";
+import { Colibri } from "./colibri";
 import { Interaction } from "./interaction";
 import { PairSet } from "./utils";
-import { Colibri } from "./colibri";
-import { services } from "@web/core/services";
-import { plugin, Plugin, useApp } from "@odoo/owl";
 
 /**
  * Website Core
@@ -26,7 +29,7 @@ import { plugin, Plugin, useApp } from "@odoo/owl";
  */
 
 export class PublicInteractionPlugin extends Plugin {
-    owlApp = useApp();
+    owlApp = null;
     Interactions = [];
     isActive = false;
     // relation el <--> Interaction
@@ -35,15 +38,12 @@ export class PublicInteractionPlugin extends Plugin {
     roots = [];
     proms = [];
     registry = null;
+    env = useChildEnv();
 
     setup() {
         this.el = document.querySelector("#wrapwrap") || document.querySelector("body");
         const Interactions = registry.category("public.interactions").getAll();
         this.activate(Interactions);
-    }
-
-    get env() {
-        return this.owlApp.env;
     }
 
     /**
@@ -59,7 +59,20 @@ export class PublicInteractionPlugin extends Plugin {
     }
 
     prepareRoot(el, C, props, position = "beforeend") {
-        const root = this.owlApp.createRoot(C, { props });
+        if (!this.owlApp) {
+            const { App } = odoo.loader.modules.get("@odoo/owl");
+            const appConfig = {
+                name: "Odoo Website",
+                getTemplate,
+                env: this.env,
+                dev: this.env.debug,
+                translateFn: appTranslateFn,
+                warnIfNoStaticProps: this.env.debug,
+                translatableAttributes: ["data-tooltip"],
+            };
+            this.owlApp = new App(appConfig);
+        }
+        const root = this.owlApp.createRoot(C, { props, env: this.env });
         const rootEl = document.createElement("owl-root");
         rootEl.setAttribute("contenteditable", "false");
         rootEl.dataset.oeProtected = "true";
