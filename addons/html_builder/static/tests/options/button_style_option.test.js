@@ -132,7 +132,9 @@ test("fill gradient should be stored as background-image", async () => {
 
     await contains("[data-label=Fill] .o_we_color_preview").click();
     await contains(".gradient-tab").click();
-    await contains(".o_gradient_color_button").click();
+    await contains(
+        ".o_gradient_color_button[data-color='linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%)']"
+    ).click();
 
     expect(":iframe p > a").toHaveStyle(
         {

@@ -97,7 +97,9 @@ test("BuilderColorPicker with action “customizeWebsiteColor” is correctly di
     expect.step("set gradient");
     await contains("button.o_we_color_preview").click();
     await contains("button.gradient-tab").click();
-    await contains("button.o_gradient_color_button").click();
+    await contains(
+        "button.o_gradient_color_button[data-color='linear-gradient(135deg, rgb(255, 204, 51) 0%, rgb(226, 51, 255) 100%)']"
+    ).click();
     // Should wait for 3 ticks (debounced): customizeWebsiteColors, customizeWebsiteVariables, reloadBundles
     await def.promise;
     expect.verifySteps([

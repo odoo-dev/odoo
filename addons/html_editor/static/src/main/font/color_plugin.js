@@ -160,7 +160,12 @@ export class ColorPlugin extends Plugin {
 
     getElementColors(el) {
         const elStyle = getComputedStyle(el);
-        const backgroundImage = elStyle.backgroundImage;
+        // Prefer the raw inline style to preserve CSS variable references
+        // (e.g. var(--o-color-1)) instead of their computed RGB values, so
+        // preset gradient buttons can be matched when the picker is reopened.
+        const rawBgImage = el.style.backgroundImage;
+        const rawGradient = backgroundImageCssToParts(rawBgImage).gradient;
+        const backgroundImage = isColorGradient(rawGradient) ? rawBgImage : elStyle.backgroundImage;
         const gradient = backgroundImageCssToParts(backgroundImage).gradient;
         const hasGradient = isColorGradient(gradient);
         const hasTextGradientClass = el.classList.contains("text-gradient");

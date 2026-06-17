@@ -1,7 +1,8 @@
 import { Plugin } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
-import { applyNeededCss } from "@html_builder/utils/utils_css";
+import { applyNeededCss, normalizeGradientThemeVars } from "@html_builder/utils/utils_css";
 import { withSequence } from "@html_editor/utils/resource";
+import { isColorGradient } from "@web/core/utils/colors";
 
 /**
  * @typedef {((editingElement: HTMLElement) => void)[]} on_bg_color_updated_handlers
@@ -13,6 +14,9 @@ export class ColorStylePlugin extends Plugin {
     /** @type {import("plugins").BuilderResources} */
     resources = {
         apply_color_style_overrides: withSequence(5, (element, cssProp, color, params = {}) => {
+            if (cssProp === "background-image" && isColorGradient(color)) {
+                color = normalizeGradientThemeVars(color);
+            }
             applyNeededCss(
                 element,
                 cssProp,
@@ -34,9 +38,13 @@ export class ColorStylePlugin extends Plugin {
      */
     applyColorStyle({ editingElement, styleName, value, params = {} }) {
         if (styleName === "background-color") {
-            const match = value.match(/var\(--([a-zA-Z0-9-_]+)\)/);
-            if (match) {
-                value = `bg-${match[1]}`;
+            if (isColorGradient(value)) {
+                value = normalizeGradientThemeVars(value);
+            } else {
+                const match = value.match(/var\(--([a-zA-Z0-9-_]+)\)/);
+                if (match) {
+                    value = `bg-${match[1]}`;
+                }
             }
             this.dependencies.color.colorElement(editingElement, value, "backgroundColor", params);
             this.trigger("on_bg_color_updated_handlers", editingElement);

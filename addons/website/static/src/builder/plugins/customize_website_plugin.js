@@ -2,6 +2,7 @@ import {
     isCSSVariable,
     setBuilderCSSVariables,
     getBgImageURLFromEl,
+    normalizeGradientThemeVars,
 } from "@html_builder/utils/utils_css";
 import { Plugin } from "@html_editor/plugin";
 import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
@@ -1054,7 +1055,7 @@ export class CustomizeWebsiteColorAction extends BuilderAction {
             let colorValue = "";
             let gradientValue = "";
             if (isColorGradient(value)) {
-                gradientValue = value;
+                gradientValue = normalizeGradientThemeVars(value);
             } else {
                 colorValue = value;
             }

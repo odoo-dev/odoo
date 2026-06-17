@@ -15,7 +15,7 @@ import {
     useHasPreview,
 } from "../utils";
 import { isCSSColor, isColorGradient } from "@web/core/utils/colors";
-import { getAllUsedColors } from "@html_builder/utils/utils_css";
+import { getAllUsedColors, oColorToBuilderVars } from "@html_builder/utils/utils_css";
 
 // TODO replace by useInputBuilderComponent after extract unit by AGAU
 export function useColorPickerBuilderComponent() {
@@ -52,11 +52,16 @@ export function useColorPickerBuilderComponent() {
         );
         const { actionId, actionParam } = actionWithGetValue;
         const actionValue = getAction(actionId).getValue({ editingElement, params: actionParam });
+        // Normalize gradient theme vars (var(--o-color-N)) back to the builder's
+        // hb-cp-* display format so the selected color matches preset gradient buttons.
+        const selectedColor = isColorGradient(actionValue)
+            ? oColorToBuilderVars(actionValue)
+            : actionValue;
         return {
             // defaultTab is the tab to open if the user has not done a selection yet.
             // If the user has already selected a color, the tab of the last selection is opened
             defaultTab: comp.props.selectedTab,
-            selectedColor: actionValue || comp.props.defaultColor,
+            selectedColor: selectedColor || comp.props.defaultColor,
             selectedColorCombination: comp.env.editor.shared.color.getColorCombination(
                 editingElement,
                 actionParam

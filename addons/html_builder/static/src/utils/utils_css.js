@@ -405,6 +405,7 @@ export function applyNeededCss(
 const builderStylesheet = new CSSStyleSheet();
 export function setBuilderCSSVariables(htmlStyle) {
     const styles = [];
+    const oColorStyles = [];
     for (const style of EDITOR_COLOR_CSS_VARIABLES) {
         let value = getCSSVariableValue(style, htmlStyle);
         if (value.startsWith("'") && value.endsWith("'")) {
@@ -412,8 +413,20 @@ export function setBuilderCSSVariables(htmlStyle) {
             value = value.substring(1, value.length - 1);
         }
         styles.push(`--hb-cp-${style}: ${value};`);
+        // Mirror --o-color-N into the outer document so elements whose style uses
+        // var(--o-color-N) (e.g. theme gradients stored as inline styles) update
+        // live when the palette changes. Uses :root {} rather than html {} to match
+        // the specificity of the CSS bundle's own :root definition — adoptedStyleSheets
+        // come last in the cascade, so source-order ensures this rule wins.
+        if (/^o-color-\d+$/.test(style)) {
+            oColorStyles.push(`--${style}: ${value};`);
+        }
     }
-    builderStylesheet.replaceSync(`html { ${styles.join(" ")} }`);
+    let cssText = `html { ${styles.join(" ")} }`;
+    if (oColorStyles.length) {
+        cssText += ` :root { ${oColorStyles.join(" ")} }`;
+    }
+    builderStylesheet.replaceSync(cssText);
     if (!window.top.document.adoptedStyleSheets.find((style) => style === builderStylesheet)) {
         window.top.document.adoptedStyleSheets.push(builderStylesheet);
     }
@@ -471,4 +484,46 @@ export function getAllUsedColors(el) {
         collectUrlColors(getBgImageURLFromEl(bgEl));
     }
     return usedCustomColors;
+}
+
+// Maps builder's hb-cp-* variable names to canonical Odoo palette var names.
+// Derive the reverse so both stay in sync when new entries are added here.
+const BUILDER_VARIABLE_TO_O_COLOR = {
+    primary: "o-color-1",
+    secondary: "o-color-2",
+};
+
+const O_COLOR_TO_BUILDER_VARIABLE = Object.fromEntries(
+    Object.entries(BUILDER_VARIABLE_TO_O_COLOR).map(([k, v]) => [v, k])
+);
+
+/**
+ * Replaces `var(--hb-cp-<name>)` references inside a gradient string with
+ * their canonical `var(--o-color-N)` equivalents so the gradient stays
+ * palette-aware after it is persisted. Unknown variables are left unchanged.
+ *
+ * @param {string} gradient
+ * @returns {string}
+ */
+export function normalizeGradientThemeVars(gradient) {
+    return gradient.replace(/var\(--hb-cp-([a-zA-Z0-9-_]+)\)/g, (match, varName) => {
+        const mapped = BUILDER_VARIABLE_TO_O_COLOR[varName];
+        return mapped ? `var(--${mapped})` : match;
+    });
+}
+
+/**
+ * Converts `var(--o-color-N)` references in a gradient back to the builder's
+ * `var(--hb-cp-<name>)` format so the selected color matches the preset
+ * gradient buttons in the color picker (which use the hb-cp- prefix).
+ * Unknown variables are left unchanged.
+ *
+ * @param {string} gradient
+ * @returns {string}
+ */
+export function oColorToBuilderVars(gradient) {
+    return gradient.replace(/var\(--o-color-(\d+)\)/g, (match, n) => {
+        const varName = O_COLOR_TO_BUILDER_VARIABLE[`o-color-${n}`];
+        return varName ? `var(--hb-cp-${varName})` : match;
+    });
 }

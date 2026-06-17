@@ -73,6 +73,14 @@ export class GradientPicker extends Component {
         if (!gradient || !isColorGradient(gradient)) {
             return;
         }
+        // Resolve CSS variable references (e.g. var(--hb-cp-primary)) to their
+        // computed values so the color stops can be parsed.
+        gradient = gradient.replace(/var\(--([^)]+)\)/g, (_match, varName) => {
+            const resolved = getComputedStyle(document.documentElement)
+                .getPropertyValue(`--${varName}`)
+                .trim();
+            return resolved || `var(--${varName})`;
+        });
         gradient = standardizeGradient(gradient);
         const colors = [
             ...gradient.matchAll(
@@ -80,6 +88,10 @@ export class GradientPicker extends Component {
             ),
         ].filter((color) => rgbaToHex(color[1]) !== "#");
 
+        if (colors.length === 0) {
+            // CSS vars could not be resolved — keep existing colors to avoid an empty array.
+            return;
+        }
         this.colors.splice(0, this.colors.length);
         for (const color of colors) {
             const colorValue = color[1];
