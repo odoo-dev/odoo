@@ -1433,6 +1433,10 @@ class TransactionCase(BaseCase):
         for name, layer in transaction.ormcaches__.items():
             transaction.ormcaches__[name] = CacheLayer(layer)
 
+        if f := self.env['ir.model.fields'].sudo().search([('name', 'like', 'x_studio_ma')]):
+            print(f.read())
+            sys.exit(1)
+
     @classmethod
     @contextmanager
     def registry_test_mode(cls, *, cr: Cursor | None = None, registry: Registry | None = None):
