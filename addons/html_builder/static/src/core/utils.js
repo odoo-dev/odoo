@@ -10,10 +10,10 @@ import {
     onMounted,
     onWillDestroy,
     onWillStart,
-    onWillUpdateProps,
     proxy,
     status,
     toRaw,
+    asyncComputed,
     useEffect,
 } from "@odoo/owl";
 import { convertNumericToUnit, getHtmlStyle } from "@html_editor/utils/formatting";
@@ -122,12 +122,15 @@ export function useBuilderComponent() {
     };
     updateEditingElements();
     oldEnv.editorBus.addEventListener("UPDATE_EDITING_ELEMENT", updateEditingElements);
-    onWillUpdateProps(async (nextProps) => {
-        if (comp.props.applyTo !== nextProps.applyTo) {
-            applyTo = nextProps.applyTo;
-            oldEnv.editorBus.trigger("UPDATE_EDITING_ELEMENT");
-            await oldEnv.triggerDomUpdated();
+    let isFirstRun = true;
+    useEffect(() => {
+        applyTo = comp.props.applyTo;
+        if (isFirstRun) {
+            isFirstRun = false;
+            return;
         }
+        oldEnv.editorBus.trigger("UPDATE_EDITING_ELEMENT");
+        oldEnv.triggerDomUpdated();
     });
     onWillDestroy(() => {
         oldEnv.editorBus.removeEventListener("UPDATE_EDITING_ELEMENT", updateEditingElements);
@@ -477,10 +480,7 @@ export function useSelectableLtrRtlComponent({
         };
         env.selectableContext.addLtrRtlMappedItem(ltrRtlMappedItem);
 
-        onWillStart(() => {
-            env.selectableContext.updateLtrRtlMappedItem(ltrRtlMappedItem);
-        });
-        onWillUpdateProps(async () => {
+        useEffect(() => {
             env.selectableContext.updateLtrRtlMappedItem(ltrRtlMappedItem);
         });
         onWillDestroy(() => {
@@ -490,6 +490,7 @@ export function useSelectableLtrRtlComponent({
 }
 
 function usePrepareAction(getAllActions) {
+    const comp = useComponent();
     const env = useEnv();
     const getAction = env.editor.shared.builderActions.getAction;
     const asyncActions = [];
@@ -507,19 +508,9 @@ function usePrepareAction(getAllActions) {
         onReady = new Promise((r) => {
             resolve = r;
         });
-        onWillStart(async function () {
-            await Promise.all(
-                asyncActions.map((obj) =>
-                    obj.action.prepare({ ...obj.descr, editingElement: env.getEditingElement() })
-                )
-            );
-            resolve();
-        });
-        onWillUpdateProps(async ({ actionParam, actionValue }) => {
-            onReady = new Promise((r) => {
-                resolve = r;
-            });
-            // TODO: should we support updating actionId?
+        asyncComputed(async () => {
+            const actionParam = comp.props.actionParam;
+            const actionValue = comp.props.actionValue;
             await Promise.all(
                 asyncActions.map((obj) =>
                     obj.action.prepare({
@@ -531,6 +522,7 @@ function usePrepareAction(getAllActions) {
                 )
             );
             resolve();
+            return true;
         });
     }
     return onReady;
@@ -937,9 +929,9 @@ export function useInputBuilderComponent({
     const withLoadingEffect = useWithLoadingEffect(getAllActions);
     const canTimeout = useCanTimeout(getAllActions);
 
-    onWillUpdateProps((nextProps) => {
-        if ("default" in nextProps) {
-            defaultValue = nextProps.default;
+    useEffect(() => {
+        if ("default" in comp.props) {
+            defaultValue = comp.props.default;
         }
     });
 
