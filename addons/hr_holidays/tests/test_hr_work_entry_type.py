@@ -232,3 +232,31 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_search_virtual_remaining_leaves(self):
+        """Test search method on virtual_remaining_leaves"""
+        employee = self.env['hr.employee'].create({'name': 'Test Employee'})
+
+        allocated_work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Test Time Off',
+            'code': 'Test Time Off 5',
+            'requires_allocation': True,
+            'request_unit': 'day',
+        })
+
+        self.env['hr.leave.allocation'].sudo().create({
+            'state': 'confirm',
+            'work_entry_type_id': allocated_work_entry_type.id,
+            'employee_id': employee.id,
+            'number_of_days': 10,
+        }).action_approve()
+
+        env_with_context = self.env['hr.work.entry.type'].with_context(employee_id=employee.id)
+
+        types_greater_than_5 = env_with_context.search([('virtual_remaining_leaves', '>', 5)])
+
+        self.assertIn(
+            allocated_work_entry_type,
+            types_greater_than_5,
+            "Search failed: Should have found the work entry type within search results"
+        )
