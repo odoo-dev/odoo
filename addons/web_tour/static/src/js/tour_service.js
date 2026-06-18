@@ -33,11 +33,8 @@ const stepSchema = {
 const stepSchemaAuto = {
     ...stepSchema,
     content: t.string().optional(),
-    expectUnloadPage: t.boolean().optional(),
+    expectUnloadPage: t.customValidator(t.boolean(), (value) => value === true).optional(),
     timeout: t.customValidator(t.number(), (value) => value >= 0 && value <= 60000).optional(),
-    tooltipPosition: t
-        .customValidator(t.string(), (value) => ["top", "bottom", "left", "right"].includes(value))
-        .optional(),
 };
 
 const stepSchemaOnboarding = {
@@ -178,8 +175,8 @@ export class TourService {
                     typeof tour.steps === "function"
                         ? tour.steps()
                         : Array.isArray(tour.steps)
-                          ? tour.steps
-                          : [],
+                        ? tour.steps
+                        : [],
             };
         }
         // Automatic tour (come from registry)

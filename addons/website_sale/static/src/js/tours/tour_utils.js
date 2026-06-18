@@ -241,7 +241,7 @@ export function goToCart({ quantity = 1, backend = false, expectUnloadPage = tru
         content: _t("Go to cart"),
         trigger: `${backend ? ":iframe" : ""} a sup.my_cart_quantity:text(${quantity})`,
         run: "click",
-        expectUnloadPage,
+        ...(expectUnloadPage && { expectUnloadPage: true }),
     };
 }
 

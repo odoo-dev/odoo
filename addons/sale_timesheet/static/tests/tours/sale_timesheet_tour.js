@@ -34,7 +34,6 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     isActive: ['button.o-kanban-button-new.dropdown'], // if the project template dropdown is active
     trigger: 'button.o-dropdown-item:contains("New Project")',
     content: 'Let\'s create a regular project.',
-    tooltipPosition: 'right',
     run: "click",
 }, {
     trigger: '.o_field_widget.o_project_name input',
@@ -89,7 +88,6 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: 'button.o_kanban_edit',
     content: 'Click on Edit button to enter to the form view of the task.',
-    tooltipPosition: 'bottom',
     run: "click",
 }, {
     trigger: 'div[name="partner_id"] input',
@@ -173,7 +171,6 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
     isActive: ['button.o_list_button_add.dropdown'], // if the project template dropdown is active
     trigger: 'button.o-dropdown-item:contains("New Project")',
     content: 'Let\'s create a regular project.',
-    tooltipPosition: 'right',
     run: "click",
 },
 {
@@ -230,7 +227,6 @@ registry.category("web_tour.tours").add('sale_timesheet_tour', {
 }, {
     trigger: 'div[name="sale_line_employee_ids"] div[name="sale_line_id"] input',
     content: 'Select the Sales Order Item to link to the timesheets of this employee.',
-    tooltipPosition: 'bottom',
     run: "edit S",
 }, {
     trigger: '[name=sale_line_id] ul.ui-autocomplete > li:first-child > a:not(:has(i.fa))',

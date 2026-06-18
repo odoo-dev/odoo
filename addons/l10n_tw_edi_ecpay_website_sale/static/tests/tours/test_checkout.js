@@ -351,7 +351,6 @@ registry.category("web_tour.tours").add("test_checkout_b2c_mobile_barcode", {
             content: "Validate Mobile Barcode",
             trigger: "#validate_carrier_number",
             run: "click",
-            expectUnloadPage: false,
         },
         {
             content: "Continue checkout",

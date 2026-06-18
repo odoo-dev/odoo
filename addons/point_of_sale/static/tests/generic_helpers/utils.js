@@ -14,7 +14,7 @@ export function negate(selector, parent = "body") {
     return `${parent}:not(:has(${selector}))`;
 }
 export function run(run, content = "run function", expectUnloadPage = false) {
-    return { content, trigger: "body", run, expectUnloadPage };
+    return { content, trigger: "body", run, ...(expectUnloadPage && { expectUnloadPage: true }) };
 }
 export function scan_barcode(barcode) {
     return [

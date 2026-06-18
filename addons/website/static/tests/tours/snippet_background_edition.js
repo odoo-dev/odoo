@@ -56,7 +56,6 @@ function addCheck(steps, checkX, checkNoX, xType, noSwitch = false) {
     const step = {
         trigger: selectorCheckX || selectorCheckNoX,
         content: `The correct ${name} is marked as selected`,
-        tooltipPosition: "bottom",
     };
     if (!noSwitch) {
         steps.push(switchTo(xType, name));
@@ -101,7 +100,6 @@ function checkAndUpdateBackgroundColor({
         steps.push({
             trigger: finalSelector,
             content: "The selected colors have been applied (CC AND (BG or GRADIENT))",
-            tooltipPosition: "bottom",
             run: finalRun,
         });
     }

@@ -39,7 +39,7 @@ export function clickMenuDropdownOption(name, { expectUnloadPage = false } = {})
         content: `click on something in the burger menu`,
         trigger: `span.dropdown-item:contains(${name})`,
         run: "click",
-        expectUnloadPage,
+        ...(expectUnloadPage && { expectUnloadPage: true }),
     };
 }
 export function existMenuOption(name) {
@@ -144,7 +144,7 @@ export function clickBtn(name, { expectUnloadPage = false } = {}) {
         content: `Click on ${name}`,
         trigger: `body button:contains(${name})`,
         run: "click",
-        expectUnloadPage,
+        ...(expectUnloadPage && { expectUnloadPage: true }),
     };
 }
 export function hasBtn(name) {
