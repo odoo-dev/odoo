@@ -119,6 +119,11 @@ This addon provides an extensible, maintainable editor.
         'html_editor.assets_prism_dark': [
             'web/static/lib/prismjs/prism.js',
             'web/static/lib/prismjs/themes/okaida.css',
+        ],
+        'web.report_assets_common': [
+            'html_editor/static/src/scss/bootstrap_overridden_backend.scss',
+            'html_editor/static/src/scss/bootstrap_overridden.scss',
+            'html_editor/static/src/main/**/*.scss',
         ]
     },
     'license': 'LGPL-3'
