@@ -2,6 +2,9 @@
   .o_kanban_record {
     width: 500px;
   }
+  .o_dashboard_graph {
+    margin-bottom: -#{map-get($spacers, 2)};
+  }
 }
 
 .pos-scenario-card {
