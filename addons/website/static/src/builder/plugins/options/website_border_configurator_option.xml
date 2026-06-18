@@ -2,27 +2,54 @@
 <templates xml:space="preserve">
 
 <t t-name="website.WebsiteBorderConfiguratorOption" t-inherit="html_builder.BorderConfiguratorOption">
-    <xpath expr="//BuilderRow[@label.translate=&quot;Round Corners&quot;]/BuilderNumberInput" position="replace">
-        <BuilderContext action="this.props.action" actionParam="{ mainParam: this.getStyleActionParam('radius'), extraClass: this.props.withBSClass and 'rounded' }">
-            <Dropdown state="this.dropdownState" menuClass="'o-hb-border-radius'">
-                <div t-ref="this.inputRef" class="o-hb-border-radius-dropdown">
-                    <BuilderNumberInput unit="'px'" min="0" composable="true"/>
-                    <t t-set-slot="content">
-                        <t t-foreach="this.roundCorners.suggestions" t-as="suggestion" t-key="suggestion.variable">
-                            <BuilderDropdownItem class="'o-hb-border-radius-item'" actionValue="`${suggestion.value}px`">
-                                <span class="d-inline-block w-25">
-                                    <t t-out="suggestion.value"/>
-                                </span>
-                                <span class="badge rounded-pill ms-3 o-hb-border-radius-badge">
-                                    <t t-out="suggestion.label"/>
-                                </span>
-                            </BuilderDropdownItem>
+    <xpath expr="//BuilderRow[@label.translate=&quot;Round Corners&quot;]" position="replace">
+        <t t-if="this.props.withRoundCorner">
+
+            <t t-if="this.showRoundnessSuggestions">
+                <BuilderRow label.translate="Round Corners" level="this.props.level">
+                    <BuilderSelect dropdownClass="'o-hb-border-radius'">
+                        <t t-foreach="this.roundCorners.items" t-as="item" t-key="item.label">
+
+                            <BuilderSelectItem
+                                id="item.label === 'Custom' ? 'custom_radius' : ''"
+                                className="'o-hb-border-radius-menuitem'"
+                                action="'setBorderRadius'"
+                                actionParam="{ mainParam: item.class, radiusActionParam: this.radiusActionParam }"
+                            >
+                                <div class="d-flex o-hb-border-radius-item">
+                                    <t t-set="itemValueOrLabel" t-value="item.variable ? item.value : item.label"/>
+                                    <span class="w-25" t-out="itemValueOrLabel"></span>
+                                    <span t-if="item.variable" class="badge rounded-pill ms-3 o-hb-border-radius-badge" t-out="item.label"/>
+                                </div>
+                            </BuilderSelectItem>
+
                         </t>
-                    </t>
-                </div>
-            </Dropdown>
-        </BuilderContext>
+                    </BuilderSelect>
+                </BuilderRow>
+
+                <BuilderRow t-if="this.isActiveItem('custom_radius')" label.translate="Border Radius" level="(this.props.level ?? 0) + 1">
+                    <t t-call="website.RoundnessInput"/>
+                </BuilderRow>
+            </t>
+
+            <t t-else="">
+                <BuilderRow label.translate="Round Corners" level="this.props.level">
+                    <t t-call="website.RoundnessInput"/>
+                </BuilderRow>
+            </t>
+
+        </t>
     </xpath>
+</t>
+
+<t t-name="website.RoundnessInput">
+    <BuilderNumberInput
+        action="this.props.action"
+        actionParam="this.radiusActionParam"
+        unit="'px'"
+        min="0"
+        composable="true"
+    />
 </t>
 
 </templates>
