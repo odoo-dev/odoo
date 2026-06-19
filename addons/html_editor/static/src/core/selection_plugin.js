@@ -780,6 +780,9 @@ export class SelectionPlugin extends Plugin {
                 if (!hadSelection) {
                     return;
                 }
+                if (this.services.popover.isClickAwayInProgress()) {
+                    return;
+                }
                 this.setSelection(
                     {
                         anchorNode: cursor.anchor.node,

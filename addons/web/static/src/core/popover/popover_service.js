@@ -24,6 +24,7 @@ import { registry } from "@web/core/registry";
 export const popoverService = {
     dependencies: ["overlay"],
     start(_, { overlay }) {
+        let clickAwayInProgress = false;
         /**
          * Signals the manager to add a popover.
          *
@@ -69,8 +70,19 @@ export const popoverService = {
 
             return remove;
         };
+        function executeDuringClickAway(fn) {
+            clickAwayInProgress = true;
+            try {
+                fn();
+            } finally {
+                clickAwayInProgress = false;
+            }
+        }
+        function isClickAwayInProgress() {
+            return clickAwayInProgress;
+        }
 
-        return { add };
+        return { add, executeDuringClickAway, isClickAwayInProgress };
     },
 };
 
