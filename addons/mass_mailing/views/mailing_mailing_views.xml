@@ -97,12 +97,6 @@
                                     </button>
                                 </strong>
                             </div>
-
-                            <div class="o_mails_sent" invisible="state != 'done' or sent != 0">
-                                <strong class="d-block">
-                                    <span name="ab_test_text">There weren't enough recipients given to this mailing. </span>
-                                </strong>
-                            </div>
                             <div class="o_mails_scheduled o_mails_process" invisible="scheduled == 0 and process == 0">
                                 <span invisible="scheduled == 0">
                                     <button class="btn btn-link p-0"
@@ -318,25 +312,29 @@
                                         <field name="mail_server_id" invisible="not mail_server_available" readonly="state in ('sending', 'done')"/>
                                         <field name="keep_archives" readonly="state in ('sending', 'done')"/>
                                     </group>
-                                    <label for="ab_testing_enabled"/>
-                                    <span class="d-flex">
-                                        <field name="ab_testing_enabled" readonly="state != 'draft'" force_save="1"/>
-                                        <span class="d-flex" invisible="not ab_testing_enabled">
-                                            on <field name="ab_testing_pc" class="mx-1 text-center"
-                                                readonly="state != 'draft'"/> %
+                                </group>
+                                <div class="row" name="ab_testing">
+                                    <group class="col-12 col-md-6">
+                                        <label for="ab_testing_enabled"/>
+                                        <span class="d-flex">
+                                            <field name="ab_testing_enabled" readonly="state != 'draft'" force_save="1"/>
+                                            <span class="d-flex" invisible="not ab_testing_enabled">
+                                                on <field name="ab_testing_pc" class="mx-1 text-center"
+                                                    readonly="state != 'draft'"/> %
+                                            </span>
                                         </span>
-                                    </span>
-                                    <field name="ab_testing_version_name" invisible="not ab_testing_enabled"
-                                        placeholder="e.g. 'Header with product picture'"/>
-                                    <field name="ab_testing_winner_selection"
-                                        invisible="not ab_testing_enabled or mailing_type != 'mail'"
-                                        readonly="state != 'draft'"
-                                        required="ab_testing_enabled and mailing_type == 'mail'"/>
-                                    <field name="ab_testing_schedule_datetime"
-                                        invisible="not ab_testing_enabled or ab_testing_winner_selection == 'manual'"
-                                        readonly="not ab_testing_enabled or state != 'draft'"
-                                        required="ab_testing_enabled and ab_testing_winner_selection != 'manual'"/>
-                                    <field name="is_ab_test_sent" invisible="1"/>
+                                        <field name="ab_testing_version_name" invisible="not ab_testing_enabled"
+                                            placeholder="e.g. 'Header with product picture'"/>
+                                        <field name="ab_testing_winner_selection"
+                                            invisible="not ab_testing_enabled or mailing_type != 'mail'"
+                                            readonly="state != 'draft'"
+                                            required="ab_testing_enabled and mailing_type == 'mail'"/>
+                                        <field name="ab_testing_schedule_datetime"
+                                            invisible="not ab_testing_enabled or ab_testing_winner_selection == 'manual'"
+                                            readonly="not ab_testing_enabled or state != 'draft'"
+                                            required="ab_testing_enabled and ab_testing_winner_selection != 'manual'"/>
+                                        <field name="is_ab_test_sent" invisible="1"/>
+                                    </group>
                                     <div class="col-12 col-md-6">
                                         <field name="ab_testing_mailings_count" invisible="1"/>
                                         <field name="ab_testing_completed" invisible="1"/>
