@@ -71,7 +71,8 @@ class AccountMoveLine(models.Model):
                     AND base_line.tax_repartition_line_id IS NULL
                     AND base_line.move_id = account_move_line.move_id
                     AND base_line.currency_id = account_move_line.currency_id
-                WHERE base_tax_line_mapping.tax_line_id IS NULL
+                WHERE account_move_line.move_id = moves_to_process.move_id
+                AND base_tax_line_mapping.tax_line_id IS NULL
                 AND %(search_condition)s
                 ''',
                 table_references=table_references,
@@ -97,7 +98,16 @@ class AccountMoveLine(models.Model):
             tax_line_4      5                                                       275         base_line_2/3
             */
 
-            WITH base_tax_line_mapping AS (
+            WITH moves_to_process AS MATERIALIZED (
+                SELECT DISTINCT account_move_line.move_id
+                FROM %(table_references)s
+                WHERE %(search_condition)s
+            )
+
+            SELECT tax_details.*
+            FROM moves_to_process
+            CROSS JOIN LATERAL (
+                WITH base_tax_line_mapping AS (
 
                 /*
                 Create the mapping of each tax lines with their corresponding base lines.
@@ -192,7 +202,8 @@ class AccountMoveLine(models.Model):
                         AND tax_rel.account_move_line_id = base_line.id
                     ) AS sub
                 ) base_line_tax_ids ON TRUE
-                WHERE account_move_line.tax_repartition_line_id IS NOT NULL
+                WHERE account_move_line.move_id = moves_to_process.move_id
+                    AND account_move_line.tax_repartition_line_id IS NOT NULL
                     AND %(search_condition)s
                     AND (
                         -- keeping only the rows from affecting_base_tax_lines that end with the same taxes applied (see comment in tax_line_tax_ids)
@@ -286,7 +297,8 @@ class AccountMoveLine(models.Model):
                     comp_curr.id = tax_line.company_currency_id
                 JOIN account_move_line base_line ON
                     base_line.id = base_tax_line_mapping.base_line_id
-                WHERE %(search_condition)s
+                WHERE account_move_line.move_id = moves_to_process.move_id
+                    AND %(search_condition)s
             ),
 
 
@@ -502,7 +514,8 @@ class AccountMoveLine(models.Model):
                     ),
                     0.0
                 ) AS tax_amount_currency
-            FROM base_tax_matching_all_amounts sub
+                FROM base_tax_matching_all_amounts sub
+            ) tax_details
             ''',
             extra_query_base_tax_line_mapping=extra_query_base_tax_line_mapping,
             group_taxes_query=group_taxes_query,
