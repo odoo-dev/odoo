@@ -189,24 +189,15 @@ class IrAccess(models.Model):
         # separately. This is necessary when upgrading modules, since other
         # ir.access domains may be invalid while the registry is not fully
         # loaded.
-        def skip_access(condition):
-            if condition.operator == 'access':
-                return Domain(condition.field_expr, '!=', False)
-            if (
-                condition.operator in ('any', 'not any', 'any!', 'not any!')
-                and isinstance(condition.value, (list, Domain))
-            ):
-                subdomain = Domain(condition.value).map_conditions(skip_access)
-                return Domain(condition.field_expr, condition.operator, subdomain)
-            return condition
-
         eval_context = self._eval_context()
         for access in self:
             if access.active and access.domain:
                 try:
                     domain = safe_eval(access.domain, eval_context)
                     model = self.env[access.model_id.model].sudo()
-                    Domain(domain).map_conditions(skip_access).validate(model)
+                    Domain(domain).map_conditions_recursively(model, lambda _, condition: (
+                        Domain(condition.field_expr, '!=', False) if condition.operator == 'access' else condition
+                    )).validate(model)
                 except Exception as e:  # noqa: BLE001
                     raise ValidationError(self.env._('Invalid domain %(domain)s: %(error)s', domain=access.domain, error=e))
 

@@ -415,6 +415,17 @@ class Domain:
         """Map a function to each condition and return the combined result"""
         return self
 
+    def map_conditions_recursively(self, model: BaseModel, function: Callable[[BaseModel, DomainCondition], Domain]) -> Domain:
+        """Map a function to each condition and return the combined result"""
+        def mapper(condition):
+            if isinstance(condition.value, Domain):
+                comodel = model.env[condition._field(model).comodel_name]
+                value = condition.value.map_conditions_recursively(function, comodel)
+                condition = DomainCondition(condition.field_expr, condition.operator, value)
+            return function(model, condition)
+        result = self.optimize(model).map_conditions(mapper)
+        return result
+
     def validate(self, model: BaseModel) -> None:
         """Validates that the current domain is correct or raises an exception"""
         # just execute the optimization code that goes through all the fields
