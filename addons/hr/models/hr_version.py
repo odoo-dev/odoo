@@ -149,6 +149,8 @@ class HrVersion(models.Model):
     departure_apply_date = fields.Date(related='departure_id.apply_date', groups="hr.group_hr_user")
 
     resource_calendar_id = fields.Many2one('resource.calendar', inverse='_inverse_resource_calendar_id', check_company=True, string="Working Hours", index='btree_not_null', tracking=1)
+    permit_no = fields.Char(string='Work Permit No', groups="hr.group_hr_user", tracking=1)
+    work_permit_expiration_date = fields.Date(string='Work Permit Expiration Date', groups="hr.group_hr_user", tracking=1)
     hours_per_week = fields.Float(string="Hours per Week", compute='_compute_hours_per_week', store=True, readonly=False)
     hours_per_day = fields.Float(string="Hours per Day", compute='_compute_hours_per_day', store=True, readonly=False)
     is_flexible = fields.Boolean(compute='_compute_is_flexible', store=True, groups="hr.group_hr_user")
