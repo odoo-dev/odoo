@@ -11,17 +11,12 @@ export class NilveraSendStatus extends DocumentState {
         if (this.nilveraSendStatus !== "error") {
             return "";
         }
-        const value = this.props.record.data.l10n_tr_nilvera_customer_status;
-        if (!value) {
-            return "";
-        }
-        const field = this.props.record.fields.l10n_tr_nilvera_customer_status;
-        const entry = field?.selection?.find(([v]) => v === value);
-        return entry ? entry[1] : value;
+        return this.props.record.data.l10n_tr_nilvera_error_message || "";
     }
 }
 
 registry.category("fields").add("l10n_tr_nilvera_send_status", {
     ...selectionField,
     component: NilveraSendStatus,
+    fieldDependencies: [{ name: "l10n_tr_nilvera_error_message", type: "char" }],
 });

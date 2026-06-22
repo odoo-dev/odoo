@@ -67,7 +67,7 @@ class AccountMove(models.Model):
             ('waiting', "Waiting"),
             ('unknown', "Unknown"),
             ('commercial_approved', "Approved"),
-            ('commercial_answered_automatically', "Approved"),
+            ('commercial_answered_automatically', "Approved Automatically"),
             ('commercial_rejected', "Rejected"),
         ],
         string="Nilvera Status",
@@ -82,7 +82,7 @@ class AccountMove(models.Model):
              "- Successful: GİB has accepted the invoice. \n"
              "- Error: The submission failed (check chatter for details). \n"
              "- Approved: Commercial Invoice is approved by recipient.\n"
-             "- Approved: Commercial Invoice is automatically approved after 8 days without a response.\n"
+             "- Approved Automatically: Commercial Invoice is automatically approved after 8 days without a response.\n"
              "- Rejected: Commercial Invoice is rejected by recipient.",
     )
     l10n_tr_gib_invoice_scenario = fields.Selection(
@@ -165,6 +165,11 @@ class AccountMove(models.Model):
         string="Partner Nilvera Status",
         related='partner_id.l10n_tr_nilvera_customer_status',
         help="Shows the Nilvera status of the customer. ",
+    )
+    l10n_tr_nilvera_error_message = fields.Char(
+        string="Nilvera Error",
+        readonly=True,
+        copy=False,
     )
     l10n_tr_ticarifatura_last_checked_at = fields.Datetime(
         string="Commercial Status Check Date", copy=False,
@@ -449,14 +454,18 @@ class AccountMove(models.Model):
                     nilvera_status = response.get('InvoiceStatus', {}).get('Code') or response.get('StatusCode')
                     if nilvera_status in dict(invoice._fields['l10n_tr_nilvera_send_status'].selection):
                         if nilvera_status == 'error':
+                            invoice.l10n_tr_nilvera_send_status = nilvera_status
+                            description = response.get('InvoiceStatus', {}).get('Description') or response.get('StatusDetail')
+                            detail = response.get('InvoiceStatus', {}).get('DetailDescription') or response.get('ReportStatus')
+                            invoice.l10n_tr_nilvera_error_message = "%s - %s" % (description, detail)
                             invoice.message_post(
                                 body=Markup(
-                                    "%s<br/>%s - %s<br/>"
+                                    "%s<br/>%s - %s<br/>",
                                 ) % (
                                     _("The invoice couldn't be sent to the recipient."),
-                                    response.get('InvoiceStatus', {}).get('Description') or response.get('StatusDetail'),
-                                    response.get('InvoiceStatus', {}).get('DetailDescription') or response.get('ReportStatus'),
-                                )
+                                    description,
+                                    detail,
+                                ),
                             )
                         elif invoice.l10n_tr_gib_invoice_scenario == "TICARIFATURA" and invoice.move_type in {'out_invoice', 'in_invoice'} and nilvera_status == 'succeed':
                             if response['Answer'] and response['Answer'].get('AnswerCode') in {'approved', 'rejected', 'documentAnsweredAutomatically'}:
