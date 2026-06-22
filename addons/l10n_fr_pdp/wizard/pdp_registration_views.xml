@@ -17,15 +17,22 @@
                         </div>
 
                         <!-- business fields -->
-                        <field name="pdp_identifier"
-                               string="Identifier"
-                               invisible="pdp_kyc_status != 'success'"/>
+                        <field name="pdp_identifier" invisible="True"/>
+                        <label for="pdp_identifier_after_siren" string="Identifier"/>
+                        <div colspan="1">
+                            <span>
+                                <field name="siren_number" class="oe_inline o_form_label text-lowercase" string="SIREN"/>
+                                <field name="pdp_identifier_after_siren"
+                                       class="oe_inline o_form_label text-lowercase"
+                                       readonly="pdp_kyc_status in ('processing', 'success')"/>
+                            </span>
+                        </div>
                         <field name="contact_email"
                                string="Email"
                                readonly="pdp_kyc_status in ('processing', 'success')"/>
                         <field name="pdp_pilot_phase"
                                string="Pilot Phase"
-                               invisible="pdp_kyc_status != 'success'"/>
+                               readonly="pdp_kyc_status in ('processing', 'success')"/>
 
                     </group>
 

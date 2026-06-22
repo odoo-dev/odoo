@@ -222,5 +222,6 @@ class ResCompany(models.Model):
             if user := pdp_registration.create_uid:
                 user._bus_send(
                     'auth_done',
-                    {'pdp_registration_id': pdp_registration.id},
+                    {'pdp_registration_id': pdp_registration.id, 'status': kyc_status},
                 )
+                return True

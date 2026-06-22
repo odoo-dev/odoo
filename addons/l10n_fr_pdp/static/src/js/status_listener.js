@@ -16,12 +16,20 @@ export class KycStatusFormController extends FormController {
                 if (data.pdp_registration_id !== this.recordId) {
                     return;
                 }
-                const action = await this.orm.call(
+                const notification_action = await this.orm.call(
                     "pdp.registration",
                     "display_status_notification_from_uuid",
                     [this.recordId]
                 );
-                this.action.doAction(action);
+                this.action.doAction(notification_action);
+                if (data.status === 'success') {
+                    const registration_action = await this.orm.call(
+                        "pdp.registration",
+                        "button_register_pdp_participant",
+                        [this.recordId]
+                    );
+                    this.action.doAction(registration_action);
+                }
             });
         });
     }
