@@ -250,9 +250,8 @@ def depends_context(*args: str) -> Decorator:
     All dependencies must be hashable.  The following keys have special
     support:
 
-    * `company` (value in context or current company id),
-    * `uid` (current user id and superuser flag),
-    * `active_test` (value in env.context or value in field.context).
+    * `company` (value in context or current company id)
+    * `uid` (current user id and superuser flag)
     """
     return attrsetter('_depends_context', args)
 

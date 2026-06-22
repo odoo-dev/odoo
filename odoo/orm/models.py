@@ -118,6 +118,19 @@ SQL_DEFAULT = psycopg2.extensions.AsIs("DEFAULT")
 NO_ACCESS = '.'
 
 
+def add_active_test(domain, model):
+    # inactive records unless they were explicitly asked for
+    if (
+        model._active_name
+        and model.env.context.get('active_test', True)
+        and not any(leaf.field_expr == model._active_name for leaf in domain.iter_conditions())
+    ):
+        # try to create the domain close to what it will look like after optimization
+        # to avoid reoptimizing it
+        domain = Domain(model._active_name, 'in', OrderedSet((True,))) & domain
+    return domain
+
+
 def parse_read_group_spec(spec: str) -> tuple:
     """ Return a triplet corresponding to the given field/property_name/aggregate specification. """
     res_match = regex_read_group_spec.match(spec)
@@ -1409,6 +1422,7 @@ class BaseModel(metaclass=MetaModel):
         This is a high-level method, which should not be overridden. Its actual
         implementation is done by method :meth:`_search`.
         """
+        domain = add_active_test(Domain(domain), self)
         query = self._search(domain, limit=limit)
         return len(query)
 
@@ -1459,6 +1473,7 @@ class BaseModel(metaclass=MetaModel):
         :raise AccessError: if user is not allowed to access requested information
         """
         # first determine a query that satisfies the domain and access rules
+        domain = add_active_test(Domain(domain), self)
         query = self._search(domain, offset=offset, limit=limit, order=order or self._order)
 
         if query.is_empty():
@@ -3066,7 +3081,7 @@ class BaseModel(metaclass=MetaModel):
 
         # first determine a query that satisfies the domain and access rules
         if any(field.column_type for field in fields_to_fetch):
-            query = self._search([('id', 'in', self.ids)], active_test=False)
+            query = self._search([('id', 'in', self.ids)])
         else:
             try:
                 self.check_access('read')
@@ -4730,7 +4745,6 @@ class BaseModel(metaclass=MetaModel):
         limit: int | None = None,
         order: str | None = None,
         *,
-        active_test: bool = True,
         bypass_access: bool = False,
     ) -> Query:
         """
@@ -4746,7 +4760,6 @@ class BaseModel(metaclass=MetaModel):
         default the returned query object is not actually executed, and it can
         be injected as a value in a domain in order to generate sub-queries.
 
-        The `active_test` flag specifies whether to filter only active records.
         The `bypass_access` controls whether or not permissions should be
         checked on the model and record rules should be applied.
         """
@@ -4757,19 +4770,8 @@ class BaseModel(metaclass=MetaModel):
             if sec_domain.is_false():
                 raise self._make_access_error_message('read', sec_domain)
 
-        domain = Domain(domain)
-        # inactive records unless they were explicitly asked for
-        if (
-            self._active_name
-            and active_test
-            and self.env.context.get('active_test', True)
-            and not any(leaf.field_expr == self._active_name for leaf in domain.iter_conditions())
-        ):
-            # try to create the domain close to what it will look like after optimization
-            # to avoid reoptimizing it
-            domain = Domain(self._active_name, 'in', OrderedSet((True,))) & domain
-
         # build the query
+        domain = Domain(domain)
         domain = domain.optimize_full(self)
         if domain.is_false():
             return self.browse()._as_query()

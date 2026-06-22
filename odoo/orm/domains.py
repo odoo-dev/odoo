@@ -95,7 +95,7 @@ This should be supported in the framework at all levels.
   - if value is SQL or Query, see `any!`
   - if bypass_search_access is set on the field, see `any!`
   - if value is a Domain for a many2one (or `id`),
-    _search with active_test=False
+    _search on the comodel of the field
   - if value is a Domain for a x2many,
     _search on the comodel of the field (with its context)
 - `any!` works like `any` but bypass adding record rules on the comodel

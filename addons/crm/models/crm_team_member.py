@@ -72,13 +72,16 @@ class CrmTeamMember(models.Model):
             member.lead_month_count = monthly_leads_counts.get((member.user_id.id, member.crm_team_id.id), 0)
 
     def _get_lead_from_date(self, date_from, active_test=False):
+        domain = [
+            ('date_open', '>=', date_from),
+            ('team_id', 'in', self.crm_team_id.ids),
+            ('user_id', 'in', self.user_id.ids),
+        ]
+        if active_test:
+            domain += [('active', '=', True)]
         return {
             (user.id, team.id): count for user, team, count in self.env['crm.lead'].with_context(active_test=active_test)._read_group(
-                [
-                    ('date_open', '>=', date_from),
-                    ('team_id', 'in', self.crm_team_id.ids),
-                    ('user_id', 'in', self.user_id.ids),
-                ],
+                domain,
                 ['user_id', 'team_id'],
                 ['__count'],
             )

@@ -63,8 +63,7 @@ class ProjectProject(models.Model):
 
         Company = self.env['res.company']
         sql = Company._search(
-            [('internal_project_id', '!=', False)],
-            active_test=False, bypass_access=True,
+            [('internal_project_id', '!=', False)], bypass_access=True,
         ).subselect("internal_project_id")
         return [('id', operator, sql)]
 

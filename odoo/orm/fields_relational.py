@@ -532,7 +532,7 @@ class Many2one(_Relational):
             return sql
 
         if isinstance(value, Domain):
-            value = comodel._search(value, active_test=False, bypass_access=bypass_access)
+            value = comodel._search(value, bypass_access=bypass_access)
         if isinstance(value, Query):
             subselect = value.subselect()
         elif isinstance(value, SQL):
@@ -561,7 +561,7 @@ class Many2one(_Relational):
         if self.compute_sudo or self.delegate or model.env.su:
             coquery = None
         else:
-            coquery = comodel.with_context(_generating_sql_for_fields=True)._search(Domain.TRUE, active_test=False)
+            coquery = comodel.with_context(_generating_sql_for_fields=True)._search(Domain.TRUE)
             if not coquery.where_clause:
                 coquery = None
         if coquery is None:
@@ -704,6 +704,7 @@ class _RelationalMulti(_Relational):
                 # default behaviour
                 corecords = corecords._filtered_access('read')
         if (
+            # TODO to remove
             Comodel._active_name
             and self.context.get('active_test', env.context.get('active_test', True))
         ):

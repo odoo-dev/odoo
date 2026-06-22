@@ -5,7 +5,7 @@ from odoo.fields import Domain
 
 
 def _subselect_domain(model, field_name, domain):
-    query = model._search(Domain(field_name, '!=', False) & domain, active_test=False, bypass_access=True)
+    query = model._search(Domain(field_name, '!=', False) & domain, bypass_access=True)
     return Domain('id', 'in', query.subselect(query.table[field_name]))
 
 

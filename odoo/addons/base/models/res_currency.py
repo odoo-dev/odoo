@@ -149,7 +149,7 @@ class ResCurrency(models.CachedModel):
         Currency = self.env['res.currency'].sudo()
         Rate = self.env['res.currency.rate'].sudo()
 
-        currency_query = Currency._search([('id', 'in', self.ids)] if self else [], active_test=False)
+        currency_query = Currency._search([('id', 'in', self.ids)] if self else [])
         currency_id_field = currency_query.table.id
 
         rate_query = Rate._search(
