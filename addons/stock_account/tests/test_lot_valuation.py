@@ -53,6 +53,18 @@ class TestLotValuation(TestStockValuationCommon):
         quant = self.lot3.quant_ids.filtered(lambda q: q.location_id.usage == 'internal')
         self.assertEqual(quant.value, 70)
 
+    def test_fifo_remaining_qty_by_lot(self):
+        """The remaining quantity of each receipt follows its lot's FIFO stack."""
+        self.product.categ_id = self.category_fifo
+        in_move_lot1 = self._make_in_move(self.product, 10, 5, lot_ids=[self.lot1])
+        in_move_lot2 = self._make_in_move(self.product, 10, 7, lot_ids=[self.lot2])
+
+        self._make_out_move(self.product, 2, lot_ids=[self.lot1])
+        self._make_out_move(self.product, 4, lot_ids=[self.lot2])
+
+        self.assertEqual(in_move_lot1.remaining_qty, 8)
+        self.assertEqual(in_move_lot2.remaining_qty, 6)
+
     def test_lot_normal_2(self):
         """ Lot standard_price is set at creation (not at delivery) """
         self._make_in_move(self.product, 10, 5, lot_ids=[self.lot1, self.lot2])
