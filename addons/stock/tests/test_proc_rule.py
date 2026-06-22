@@ -920,6 +920,34 @@ class TestProcRule(TransactionCase):
         self.assertListEqual(graph_data['x_axis_vals'], ['', 'In 2 day(s)', 'In 4 day(s)', 'In 6 day(s)'])
         self.assertListEqual([curve_line_val['y'] for curve_line_val in graph_data['curve_line_vals']], [40, 20, 40, 20, 40, 20])
 
+    def test_orderpoint_match_to_order_rounding(self):
+        """ Test that the match_to_order field (Up/Down) correctly rounds
+        the quantity to order according to the specified multiple. """
+
+        warehouse = self.env['stock.warehouse'].search([], limit=1)
+
+        product = self.env['product.product'].create({
+            'name': 'Test Match to Order Product',
+            'is_storable': True,
+        })
+
+        uom_dozen = self.env.ref('uom.product_uom_dozen')
+
+        orderpoint = self.env['stock.warehouse.orderpoint'].create({
+            'product_id': product.id,
+            'location_id': warehouse.lot_stock_id.id,
+            'product_min_qty': 13.0,
+            'product_max_qty': 13.0,
+            'replenishment_uom_id': uom_dozen.id,
+            'match_to_order': 'up',
+        })
+
+        orderpoint._compute_qty_to_order_computed()
+        self.assertEqual(orderpoint.qty_to_order_computed, 24.0, "Rounding up should result in 24.0")
+        orderpoint.match_to_order = 'down'
+        orderpoint._compute_qty_to_order_computed()
+        self.assertEqual(orderpoint.qty_to_order_computed, 12.0, "Rounding down should result in 12.0")
+
 
 class TestProcRuleLoad(TransactionCase):
     def setUp(cls):

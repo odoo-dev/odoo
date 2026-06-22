@@ -47,6 +47,7 @@
                 <field name="product_min_qty" string="Min" optional="show" width="50"/>
                 <field name="product_max_qty" string="Max" optional="show" width="50"/>
                 <field name="replenishment_uom_id" widget="stock.forced_placeholder" options="{'no_create': True, 'placeholder_field': 'replenishment_uom_id_placeholder'}" optional="hide" decoration-muted="not replenishment_uom_id"/>
+                <field name="match_to_order" optional="hide"/>
                 <field name="qty_to_order_to_max" column_invisible="true"/>
                 <field name="qty_to_order" widget="stock.max_qty_to_order" readonly="trigger == 'auto'" width="60"/>
                 <field name="qty_to_order_manual" column_invisible="True"/>

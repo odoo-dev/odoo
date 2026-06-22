@@ -100,6 +100,12 @@ class StockWarehouseOrderpoint(models.Model):
                                      "arrival is expected after the minimum quantity is reached (potential stockout). "
                                      "Check the Forecast Report.")
 
+    match_to_order = fields.Selection([
+        ('up', 'Up'),
+        ('down', 'Down')
+    ], string="Match to Order", default='up', required=True,
+      help="Determines if the quantity to order should be rounded up or down to the nearest multiple.")
+
     _product_location_check = models.Constraint(
         'unique (product_id, location_id, company_id)',
         'A replenishment rule already exists for this product on this location.',
@@ -422,7 +428,7 @@ class StockWarehouseOrderpoint(models.Model):
                     ('id', 'in', matched_ids)
                 ]
 
-    @api.depends('replenishment_uom_id', 'product_min_qty', 'product_max_qty',
+    @api.depends('match_to_order', 'replenishment_uom_id', 'product_min_qty', 'product_max_qty',
     'product_id', 'location_id', 'product_id.seller_ids.delay', 'company_id.horizon_days')
     def _compute_qty_to_order_computed(self):
         def to_compute(orderpoint):
@@ -439,7 +445,7 @@ class StockWarehouseOrderpoint(models.Model):
             orderpoint.qty_to_order_computed = orderpoint._get_qty_to_order(qty_in_progress_by_orderpoint=qty_in_progress_by_orderpoint)
         (self - orderpoints).qty_to_order_computed = False
 
-    @api.depends('replenishment_uom_id', 'product_max_qty')
+    @api.depends('match_to_order', 'replenishment_uom_id', 'product_max_qty')
     def _compute_qty_to_order_to_max(self):
         for orderpoint in self:
             orderpoint.qty_to_order_to_max = max(0, orderpoint._get_multiple_rounded_qty(orderpoint.product_max_qty - orderpoint.qty_forecast))
@@ -812,9 +818,9 @@ class StockWarehouseOrderpoint(models.Model):
     def _get_multiple_rounded_qty(self, qty_to_order):
         replenishment_multiple = self.replenishment_uom_id or self._get_replenishment_multiple_alternative(qty_to_order)
         if replenishment_multiple:
-            # Replace the UP by DOWN if we don't want to order more quantity than product_max_qty
+            method = "DOWN" if self.match_to_order == 'down' else "UP"
             qty_to_order = self.product_id.uom_id._compute_quantity(qty_to_order, replenishment_multiple)
-            qty_to_order = fields.Float.round(qty_to_order, precision_digits=0, rounding_method="UP")
+            qty_to_order = fields.Float.round(qty_to_order, precision_digits=0, rounding_method=method)
             qty_to_order = replenishment_multiple._compute_quantity(qty_to_order, self.product_id.uom_id)
         return qty_to_order
 
