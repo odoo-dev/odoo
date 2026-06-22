@@ -2,7 +2,6 @@ import { useLayoutEffect, useRef } from "@web/owl2/utils";
 import { Component, onMounted, props, proxy, t } from "@odoo/owl";
 import { useTransition } from "@web/core/transition";
 import { uniqueId } from "@web/core/utils/functions";
-import { useService } from "@web/core/utils/hooks";
 import { useApplyVisibility, useBuilderComponent, useVisibilityObserver } from "../utils";
 import { BuilderComponent } from "./builder_component";
 
@@ -44,7 +43,6 @@ export class BuilderRow extends Component {
         this.state = proxy({
             expanded: this.props.expand,
         });
-        this.tooltipText = undefined;
 
         if (this.props.slots.collapse) {
             useVisibilityObserver("collapse-content", useApplyVisibility("collapse"));
@@ -53,7 +51,6 @@ export class BuilderRow extends Component {
         }
 
         this.labelWrapperRef = useRef("label-wrapper");
-        this.labelRef = useRef("label");
         this.rootRef = useRef("root");
         this.collapseContentRef = useRef("collapse-content");
         let isMounted = false;
@@ -94,7 +91,9 @@ export class BuilderRow extends Component {
                 switch (stage) {
                     case "enter-active": {
                         contentEl.style.height = contentEl.scrollHeight + "px";
-                        contentEl.addEventListener("transitionend", setHeightAuto, { once: true });
+                        contentEl.addEventListener("transitionend", setHeightAuto, {
+                            once: true,
+                        });
                         break;
                     }
                     case "leave": {
@@ -108,9 +107,25 @@ export class BuilderRow extends Component {
             },
             () => [this.transition.stage]
         );
-        this.tooltip = useService("tooltip");
 
         useLayoutEffect(() => refreshSublevelLines(this.rootRef.el));
+    }
+
+    appendTooltip(ev) {
+        if (!ev.target || !this.labelWrapperRef.el) {
+            return;
+        }
+        const labelEl = ev.target.querySelector(".o_row_label");
+        const isLabelTooLong = labelEl && labelEl.offsetWidth < labelEl.scrollWidth;
+        if (isLabelTooLong) {
+            this.labelWrapperRef.el.dataset.tooltip = this.props.tooltip
+                ? `${this.props.label}\u00A0: ${this.props.tooltip}`
+                : this.props.label;
+        } else if (this.props.tooltip) {
+            this.labelWrapperRef.el.dataset.tooltip = this.props.tooltip;
+        } else {
+            this.labelWrapperRef.el.dataset.tooltip = "";
+        }
     }
 
     getLevelClass() {
@@ -135,33 +150,6 @@ export class BuilderRow extends Component {
     get collapseContentClass() {
         const isNotVisible = this.props.observeCollapseContent && !this.transition.shouldMount;
         return `${this.transition.className} ${isNotVisible ? "d-none" : ""}`;
-    }
-
-    openTooltip() {
-        const labelEl = this.labelRef.el;
-        if (this.tooltipText === undefined) {
-            const isLabelTooLong = labelEl.offsetWidth < labelEl.scrollWidth;
-            if (isLabelTooLong) {
-                this.tooltipText = this.props.tooltip
-                    ? `${this.props.label}\u00A0: ${this.props.tooltip}`
-                    : this.props.label;
-            } else if (this.props.tooltip) {
-                this.tooltipText = this.props.tooltip;
-            } else {
-                this.tooltipText = "";
-            }
-        }
-        if (this.tooltipText) {
-            this.removeTooltip = this.tooltip.add(this.labelWrapperRef.el, {
-                tooltip: this.tooltipText,
-            });
-        }
-    }
-
-    closeTooltip() {
-        if (this.removeTooltip) {
-            this.removeTooltip();
-        }
     }
 }
 
