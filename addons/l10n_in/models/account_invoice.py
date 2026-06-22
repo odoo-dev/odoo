@@ -190,6 +190,71 @@ class AccountMove(models.Model):
             return 'l10n_in.l10n_in_report_invoice_document_inherit'
         return super()._get_name_invoice_report()
 
+    def _get_move_type_domain(self):
+        return [("move_id.move_type", "in", ["out_invoice", "out_refund", "out_receipt"])]
+
+    @api.model
+    def _l10n_in_fetch_base_line_tax_map(self):
+        tax_vals_map = {}
+        tags_name = ['sgst', 'cgst', 'igst', 'cess']
+        tags_name += [f'base_{tax_name}' for tax_name in tags_name] + ['zero_rated', 'exempt', 'nil_rated', 'non_gst_supplies']
+        taxes_tag_ids = {
+            tag_name: self.env['ir.model.data']._xmlid_to_res_id(f"l10n_in.tax_tag_{tag_name}")
+            for tag_name in tags_name
+        }
+        sgst_tag_ids = [taxes_tag_ids['base_sgst'], taxes_tag_ids['sgst']]
+        cgst_tag_ids = [taxes_tag_ids['base_cgst'], taxes_tag_ids['cgst']]
+        igst_tag_ids = [taxes_tag_ids['base_igst'], taxes_tag_ids['igst']]
+        cess_tag_ids = [taxes_tag_ids['base_cess'], taxes_tag_ids['cess']]
+        nil_tags = [taxes_tag_ids[key] for key in ['exempt', 'nil_rated', 'non_gst_supplies']]
+        gst_with_other_tags = sgst_tag_ids + cgst_tag_ids + igst_tag_ids + cess_tag_ids + [taxes_tag_ids['zero_rated']] + nil_tags
+        gst_tags = {
+            'igst': self.env.ref('l10n_in.tax_tag_igst'),
+            'cgst': self.env.ref('l10n_in.tax_tag_cgst'),
+            'sgst': self.env.ref('l10n_in.tax_tag_sgst'),
+            'cess': self.env.ref('l10n_in.tax_tag_cess'),
+        }
+        domain = [
+            ('move_id', 'in', self.ids),
+            ("display_type", "not in", ('rounding', 'line_note', 'line_section')),
+            ("tax_tag_ids", "in", gst_with_other_tags),
+        ]
+        domain += self._get_move_type_domain()
+        tax_details_sql = self.env['account.move.line']._get_query_tax_details_from_domain(domain=domain)
+        tax_details = self.env.execute_query_dict(tax_details_sql)
+        # Retrieve base lines and tax lines based on tax_details
+        base_lines = self.env['account.move.line'].browse([tax['base_line_id'] for tax in tax_details])
+        tax_lines = self.env['account.move.line'].browse([tax['tax_line_id'] for tax in tax_details])
+        base_lines_map = {line.id: line for line in base_lines}
+        tax_lines_map = {line.id: line for line in tax_lines}
+        for tax_vals in tax_details:
+            base_line = base_lines_map[tax_vals['base_line_id']]
+            tax_line = tax_lines_map[tax_vals['tax_line_id']]
+            tax_vals_map.setdefault(base_line, {
+                'rate_by_tax_tag': {},
+                'gst_tax_rate': 0.00,
+                'igst': 0.00,
+                'cgst': 0.00,
+                'sgst': 0.00,
+                'cess': 0.00,
+            })
+            for tax_type, tag_id in gst_tags.items():
+                if tag_id in tax_line.tax_tag_ids:
+                    tax_vals_map[base_line][tax_type] += tax_vals['tax_amount']
+                    if tax_type in ['igst', 'cgst', 'sgst']:
+                        tax_vals_map[base_line]['rate_by_tax_tag'][tax_type] = tax_line.tax_line_id.amount
+            tax_vals_map[base_line]['gst_tax_rate'] = sum(tax_vals_map[base_line]['rate_by_tax_tag'].values())
+        return tax_vals_map
+
+    @api.model
+    def _l10n_in_set_base_line_tax_details(self):
+        for base_line, tax_data in self._l10n_in_fetch_base_line_tax_map().items():
+            base_line.l10n_in_line_tax_rate = tax_data['gst_tax_rate']
+            base_line.l10n_in_line_igst_amt = tax_data['igst']
+            base_line.l10n_in_line_cgst_amt = tax_data['cgst']
+            base_line.l10n_in_line_sgst_amt = tax_data['sgst']
+            base_line.l10n_in_line_cess_amt = tax_data['cess']
+
     def _post(self, soft=True):
         """Use journal type to define document type because not miss state in any entry including POS entry"""
         posted = super()._post(soft)
@@ -217,6 +282,7 @@ class AccountMove(models.Model):
                     partner_id=move.partner_id.id,
                     name=gst_treatment_name_mapping.get(move.l10n_in_gst_treatment)
                 ))
+        posted._l10n_in_set_base_line_tax_details()
         return posted
 
     def _l10n_in_get_warehouse_address(self):

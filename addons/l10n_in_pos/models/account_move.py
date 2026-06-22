@@ -12,3 +12,11 @@ class AccountMove(models.Model):
         for move in to_compute:
             move.l10n_in_state_id = move.company_id.state_id
         return res
+
+    def _get_move_type_domain(self):
+        return ["|", "&",
+            ("move_id.move_type", "=", "entry"),
+            "|", ("move_id.pos_session_ids", "!=", False),
+                ('move_id.reversed_pos_order_id', '!=', False),
+            ("move_id.move_type", "in", ["out_invoice", "out_refund", "out_receipt"]),
+        ]

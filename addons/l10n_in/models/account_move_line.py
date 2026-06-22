@@ -11,3 +11,10 @@ class AccountMoveLine(models.Model):
         for line in self:
             if line.move_id.country_code == 'IN' and line.parent_state == 'draft':
                 line.l10n_in_hsn_code = line.product_id.l10n_in_hsn_code
+
+    # Internal Tax fields
+    l10n_in_line_tax_rate = fields.Float()
+    l10n_in_line_sgst_amt = fields.Monetary()
+    l10n_in_line_cgst_amt = fields.Monetary()
+    l10n_in_line_igst_amt = fields.Monetary()
+    l10n_in_line_cess_amt = fields.Monetary()
