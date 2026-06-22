@@ -53,58 +53,82 @@
 // Since JSON grammar is way simpler than JavaScript's grammar, it is actually
 // faster to parse the data as a JSON object than as a JavaScript object.
 
-import { appTranslateFn } from "@web/core/l10n/translation";
+// import { appTranslateFn } from "@web/core/l10n/translation";
 
 // Escape translated strings to prevent parsing errors
-const _t = (str) => JSON.stringify(appTranslateFn(str, "web")).slice(1, -1);
+const _t = (str) => str;
 
 const _getCategories = () => `[
     {
         "name": "Smileys & Emotion",
         "displayName": "`+ _t("Smileys & Emotion") + `",
-        "title": "🙂",
+        "title": "👁️‍🗨️",
+        "hexcode": "1f441-200d-1f5e8",
+        "p_x": 1297,
+        "p_y": 163,
         "sortId": 1
     },
     {
         "name": "People & Body",
         "displayName": "`+ _t("People & Body") + `",
         "title": "🤟",
+        "hexcode": "1f91f",
+        "p_x": 2053,
+        "p_y": 163,
         "sortId": 2
     },
     {
         "name": "Animals & Nature",
         "displayName": "`+ _t("Animals & Nature") + `",
         "title": "🐢",
+        "hexcode": "1f422",
+        "p_x": 2107,
+        "p_y": 649,
         "sortId": 3
     },
     {
         "name": "Food & Drink",
         "displayName": "`+ _t("Food & Drink") + `",
         "title": "🍭",
+        "hexcode": "1f36d",
+        "p_x": 865,
+        "p_y": 865,
         "sortId": 4
     },
     {
         "name": "Travel & Places",
         "displayName": "`+ _t("Travel & Places") + `",
         "title": "🚗",
+        "hexcode": "1f697",
+        "p_x": 1,
+        "p_y": 1027,
         "sortId": 5
     },
     {
         "name": "Activities",
         "displayName": "`+ _t("Activities") + `",
         "title": "🏈",
+        "hexcode": "1f3c8",
+        "p_x": 1729,
+        "p_y": 1189,
         "sortId": 6
     },
     {
         "name": "Objects",
         "displayName": "`+ _t("Objects") + `",
         "title": "📕",
+        "hexcode": "1f4d5",
+        "p_x": 811,
+        "p_y": 1405,
         "sortId": 7
     },
     {
         "name": "Symbols",
         "displayName": "`+ _t("Symbols") + `",
         "title": "🔠",
+        "hexcode": "1f520",
+        "p_x": 1945,
+        "p_y": 1729,
         "sortId": 8
     }
 ]`;
@@ -112,6 +136,9 @@ const _getCategories = () => `[
 const _getEmojisData1 = () => `{
     "category": "Smileys & Emotion",
     "codepoints": "😀",
+    "hexcode": "1f600",
+    "p_x": 433,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -126,6 +153,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😃",
+    "hexcode": "1f603",
+    "p_x": 487,
+    "p_y": 1,
     "emoticons": [
         ":D",
         ":-D",
@@ -146,6 +176,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😄",
+    "hexcode": "1f604",
+    "p_x": 541,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("eye") + `",
@@ -163,6 +196,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😁",
+    "hexcode": "1f601",
+    "p_x": 595,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("beaming face with smiling eyes") + `",
@@ -179,6 +215,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😆",
+    "hexcode": "1f606",
+    "p_x": 649,
+    "p_y": 1,
     "emoticons": [
         "xD",
         "XD"
@@ -199,6 +238,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😅",
+    "hexcode": "1f605",
+    "p_x": 703,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("cold") + `",
@@ -216,6 +258,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤣",
+    "hexcode": "1f923",
+    "p_x": 757,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -234,6 +279,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😂",
+    "hexcode": "1f602",
+    "p_x": 811,
+    "p_y": 1,
     "emoticons": [
         "x'D"
     ],
@@ -253,6 +301,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🙂",
+    "hexcode": "1f642",
+    "p_x": 865,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -267,6 +318,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🙃",
+    "hexcode": "1f643",
+    "p_x": 919,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -282,6 +336,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😉",
+    "hexcode": "1f609",
+    "p_x": 973,
+    "p_y": 1,
     "emoticons": [
         ";)",
         ";-)"
@@ -299,6 +356,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😊",
+    "hexcode": "1f60a",
+    "p_x": 1027,
+    "p_y": 1,
     "emoticons": [
         ":)",
         ":-)",
@@ -320,6 +380,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😇",
+    "hexcode": "1f607",
+    "p_x": 1081,
+    "p_y": 1,
     "emoticons": [
         "o:)"
     ],
@@ -340,6 +403,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🥰",
+    "hexcode": "1f970",
+    "p_x": 1135,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("adore") + `",
@@ -356,6 +422,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😍",
+    "hexcode": "1f60d",
+    "p_x": 1189,
+    "p_y": 1,
     "emoticons": [
         ":heart_eyes"
     ],
@@ -375,6 +444,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤩",
+    "hexcode": "1f929",
+    "p_x": 1243,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("eyes") + `",
@@ -391,6 +463,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😘",
+    "hexcode": "1f618",
+    "p_x": 1297,
+    "p_y": 1,
     "emoticons": [
         ":*",
         ":-*"
@@ -408,6 +483,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😗",
+    "hexcode": "1f617",
+    "p_x": 1351,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -422,6 +500,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😚",
+    "hexcode": "1f61a",
+    "p_x": 1405,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("closed") + `",
@@ -438,6 +519,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😙",
+    "hexcode": "1f619",
+    "p_x": 1459,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("eye") + `",
@@ -454,6 +538,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😋",
+    "hexcode": "1f60b",
+    "p_x": 1513,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("delicious") + `",
@@ -473,6 +560,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😛",
+    "hexcode": "1f61b",
+    "p_x": 1567,
+    "p_y": 1,
     "emoticons": [
         ":p",
         ":P",
@@ -493,6 +583,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😜",
+    "hexcode": "1f61c",
+    "p_x": 1621,
+    "p_y": 1,
     "emoticons": [
         ";p",
         ";P"
@@ -513,6 +606,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤪",
+    "hexcode": "1f92a",
+    "p_x": 1675,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("eye") + `",
@@ -529,6 +625,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😝",
+    "hexcode": "1f61d",
+    "p_x": 1729,
+    "p_y": 1,
     "emoticons": [
         "xp",
         "xP"
@@ -549,6 +648,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤑",
+    "hexcode": "1f911",
+    "p_x": 1783,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -564,6 +666,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤗",
+    "hexcode": "1f917",
+    "p_x": 1837,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -581,6 +686,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤭",
+    "hexcode": "1f92d",
+    "p_x": 1891,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("face with hand over mouth") + `",
@@ -596,6 +704,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤫",
+    "hexcode": "1f92b",
+    "p_x": 1945,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("quiet") + `",
@@ -611,6 +722,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤔",
+    "hexcode": "1f914",
+    "p_x": 1999,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -624,6 +738,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤐",
+    "hexcode": "1f910",
+    "p_x": 2053,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -639,6 +756,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤨",
+    "hexcode": "1f928",
+    "p_x": 2107,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("distrust") + `",
@@ -654,6 +774,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😐",
+    "hexcode": "1f610",
+    "p_x": 2161,
+    "p_y": 1,
     "emoticons": [
         ":|",
         ":-|"
@@ -672,6 +795,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😑",
+    "hexcode": "1f611",
+    "p_x": 2215,
+    "p_y": 1,
     "emoticons": [],
     "keywords": [
         "` + _t("expressionless") + `",
@@ -688,6 +814,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😶",
+    "hexcode": "1f636",
+    "p_x": 1,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -704,6 +833,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😏",
+    "hexcode": "1f60f",
+    "p_x": 55,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -718,6 +850,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😒",
+    "hexcode": "1f612",
+    "p_x": 109,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -732,6 +867,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🙄",
+    "hexcode": "1f644",
+    "p_x": 163,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("eyeroll") + `",
@@ -748,6 +886,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😬",
+    "hexcode": "1f62c",
+    "p_x": 217,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -762,6 +903,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤥",
+    "hexcode": "1f925",
+    "p_x": 271,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -777,6 +921,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😌",
+    "hexcode": "1f60c",
+    "p_x": 325,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -790,6 +937,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😔",
+    "hexcode": "1f614",
+    "p_x": 379,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("dejected") + `",
@@ -804,6 +954,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😪",
+    "hexcode": "1f62a",
+    "p_x": 433,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -819,6 +972,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤤",
+    "hexcode": "1f924",
+    "p_x": 487,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("drooling") + `",
@@ -832,6 +988,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😴",
+    "hexcode": "1f634",
+    "p_x": 541,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -848,6 +1007,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😷",
+    "hexcode": "1f637",
+    "p_x": 595,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("cold") + `",
@@ -868,6 +1030,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤒",
+    "hexcode": "1f912",
+    "p_x": 649,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -884,6 +1049,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤕",
+    "hexcode": "1f915",
+    "p_x": 703,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("bandage") + `",
@@ -901,6 +1069,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤢",
+    "hexcode": "1f922",
+    "p_x": 757,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -915,6 +1086,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤮",
+    "hexcode": "1f92e",
+    "p_x": 811,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face vomiting") + `",
@@ -930,6 +1104,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤧",
+    "hexcode": "1f927",
+    "p_x": 865,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -946,6 +1123,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🥵",
+    "hexcode": "1f975",
+    "p_x": 919,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("feverish") + `",
@@ -964,6 +1144,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🥶",
+    "hexcode": "1f976",
+    "p_x": 973,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("blue-faced") + `",
@@ -981,6 +1164,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🥴",
+    "hexcode": "1f974",
+    "p_x": 1027,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("dizzy") + `",
@@ -998,6 +1184,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😵",
+    "hexcode": "1f635",
+    "p_x": 1081,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("crossed-out eyes") + `",
@@ -1014,6 +1203,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤯",
+    "hexcode": "1f92f",
+    "p_x": 1135,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("exploding head") + `",
@@ -1028,6 +1220,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤠",
+    "hexcode": "1f920",
+    "p_x": 1189,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("cowboy") + `",
@@ -1043,6 +1238,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🥳",
+    "hexcode": "1f973",
+    "p_x": 1243,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -1059,6 +1257,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😎",
+    "hexcode": "1f60e",
+    "p_x": 1297,
+    "p_y": 55,
     "emoticons": [
         "8)",
         "B-)",
@@ -1080,6 +1281,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤓",
+    "hexcode": "1f913",
+    "p_x": 1351,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1094,6 +1298,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🧐",
+    "hexcode": "1f9d0",
+    "p_x": 1405,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1109,6 +1316,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😕",
+    "hexcode": "1f615",
+    "p_x": 1459,
+    "p_y": 55,
     "emoticons": [
         ":/",
         ":-/"
@@ -1126,6 +1336,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😟",
+    "hexcode": "1f61f",
+    "p_x": 1513,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1139,6 +1352,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🙁",
+    "hexcode": "1f641",
+    "p_x": 1567,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1153,6 +1369,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😮",
+    "hexcode": "1f62e",
+    "p_x": 1621,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1169,6 +1388,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😯",
+    "hexcode": "1f62f",
+    "p_x": 1675,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1184,6 +1406,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😲",
+    "hexcode": "1f632",
+    "p_x": 1729,
+    "p_y": 55,
     "emoticons": [
         ":O",
         ":-O",
@@ -1204,6 +1429,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😳",
+    "hexcode": "1f633",
+    "p_x": 1783,
+    "p_y": 55,
     "emoticons": [
         "o_o"
     ],
@@ -1220,6 +1448,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🥺",
+    "hexcode": "1f97a",
+    "p_x": 1837,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("begging") + `",
@@ -1235,6 +1466,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😦",
+    "hexcode": "1f626",
+    "p_x": 1891,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1251,6 +1485,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😧",
+    "hexcode": "1f627",
+    "p_x": 1945,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("anguished") + `",
@@ -1264,6 +1501,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😨",
+    "hexcode": "1f628",
+    "p_x": 1999,
+    "p_y": 55,
     "emoticons": [
         ":'o"
     ],
@@ -1281,6 +1521,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😰",
+    "hexcode": "1f630",
+    "p_x": 2053,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("anxious face with sweat") + `",
@@ -1298,6 +1541,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😥",
+    "hexcode": "1f625",
+    "p_x": 2107,
+    "p_y": 55,
     "emoticons": [],
     "keywords": [
         "` + _t("disappointed") + `",
@@ -1314,6 +1560,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😢",
+    "hexcode": "1f622",
+    "p_x": 2161,
+    "p_y": 55,
     "emoticons": [
         ":'("
     ],
@@ -1332,6 +1581,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😭",
+    "hexcode": "1f62d",
+    "p_x": 2215,
+    "p_y": 55,
     "emoticons": [
         ":'-(",
         ":\\"("
@@ -1352,6 +1604,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😱",
+    "hexcode": "1f631",
+    "p_x": 1,
+    "p_y": 109,
     "emoticons": [
         ":@"
     ],
@@ -1372,6 +1627,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😖",
+    "hexcode": "1f616",
+    "p_x": 55,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("confounded") + `",
@@ -1385,6 +1643,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😣",
+    "hexcode": "1f623",
+    "p_x": 109,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1399,6 +1660,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😞",
+    "hexcode": "1f61e",
+    "p_x": 163,
+    "p_y": 109,
     "emoticons": [
         ":("
     ],
@@ -1414,6 +1678,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😓",
+    "hexcode": "1f613",
+    "p_x": 217,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("cold") + `",
@@ -1429,6 +1696,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😩",
+    "hexcode": "1f629",
+    "p_x": 271,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1443,6 +1713,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😫",
+    "hexcode": "1f62b",
+    "p_x": 325,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1456,6 +1729,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🥱",
+    "hexcode": "1f971",
+    "p_x": 379,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("bored") + `",
@@ -1471,6 +1747,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😤",
+    "hexcode": "1f624",
+    "p_x": 433,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1489,6 +1768,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😡",
+    "hexcode": "1f621",
+    "p_x": 487,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("angry") + `",
@@ -1507,6 +1789,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😠",
+    "hexcode": "1f620",
+    "p_x": 541,
+    "p_y": 109,
     "emoticons": [
         "3:(",
         ">:("
@@ -1525,6 +1810,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤬",
+    "hexcode": "1f92c",
+    "p_x": 595,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("face with symbols on mouth") + `",
@@ -1538,6 +1826,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😈",
+    "hexcode": "1f608",
+    "p_x": 649,
+    "p_y": 109,
     "emoticons": [
         "3:)",
         ">:)"
@@ -1559,6 +1850,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "👿",
+    "hexcode": "1f47f",
+    "p_x": 703,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("angry face with horns") + `",
@@ -1576,6 +1870,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💀",
+    "hexcode": "1f480",
+    "p_x": 757,
+    "p_y": 109,
     "emoticons": [
         ":skull"
     ],
@@ -1594,6 +1891,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "☠️",
+    "hexcode": "2620",
+    "p_x": 811,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("crossbones") + `",
@@ -1611,6 +1911,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💩",
+    "hexcode": "1f4a9",
+    "p_x": 865,
+    "p_y": 109,
     "emoticons": [
         ":poop"
     ],
@@ -1630,6 +1933,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤡",
+    "hexcode": "1f921",
+    "p_x": 919,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("clown") + `",
@@ -1643,6 +1949,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "👹",
+    "hexcode": "1f479",
+    "p_x": 973,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("creature") + `",
@@ -1660,6 +1969,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "👺",
+    "hexcode": "1f47a",
+    "p_x": 1027,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("creature") + `",
@@ -1677,6 +1989,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "👻",
+    "hexcode": "1f47b",
+    "p_x": 1081,
+    "p_y": 109,
     "emoticons": [
         ":ghost"
     ],
@@ -1696,6 +2011,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "👽",
+    "hexcode": "1f47d",
+    "p_x": 1135,
+    "p_y": 109,
     "emoticons": [
         ":et",
         ":alien"
@@ -1716,6 +2034,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "👾",
+    "hexcode": "1f47e",
+    "p_x": 1189,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("alien") + `",
@@ -1733,6 +2054,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤖",
+    "hexcode": "1f916",
+    "p_x": 1243,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -1747,6 +2071,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😺",
+    "hexcode": "1f63a",
+    "p_x": 1297,
+    "p_y": 109,
     "emoticons": [
         ":kitten"
     ],
@@ -1766,6 +2093,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😸",
+    "hexcode": "1f638",
+    "p_x": 1351,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("cat") + `",
@@ -1783,6 +2113,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😹",
+    "hexcode": "1f639",
+    "p_x": 1405,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("cat") + `",
@@ -1799,6 +2132,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😻",
+    "hexcode": "1f63b",
+    "p_x": 1459,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("cat") + `",
@@ -1819,6 +2155,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😼",
+    "hexcode": "1f63c",
+    "p_x": 1513,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("cat") + `",
@@ -1836,6 +2175,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😽",
+    "hexcode": "1f63d",
+    "p_x": 1567,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("cat") + `",
@@ -1852,6 +2194,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🙀",
+    "hexcode": "1f640",
+    "p_x": 1621,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("cat") + `",
@@ -1868,6 +2213,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😿",
+    "hexcode": "1f63f",
+    "p_x": 1675,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("cat") + `",
@@ -1885,6 +2233,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "😾",
+    "hexcode": "1f63e",
+    "p_x": 1729,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("cat") + `",
@@ -1899,6 +2250,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🙈",
+    "hexcode": "1f648",
+    "p_x": 1783,
+    "p_y": 109,
     "emoticons": [
         ":no_see"
     ],
@@ -1919,6 +2273,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🙉",
+    "hexcode": "1f649",
+    "p_x": 1837,
+    "p_y": 109,
     "emoticons": [
         ":no_hear"
     ],
@@ -1939,6 +2296,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🙊",
+    "hexcode": "1f64a",
+    "p_x": 1891,
+    "p_y": 109,
     "emoticons": [
         ":no_speak"
     ],
@@ -1959,6 +2319,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💋",
+    "hexcode": "1f48b",
+    "p_x": 1945,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("kiss") + `",
@@ -1973,6 +2336,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💌",
+    "hexcode": "1f48c",
+    "p_x": 1999,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("heart") + `",
@@ -1988,6 +2354,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💘",
+    "hexcode": "1f498",
+    "p_x": 2053,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -2002,6 +2371,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💝",
+    "hexcode": "1f49d",
+    "p_x": 2107,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("heart with ribbon") + `",
@@ -2016,6 +2388,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💖",
+    "hexcode": "1f496",
+    "p_x": 2161,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("excited") + `",
@@ -2030,6 +2405,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💗",
+    "hexcode": "1f497",
+    "p_x": 2215,
+    "p_y": 109,
     "emoticons": [],
     "keywords": [
         "` + _t("excited") + `",
@@ -2046,6 +2424,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💓",
+    "hexcode": "1f493",
+    "p_x": 1,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("beating") + `",
@@ -2061,6 +2442,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💞",
+    "hexcode": "1f49e",
+    "p_x": 55,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("revolving") + `",
@@ -2074,6 +2458,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💕",
+    "hexcode": "1f495",
+    "p_x": 109,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("love") + `",
@@ -2087,6 +2474,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💟",
+    "hexcode": "1f49f",
+    "p_x": 163,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("heart") + `",
@@ -2100,6 +2490,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "❣️",
+    "hexcode": "2763",
+    "p_x": 217,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("exclamation") + `",
@@ -2115,6 +2508,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💔",
+    "hexcode": "1f494",
+    "p_x": 271,
+    "p_y": 163,
     "emoticons": [
         "</3",
         "&lt;/3"
@@ -2132,6 +2528,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "❤️",
+    "hexcode": "2764",
+    "p_x": 325,
+    "p_y": 163,
     "emoticons": [
         "<3",
         "&lt;3",
@@ -2149,6 +2548,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🧡",
+    "hexcode": "1f9e1",
+    "p_x": 379,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("orange") + `",
@@ -2162,6 +2564,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💛",
+    "hexcode": "1f49b",
+    "p_x": 433,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("yellow") + `",
@@ -2175,6 +2580,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💚",
+    "hexcode": "1f49a",
+    "p_x": 487,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("green") + `",
@@ -2188,6 +2596,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💙",
+    "hexcode": "1f499",
+    "p_x": 541,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("blue") + `",
@@ -2201,6 +2612,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💜",
+    "hexcode": "1f49c",
+    "p_x": 595,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("purple") + `",
@@ -2214,6 +2628,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤎",
+    "hexcode": "1f90e",
+    "p_x": 649,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("brown") + `",
@@ -2227,6 +2644,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🖤",
+    "hexcode": "1f5a4",
+    "p_x": 703,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("black") + `",
@@ -2242,6 +2662,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🤍",
+    "hexcode": "1f90d",
+    "p_x": 757,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("heart") + `",
@@ -2255,6 +2678,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💯",
+    "hexcode": "1f4af",
+    "p_x": 811,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("100") + `",
@@ -2272,6 +2698,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💢",
+    "hexcode": "1f4a2",
+    "p_x": 865,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("anger symbol") + `",
@@ -2287,6 +2716,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💥",
+    "hexcode": "1f4a5",
+    "p_x": 919,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("boom") + `",
@@ -2301,6 +2733,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💫",
+    "hexcode": "1f4ab",
+    "p_x": 973,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("comic") + `",
@@ -2315,6 +2750,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💦",
+    "hexcode": "1f4a6",
+    "p_x": 1027,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("comic") + `",
@@ -2330,6 +2768,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💨",
+    "hexcode": "1f4a8",
+    "p_x": 1081,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("comic") + `",
@@ -2345,6 +2786,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🕳️",
+    "hexcode": "1f573",
+    "p_x": 1135,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("hole") + `"
@@ -2357,6 +2801,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💣",
+    "hexcode": "1f4a3",
+    "p_x": 1189,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("bomb") + `",
@@ -2370,6 +2817,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💬",
+    "hexcode": "1f4ac",
+    "p_x": 1243,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("balloon") + `",
@@ -2386,6 +2836,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "👁️‍🗨️",
+    "hexcode": "1f441-200d-1f5e8",
+    "p_x": 1297,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [],
     "name": "` + _t("eye in speech bubble") + `",
@@ -2396,6 +2849,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🗨️",
+    "hexcode": "1f5e8",
+    "p_x": 1351,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("balloon") + `",
@@ -2413,6 +2869,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "🗯️",
+    "hexcode": "1f5ef",
+    "p_x": 1405,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("angry") + `",
@@ -2429,6 +2888,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💭",
+    "hexcode": "1f4ad",
+    "p_x": 1459,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("balloon") + `",
@@ -2444,6 +2906,9 @@ const _getEmojisData1 = () => `{
 {
     "category": "Smileys & Emotion",
     "codepoints": "💤",
+    "hexcode": "1f4a4",
+    "p_x": 1513,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("comic") + `",
@@ -2460,6 +2925,9 @@ const _getEmojisData1 = () => `{
 const _getEmojisData2 = () => `{
     "category": "People & Body",
     "codepoints": "👋",
+    "hexcode": "1f44b",
+    "p_x": 1567,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("hand") + `",
@@ -2475,6 +2943,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤚",
+    "hexcode": "1f91a",
+    "p_x": 1621,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("backhand") + `",
@@ -2489,6 +2960,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🖐️",
+    "hexcode": "1f590",
+    "p_x": 1675,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("finger") + `",
@@ -2504,6 +2978,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "✋",
+    "hexcode": "270b",
+    "p_x": 1729,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("hand") + `",
@@ -2519,6 +2996,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🖖",
+    "hexcode": "1f596",
+    "p_x": 1783,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("finger") + `",
@@ -2536,6 +3016,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👌",
+    "hexcode": "1f44c",
+    "p_x": 1837,
+    "p_y": 163,
     "emoticons": [
         ":ok"
     ],
@@ -2552,6 +3035,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤏",
+    "hexcode": "1f90f",
+    "p_x": 1891,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("pinching hand") + `",
@@ -2565,6 +3051,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "✌️",
+    "hexcode": "270c",
+    "p_x": 1945,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("hand") + `",
@@ -2579,6 +3068,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤞",
+    "hexcode": "1f91e",
+    "p_x": 1999,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("cross") + `",
@@ -2596,6 +3088,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤟",
+    "hexcode": "1f91f",
+    "p_x": 2053,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("hand") + `",
@@ -2611,6 +3106,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤘",
+    "hexcode": "1f918",
+    "p_x": 2107,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("finger") + `",
@@ -2628,6 +3126,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤙",
+    "hexcode": "1f919",
+    "p_x": 2161,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("call") + `",
@@ -2646,6 +3147,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👈",
+    "hexcode": "1f448",
+    "p_x": 2215,
+    "p_y": 163,
     "emoticons": [],
     "keywords": [
         "` + _t("backhand") + `",
@@ -2663,6 +3167,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👉",
+    "hexcode": "1f449",
+    "p_x": 1,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("backhand") + `",
@@ -2680,6 +3187,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👆",
+    "hexcode": "1f446",
+    "p_x": 55,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("backhand") + `",
@@ -2697,6 +3207,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🖕",
+    "hexcode": "1f595",
+    "p_x": 109,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("finger") + `",
@@ -2711,6 +3224,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👇",
+    "hexcode": "1f447",
+    "p_x": 163,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("backhand") + `",
@@ -2728,6 +3244,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "☝️",
+    "hexcode": "261d",
+    "p_x": 217,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("finger") + `",
@@ -2745,6 +3264,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👍",
+    "hexcode": "1f44d",
+    "p_x": 271,
+    "p_y": 217,
     "emoticons": [
         ":+1"
     ],
@@ -2764,6 +3286,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👎",
+    "hexcode": "1f44e",
+    "p_x": 325,
+    "p_y": 217,
     "emoticons": [
         ":-1"
     ],
@@ -2782,6 +3307,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "✊",
+    "hexcode": "270a",
+    "p_x": 379,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("clenched") + `",
@@ -2798,6 +3326,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👊",
+    "hexcode": "1f44a",
+    "p_x": 433,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("clenched") + `",
@@ -2814,6 +3345,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤛",
+    "hexcode": "1f91b",
+    "p_x": 487,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("fist") + `",
@@ -2829,6 +3363,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤜",
+    "hexcode": "1f91c",
+    "p_x": 541,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("fist") + `",
@@ -2844,6 +3381,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👏",
+    "hexcode": "1f44f",
+    "p_x": 595,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("clap") + `",
@@ -2858,6 +3398,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙌",
+    "hexcode": "1f64c",
+    "p_x": 649,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -2877,6 +3420,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👐",
+    "hexcode": "1f450",
+    "p_x": 703,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("hand") + `",
@@ -2891,6 +3437,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤲",
+    "hexcode": "1f932",
+    "p_x": 757,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("palms up together") + `",
@@ -2904,6 +3453,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤝",
+    "hexcode": "1f91d",
+    "p_x": 811,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("agreement") + `",
@@ -2920,6 +3472,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙏",
+    "hexcode": "1f64f",
+    "p_x": 865,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("ask") + `",
@@ -2940,6 +3495,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "✍️",
+    "hexcode": "270d",
+    "p_x": 919,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("hand") + `",
@@ -2954,6 +3512,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💅",
+    "hexcode": "1f485",
+    "p_x": 973,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("care") + `",
@@ -2970,6 +3531,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤳",
+    "hexcode": "1f933",
+    "p_x": 1027,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("camera") + `",
@@ -2984,6 +3548,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💪",
+    "hexcode": "1f4aa",
+    "p_x": 1081,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("biceps") + `",
@@ -3001,6 +3568,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦾",
+    "hexcode": "1f9be",
+    "p_x": 1135,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -3015,6 +3585,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦿",
+    "hexcode": "1f9bf",
+    "p_x": 1189,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -3029,6 +3602,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦵",
+    "hexcode": "1f9b5",
+    "p_x": 1243,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("kick") + `",
@@ -3043,6 +3619,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦶",
+    "hexcode": "1f9b6",
+    "p_x": 1297,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("foot") + `",
@@ -3057,6 +3636,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👂",
+    "hexcode": "1f442",
+    "p_x": 1351,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("body") + `",
@@ -3070,6 +3652,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦻",
+    "hexcode": "1f9bb",
+    "p_x": 1405,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -3085,6 +3670,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👃",
+    "hexcode": "1f443",
+    "p_x": 1459,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("body") + `",
@@ -3098,6 +3686,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧠",
+    "hexcode": "1f9e0",
+    "p_x": 1513,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("brain") + `",
@@ -3111,6 +3702,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦷",
+    "hexcode": "1f9b7",
+    "p_x": 1567,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("dentist") + `",
@@ -3124,6 +3718,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦴",
+    "hexcode": "1f9b4",
+    "p_x": 1621,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("bone") + `",
@@ -3137,6 +3734,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👀",
+    "hexcode": "1f440",
+    "p_x": 1675,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("eye") + `",
@@ -3151,6 +3751,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👁️",
+    "hexcode": "1f441",
+    "p_x": 1729,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("body") + `",
@@ -3164,6 +3767,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👅",
+    "hexcode": "1f445",
+    "p_x": 1783,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("body") + `",
@@ -3177,6 +3783,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👄",
+    "hexcode": "1f444",
+    "p_x": 1837,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("lips") + `",
@@ -3190,6 +3799,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👶",
+    "hexcode": "1f476",
+    "p_x": 1891,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("baby") + `",
@@ -3203,6 +3815,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧒",
+    "hexcode": "1f9d2",
+    "p_x": 1945,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("child") + `",
@@ -3218,6 +3833,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👦",
+    "hexcode": "1f466",
+    "p_x": 1999,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -3232,6 +3850,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👧",
+    "hexcode": "1f467",
+    "p_x": 2053,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("girl") + `",
@@ -3248,6 +3869,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧑",
+    "hexcode": "1f9d1",
+    "p_x": 2107,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3263,6 +3887,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👱",
+    "hexcode": "1f471",
+    "p_x": 2161,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("blond") + `",
@@ -3278,6 +3905,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨",
+    "hexcode": "1f468",
+    "p_x": 2215,
+    "p_y": 217,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3291,6 +3921,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧔",
+    "hexcode": "1f9d4",
+    "p_x": 1,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("beard") + `",
@@ -3305,6 +3938,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🦰",
+    "hexcode": "1f468-200d-1f9b0",
+    "p_x": 55,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3319,6 +3955,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🦱",
+    "hexcode": "1f468-200d-1f9b1",
+    "p_x": 109,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3333,6 +3972,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🦳",
+    "hexcode": "1f468-200d-1f9b3",
+    "p_x": 163,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3347,6 +3989,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🦲",
+    "hexcode": "1f468-200d-1f9b2",
+    "p_x": 217,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3361,6 +4006,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩",
+    "hexcode": "1f469",
+    "p_x": 271,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3374,6 +4022,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🦰",
+    "hexcode": "1f469-200d-1f9b0",
+    "p_x": 325,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3388,6 +4039,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🦱",
+    "hexcode": "1f469-200d-1f9b1",
+    "p_x": 379,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3402,6 +4056,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🦳",
+    "hexcode": "1f469-200d-1f9b3",
+    "p_x": 433,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3416,6 +4073,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🦲",
+    "hexcode": "1f469-200d-1f9b2",
+    "p_x": 487,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3430,6 +4090,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👱‍♀️",
+    "hexcode": "1f471-200d-2640-fe0f",
+    "p_x": 541,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("blond-haired woman") + `",
@@ -3446,6 +4109,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👱‍♂️",
+    "hexcode": "1f471-200d-2642-fe0f",
+    "p_x": 595,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("blond") + `",
@@ -3462,6 +4128,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧓",
+    "hexcode": "1f9d3",
+    "p_x": 649,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3478,6 +4147,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👴",
+    "hexcode": "1f474",
+    "p_x": 703,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3492,6 +4164,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👵",
+    "hexcode": "1f475",
+    "p_x": 757,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("adult") + `",
@@ -3506,6 +4181,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙍",
+    "hexcode": "1f64d",
+    "p_x": 811,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("frown") + `",
@@ -3520,6 +4198,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙍‍♂️",
+    "hexcode": "1f64d-200d-2642-fe0f",
+    "p_x": 865,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("frowning") + `",
@@ -3534,6 +4215,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙍‍♀️",
+    "hexcode": "1f64d-200d-2640-fe0f",
+    "p_x": 919,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("frowning") + `",
@@ -3548,6 +4232,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙎",
+    "hexcode": "1f64e",
+    "p_x": 973,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("gesture") + `",
@@ -3562,6 +4249,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙎‍♂️",
+    "hexcode": "1f64e-200d-2642-fe0f",
+    "p_x": 1027,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("gesture") + `",
@@ -3576,6 +4266,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙎‍♀️",
+    "hexcode": "1f64e-200d-2640-fe0f",
+    "p_x": 1081,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("gesture") + `",
@@ -3590,6 +4283,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙅",
+    "hexcode": "1f645",
+    "p_x": 1135,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("forbidden") + `",
@@ -3606,6 +4302,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙅‍♂️",
+    "hexcode": "1f645-200d-2642-fe0f",
+    "p_x": 1189,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("forbidden") + `",
@@ -3623,6 +4322,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙅‍♀️",
+    "hexcode": "1f645-200d-2640-fe0f",
+    "p_x": 1243,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("forbidden") + `",
@@ -3640,6 +4342,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙆",
+    "hexcode": "1f646",
+    "p_x": 1297,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("gesture") + `",
@@ -3655,6 +4360,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙆‍♂️",
+    "hexcode": "1f646-200d-2642-fe0f",
+    "p_x": 1351,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("gesture") + `",
@@ -3671,6 +4379,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙆‍♀️",
+    "hexcode": "1f646-200d-2640-fe0f",
+    "p_x": 1405,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("gesture") + `",
@@ -3687,6 +4398,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💁",
+    "hexcode": "1f481",
+    "p_x": 1459,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("hand") + `",
@@ -3704,6 +4418,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💁‍♂️",
+    "hexcode": "1f481-200d-2642-fe0f",
+    "p_x": 1513,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("man") + `",
@@ -3719,6 +4436,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💁‍♀️",
+    "hexcode": "1f481-200d-2640-fe0f",
+    "p_x": 1567,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("sassy") + `",
@@ -3734,6 +4454,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙋",
+    "hexcode": "1f64b",
+    "p_x": 1621,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("gesture") + `",
@@ -3750,6 +4473,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙋‍♂️",
+    "hexcode": "1f64b-200d-2642-fe0f",
+    "p_x": 1675,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("gesture") + `",
@@ -3765,6 +4491,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙋‍♀️",
+    "hexcode": "1f64b-200d-2640-fe0f",
+    "p_x": 1729,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("gesture") + `",
@@ -3780,6 +4509,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧏",
+    "hexcode": "1f9cf",
+    "p_x": 1783,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -3797,6 +4529,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧏‍♂️",
+    "hexcode": "1f9cf-200d-2642-fe0f",
+    "p_x": 1837,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("deaf") + `",
@@ -3810,6 +4545,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧏‍♀️",
+    "hexcode": "1f9cf-200d-2640-fe0f",
+    "p_x": 1891,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("deaf") + `",
@@ -3823,6 +4561,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙇",
+    "hexcode": "1f647",
+    "p_x": 1945,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("apology") + `",
@@ -3839,6 +4580,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙇‍♂️",
+    "hexcode": "1f647-200d-2642-fe0f",
+    "p_x": 1999,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("apology") + `",
@@ -3856,6 +4600,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🙇‍♀️",
+    "hexcode": "1f647-200d-2640-fe0f",
+    "p_x": 2053,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("apology") + `",
@@ -3873,6 +4620,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤦",
+    "hexcode": "1f926",
+    "p_x": 2107,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("disbelief") + `",
@@ -3889,6 +4639,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤦‍♂️",
+    "hexcode": "1f926-200d-2642-fe0f",
+    "p_x": 2161,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("disbelief") + `",
@@ -3905,6 +4658,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤦‍♀️",
+    "hexcode": "1f926-200d-2640-fe0f",
+    "p_x": 2215,
+    "p_y": 271,
     "emoticons": [],
     "keywords": [
         "` + _t("disbelief") + `",
@@ -3921,6 +4677,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤷",
+    "hexcode": "1f937",
+    "p_x": 1,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("doubt") + `",
@@ -3937,6 +4696,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤷‍♂️",
+    "hexcode": "1f937-200d-2642-fe0f",
+    "p_x": 55,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("doubt") + `",
@@ -3954,6 +4716,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤷‍♀️",
+    "hexcode": "1f937-200d-2640-fe0f",
+    "p_x": 109,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("doubt") + `",
@@ -3971,6 +4736,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍⚕️",
+    "hexcode": "1f468-200d-2695-fe0f",
+    "p_x": 163,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("doctor") + `",
@@ -3989,6 +4757,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍⚕️",
+    "hexcode": "1f469-200d-2695-fe0f",
+    "p_x": 217,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("doctor") + `",
@@ -4007,6 +4778,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🎓",
+    "hexcode": "1f468-200d-1f393",
+    "p_x": 271,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("graduate") + `",
@@ -4021,6 +4795,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🎓",
+    "hexcode": "1f469-200d-1f393",
+    "p_x": 325,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("graduate") + `",
@@ -4035,6 +4812,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🏫",
+    "hexcode": "1f468-200d-1f3eb",
+    "p_x": 379,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("instructor") + `",
@@ -4050,6 +4830,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🏫",
+    "hexcode": "1f469-200d-1f3eb",
+    "p_x": 433,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("instructor") + `",
@@ -4065,6 +4848,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍⚖️",
+    "hexcode": "1f468-200d-2696-fe0f",
+    "p_x": 487,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("judge") + `",
@@ -4080,6 +4866,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍⚖️",
+    "hexcode": "1f469-200d-2696-fe0f",
+    "p_x": 541,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("judge") + `",
@@ -4095,6 +4884,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🌾",
+    "hexcode": "1f468-200d-1f33e",
+    "p_x": 595,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("farmer") + `",
@@ -4110,6 +4902,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🌾",
+    "hexcode": "1f469-200d-1f33e",
+    "p_x": 649,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("farmer") + `",
@@ -4125,6 +4920,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🍳",
+    "hexcode": "1f468-200d-1f373",
+    "p_x": 703,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("chef") + `",
@@ -4139,6 +4937,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🍳",
+    "hexcode": "1f469-200d-1f373",
+    "p_x": 757,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("chef") + `",
@@ -4153,6 +4954,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🔧",
+    "hexcode": "1f468-200d-1f527",
+    "p_x": 811,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("electrician") + `",
@@ -4169,6 +4973,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🔧",
+    "hexcode": "1f469-200d-1f527",
+    "p_x": 865,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("electrician") + `",
@@ -4185,6 +4992,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🏭",
+    "hexcode": "1f468-200d-1f3ed",
+    "p_x": 919,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("assembly") + `",
@@ -4201,6 +5011,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🏭",
+    "hexcode": "1f469-200d-1f3ed",
+    "p_x": 973,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("assembly") + `",
@@ -4217,6 +5030,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍💼",
+    "hexcode": "1f468-200d-1f4bc",
+    "p_x": 1027,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("business man") + `",
@@ -4237,6 +5053,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍💼",
+    "hexcode": "1f469-200d-1f4bc",
+    "p_x": 1081,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("business woman") + `",
@@ -4257,6 +5076,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🔬",
+    "hexcode": "1f468-200d-1f52c",
+    "p_x": 1135,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("biologist") + `",
@@ -4274,6 +5096,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🔬",
+    "hexcode": "1f469-200d-1f52c",
+    "p_x": 1189,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("biologist") + `",
@@ -4291,6 +5116,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍💻",
+    "hexcode": "1f468-200d-1f4bb",
+    "p_x": 1243,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("coder") + `",
@@ -4308,6 +5136,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍💻",
+    "hexcode": "1f469-200d-1f4bb",
+    "p_x": 1297,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("coder") + `",
@@ -4325,6 +5156,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🎤",
+    "hexcode": "1f468-200d-1f3a4",
+    "p_x": 1351,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("entertainer") + `",
@@ -4345,6 +5179,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🎤",
+    "hexcode": "1f469-200d-1f3a4",
+    "p_x": 1405,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("entertainer") + `",
@@ -4365,6 +5202,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🎨",
+    "hexcode": "1f468-200d-1f3a8",
+    "p_x": 1459,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("artist") + `",
@@ -4380,6 +5220,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🎨",
+    "hexcode": "1f469-200d-1f3a8",
+    "p_x": 1513,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("artist") + `",
@@ -4395,6 +5238,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍✈️",
+    "hexcode": "1f468-200d-2708-fe0f",
+    "p_x": 1567,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("man") + `",
@@ -4409,6 +5255,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍✈️",
+    "hexcode": "1f469-200d-2708-fe0f",
+    "p_x": 1621,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("pilot") + `",
@@ -4423,6 +5272,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🚀",
+    "hexcode": "1f468-200d-1f680",
+    "p_x": 1675,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("astronaut") + `",
@@ -4437,6 +5289,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🚀",
+    "hexcode": "1f469-200d-1f680",
+    "p_x": 1729,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("astronaut") + `",
@@ -4451,6 +5306,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🚒",
+    "hexcode": "1f468-200d-1f692",
+    "p_x": 1783,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("fire truck") + `",
@@ -4467,6 +5325,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🚒",
+    "hexcode": "1f469-200d-1f692",
+    "p_x": 1837,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("fire truck") + `",
@@ -4486,6 +5347,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👮",
+    "hexcode": "1f46e",
+    "p_x": 1891,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("cop") + `",
@@ -4500,6 +5364,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👮‍♂️",
+    "hexcode": "1f46e-200d-2642-fe0f",
+    "p_x": 1945,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("cop") + `",
@@ -4515,6 +5382,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👮‍♀️",
+    "hexcode": "1f46e-200d-2640-fe0f",
+    "p_x": 1999,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("cop") + `",
@@ -4530,6 +5400,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🕵️",
+    "hexcode": "1f575",
+    "p_x": 2053,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("detective") + `",
@@ -4545,6 +5418,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🕵️‍♂️",
+    "hexcode": "1f575-fe0f-200d-2642-fe0f",
+    "p_x": 2107,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [],
     "name": "` + _t("man detective") + `",
@@ -4555,6 +5431,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🕵️‍♀️",
+    "hexcode": "1f575-fe0f-200d-2640-fe0f",
+    "p_x": 2161,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [],
     "name": "` + _t("woman detective") + `",
@@ -4565,6 +5444,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💂",
+    "hexcode": "1f482",
+    "p_x": 2215,
+    "p_y": 325,
     "emoticons": [],
     "keywords": [
         "` + _t("guard") + `"
@@ -4577,6 +5459,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💂‍♂️",
+    "hexcode": "1f482-200d-2642-fe0f",
+    "p_x": 1,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("guard") + `",
@@ -4590,6 +5475,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💂‍♀️",
+    "hexcode": "1f482-200d-2640-fe0f",
+    "p_x": 55,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("guard") + `",
@@ -4603,6 +5491,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👷",
+    "hexcode": "1f477",
+    "p_x": 109,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("construction") + `",
@@ -4617,6 +5508,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👷‍♂️",
+    "hexcode": "1f477-200d-2642-fe0f",
+    "p_x": 163,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("construction") + `",
@@ -4631,6 +5525,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👷‍♀️",
+    "hexcode": "1f477-200d-2640-fe0f",
+    "p_x": 217,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("construction") + `",
@@ -4645,6 +5542,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤴",
+    "hexcode": "1f934",
+    "p_x": 271,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("prince") + `"
@@ -4657,6 +5557,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👸",
+    "hexcode": "1f478",
+    "p_x": 325,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("fairy tale") + `",
@@ -4671,6 +5574,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👳",
+    "hexcode": "1f473",
+    "p_x": 379,
+    "p_y": 379,
     "emoticons": [
         ":turban"
     ],
@@ -4686,6 +5592,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👳‍♂️",
+    "hexcode": "1f473-200d-2642-fe0f",
+    "p_x": 433,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("man") + `",
@@ -4700,6 +5609,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👳‍♀️",
+    "hexcode": "1f473-200d-2640-fe0f",
+    "p_x": 487,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("turban") + `",
@@ -4714,6 +5626,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👲",
+    "hexcode": "1f472",
+    "p_x": 541,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("cap") + `",
@@ -4731,6 +5646,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧕",
+    "hexcode": "1f9d5",
+    "p_x": 595,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("headscarf") + `",
@@ -4747,6 +5665,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤵",
+    "hexcode": "1f935",
+    "p_x": 649,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("groom") + `",
@@ -4763,6 +5684,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👰",
+    "hexcode": "1f470",
+    "p_x": 703,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("bride") + `",
@@ -4779,6 +5703,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤰",
+    "hexcode": "1f930",
+    "p_x": 757,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("pregnant") + `",
@@ -4792,6 +5719,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤱",
+    "hexcode": "1f931",
+    "p_x": 811,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("baby") + `",
@@ -4807,6 +5737,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👼",
+    "hexcode": "1f47c",
+    "p_x": 865,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("angel") + `",
@@ -4823,6 +5756,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🎅",
+    "hexcode": "1f385",
+    "p_x": 919,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -4844,6 +5780,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤶",
+    "hexcode": "1f936",
+    "p_x": 973,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -4865,6 +5804,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦸",
+    "hexcode": "1f9b8",
+    "p_x": 1027,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("good") + `",
@@ -4881,6 +5823,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦸‍♂️",
+    "hexcode": "1f9b8-200d-2642-fe0f",
+    "p_x": 1081,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("good") + `",
@@ -4897,6 +5842,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦸‍♀️",
+    "hexcode": "1f9b8-200d-2640-fe0f",
+    "p_x": 1135,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("good") + `",
@@ -4914,6 +5862,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦹",
+    "hexcode": "1f9b9",
+    "p_x": 1189,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("criminal") + `",
@@ -4930,6 +5881,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦹‍♂️",
+    "hexcode": "1f9b9-200d-2642-fe0f",
+    "p_x": 1243,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("criminal") + `",
@@ -4947,6 +5901,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🦹‍♀️",
+    "hexcode": "1f9b9-200d-2640-fe0f",
+    "p_x": 1297,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("criminal") + `",
@@ -4964,6 +5921,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧙",
+    "hexcode": "1f9d9",
+    "p_x": 1351,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("mage") + `",
@@ -4980,6 +5940,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧙‍♂️",
+    "hexcode": "1f9d9-200d-2642-fe0f",
+    "p_x": 1405,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("man mage") + `",
@@ -4994,6 +5957,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧙‍♀️",
+    "hexcode": "1f9d9-200d-2640-fe0f",
+    "p_x": 1459,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("sorceress") + `",
@@ -5008,6 +5974,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧚",
+    "hexcode": "1f9da",
+    "p_x": 1513,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("fairy") + `",
@@ -5023,6 +5992,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧚‍♂️",
+    "hexcode": "1f9da-200d-2642-fe0f",
+    "p_x": 1567,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("man fairy") + `",
@@ -5037,6 +6009,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧚‍♀️",
+    "hexcode": "1f9da-200d-2640-fe0f",
+    "p_x": 1621,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("Titania") + `",
@@ -5050,6 +6025,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧛",
+    "hexcode": "1f9db",
+    "p_x": 1675,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("Dracula") + `",
@@ -5064,6 +6042,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧛‍♂️",
+    "hexcode": "1f9db-200d-2642-fe0f",
+    "p_x": 1729,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("Dracula") + `",
@@ -5078,6 +6059,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧛‍♀️",
+    "hexcode": "1f9db-200d-2640-fe0f",
+    "p_x": 1783,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("undead") + `",
@@ -5091,6 +6075,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧜",
+    "hexcode": "1f9dc",
+    "p_x": 1837,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("mermaid") + `",
@@ -5106,6 +6093,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧜‍♂️",
+    "hexcode": "1f9dc-200d-2642-fe0f",
+    "p_x": 1891,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("merman") + `",
@@ -5119,6 +6109,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧜‍♀️",
+    "hexcode": "1f9dc-200d-2640-fe0f",
+    "p_x": 1945,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("mermaid") + `",
@@ -5132,6 +6125,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧝",
+    "hexcode": "1f9dd",
+    "p_x": 1999,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("elf") + `",
@@ -5145,6 +6141,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧝‍♂️",
+    "hexcode": "1f9dd-200d-2642-fe0f",
+    "p_x": 2053,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("magical") + `",
@@ -5158,6 +6157,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧝‍♀️",
+    "hexcode": "1f9dd-200d-2640-fe0f",
+    "p_x": 2107,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("magical") + `",
@@ -5171,6 +6173,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧞",
+    "hexcode": "1f9de",
+    "p_x": 2161,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("djinn") + `",
@@ -5184,6 +6189,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧞‍♂️",
+    "hexcode": "1f9de-200d-2642-fe0f",
+    "p_x": 2215,
+    "p_y": 379,
     "emoticons": [],
     "keywords": [
         "` + _t("djinn") + `",
@@ -5197,6 +6205,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧞‍♀️",
+    "hexcode": "1f9de-200d-2640-fe0f",
+    "p_x": 1,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("djinn") + `",
@@ -5210,6 +6221,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧟",
+    "hexcode": "1f9df",
+    "p_x": 55,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("undead") + `",
@@ -5224,6 +6238,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧟‍♂️",
+    "hexcode": "1f9df-200d-2642-fe0f",
+    "p_x": 109,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("man zombie") + `",
@@ -5238,6 +6255,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧟‍♀️",
+    "hexcode": "1f9df-200d-2640-fe0f",
+    "p_x": 163,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("undead") + `",
@@ -5252,6 +6272,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💆",
+    "hexcode": "1f486",
+    "p_x": 217,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -5267,6 +6290,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💆‍♂️",
+    "hexcode": "1f486-200d-2642-fe0f",
+    "p_x": 271,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -5282,6 +6308,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💆‍♀️",
+    "hexcode": "1f486-200d-2640-fe0f",
+    "p_x": 325,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -5297,6 +6326,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💇",
+    "hexcode": "1f487",
+    "p_x": 379,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("barber") + `",
@@ -5314,6 +6346,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💇‍♂️",
+    "hexcode": "1f487-200d-2642-fe0f",
+    "p_x": 433,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("haircut") + `",
@@ -5329,6 +6364,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💇‍♀️",
+    "hexcode": "1f487-200d-2640-fe0f",
+    "p_x": 487,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("haircut") + `",
@@ -5344,6 +6382,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚶",
+    "hexcode": "1f6b6",
+    "p_x": 541,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("hike") + `",
@@ -5359,6 +6400,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚶‍♂️",
+    "hexcode": "1f6b6-200d-2642-fe0f",
+    "p_x": 595,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("hike") + `",
@@ -5374,6 +6418,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚶‍♀️",
+    "hexcode": "1f6b6-200d-2640-fe0f",
+    "p_x": 649,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("hike") + `",
@@ -5389,6 +6436,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧍",
+    "hexcode": "1f9cd",
+    "p_x": 703,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("person standing") + `",
@@ -5403,6 +6453,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧍‍♂️",
+    "hexcode": "1f9cd-200d-2642-fe0f",
+    "p_x": 757,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("man") + `",
@@ -5416,6 +6469,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧍‍♀️",
+    "hexcode": "1f9cd-200d-2640-fe0f",
+    "p_x": 811,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("standing") + `",
@@ -5429,6 +6485,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧎",
+    "hexcode": "1f9ce",
+    "p_x": 865,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("kneel") + `",
@@ -5443,6 +6502,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧎‍♂️",
+    "hexcode": "1f9ce-200d-2642-fe0f",
+    "p_x": 919,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("kneeling") + `",
@@ -5456,6 +6518,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧎‍♀️",
+    "hexcode": "1f9ce-200d-2640-fe0f",
+    "p_x": 973,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("kneeling") + `",
@@ -5469,6 +6534,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🦯",
+    "hexcode": "1f468-200d-1f9af",
+    "p_x": 1027,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -5485,6 +6553,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🦯",
+    "hexcode": "1f469-200d-1f9af",
+    "p_x": 1081,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -5501,6 +6572,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🦼",
+    "hexcode": "1f468-200d-1f9bc",
+    "p_x": 1135,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("man in motorised wheelchair") + `",
@@ -5518,6 +6592,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🦼",
+    "hexcode": "1f469-200d-1f9bc",
+    "p_x": 1189,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("woman in motorised wheelchair") + `",
@@ -5535,6 +6612,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍🦽",
+    "hexcode": "1f468-200d-1f9bd",
+    "p_x": 1243,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -5550,6 +6630,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍🦽",
+    "hexcode": "1f469-200d-1f9bd",
+    "p_x": 1297,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -5565,6 +6648,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏃",
+    "hexcode": "1f3c3",
+    "p_x": 1351,
+    "p_y": 433,
     "emoticons": [
         ":run"
     ],
@@ -5581,6 +6667,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏃‍♂️",
+    "hexcode": "1f3c3-200d-2642-fe0f",
+    "p_x": 1405,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("man") + `",
@@ -5596,6 +6685,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏃‍♀️",
+    "hexcode": "1f3c3-200d-2640-fe0f",
+    "p_x": 1459,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("marathon") + `",
@@ -5611,6 +6703,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💃",
+    "hexcode": "1f483",
+    "p_x": 1513,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("dance") + `",
@@ -5625,6 +6720,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🕺",
+    "hexcode": "1f57a",
+    "p_x": 1567,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("dance") + `",
@@ -5639,6 +6737,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🕴️",
+    "hexcode": "1f574",
+    "p_x": 1621,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("business") + `",
@@ -5654,6 +6755,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👯",
+    "hexcode": "1f46f",
+    "p_x": 1675,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("bunny ear") + `",
@@ -5669,6 +6773,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👯‍♂️",
+    "hexcode": "1f46f-200d-2642-fe0f",
+    "p_x": 1729,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("bunny ear") + `",
@@ -5685,6 +6792,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👯‍♀️",
+    "hexcode": "1f46f-200d-2640-fe0f",
+    "p_x": 1783,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("bunny ear") + `",
@@ -5701,6 +6811,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧖",
+    "hexcode": "1f9d6",
+    "p_x": 1837,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("person in steamy room") + `",
@@ -5715,6 +6828,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧖‍♂️",
+    "hexcode": "1f9d6-200d-2642-fe0f",
+    "p_x": 1891,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("man in steam room") + `",
@@ -5730,6 +6846,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧖‍♀️",
+    "hexcode": "1f9d6-200d-2640-fe0f",
+    "p_x": 1945,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("sauna") + `",
@@ -5745,6 +6864,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧗",
+    "hexcode": "1f9d7",
+    "p_x": 1999,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("climber") + `",
@@ -5758,6 +6880,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧗‍♂️",
+    "hexcode": "1f9d7-200d-2642-fe0f",
+    "p_x": 2053,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("climber") + `",
@@ -5771,6 +6896,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧗‍♀️",
+    "hexcode": "1f9d7-200d-2640-fe0f",
+    "p_x": 2107,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("climber") + `",
@@ -5784,6 +6912,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤺",
+    "hexcode": "1f93a",
+    "p_x": 2161,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("fencer") + `",
@@ -5799,6 +6930,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏇",
+    "hexcode": "1f3c7",
+    "p_x": 2215,
+    "p_y": 433,
     "emoticons": [],
     "keywords": [
         "` + _t("horse") + `",
@@ -5814,6 +6948,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "⛷️",
+    "hexcode": "26f7",
+    "p_x": 1,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("ski") + `",
@@ -5828,6 +6965,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏂",
+    "hexcode": "1f3c2",
+    "p_x": 55,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("ski") + `",
@@ -5843,6 +6983,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏌️",
+    "hexcode": "1f3cc",
+    "p_x": 109,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -5858,6 +7001,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏌️‍♂️",
+    "hexcode": "1f3cc-fe0f-200d-2642-fe0f",
+    "p_x": 163,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [],
     "name": "` + _t("man golfing") + `",
@@ -5868,6 +7014,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏌️‍♀️",
+    "hexcode": "1f3cc-fe0f-200d-2640-fe0f",
+    "p_x": 217,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [],
     "name": "` + _t("woman golfing") + `",
@@ -5878,6 +7027,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏄",
+    "hexcode": "1f3c4",
+    "p_x": 271,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("person surfing") + `",
@@ -5892,6 +7044,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏄‍♂️",
+    "hexcode": "1f3c4-200d-2642-fe0f",
+    "p_x": 325,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("man") + `",
@@ -5906,6 +7061,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏄‍♀️",
+    "hexcode": "1f3c4-200d-2640-fe0f",
+    "p_x": 379,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("surfer") + `",
@@ -5920,6 +7078,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚣",
+    "hexcode": "1f6a3",
+    "p_x": 433,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("boat") + `",
@@ -5935,6 +7096,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚣‍♂️",
+    "hexcode": "1f6a3-200d-2642-fe0f",
+    "p_x": 487,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("boat") + `",
@@ -5950,6 +7114,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚣‍♀️",
+    "hexcode": "1f6a3-200d-2640-fe0f",
+    "p_x": 541,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("boat") + `",
@@ -5965,6 +7132,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏊",
+    "hexcode": "1f3ca",
+    "p_x": 595,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("person swimming") + `",
@@ -5979,6 +7149,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏊‍♂️",
+    "hexcode": "1f3ca-200d-2642-fe0f",
+    "p_x": 649,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("man") + `",
@@ -5994,6 +7167,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏊‍♀️",
+    "hexcode": "1f3ca-200d-2640-fe0f",
+    "p_x": 703,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("swim") + `",
@@ -6009,6 +7185,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "⛹️",
+    "hexcode": "26f9",
+    "p_x": 757,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -6022,6 +7201,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "⛹️‍♂️",
+    "hexcode": "26f9-fe0f-200d-2642-fe0f",
+    "p_x": 811,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [],
     "name": "` + _t("man bouncing ball") + `",
@@ -6032,6 +7214,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "⛹️‍♀️",
+    "hexcode": "26f9-fe0f-200d-2640-fe0f",
+    "p_x": 865,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [],
     "name": "` + _t("woman bouncing ball") + `",
@@ -6042,6 +7227,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏋️",
+    "hexcode": "1f3cb",
+    "p_x": 919,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("lifter") + `",
@@ -6057,6 +7245,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏋️‍♂️",
+    "hexcode": "1f3cb-fe0f-200d-2642-fe0f",
+    "p_x": 973,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [],
     "name": "` + _t("man lifting weights") + `",
@@ -6067,6 +7258,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🏋️‍♀️",
+    "hexcode": "1f3cb-fe0f-200d-2640-fe0f",
+    "p_x": 1027,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [],
     "name": "` + _t("woman lifting weights") + `",
@@ -6077,6 +7271,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚴",
+    "hexcode": "1f6b4",
+    "p_x": 1081,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("bicycle") + `",
@@ -6093,6 +7290,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚴‍♂️",
+    "hexcode": "1f6b4-200d-2642-fe0f",
+    "p_x": 1135,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("bicycle") + `",
@@ -6109,6 +7309,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚴‍♀️",
+    "hexcode": "1f6b4-200d-2640-fe0f",
+    "p_x": 1189,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("bicycle") + `",
@@ -6125,6 +7328,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚵",
+    "hexcode": "1f6b5",
+    "p_x": 1243,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("bicycle") + `",
@@ -6142,6 +7348,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚵‍♂️",
+    "hexcode": "1f6b5-200d-2642-fe0f",
+    "p_x": 1297,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("bicycle") + `",
@@ -6159,6 +7368,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🚵‍♀️",
+    "hexcode": "1f6b5-200d-2640-fe0f",
+    "p_x": 1351,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("bicycle") + `",
@@ -6176,6 +7388,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤸",
+    "hexcode": "1f938",
+    "p_x": 1405,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("cartwheel") + `",
@@ -6190,6 +7405,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤸‍♂️",
+    "hexcode": "1f938-200d-2642-fe0f",
+    "p_x": 1459,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("cartwheel") + `",
@@ -6205,6 +7423,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤸‍♀️",
+    "hexcode": "1f938-200d-2640-fe0f",
+    "p_x": 1513,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("cartwheel") + `",
@@ -6220,6 +7441,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤼",
+    "hexcode": "1f93c",
+    "p_x": 1567,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("people wrestling") + `",
@@ -6234,6 +7458,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤼‍♂️",
+    "hexcode": "1f93c-200d-2642-fe0f",
+    "p_x": 1621,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("men") + `",
@@ -6248,6 +7475,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤼‍♀️",
+    "hexcode": "1f93c-200d-2640-fe0f",
+    "p_x": 1675,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("women") + `",
@@ -6262,6 +7492,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤽",
+    "hexcode": "1f93d",
+    "p_x": 1729,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("person playing water polo") + `",
@@ -6276,6 +7509,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤽‍♂️",
+    "hexcode": "1f93d-200d-2642-fe0f",
+    "p_x": 1783,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("man") + `",
@@ -6290,6 +7526,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤽‍♀️",
+    "hexcode": "1f93d-200d-2640-fe0f",
+    "p_x": 1837,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("water polo") + `",
@@ -6304,6 +7543,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤾",
+    "hexcode": "1f93e",
+    "p_x": 1891,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -6318,6 +7560,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤾‍♂️",
+    "hexcode": "1f93e-200d-2642-fe0f",
+    "p_x": 1945,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("handball") + `",
@@ -6332,6 +7577,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤾‍♀️",
+    "hexcode": "1f93e-200d-2640-fe0f",
+    "p_x": 1999,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("handball") + `",
@@ -6346,6 +7594,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤹",
+    "hexcode": "1f939",
+    "p_x": 2053,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("balance") + `",
@@ -6363,6 +7614,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤹‍♂️",
+    "hexcode": "1f939-200d-2642-fe0f",
+    "p_x": 2107,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("juggling") + `",
@@ -6378,6 +7632,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🤹‍♀️",
+    "hexcode": "1f939-200d-2640-fe0f",
+    "p_x": 2161,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("juggling") + `",
@@ -6393,6 +7650,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧘",
+    "hexcode": "1f9d8",
+    "p_x": 2215,
+    "p_y": 487,
     "emoticons": [],
     "keywords": [
         "` + _t("meditation") + `",
@@ -6407,6 +7667,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧘‍♂️",
+    "hexcode": "1f9d8-200d-2642-fe0f",
+    "p_x": 1,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("man in lotus position") + `",
@@ -6421,6 +7684,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧘‍♀️",
+    "hexcode": "1f9d8-200d-2640-fe0f",
+    "p_x": 55,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("meditation") + `",
@@ -6435,6 +7701,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🛀",
+    "hexcode": "1f6c0",
+    "p_x": 109,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("bath") + `",
@@ -6450,6 +7719,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🛌",
+    "hexcode": "1f6cc",
+    "p_x": 163,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("hotel") + `",
@@ -6466,6 +7738,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🧑‍🤝‍🧑",
+    "hexcode": "1f9d1-200d-1f91d-200d-1f9d1",
+    "p_x": 217,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6483,6 +7758,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👭",
+    "hexcode": "1f46d",
+    "p_x": 271,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6500,6 +7778,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👫",
+    "hexcode": "1f46b",
+    "p_x": 325,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6519,6 +7800,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👬",
+    "hexcode": "1f46c",
+    "p_x": 379,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6539,6 +7823,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💏",
+    "hexcode": "1f48f",
+    "p_x": 433,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6552,6 +7839,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍❤️‍💋‍👨",
+    "hexcode": "1f469-200d-2764-fe0f-200d-1f48b-200d-1f468",
+    "p_x": 487,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6567,6 +7857,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍❤️‍💋‍👨",
+    "hexcode": "1f468-200d-2764-fe0f-200d-1f48b-200d-1f468",
+    "p_x": 541,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6581,6 +7874,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍❤️‍💋‍👩",
+    "hexcode": "1f469-200d-2764-fe0f-200d-1f48b-200d-1f469",
+    "p_x": 595,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6595,6 +7891,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "💑",
+    "hexcode": "1f491",
+    "p_x": 649,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6609,6 +7908,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍❤️‍👨",
+    "hexcode": "1f469-200d-2764-fe0f-200d-1f468",
+    "p_x": 703,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6625,6 +7927,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍❤️‍👨",
+    "hexcode": "1f468-200d-2764-fe0f-200d-1f468",
+    "p_x": 757,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6640,6 +7945,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍❤️‍👩",
+    "hexcode": "1f469-200d-2764-fe0f-200d-1f469",
+    "p_x": 811,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("couple") + `",
@@ -6655,6 +7963,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👪",
+    "hexcode": "1f46a",
+    "p_x": 865,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `"
@@ -6667,6 +7978,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👩‍👦",
+    "hexcode": "1f468-200d-1f469-200d-1f466",
+    "p_x": 919,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6682,6 +7996,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👩‍👧",
+    "hexcode": "1f468-200d-1f469-200d-1f467",
+    "p_x": 973,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `",
@@ -6697,6 +8014,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👩‍👧‍👦",
+    "hexcode": "1f468-200d-1f469-200d-1f467-200d-1f466",
+    "p_x": 1027,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6713,6 +8033,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👩‍👦‍👦",
+    "hexcode": "1f468-200d-1f469-200d-1f466-200d-1f466",
+    "p_x": 1081,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6728,6 +8051,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👩‍👧‍👧",
+    "hexcode": "1f468-200d-1f469-200d-1f467-200d-1f467",
+    "p_x": 1135,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `",
@@ -6743,6 +8069,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👨‍👦",
+    "hexcode": "1f468-200d-1f468-200d-1f466",
+    "p_x": 1189,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6757,6 +8086,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👨‍👧",
+    "hexcode": "1f468-200d-1f468-200d-1f467",
+    "p_x": 1243,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `",
@@ -6771,6 +8103,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👨‍👧‍👦",
+    "hexcode": "1f468-200d-1f468-200d-1f467-200d-1f466",
+    "p_x": 1297,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6786,6 +8121,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👨‍👦‍👦",
+    "hexcode": "1f468-200d-1f468-200d-1f466-200d-1f466",
+    "p_x": 1351,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6800,6 +8138,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👨‍👧‍👧",
+    "hexcode": "1f468-200d-1f468-200d-1f467-200d-1f467",
+    "p_x": 1405,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `",
@@ -6814,6 +8155,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍👩‍👦",
+    "hexcode": "1f469-200d-1f469-200d-1f466",
+    "p_x": 1459,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6828,6 +8172,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍👩‍👧",
+    "hexcode": "1f469-200d-1f469-200d-1f467",
+    "p_x": 1513,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `",
@@ -6842,6 +8189,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍👩‍👧‍👦",
+    "hexcode": "1f469-200d-1f469-200d-1f467-200d-1f466",
+    "p_x": 1567,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6857,6 +8207,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍👩‍👦‍👦",
+    "hexcode": "1f469-200d-1f469-200d-1f466-200d-1f466",
+    "p_x": 1621,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6871,6 +8224,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍👩‍👧‍👧",
+    "hexcode": "1f469-200d-1f469-200d-1f467-200d-1f467",
+    "p_x": 1675,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `",
@@ -6885,6 +8241,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👦",
+    "hexcode": "1f468-200d-1f466",
+    "p_x": 1729,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6899,6 +8258,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👦‍👦",
+    "hexcode": "1f468-200d-1f466-200d-1f466",
+    "p_x": 1783,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6913,6 +8275,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👧",
+    "hexcode": "1f468-200d-1f467",
+    "p_x": 1837,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `",
@@ -6927,6 +8292,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👧‍👦",
+    "hexcode": "1f468-200d-1f467-200d-1f466",
+    "p_x": 1891,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6942,6 +8310,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👨‍👧‍👧",
+    "hexcode": "1f468-200d-1f467-200d-1f467",
+    "p_x": 1945,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `",
@@ -6956,6 +8327,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍👦",
+    "hexcode": "1f469-200d-1f466",
+    "p_x": 1999,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6970,6 +8344,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍👦‍👦",
+    "hexcode": "1f469-200d-1f466-200d-1f466",
+    "p_x": 2053,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -6984,6 +8361,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍👧",
+    "hexcode": "1f469-200d-1f467",
+    "p_x": 2107,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `",
@@ -6998,6 +8378,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍👧‍👦",
+    "hexcode": "1f469-200d-1f467-200d-1f466",
+    "p_x": 2161,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("boy") + `",
@@ -7013,6 +8396,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👩‍👧‍👧",
+    "hexcode": "1f469-200d-1f467-200d-1f467",
+    "p_x": 2215,
+    "p_y": 541,
     "emoticons": [],
     "keywords": [
         "` + _t("family") + `",
@@ -7027,6 +8413,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "🗣️",
+    "hexcode": "1f5e3",
+    "p_x": 1,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7043,6 +8432,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👤",
+    "hexcode": "1f464",
+    "p_x": 55,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("bust") + `",
@@ -7057,6 +8449,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👥",
+    "hexcode": "1f465",
+    "p_x": 109,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("bust") + `",
@@ -7071,6 +8466,9 @@ const _getEmojisData2 = () => `{
 {
     "category": "People & Body",
     "codepoints": "👣",
+    "hexcode": "1f463",
+    "p_x": 163,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -7087,6 +8485,9 @@ const _getEmojisData2 = () => `{
 const _getEmojisData3 = () => `{
     "category": "Animals & Nature",
     "codepoints": "🐵",
+    "hexcode": "1f435",
+    "p_x": 217,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7100,6 +8501,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐒",
+    "hexcode": "1f412",
+    "p_x": 271,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("monkey") + `"
@@ -7112,6 +8516,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦍",
+    "hexcode": "1f98d",
+    "p_x": 325,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("gorilla") + `"
@@ -7124,6 +8531,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦧",
+    "hexcode": "1f9a7",
+    "p_x": 379,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("ape") + `",
@@ -7137,6 +8547,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐶",
+    "hexcode": "1f436",
+    "p_x": 433,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("dog") + `",
@@ -7151,6 +8564,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐕",
+    "hexcode": "1f415",
+    "p_x": 487,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("dog") + `",
@@ -7164,6 +8580,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦮",
+    "hexcode": "1f9ae",
+    "p_x": 541,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -7179,6 +8598,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐕‍🦺",
+    "hexcode": "1f415-200d-1f9ba",
+    "p_x": 595,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -7194,6 +8616,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐩",
+    "hexcode": "1f429",
+    "p_x": 649,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("dog") + `",
@@ -7207,6 +8632,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐺",
+    "hexcode": "1f43a",
+    "p_x": 703,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7220,6 +8648,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦊",
+    "hexcode": "1f98a",
+    "p_x": 757,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7233,6 +8664,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦝",
+    "hexcode": "1f99d",
+    "p_x": 811,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("curious") + `",
@@ -7247,6 +8681,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐱",
+    "hexcode": "1f431",
+    "p_x": 865,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("cat") + `",
@@ -7261,6 +8698,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐈",
+    "hexcode": "1f408",
+    "p_x": 919,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("cat") + `",
@@ -7274,6 +8714,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦁",
+    "hexcode": "1f981",
+    "p_x": 973,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7289,6 +8732,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐯",
+    "hexcode": "1f42f",
+    "p_x": 1027,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7302,6 +8748,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐅",
+    "hexcode": "1f405",
+    "p_x": 1081,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("tiger") + `"
@@ -7314,6 +8763,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐆",
+    "hexcode": "1f406",
+    "p_x": 1135,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("leopard") + `"
@@ -7326,6 +8778,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐴",
+    "hexcode": "1f434",
+    "p_x": 1189,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7339,6 +8794,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐎",
+    "hexcode": "1f40e",
+    "p_x": 1243,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("equestrian") + `",
@@ -7354,6 +8812,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦄",
+    "hexcode": "1f984",
+    "p_x": 1297,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7367,6 +8828,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦓",
+    "hexcode": "1f993",
+    "p_x": 1351,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("stripe") + `",
@@ -7380,6 +8844,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦌",
+    "hexcode": "1f98c",
+    "p_x": 1405,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("deer") + `",
@@ -7393,6 +8860,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐮",
+    "hexcode": "1f42e",
+    "p_x": 1459,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("cow") + `",
@@ -7406,6 +8876,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐂",
+    "hexcode": "1f402",
+    "p_x": 1513,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("bull") + `",
@@ -7421,6 +8894,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐃",
+    "hexcode": "1f403",
+    "p_x": 1567,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("buffalo") + `",
@@ -7434,6 +8910,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐄",
+    "hexcode": "1f404",
+    "p_x": 1621,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("cow") + `"
@@ -7446,6 +8925,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐷",
+    "hexcode": "1f437",
+    "p_x": 1675,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7459,6 +8941,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐖",
+    "hexcode": "1f416",
+    "p_x": 1729,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("pig") + `",
@@ -7472,6 +8957,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐗",
+    "hexcode": "1f417",
+    "p_x": 1783,
+    "p_y": 595,
     "emoticons": [
         ":boar"
     ],
@@ -7487,6 +8975,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐽",
+    "hexcode": "1f43d",
+    "p_x": 1837,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7501,6 +8992,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐏",
+    "hexcode": "1f40f",
+    "p_x": 1891,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("Aries") + `",
@@ -7517,6 +9011,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐑",
+    "hexcode": "1f411",
+    "p_x": 1945,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("ewe") + `",
@@ -7531,6 +9028,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐐",
+    "hexcode": "1f410",
+    "p_x": 1999,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("Capricorn") + `",
@@ -7545,6 +9045,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐪",
+    "hexcode": "1f42a",
+    "p_x": 2053,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("camel") + `",
@@ -7559,6 +9062,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐫",
+    "hexcode": "1f42b",
+    "p_x": 2107,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("bactrian") + `",
@@ -7575,6 +9081,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦙",
+    "hexcode": "1f999",
+    "p_x": 2161,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("alpaca") + `",
@@ -7591,6 +9100,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦒",
+    "hexcode": "1f992",
+    "p_x": 2215,
+    "p_y": 595,
     "emoticons": [],
     "keywords": [
         "` + _t("giraffe") + `",
@@ -7604,6 +9116,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐘",
+    "hexcode": "1f418",
+    "p_x": 1,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("elephant") + `"
@@ -7616,6 +9131,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦏",
+    "hexcode": "1f98f",
+    "p_x": 55,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("rhino") + `",
@@ -7629,6 +9147,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦛",
+    "hexcode": "1f99b",
+    "p_x": 109,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("hippo") + `",
@@ -7642,6 +9163,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐭",
+    "hexcode": "1f42d",
+    "p_x": 163,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7656,6 +9180,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐁",
+    "hexcode": "1f401",
+    "p_x": 217,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("mouse") + `",
@@ -7670,6 +9197,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐀",
+    "hexcode": "1f400",
+    "p_x": 271,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("pet") + `",
@@ -7684,6 +9214,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐹",
+    "hexcode": "1f439",
+    "p_x": 325,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7698,6 +9231,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐰",
+    "hexcode": "1f430",
+    "p_x": 379,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bunny") + `",
@@ -7713,6 +9249,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐇",
+    "hexcode": "1f407",
+    "p_x": 433,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bunny") + `",
@@ -7727,6 +9266,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐿️",
+    "hexcode": "1f43f",
+    "p_x": 487,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("chipmunk") + `",
@@ -7740,6 +9282,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦔",
+    "hexcode": "1f994",
+    "p_x": 541,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("hedgehog") + `",
@@ -7753,6 +9298,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦇",
+    "hexcode": "1f987",
+    "p_x": 595,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bat") + `",
@@ -7766,6 +9314,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐻",
+    "hexcode": "1f43b",
+    "p_x": 649,
+    "p_y": 649,
     "emoticons": [
         ":bear"
     ],
@@ -7781,6 +9332,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐨",
+    "hexcode": "1f428",
+    "p_x": 703,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("koala") + `",
@@ -7795,6 +9349,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐼",
+    "hexcode": "1f43c",
+    "p_x": 757,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -7808,6 +9365,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦥",
+    "hexcode": "1f9a5",
+    "p_x": 811,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("lazy") + `",
@@ -7822,6 +9382,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦦",
+    "hexcode": "1f9a6",
+    "p_x": 865,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("fishing") + `",
@@ -7836,6 +9399,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦨",
+    "hexcode": "1f9a8",
+    "p_x": 919,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("skunk") + `",
@@ -7849,6 +9415,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦘",
+    "hexcode": "1f998",
+    "p_x": 973,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("Australia") + `",
@@ -7865,6 +9434,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦡",
+    "hexcode": "1f9a1",
+    "p_x": 1027,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("badger") + `",
@@ -7879,6 +9451,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐾",
+    "hexcode": "1f43e",
+    "p_x": 1081,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("feet") + `",
@@ -7894,6 +9469,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦃",
+    "hexcode": "1f983",
+    "p_x": 1135,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird") + `",
@@ -7908,6 +9486,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐔",
+    "hexcode": "1f414",
+    "p_x": 1189,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird") + `",
@@ -7922,6 +9503,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐓",
+    "hexcode": "1f413",
+    "p_x": 1243,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird") + `",
@@ -7935,6 +9519,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐣",
+    "hexcode": "1f423",
+    "p_x": 1297,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("baby") + `",
@@ -7950,6 +9537,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐤",
+    "hexcode": "1f424",
+    "p_x": 1351,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("baby") + `",
@@ -7964,6 +9554,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐥",
+    "hexcode": "1f425",
+    "p_x": 1405,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("baby") + `",
@@ -7979,6 +9572,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐦",
+    "hexcode": "1f426",
+    "p_x": 1459,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird") + `"
@@ -7991,6 +9587,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐧",
+    "hexcode": "1f427",
+    "p_x": 1513,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird") + `",
@@ -8004,6 +9603,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🕊️",
+    "hexcode": "1f54a",
+    "p_x": 1567,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird") + `",
@@ -8019,6 +9621,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦅",
+    "hexcode": "1f985",
+    "p_x": 1621,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird of prey") + `",
@@ -8033,6 +9638,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦆",
+    "hexcode": "1f986",
+    "p_x": 1675,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird") + `",
@@ -8046,6 +9654,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦢",
+    "hexcode": "1f9a2",
+    "p_x": 1729,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird") + `",
@@ -8061,6 +9672,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦉",
+    "hexcode": "1f989",
+    "p_x": 1783,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird of prey") + `",
@@ -8076,6 +9690,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦩",
+    "hexcode": "1f9a9",
+    "p_x": 1837,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("flamboyant") + `",
@@ -8090,6 +9707,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦚",
+    "hexcode": "1f99a",
+    "p_x": 1891,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird") + `",
@@ -8106,6 +9726,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦜",
+    "hexcode": "1f99c",
+    "p_x": 1945,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bird") + `",
@@ -8121,6 +9744,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐸",
+    "hexcode": "1f438",
+    "p_x": 1999,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -8134,6 +9760,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐊",
+    "hexcode": "1f40a",
+    "p_x": 2053,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("crocodile") + `"
@@ -8146,6 +9775,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐢",
+    "hexcode": "1f422",
+    "p_x": 2107,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("terrapin") + `",
@@ -8160,6 +9792,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦎",
+    "hexcode": "1f98e",
+    "p_x": 2161,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("lizard") + `",
@@ -8173,6 +9808,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐍",
+    "hexcode": "1f40d",
+    "p_x": 2215,
+    "p_y": 649,
     "emoticons": [],
     "keywords": [
         "` + _t("bearer") + `",
@@ -8189,6 +9827,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐲",
+    "hexcode": "1f432",
+    "p_x": 1,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("dragon") + `",
@@ -8203,6 +9844,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐉",
+    "hexcode": "1f409",
+    "p_x": 55,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("dragon") + `",
@@ -8216,6 +9860,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦕",
+    "hexcode": "1f995",
+    "p_x": 109,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("brachiosaurus") + `",
@@ -8232,6 +9879,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦖",
+    "hexcode": "1f996",
+    "p_x": 163,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("T-Rex") + `",
@@ -8246,6 +9896,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐳",
+    "hexcode": "1f433",
+    "p_x": 217,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -8260,6 +9913,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐋",
+    "hexcode": "1f40b",
+    "p_x": 271,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("whale") + `"
@@ -8272,6 +9928,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐬",
+    "hexcode": "1f42c",
+    "p_x": 325,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("dolphin") + `",
@@ -8286,6 +9945,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐟",
+    "hexcode": "1f41f",
+    "p_x": 379,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("fish") + `",
@@ -8300,6 +9962,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐠",
+    "hexcode": "1f420",
+    "p_x": 433,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("fish") + `",
@@ -8314,6 +9979,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐡",
+    "hexcode": "1f421",
+    "p_x": 487,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("blowfish") + `",
@@ -8327,6 +9995,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦈",
+    "hexcode": "1f988",
+    "p_x": 541,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("fish") + `",
@@ -8340,6 +10011,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐙",
+    "hexcode": "1f419",
+    "p_x": 595,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("octopus") + `"
@@ -8352,6 +10026,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐚",
+    "hexcode": "1f41a",
+    "p_x": 649,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("shell") + `",
@@ -8365,6 +10042,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐌",
+    "hexcode": "1f40c",
+    "p_x": 703,
+    "p_y": 703,
     "emoticons": [
         ":snail"
     ],
@@ -8380,6 +10060,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦋",
+    "hexcode": "1f98b",
+    "p_x": 757,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("butterfly") + `",
@@ -8395,6 +10078,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐛",
+    "hexcode": "1f41b",
+    "p_x": 811,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("bug") + `",
@@ -8410,6 +10096,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐜",
+    "hexcode": "1f41c",
+    "p_x": 865,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("ant") + `",
@@ -8423,6 +10112,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐝",
+    "hexcode": "1f41d",
+    "p_x": 919,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("bee") + `",
@@ -8437,6 +10129,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🐞",
+    "hexcode": "1f41e",
+    "p_x": 973,
+    "p_y": 703,
     "emoticons": [
         ":bug"
     ],
@@ -8455,6 +10150,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦗",
+    "hexcode": "1f997",
+    "p_x": 1027,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("cricket") + `",
@@ -8468,6 +10166,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🕷️",
+    "hexcode": "1f577",
+    "p_x": 1081,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("arachnid") + `",
@@ -8482,6 +10183,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🕸️",
+    "hexcode": "1f578",
+    "p_x": 1135,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("spider") + `",
@@ -8495,6 +10199,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦂",
+    "hexcode": "1f982",
+    "p_x": 1189,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("scorpio") + `",
@@ -8510,6 +10217,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦟",
+    "hexcode": "1f99f",
+    "p_x": 1243,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("dengue") + `",
@@ -8530,6 +10240,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🦠",
+    "hexcode": "1f9a0",
+    "p_x": 1297,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("amoeba") + `",
@@ -8545,6 +10258,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "💐",
+    "hexcode": "1f490",
+    "p_x": 1351,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("bouquet") + `",
@@ -8558,6 +10274,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌸",
+    "hexcode": "1f338",
+    "p_x": 1405,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("blossom") + `",
@@ -8572,6 +10291,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "💮",
+    "hexcode": "1f4ae",
+    "p_x": 1459,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("flower") + `",
@@ -8585,6 +10307,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🏵️",
+    "hexcode": "1f3f5",
+    "p_x": 1513,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("plant") + `",
@@ -8598,6 +10323,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌹",
+    "hexcode": "1f339",
+    "p_x": 1567,
+    "p_y": 703,
     "emoticons": [
         ":sunflower"
     ],
@@ -8613,6 +10341,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🥀",
+    "hexcode": "1f940",
+    "p_x": 1621,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("flower") + `",
@@ -8626,6 +10357,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌺",
+    "hexcode": "1f33a",
+    "p_x": 1675,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("flower") + `",
@@ -8639,6 +10373,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌻",
+    "hexcode": "1f33b",
+    "p_x": 1729,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("flower") + `",
@@ -8653,6 +10390,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌼",
+    "hexcode": "1f33c",
+    "p_x": 1783,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("blossom") + `",
@@ -8666,6 +10406,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌷",
+    "hexcode": "1f337",
+    "p_x": 1837,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("flower") + `",
@@ -8679,6 +10422,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌱",
+    "hexcode": "1f331",
+    "p_x": 1891,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("seedling") + `",
@@ -8692,6 +10438,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌲",
+    "hexcode": "1f332",
+    "p_x": 1945,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("evergreen tree") + `",
@@ -8705,6 +10454,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌳",
+    "hexcode": "1f333",
+    "p_x": 1999,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("deciduous") + `",
@@ -8719,6 +10471,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌴",
+    "hexcode": "1f334",
+    "p_x": 2053,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("palm") + `",
@@ -8732,6 +10487,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌵",
+    "hexcode": "1f335",
+    "p_x": 2107,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("cactus") + `",
@@ -8745,6 +10503,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌾",
+    "hexcode": "1f33e",
+    "p_x": 2161,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("ear") + `",
@@ -8761,6 +10522,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🌿",
+    "hexcode": "1f33f",
+    "p_x": 2215,
+    "p_y": 703,
     "emoticons": [],
     "keywords": [
         "` + _t("herb") + `",
@@ -8774,6 +10538,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "☘️",
+    "hexcode": "2618",
+    "p_x": 1,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("plant") + `",
@@ -8787,6 +10554,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🍀",
+    "hexcode": "1f340",
+    "p_x": 55,
+    "p_y": 757,
     "emoticons": [
         ":clover"
     ],
@@ -8805,6 +10575,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🍁",
+    "hexcode": "1f341",
+    "p_x": 109,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("falling") + `",
@@ -8819,6 +10592,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🍂",
+    "hexcode": "1f342",
+    "p_x": 163,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("fallen leaf") + `",
@@ -8833,6 +10609,9 @@ const _getEmojisData3 = () => `{
 {
     "category": "Animals & Nature",
     "codepoints": "🍃",
+    "hexcode": "1f343",
+    "p_x": 217,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("blow") + `",
@@ -8850,6 +10629,9 @@ const _getEmojisData3 = () => `{
 const _getEmojisData4 = () => `{
     "category": "Food & Drink",
     "codepoints": "🍇",
+    "hexcode": "1f347",
+    "p_x": 271,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("fruit") + `",
@@ -8864,6 +10646,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍈",
+    "hexcode": "1f348",
+    "p_x": 325,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("fruit") + `",
@@ -8877,6 +10662,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍉",
+    "hexcode": "1f349",
+    "p_x": 379,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("fruit") + `",
@@ -8890,6 +10678,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍊",
+    "hexcode": "1f34a",
+    "p_x": 433,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("fruit") + `",
@@ -8905,6 +10696,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍋",
+    "hexcode": "1f34b",
+    "p_x": 487,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("citrus") + `",
@@ -8919,6 +10713,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍌",
+    "hexcode": "1f34c",
+    "p_x": 541,
+    "p_y": 757,
     "emoticons": [
         ":banana"
     ],
@@ -8934,6 +10731,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍍",
+    "hexcode": "1f34d",
+    "p_x": 595,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("fruit") + `",
@@ -8947,6 +10747,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥭",
+    "hexcode": "1f96d",
+    "p_x": 649,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("fruit") + `",
@@ -8961,6 +10764,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍎",
+    "hexcode": "1f34e",
+    "p_x": 703,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("apple") + `",
@@ -8975,6 +10781,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍏",
+    "hexcode": "1f34f",
+    "p_x": 757,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("apple") + `",
@@ -8989,6 +10798,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍐",
+    "hexcode": "1f350",
+    "p_x": 811,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("fruit") + `",
@@ -9002,6 +10814,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍑",
+    "hexcode": "1f351",
+    "p_x": 865,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("fruit") + `",
@@ -9015,6 +10830,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍒",
+    "hexcode": "1f352",
+    "p_x": 919,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("berries") + `",
@@ -9031,6 +10849,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍓",
+    "hexcode": "1f353",
+    "p_x": 973,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("berry") + `",
@@ -9045,6 +10866,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥝",
+    "hexcode": "1f95d",
+    "p_x": 1027,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("food") + `",
@@ -9060,6 +10884,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍅",
+    "hexcode": "1f345",
+    "p_x": 1081,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("fruit") + `",
@@ -9074,6 +10901,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥥",
+    "hexcode": "1f965",
+    "p_x": 1135,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("coconut") + `",
@@ -9088,6 +10918,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥑",
+    "hexcode": "1f951",
+    "p_x": 1189,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("avocado") + `",
@@ -9102,6 +10935,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍆",
+    "hexcode": "1f346",
+    "p_x": 1243,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("aubergine") + `",
@@ -9116,6 +10952,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥔",
+    "hexcode": "1f954",
+    "p_x": 1297,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("food") + `",
@@ -9130,6 +10969,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥕",
+    "hexcode": "1f955",
+    "p_x": 1351,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("carrot") + `",
@@ -9144,6 +10986,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🌽",
+    "hexcode": "1f33d",
+    "p_x": 1405,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("corn") + `",
@@ -9162,6 +11007,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🌶️",
+    "hexcode": "1f336",
+    "p_x": 1459,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("chilli") + `",
@@ -9177,6 +11025,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥒",
+    "hexcode": "1f952",
+    "p_x": 1513,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("cucumber") + `",
@@ -9192,6 +11043,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥬",
+    "hexcode": "1f96c",
+    "p_x": 1567,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("bok choy") + `",
@@ -9209,6 +11063,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥦",
+    "hexcode": "1f966",
+    "p_x": 1621,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("broccoli") + `",
@@ -9222,6 +11079,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧄",
+    "hexcode": "1f9c4",
+    "p_x": 1675,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("flavouring") + `",
@@ -9236,6 +11096,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧅",
+    "hexcode": "1f9c5",
+    "p_x": 1729,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("flavouring") + `",
@@ -9250,6 +11113,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍄",
+    "hexcode": "1f344",
+    "p_x": 1783,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("mushroom") + `",
@@ -9263,6 +11129,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥜",
+    "hexcode": "1f95c",
+    "p_x": 1837,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("food") + `",
@@ -9280,6 +11149,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🌰",
+    "hexcode": "1f330",
+    "p_x": 1891,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("chestnut") + `",
@@ -9294,6 +11166,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍞",
+    "hexcode": "1f35e",
+    "p_x": 1945,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("bread") + `",
@@ -9307,6 +11182,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥐",
+    "hexcode": "1f950",
+    "p_x": 1999,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("bread") + `",
@@ -9326,6 +11204,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥖",
+    "hexcode": "1f956",
+    "p_x": 2053,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("baguette") + `",
@@ -9343,6 +11224,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥨",
+    "hexcode": "1f968",
+    "p_x": 2107,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("pretzel") + `",
@@ -9356,6 +11240,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥯",
+    "hexcode": "1f96f",
+    "p_x": 2161,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("bagel") + `",
@@ -9371,6 +11258,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥞",
+    "hexcode": "1f95e",
+    "p_x": 2215,
+    "p_y": 757,
     "emoticons": [],
     "keywords": [
         "` + _t("breakfast") + `",
@@ -9388,6 +11278,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧇",
+    "hexcode": "1f9c7",
+    "p_x": 1,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("waffle") + `",
@@ -9406,6 +11299,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧀",
+    "hexcode": "1f9c0",
+    "p_x": 55,
+    "p_y": 811,
     "emoticons": [
         ":cheese"
     ],
@@ -9421,6 +11317,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍖",
+    "hexcode": "1f356",
+    "p_x": 109,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("bone") + `",
@@ -9435,6 +11334,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍗",
+    "hexcode": "1f357",
+    "p_x": 163,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("bone") + `",
@@ -9451,6 +11353,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥩",
+    "hexcode": "1f969",
+    "p_x": 217,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("chop") + `",
@@ -9469,6 +11374,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥓",
+    "hexcode": "1f953",
+    "p_x": 271,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("bacon") + `",
@@ -9484,6 +11392,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍔",
+    "hexcode": "1f354",
+    "p_x": 325,
+    "p_y": 811,
     "emoticons": [
         ":hamburger"
     ],
@@ -9500,6 +11411,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍟",
+    "hexcode": "1f35f",
+    "p_x": 379,
+    "p_y": 811,
     "emoticons": [
         ":fries"
     ],
@@ -9518,6 +11432,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍕",
+    "hexcode": "1f355",
+    "p_x": 433,
+    "p_y": 811,
     "emoticons": [
         ":pizza"
     ],
@@ -9534,6 +11451,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🌭",
+    "hexcode": "1f32d",
+    "p_x": 487,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("frankfurter") + `",
@@ -9549,6 +11469,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥪",
+    "hexcode": "1f96a",
+    "p_x": 541,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("bread") + `",
@@ -9562,6 +11485,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🌮",
+    "hexcode": "1f32e",
+    "p_x": 595,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("mexican") + `",
@@ -9576,6 +11502,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🌯",
+    "hexcode": "1f32f",
+    "p_x": 649,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("burrito") + `",
@@ -9591,6 +11520,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥙",
+    "hexcode": "1f959",
+    "p_x": 703,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("falafel") + `",
@@ -9610,6 +11542,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧆",
+    "hexcode": "1f9c6",
+    "p_x": 757,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("chickpea") + `",
@@ -9625,6 +11560,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥚",
+    "hexcode": "1f95a",
+    "p_x": 811,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("breakfast") + `",
@@ -9639,6 +11577,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍳",
+    "hexcode": "1f373",
+    "p_x": 865,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("breakfast") + `",
@@ -9655,6 +11596,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥘",
+    "hexcode": "1f958",
+    "p_x": 919,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("casserole") + `",
@@ -9672,6 +11616,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍲",
+    "hexcode": "1f372",
+    "p_x": 973,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("pot") + `",
@@ -9686,6 +11633,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥣",
+    "hexcode": "1f963",
+    "p_x": 1027,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("bowl with spoon") + `",
@@ -9701,6 +11651,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥗",
+    "hexcode": "1f957",
+    "p_x": 1081,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("food") + `",
@@ -9716,6 +11669,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍿",
+    "hexcode": "1f37f",
+    "p_x": 1135,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("popcorn") + `"
@@ -9728,6 +11684,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧈",
+    "hexcode": "1f9c8",
+    "p_x": 1189,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("butter") + `",
@@ -9741,6 +11700,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧂",
+    "hexcode": "1f9c2",
+    "p_x": 1243,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("condiment") + `",
@@ -9755,6 +11717,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥫",
+    "hexcode": "1f96b",
+    "p_x": 1297,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("can") + `",
@@ -9768,6 +11733,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍱",
+    "hexcode": "1f371",
+    "p_x": 1351,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("bento") + `",
@@ -9781,6 +11749,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍘",
+    "hexcode": "1f358",
+    "p_x": 1405,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("cracker") + `",
@@ -9794,6 +11765,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍙",
+    "hexcode": "1f359",
+    "p_x": 1459,
+    "p_y": 811,
     "emoticons": [
         ":rice_ball"
     ],
@@ -9810,6 +11784,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍚",
+    "hexcode": "1f35a",
+    "p_x": 1513,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("cooked") + `",
@@ -9823,6 +11800,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍛",
+    "hexcode": "1f35b",
+    "p_x": 1567,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("curry") + `",
@@ -9836,6 +11816,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍜",
+    "hexcode": "1f35c",
+    "p_x": 1621,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("bowl") + `",
@@ -9851,6 +11834,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍝",
+    "hexcode": "1f35d",
+    "p_x": 1675,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("pasta") + `",
@@ -9864,6 +11850,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍠",
+    "hexcode": "1f360",
+    "p_x": 1729,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("potato") + `",
@@ -9878,6 +11867,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍢",
+    "hexcode": "1f362",
+    "p_x": 1783,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("kebab") + `",
@@ -9894,6 +11886,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍣",
+    "hexcode": "1f363",
+    "p_x": 1837,
+    "p_y": 811,
     "emoticons": [
         ":sushi"
     ],
@@ -9908,6 +11903,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍤",
+    "hexcode": "1f364",
+    "p_x": 1891,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("battered") + `",
@@ -9924,6 +11922,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍥",
+    "hexcode": "1f365",
+    "p_x": 1945,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("cake") + `",
@@ -9941,6 +11942,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥮",
+    "hexcode": "1f96e",
+    "p_x": 1999,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("autumn") + `",
@@ -9956,6 +11960,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍡",
+    "hexcode": "1f361",
+    "p_x": 2053,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("dango") + `",
@@ -9973,6 +11980,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥟",
+    "hexcode": "1f95f",
+    "p_x": 2107,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("dumpling") + `",
@@ -9992,6 +12002,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥠",
+    "hexcode": "1f960",
+    "p_x": 2161,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("fortune cookie") + `",
@@ -10005,6 +12018,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥡",
+    "hexcode": "1f961",
+    "p_x": 2215,
+    "p_y": 811,
     "emoticons": [],
     "keywords": [
         "` + _t("takeaway container") + `",
@@ -10021,6 +12037,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🦀",
+    "hexcode": "1f980",
+    "p_x": 1,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("crab") + `",
@@ -10038,6 +12057,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🦞",
+    "hexcode": "1f99e",
+    "p_x": 55,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("bisque") + `",
@@ -10054,6 +12076,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🦐",
+    "hexcode": "1f990",
+    "p_x": 109,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("prawn") + `",
@@ -10071,6 +12096,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🦑",
+    "hexcode": "1f991",
+    "p_x": 163,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("decapod") + `",
@@ -10087,6 +12115,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🦪",
+    "hexcode": "1f9aa",
+    "p_x": 217,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("diving") + `",
@@ -10101,6 +12132,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍦",
+    "hexcode": "1f366",
+    "p_x": 271,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("cream") + `",
@@ -10120,6 +12154,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍧",
+    "hexcode": "1f367",
+    "p_x": 325,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("dessert") + `",
@@ -10136,6 +12173,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍨",
+    "hexcode": "1f368",
+    "p_x": 379,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("cream") + `",
@@ -10152,6 +12192,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍩",
+    "hexcode": "1f369",
+    "p_x": 433,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("breakfast") + `",
@@ -10168,6 +12211,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍪",
+    "hexcode": "1f36a",
+    "p_x": 487,
+    "p_y": 865,
     "emoticons": [
         ":cookie"
     ],
@@ -10185,6 +12231,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🎂",
+    "hexcode": "1f382",
+    "p_x": 541,
+    "p_y": 865,
     "emoticons": [
         ":cake"
     ],
@@ -10204,6 +12253,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍰",
+    "hexcode": "1f370",
+    "p_x": 595,
+    "p_y": 865,
     "emoticons": [
         ":cake_part"
     ],
@@ -10223,6 +12275,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧁",
+    "hexcode": "1f9c1",
+    "p_x": 649,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("bakery") + `",
@@ -10237,6 +12292,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥧",
+    "hexcode": "1f967",
+    "p_x": 703,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("filling") + `",
@@ -10251,6 +12309,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍫",
+    "hexcode": "1f36b",
+    "p_x": 757,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("bar") + `",
@@ -10266,6 +12327,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍬",
+    "hexcode": "1f36c",
+    "p_x": 811,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("candy") + `",
@@ -10281,6 +12345,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍭",
+    "hexcode": "1f36d",
+    "p_x": 865,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("candy") + `",
@@ -10296,6 +12363,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍮",
+    "hexcode": "1f36e",
+    "p_x": 919,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("baked custard") + `",
@@ -10312,6 +12382,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍯",
+    "hexcode": "1f36f",
+    "p_x": 973,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("honey") + `",
@@ -10327,6 +12400,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍼",
+    "hexcode": "1f37c",
+    "p_x": 1027,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("baby") + `",
@@ -10342,6 +12418,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥛",
+    "hexcode": "1f95b",
+    "p_x": 1081,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("drink") + `",
@@ -10357,6 +12436,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "☕",
+    "hexcode": "2615",
+    "p_x": 1135,
+    "p_y": 865,
     "emoticons": [
         ":coffee"
     ],
@@ -10377,6 +12459,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍵",
+    "hexcode": "1f375",
+    "p_x": 1189,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("beverage") + `",
@@ -10394,6 +12479,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍶",
+    "hexcode": "1f376",
+    "p_x": 1243,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("bar") + `",
@@ -10412,6 +12500,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍾",
+    "hexcode": "1f37e",
+    "p_x": 1297,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("bar") + `",
@@ -10429,6 +12520,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍷",
+    "hexcode": "1f377",
+    "p_x": 1351,
+    "p_y": 865,
     "emoticons": [
         ":wine"
     ],
@@ -10447,6 +12541,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍸",
+    "hexcode": "1f378",
+    "p_x": 1405,
+    "p_y": 865,
     "emoticons": [
         ":cocktail"
     ],
@@ -10464,6 +12561,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍹",
+    "hexcode": "1f379",
+    "p_x": 1459,
+    "p_y": 865,
     "emoticons": [
         ":tropical"
     ],
@@ -10480,6 +12580,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍺",
+    "hexcode": "1f37a",
+    "p_x": 1513,
+    "p_y": 865,
     "emoticons": [
         ":beer"
     ],
@@ -10497,6 +12600,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍻",
+    "hexcode": "1f37b",
+    "p_x": 1567,
+    "p_y": 865,
     "emoticons": [
         ":beers"
     ],
@@ -10516,6 +12622,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥂",
+    "hexcode": "1f942",
+    "p_x": 1621,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("celebrate") + `",
@@ -10532,6 +12641,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥃",
+    "hexcode": "1f943",
+    "p_x": 1675,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("glass") + `",
@@ -10548,6 +12660,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥤",
+    "hexcode": "1f964",
+    "p_x": 1729,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("cup with straw") + `",
@@ -10562,6 +12677,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧃",
+    "hexcode": "1f9c3",
+    "p_x": 1783,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("drink carton") + `",
@@ -10581,6 +12699,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧉",
+    "hexcode": "1f9c9",
+    "p_x": 1837,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("drink") + `",
@@ -10595,6 +12716,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🧊",
+    "hexcode": "1f9ca",
+    "p_x": 1891,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("cold") + `",
@@ -10610,6 +12734,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥢",
+    "hexcode": "1f962",
+    "p_x": 1945,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("chopsticks") + `",
@@ -10624,6 +12751,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍽️",
+    "hexcode": "1f37d",
+    "p_x": 1999,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("cooking") + `",
@@ -10640,6 +12770,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🍴",
+    "hexcode": "1f374",
+    "p_x": 2053,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("cooking") + `",
@@ -10657,6 +12790,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🥄",
+    "hexcode": "1f944",
+    "p_x": 2107,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("spoon") + `",
@@ -10670,6 +12806,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🔪",
+    "hexcode": "1f52a",
+    "p_x": 2161,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("cooking") + `",
@@ -10687,6 +12826,9 @@ const _getEmojisData4 = () => `{
 {
     "category": "Food & Drink",
     "codepoints": "🏺",
+    "hexcode": "1f3fa",
+    "p_x": 2215,
+    "p_y": 865,
     "emoticons": [],
     "keywords": [
         "` + _t("amphora") + `",
@@ -10706,6 +12848,9 @@ const _getEmojisData4 = () => `{
 const _getEmojisData5 = () => `{
     "category": "Travel & Places",
     "codepoints": "🌍",
+    "hexcode": "1f30d",
+    "p_x": 1,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("Africa") + `",
@@ -10723,6 +12868,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌎",
+    "hexcode": "1f30e",
+    "p_x": 55,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("Americas") + `",
@@ -10739,6 +12887,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌏",
+    "hexcode": "1f30f",
+    "p_x": 109,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("Asia") + `",
@@ -10756,6 +12907,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌐",
+    "hexcode": "1f310",
+    "p_x": 163,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("earth") + `",
@@ -10772,6 +12926,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🗺️",
+    "hexcode": "1f5fa",
+    "p_x": 217,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("map") + `",
@@ -10785,6 +12942,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🗾",
+    "hexcode": "1f5fe",
+    "p_x": 271,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("Japan") + `",
@@ -10799,6 +12959,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🧭",
+    "hexcode": "1f9ed",
+    "p_x": 325,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("compass") + `",
@@ -10814,6 +12977,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏔️",
+    "hexcode": "1f3d4",
+    "p_x": 379,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("cold") + `",
@@ -10829,6 +12995,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛰️",
+    "hexcode": "26f0",
+    "p_x": 433,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("mountain") + `"
@@ -10841,6 +13010,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌋",
+    "hexcode": "1f30b",
+    "p_x": 487,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("eruption") + `",
@@ -10855,6 +13027,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🗻",
+    "hexcode": "1f5fb",
+    "p_x": 541,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("Fuji") + `",
@@ -10872,6 +13047,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏕️",
+    "hexcode": "1f3d5",
+    "p_x": 595,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("camping") + `"
@@ -10884,6 +13062,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏖️",
+    "hexcode": "1f3d6",
+    "p_x": 649,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("beach") + `",
@@ -10898,6 +13079,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏜️",
+    "hexcode": "1f3dc",
+    "p_x": 703,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("desert") + `"
@@ -10910,6 +13094,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏝️",
+    "hexcode": "1f3dd",
+    "p_x": 757,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("desert") + `",
@@ -10923,6 +13110,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏞️",
+    "hexcode": "1f3de",
+    "p_x": 811,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("national park") + `",
@@ -10936,6 +13126,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏟️",
+    "hexcode": "1f3df",
+    "p_x": 865,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("arena") + `",
@@ -10949,6 +13142,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏛️",
+    "hexcode": "1f3db",
+    "p_x": 919,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("classical") + `",
@@ -10963,6 +13159,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏗️",
+    "hexcode": "1f3d7",
+    "p_x": 973,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("building construction") + `",
@@ -10976,6 +13175,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🧱",
+    "hexcode": "1f9f1",
+    "p_x": 1027,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("brick") + `",
@@ -10992,6 +13194,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏘️",
+    "hexcode": "1f3d8",
+    "p_x": 1081,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("houses") + `"
@@ -11004,6 +13209,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏚️",
+    "hexcode": "1f3da",
+    "p_x": 1135,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("derelict") + `",
@@ -11017,6 +13225,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏠",
+    "hexcode": "1f3e0",
+    "p_x": 1189,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("home") + `",
@@ -11030,6 +13241,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏡",
+    "hexcode": "1f3e1",
+    "p_x": 1243,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("garden") + `",
@@ -11045,6 +13259,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏢",
+    "hexcode": "1f3e2",
+    "p_x": 1297,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("building") + `",
@@ -11058,6 +13275,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏣",
+    "hexcode": "1f3e3",
+    "p_x": 1351,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("Japanese") + `",
@@ -11072,6 +13292,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏤",
+    "hexcode": "1f3e4",
+    "p_x": 1405,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("European") + `",
@@ -11086,6 +13309,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏥",
+    "hexcode": "1f3e5",
+    "p_x": 1459,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("doctor") + `",
@@ -11100,6 +13326,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏦",
+    "hexcode": "1f3e6",
+    "p_x": 1513,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("bank") + `",
@@ -11113,6 +13342,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏨",
+    "hexcode": "1f3e8",
+    "p_x": 1567,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("building") + `",
@@ -11126,6 +13358,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏩",
+    "hexcode": "1f3e9",
+    "p_x": 1621,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("hotel") + `",
@@ -11139,6 +13374,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏪",
+    "hexcode": "1f3ea",
+    "p_x": 1675,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("convenience") + `",
@@ -11153,6 +13391,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏫",
+    "hexcode": "1f3eb",
+    "p_x": 1729,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("building") + `",
@@ -11166,6 +13407,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏬",
+    "hexcode": "1f3ec",
+    "p_x": 1783,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("department") + `",
@@ -11179,6 +13423,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏭",
+    "hexcode": "1f3ed",
+    "p_x": 1837,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("building") + `",
@@ -11192,6 +13439,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏯",
+    "hexcode": "1f3ef",
+    "p_x": 1891,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("castle") + `",
@@ -11205,6 +13455,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏰",
+    "hexcode": "1f3f0",
+    "p_x": 1945,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("castle") + `",
@@ -11218,6 +13471,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "💒",
+    "hexcode": "1f492",
+    "p_x": 1999,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("chapel") + `",
@@ -11232,6 +13488,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🗼",
+    "hexcode": "1f5fc",
+    "p_x": 2053,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("Tokyo") + `",
@@ -11246,6 +13505,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🗽",
+    "hexcode": "1f5fd",
+    "p_x": 2107,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("liberty") + `",
@@ -11262,6 +13524,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛪",
+    "hexcode": "26ea",
+    "p_x": 2161,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("Christian") + `",
@@ -11277,6 +13542,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕌",
+    "hexcode": "1f54c",
+    "p_x": 2215,
+    "p_y": 919,
     "emoticons": [],
     "keywords": [
         "` + _t("Islam") + `",
@@ -11293,6 +13561,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛕",
+    "hexcode": "1f6d5",
+    "p_x": 1,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("hindu") + `",
@@ -11307,6 +13578,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕍",
+    "hexcode": "1f54d",
+    "p_x": 55,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("Jew") + `",
@@ -11324,6 +13598,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛩️",
+    "hexcode": "26e9",
+    "p_x": 109,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("religion") + `",
@@ -11339,6 +13616,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕋",
+    "hexcode": "1f54b",
+    "p_x": 163,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("Islam") + `",
@@ -11356,6 +13636,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛲",
+    "hexcode": "26f2",
+    "p_x": 217,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("fountain") + `"
@@ -11368,6 +13651,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛺",
+    "hexcode": "26fa",
+    "p_x": 271,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("camping") + `",
@@ -11381,6 +13667,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌁",
+    "hexcode": "1f301",
+    "p_x": 325,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("fog") + `",
@@ -11394,6 +13683,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌃",
+    "hexcode": "1f303",
+    "p_x": 379,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("night") + `",
@@ -11408,6 +13700,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏙️",
+    "hexcode": "1f3d9",
+    "p_x": 433,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("city") + `",
@@ -11421,6 +13716,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌄",
+    "hexcode": "1f304",
+    "p_x": 487,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("morning") + `",
@@ -11437,6 +13735,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌅",
+    "hexcode": "1f305",
+    "p_x": 541,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("morning") + `",
@@ -11451,6 +13752,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌆",
+    "hexcode": "1f306",
+    "p_x": 595,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("city") + `",
@@ -11468,6 +13772,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌇",
+    "hexcode": "1f307",
+    "p_x": 649,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("dusk") + `",
@@ -11482,6 +13789,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌉",
+    "hexcode": "1f309",
+    "p_x": 703,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("bridge") + `",
@@ -11496,6 +13806,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "♨️",
+    "hexcode": "2668",
+    "p_x": 757,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("hot") + `",
@@ -11511,6 +13824,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🎠",
+    "hexcode": "1f3a0",
+    "p_x": 811,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("carousel") + `",
@@ -11525,6 +13841,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🎡",
+    "hexcode": "1f3a1",
+    "p_x": 865,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("amusement park") + `",
@@ -11541,6 +13860,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🎢",
+    "hexcode": "1f3a2",
+    "p_x": 919,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("amusement park") + `",
@@ -11555,6 +13877,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "💈",
+    "hexcode": "1f488",
+    "p_x": 973,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("barber") + `",
@@ -11569,6 +13894,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🎪",
+    "hexcode": "1f3aa",
+    "p_x": 1027,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("big top") + `",
@@ -11583,6 +13911,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚂",
+    "hexcode": "1f682",
+    "p_x": 1081,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("engine") + `",
@@ -11599,6 +13930,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚃",
+    "hexcode": "1f683",
+    "p_x": 1135,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("car") + `",
@@ -11618,6 +13952,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚄",
+    "hexcode": "1f684",
+    "p_x": 1189,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("high-speed train") + `",
@@ -11635,6 +13972,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚅",
+    "hexcode": "1f685",
+    "p_x": 1243,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("bullet") + `",
@@ -11652,6 +13992,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚆",
+    "hexcode": "1f686",
+    "p_x": 1297,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("railway") + `",
@@ -11665,6 +14008,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚇",
+    "hexcode": "1f687",
+    "p_x": 1351,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("metro") + `",
@@ -11678,6 +14024,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚈",
+    "hexcode": "1f688",
+    "p_x": 1405,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("light rail") + `",
@@ -11691,6 +14040,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚉",
+    "hexcode": "1f689",
+    "p_x": 1459,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("railway") + `",
@@ -11705,6 +14057,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚊",
+    "hexcode": "1f68a",
+    "p_x": 1513,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("light rail") + `",
@@ -11726,6 +14081,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚝",
+    "hexcode": "1f69d",
+    "p_x": 1567,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("monorail") + `",
@@ -11739,6 +14097,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚞",
+    "hexcode": "1f69e",
+    "p_x": 1621,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("car") + `",
@@ -11753,6 +14114,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚋",
+    "hexcode": "1f68b",
+    "p_x": 1675,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("car") + `",
@@ -11771,6 +14135,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚌",
+    "hexcode": "1f68c",
+    "p_x": 1729,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("bus") + `",
@@ -11784,6 +14151,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚍",
+    "hexcode": "1f68d",
+    "p_x": 1783,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("bus") + `",
@@ -11797,6 +14167,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚎",
+    "hexcode": "1f68e",
+    "p_x": 1837,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("bus") + `",
@@ -11813,6 +14186,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚐",
+    "hexcode": "1f690",
+    "p_x": 1891,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("bus") + `",
@@ -11826,6 +14202,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚑",
+    "hexcode": "1f691",
+    "p_x": 1945,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("ambulance") + `",
@@ -11839,6 +14218,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚒",
+    "hexcode": "1f692",
+    "p_x": 1999,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("engine") + `",
@@ -11853,6 +14235,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚓",
+    "hexcode": "1f693",
+    "p_x": 2053,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("car") + `",
@@ -11867,6 +14252,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚔",
+    "hexcode": "1f694",
+    "p_x": 2107,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("car") + `",
@@ -11881,6 +14269,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚕",
+    "hexcode": "1f695",
+    "p_x": 2161,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("taxi") + `",
@@ -11894,6 +14285,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚖",
+    "hexcode": "1f696",
+    "p_x": 2215,
+    "p_y": 973,
     "emoticons": [],
     "keywords": [
         "` + _t("oncoming") + `",
@@ -11907,6 +14301,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚗",
+    "hexcode": "1f697",
+    "p_x": 1,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("automobile") + `",
@@ -11920,6 +14317,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚘",
+    "hexcode": "1f698",
+    "p_x": 55,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("automobile") + `",
@@ -11934,6 +14334,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚙",
+    "hexcode": "1f699",
+    "p_x": 109,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("4WD") + `",
@@ -11953,6 +14356,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚚",
+    "hexcode": "1f69a",
+    "p_x": 163,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("delivery") + `",
@@ -11966,6 +14372,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚛",
+    "hexcode": "1f69b",
+    "p_x": 217,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("articulated truck") + `",
@@ -11982,6 +14391,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚜",
+    "hexcode": "1f69c",
+    "p_x": 271,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("tractor") + `",
@@ -11995,6 +14407,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏎️",
+    "hexcode": "1f3ce",
+    "p_x": 325,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("car") + `",
@@ -12008,6 +14423,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🏍️",
+    "hexcode": "1f3cd",
+    "p_x": 379,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("motorcycle") + `",
@@ -12021,6 +14439,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛵",
+    "hexcode": "1f6f5",
+    "p_x": 433,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("motor") + `",
@@ -12034,6 +14455,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🦽",
+    "hexcode": "1f9bd",
+    "p_x": 487,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -12047,6 +14471,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🦼",
+    "hexcode": "1f9bc",
+    "p_x": 541,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("mobility scooter") + `",
@@ -12062,6 +14489,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛺",
+    "hexcode": "1f6fa",
+    "p_x": 595,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("auto rickshaw") + `",
@@ -12077,6 +14507,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚲",
+    "hexcode": "1f6b2",
+    "p_x": 649,
+    "p_y": 1027,
     "emoticons": [
         ":bike"
     ],
@@ -12092,6 +14525,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛴",
+    "hexcode": "1f6f4",
+    "p_x": 703,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("kick") + `",
@@ -12105,6 +14541,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛹",
+    "hexcode": "1f6f9",
+    "p_x": 757,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("board") + `",
@@ -12118,6 +14557,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚏",
+    "hexcode": "1f68f",
+    "p_x": 811,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("bus") + `",
@@ -12132,6 +14574,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛣️",
+    "hexcode": "1f6e3",
+    "p_x": 865,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("freeway") + `",
@@ -12147,6 +14592,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛤️",
+    "hexcode": "1f6e4",
+    "p_x": 919,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("railway") + `",
@@ -12161,6 +14609,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛢️",
+    "hexcode": "1f6e2",
+    "p_x": 973,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("drum") + `",
@@ -12174,6 +14625,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛽",
+    "hexcode": "26fd",
+    "p_x": 1027,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("diesel") + `",
@@ -12192,6 +14646,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚨",
+    "hexcode": "1f6a8",
+    "p_x": 1081,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("beacon") + `",
@@ -12209,6 +14666,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚥",
+    "hexcode": "1f6a5",
+    "p_x": 1135,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("horizontal traffic lights") + `",
@@ -12226,6 +14686,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚦",
+    "hexcode": "1f6a6",
+    "p_x": 1189,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("lights") + `",
@@ -12243,6 +14706,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛑",
+    "hexcode": "1f6d1",
+    "p_x": 1243,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("octagonal") + `",
@@ -12257,6 +14723,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚧",
+    "hexcode": "1f6a7",
+    "p_x": 1297,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("barrier") + `",
@@ -12270,6 +14739,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⚓",
+    "hexcode": "2693",
+    "p_x": 1351,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("anchor") + `",
@@ -12284,6 +14756,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛵",
+    "hexcode": "26f5",
+    "p_x": 1405,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("boat") + `",
@@ -12300,6 +14775,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛶",
+    "hexcode": "1f6f6",
+    "p_x": 1459,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("boat") + `",
@@ -12313,6 +14791,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚤",
+    "hexcode": "1f6a4",
+    "p_x": 1513,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("boat") + `",
@@ -12326,6 +14807,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛳️",
+    "hexcode": "1f6f3",
+    "p_x": 1567,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("passenger") + `",
@@ -12339,6 +14823,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛴️",
+    "hexcode": "26f4",
+    "p_x": 1621,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("boat") + `",
@@ -12353,6 +14840,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛥️",
+    "hexcode": "1f6e5",
+    "p_x": 1675,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("boat") + `",
@@ -12367,6 +14857,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚢",
+    "hexcode": "1f6a2",
+    "p_x": 1729,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("boat") + `",
@@ -12381,6 +14874,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "✈️",
+    "hexcode": "2708",
+    "p_x": 1783,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("aeroplane") + `",
@@ -12394,6 +14890,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛩️",
+    "hexcode": "1f6e9",
+    "p_x": 1837,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("aeroplane") + `",
@@ -12408,6 +14907,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛫",
+    "hexcode": "1f6eb",
+    "p_x": 1891,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("aeroplane") + `",
@@ -12425,6 +14927,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛬",
+    "hexcode": "1f6ec",
+    "p_x": 1945,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("aeroplane") + `",
@@ -12442,6 +14947,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🪂",
+    "hexcode": "1fa82",
+    "p_x": 1999,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("hang-glide") + `",
@@ -12458,6 +14966,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "💺",
+    "hexcode": "1f4ba",
+    "p_x": 2053,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("chair") + `",
@@ -12471,6 +14982,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚁",
+    "hexcode": "1f681",
+    "p_x": 2107,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("helicopter") + `",
@@ -12484,6 +14998,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚟",
+    "hexcode": "1f69f",
+    "p_x": 2161,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("cable") + `",
@@ -12498,6 +15015,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚠",
+    "hexcode": "1f6a0",
+    "p_x": 2215,
+    "p_y": 1027,
     "emoticons": [],
     "keywords": [
         "` + _t("cable") + `",
@@ -12514,6 +15034,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚡",
+    "hexcode": "1f6a1",
+    "p_x": 1,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("aerial") + `",
@@ -12530,6 +15053,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛰️",
+    "hexcode": "1f6f0",
+    "p_x": 55,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("satellite") + `",
@@ -12543,6 +15069,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🚀",
+    "hexcode": "1f680",
+    "p_x": 109,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("rocket") + `",
@@ -12556,6 +15085,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛸",
+    "hexcode": "1f6f8",
+    "p_x": 163,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("flying saucer") + `",
@@ -12569,6 +15101,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🛎️",
+    "hexcode": "1f6ce",
+    "p_x": 217,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("bell") + `",
@@ -12584,6 +15119,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🧳",
+    "hexcode": "1f9f3",
+    "p_x": 271,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("luggage") + `",
@@ -12598,6 +15136,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⌛",
+    "hexcode": "231b",
+    "p_x": 325,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("hourglass") + `",
@@ -12613,6 +15154,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⏳",
+    "hexcode": "23f3",
+    "p_x": 379,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("hourglass") + `",
@@ -12628,6 +15172,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⌚",
+    "hexcode": "231a",
+    "p_x": 433,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("clock") + `",
@@ -12641,6 +15188,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⏰",
+    "hexcode": "23f0",
+    "p_x": 487,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("alarm") + `",
@@ -12654,6 +15204,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⏱️",
+    "hexcode": "23f1",
+    "p_x": 541,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("clock") + `",
@@ -12667,6 +15220,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⏲️",
+    "hexcode": "23f2",
+    "p_x": 595,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("clock") + `",
@@ -12680,6 +15236,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕰️",
+    "hexcode": "1f570",
+    "p_x": 649,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("clock") + `",
@@ -12693,6 +15252,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕛",
+    "hexcode": "1f55b",
+    "p_x": 703,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -12710,6 +15272,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕧",
+    "hexcode": "1f567",
+    "p_x": 757,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("12") + `",
@@ -12729,6 +15294,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕐",
+    "hexcode": "1f550",
+    "p_x": 811,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -12746,6 +15314,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕜",
+    "hexcode": "1f55c",
+    "p_x": 865,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("1") + `",
@@ -12765,6 +15336,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕑",
+    "hexcode": "1f551",
+    "p_x": 919,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -12782,6 +15356,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕝",
+    "hexcode": "1f55d",
+    "p_x": 973,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("2") + `",
@@ -12801,6 +15378,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕒",
+    "hexcode": "1f552",
+    "p_x": 1027,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -12818,6 +15398,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕞",
+    "hexcode": "1f55e",
+    "p_x": 1081,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("3") + `",
@@ -12837,6 +15420,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕓",
+    "hexcode": "1f553",
+    "p_x": 1135,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -12854,6 +15440,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕟",
+    "hexcode": "1f55f",
+    "p_x": 1189,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("4") + `",
@@ -12873,6 +15462,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕔",
+    "hexcode": "1f554",
+    "p_x": 1243,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -12890,6 +15482,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕠",
+    "hexcode": "1f560",
+    "p_x": 1297,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("5") + `",
@@ -12909,6 +15504,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕕",
+    "hexcode": "1f555",
+    "p_x": 1351,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -12926,6 +15524,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕡",
+    "hexcode": "1f561",
+    "p_x": 1405,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("6") + `",
@@ -12945,6 +15546,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕖",
+    "hexcode": "1f556",
+    "p_x": 1459,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -12962,6 +15566,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕢",
+    "hexcode": "1f562",
+    "p_x": 1513,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("7") + `",
@@ -12981,6 +15588,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕗",
+    "hexcode": "1f557",
+    "p_x": 1567,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -12998,6 +15608,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕣",
+    "hexcode": "1f563",
+    "p_x": 1621,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("8") + `",
@@ -13017,6 +15630,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕘",
+    "hexcode": "1f558",
+    "p_x": 1675,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -13034,6 +15650,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕤",
+    "hexcode": "1f564",
+    "p_x": 1729,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("9") + `",
@@ -13053,6 +15672,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕙",
+    "hexcode": "1f559",
+    "p_x": 1783,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -13070,6 +15692,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕥",
+    "hexcode": "1f565",
+    "p_x": 1837,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("10") + `",
@@ -13089,6 +15714,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕚",
+    "hexcode": "1f55a",
+    "p_x": 1891,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("00") + `",
@@ -13106,6 +15734,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🕦",
+    "hexcode": "1f566",
+    "p_x": 1945,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("11") + `",
@@ -13125,6 +15756,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌑",
+    "hexcode": "1f311",
+    "p_x": 1999,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("dark") + `",
@@ -13139,6 +15773,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌒",
+    "hexcode": "1f312",
+    "p_x": 2053,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("crescent") + `",
@@ -13153,6 +15790,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌓",
+    "hexcode": "1f313",
+    "p_x": 2107,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("first quarter moon") + `",
@@ -13167,6 +15807,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌔",
+    "hexcode": "1f314",
+    "p_x": 2161,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("gibbous") + `",
@@ -13181,6 +15824,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌕",
+    "hexcode": "1f315",
+    "p_x": 2215,
+    "p_y": 1081,
     "emoticons": [],
     "keywords": [
         "` + _t("full") + `",
@@ -13194,6 +15840,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌖",
+    "hexcode": "1f316",
+    "p_x": 1,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("gibbous") + `",
@@ -13208,6 +15857,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌗",
+    "hexcode": "1f317",
+    "p_x": 55,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("last quarter moon") + `",
@@ -13222,6 +15874,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌘",
+    "hexcode": "1f318",
+    "p_x": 109,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("crescent") + `",
@@ -13236,6 +15891,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌙",
+    "hexcode": "1f319",
+    "p_x": 163,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("crescent") + `",
@@ -13249,6 +15907,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌚",
+    "hexcode": "1f31a",
+    "p_x": 217,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -13263,6 +15924,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌛",
+    "hexcode": "1f31b",
+    "p_x": 271,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -13278,6 +15942,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌜",
+    "hexcode": "1f31c",
+    "p_x": 325,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -13293,6 +15960,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌡️",
+    "hexcode": "1f321",
+    "p_x": 379,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("thermometer") + `",
@@ -13306,6 +15976,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "☀️",
+    "hexcode": "2600",
+    "p_x": 433,
+    "p_y": 1135,
     "emoticons": [
         ":sun"
     ],
@@ -13323,6 +15996,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌝",
+    "hexcode": "1f31d",
+    "p_x": 487,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("bright") + `",
@@ -13339,6 +16015,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌞",
+    "hexcode": "1f31e",
+    "p_x": 541,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("bright") + `",
@@ -13354,6 +16033,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🪐",
+    "hexcode": "1fa90",
+    "p_x": 595,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("ringed planet") + `",
@@ -13368,6 +16050,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⭐",
+    "hexcode": "2b50",
+    "p_x": 649,
+    "p_y": 1135,
     "emoticons": [
         ":star"
     ],
@@ -13382,6 +16067,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌟",
+    "hexcode": "1f31f",
+    "p_x": 703,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("glittery") + `",
@@ -13399,6 +16087,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌠",
+    "hexcode": "1f320",
+    "p_x": 757,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("falling") + `",
@@ -13413,6 +16104,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌌",
+    "hexcode": "1f30c",
+    "p_x": 811,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("Milky Way") + `",
@@ -13429,6 +16123,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "☁️",
+    "hexcode": "2601",
+    "p_x": 865,
+    "p_y": 1135,
     "emoticons": [
         ":cloud"
     ],
@@ -13444,6 +16141,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛅",
+    "hexcode": "26c5",
+    "p_x": 919,
+    "p_y": 1135,
     "emoticons": [
         ":partly_sunny:"
     ],
@@ -13460,6 +16160,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛈️",
+    "hexcode": "26c8",
+    "p_x": 973,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cloud") + `",
@@ -13475,6 +16178,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌤️",
+    "hexcode": "1f324",
+    "p_x": 1027,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cloud") + `",
@@ -13489,6 +16195,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌥️",
+    "hexcode": "1f325",
+    "p_x": 1081,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cloud") + `",
@@ -13503,6 +16212,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌦️",
+    "hexcode": "1f326",
+    "p_x": 1135,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cloud") + `",
@@ -13518,6 +16230,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌧️",
+    "hexcode": "1f327",
+    "p_x": 1189,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cloud") + `",
@@ -13532,6 +16247,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌨️",
+    "hexcode": "1f328",
+    "p_x": 1243,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cloud") + `",
@@ -13547,6 +16265,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌩️",
+    "hexcode": "1f329",
+    "p_x": 1297,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cloud") + `",
@@ -13561,6 +16282,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌪️",
+    "hexcode": "1f32a",
+    "p_x": 1351,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cloud") + `",
@@ -13575,6 +16299,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌫️",
+    "hexcode": "1f32b",
+    "p_x": 1405,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cloud") + `",
@@ -13588,6 +16315,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌬️",
+    "hexcode": "1f32c",
+    "p_x": 1459,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("blow") + `",
@@ -13603,6 +16333,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌀",
+    "hexcode": "1f300",
+    "p_x": 1513,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cyclone") + `",
@@ -13619,6 +16352,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌈",
+    "hexcode": "1f308",
+    "p_x": 1567,
+    "p_y": 1135,
     "emoticons": [
         ":rainbow"
     ],
@@ -13634,6 +16370,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌂",
+    "hexcode": "1f302",
+    "p_x": 1621,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("closed umbrella") + `",
@@ -13649,6 +16388,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "☂️",
+    "hexcode": "2602",
+    "p_x": 1675,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -13663,6 +16405,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "☔",
+    "hexcode": "2614",
+    "p_x": 1729,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -13679,6 +16424,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛱️",
+    "hexcode": "26f1",
+    "p_x": 1783,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("beach") + `",
@@ -13696,6 +16444,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⚡",
+    "hexcode": "26a1",
+    "p_x": 1837,
+    "p_y": 1135,
     "emoticons": [
         ":zap"
     ],
@@ -13716,6 +16467,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "❄️",
+    "hexcode": "2744",
+    "p_x": 1891,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cold") + `",
@@ -13730,6 +16484,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "☃️",
+    "hexcode": "2603",
+    "p_x": 1945,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cold") + `",
@@ -13744,6 +16501,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "⛄",
+    "hexcode": "26c4",
+    "p_x": 1999,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cold") + `",
@@ -13759,6 +16519,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "☄️",
+    "hexcode": "2604",
+    "p_x": 2053,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("comet") + `",
@@ -13772,6 +16535,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🔥",
+    "hexcode": "1f525",
+    "p_x": 2107,
+    "p_y": 1135,
     "emoticons": [
         ":fire"
     ],
@@ -13788,6 +16554,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "💧",
+    "hexcode": "1f4a7",
+    "p_x": 2161,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("cold") + `",
@@ -13804,6 +16573,9 @@ const _getEmojisData5 = () => `{
 {
     "category": "Travel & Places",
     "codepoints": "🌊",
+    "hexcode": "1f30a",
+    "p_x": 2215,
+    "p_y": 1135,
     "emoticons": [],
     "keywords": [
         "` + _t("ocean") + `",
@@ -13820,6 +16592,9 @@ const _getEmojisData5 = () => `{
 const _getEmojisData6 = () => `{
     "category": "Activities",
     "codepoints": "🎃",
+    "hexcode": "1f383",
+    "p_x": 1,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -13838,6 +16613,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎄",
+    "hexcode": "1f384",
+    "p_x": 55,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -13852,6 +16630,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎆",
+    "hexcode": "1f386",
+    "p_x": 109,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -13865,6 +16646,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎇",
+    "hexcode": "1f387",
+    "p_x": 163,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -13880,6 +16664,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🧨",
+    "hexcode": "1f9e8",
+    "p_x": 217,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("dynamite") + `",
@@ -13895,6 +16682,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "✨",
+    "hexcode": "2728",
+    "p_x": 271,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("*") + `",
@@ -13910,6 +16700,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎈",
+    "hexcode": "1f388",
+    "p_x": 325,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("balloon") + `",
@@ -13923,6 +16716,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎉",
+    "hexcode": "1f389",
+    "p_x": 379,
+    "p_y": 1189,
     "emoticons": [
         ":party"
     ],
@@ -13941,6 +16737,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎊",
+    "hexcode": "1f38a",
+    "p_x": 433,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -13955,6 +16754,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎋",
+    "hexcode": "1f38b",
+    "p_x": 487,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("banner") + `",
@@ -13972,6 +16774,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎍",
+    "hexcode": "1f38d",
+    "p_x": 541,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("bamboo") + `",
@@ -13989,6 +16794,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎎",
+    "hexcode": "1f38e",
+    "p_x": 595,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -14005,6 +16813,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎏",
+    "hexcode": "1f38f",
+    "p_x": 649,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("carp") + `",
@@ -14022,6 +16833,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎐",
+    "hexcode": "1f390",
+    "p_x": 703,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("bell") + `",
@@ -14037,6 +16851,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎑",
+    "hexcode": "1f391",
+    "p_x": 757,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -14053,6 +16870,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🧧",
+    "hexcode": "1f9e7",
+    "p_x": 811,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("gift") + `",
@@ -14070,6 +16890,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎀",
+    "hexcode": "1f380",
+    "p_x": 865,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -14083,6 +16906,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎁",
+    "hexcode": "1f381",
+    "p_x": 919,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("box") + `",
@@ -14099,6 +16925,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎗️",
+    "hexcode": "1f397",
+    "p_x": 973,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -14113,6 +16942,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎟️",
+    "hexcode": "1f39f",
+    "p_x": 1027,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("admission") + `",
@@ -14128,6 +16960,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎫",
+    "hexcode": "1f3ab",
+    "p_x": 1081,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("admission") + `",
@@ -14141,6 +16976,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎖️",
+    "hexcode": "1f396",
+    "p_x": 1135,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -14155,6 +16993,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏆",
+    "hexcode": "1f3c6",
+    "p_x": 1189,
+    "p_y": 1189,
     "emoticons": [
         ":trophy"
     ],
@@ -14171,6 +17012,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏅",
+    "hexcode": "1f3c5",
+    "p_x": 1243,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -14186,6 +17030,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🥇",
+    "hexcode": "1f947",
+    "p_x": 1297,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("1st place medal") + `",
@@ -14201,6 +17048,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🥈",
+    "hexcode": "1f948",
+    "p_x": 1351,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("2nd place medal") + `",
@@ -14216,6 +17066,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🥉",
+    "hexcode": "1f949",
+    "p_x": 1405,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("3rd place medal") + `",
@@ -14231,6 +17084,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "⚽",
+    "hexcode": "26bd",
+    "p_x": 1459,
+    "p_y": 1189,
     "emoticons": [
         ":soccer"
     ],
@@ -14247,6 +17103,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "⚾",
+    "hexcode": "26be",
+    "p_x": 1513,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14260,6 +17119,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🥎",
+    "hexcode": "1f94e",
+    "p_x": 1567,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14275,6 +17137,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏀",
+    "hexcode": "1f3c0",
+    "p_x": 1621,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14289,6 +17154,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏐",
+    "hexcode": "1f3d0",
+    "p_x": 1675,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14303,6 +17171,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏈",
+    "hexcode": "1f3c8",
+    "p_x": 1729,
+    "p_y": 1189,
     "emoticons": [
         ":football"
     ],
@@ -14319,6 +17190,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏉",
+    "hexcode": "1f3c9",
+    "p_x": 1783,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("australian football") + `",
@@ -14337,6 +17211,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎾",
+    "hexcode": "1f3be",
+    "p_x": 1837,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14351,6 +17228,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🥏",
+    "hexcode": "1f94f",
+    "p_x": 1891,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("flying disc") + `",
@@ -14366,6 +17246,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎳",
+    "hexcode": "1f3b3",
+    "p_x": 1945,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14381,6 +17264,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏏",
+    "hexcode": "1f3cf",
+    "p_x": 1999,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14398,6 +17284,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏑",
+    "hexcode": "1f3d1",
+    "p_x": 2053,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14414,6 +17303,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏒",
+    "hexcode": "1f3d2",
+    "p_x": 2107,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("game") + `",
@@ -14430,6 +17322,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🥍",
+    "hexcode": "1f94d",
+    "p_x": 2161,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14445,6 +17340,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏓",
+    "hexcode": "1f3d3",
+    "p_x": 2215,
+    "p_y": 1189,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14462,6 +17360,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🏸",
+    "hexcode": "1f3f8",
+    "p_x": 1,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("badminton") + `",
@@ -14478,6 +17379,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🥊",
+    "hexcode": "1f94a",
+    "p_x": 55,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("boxing") + `",
@@ -14491,6 +17395,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🥋",
+    "hexcode": "1f94b",
+    "p_x": 109,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("judo") + `",
@@ -14508,6 +17415,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🥅",
+    "hexcode": "1f945",
+    "p_x": 163,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("goal") + `",
@@ -14522,6 +17432,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "⛳",
+    "hexcode": "26f3",
+    "p_x": 217,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("flag") + `",
@@ -14537,6 +17450,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "⛸️",
+    "hexcode": "26f8",
+    "p_x": 271,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("ice") + `",
@@ -14551,6 +17467,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎣",
+    "hexcode": "1f3a3",
+    "p_x": 325,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("fish") + `",
@@ -14567,6 +17486,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🤿",
+    "hexcode": "1f93f",
+    "p_x": 379,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("diving") + `",
@@ -14583,6 +17505,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎽",
+    "hexcode": "1f3bd",
+    "p_x": 433,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("athletics") + `",
@@ -14598,6 +17523,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎿",
+    "hexcode": "1f3bf",
+    "p_x": 487,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("ski") + `",
@@ -14613,6 +17541,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🛷",
+    "hexcode": "1f6f7",
+    "p_x": 541,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("sled") + `",
@@ -14627,6 +17558,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🥌",
+    "hexcode": "1f94c",
+    "p_x": 595,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("curling") + `",
@@ -14644,6 +17578,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎯",
+    "hexcode": "1f3af",
+    "p_x": 649,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("bullseye") + `",
@@ -14661,6 +17598,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🪀",
+    "hexcode": "1fa80",
+    "p_x": 703,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("fluctuate") + `",
@@ -14675,6 +17615,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🪁",
+    "hexcode": "1fa81",
+    "p_x": 757,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("fly") + `",
@@ -14689,6 +17632,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎱",
+    "hexcode": "1f3b1",
+    "p_x": 811,
+    "p_y": 1243,
     "emoticons": [
         ":8ball"
     ],
@@ -14708,6 +17654,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🔮",
+    "hexcode": "1f52e",
+    "p_x": 865,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -14725,6 +17674,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🧿",
+    "hexcode": "1f9ff",
+    "p_x": 919,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("amulet") + `",
@@ -14744,6 +17696,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎮",
+    "hexcode": "1f3ae",
+    "p_x": 973,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("controller") + `",
@@ -14758,6 +17713,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🕹️",
+    "hexcode": "1f579",
+    "p_x": 1027,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("game") + `",
@@ -14772,6 +17730,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎰",
+    "hexcode": "1f3b0",
+    "p_x": 1081,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("game") + `",
@@ -14788,6 +17749,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎲",
+    "hexcode": "1f3b2",
+    "p_x": 1135,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("dice") + `",
@@ -14802,6 +17766,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🧩",
+    "hexcode": "1f9e9",
+    "p_x": 1189,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("clue") + `",
@@ -14818,6 +17785,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🧸",
+    "hexcode": "1f9f8",
+    "p_x": 1243,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("plaything") + `",
@@ -14834,6 +17804,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "♠️",
+    "hexcode": "2660",
+    "p_x": 1297,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("card") + `",
@@ -14848,6 +17821,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "♥️",
+    "hexcode": "2665",
+    "p_x": 1351,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("card") + `",
@@ -14862,6 +17838,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "♦️",
+    "hexcode": "2666",
+    "p_x": 1405,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("card") + `",
@@ -14877,6 +17856,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "♣️",
+    "hexcode": "2663",
+    "p_x": 1459,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("card") + `",
@@ -14892,6 +17874,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "♟️",
+    "hexcode": "265f",
+    "p_x": 1513,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("chess") + `",
@@ -14907,6 +17892,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🃏",
+    "hexcode": "1f0cf",
+    "p_x": 1567,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("card") + `",
@@ -14922,6 +17910,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🀄",
+    "hexcode": "1f004",
+    "p_x": 1621,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("game") + `",
@@ -14939,6 +17930,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎴",
+    "hexcode": "1f3b4",
+    "p_x": 1675,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("card") + `",
@@ -14956,6 +17950,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎭",
+    "hexcode": "1f3ad",
+    "p_x": 1729,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("art") + `",
@@ -14973,6 +17970,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🖼️",
+    "hexcode": "1f5bc",
+    "p_x": 1783,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("art") + `",
@@ -14990,6 +17990,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🎨",
+    "hexcode": "1f3a8",
+    "p_x": 1837,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("art") + `",
@@ -15006,6 +18009,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🧵",
+    "hexcode": "1f9f5",
+    "p_x": 1891,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("needle") + `",
@@ -15022,6 +18028,9 @@ const _getEmojisData6 = () => `{
 {
     "category": "Activities",
     "codepoints": "🧶",
+    "hexcode": "1f9f6",
+    "p_x": 1945,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("ball") + `",
@@ -15038,6 +18047,9 @@ const _getEmojisData6 = () => `{
 const _getEmojisData7 = () => `{
     "category": "Objects",
     "codepoints": "👓",
+    "hexcode": "1f453",
+    "p_x": 1999,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15054,6 +18066,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🕶️",
+    "hexcode": "1f576",
+    "p_x": 2053,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("dark") + `",
@@ -15071,6 +18086,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🥽",
+    "hexcode": "1f97d",
+    "p_x": 2107,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("eye protection") + `",
@@ -15086,6 +18104,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🥼",
+    "hexcode": "1f97c",
+    "p_x": 2161,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("doctor") + `",
@@ -15101,6 +18122,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🦺",
+    "hexcode": "1f9ba",
+    "p_x": 2215,
+    "p_y": 1243,
     "emoticons": [],
     "keywords": [
         "` + _t("emergency") + `",
@@ -15119,6 +18143,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👔",
+    "hexcode": "1f454",
+    "p_x": 1,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15133,6 +18160,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👕",
+    "hexcode": "1f455",
+    "p_x": 55,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15151,6 +18181,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👖",
+    "hexcode": "1f456",
+    "p_x": 109,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15166,6 +18199,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧣",
+    "hexcode": "1f9e3",
+    "p_x": 163,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("neck") + `",
@@ -15179,6 +18215,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧤",
+    "hexcode": "1f9e4",
+    "p_x": 217,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("gloves") + `",
@@ -15192,6 +18231,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧥",
+    "hexcode": "1f9e5",
+    "p_x": 271,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("coat") + `",
@@ -15205,6 +18247,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧦",
+    "hexcode": "1f9e6",
+    "p_x": 325,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("socks") + `",
@@ -15218,6 +18263,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👗",
+    "hexcode": "1f457",
+    "p_x": 379,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15232,6 +18280,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👘",
+    "hexcode": "1f458",
+    "p_x": 433,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15245,6 +18296,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🥻",
+    "hexcode": "1f97b",
+    "p_x": 487,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15259,6 +18313,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🩱",
+    "hexcode": "1fa71",
+    "p_x": 541,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("bathing suit") + `",
@@ -15273,6 +18330,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🩲",
+    "hexcode": "1fa72",
+    "p_x": 595,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("bathers") + `",
@@ -15292,6 +18352,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🩳",
+    "hexcode": "1fa73",
+    "p_x": 649,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("bathing suit") + `",
@@ -15310,6 +18373,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👙",
+    "hexcode": "1f459",
+    "p_x": 703,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("bikini") + `",
@@ -15326,6 +18392,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👚",
+    "hexcode": "1f45a",
+    "p_x": 757,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("blouse") + `",
@@ -15342,6 +18411,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👛",
+    "hexcode": "1f45b",
+    "p_x": 811,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("accessories") + `",
@@ -15357,6 +18429,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👜",
+    "hexcode": "1f45c",
+    "p_x": 865,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("accessories") + `",
@@ -15374,6 +18449,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👝",
+    "hexcode": "1f45d",
+    "p_x": 919,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("accessories") + `",
@@ -15390,6 +18468,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🛍️",
+    "hexcode": "1f6cd",
+    "p_x": 973,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("bag") + `",
@@ -15405,6 +18486,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎒",
+    "hexcode": "1f392",
+    "p_x": 1027,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("backpack") + `",
@@ -15421,6 +18505,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👞",
+    "hexcode": "1f45e",
+    "p_x": 1081,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15436,6 +18523,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👟",
+    "hexcode": "1f45f",
+    "p_x": 1135,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("athletic") + `",
@@ -15454,6 +18544,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🥾",
+    "hexcode": "1f97e",
+    "p_x": 1189,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("backpacking") + `",
@@ -15469,6 +18562,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🥿",
+    "hexcode": "1f97f",
+    "p_x": 1243,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("ballet flat") + `",
@@ -15485,6 +18581,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👠",
+    "hexcode": "1f460",
+    "p_x": 1297,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15501,6 +18600,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👡",
+    "hexcode": "1f461",
+    "p_x": 1351,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15517,6 +18619,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🩰",
+    "hexcode": "1fa70",
+    "p_x": 1405,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("ballet") + `",
@@ -15531,6 +18636,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👢",
+    "hexcode": "1f462",
+    "p_x": 1459,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("boot") + `",
@@ -15547,6 +18655,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👑",
+    "hexcode": "1f451",
+    "p_x": 1513,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15562,6 +18673,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "👒",
+    "hexcode": "1f452",
+    "p_x": 1567,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15577,6 +18691,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎩",
+    "hexcode": "1f3a9",
+    "p_x": 1621,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("clothing") + `",
@@ -15592,6 +18709,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎓",
+    "hexcode": "1f393",
+    "p_x": 1675,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("cap") + `",
@@ -15608,6 +18728,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧢",
+    "hexcode": "1f9e2",
+    "p_x": 1729,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("baseball cap") + `",
@@ -15621,6 +18744,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⛑️",
+    "hexcode": "26d1",
+    "p_x": 1783,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("aid") + `",
@@ -15638,6 +18764,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📿",
+    "hexcode": "1f4ff",
+    "p_x": 1837,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("beads") + `",
@@ -15654,6 +18783,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💄",
+    "hexcode": "1f484",
+    "p_x": 1891,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("cosmetics") + `",
@@ -15669,6 +18801,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💍",
+    "hexcode": "1f48d",
+    "p_x": 1945,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("diamond") + `",
@@ -15682,6 +18817,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💎",
+    "hexcode": "1f48e",
+    "p_x": 1999,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("diamond") + `",
@@ -15698,6 +18836,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔇",
+    "hexcode": "1f507",
+    "p_x": 2053,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("mute") + `",
@@ -15714,6 +18855,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔈",
+    "hexcode": "1f508",
+    "p_x": 2107,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("low") + `",
@@ -15731,6 +18875,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔉",
+    "hexcode": "1f509",
+    "p_x": 2161,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("medium") + `",
@@ -15744,6 +18891,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔊",
+    "hexcode": "1f50a",
+    "p_x": 2215,
+    "p_y": 1297,
     "emoticons": [],
     "keywords": [
         "` + _t("loud") + `",
@@ -15757,6 +18907,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📢",
+    "hexcode": "1f4e2",
+    "p_x": 1,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("loud") + `",
@@ -15771,6 +18924,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📣",
+    "hexcode": "1f4e3",
+    "p_x": 55,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("cheering") + `",
@@ -15784,6 +18940,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📯",
+    "hexcode": "1f4ef",
+    "p_x": 109,
+    "p_y": 1351,
     "emoticons": [
         ":postal_horn"
     ],
@@ -15800,6 +18959,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔔",
+    "hexcode": "1f514",
+    "p_x": 163,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("bell") + `"
@@ -15812,6 +18974,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔕",
+    "hexcode": "1f515",
+    "p_x": 217,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("bell") + `",
@@ -15829,6 +18994,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎼",
+    "hexcode": "1f3bc",
+    "p_x": 271,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("music") + `",
@@ -15843,6 +19011,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎵",
+    "hexcode": "1f3b5",
+    "p_x": 325,
+    "p_y": 1351,
     "emoticons": [
         ":music"
     ],
@@ -15859,6 +19030,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎶",
+    "hexcode": "1f3b6",
+    "p_x": 379,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("music") + `",
@@ -15874,6 +19048,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎙️",
+    "hexcode": "1f399",
+    "p_x": 433,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("mic") + `",
@@ -15889,6 +19066,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎚️",
+    "hexcode": "1f39a",
+    "p_x": 487,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("level") + `",
@@ -15903,6 +19083,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎛️",
+    "hexcode": "1f39b",
+    "p_x": 541,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("control") + `",
@@ -15917,6 +19100,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎤",
+    "hexcode": "1f3a4",
+    "p_x": 595,
+    "p_y": 1351,
     "emoticons": [
         ":microphone"
     ],
@@ -15933,6 +19119,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎧",
+    "hexcode": "1f3a7",
+    "p_x": 649,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("earbud") + `",
@@ -15946,6 +19135,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📻",
+    "hexcode": "1f4fb",
+    "p_x": 703,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("AM") + `",
@@ -15962,6 +19154,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎷",
+    "hexcode": "1f3b7",
+    "p_x": 757,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("instrument") + `",
@@ -15977,6 +19172,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎸",
+    "hexcode": "1f3b8",
+    "p_x": 811,
+    "p_y": 1351,
     "emoticons": [
         ":guitar"
     ],
@@ -15993,6 +19191,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎹",
+    "hexcode": "1f3b9",
+    "p_x": 865,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("instrument") + `",
@@ -16010,6 +19211,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎺",
+    "hexcode": "1f3ba",
+    "p_x": 919,
+    "p_y": 1351,
     "emoticons": [
         ":trumpet"
     ],
@@ -16026,6 +19230,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎻",
+    "hexcode": "1f3bb",
+    "p_x": 973,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("instrument") + `",
@@ -16040,6 +19247,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🪕",
+    "hexcode": "1fa95",
+    "p_x": 1027,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("banjo") + `",
@@ -16054,6 +19264,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🥁",
+    "hexcode": "1f941",
+    "p_x": 1081,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("drum") + `",
@@ -16069,6 +19282,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📱",
+    "hexcode": "1f4f1",
+    "p_x": 1135,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("cell") + `",
@@ -16084,6 +19300,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📲",
+    "hexcode": "1f4f2",
+    "p_x": 1189,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -16101,6 +19320,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "☎️",
+    "hexcode": "260e",
+    "p_x": 1243,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("landline") + `",
@@ -16115,6 +19337,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📞",
+    "hexcode": "1f4de",
+    "p_x": 1297,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("phone") + `",
@@ -16129,6 +19354,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📟",
+    "hexcode": "1f4df",
+    "p_x": 1351,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("pager") + `"
@@ -16141,6 +19369,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📠",
+    "hexcode": "1f4e0",
+    "p_x": 1405,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("fax") + `",
@@ -16154,6 +19385,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔋",
+    "hexcode": "1f50b",
+    "p_x": 1459,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("battery") + `"
@@ -16166,6 +19400,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔌",
+    "hexcode": "1f50c",
+    "p_x": 1513,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("electric") + `",
@@ -16180,6 +19417,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💻",
+    "hexcode": "1f4bb",
+    "p_x": 1567,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("computer") + `",
@@ -16196,6 +19436,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🖥️",
+    "hexcode": "1f5a5",
+    "p_x": 1621,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("computer") + `",
@@ -16209,6 +19452,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🖨️",
+    "hexcode": "1f5a8",
+    "p_x": 1675,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("computer") + `",
@@ -16222,6 +19468,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⌨️",
+    "hexcode": "2328",
+    "p_x": 1729,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("computer") + `",
@@ -16235,6 +19484,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🖱️",
+    "hexcode": "1f5b1",
+    "p_x": 1783,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("computer") + `",
@@ -16248,6 +19500,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🖲️",
+    "hexcode": "1f5b2",
+    "p_x": 1837,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("computer") + `",
@@ -16261,6 +19516,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💽",
+    "hexcode": "1f4bd",
+    "p_x": 1891,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("computer") + `",
@@ -16276,6 +19534,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💾",
+    "hexcode": "1f4be",
+    "p_x": 1945,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("computer") + `",
@@ -16291,6 +19552,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💿",
+    "hexcode": "1f4bf",
+    "p_x": 1999,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("CD") + `",
@@ -16306,6 +19570,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📀",
+    "hexcode": "1f4c0",
+    "p_x": 2053,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("blu-ray") + `",
@@ -16324,6 +19591,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧮",
+    "hexcode": "1f9ee",
+    "p_x": 2107,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("abacus") + `",
@@ -16337,6 +19607,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎥",
+    "hexcode": "1f3a5",
+    "p_x": 2161,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("camera") + `",
@@ -16351,6 +19624,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎞️",
+    "hexcode": "1f39e",
+    "p_x": 2215,
+    "p_y": 1351,
     "emoticons": [],
     "keywords": [
         "` + _t("cinema") + `",
@@ -16366,6 +19642,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📽️",
+    "hexcode": "1f4fd",
+    "p_x": 1,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("cinema") + `",
@@ -16382,6 +19661,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🎬",
+    "hexcode": "1f3ac",
+    "p_x": 55,
+    "p_y": 1405,
     "emoticons": [
         ":clapper"
     ],
@@ -16400,6 +19682,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📺",
+    "hexcode": "1f4fa",
+    "p_x": 109,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("television") + `",
@@ -16415,6 +19700,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📷",
+    "hexcode": "1f4f7",
+    "p_x": 163,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("camera") + `",
@@ -16428,6 +19716,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📸",
+    "hexcode": "1f4f8",
+    "p_x": 217,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("camera") + `",
@@ -16443,6 +19734,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📹",
+    "hexcode": "1f4f9",
+    "p_x": 271,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("camera") + `",
@@ -16456,6 +19750,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📼",
+    "hexcode": "1f4fc",
+    "p_x": 325,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("tape") + `",
@@ -16472,6 +19769,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔍",
+    "hexcode": "1f50d",
+    "p_x": 379,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("glass") + `",
@@ -16488,6 +19788,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔎",
+    "hexcode": "1f50e",
+    "p_x": 433,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("glass") + `",
@@ -16504,6 +19807,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🕯️",
+    "hexcode": "1f56f",
+    "p_x": 487,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("candle") + `",
@@ -16517,6 +19823,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💡",
+    "hexcode": "1f4a1",
+    "p_x": 541,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("bulb") + `",
@@ -16534,6 +19843,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔦",
+    "hexcode": "1f526",
+    "p_x": 595,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("electric") + `",
@@ -16550,6 +19862,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🏮",
+    "hexcode": "1f3ee",
+    "p_x": 649,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("bar") + `",
@@ -16566,6 +19881,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🪔",
+    "hexcode": "1fa94",
+    "p_x": 703,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("diya") + `",
@@ -16580,6 +19898,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📔",
+    "hexcode": "1f4d4",
+    "p_x": 757,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("book") + `",
@@ -16596,6 +19917,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📕",
+    "hexcode": "1f4d5",
+    "p_x": 811,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("book") + `",
@@ -16609,6 +19933,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📖",
+    "hexcode": "1f4d6",
+    "p_x": 865,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("book") + `",
@@ -16622,6 +19949,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📗",
+    "hexcode": "1f4d7",
+    "p_x": 919,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("book") + `",
@@ -16635,6 +19965,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📘",
+    "hexcode": "1f4d8",
+    "p_x": 973,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("blue") + `",
@@ -16648,6 +19981,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📙",
+    "hexcode": "1f4d9",
+    "p_x": 1027,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("book") + `",
@@ -16661,6 +19997,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📚",
+    "hexcode": "1f4da",
+    "p_x": 1081,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("book") + `",
@@ -16674,6 +20013,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📓",
+    "hexcode": "1f4d3",
+    "p_x": 1135,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("notebook") + `"
@@ -16686,6 +20028,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📒",
+    "hexcode": "1f4d2",
+    "p_x": 1189,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("ledger") + `",
@@ -16699,6 +20044,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📃",
+    "hexcode": "1f4c3",
+    "p_x": 1243,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("curl") + `",
@@ -16714,6 +20062,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📜",
+    "hexcode": "1f4dc",
+    "p_x": 1297,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("paper") + `",
@@ -16727,6 +20078,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📄",
+    "hexcode": "1f4c4",
+    "p_x": 1351,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("document") + `",
@@ -16741,6 +20095,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📰",
+    "hexcode": "1f4f0",
+    "p_x": 1405,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("news") + `",
@@ -16755,6 +20112,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗞️",
+    "hexcode": "1f5de",
+    "p_x": 1459,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("news") + `",
@@ -16771,6 +20131,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📑",
+    "hexcode": "1f4d1",
+    "p_x": 1513,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("bookmark") + `",
@@ -16786,6 +20149,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔖",
+    "hexcode": "1f516",
+    "p_x": 1567,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("bookmark") + `",
@@ -16799,6 +20165,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🏷️",
+    "hexcode": "1f3f7",
+    "p_x": 1621,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("label") + `"
@@ -16811,6 +20180,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💰",
+    "hexcode": "1f4b0",
+    "p_x": 1675,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("bag") + `",
@@ -16826,6 +20198,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💴",
+    "hexcode": "1f4b4",
+    "p_x": 1729,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("banknote") + `",
@@ -16843,6 +20218,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💵",
+    "hexcode": "1f4b5",
+    "p_x": 1783,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("banknote") + `",
@@ -16860,6 +20238,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💶",
+    "hexcode": "1f4b6",
+    "p_x": 1837,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("banknote") + `",
@@ -16877,6 +20258,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💷",
+    "hexcode": "1f4b7",
+    "p_x": 1891,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("banknote") + `",
@@ -16895,6 +20279,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💸",
+    "hexcode": "1f4b8",
+    "p_x": 1945,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("banknote") + `",
@@ -16912,6 +20299,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💳",
+    "hexcode": "1f4b3",
+    "p_x": 1999,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("card") + `",
@@ -16926,6 +20316,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧾",
+    "hexcode": "1f9fe",
+    "p_x": 2053,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("accounting") + `",
@@ -16942,6 +20335,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💹",
+    "hexcode": "1f4b9",
+    "p_x": 2107,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("chart") + `",
@@ -16960,6 +20356,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "✉️",
+    "hexcode": "2709",
+    "p_x": 2161,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("email") + `",
@@ -16975,6 +20374,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📧",
+    "hexcode": "1f4e7",
+    "p_x": 2215,
+    "p_y": 1405,
     "emoticons": [],
     "keywords": [
         "` + _t("e-mail") + `",
@@ -16990,6 +20392,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📨",
+    "hexcode": "1f4e8",
+    "p_x": 1,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("e-mail") + `",
@@ -17007,6 +20412,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📩",
+    "hexcode": "1f4e9",
+    "p_x": 55,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -17024,6 +20432,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📤",
+    "hexcode": "1f4e4",
+    "p_x": 109,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("box") + `",
@@ -17042,6 +20453,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📥",
+    "hexcode": "1f4e5",
+    "p_x": 163,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("box") + `",
@@ -17060,6 +20474,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📦",
+    "hexcode": "1f4e6",
+    "p_x": 217,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("box") + `",
@@ -17074,6 +20491,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📫",
+    "hexcode": "1f4eb",
+    "p_x": 271,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("closed") + `",
@@ -17095,6 +20515,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📪",
+    "hexcode": "1f4ea",
+    "p_x": 325,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("closed") + `",
@@ -17117,6 +20540,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📬",
+    "hexcode": "1f4ec",
+    "p_x": 379,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("mail") + `",
@@ -17137,6 +20563,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📭",
+    "hexcode": "1f4ed",
+    "p_x": 433,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("lowered") + `",
@@ -17158,6 +20587,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📮",
+    "hexcode": "1f4ee",
+    "p_x": 487,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("mail") + `",
@@ -17174,6 +20606,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗳️",
+    "hexcode": "1f5f3",
+    "p_x": 541,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("ballot") + `",
@@ -17188,6 +20623,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "✏️",
+    "hexcode": "270f",
+    "p_x": 595,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("pencil") + `"
@@ -17200,6 +20638,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "✒️",
+    "hexcode": "2712",
+    "p_x": 649,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("black nib") + `",
@@ -17214,6 +20655,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🖋️",
+    "hexcode": "1f58b",
+    "p_x": 703,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("fountain") + `",
@@ -17227,6 +20671,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🖊️",
+    "hexcode": "1f58a",
+    "p_x": 757,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("ballpoint") + `",
@@ -17240,6 +20687,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🖌️",
+    "hexcode": "1f58c",
+    "p_x": 811,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("paintbrush") + `",
@@ -17253,6 +20703,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🖍️",
+    "hexcode": "1f58d",
+    "p_x": 865,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("crayon") + `"
@@ -17265,6 +20718,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📝",
+    "hexcode": "1f4dd",
+    "p_x": 919,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("memo") + `",
@@ -17278,6 +20734,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💼",
+    "hexcode": "1f4bc",
+    "p_x": 973,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("briefcase") + `"
@@ -17290,6 +20749,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📁",
+    "hexcode": "1f4c1",
+    "p_x": 1027,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("file") + `",
@@ -17303,6 +20765,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📂",
+    "hexcode": "1f4c2",
+    "p_x": 1081,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("file") + `",
@@ -17317,6 +20782,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗂️",
+    "hexcode": "1f5c2",
+    "p_x": 1135,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("card") + `",
@@ -17331,6 +20799,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📅",
+    "hexcode": "1f4c5",
+    "p_x": 1189,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("calendar") + `",
@@ -17344,6 +20815,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📆",
+    "hexcode": "1f4c6",
+    "p_x": 1243,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("calendar") + `",
@@ -17357,6 +20831,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗒️",
+    "hexcode": "1f5d2",
+    "p_x": 1297,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("note") + `",
@@ -17372,6 +20849,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗓️",
+    "hexcode": "1f5d3",
+    "p_x": 1351,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("calendar") + `",
@@ -17386,6 +20866,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📇",
+    "hexcode": "1f4c7",
+    "p_x": 1405,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("card") + `",
@@ -17400,6 +20883,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📈",
+    "hexcode": "1f4c8",
+    "p_x": 1459,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("chart") + `",
@@ -17418,6 +20904,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📉",
+    "hexcode": "1f4c9",
+    "p_x": 1513,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("chart") + `",
@@ -17435,6 +20924,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📊",
+    "hexcode": "1f4ca",
+    "p_x": 1567,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("bar") + `",
@@ -17449,6 +20941,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📋",
+    "hexcode": "1f4cb",
+    "p_x": 1621,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("clipboard") + `"
@@ -17461,6 +20956,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📌",
+    "hexcode": "1f4cc",
+    "p_x": 1675,
+    "p_y": 1459,
     "emoticons": [
         ":pin"
     ],
@@ -17477,6 +20975,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📍",
+    "hexcode": "1f4cd",
+    "p_x": 1729,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("pin") + `",
@@ -17492,6 +20993,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📎",
+    "hexcode": "1f4ce",
+    "p_x": 1783,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("paperclip") + `"
@@ -17504,6 +21008,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🖇️",
+    "hexcode": "1f587",
+    "p_x": 1837,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("link") + `",
@@ -17518,6 +21025,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📏",
+    "hexcode": "1f4cf",
+    "p_x": 1891,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("ruler") + `",
@@ -17532,6 +21042,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📐",
+    "hexcode": "1f4d0",
+    "p_x": 1945,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("ruler") + `",
@@ -17548,6 +21061,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "✂️",
+    "hexcode": "2702",
+    "p_x": 1999,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("cutting") + `",
@@ -17562,6 +21078,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗃️",
+    "hexcode": "1f5c3",
+    "p_x": 2053,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("box") + `",
@@ -17576,6 +21095,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗄️",
+    "hexcode": "1f5c4",
+    "p_x": 2107,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("cabinet") + `",
@@ -17590,6 +21112,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗑️",
+    "hexcode": "1f5d1",
+    "p_x": 2161,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("wastebasket") + `"
@@ -17602,6 +21127,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔒",
+    "hexcode": "1f512",
+    "p_x": 2215,
+    "p_y": 1459,
     "emoticons": [],
     "keywords": [
         "` + _t("closed") + `",
@@ -17616,6 +21144,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔓",
+    "hexcode": "1f513",
+    "p_x": 1,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("lock") + `",
@@ -17632,6 +21163,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔏",
+    "hexcode": "1f50f",
+    "p_x": 55,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("ink") + `",
@@ -17649,6 +21183,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔐",
+    "hexcode": "1f510",
+    "p_x": 109,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("closed") + `",
@@ -17665,6 +21202,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔑",
+    "hexcode": "1f511",
+    "p_x": 163,
+    "p_y": 1513,
     "emoticons": [
         ":key"
     ],
@@ -17681,6 +21221,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗝️",
+    "hexcode": "1f5dd",
+    "p_x": 217,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("clue") + `",
@@ -17696,6 +21239,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔨",
+    "hexcode": "1f528",
+    "p_x": 271,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("hammer") + `",
@@ -17709,6 +21255,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🪓",
+    "hexcode": "1fa93",
+    "p_x": 325,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("axe") + `",
@@ -17725,6 +21274,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⛏️",
+    "hexcode": "26cf",
+    "p_x": 379,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("mining") + `",
@@ -17739,6 +21291,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⚒️",
+    "hexcode": "2692",
+    "p_x": 433,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("hammer") + `",
@@ -17754,6 +21309,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🛠️",
+    "hexcode": "1f6e0",
+    "p_x": 487,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("hammer") + `",
@@ -17771,6 +21329,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗡️",
+    "hexcode": "1f5e1",
+    "p_x": 541,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("dagger") + `",
@@ -17785,6 +21346,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⚔️",
+    "hexcode": "2694",
+    "p_x": 595,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("crossed") + `",
@@ -17799,6 +21363,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔫",
+    "hexcode": "1f52b",
+    "p_x": 649,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("toy") + `",
@@ -17819,6 +21386,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🏹",
+    "hexcode": "1f3f9",
+    "p_x": 703,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("archer") + `",
@@ -17836,6 +21406,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🛡️",
+    "hexcode": "1f6e1",
+    "p_x": 757,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("shield") + `",
@@ -17849,6 +21422,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔧",
+    "hexcode": "1f527",
+    "p_x": 811,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("spanner") + `",
@@ -17863,6 +21439,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔩",
+    "hexcode": "1f529",
+    "p_x": 865,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("bolt") + `",
@@ -17878,6 +21457,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⚙️",
+    "hexcode": "2699",
+    "p_x": 919,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("cog") + `",
@@ -17893,6 +21475,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗜️",
+    "hexcode": "1f5dc",
+    "p_x": 973,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("clamp") + `",
@@ -17908,6 +21493,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⚖️",
+    "hexcode": "2696",
+    "p_x": 1027,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("balance") + `",
@@ -17924,6 +21512,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🦯",
+    "hexcode": "1f9af",
+    "p_x": 1081,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("accessibility") + `",
@@ -17940,6 +21531,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔗",
+    "hexcode": "1f517",
+    "p_x": 1135,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("link") + `"
@@ -17952,6 +21546,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⛓️",
+    "hexcode": "26d3",
+    "p_x": 1189,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("chain") + `",
@@ -17965,6 +21562,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧰",
+    "hexcode": "1f9f0",
+    "p_x": 1243,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("chest") + `",
@@ -17980,6 +21580,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧲",
+    "hexcode": "1f9f2",
+    "p_x": 1297,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("attraction") + `",
@@ -17995,6 +21598,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⚗️",
+    "hexcode": "2697",
+    "p_x": 1351,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("alembic") + `",
@@ -18009,6 +21615,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧪",
+    "hexcode": "1f9ea",
+    "p_x": 1405,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("chemist") + `",
@@ -18026,6 +21635,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧫",
+    "hexcode": "1f9eb",
+    "p_x": 1459,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("bacteria") + `",
@@ -18043,6 +21655,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧬",
+    "hexcode": "1f9ec",
+    "p_x": 1513,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("biologist") + `",
@@ -18061,6 +21676,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔬",
+    "hexcode": "1f52c",
+    "p_x": 1567,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("microscope") + `",
@@ -18075,6 +21693,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🔭",
+    "hexcode": "1f52d",
+    "p_x": 1621,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("science") + `",
@@ -18089,6 +21710,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "📡",
+    "hexcode": "1f4e1",
+    "p_x": 1675,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("antenna") + `",
@@ -18103,6 +21727,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💉",
+    "hexcode": "1f489",
+    "p_x": 1729,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("medicine") + `",
@@ -18121,6 +21748,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🩸",
+    "hexcode": "1fa78",
+    "p_x": 1783,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("bleed") + `",
@@ -18138,6 +21768,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "💊",
+    "hexcode": "1f48a",
+    "p_x": 1837,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("doctor") + `",
@@ -18153,6 +21786,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🩹",
+    "hexcode": "1fa79",
+    "p_x": 1891,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("adhesive bandage") + `",
@@ -18171,6 +21807,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🩺",
+    "hexcode": "1fa7a",
+    "p_x": 1945,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("doctor") + `",
@@ -18186,6 +21825,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🚪",
+    "hexcode": "1f6aa",
+    "p_x": 1999,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("door") + `"
@@ -18198,6 +21840,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🛏️",
+    "hexcode": "1f6cf",
+    "p_x": 2053,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("bed") + `",
@@ -18212,6 +21857,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🛋️",
+    "hexcode": "1f6cb",
+    "p_x": 2107,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("couch") + `",
@@ -18229,6 +21877,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🪑",
+    "hexcode": "1fa91",
+    "p_x": 2161,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("chair") + `",
@@ -18243,6 +21894,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🚽",
+    "hexcode": "1f6bd",
+    "p_x": 2215,
+    "p_y": 1513,
     "emoticons": [],
     "keywords": [
         "` + _t("facilities") + `",
@@ -18259,6 +21913,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🚿",
+    "hexcode": "1f6bf",
+    "p_x": 1,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("shower") + `",
@@ -18272,6 +21929,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🛁",
+    "hexcode": "1f6c1",
+    "p_x": 55,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("bath") + `",
@@ -18285,6 +21945,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🪒",
+    "hexcode": "1fa92",
+    "p_x": 109,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("razor") + `",
@@ -18300,6 +21963,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧴",
+    "hexcode": "1f9f4",
+    "p_x": 163,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("lotion") + `",
@@ -18317,6 +21983,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧷",
+    "hexcode": "1f9f7",
+    "p_x": 217,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("nappy") + `",
@@ -18332,6 +22001,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧹",
+    "hexcode": "1f9f9",
+    "p_x": 271,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("broom") + `",
@@ -18347,6 +22019,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧺",
+    "hexcode": "1f9fa",
+    "p_x": 325,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("basket") + `",
@@ -18362,6 +22037,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧻",
+    "hexcode": "1f9fb",
+    "p_x": 379,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("paper towels") + `",
@@ -18377,6 +22055,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧼",
+    "hexcode": "1f9fc",
+    "p_x": 433,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("bar") + `",
@@ -18394,6 +22075,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧽",
+    "hexcode": "1f9fd",
+    "p_x": 487,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("absorbing") + `",
@@ -18409,6 +22093,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🧯",
+    "hexcode": "1f9ef",
+    "p_x": 541,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("extinguish") + `",
@@ -18424,6 +22111,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🛒",
+    "hexcode": "1f6d2",
+    "p_x": 595,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("cart") + `",
@@ -18439,6 +22129,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🚬",
+    "hexcode": "1f6ac",
+    "p_x": 649,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("cigarette") + `",
@@ -18452,6 +22145,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⚰️",
+    "hexcode": "26b0",
+    "p_x": 703,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("coffin") + `",
@@ -18465,6 +22161,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "⚱️",
+    "hexcode": "26b1",
+    "p_x": 757,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("ashes") + `",
@@ -18480,6 +22179,9 @@ const _getEmojisData7 = () => `{
 {
     "category": "Objects",
     "codepoints": "🗿",
+    "hexcode": "1f5ff",
+    "p_x": 811,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("face") + `",
@@ -18496,6 +22198,9 @@ const _getEmojisData7 = () => `{
 const _getEmojisData8 = () => `{
     "category": "Symbols",
     "codepoints": "🏧",
+    "hexcode": "1f3e7",
+    "p_x": 865,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("ATM") + `",
@@ -18512,6 +22217,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚮",
+    "hexcode": "1f6ae",
+    "p_x": 919,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("litter") + `",
@@ -18528,6 +22236,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚰",
+    "hexcode": "1f6b0",
+    "p_x": 973,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("drinking") + `",
@@ -18542,6 +22253,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♿",
+    "hexcode": "267f",
+    "p_x": 1027,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("access") + `",
@@ -18556,6 +22270,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚹",
+    "hexcode": "1f6b9",
+    "p_x": 1081,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("bathroom") + `",
@@ -18577,6 +22294,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚺",
+    "hexcode": "1f6ba",
+    "p_x": 1135,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("ladies room") + `",
@@ -18601,6 +22321,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚻",
+    "hexcode": "1f6bb",
+    "p_x": 1189,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("bathroom") + `",
@@ -18618,6 +22341,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚼",
+    "hexcode": "1f6bc",
+    "p_x": 1243,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("baby") + `",
@@ -18633,6 +22359,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚾",
+    "hexcode": "1f6be",
+    "p_x": 1297,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("amenities") + `",
@@ -18654,6 +22383,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🛂",
+    "hexcode": "1f6c2",
+    "p_x": 1351,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("border") + `",
@@ -18669,6 +22401,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🛃",
+    "hexcode": "1f6c3",
+    "p_x": 1405,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("customs") + `"
@@ -18681,6 +22416,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🛄",
+    "hexcode": "1f6c4",
+    "p_x": 1459,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("baggage") + `",
@@ -18694,6 +22432,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🛅",
+    "hexcode": "1f6c5",
+    "p_x": 1513,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("baggage") + `",
@@ -18709,6 +22450,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⚠️",
+    "hexcode": "26a0",
+    "p_x": 1567,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("warning") + `"
@@ -18721,6 +22465,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚸",
+    "hexcode": "1f6b8",
+    "p_x": 1621,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("child") + `",
@@ -18737,6 +22484,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⛔",
+    "hexcode": "26d4",
+    "p_x": 1675,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("denied") + `",
@@ -18755,6 +22505,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚫",
+    "hexcode": "1f6ab",
+    "p_x": 1729,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("denied") + `",
@@ -18772,6 +22525,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚳",
+    "hexcode": "1f6b3",
+    "p_x": 1783,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("bicycle") + `",
@@ -18789,6 +22545,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚭",
+    "hexcode": "1f6ad",
+    "p_x": 1837,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("denied") + `",
@@ -18806,6 +22565,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚯",
+    "hexcode": "1f6af",
+    "p_x": 1891,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("denied") + `",
@@ -18824,6 +22586,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚱",
+    "hexcode": "1f6b1",
+    "p_x": 1945,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("non-drinkable water") + `",
@@ -18839,6 +22604,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚷",
+    "hexcode": "1f6b7",
+    "p_x": 1999,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("denied") + `",
@@ -18857,6 +22625,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "📵",
+    "hexcode": "1f4f5",
+    "p_x": 2053,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("cell") + `",
@@ -18874,6 +22645,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔞",
+    "hexcode": "1f51e",
+    "p_x": 2107,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("18") + `",
@@ -18891,6 +22665,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "☢️",
+    "hexcode": "2622",
+    "p_x": 2161,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("radioactive") + `",
@@ -18904,6 +22681,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "☣️",
+    "hexcode": "2623",
+    "p_x": 2215,
+    "p_y": 1567,
     "emoticons": [],
     "keywords": [
         "` + _t("biohazard") + `",
@@ -18917,6 +22697,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⬆️",
+    "hexcode": "2b06",
+    "p_x": 1,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -18934,6 +22717,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "↗️",
+    "hexcode": "2197",
+    "p_x": 55,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -18950,6 +22736,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "➡️",
+    "hexcode": "27a1",
+    "p_x": 109,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -18966,6 +22755,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "↘️",
+    "hexcode": "2198",
+    "p_x": 163,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -18982,6 +22774,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⬇️",
+    "hexcode": "2b07",
+    "p_x": 217,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -18998,6 +22793,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "↙️",
+    "hexcode": "2199",
+    "p_x": 271,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19014,6 +22812,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⬅️",
+    "hexcode": "2b05",
+    "p_x": 325,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19030,6 +22831,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "↖️",
+    "hexcode": "2196",
+    "p_x": 379,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19046,6 +22850,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "↕️",
+    "hexcode": "2195",
+    "p_x": 433,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19059,6 +22866,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "↔️",
+    "hexcode": "2194",
+    "p_x": 487,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19072,6 +22882,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "↩️",
+    "hexcode": "21a9",
+    "p_x": 541,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19085,6 +22898,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "↪️",
+    "hexcode": "21aa",
+    "p_x": 595,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19098,6 +22914,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⤴️",
+    "hexcode": "2934",
+    "p_x": 649,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19111,6 +22930,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⤵️",
+    "hexcode": "2935",
+    "p_x": 703,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19125,6 +22947,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔃",
+    "hexcode": "1f503",
+    "p_x": 757,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19140,6 +22965,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔄",
+    "hexcode": "1f504",
+    "p_x": 811,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("anticlockwise") + `",
@@ -19157,6 +22985,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔙",
+    "hexcode": "1f519",
+    "p_x": 865,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19170,6 +23001,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔚",
+    "hexcode": "1f51a",
+    "p_x": 919,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19183,6 +23017,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔛",
+    "hexcode": "1f51b",
+    "p_x": 973,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19198,6 +23035,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔜",
+    "hexcode": "1f51c",
+    "p_x": 1027,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19211,6 +23051,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔝",
+    "hexcode": "1f51d",
+    "p_x": 1081,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19225,6 +23068,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🛐",
+    "hexcode": "1f6d0",
+    "p_x": 1135,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("place of worship") + `",
@@ -19239,6 +23085,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⚛️",
+    "hexcode": "269b",
+    "p_x": 1189,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("atheist") + `",
@@ -19253,6 +23102,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🕉️",
+    "hexcode": "1f549",
+    "p_x": 1243,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("Hindu") + `",
@@ -19267,6 +23119,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "✡️",
+    "hexcode": "2721",
+    "p_x": 1297,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("David") + `",
@@ -19286,6 +23141,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "☸️",
+    "hexcode": "2638",
+    "p_x": 1351,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("Buddhist") + `",
@@ -19302,6 +23160,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "☯️",
+    "hexcode": "262f",
+    "p_x": 1405,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("religion") + `",
@@ -19320,6 +23181,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "✝️",
+    "hexcode": "271d",
+    "p_x": 1459,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("Christian") + `",
@@ -19336,6 +23200,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "☦️",
+    "hexcode": "2626",
+    "p_x": 1513,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("Christian") + `",
@@ -19352,6 +23219,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "☪️",
+    "hexcode": "262a",
+    "p_x": 1567,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("islam") + `",
@@ -19368,6 +23238,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "☮️",
+    "hexcode": "262e",
+    "p_x": 1621,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("peace") + `",
@@ -19381,6 +23254,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🕎",
+    "hexcode": "1f54e",
+    "p_x": 1675,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("candelabrum") + `",
@@ -19396,6 +23272,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔯",
+    "hexcode": "1f52f",
+    "p_x": 1729,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("dotted six-pointed star") + `",
@@ -19410,6 +23289,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♈",
+    "hexcode": "2648",
+    "p_x": 1783,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("Aries") + `",
@@ -19424,6 +23306,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♉",
+    "hexcode": "2649",
+    "p_x": 1837,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("bull") + `",
@@ -19439,6 +23324,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♊",
+    "hexcode": "264a",
+    "p_x": 1891,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("Gemini") + `",
@@ -19453,6 +23341,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♋",
+    "hexcode": "264b",
+    "p_x": 1945,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("Cancer") + `",
@@ -19467,6 +23358,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♌",
+    "hexcode": "264c",
+    "p_x": 1999,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("Leo") + `",
@@ -19481,6 +23375,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♍",
+    "hexcode": "264d",
+    "p_x": 2053,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("virgin") + `",
@@ -19495,6 +23392,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♎",
+    "hexcode": "264e",
+    "p_x": 2107,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("balance") + `",
@@ -19511,6 +23411,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♏",
+    "hexcode": "264f",
+    "p_x": 2161,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("Scorpio") + `",
@@ -19527,6 +23430,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♐",
+    "hexcode": "2650",
+    "p_x": 2215,
+    "p_y": 1621,
     "emoticons": [],
     "keywords": [
         "` + _t("archer") + `",
@@ -19542,6 +23448,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♑",
+    "hexcode": "2651",
+    "p_x": 1,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("Capricorn") + `",
@@ -19556,6 +23465,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♒",
+    "hexcode": "2652",
+    "p_x": 55,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("Aquarius") + `",
@@ -19572,6 +23484,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♓",
+    "hexcode": "2653",
+    "p_x": 109,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("fish") + `",
@@ -19586,6 +23501,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⛎",
+    "hexcode": "26ce",
+    "p_x": 163,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("bearer") + `",
@@ -19602,6 +23520,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔀",
+    "hexcode": "1f500",
+    "p_x": 217,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19616,6 +23537,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔁",
+    "hexcode": "1f501",
+    "p_x": 271,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19631,6 +23555,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔂",
+    "hexcode": "1f502",
+    "p_x": 325,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19646,6 +23573,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "▶️",
+    "hexcode": "25b6",
+    "p_x": 379,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19662,6 +23592,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏩",
+    "hexcode": "23e9",
+    "p_x": 433,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("fast forward button") + `",
@@ -19679,6 +23612,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏭️",
+    "hexcode": "23ed",
+    "p_x": 487,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19695,6 +23631,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏯️",
+    "hexcode": "23ef",
+    "p_x": 541,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19712,6 +23651,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "◀️",
+    "hexcode": "25c0",
+    "p_x": 595,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19728,6 +23670,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏪",
+    "hexcode": "23ea",
+    "p_x": 649,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19743,6 +23688,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏮️",
+    "hexcode": "23ee",
+    "p_x": 703,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19759,6 +23707,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔼",
+    "hexcode": "1f53c",
+    "p_x": 757,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19775,6 +23726,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏫",
+    "hexcode": "23eb",
+    "p_x": 811,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19789,6 +23743,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔽",
+    "hexcode": "1f53d",
+    "p_x": 865,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19806,6 +23763,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏬",
+    "hexcode": "23ec",
+    "p_x": 919,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("arrow") + `",
@@ -19821,6 +23781,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏸️",
+    "hexcode": "23f8",
+    "p_x": 973,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("bar") + `",
@@ -19837,6 +23800,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏹️",
+    "hexcode": "23f9",
+    "p_x": 1027,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("square") + `",
@@ -19851,6 +23817,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏺️",
+    "hexcode": "23fa",
+    "p_x": 1081,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("circle") + `",
@@ -19865,6 +23834,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⏏️",
+    "hexcode": "23cf",
+    "p_x": 1135,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("eject") + `",
@@ -19878,6 +23850,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🎦",
+    "hexcode": "1f3a6",
+    "p_x": 1189,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("camera") + `",
@@ -19893,6 +23868,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔅",
+    "hexcode": "1f505",
+    "p_x": 1243,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("brightness") + `",
@@ -19908,6 +23886,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔆",
+    "hexcode": "1f506",
+    "p_x": 1297,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("bright button") + `",
@@ -19923,6 +23904,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "📶",
+    "hexcode": "1f4f6",
+    "p_x": 1351,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("antenna") + `",
@@ -19940,6 +23924,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "📳",
+    "hexcode": "1f4f3",
+    "p_x": 1405,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("cell") + `",
@@ -19958,6 +23945,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "📴",
+    "hexcode": "1f4f4",
+    "p_x": 1459,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("cell") + `",
@@ -19974,6 +23964,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♀️",
+    "hexcode": "2640",
+    "p_x": 1513,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("female sign") + `",
@@ -19987,6 +23980,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♂️",
+    "hexcode": "2642",
+    "p_x": 1567,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("male sign") + `",
@@ -20000,6 +23996,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "✖️",
+    "hexcode": "2716",
+    "p_x": 1621,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("×") + `",
@@ -20018,6 +24017,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "➕",
+    "hexcode": "2795",
+    "p_x": 1675,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("+") + `",
@@ -20036,6 +24038,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "➖",
+    "hexcode": "2796",
+    "p_x": 1729,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("-") + `",
@@ -20056,6 +24061,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "➗",
+    "hexcode": "2797",
+    "p_x": 1783,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("÷") + `",
@@ -20072,6 +24080,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♾️",
+    "hexcode": "267e",
+    "p_x": 1837,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("eternal") + `",
@@ -20089,6 +24100,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "‼️",
+    "hexcode": "203c",
+    "p_x": 1891,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("double exclamation mark") + `",
@@ -20107,6 +24121,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⁉️",
+    "hexcode": "2049",
+    "p_x": 1945,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("exclamation") + `",
@@ -20127,6 +24144,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "❓",
+    "hexcode": "2753",
+    "p_x": 1999,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("?") + `",
@@ -20143,6 +24163,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "❔",
+    "hexcode": "2754",
+    "p_x": 2053,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("?") + `",
@@ -20160,6 +24183,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "❕",
+    "hexcode": "2755",
+    "p_x": 2107,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("!") + `",
@@ -20177,6 +24203,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "❗",
+    "hexcode": "2757",
+    "p_x": 2161,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("!") + `",
@@ -20193,6 +24222,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "〰️",
+    "hexcode": "3030",
+    "p_x": 2215,
+    "p_y": 1675,
     "emoticons": [],
     "keywords": [
         "` + _t("dash") + `",
@@ -20207,6 +24239,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "💱",
+    "hexcode": "1f4b1",
+    "p_x": 1,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("bank") + `",
@@ -20222,6 +24257,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "💲",
+    "hexcode": "1f4b2",
+    "p_x": 55,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("currency") + `",
@@ -20237,6 +24275,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⚕️",
+    "hexcode": "2695",
+    "p_x": 109,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("aesculapius") + `",
@@ -20252,6 +24293,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "♻️",
+    "hexcode": "267b",
+    "p_x": 163,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("recycle") + `",
@@ -20265,6 +24309,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⚜️",
+    "hexcode": "269c",
+    "p_x": 217,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("fleur-de-lis") + `"
@@ -20277,6 +24324,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔱",
+    "hexcode": "1f531",
+    "p_x": 271,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("anchor") + `",
@@ -20293,6 +24343,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "📛",
+    "hexcode": "1f4db",
+    "p_x": 325,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("badge") + `",
@@ -20306,6 +24359,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔰",
+    "hexcode": "1f530",
+    "p_x": 379,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("beginner") + `",
@@ -20322,6 +24378,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⭕",
+    "hexcode": "2b55",
+    "p_x": 433,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("circle") + `",
@@ -20338,6 +24397,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "✅",
+    "hexcode": "2705",
+    "p_x": 487,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("✓") + `",
@@ -20354,6 +24416,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "☑️",
+    "hexcode": "2611",
+    "p_x": 541,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("ballot") + `",
@@ -20372,6 +24437,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "✔️",
+    "hexcode": "2714",
+    "p_x": 595,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("check mark") + `",
@@ -20389,6 +24457,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "❌",
+    "hexcode": "274c",
+    "p_x": 649,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("×") + `",
@@ -20407,6 +24478,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "❎",
+    "hexcode": "274e",
+    "p_x": 703,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("×") + `",
@@ -20423,6 +24497,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "➰",
+    "hexcode": "27b0",
+    "p_x": 757,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("curl") + `",
@@ -20437,6 +24514,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "➿",
+    "hexcode": "27bf",
+    "p_x": 811,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("curl") + `",
@@ -20452,6 +24532,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "〽️",
+    "hexcode": "303d",
+    "p_x": 865,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("mark") + `",
@@ -20466,6 +24549,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "✳️",
+    "hexcode": "2733",
+    "p_x": 919,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("*") + `",
@@ -20480,6 +24566,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "✴️",
+    "hexcode": "2734",
+    "p_x": 973,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("*") + `",
@@ -20494,6 +24583,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "❇️",
+    "hexcode": "2747",
+    "p_x": 1027,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("*") + `",
@@ -20507,6 +24599,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "©️",
+    "hexcode": "a9",
+    "p_x": 1081,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("C") + `",
@@ -20520,6 +24615,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "®️",
+    "hexcode": "ae",
+    "p_x": 1135,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("R") + `",
@@ -20535,6 +24633,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "™️",
+    "hexcode": "2122",
+    "p_x": 1189,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("mark") + `",
@@ -20550,6 +24651,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "#️⃣",
+    "hexcode": "23-20e3",
+    "p_x": 1243,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20562,6 +24666,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "*️⃣",
+    "hexcode": "2a-20e3",
+    "p_x": 1297,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20574,6 +24681,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "0️⃣",
+    "hexcode": "30-20e3",
+    "p_x": 1351,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20586,6 +24696,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "1️⃣",
+    "hexcode": "31-20e3",
+    "p_x": 1405,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20598,6 +24711,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "2️⃣",
+    "hexcode": "32-20e3",
+    "p_x": 1459,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20610,6 +24726,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "3️⃣",
+    "hexcode": "33-20e3",
+    "p_x": 1513,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20622,6 +24741,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "4️⃣",
+    "hexcode": "34-20e3",
+    "p_x": 1567,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20634,6 +24756,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "5️⃣",
+    "hexcode": "35-20e3",
+    "p_x": 1621,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20646,6 +24771,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "6️⃣",
+    "hexcode": "36-20e3",
+    "p_x": 1675,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20658,6 +24786,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "7️⃣",
+    "hexcode": "37-20e3",
+    "p_x": 1729,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20670,6 +24801,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "8️⃣",
+    "hexcode": "38-20e3",
+    "p_x": 1783,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20682,6 +24816,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "9️⃣",
+    "hexcode": "39-20e3",
+    "p_x": 1837,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20694,6 +24831,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔟",
+    "hexcode": "1f51f",
+    "p_x": 1891,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("keycap") + `"
@@ -20706,6 +24846,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔠",
+    "hexcode": "1f520",
+    "p_x": 1945,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("input Latin uppercase") + `",
@@ -20724,6 +24867,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔡",
+    "hexcode": "1f521",
+    "p_x": 1999,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("input Latin lowercase") + `",
@@ -20742,6 +24888,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔢",
+    "hexcode": "1f522",
+    "p_x": 2053,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("1234") + `",
@@ -20756,6 +24905,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔣",
+    "hexcode": "1f523",
+    "p_x": 2107,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("〒♪&%") + `",
@@ -20770,6 +24922,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔤",
+    "hexcode": "1f524",
+    "p_x": 2161,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("input Latin letters") + `",
@@ -20788,6 +24943,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🅰️",
+    "hexcode": "1f170",
+    "p_x": 2215,
+    "p_y": 1729,
     "emoticons": [],
     "keywords": [
         "` + _t("A") + `",
@@ -20802,6 +24960,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆎",
+    "hexcode": "1f18e",
+    "p_x": 1,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("AB") + `",
@@ -20816,6 +24977,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🅱️",
+    "hexcode": "1f171",
+    "p_x": 55,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("B") + `",
@@ -20830,6 +24994,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆑",
+    "hexcode": "1f191",
+    "p_x": 109,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("CL") + `",
@@ -20843,6 +25010,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆒",
+    "hexcode": "1f192",
+    "p_x": 163,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("COOL") + `",
@@ -20856,6 +25026,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆓",
+    "hexcode": "1f193",
+    "p_x": 217,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("FREE") + `",
@@ -20869,6 +25042,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "ℹ️",
+    "hexcode": "2139",
+    "p_x": 271,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("i") + `",
@@ -20882,6 +25058,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆔",
+    "hexcode": "1f194",
+    "p_x": 325,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("ID") + `",
@@ -20896,6 +25075,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "Ⓜ️",
+    "hexcode": "24c2",
+    "p_x": 379,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("circle") + `",
@@ -20910,6 +25092,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆕",
+    "hexcode": "1f195",
+    "p_x": 433,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("NEW") + `",
@@ -20923,6 +25108,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆖",
+    "hexcode": "1f196",
+    "p_x": 487,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("NG") + `",
@@ -20936,6 +25124,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🅾️",
+    "hexcode": "1f17e",
+    "p_x": 541,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("blood type") + `",
@@ -20950,6 +25141,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆗",
+    "hexcode": "1f197",
+    "p_x": 595,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("OK") + `",
@@ -20963,6 +25157,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🅿️",
+    "hexcode": "1f17f",
+    "p_x": 649,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("P") + `",
@@ -20977,6 +25174,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆘",
+    "hexcode": "1f198",
+    "p_x": 703,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("help") + `",
@@ -20991,6 +25191,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆙",
+    "hexcode": "1f199",
+    "p_x": 757,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("mark") + `",
@@ -21006,6 +25209,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🆚",
+    "hexcode": "1f19a",
+    "p_x": 811,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("versus") + `",
@@ -21020,6 +25226,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈁",
+    "hexcode": "1f201",
+    "p_x": 865,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“here”") + `",
@@ -21036,6 +25245,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈂️",
+    "hexcode": "1f202",
+    "p_x": 919,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“service charge”") + `",
@@ -21052,6 +25264,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈷️",
+    "hexcode": "1f237",
+    "p_x": 973,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“monthly amount”") + `",
@@ -21068,6 +25283,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈶",
+    "hexcode": "1f236",
+    "p_x": 1027,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“not free of charge”") + `",
@@ -21084,6 +25302,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈯",
+    "hexcode": "1f22f",
+    "p_x": 1081,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“reserved”") + `",
@@ -21100,6 +25321,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🉐",
+    "hexcode": "1f250",
+    "p_x": 1135,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“bargain”") + `",
@@ -21116,6 +25340,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈹",
+    "hexcode": "1f239",
+    "p_x": 1189,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“discount”") + `",
@@ -21132,6 +25359,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈚",
+    "hexcode": "1f21a",
+    "p_x": 1243,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“free of charge”") + `",
@@ -21148,6 +25378,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈲",
+    "hexcode": "1f232",
+    "p_x": 1297,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“prohibited”") + `",
@@ -21164,6 +25397,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🉑",
+    "hexcode": "1f251",
+    "p_x": 1351,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“acceptable”") + `",
@@ -21180,6 +25416,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈸",
+    "hexcode": "1f238",
+    "p_x": 1405,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“application”") + `",
@@ -21196,6 +25435,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈴",
+    "hexcode": "1f234",
+    "p_x": 1459,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“passing grade”") + `",
@@ -21212,6 +25454,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈳",
+    "hexcode": "1f233",
+    "p_x": 1513,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“vacancy”") + `",
@@ -21228,6 +25473,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "㊗️",
+    "hexcode": "3297",
+    "p_x": 1567,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“congratulations”") + `",
@@ -21244,6 +25492,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "㊙️",
+    "hexcode": "3299",
+    "p_x": 1621,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“secret”") + `",
@@ -21260,6 +25511,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈺",
+    "hexcode": "1f23a",
+    "p_x": 1675,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“open for business”") + `",
@@ -21276,6 +25530,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🈵",
+    "hexcode": "1f235",
+    "p_x": 1729,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("“no vacancy”") + `",
@@ -21292,6 +25549,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔴",
+    "hexcode": "1f534",
+    "p_x": 1783,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("circle") + `",
@@ -21306,6 +25566,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟠",
+    "hexcode": "1f7e0",
+    "p_x": 1837,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("circle") + `",
@@ -21319,6 +25582,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟡",
+    "hexcode": "1f7e1",
+    "p_x": 1891,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("circle") + `",
@@ -21332,6 +25598,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟢",
+    "hexcode": "1f7e2",
+    "p_x": 1945,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("circle") + `",
@@ -21345,6 +25614,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔵",
+    "hexcode": "1f535",
+    "p_x": 1999,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("blue") + `",
@@ -21359,6 +25631,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟣",
+    "hexcode": "1f7e3",
+    "p_x": 2053,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("circle") + `",
@@ -21372,6 +25647,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟤",
+    "hexcode": "1f7e4",
+    "p_x": 2107,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("brown") + `",
@@ -21385,6 +25663,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⚫",
+    "hexcode": "26ab",
+    "p_x": 2161,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("black circle") + `",
@@ -21399,6 +25680,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⚪",
+    "hexcode": "26aa",
+    "p_x": 2215,
+    "p_y": 1783,
     "emoticons": [],
     "keywords": [
         "` + _t("circle") + `",
@@ -21413,6 +25697,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟥",
+    "hexcode": "1f7e5",
+    "p_x": 1,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("red") + `",
@@ -21426,6 +25713,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟧",
+    "hexcode": "1f7e7",
+    "p_x": 55,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("orange") + `",
@@ -21439,6 +25729,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟨",
+    "hexcode": "1f7e8",
+    "p_x": 109,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("square") + `",
@@ -21452,6 +25745,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟩",
+    "hexcode": "1f7e9",
+    "p_x": 163,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("green") + `",
@@ -21465,6 +25761,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟦",
+    "hexcode": "1f7e6",
+    "p_x": 217,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("blue") + `",
@@ -21478,6 +25777,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟪",
+    "hexcode": "1f7ea",
+    "p_x": 271,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("purple") + `",
@@ -21491,6 +25793,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🟫",
+    "hexcode": "1f7eb",
+    "p_x": 325,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("brown") + `",
@@ -21504,6 +25809,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⬛",
+    "hexcode": "2b1b",
+    "p_x": 379,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("black large square") + `",
@@ -21518,6 +25826,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "⬜",
+    "hexcode": "2b1c",
+    "p_x": 433,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("geometric") + `",
@@ -21532,6 +25843,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "◼️",
+    "hexcode": "25fc",
+    "p_x": 487,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("black medium square") + `",
@@ -21546,6 +25860,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "◻️",
+    "hexcode": "25fb",
+    "p_x": 541,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("geometric") + `",
@@ -21560,6 +25877,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "◾",
+    "hexcode": "25fe",
+    "p_x": 595,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("black medium-small square") + `",
@@ -21574,6 +25894,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "◽",
+    "hexcode": "25fd",
+    "p_x": 649,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("geometric") + `",
@@ -21588,6 +25911,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "▪️",
+    "hexcode": "25aa",
+    "p_x": 703,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("black small square") + `",
@@ -21602,6 +25928,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "▫️",
+    "hexcode": "25ab",
+    "p_x": 757,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("geometric") + `",
@@ -21616,6 +25945,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔶",
+    "hexcode": "1f536",
+    "p_x": 811,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("diamond") + `",
@@ -21631,6 +25963,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔷",
+    "hexcode": "1f537",
+    "p_x": 865,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("blue") + `",
@@ -21646,6 +25981,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔸",
+    "hexcode": "1f538",
+    "p_x": 919,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("diamond") + `",
@@ -21661,6 +25999,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔹",
+    "hexcode": "1f539",
+    "p_x": 973,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("blue") + `",
@@ -21676,6 +26017,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔺",
+    "hexcode": "1f53a",
+    "p_x": 1027,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("geometric") + `",
@@ -21690,6 +26034,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔻",
+    "hexcode": "1f53b",
+    "p_x": 1081,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("down") + `",
@@ -21705,6 +26052,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "💠",
+    "hexcode": "1f4a0",
+    "p_x": 1135,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("comic") + `",
@@ -21721,6 +26071,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔘",
+    "hexcode": "1f518",
+    "p_x": 1189,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("button") + `",
@@ -21735,6 +26088,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔳",
+    "hexcode": "1f533",
+    "p_x": 1243,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("button") + `",
@@ -21751,6 +26107,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🔲",
+    "hexcode": "1f532",
+    "p_x": 1297,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("black square button") + `",
@@ -21766,6 +26125,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🏁",
+    "hexcode": "1f3c1",
+    "p_x": 1351,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("checkered") + `",
@@ -21782,6 +26144,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🚩",
+    "hexcode": "1f6a9",
+    "p_x": 1405,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("post") + `",
@@ -21796,6 +26161,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🎌",
+    "hexcode": "1f38c",
+    "p_x": 1459,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("celebration") + `",
@@ -21812,6 +26180,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🏴",
+    "hexcode": "1f3f4",
+    "p_x": 1513,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("black flag") + `",
@@ -21825,6 +26196,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🏳️",
+    "hexcode": "1f3f3",
+    "p_x": 1567,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("waving") + `",
@@ -21839,6 +26213,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🏳️‍🌈",
+    "hexcode": "1f3f3-fe0f-200d-1f308",
+    "p_x": 1621,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("pride") + `",
@@ -21853,6 +26230,9 @@ const _getEmojisData8 = () => `{
 {
     "category": "Symbols",
     "codepoints": "🏴‍☠️",
+    "hexcode": "1f3f4-200d-2620-fe0f",
+    "p_x": 1675,
+    "p_y": 1837,
     "emoticons": [],
     "keywords": [
         "` + _t("Jolly Roger") + `",

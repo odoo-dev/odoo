@@ -43,6 +43,9 @@ This module provides the core of the Odoo Web Client.
         'web.assets_emoji': [
             'web/static/src/core/emoji_picker/emoji_data.js'
         ],
+        'web.assets_extra_emoji': [
+            'web/static/src/core/emoji_picker/extra_emoji_data.js',
+        ],
         'web.assets_backend': [
             ('include', 'web._assets_helpers'),
             ('include', 'web._assets_backend_helpers'),
