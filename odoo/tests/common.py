@@ -115,6 +115,19 @@ TEST_CURSOR_COOKIE_NAME = 'test_request_key'
 
 DISABLE_TIMEOUTS = str2bool(os.getenv('ODOO_TEST_DISABLE_TIMEOUT', '0'))
 
+# A single Chrome process is kept warm and reused across all the
+# browser_js/start_tour calls of a given HttpCase subclass, instead of being
+# respawned for every call. The browser is closed once the class is done.
+# {test_class: ChromeBrowser} -- the currently warm browser for each class.
+_WARM_BROWSERS = {}
+
+
+def _close_warm_browser(cls):
+    browser = _WARM_BROWSERS.pop(cls, None)
+    if browser is not None:
+        browser.stop()
+
+
 IGNORED_MSGS = re.compile(r"""
     failed\ to\ fetch  # base error
   | connectionlosterror:  # conversion by offlineFailToFetchErrorHandler
@@ -1663,6 +1676,62 @@ class ChromeBrowser:
     def stop(self):
         self.cleanup.close()
 
+    def is_alive(self):
+        """Return whether the underlying Chrome process is still running."""
+        return getattr(self, 'chrome', None) is not None and self.chrome.poll() is None
+
+    def reset_for_reuse(self, test_case, success_signal):
+        """Reset a *running* browser so it can serve another ``browser_js`` call
+        without paying the cost of spawning a fresh Chrome process.
+
+        This rebinds the browser to the new test-case instance (each test method
+        is a distinct instance) and wipes the client-side state (cookies, storage,
+        service workers, CPU throttling) so tests stay isolated.
+
+        Ordering matters:
+        1. tear the previous page down (blank it) *while the previous, already
+           settled, ``_result`` future is still in place* -- this way any
+           unload/abort noise from the old page is logged as "after termination"
+           instead of failing the next run;
+        2. only then wipe cookies/storage, now that no page holds open
+           connections (clearing IndexedDB under a live connection aborts its
+           transactions and can block the next page's boot);
+        3. finally install the fresh per-run state for the new call.
+        """
+        # 1) tear down the previous page (old _result future still settled)
+        self._websocket_request('Page.stopLoading')
+        # unregister service workers (same-origin context still loaded)
+        self._websocket_request('Runtime.evaluate', params={'expression': """
+        ('serviceWorker' in navigator) &&
+            navigator.serviceWorker.getRegistrations().then(
+                registrations => Promise.all(registrations.map(r => r.unregister()))
+            )
+        """, 'awaitPromise': True})
+        # blank the page: closes the previous document's IndexedDB connections,
+        # websockets and timers so storage can be wiped without aborting anything
+        self.navigate_to('about:blank', wait_stop=True)
+
+        # 2) wipe cookies + per-origin storage (localStorage/indexedDB/cache/…)
+        self._websocket_request('Network.clearBrowserCookies')
+        with contextlib.suppress(ChromeBrowserException):
+            self._websocket_request('Storage.clearDataForOrigin', params={
+                'origin': test_case.base_url(),
+                'storageTypes': 'all',
+            })
+
+        # 3) rebind to the new test case and install fresh per-run state. The new
+        #    _result future is created last, so leftover events from the previous
+        #    page cannot settle (and thus fail) the upcoming run.
+        self.test_case = test_case
+        self._logger = test_case._logger
+        self.success_signal = success_signal
+        self.had_failure = False
+        self.error_checker = None
+        if self.throttling_factor != 1:
+            self.throttling_factor = 1
+            self._websocket_request('Emulation.setCPUThrottlingRate', params={'rate': 1})
+        self._result = Future()
+
     @property
     def executable(self):
         try:
@@ -2560,6 +2629,9 @@ class HttpCase(TransactionCase):
         # v8 api with correct xmlrpc exception handling.
         cls.xmlrpc_url = f'{cls.base_url()}/xmlrpc/2/'
         cls._logger = logging.getLogger('%s.%s' % (cls.__module__, cls.__name__))
+        # Make sure a browser kept warm for reuse is shut down once the whole
+        # class is done (runs after the last test method of the class).
+        cls.addClassCleanup(_close_warm_browser, cls)
 
     @classmethod
     def base_url(cls):
@@ -2851,7 +2923,33 @@ class HttpCase(TransactionCase):
         if watch:
             self._logger.warning('watch mode is only suitable for local testing')
 
-        browser = ChromeBrowser(self, headless=not watch, success_signal=success_signal, debug=debug)
+        # A warm browser can only be reused for headless, non-debug runs (a
+        # watch/debug run spawns a visible window with its own devtools).
+        reuse = not watch and debug is False
+        cls = type(self)
+
+        browser = _WARM_BROWSERS.get(cls) if reuse else None
+        if browser is not None and browser.is_alive():
+            # Reuse the already-running Chrome process: only pay the (cheap)
+            # cost of resetting its client-side state.
+            browser.reset_for_reuse(self, success_signal)
+        else:
+            if browser is not None:  # stale/dead entry, drop it
+                _close_warm_browser(cls)
+            browser = ChromeBrowser(self, headless=not watch, success_signal=success_signal, debug=debug)
+            if reuse:
+                _WARM_BROWSERS[cls] = browser
+
+        # Keep the browser warm only after a clean run; a failed/aborted run may
+        # have left Chrome in a bad state, so it is closed and respawned next time.
+        keep_browser = False
+
+        def _teardown_browser():
+            if reuse and keep_browser:
+                return  # leave it running, ready for the next call
+            browser.cleanup.close()
+            _WARM_BROWSERS.pop(cls, None)  # no-op when not reusing
+
         with self.allow_requests(browser=browser), contextlib.ExitStack() as atexit:
             # Flush and clear the current transaction.  This is useful in case
             # we make requests to the server, as these requests are made with
@@ -2859,7 +2957,7 @@ class HttpCase(TransactionCase):
             # Wait for all request before resetting the cursor.
             atexit.enter_context(flushing_cursor(self.cr))
             atexit.callback(self._wait_remaining_requests)
-            atexit.enter_context(browser.cleanup)
+            atexit.callback(_teardown_browser)
             if "bus.bus" in self.env.registry:
                 from odoo.addons.base.models.ir_http import IrHttp  # noqa: PLC0415
                 from odoo.addons.bus.websocket import CloseCode, WebsocketConnectionHandler, _kick_all  # noqa: PLC0415
@@ -2917,6 +3015,8 @@ class HttpCase(TransactionCase):
                 error = chrome_browser_exception
             if error:  # dont keep initial traceback, keep that outside of except
                 self.fail(str(error))
+            # clean run: it is safe to keep this browser warm for the next call
+            keep_browser = reuse
 
     def start_tour(self, url_path, tour_name, step_delay=None, **kwargs):
         """Wrapper for `browser_js` to start the given `tour_name` with the
