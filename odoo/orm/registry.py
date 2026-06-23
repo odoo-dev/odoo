@@ -15,8 +15,6 @@ from collections import defaultdict, deque
 from collections.abc import Mapping
 from contextlib import closing, ExitStack
 from functools import partial
-from operator import attrgetter
-
 import psycopg2.sql
 
 from odoo import sql_db
@@ -107,6 +105,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
     ready: bool  # whether everything is set up
     loaded: bool  # whether all modules are loaded
     models: dict[str, type[BaseModel]]
+    _inherit_children: defaultdict[str, OrderedSet[str]]
 
     @classmethod
     @locked
@@ -253,6 +252,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self.ready = False
 
         self.models: dict[str, type[BaseModel]] = {}    # model name/model instance mapping
+        self._inherit_children = defaultdict(OrderedSet)  # parent model name -> child model names
         self._sql_constraints = set()  # type: ignore
         self._database_translated_fields: dict[str, str] = {}  # names and translate function names of translated fields in database {"{model}.{field_name}": "translate_func"}
         self._database_company_dependent_fields: set[str] = set()  # names of company dependent fields in database
@@ -356,25 +356,30 @@ class Registry(Mapping[str, type["BaseModel"]]):
         """ Remove a (custom) model from the registry. """
         del self.models[model_name]
         # the custom model can inherit from mixins ('mail.thread', ...)
-        for Model in self.models.values():
-            Model._inherit_children.discard(model_name)
+        for children in self._inherit_children.values():
+            children.discard(model_name)
+        self._inherit_children.pop(model_name, None)
 
     def descendants(self, model_names: Iterable[str], *kinds: typing.Literal['_inherit', '_inherits']) -> OrderedSet[str]:
         """ Return the models corresponding to ``model_names`` and all those
         that inherit/inherits from them.
         """
         assert all(kind in ('_inherit', '_inherits') for kind in kinds)
-        funcs = [attrgetter(kind + '_children') for kind in kinds]
 
         models: OrderedSet[str] = OrderedSet()
         queue = deque(model_names)
         while queue:
-            model = self.get(queue.popleft())
-            if model is None or model._name in models:
+            model_name = queue.popleft()
+            if model_name in models:
                 continue
-            models.add(model._name)
-            for func in funcs:
-                queue.extend(func(model))
+            model = self.get(model_name)
+            if model is None:
+                continue
+            models.add(model_name)
+            if '_inherit' in kinds:
+                queue.extend(self._inherit_children[model_name])
+            if '_inherits' in kinds:
+                queue.extend(model._inherits_children)
         return models
 
     def load(self, module: module_graph.ModuleNode) -> list[str]:

@@ -463,7 +463,6 @@ class BaseModel(metaclass=MetaModel):
     _table: str = ''                 #: SQL table name used by model if :attr:`_auto`
     _table_query: SQL | str | None = None  #: SQL expression of the table's content (optional)
     _table_objects: dict[str, TableObject] = frozendict()  #: SQL/Table objects
-    _inherit_children: OrderedSet[str]
 
     # TODO default _rec_name to ''
     _rec_name: str | None = None                  #: field to use for labeling records, default: ``name``

@@ -186,7 +186,6 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
             '_register': False,
             '_original_module': model_def._module,
             '_inherit_module': {},                  # map parent to introducing module
-            '_inherit_children': OrderedSet(),      # names of children models
             '_inherits_children': set(),            # names of children models
             '_fields__': {},                        # populated in _setup()
             '_fields_update_order__': {},           # populated in _post_model_setup__()
@@ -207,7 +206,7 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
             _check_model_parent_extension(model_cls, model_def, parent_cls)
             bases.add(parent_cls)
             model_cls._inherit_module[parent_name] = model_def._module
-            parent_cls._inherit_children.add(name)
+            registry._inherit_children[parent_name].add(name)
 
     # model_cls.__bases__ must be assigned those classes; however, this
     # operation is quite slow, so we do it once in method _prepare_setup()
@@ -303,8 +302,8 @@ def _init_model_class_attributes(model_cls: type[BaseModel], registry: Registry)
     for parent_name in model_cls._inherits:
         registry[parent_name]._inherits_children.add(model_cls._name)
 
-    # recompute attributes of _inherit_children models
-    for child_name in model_cls._inherit_children:
+    # recompute attributes of inherit children models
+    for child_name in registry._inherit_children[model_cls._name]:
         _init_model_class_attributes(registry[child_name], registry)
 
 
@@ -560,10 +559,9 @@ def _add_manual_models(env: Environment):
         if model_cls._custom:
             removed_fields.update(model_cls._fields.values())
             del env.registry.models[name]
-            # remove the model's name from its parents' _inherit_children
-            for parent_cls in model_cls.__bases__:
-                if not parent_cls._is_model_definition:
-                    parent_cls._inherit_children.discard(name)
+            for children in env.registry._inherit_children.values():
+                children.discard(name)
+            env.registry._inherit_children.pop(name, None)
 
     if removed_fields:
         env.registry._discard_fields(list(removed_fields))
