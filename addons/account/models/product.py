@@ -300,6 +300,47 @@ class ProductProduct(models.Model):
         for record in self:
             record.tax_string = record.product_tmpl_id._construct_tax_string(record.lst_price)
 
+    def _compute_forecasted_without_stock(self):
+        res = super()._compute_forecasted_without_stock()
+        installed_modules = self.env['ir.module.module']._installed()
+        is_sale_installed = 'sale_management' in installed_modules
+        is_purchase_installed = 'purchase' in installed_modules
+
+        if not is_sale_installed:
+            sale_domain = [
+                ('move_id.state', '=', 'draft'),
+                ('move_id.move_type', 'in', ('out_invoice', 'out_refund', 'out_receipt')),
+                ('product_id', 'in', self.ids),
+                ('product_id.is_storable', '=', True),
+            ]
+            sale_lines = self.env['account.move.line']._read_group(sale_domain, ['product_id', 'product_uom_id', 'move_id.move_type'], ['quantity:sum'])
+            for product, line_uom, move_type, qty_sum in sale_lines:
+                qty = line_uom._compute_quantity(qty_sum, product.uom_id)
+                if move_type in ('out_invoice', 'out_receipt'):
+                    res[product.id]['outgoing_qty'] += qty
+                    res[product.id]['virtual_available'] -= qty
+                else:
+                    res[product.id]['outgoing_qty'] -= qty
+                    res[product.id]['virtual_available'] += qty
+
+        if not is_purchase_installed:
+            purchase_domain = [
+                ('move_id.state', '=', 'draft'),
+                ('move_id.move_type', 'in', ('in_invoice', 'in_refund', 'in_receipt')),
+                ('product_id', "in", self.ids),
+                ('product_id.is_storable', '=', True),
+            ]
+            purchase_lines = self.env['account.move.line']._read_group(purchase_domain, ['product_id', 'product_uom_id', 'move_id.move_type'], ['quantity:sum'])
+            for product, line_uom, move_type, qty_sum in purchase_lines:
+                qty = line_uom._compute_quantity(qty_sum, product.uom_id)
+                if move_type in ('in_invoice', 'in_receipt'):
+                    res[product.id]['incoming_qty'] += qty
+                    res[product.id]['virtual_available'] += qty
+                else:
+                    res[product.id]['incoming_qty'] -= qty
+                    res[product.id]['virtual_available'] -= qty
+        return res
+
     # -------------------------------------------------------------------------
     # EDI
     # -------------------------------------------------------------------------

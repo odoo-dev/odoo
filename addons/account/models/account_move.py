@@ -3905,6 +3905,17 @@ class AccountMove(models.Model):
         self._sanitize_vals(vals)
         self._check_user_access([vals])
 
+        posted_to_draft = draft_to_posted = self.env["account.move"]
+
+        if "state" in vals:
+            if vals["state"] == "draft":
+                posted_to_draft = self.filtered(lambda m: m.state == "posted")
+            elif vals["state"] == "posted":
+                draft_to_posted = self.filtered(lambda m: m.state != "posted")
+
+        if posted_to_draft:
+            posted_to_draft._update_product_qty_available(to_draft=True)
+
         unmodifiable_fields = [
             'line_ids', 'invoice_line_ids',
             'date', 'invoice_date',
@@ -4018,6 +4029,9 @@ class AccountMove(models.Model):
             for move in self:
                 if 'tax_totals' in vals:
                     super(AccountMove, move).write({'tax_totals': vals['tax_totals']})
+
+        if draft_to_posted:
+            draft_to_posted._update_product_qty_available(to_draft=False)
 
         if any(field in vals for field in ['journal_id', 'currency_id']):
             self.line_ids._check_constrains_account_id_journal_id()
@@ -5571,6 +5585,40 @@ class AccountMove(models.Model):
         to_cancel.filtered(lambda m: m.state != 'cancel').button_cancel()
         return to_reverse._reverse_moves(cancel=True)
 
+    def _update_product_qty_available(self, to_draft=False):
+        installed_modules = self.env['ir.module.module']._installed()
+        if 'stock' in installed_modules:
+            return
+        is_purchase_installed = 'purchase' in installed_modules
+        reverse = -1 if to_draft else 1
+
+        for move in self:
+            move_type = move.move_type
+            is_sale_move = not move.is_sale_installed and move.invoice_filter_type_domain == 'sale'
+            is_purchase_move = not is_purchase_installed and move.invoice_filter_type_domain == 'purchase'
+
+            if not (is_sale_move or is_purchase_move):
+                continue
+            for line in move.invoice_line_ids.filtered(lambda l: l.product_id.is_storable):
+                product = line.product_id
+                qty = line.product_uom_id._compute_quantity(line.quantity, product.uom_id)
+                line_qty_adj = 0.0
+                if is_sale_move:
+                    if move_type in ('out_invoice', 'out_receipt'):
+                        line_qty_adj = -qty * reverse
+                    else:
+                        line_qty_adj = qty * reverse
+
+                elif is_purchase_move:
+                    if move_type in ('in_invoice', 'in_receipt'):
+                        line_qty_adj = qty * reverse
+                    else:
+                        line_qty_adj = -qty * reverse
+
+                product.sudo().with_company(move.company_id).with_context(
+                    skip_qty_available_update=True
+                ).qty_available += line_qty_adj
+
     def _post(self, soft=True):
         """Post/Validate the documents.
 
@@ -5779,7 +5827,6 @@ class AccountMove(models.Model):
 
         draft_reverse_moves.reversed_entry_id._reconcile_reversed_moves(draft_reverse_moves, self.env.context.get('move_reverse_cancel', False))
         to_post.line_ids._reconcile_marked()
-
         customer_count, supplier_count = defaultdict(int), defaultdict(int)
         for invoice in to_post:
             if invoice.is_sale_document():
