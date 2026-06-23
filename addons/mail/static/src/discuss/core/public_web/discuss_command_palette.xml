@@ -11,6 +11,9 @@
                 </t>
                 <t t-call-slot="name" />
             </span>
+            <span t-if="this.props.channel?.last_message_preview" class="text-truncate text-muted">
+                <t t-out="this.props.channel.last_message_preview"/>
+            </span>
             <span t-if="this.email" class="text-truncate text-muted smaller opacity-75" t-att-title="this.email">
                 <span class="pe-1">-</span>
                 <t t-out="this.formattedEmail"/>

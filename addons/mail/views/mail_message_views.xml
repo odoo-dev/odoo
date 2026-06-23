@@ -36,19 +36,28 @@
                         </div>
                         <group>
                             <group>
-                                <field name="subject"/>
                                 <field name="date"/>
+                                <field name="subject"/>
                                 <field name="email_from"/>
                                 <field name="author_id"/>
-                                <field name="message_type"/>
-                                <field name="subtype_id"/>
-                                <field name="is_internal"/>
+                                <label for="message_type"/>
+                                <div class="o_row">
+                                    <field name="message_type"/>
+                                    <span>/</span>
+                                    <field name="subtype_id"/>
+                                </div>
                             </group>
                             <group>
-                                <field name="model"/>
-                                <field name="res_id"/>
-                                <field name="record_name"/>
-                                <field name="parent_id"/>
+                                <label for="res_id"/>
+                                <span class="o_row">
+                                    <field name="res_id"/>
+                                    <span class="d-inline-flex" invisible="not model">
+                                        (
+                                        <field name="model" readonly="True"/>
+                                        )
+                                    </span>
+                                </span>
+                                <field name="is_internal"/>
                             </group>
                         </group>
                         <notebook>

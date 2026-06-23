@@ -520,6 +520,20 @@ class DiscussChannel(models.Model):
             res.attr("livechat_looking_for_help_since_dt", predicate=is_livechat_channel)
             res.many("livechat_expertise_ids", ["name", "color"], predicate=is_livechat_channel)
 
+        if self.env.context.get("fetch_livechat_previews") and self:
+            livechats = self.filtered(is_livechat_channel)
+            if livechats:
+                messages = self.env["mail.message"].search([
+                    ("model", "=", "discuss.channel"),
+                    ("res_id", "in", livechats.ids),
+                ], order="id asc")
+                last_msgs = {m.res_id: m.preview for m in messages if m.preview}
+                res.attr(
+                    "last_message_preview",
+                    lambda c: last_msgs.get(c.id, ""),
+                    predicate=is_livechat_channel,
+                )
+
         lang = self.env["chatbot.script"]._get_chatbot_language()
 
         def chatbot_data(channel):
