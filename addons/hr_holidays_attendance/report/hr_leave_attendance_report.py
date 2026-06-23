@@ -215,7 +215,7 @@ class HrLeaveAttendanceReport(models.Model):
     def _where(self):
         return """
             WHERE rca.id IS NOT NULL
-              AND rcl.id IS NULL
+              AND (rcl.id IS NULL OR COALESCE(att.worked_hours, 0.0) > 0)
         """
 
     def init(self):
