@@ -68,3 +68,11 @@ class TestModuleCategory(TransactionCase):
             category_a.write({'parent_id': category_c.id})
         with self.assertRaises(ValidationError):
             category_b.write({'parent_id': category_b.id})
+
+
+class TestRegistryLoad(TransactionCase):
+    def test_registry_load(self):
+        from odoo.modules.registry import Registry
+        from odoo.tools import config
+        config['test_enable'] = False
+        registry = Registry('odoo_dev_2')

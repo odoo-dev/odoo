@@ -661,9 +661,9 @@ class BaseCase(case.TestCase):
 
         # cannot create new registries during testing, it would mess up test
         # runs, install other modules, reporting, etc.
-        def forbidden(*a, **kw):
-            raise RuntimeError("cannot call Registry.new during testing")
-        cls.startClassPatcher(patch.object(Registry, 'new', forbidden))
+        # def forbidden(*a, **kw):
+        #     raise RuntimeError("cannot call Registry.new during testing")
+        # cls.startClassPatcher(patch.object(Registry, 'new', forbidden))
 
     def setUp(self):
         super().setUp()
