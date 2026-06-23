@@ -235,9 +235,6 @@ class MetaModel(type):
     _module_to_models__: defaultdict[str, list[MetaModel]] = defaultdict(list)
     _is_model_definition: bool
 
-    pool: Registry | None
-    """Reference to the registry for registry classes, otherwise it is a definition class."""
-
     _field_definitions: list[Field]
     _table_object_definitions: list[TableObject]
     _name: str
@@ -394,8 +391,6 @@ class BaseModel(metaclass=MetaModel):
     """
     __slots__ = ['env', '_ids', '_prefetch_ids']
 
-    pool: Registry  # all registry classes have a registry on the class
-    # TODO replace most usages with self.env.registry; pool is reserved for class instance
     _is_model_definition: bool = True
 
     _fields__: dict[str, Field]
@@ -523,6 +518,10 @@ class BaseModel(metaclass=MetaModel):
         compute='_compute_display_name',
         search='_search_display_name',
     )
+
+    @property
+    def pool(self) -> Registry:
+        return self.env.registry
 
     def _valid_field_parameter(self, field, name):
         """ Return whether the given parameter name is valid for the field. """

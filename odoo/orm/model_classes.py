@@ -209,7 +209,7 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
     model_cls._base_classes__ = tuple(bases)
 
     # determine the attributes of the model's class
-    _init_model_class_attributes(model_cls)
+    _init_model_class_attributes(model_cls, registry)
 
     check_pg_name(model_cls._table)
 
@@ -264,7 +264,7 @@ def _check_model_parent_extension(model_cls: type[BaseModel], model_def: type[Ba
         )
 
 
-def _init_model_class_attributes(model_cls: type[BaseModel]):
+def _init_model_class_attributes(model_cls: type[BaseModel], registry: Registry):
     """ Initialize model class attributes. """
     assert not model_cls._is_model_definition
 
@@ -295,13 +295,12 @@ def _init_model_class_attributes(model_cls: type[BaseModel]):
         model_cls._depends = depends
 
     # update _inherits_children of parent models
-    registry = model_cls.pool
     for parent_name in model_cls._inherits:
         registry[parent_name]._inherits_children.add(model_cls._name)
 
     # recompute attributes of _inherit_children models
     for child_name in model_cls._inherit_children:
-        _init_model_class_attributes(registry[child_name])
+        _init_model_class_attributes(registry[child_name], registry)
 
 
 def setup_model_classes(env: Environment):
@@ -383,7 +382,7 @@ def _setup(model_cls: type[BaseModel], env: Environment):
             definitions[field.name].append(field)
 
     for name, fields_ in definitions.items():
-        if f'{model_cls._name}.{name}' in model_cls.pool._database_translated_fields:
+        if f'{model_cls._name}.{name}' in env.registry._database_translated_fields:
             # the field is currently translated in the database; ensure the
             # field is translated to avoid converting its column to varchar
             # and losing data
@@ -392,13 +391,13 @@ def _setup(model_cls: type[BaseModel], env: Environment):
             ), False)
             if not translate:
                 field_translate = FIELD_TRANSLATE.get(
-                    model_cls.pool._database_translated_fields[f'{model_cls._name}.{name}'],
+                    env.registry._database_translated_fields[f'{model_cls._name}.{name}'],
                     True
                 )
                 # patch the field definition by adding an override
                 _logger.debug("Patching %s.%s with translate=True", model_cls._name, name)
                 fields_.append(type(fields_[0])(translate=field_translate))
-        if f'{model_cls._name}.{name}' in model_cls.pool._database_company_dependent_fields:
+        if f'{model_cls._name}.{name}' in env.registry._database_company_dependent_fields:
             # the field is currently company dependent in the database; ensure
             # the field is company dependent to avoid converting its column to
             # the base data type
@@ -420,18 +419,18 @@ def _setup(model_cls: type[BaseModel], env: Environment):
             model_cls._fields__[name] = fields_[0]
         else:
             Field = type(fields_[-1])
-            add_field(model_cls, name, Field(_base_fields__=tuple(fields_)))
+            add_field(model_cls, name, Field(_base_fields__=tuple(fields_)), env)
 
     # 2. add manual fields
-    if model_cls.pool._init_modules:
+    if env.registry._init_modules:
         _add_manual_fields(model_cls, env)
 
     # 3. make sure that parent models determine their own fields, then add
     # inherited fields to model_cls
     _check_inherits(model_cls)
     for parent_name in model_cls._inherits:
-        _setup(model_cls.pool[parent_name], env)
-    _add_inherited_fields(model_cls)
+        _setup(env.registry[parent_name], env)
+    _add_inherited_fields(model_cls, env)
 
     # 4. initialize more field metadata
     model_cls._setup_done__ = True
@@ -485,7 +484,7 @@ def _check_inherits(model_cls: type[BaseModel]):
             )
 
 
-def _add_inherited_fields(model_cls: type[BaseModel]):
+def _add_inherited_fields(model_cls: type[BaseModel], env: Environment):
     """ Determine inherited fields. """
     if model_cls._abstract or not model_cls._inherits:
         return
@@ -494,7 +493,7 @@ def _add_inherited_fields(model_cls: type[BaseModel]):
     to_inherit = {
         name: (parent_fname, field)
         for parent_model_name, parent_fname in model_cls._inherits.items()
-        for name, field in model_cls.pool[parent_model_name]._fields.items()
+        for name, field in env.registry[parent_model_name]._fields.items()
     }
 
     # add inherited fields that are not redefined locally
@@ -513,13 +512,13 @@ def _add_inherited_fields(model_cls: type[BaseModel]):
                 copy=field.copy,
                 readonly=field.readonly,
                 export_string_translation=field.export_string_translation,
-            ))
+            ), env)
 
 
 def _setup_fields(model_cls: type[BaseModel], env: Environment):
     """ Setup the fields, except for recomputation triggers. """
     bad_fields = []
-    many2one_company_dependents = model_cls.pool.many2one_company_dependents
+    many2one_company_dependents = env.registry.many2one_company_dependents
     model = model_cls(env, (), ())
     for name, field in model_cls._fields.items():
         try:
@@ -537,7 +536,7 @@ def _setup_fields(model_cls: type[BaseModel], env: Environment):
             many2one_company_dependents.add(field.comodel_name, field)
 
     for name in bad_fields:
-        pop_field(model_cls, name)
+        pop_field(model_cls, name, env)
 
 
 def _add_manual_models(env: Environment):
@@ -596,20 +595,20 @@ def _add_manual_fields(model_cls: type[BaseModel], env: Environment):
                 attrs = IrModelFields._instanciate_attrs(field_data)
                 if attrs:
                     field = fields.Field._by_type__[field_data['ttype']](**attrs)
-                    add_field(model_cls, name, field)
+                    add_field(model_cls, name, field, env)
             except Exception:
                 _logger.exception("Failed to load field %s.%s: skipped", model_cls._name, field_data['name'])
 
 
-def add_field(model_cls: type[BaseModel], name: str, field: Field):
+def add_field(model_cls: type[BaseModel], name: str, field: Field, env: Environment):
     """ Add the given ``field`` under the given ``name`` on the model class of the given ``model``. """
     # Assert the name is an existing field in the model, or any model in the _inherits
     # or a custom field (starting by `x_`)
     is_class_field = any(
         isinstance(getattr(model, name, None), fields.Field)
-        for model in [model_cls] + [model_cls.pool[inherit] for inherit in model_cls._inherits]
+        for model in [model_cls] + [env.registry[inherit] for inherit in model_cls._inherits]
     )
-    if not (is_class_field or model_cls.pool['ir.model.fields']._is_manual_name(None, name)):
+    if not (is_class_field or env.registry['ir.model.fields']._is_manual_name(None, name)):
         raise ValidationError(  # pylint: disable=missing-gettext
             f"The field `{name}` is not defined in the `{model_cls._name}` Python class and does not start with 'x_'"
         )
@@ -627,15 +626,16 @@ def add_field(model_cls: type[BaseModel], name: str, field: Field):
     model_cls._fields__[name] = field
 
 
-def pop_field(model_cls: type[BaseModel], name: str) -> Field | None:
+def pop_field(model_cls: type[BaseModel], name: str, env: Environment) -> Field | None:
     """ Remove the field with the given ``name`` from the model class of ``model``. """
     field = model_cls._fields__.pop(name, None)
     discardattr(model_cls, name)
     if model_cls._rec_name == name:
         # fixup _rec_name and display_name's dependencies
         model_cls._rec_name = None
-        if model_cls.display_name in model_cls.pool.field_depends:
-            model_cls.pool.field_depends[model_cls.display_name] = tuple(
-                dep for dep in model_cls.pool.field_depends[model_cls.display_name] if dep != name
+        registry = env.registry
+        if model_cls.display_name in registry.field_depends:
+            registry.field_depends[model_cls.display_name] = tuple(
+                dep for dep in registry.field_depends[model_cls.display_name] if dep != name
             )
     return field

@@ -928,7 +928,7 @@ class IrModelFields(models.Model):
                     tables_to_drop.add(rel_name)
             if field.state == 'manual' and is_model:
                 model_cls = self.env.registry[model._name]
-                pop_field(model_cls, field.name)
+                pop_field(model_cls, field.name, self.env)
 
         if tables_to_drop:
             # drop the relation tables that are not used by other fields
@@ -1004,7 +1004,7 @@ class IrModelFields(models.Model):
             if field:
                 self.env._field_dirty.pop(field)
         # remove fields from registry, and check that views are not broken
-        fields = [pop_field(self.env.registry[record.model], record.name) for record in records]
+        fields = [pop_field(self.env.registry[record.model], record.name, self.env) for record in records]
         domain = Domain.OR([('arch_db', 'like', record.name)] for record in records)
         views = self.env['ir.ui.view'].search(domain)
         try:
@@ -2442,7 +2442,7 @@ class IrModelData(models.Model):
                         # the field is shared across registries; don't modify it
                         Field = type(field)
                         field_ = Field(_base_fields__=(field, Field(prefetch=False)))
-                        add_field(self.env.registry[ir_field.model], ir_field.name, field_)
+                        add_field(self.env.registry[ir_field.model], ir_field.name, field_, self.env)
                         field_.setup(model)
                         has_shared_field = True
         if has_shared_field:
