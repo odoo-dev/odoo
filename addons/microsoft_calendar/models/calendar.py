@@ -678,6 +678,36 @@ class CalendarEvent(models.Model):
                                     "\nEither update the events/attendees or archive these events %(details)s:"
                                     "\n%(invalid_events)s", details=details, invalid_events=invalid_events))
 
+    def _get_attendees_without_email(self):
+        """Return the attendees of the current event(s) that have no email address.
+
+        Such attendees make the event invalid for the Outlook synchronization: as
+        soon as one event is invalid, the sync of every following event of the
+        organizer is blocked (see ``_ensure_attendees_have_email``).
+        """
+        return self.attendee_ids.filtered(lambda attendee: not attendee.partner_id.email)
+
+    @api.onchange('attendee_ids')
+    def _onchange_attendee_ids_warn_missing_email(self):
+        """Warn the user as soon as an attendee without email is added, before the
+        invalid event silently blocks the synchronization of all his next events."""
+        if not self.env.user._microsoft_calendar_authenticated() \
+                or self.env.user._get_microsoft_sync_status() != "sync_active":
+            return
+        if self._get_attendees_without_email():
+            return {
+                'warning': {
+                    'title': _("Outlook synchronization"),
+                    'message': _(
+                        "At least one attendee of this event has no email address. "
+                        "Outlook synchronization requires every attendee to have an "
+                        "email address: as long as this event is incorrect, none of "
+                        "your following events will be synchronized.\n"
+                        "Either add the missing email addresses or archive this event."
+                    ),
+                }
+            }
+
     def _microsoft_values_occurence(self, initial_values=()):
         values = dict(initial_values)
         values['type'] = 'occurrence'
