@@ -147,22 +147,12 @@ def discardattr(obj: object, key: str) -> None:
         pass
 
 
-def is_model_definition(cls: type) -> bool:
-    """ Return whether ``cls`` is a model definition class. """
-    return isinstance(cls, models.MetaModel) and getattr(cls, 'pool', None) is None
-
-
-def is_model_class(cls: type) -> bool:
-    """ Return whether ``cls`` is a model registry class. """
-    return getattr(cls, 'pool', None) is not None
-
-
 def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[BaseModel]:
     """ Add a model definition to the given registry, and return its
     corresponding model class.  This function creates or extends a model class
     for the given model definition.
     """
-    assert is_model_definition(model_def)
+    assert model_def._is_model_definition
 
     if hasattr(model_def, '_constraints'):
         _logger.warning("Model attribute '_constraints' is no longer supported, "
@@ -186,6 +176,7 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
     else:
         model_cls = type(name, (model_def,), {
             'pool': registry,                       # this makes it a model class
+            '_is_model_definition': False,
             '_name': name,
             '_register': False,
             '_original_module': model_def._module,
@@ -275,7 +266,7 @@ def _check_model_parent_extension(model_cls: type[BaseModel], model_def: type[Ba
 
 def _init_model_class_attributes(model_cls: type[BaseModel]):
     """ Initialize model class attributes. """
-    assert is_model_class(model_cls)
+    assert not model_cls._is_model_definition
 
     model_cls._description = model_cls._name
     model_cls._table = model_cls._name.replace('.', '_')
@@ -284,7 +275,7 @@ def _init_model_class_attributes(model_cls: type[BaseModel]):
     depends = {}
 
     for base in reversed(model_cls._base_classes__):
-        if is_model_definition(base):
+        if base._is_model_definition:
             # the following attributes are not taken from registry classes
             if model_cls._name not in base._inherit and not base._description:
                 _logger.warning("The model %s has no _description", model_cls._name)
@@ -372,9 +363,9 @@ def _setup(model_cls: type[BaseModel], env: Environment):
 
     # the classes that define this model, i.e., the ones that are not
     # registry classes; the purpose of this attribute is to behave as a
-    # cache of [c for c in model_cls.mro() if not is_model_class(c))], which
+    # cache of [c for c in model_cls.mro() if c._is_model_definition], which
     # is heavily used in function fields.resolve_mro()
-    model_cls._model_classes__ = tuple(c for c in model_cls.mro() if getattr(c, 'pool', None) is None)
+    model_cls._model_classes__ = tuple(c for c in model_cls.mro() if getattr(c, '_is_model_definition', False))
 
     # 1. determine the proper fields of the model: the fields defined on the
     # class and magic fields, not the inherited or custom ones
@@ -388,10 +379,8 @@ def _setup(model_cls: type[BaseModel], env: Environment):
     # collect the definitions of each field (base definition + overrides)
     definitions = defaultdict(list)
     for cls in reversed(model_cls._model_classes__):
-        # this condition is an optimization of is_model_definition(cls)
-        if isinstance(cls, models.MetaModel):
-            for field in cls._field_definitions:
-                definitions[field.name].append(field)
+        for field in cls._field_definitions:
+            definitions[field.name].append(field)
 
     for name, fields_ in definitions.items():
         if f'{model_cls._name}.{name}' in model_cls.pool._database_translated_fields:
@@ -561,7 +550,7 @@ def _add_manual_models(env: Environment):
             del env.registry.models[name]
             # remove the model's name from its parents' _inherit_children
             for parent_cls in model_cls.__bases__:
-                if hasattr(parent_cls, 'pool'):
+                if not parent_cls._is_model_definition:
                     parent_cls._inherit_children.discard(name)
 
     if removed_fields:

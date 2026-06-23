@@ -20,7 +20,6 @@ from odoo.orm.models import (
     regex_order,
     to_record_ids,
 )
-from odoo.orm.model_classes import is_model_class, is_model_definition
 from odoo.orm.models_cached import CachedModel
 from odoo.orm.models_transient import TransientModel
 from odoo.orm.query import Query, TableSQL

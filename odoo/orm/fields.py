@@ -393,7 +393,7 @@ class Field[T]:
         assert '_models' not in globals() or isinstance(owner, _models.MetaModel)
         self.model_name = owner._name
         self.name = name
-        if getattr(owner, 'pool', None) is None:  # models.is_model_definition(owner)
+        if owner._is_model_definition:
             assert '_base_fields__' not in self._args__
             self._module = owner._module
             owner._field_definitions.append(self)

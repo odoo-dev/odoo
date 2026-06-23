@@ -1513,7 +1513,7 @@ class IrModelInherit(models.Model):
             model = self.env[model_name]
 
             for cls in reversed(type(model).mro()):
-                if not models.is_model_definition(cls):
+                if not getattr(cls, '_is_model_definition', False):
                     continue
 
                 items = [

@@ -233,6 +233,7 @@ class MetaModel(type):
         Its main purpose is to register the models per module.
     """
     _module_to_models__: defaultdict[str, list[MetaModel]] = defaultdict(list)
+    _is_model_definition: bool
 
     pool: Registry | None
     """Reference to the registry for registry classes, otherwise it is a definition class."""
@@ -317,7 +318,7 @@ class MetaModel(type):
 
     @property
     def _inherit(cls):
-        if getattr(cls, 'pool', None) is not None:
+        if not cls._is_model_definition:
             raise AttributeError("Registry Class shouldn't access attribute '_inherit'. Please use issubclass instead")
         return cls._inherit__
 
@@ -395,6 +396,7 @@ class BaseModel(metaclass=MetaModel):
 
     pool: Registry  # all registry classes have a registry on the class
     # TODO replace most usages with self.env.registry; pool is reserved for class instance
+    _is_model_definition: bool = True
 
     _fields__: dict[str, Field]
     _fields: MappingProxyType[str, Field]

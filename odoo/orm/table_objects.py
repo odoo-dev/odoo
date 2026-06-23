@@ -45,7 +45,7 @@ class TableObject:
         assert name.startswith('_'), "Names of SQL objects in a model must start with '_'"
         assert not name.startswith(f"_{owner.__name__}__"), "Names of SQL objects must not be mangled"
         self.name = name[1:]
-        if getattr(owner, 'pool', None) is None:  # models.is_model_definition(owner)
+        if owner._is_model_definition:
             # only for fields on definition classes, not registry classes
             self._module = owner._module
             owner._table_object_definitions.append(self)
