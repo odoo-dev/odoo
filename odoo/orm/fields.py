@@ -391,6 +391,8 @@ class Field[T]:
         # file, it is not yet available and we already declare fields:
         # id and display_name
         assert '_models' not in globals() or isinstance(owner, _models.MetaModel)
+        if not self._shareable:
+            owner._shareable = False
 
         if self._args__ is None:
             # assert self in FIELD_CACHE.values()

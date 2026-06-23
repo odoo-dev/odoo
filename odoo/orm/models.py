@@ -392,6 +392,7 @@ class BaseModel(metaclass=MetaModel):
     __slots__ = ['env', '_ids', '_prefetch_ids']
 
     _is_model_definition: bool = True
+    _shareable: bool = True
 
     _fields__: dict[str, Field]
     _fields: MappingProxyType[str, Field]
