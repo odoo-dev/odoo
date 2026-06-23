@@ -8,12 +8,16 @@ registry.category("web_tour.tours").add("course_review_modification", {
             expectUnloadPage: true,
         },
         {
-            trigger: 'a:contains("Join this Course")',
+            trigger: "a.o_wslides_js_course_join_link:contains(Enroll now)",
             run: "click",
             expectUnloadPage: true,
         },
         {
-            trigger: '.o_wslides_js_course_join:contains("You\'re enrolled")',
+            trigger: ".o_wslides_course_sidebar .badge:contains(Enrolled)",
+        },
+        {
+            trigger: "a[id=review-tab]",
+            run: "click",
         },
         {
             trigger: "span:contains(Add Review)",
@@ -29,7 +33,7 @@ registry.category("web_tour.tours").add("course_review_modification", {
             run: "click",
         },
         {
-            trigger: ".o_wslides_course_header .o_website_rating_static[title='4 stars on 5']",
+            trigger: ".o_wslides_course_header .o_wslides_header_text:contains(4.0)",
         },
         {
             trigger: "a[id=review-tab]:contains(Reviews (1))",
@@ -59,7 +63,7 @@ registry.category("web_tour.tours").add("course_review_modification", {
             trigger: "#chatterRoot:shadow .o-mail-Chatter:contains(No reviews yet.)",
         },
         {
-            trigger: ".o_wslides_course_header .o_website_rating_static[title='0 stars on 5']",
+            trigger: ".o_wslides_course_header:not(:has(.o_wslides_header_text .fa-star))",
         },
         {
             trigger: "a[id=review-tab]:contains(Reviews):not(:contains(1))",
@@ -83,7 +87,7 @@ registry.category("web_tour.tours").add("course_review_modification", {
             run: "click",
         },
         {
-            trigger: ".o_wslides_course_header .o_website_rating_static[title='3 stars on 5']",
+            trigger: ".o_wslides_course_header .o_wslides_header_text:contains(3.0)",
         },
         {
             trigger: "a[id=review-tab]:contains(Reviews (1))",
@@ -119,7 +123,7 @@ registry.category("web_tour.tours").add("course_review_modification", {
             run: "click",
         },
         {
-            trigger: ".o_wslides_course_header .o_website_rating_static[title='2 stars on 5']",
+            trigger: ".o_wslides_course_header .o_wslides_header_text:contains(2.0)",
         },
         {
             trigger: "a[id=review-tab]:contains(Reviews (1))",

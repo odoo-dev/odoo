@@ -48,17 +48,17 @@
     <t t-name="slide.slide.quiz.validation">
         <div id="validation">
             <div t-if="!channel.isMember">
-                <div class="o_wslides_join_course alert alert-info d-flex align-items-center justify-content-between">
+                <div class="o_wslides_join_course o_wslides_prerequisite_block alert alert-info d-flex align-items-center justify-content-between">
                     <div t-if="channel.enroll == 'invite' and !channel.isMemberOrInvited">
                         <b>This course is private.
                             <span t-if="isPublicUser">
                                 Please
-                                <a t-att-href="'/web/login?redirect=' + redirectURL" class="fw-bold">
+                                <a t-att-href="'/web/login?redirect=' + redirectURL" class="alert-link">
                                     sign in
                                 </a>
                                 to enroll.
                             </span>
-                            <a t-else="" href="#" class="fw-bold o_wslides_js_channel_enroll"
+                            <a t-else="" href="#" class="alert-link o_wslides_js_channel_enroll"
                                t-att-data-channel-id="channel.id">
                                 <span t-if="channel.requestedAccess" class="text-success">
                                     Responsible already contacted.

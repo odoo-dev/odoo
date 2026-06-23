@@ -17,8 +17,14 @@ export class EnrollEmail extends Interaction {
      * @param {MouseEvent} ev
      */
     openDialog(ev) {
-        const alertEl = ev.currentTarget.closest(".alert");
-        const channelId = parseInt(ev.currentTarget.dataset.channelId);
+        const targetEl = ev.currentTarget;
+        // Prefer the prerequisite wrapper; otherwise replace the alert/button itself
+        // (invite without prereqs puts the enroll class on the alert; mobile CTA is a bare link).
+        const replaceEl =
+            targetEl.closest(".o_wslides_prerequisite_block") ||
+            (targetEl.matches(".alert") ? targetEl : null) ||
+            targetEl;
+        const channelId = parseInt(targetEl.dataset.channelId);
         this.services.dialog.add(ConfirmationDialog, {
             title: _t("Request Access."),
             body: _t("Do you want to request access to this course?"),
@@ -37,8 +43,8 @@ export class EnrollEmail extends Interaction {
                 newAlertEl.classList.add("alert", done ? "alert-success" : "alert-danger");
                 newAlertEl.role = "alert";
                 newAlertEl.appendChild(createElementWithContent("strong", message));
-                this.insert(newAlertEl, alertEl, "afterend");
-                alertEl.remove();
+                this.insert(newAlertEl, replaceEl, "afterend");
+                replaceEl.remove();
             },
             cancel: () => { },
         });

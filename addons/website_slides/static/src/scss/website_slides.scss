@@ -139,10 +139,6 @@ $o-wslides-fs-side-width: 300px;
 
 }
 
-.o_wslides_channel_completion_completed {
-    @include font-size(1rem);
-}
-
 // New home page
 // **************************************************
 .o_wslides_home_main {
@@ -172,47 +168,30 @@ $o-wslides-fs-side-width: 300px;
     }
 }
 
-// New course page
+// Mobile sticky CTA bar (course page)
 // **************************************************
 
-.o_wslides_course_sidebar {
-    border: 1px solid $border-color;
+.o_wslides_mobile_cta_bar {
+    box-shadow: 0px -12px 32px rgba($black, .175);
+}
 
-    @include media-breakpoint-up(md) {
-        border-top-width: 0;
-    }
+.o_wslides_js_channel_enroll {
+    cursor: pointer;
 
-    .o_wslides_js_channel_unsubscribe {
-        > [data-icon="close"] {
-            display: none;
-        }
-
-        &:hover {
-            > [data-icon="check"] {
-                display: none;
-            }
-
-            > [data-icon="close"] {
-                display: inline-block;
-            }
-        }
-    }
-
-    .o_wslides_js_channel_enroll {
-        cursor: pointer;
-
-        &:hover, &:hover .o_wslides_enroll_msg small {
-            font-weight: bold;
-        }
-    }
-
-    .o_wslides_enroll_msg {
-        p {
-            display: inline-block;
-            margin-bottom: 0px;
-        }
+    &:hover, &:hover .o_wslides_enroll_msg small {
+        font-weight: bold;
     }
 }
+
+.o_wslides_enroll_msg {
+    p {
+        display: inline-block;
+        margin-bottom: 0px;
+    }
+}
+
+// New course page
+// **************************************************
 
 @mixin o-wslides-tabs($tab-active-color: $o-wslides-color-bg) {
     margin-top: ($o-wslides-tabs-height * -1);
@@ -249,37 +228,20 @@ $o-wslides-fs-side-width: 300px;
     }
 }
 
-.o_wslides_course_nav {
-    @include o-position-absolute(0,0,auto,0);
-    border-width: 1px 0;
-
-    .breadcrumb-item {
-        --max-lines: 2;
-        position: relative;
-        max-height: calc(1.4rem * var(--max-lines));
-        overflow: hidden;
-        text-overflow: ellipsis;
-
-        a, a:hover, + .breadcrumb-item::before {
-            // Resolves into the color chosen for slide channel description through cover customization
-            color: inherit;
-            opacity: 0.8;
-        }
-    }
-}
-
-
-.o_wslides_course_header {
-    @include media-breakpoint-up(md)  {
-        @include o-wslides-header-bar();
-    }
-    .o_wslides_header_text {
-        color:inherit;
-    }
-}
-
 .o_wslides_course_doc_header {
     @include o-wslides-header-bar();
+}
+
+.o_wslides_course_cover {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+
+    .o_wslides_course_cover_overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(28, 20, 24, 0.82), rgba(28, 20, 24, 0.32) 55%, rgba(28, 20, 24, 0.08));
+    }
 }
 
 .o_wslides_course_main {
@@ -288,55 +250,24 @@ $o-wslides-fs-side-width: 300px;
     min-height: 70vh;
 
     .o_wslides_nav_tabs {
-        @include media-breakpoint-up(md)  {
-            @include o-wslides-tabs();
-        }
+        --nav-underline-border-width: #{$border-width * 3};
+        --nav-link-hover-color: #{$body-color};
+        --nav-underline-link-active-color: #{$body-color};
+        --nav-link-color: #{$text-muted};
 
-        @include media-breakpoint-only(xs) {
-            overflow-x: auto;
-            overflow-y: hidden;
-            line-height: 1.51;
+        .nav-link {
+            font-weight: $font-weight-normal;
 
-            li {
-                white-space: nowrap;
+            &:hover, &:focus, &.active {
+                border-bottom-color: $primary;
             }
         }
     }
 
-    .o_wslides_doc_nav_tabs {
-        @include o-wslides-tabs($gray-100);
-    }
-
-    .o_wslides_tabs_content {
-        @include media-breakpoint-down(md) {
-            background-color: $nav-tabs-link-active-bg;
-            padding:0 ($grid-gutter-width * 0.5);
-        }
-
-        @include media-breakpoint-only(xs) {
-            margin: 0 ($grid-gutter-width * -0.5);
-        }
-
-        .o_wslides_lesson_nav {
-            .navbar {
-                @if ( not has-enough-contrast($body-bg, $dark) ) {
-                    .nav-link, .navbar-brand{
-                        color: $navbar-dark-color;
-                    }
-                    .navbar-toggler-icon {
-                        background-image: $navbar-dark-toggler-icon-bg;
-                    }
-                }
-                @else {
-                    .nav-link, .navbar-brand{
-                        color: $navbar-light-color;
-                    }
-                    .navbar-toggler-icon {
-                        background-image: $navbar-light-toggler-icon-bg;
-                    }
-                }
-            }
-        }
+    .o_wslides_category_count {
+        width: $spacer * 2;
+        aspect-ratio: 1;
+        place-content: center;
     }
 
     // Slides list reordering widget
@@ -355,6 +286,16 @@ $o-wslides-fs-side-width: 300px;
             }
         }
 
+        .o_wslides_slide_icon {
+            width: var(--o-wslides-slide-icon-size, $spacer * 2.5);
+            height: var(--o-wslides-slide-icon-size, $spacer * 2.5);
+            line-height: var(--o-wslides-slide-icon-size, $spacer * 2.5);
+
+            &_sm {
+                --o-wslides-slide-icon-size: #{$spacer * 1.5};
+            }
+        }
+
         .o_text_link {
             text-decoration: none!important;
 
@@ -366,17 +307,6 @@ $o-wslides-fs-side-width: 300px;
             &:hover > * {
                 color: inherit;
             }
-        }
-
-        .o_wslides_slides_list_drag {
-            cursor: pointer;
-
-            i { opacity: 0.4; }
-            &:hover i { opacity: 1; }
-        }
-
-        .o_wslides_slide_list_category_header, .o_wslides_slides_list_slide {
-            border: 1px solid $border-color;
         }
 
         .o_wslides_slides_list_slide {

@@ -38,19 +38,13 @@ class SlideChannel(models.Model):
     _CUSTOMER_HEADERS_LIMIT_COUNT = 0  # never use X-Msg-To headers
 
     def _default_cover_properties(self):
-        """ Cover properties defaults are overridden to keep a consistent look for the slides
-        channels headers across Odoo versions (pre-customization, with purple gradient fitting the
-        homepage images, etc). Furthermore, as adding padding to the cover would not look great,
-        its height is set to fit to content (snippet option to change this also disabled on the view)."""
         res = super()._default_cover_properties()
         res.update({
+            "background-image": "url('/website_slides/static/src/img/channel-training-default.jpg')",
             "background_color_class": "o_cc4",
-            'background_color_style': (
-                'background-color: rgba(0, 0, 0, 0); '
-                'background-image: linear-gradient(120deg, #875A7B, #78516F);'
-            ),
+            'background_color_style': 'background-color: rgba(0, 0, 0, 0);',
             'opacity': '0',
-            'resize_class': 'cover_auto'
+            'resize_class': 'cover_auto',
         })
         return res
 
@@ -520,7 +514,6 @@ class SlideChannel(models.Model):
                 channel._action_add_members(channel.user_id.partner_id)
             if channel.enroll_group_ids:
                 channel._add_groups_members()
-
         return channels
 
     def copy_data(self, default=None):

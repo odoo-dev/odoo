@@ -16,7 +16,7 @@
                                      (4, ref('website_slides.slide_channel_tag_quiz')),
                                      (4, ref('website_slides.slide_channel_tag_dog_friendly'))]"/>
         <field name="image_1920" type="bytes" file="website_slides/static/src/img/channel_demo_gardening.webp"/>
-        <field name="description">Learn the basics of gardening!</field>
+<field name="description">Learn the basics of gardening!</field>
         <field name="create_date" eval="DateTime.now() - relativedelta(days=8)"/>
     </record>
 
