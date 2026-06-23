@@ -19,6 +19,7 @@ import warnings
 from contextlib import contextmanager, nullcontext
 from datetime import datetime, timedelta
 from inspect import currentframe
+from string.templatelib import Template
 
 import psycopg2
 import psycopg2.errorcodes  # noqa: F401
@@ -366,6 +367,8 @@ class Cursor(_CursorProtocol):
         return self.mogrify(query, params).decode(encoding, 'replace')
 
     def mogrify(self, query, params=None) -> bytes:
+        if isinstance(query, Template):
+            query = SQL(query)
         if isinstance(query, SQL):
             assert params is None, "Unexpected parameters for SQL query object"
             query, params, _fields = query._sql_tuple
@@ -375,6 +378,8 @@ class Cursor(_CursorProtocol):
         """ Execute a query inside the current transaction. """
         global sql_counter
 
+        if isinstance(query, Template):
+            query = SQL(query)
         if isinstance(query, SQL):
             assert params is None, "Unexpected parameters for SQL query object"
             query, params, _fields = query._sql_tuple

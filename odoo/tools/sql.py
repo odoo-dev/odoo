@@ -9,6 +9,7 @@ import re
 import typing
 from binascii import crc32
 from collections import defaultdict
+from string.templatelib import Template
 
 if typing.TYPE_CHECKING:
     from odoo.fields import Field
@@ -118,6 +119,44 @@ class LiteralSQL(SQL):
             self.__sql_tuple = code._sql_tuple
             return
 
+        # handle t-strings
+        if isinstance(code, Template):
+            if args or kwargs:
+                raise TypeError("SQL() with a t-string does not accept additional arguments")
+            stack = list(code)
+            stack.reverse()
+            code_list = []
+            params_list = []
+            to_flush_list = []
+            while stack:
+                item = stack.pop()
+                if isinstance(item, str):
+                    code_list.append(item.replace('%', '%%'))
+                else:
+                    # interpolated value
+                    if item.format_spec:
+                        raise ValueError("SQL: format spec not accepted in t-string")
+                    if item.conversion:
+                        raise ValueError("SQL: conversion not accepted in t-string")
+                    arg = item.value
+                    if isinstance(arg, Template):
+                        # template is not reversible, do it manually
+                        arg = list(arg)
+                        arg.reverse()
+                        stack.extend(arg)
+                    elif isinstance(arg, SQL):
+                        arg_code, arg_params, arg_to_flush = arg._sql_tuple
+                        code_list.append(arg_code)
+                        params_list.extend(arg_params)
+                        to_flush_list.extend(arg_to_flush)
+                    else:
+                        code_list.append('%s')
+                        params_list.append(arg)
+            params = tuple(params_list)
+            to_flush = tuple(to_flush_list)
+            self.__sql_tuple = (''.join(code_list), params, to_flush)
+            return
+
         # validate the format of code and parameters
         if args and kwargs:
             raise TypeError("SQL() takes either positional arguments, or named arguments")
@@ -139,6 +178,8 @@ class LiteralSQL(SQL):
         params_list = []
         to_flush_list = []
         for arg in args:
+            if isinstance(arg, Template):
+                arg = SQL(arg)
             if isinstance(arg, SQL):
                 arg_code, arg_params, arg_to_flush = arg._sql_tuple
                 code_list.append(arg_code)
