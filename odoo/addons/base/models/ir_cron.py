@@ -436,7 +436,7 @@ class IrCron(models.Model):
         )
 
         if not failed_by_timeout:
-            status = cls._run_job(job)
+            status = ir_cron._run_job(job)
         else:
             status = CompletionStatus.FAILED
             cron_cr.execute("""
@@ -457,8 +457,7 @@ class IrCron(models.Model):
         else:
             raise RuntimeError(f"unreachable {status=}")
 
-    @classmethod
-    def _run_job(cls, job) -> CompletionStatus:
+    def _run_job(self, job) -> CompletionStatus:
         """
         Execute the job's server action multiple times until it
         completes. The completion status is returned.
@@ -480,14 +479,14 @@ class IrCron(models.Model):
         """
         timed_out_counter = job['timed_out_counter']
 
-        with cls.pool.cursor() as job_cr:
+        with self.env.registry.cursor() as job_cr:
             start_time = time.monotonic()
             env = api.Environment(job_cr, job['user_id'], {
                 'lastcall': job['lastcall'],
                 'cron_id': job['id'],
                 'cron_end_time': start_time + MIN_TIME_PER_JOB,
             })
-            cron = env[cls._name].browse(job['id'])
+            cron = env[self._name].browse(job['id'])
 
             status = None
             loop_count = 0
