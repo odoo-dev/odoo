@@ -110,6 +110,10 @@
                     <p>Edit recurring event</p>
                     <field name="recurrence_update" widget="radio"/>
                 </div>
+                <div class="alert alert-warning" role="alert" invisible="not invalid_email_partner_ids">
+                    <span>The following attendees do not have an email address set. They will not be invited to the event.</span>
+                    <field name="invalid_email_partner_ids" widget="many2many_tags"/>
+                </div>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button icon="fa-bars" type="object" name="action_open_calendar_event" invisible="not (res_id and res_model_name)">
@@ -333,7 +337,11 @@
         <field name="priority" eval="2"/>
         <field name="arch" type="xml">
             <form string="Meetings" class="o_calendar_event_form_quick_create" js_class="calendar_quick_create_form_view">
-                <field name="invalid_email_partner_ids" invisible="1"/> <!--used in many2many_attendees widget-->
+                <div class="alert alert-warning border-0 d-flex flex-wrap m-0 mb-3" role="alert"
+                    invisible="not invalid_email_partner_ids">
+                    <span class="w-100 mb-1">The following attendees do not have an email address set. They will not be invited to the event.</span>
+                    <field name="invalid_email_partner_ids" widget="many2many_tags"/>
+                </div>
                 <div class="d-flex align-items-center" colspan="2">
                     <i class="fa fa-tag text-600" title="Booking Name"/>
                     <field name="name" nolabel="1"
