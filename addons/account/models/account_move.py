@@ -780,8 +780,6 @@ class AccountMove(models.Model):
     display_send_button = fields.Boolean(compute='_compute_display_send_button')
     highlight_send_button = fields.Boolean(compute='_compute_highlight_send_button')
     is_sale_installed = fields.Boolean(compute='_compute_is_sale_installed')
-    is_purchase_installed = fields.Boolean(compute='_compute_is_purchase_installed')
-    is_stock_installed = fields.Boolean(compute='_compute_is_stock_installed')
 
     _checked_idx = models.Index("(journal_id) WHERE (review_state IN ('todo', 'anomaly'))")
     _payment_idx = models.Index("(journal_id, state, payment_state, move_type, date)")
@@ -2365,12 +2363,6 @@ class AccountMove(models.Model):
 
     def _compute_is_sale_installed(self):
         self.is_sale_installed = 'sale_management' in self.env['ir.module.module']._installed()
-
-    def _compute_is_purchase_installed(self):
-        self.is_purchase_installed = 'purchase' in self.env['ir.module.module']._installed()
-
-    def _compute_is_stock_installed(self):
-        self.is_stock_installed = 'stock' in self.env['ir.module.module']._installed()
 
     @api.depends('line_ids.matched_debit_ids', 'line_ids.matched_credit_ids', 'matched_payment_ids', 'matched_payment_ids.state')
     def _compute_reconciled_payment_ids(self):
@@ -5580,22 +5572,49 @@ class AccountMove(models.Model):
         return to_reverse._reverse_moves(cancel=True)
 
     def _update_product_qty_available(self, to_draft=False):
+        installed_modules = self.env['ir.module.module']._installed()
+        is_stock_installed = 'stock' in installed_modules
+        if is_stock_installed:
+            return
+        is_purchase_installed = 'purchase' in installed_modules
+        qty_adjustments = defaultdict(float)
+        product_company_map = {}
+        reverse = -1 if to_draft else 1
+
         for move in self:
-            if not move.is_stock_installed and move.is_invoice(include_receipts=True):
-                for line in move.invoice_line_ids.filtered(lambda l: l.display_type == 'product'):
-                    product = line.product_id
-                    qty = line.product_uom_id._compute_quantity(line.quantity, product.uom_id)
-                    reverse = -1 if to_draft else 1
-                    if not move.is_sale_installed and move.invoice_filter_type_domain == 'sale':
-                        if move.move_type in ('out_invoice', 'out_receipt'):
-                            product.qty_available -= qty * reverse
-                        else:
-                            product.qty_available += qty * reverse
-                    elif not move.is_purchase_installed and move.invoice_filter_type_domain == 'purchase':
-                        if move.move_type in ('in_invoice', 'in_receipt'):
-                            product.qty_available += qty * reverse
-                        else:
-                            product.qty_available -= qty * reverse
+            move_type = move.move_type
+            is_sale_move = not move.is_sale_installed and move.invoice_filter_type_domain == 'sale'
+            is_purchase_move = not is_purchase_installed and move.invoice_filter_type_domain == 'purchase'
+
+            if not (is_sale_move or is_purchase_move):
+                continue
+            company = move.company_id
+
+            for line in move.invoice_line_ids.filtered(lambda l: l.product_id.is_storable):
+                product = line.product_id
+                qty = line.product_uom_id._compute_quantity(line.quantity, product.uom_id)
+                key = (product.id, company.id)
+
+                if is_sale_move:
+                    if move_type in ("out_invoice", "out_receipt"):
+                        qty_adjustments[key] -= qty * reverse
+                    else:
+                        qty_adjustments[key] += qty * reverse
+
+                elif is_purchase_move:
+                    if move_type in ("in_invoice", "in_receipt"):
+                        qty_adjustments[key] += qty * reverse
+                    else:
+                        qty_adjustments[key] -= qty * reverse
+
+                product_company_map[key] = (product, company)
+
+        for (product_id, company_id), qty_adj in qty_adjustments.items():
+            product, company = product_company_map(product_id, company_id)
+            if not float_is_zero(qty_adj, precision_rounding=product.uom_id.rounding):
+                product.sudo().with_company(company).with_context(
+                    skip_qty_available_update=True
+                ).qty_available += qty_adj
 
     def _post(self, soft=True):
         """Post/Validate the documents.
@@ -5805,7 +5824,7 @@ class AccountMove(models.Model):
 
         draft_reverse_moves.reversed_entry_id._reconcile_reversed_moves(draft_reverse_moves, self.env.context.get('move_reverse_cancel', False))
         to_post.line_ids._reconcile_marked()
-        to_post._update_product_qty_available()
+        to_post._update_product_qty_available(to_draft=False)
         customer_count, supplier_count = defaultdict(int), defaultdict(int)
         for invoice in to_post:
             if invoice.is_sale_document():
