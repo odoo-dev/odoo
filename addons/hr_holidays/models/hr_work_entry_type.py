@@ -278,13 +278,15 @@ class HrWorkEntryType(models.Model):
         return [('id', 'in', valid_leaves)]
 
     def _search_virtual_remaining_leaves(self, operator, value):
-        def is_valid(work_entry_type):
-            return not work_entry_type.requires_allocation or op(work_entry_type.virtual_remaining_leaves)
         op = PY_OPERATORS.get(operator)
         if not op:
             return NotImplemented
         if operator != 'in':
             value = float(value)
+
+        def is_valid(work_entry_type):
+            return not work_entry_type.requires_allocation or op(work_entry_type.virtual_remaining_leaves, value)
+
         work_entry_types = self.env['hr.work.entry.type'].search([])
         return [('id', 'in', work_entry_types.filtered(is_valid).ids)]
 

@@ -232,3 +232,8 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_search_virtual_remaining_leaves(self):
+        """Using _search_virtual_remaining_leaves should not raise erros if using correct arguments"""
+        self.env['hr.work.entry.type'].create({"requires_allocation": True, "code": "something", "name": "something else"})
+        self.env['hr.work.entry.type'].search([('virtual_remaining_leaves', '<', 5)])
