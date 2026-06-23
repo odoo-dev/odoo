@@ -917,7 +917,7 @@ class Field[T]:
                     yield tuple(field_seq)
 
                 if field.type == 'one2many':
-                    for inv_field in Model.pool.field_inverses[field]:
+                    for inv_field in registry.field_inverses[field]:
                         yield tuple(field_seq) + (inv_field,)
 
                 if check_precompute and field.type == 'many2one':

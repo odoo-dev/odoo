@@ -2598,7 +2598,7 @@ class IrModelData(models.Model):
             # try and remove either the xid or the record, so check if the
             # record has a child we've just updated
             keep = False
-            for inheriting in (self.env[m] for m in Model._inherits_children):
+            for inheriting in (self.env[m] for m in self.env.registry._inherits_children.get(model, ())):
                 # ignore mixins
                 if inheriting._abstract:
                     continue

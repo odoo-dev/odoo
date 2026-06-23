@@ -105,7 +105,9 @@ class Registry(Mapping[str, type["BaseModel"]]):
     ready: bool  # whether everything is set up
     loaded: bool  # whether all modules are loaded
     models: dict[str, type[BaseModel]]
+    _models: dict[str, model_classes.RegistryModel]
     _inherit_children: defaultdict[str, OrderedSet[str]]
+    _inherits_children: defaultdict[str, set[str]]
 
     @classmethod
     @locked
@@ -251,8 +253,10 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self.loaded = False
         self.ready = False
 
-        self.models: dict[str, type[BaseModel]] = {}    # model name/model instance mapping
+        self.models: dict[str, type[BaseModel]] = {}    # model name/model class mapping
+        self._models: dict[str, model_classes.RegistryModel] = {}  # model name/registry model mapping
         self._inherit_children = defaultdict(OrderedSet)  # parent model name -> child model names
+        self._inherits_children = defaultdict(set)  # parent model name -> _inherits child model names
         self._sql_constraints = set()  # type: ignore
         self._database_translated_fields: dict[str, str] = {}  # names and translate function names of translated fields in database {"{model}.{field_name}": "translate_func"}
         self._database_company_dependent_fields: set[str] = set()  # names of company dependent fields in database
@@ -338,11 +342,14 @@ class Registry(Mapping[str, type["BaseModel"]]):
     #
     def __len__(self):
         """ Return the size of the registry. """
-        return len(self.models)
+        return len(self._models)
+
+    def __contains__(self, model_name: str) -> bool:
+        return model_name in self._models
 
     def __iter__(self):
         """ Return an iterator over all model names. """
-        return iter(self.models)
+        return iter(self._models)
 
     def __getitem__(self, model_name: str) -> type[BaseModel]:
         """ Return the model with the given name or raise KeyError if it doesn't exist."""
@@ -354,11 +361,15 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
     def __delitem__(self, model_name: str):
         """ Remove a (custom) model from the registry. """
-        del self.models[model_name]
+        self.models.pop(model_name, None)
+        del self._models[model_name]
         # the custom model can inherit from mixins ('mail.thread', ...)
         for children in self._inherit_children.values():
             children.discard(model_name)
         self._inherit_children.pop(model_name, None)
+        for children in self._inherits_children.values():
+            children.discard(model_name)
+        self._inherits_children.pop(model_name, None)
 
     def descendants(self, model_names: Iterable[str], *kinds: typing.Literal['_inherit', '_inherits']) -> OrderedSet[str]:
         """ Return the models corresponding to ``model_names`` and all those
@@ -372,14 +383,13 @@ class Registry(Mapping[str, type["BaseModel"]]):
             model_name = queue.popleft()
             if model_name in models:
                 continue
-            model = self.get(model_name)
-            if model is None:
+            if model_name not in self._models:
                 continue
             models.add(model_name)
             if '_inherit' in kinds:
                 queue.extend(self._inherit_children[model_name])
             if '_inherits' in kinds:
-                queue.extend(model._inherits_children)
+                queue.extend(self._inherits_children[model_name])
         return models
 
     def load(self, module: module_graph.ModuleNode) -> list[str]:
@@ -407,9 +417,9 @@ class Registry(Mapping[str, type["BaseModel"]]):
         # or via explicit constructor call), and add them to the pool.
         model_names = []
         for model_def in models.MetaModel._module_to_models__.get(module.name, []):
-            # models register themselves in self.models
-            model_cls = model_classes.add_to_registry(self, model_def)
-            model_names.append(model_cls._name)
+            # models register themselves in self._models
+            registry_model = model_classes.add_to_registry(self, model_def)
+            model_names.append(registry_model._name)
 
         return model_names
 

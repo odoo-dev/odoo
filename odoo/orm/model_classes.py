@@ -34,6 +34,10 @@ _logger = logging.getLogger('odoo.registry')
 SHARED_FIELD_CACHE: weakref.WeakValueDictionary[tuple[str, tuple[Field, ...]], Field] = weakref.WeakValueDictionary()
 """Cache of shared registry field instances keyed by (model_name, definition_fields_tuple)."""
 
+SHARED_MODEL_CACHE: weakref.WeakValueDictionary[tuple, type[BaseModel]] = weakref.WeakValueDictionary()
+"""Cache of shared model classes keyed by their composition (see
+:meth:`RegistryModel.get_cache_key`)."""
+
 # THE MODEL DEFINITIONS, MODEL CLASSES, AND MODEL INSTANCES
 #
 # The framework deals with two kinds of classes for models: the "model
@@ -152,10 +156,66 @@ def discardattr(obj: object, key: str) -> None:
         pass
 
 
-def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[BaseModel]:
+class RegistryModel:
+    """ Lightweight per-registry placeholder for a model.
+
+    Instead of creating an actual model class (via ``type(...)``) for every
+    model and every registry, we create a ``RegistryModel`` *instance* that
+    records the classes the model is composed of (:attr:`_base_classes__`)
+    together with the metadata inferred during module loading.  The actual
+    model class is built lazily in :func:`_prepare_setup` and may be shared
+    across registries through :data:`SHARED_MODEL_CACHE`.
+    """
+    _pool = True
+    """Marker telling this object behaves like a registry model.  It does *not*
+    indicate which registry it belongs to."""
+
+    def __init__(self, registry: Registry, name: str, model_def: type[BaseModel]):
+        self._registry = registry
+        self._name = name
+        self._original_module = model_def._module
+        self._abstract = model_def._abstract
+        self._transient = model_def._transient
+        self._auto = model_def._auto
+        self._custom = model_def._custom
+
+        self._base_classes__: tuple[RegistryModel | type[BaseModel], ...] = ()
+        self._inherit_module: dict[str, str] = {}
+        self._description: str | None = name
+        self._table: str = name.replace('.', '_')
+        self._log_access: bool = self._auto
+        self._inherits: dict[str, str] = {}
+        self._depends: dict[str, list[str]] = {}
+
+        self._class__: type[BaseModel] | None = None
+        self._setup_done__: bool = False
+
+    def get_cache_key(self) -> tuple:
+        """ Return a hashable key identifying the composition of this model. """
+        return (self._name, *(
+            base if getattr(base, '_is_model_definition', False) else base.get_cache_key()
+            for base in self._base_classes__
+        ))
+
+    @property
+    def _shareable(self) -> bool:
+        """ Return whether the model composition allows sharing the model class. """
+        for base in self._base_classes__:
+            if getattr(base, '_is_model_definition', False):
+                if not base._shareable:
+                    return False
+            elif not base._shareable:
+                return False
+        return True
+
+    def __repr__(self):
+        return f"RegistryModel({self._name!r})"
+
+
+def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> RegistryModel:
     """ Add a model definition to the given registry, and return its
-    corresponding model class.  This function creates or extends a model class
-    for the given model definition.
+    corresponding registry model.  The actual model class is only built later,
+    in :func:`_prepare_setup`.
     """
     assert model_def._is_model_definition
 
@@ -172,33 +232,21 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
     if name != 'base':
         parent_names.append('base')
 
-    # create or retrieve the model's class
+    # create or retrieve the registry model
     if name in parent_names:
-        if name not in registry:
+        if name not in registry._models:
             raise TypeError(f"Model {name!r} does not exist in registry.")
-        model_cls = registry[name]
+        model_cls = registry._models[name]
         _check_model_extension(model_cls, model_def)
     else:
-        model_cls = type(name, (model_def,), {
-            'pool': registry,                       # this makes it a model class
-            '_is_model_definition': False,
-            '_name': name,
-            '_register': False,
-            '_original_module': model_def._module,
-            '_inherit_module': {},                  # map parent to introducing module
-            '_inherits_children': set(),            # names of children models
-            '_fields__': {},                        # populated in _setup()
-            '_fields_update_order__': {},           # populated in _post_model_setup__()
-            '_table_objects': frozendict(),         # populated in _setup()
-        })
-        model_cls._fields = MappingProxyType(model_cls._fields__)
+        model_cls = RegistryModel(registry, name, model_def)
 
     # determine all the classes the model should inherit from
     bases = LastOrderedSet([model_def])
     for parent_name in parent_names:
-        if parent_name not in registry:
+        if parent_name not in registry._models:
             raise TypeError(f"Model {name!r} inherits from non-existing model {parent_name!r}.")
-        parent_cls = registry[parent_name]
+        parent_cls = registry._models[parent_name]
         if parent_name == name:
             for base in parent_cls._base_classes__:
                 bases.add(base)
@@ -208,11 +256,11 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
             model_cls._inherit_module[parent_name] = model_def._module
             registry._inherit_children[parent_name].add(name)
 
-    # model_cls.__bases__ must be assigned those classes; however, this
-    # operation is quite slow, so we do it once in method _prepare_setup()
+    # the resolved bases will be assigned to the actual model class' __bases__
+    # in _prepare_setup(); keep the (possibly unresolved) composition here
     model_cls._base_classes__ = tuple(bases)
 
-    # determine the attributes of the model's class
+    # determine the attributes of the registry model
     _init_model_class_attributes(model_cls, registry)
 
     check_pg_name(model_cls._table)
@@ -225,17 +273,21 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
         )
 
     # update the registry after all checks have passed
-    registry[name] = model_cls
+    registry._models[name] = model_cls
 
     # mark all impacted models for setup
     for model_name in registry.descendants([name], '_inherit', '_inherits'):
-        registry[model_name]._setup_done__ = False
+        impacted = registry._models[model_name]
+        impacted._setup_done__ = False
+        if impacted._class__ is not None:
+            impacted._class__._setup_done__ = False
+            registry.models.pop(model_name, None)
+            impacted._class__ = None
 
-    safe_checker.add_hook(model_cls, None)  # Optimization to serialize recordset(s) faster
     return model_cls
 
 
-def _check_model_extension(model_cls: type[BaseModel], model_def: type[BaseModel]):
+def _check_model_extension(model_cls: RegistryModel, model_def: type[BaseModel]):
     """ Check whether ``model_cls`` can be extended with ``model_def``. """
     if model_def._table:
         raise TypeError(
@@ -260,7 +312,7 @@ def _check_model_extension(model_cls: type[BaseModel], model_def: type[BaseModel
             )
 
 
-def _check_model_parent_extension(model_cls: type[BaseModel], model_def: type[BaseModel], parent_cls: type[BaseModel]):
+def _check_model_parent_extension(model_cls: RegistryModel, model_def: type[BaseModel], parent_cls: RegistryModel):
     """ Check whether ``model_cls`` can inherit from ``parent_cls``. """
     if model_cls._abstract and not parent_cls._abstract:
         raise TypeError(
@@ -268,9 +320,9 @@ def _check_model_parent_extension(model_cls: type[BaseModel], model_def: type[Ba
         )
 
 
-def _init_model_class_attributes(model_cls: type[BaseModel], registry: Registry):
-    """ Initialize model class attributes. """
-    assert not model_cls._is_model_definition
+def _init_model_class_attributes(model_cls: RegistryModel, registry: Registry):
+    """ Initialize registry model attributes. """
+    assert isinstance(model_cls, RegistryModel)
 
     model_cls._description = model_cls._name
     model_cls._table = model_cls._name.replace('.', '_')
@@ -279,8 +331,8 @@ def _init_model_class_attributes(model_cls: type[BaseModel], registry: Registry)
     depends = {}
 
     for base in reversed(model_cls._base_classes__):
-        if base._is_model_definition:
-            # the following attributes are not taken from registry classes
+        if getattr(base, '_is_model_definition', False):
+            # the following attributes are not taken from parent registry models
             if model_cls._name not in base._inherit and not base._description:
                 _logger.warning("The model %s has no _description", model_cls._name)
             model_cls._description = base._description or model_cls._description
@@ -292,19 +344,16 @@ def _init_model_class_attributes(model_cls: type[BaseModel], registry: Registry)
         for mname, fnames in base._depends.items():
             depends.setdefault(mname, []).extend(fnames)
 
-    # avoid assigning an empty dict to save memory
-    if inherits:
-        model_cls._inherits = inherits
-    if depends:
-        model_cls._depends = depends
+    model_cls._inherits = inherits
+    model_cls._depends = depends
 
     # update _inherits_children of parent models
     for parent_name in model_cls._inherits:
-        registry[parent_name]._inherits_children.add(model_cls._name)
+        registry._inherits_children[parent_name].add(model_cls._name)
 
     # recompute attributes of inherit children models
     for child_name in registry._inherit_children[model_cls._name]:
-        _init_model_class_attributes(registry[child_name], registry)
+        _init_model_class_attributes(registry._models[child_name], registry)
 
 
 def setup_model_classes(env: Environment):
@@ -313,16 +362,19 @@ def setup_model_classes(env: Environment):
     # we must setup ir.model before adding manual fields because _add_manual_models may
     # depend on behavior that is implemented through overrides, such as is_mail_thread which
     # is implemented through an override to env['ir.model']._instanciate_attrs
-    _prepare_setup(registry['ir.model'])
+    _prepare_setup(registry._models['ir.model'])
 
     # add manual models
     if registry._init_modules:
         _add_manual_models(env)
 
-    # prepare the setup on all models
-    models_classes = list(registry.values())
-    for model_cls in models_classes:
-        _prepare_setup(model_cls)
+    # prepare the setup on all models: resolve (or build) the actual model class
+    # for each registry model and store it in registry.models
+    registry_models = list(registry._models.values())
+    for registry_model in registry_models:
+        _prepare_setup(registry_model)
+
+    models_classes = [registry_model._class__ for registry_model in registry_models]
 
     # do the actual setup
     for model_cls in models_classes:
@@ -339,24 +391,73 @@ def setup_model_classes(env: Environment):
         model_cls(env, (), ())._post_model_setup__()
 
 
-def _prepare_setup(model_cls: type[BaseModel]):
-    """ Prepare the setup of the model. """
-    if model_cls._setup_done__:
-        assert model_cls.__bases__ == model_cls._base_classes__
-        return
+def _prepare_setup(registry_model: RegistryModel) -> type[BaseModel]:
+    """ Resolve the actual model class of a registry model. """
+    assert isinstance(registry_model, RegistryModel)
+    registry = registry_model._registry
 
-    # changing base classes is costly, do it only when necessary
-    if model_cls.__bases__ != model_cls._base_classes__:
-        model_cls.__bases__ = model_cls._base_classes__
+    cls = registry_model._class__
+    if cls is None:
+        resolved_bases = tuple(
+            base if getattr(base, '_is_model_definition', False) else _prepare_setup(base)
+            for base in registry_model._base_classes__
+        )
 
-    # reset those attributes on the model's class for _setup_fields() below
-    for attr in ('_rec_name', '_active_name'):
-        discardattr(model_cls, attr)
+        if registry_model._shareable:
+            cache_key = registry_model.get_cache_key()
+            cls = SHARED_MODEL_CACHE.get(cache_key)
+            if cls is None:
+                cls = _build_model_class(registry_model, resolved_bases)
+                SHARED_MODEL_CACHE[cache_key] = cls
+        else:
+            cls = _build_model_class(registry_model, resolved_bases)
 
-    # reset properties memoized on model_cls
-    model_cls._constraint_methods = models.BaseModel._constraint_methods
-    model_cls._ondelete_methods = models.BaseModel._ondelete_methods
-    model_cls._onchange_methods = models.BaseModel._onchange_methods
+        registry_model._class__ = cls
+        registry.models[registry_model._name] = cls
+
+    if cls._setup_done__:
+        assert cls.__bases__ == cls._base_classes__
+    else:
+        if cls.__bases__ != cls._base_classes__:
+            cls.__bases__ = cls._base_classes__
+
+        for attr in ('_rec_name', '_active_name'):
+            discardattr(cls, attr)
+
+        cls._constraint_methods = models.BaseModel._constraint_methods
+        cls._ondelete_methods = models.BaseModel._ondelete_methods
+        cls._onchange_methods = models.BaseModel._onchange_methods
+
+    return cls
+
+
+def _build_model_class(registry_model: RegistryModel, resolved_bases: tuple) -> type[BaseModel]:
+    """ Build the actual model class for the given registry model. """
+    name = registry_model._name
+    cls = type(name, resolved_bases, {
+        '_is_model_definition': False,
+        '_name': name,
+        '_register': False,
+        '_original_module': registry_model._original_module,
+        '_inherit_module': dict(registry_model._inherit_module),
+        '_base_classes__': resolved_bases,
+        '_setup_done__': False,
+        '_fields__': {},
+        '_fields_update_order__': {},
+        '_table_objects': frozendict(),
+    })
+    cls._fields = MappingProxyType(cls._fields__)
+
+    cls._description = registry_model._description
+    cls._table = registry_model._table
+    cls._log_access = registry_model._log_access
+    if registry_model._inherits:
+        cls._inherits = dict(registry_model._inherits)
+    if registry_model._depends:
+        cls._depends = {mname: list(fnames) for mname, fnames in registry_model._depends.items()}
+
+    safe_checker.add_hook(cls, None)
+    return cls
 
 
 def _setup(model_cls: type[BaseModel], env: Environment):
@@ -555,13 +656,18 @@ def _add_manual_models(env: Environment):
     """ Add extra models to the registry. """
     # clean up registry first
     removed_fields = OrderedSet()
-    for name, model_cls in list(env.registry.items()):
-        if model_cls._custom:
-            removed_fields.update(model_cls._fields.values())
-            del env.registry.models[name]
+    for name, registry_model in list(env.registry._models.items()):
+        if registry_model._custom:
+            if registry_model._class__ is not None:
+                removed_fields.update(registry_model._class__._fields.values())
+            del env.registry._models[name]
+            env.registry.models.pop(name, None)
             for children in env.registry._inherit_children.values():
                 children.discard(name)
             env.registry._inherit_children.pop(name, None)
+            for children in env.registry._inherits_children.values():
+                children.discard(name)
+            env.registry._inherits_children.pop(name, None)
 
     if removed_fields:
         env.registry._discard_fields(list(removed_fields))
