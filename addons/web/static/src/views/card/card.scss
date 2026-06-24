@@ -41,8 +41,9 @@
 
     padding: var(--Card-padding-v) var(--Card-padding-h);
     border-width: var(--Card-border-width, #{$border-width});
+    border-radius: var(--Card-border-radius);
     border-style: solid;
-    border-color: $border-color;
+    border-color: var(--Card-border-color, #{$border-color});
     background-color: $o-view-background-color;
 
     @include media-only(print) {
