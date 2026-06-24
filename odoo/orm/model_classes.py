@@ -34,7 +34,7 @@ _logger = logging.getLogger('odoo.registry')
 SHARED_FIELD_CACHE: weakref.WeakValueDictionary[tuple[str, tuple[Field, ...]], Field] = weakref.WeakValueDictionary()
 """Cache of shared registry field instances keyed by (model_name, definition_fields_tuple)."""
 
-SHARED_MODEL_CACHE: weakref.WeakValueDictionary[tuple, type[BaseModel]] = weakref.WeakValueDictionary()
+SHARED_MODEL_CACHE: dict[tuple, type[BaseModel]] = {}
 """Cache of shared model classes keyed by their composition (see
 :meth:`RegistryModel.get_cache_key`)."""
 
