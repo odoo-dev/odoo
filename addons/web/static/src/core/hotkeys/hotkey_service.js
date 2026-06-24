@@ -346,7 +346,9 @@ export const hotkeyService = {
                     "bg-black-50",
                     "h6"
                 );
-                overlay.style.zIndex = 1;
+                // Bootstrap raises the z-index of focused/active buttons inside a
+                // btn-group up to 2, which would hide the overlay behind them.
+                overlay.style.zIndex = 3;
                 const overlayKbd = document.createElement("kbd");
                 overlayKbd.className = "small";
                 overlayKbd.appendChild(document.createTextNode(hotkey.toUpperCase()));
