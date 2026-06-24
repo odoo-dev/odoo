@@ -15,39 +15,15 @@ patch(PosStore.prototype, {
             this.config.id,
         ]);
         this.session.l10nPtCertificationNumber = values.l10n_pt_pos_certification_number;
-        this.session.l10nPtTrainingMode = values.l10n_pt_training_mode;
     },
 
     isPortugueseCompany() {
         return this.company.country_id?.code === "PT";
     },
 
-    async l10nPtComputeMissingHashes(order = this.get_order()) {
-        // Returns the last hash computed
-        try {
-            const orderId = Number.isInteger(order?.id) ? order.id : false;
-            return await this.data.call("pos.order", "l10n_pt_pos_compute_missing_hashes", [
-                orderId,
-                this.config.id,
-            ]);
-        } catch (e) {
-            console.error(e);
-            const errorMsg =
-                e?.data?.message ||
-                _t(
-                    "Check your internet connection. If the problem persists, contact Odoo support."
-                );
-            this.notification.add(_t("The receipt QR code could not be created: %s", errorMsg), {
-                type: "warning",
-            });
-            return {};
-        }
-    },
-
     getReceiptHeaderData(order) {
         const result = super.getReceiptHeaderData(...arguments);
         result.isCountryPortugal = this.isPortugueseCompany();
-        result.l10nPtTrainingMode = this.session.l10nPtTrainingMode;
         return result;
     },
 
@@ -55,16 +31,11 @@ patch(PosStore.prototype, {
         if (!this.isPortugueseCompany()) {
             return true;
         }
-        const amountTotal = order?.get_total_with_tax?.() ?? order?.amount_total;
-        if (amountTotal < 0) {
-            return true;
-        }
         if (typeof order?.id !== "number") {
             return false;
         }
-        await this.l10nPtComputeMissingHashes(order);
-        let orderValues;
 
+        let orderValues;
         try {
             orderValues = await this.data.call("pos.order", "l10n_pt_get_order_vals", [order.id]);
         } catch (error) {
@@ -79,17 +50,22 @@ patch(PosStore.prototype, {
             return false;
         }
 
+        if (!orderValues || !orderValues.hash_short) {
+            return false;
+        }
+
         order.name = orderValues.name;
         order.isReprint = orderValues.is_reprint;
         order.l10nPtPosAtcud = orderValues.atcud;
         order.l10nPtPosIdentifier = orderValues.document_identifier;
         order.l10nPtPosInalterableHashShort = orderValues.hash_short;
         order.l10nPtPosQrCodeStr = orderValues.qr_code_str;
+        order.l10nPtTrainingMode = orderValues.training_mode;
         return true;
     },
 
     async printReceipt({ order = this.get_order() } = {}) {
-        if (!this.isPortugueseCompany() || order?.get_total_with_tax?.() < 0) {
+        if (!this.isPortugueseCompany()) {
             return super.printReceipt(...arguments);
         }
         const prepared = await this.l10nPtPrepareOrderForReceipt(order);

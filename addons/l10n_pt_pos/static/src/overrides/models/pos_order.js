@@ -22,7 +22,7 @@ patch(PosOrder.prototype, {
         if (this.isPortugueseCompany()) {
             receipt["isCountryPortugal"] = true;
             receipt["l10nPtCertificationNumber"] = this.session_id.l10nPtCertificationNumber;
-            receipt["l10nPtTrainingMode"] = this.session.l10nPtTrainingMode;
+            receipt["l10nPtTrainingMode"] = this.l10nPtTrainingMode || false;
             receipt["taxExemptionReasons"] = this.taxExemptionReasons;
             if (this.l10nPtPosInalterableHashShort) {
                 receipt["isReprint"] = this.isReprint;
