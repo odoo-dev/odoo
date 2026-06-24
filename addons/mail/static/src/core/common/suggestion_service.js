@@ -66,7 +66,7 @@ export class SuggestionService {
                 await this.store.cannedReponses.fetch();
                 break;
             case SUGGESTION_DELIMITERS.EMOJI: {
-                await emojiLoader.load();
+                await emojiLoader.load(this.composer.htmlEnabled);
                 break;
             }
         }
@@ -160,7 +160,7 @@ export class SuggestionService {
             );
         }
         return {
-            type: "emoji",
+            type: this.composer.htmlEnabled ? "twemoji" : "emoji",
             suggestions: emojis,
         };
     }

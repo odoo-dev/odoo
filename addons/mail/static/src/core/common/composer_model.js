@@ -4,10 +4,11 @@ import {
     prepareBodyForEditing,
     generatePartnerMentionElement,
     prettifyMessageText,
+    replaceTwemojiWithEmoji,
 } from "@mail/utils/common/format";
-import { getInnerHtml } from "@mail/utils/common/html";
+import { getInnerHtml, isComposerEmpty } from "@mail/utils/common/html";
 import { markup } from "@odoo/owl";
-import { createDocumentFragmentFromContent, isHtmlEmpty } from "@web/core/utils/html";
+import { createDocumentFragmentFromContent } from "@web/core/utils/html";
 import { nbsp } from "@web/core/utils/strings";
 
 export class Composer extends Record {
@@ -81,7 +82,7 @@ export class Composer extends Record {
         compute() {
             if (this.syncHtmlWithMessage) {
                 return (
-                    prepareBodyForEditing(this.message.body) ||
+                    prepareBodyForEditing(this.message.body, true) ||
                     markup("<div class='o-paragraph'><br></div>")
                 );
             }
@@ -92,9 +93,9 @@ export class Composer extends Record {
                 this.updateFrom = undefined;
                 return;
             }
-            const prettifiedText = isHtmlEmpty(this.composerHtml)
+            const prettifiedText = isComposerEmpty(this.composerHtml)
                 ? ""
-                : convertBrToLineBreak(this.composerHtml, { trim: false });
+                : convertBrToLineBreak(replaceTwemojiWithEmoji(this.composerHtml), { trim: false });
             if (this.composerText !== prettifiedText) {
                 this.updateFrom = "html";
                 this.composerText = prettifiedText;

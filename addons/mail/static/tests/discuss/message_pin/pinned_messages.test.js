@@ -148,11 +148,12 @@ test("can add reactions from pinned panel", async () => {
     await start();
     await openDiscuss(channelId);
     await click(".o-mail-Message-actions [title='Add a Reaction']");
-    await click(".o-mail-QuickReactionMenu button:text('👍')");
-    await contains(".o-mail-MessageReaction:text('👍 1')");
+    await click(".o-mail-QuickReactionMenu button[data-codepoints='👍']");
+    await contains(".o-mail-MessageReaction-twemoji[data-codepoints='👍']");
+    await contains(".o-mail-MessageReaction:text('1')");
     await click(".o-mail-DiscussContent-header button[title='Pinned Messages']");
     await click(".o-discuss-PinnedMessagesPanel .o-mail-Message [title='Add a Reaction']");
-    await click(".o-mail-QuickReactionMenu button:text('👍')");
+    await click(".o-mail-QuickReactionMenu button[data-codepoints='👍']");
     await contains(".o-mail-MessageReaction", { count: 0 });
 });
 

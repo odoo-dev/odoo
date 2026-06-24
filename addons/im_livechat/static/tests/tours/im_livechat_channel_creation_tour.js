@@ -37,6 +37,6 @@ registry.category("web_tour.tours").add("im_livechat_request_chat_and_send_messa
                 ".o-livechat-root:shadow .o-mail-Composer-input:value('Hello, I need help please !😀')",
         },
         clickSend(),
-        waitForMessage("Hello, I need help please !😀"),
+        waitForMessage("Hello, I need help please !", { emoji: "😀" }),
     ],
 });

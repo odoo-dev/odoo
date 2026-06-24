@@ -228,7 +228,9 @@ test("[text composer] Posting message should transform relevant data to emoji.",
     await openDiscuss(channelId);
     await insertText(".o-mail-Composer-input", "test :P :laughing:");
     await press("Enter");
-    await contains(".o-mail-Message-body:text('test 😛 😆')");
+    await contains(".o-mail-Message-body img.o-mail-emoji[data-codepoints='😛']");
+    await contains(".o-mail-Message-body img.o-mail-emoji[data-codepoints='😆']");
+    await contains(".o-mail-Message-body:text('test')");
 });
 
 test.tags("html composer");
@@ -249,7 +251,9 @@ test("Posting message should transform relevant data to emoji.", async () => {
     };
     await htmlInsertText(editor, "test :P :laughing:");
     await press("Enter");
-    await contains(".o-mail-Message-body:text('test 😛 😆')");
+    await contains(".o-mail-Message-body img.o-mail-emoji[data-codepoints='😛']");
+    await contains(".o-mail-Message-body img.o-mail-emoji[data-codepoints='😆']");
+    await contains(".o-mail-Message-body:text('test')");
 });
 
 test("posting a message immediately after another one is displayed in 'simple' mode (squashed)", async () => {
@@ -1000,8 +1004,8 @@ test("Can add reaction from right-click on message", async () => {
     await contains(".o-mail-Message");
     await rightClick(".o-mail-Message");
     await click(".o-dropdown-item:contains('Add a Reaction')");
-    await click(".o-Emoji:contains(😊)");
-    await contains(".o-mail-MessageReaction:contains(😊)");
+    await click(".o-Emoji[data-codepoints='😊']");
+    await contains(".o-mail-MessageReaction-twemoji[data-codepoints='😊']");
 });
 
 test("Unfollow message", async function () {

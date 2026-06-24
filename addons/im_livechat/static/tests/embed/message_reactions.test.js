@@ -58,8 +58,8 @@ test("user custom live chat user name for message reactions", async () => {
         authenticateAs: { ...pyEnv["mail.guest"].read(guestId)[0], _name: "mail.guest" },
     });
     await hover(".o-mail-MessageReaction");
-    await click(".o-mail-MessageReactionList-preview", {
-        text: "👍:+1: reacted by Michou",
-    });
+    await click(
+        ".o-mail-MessageReactionList-preview:text(':+1: reacted by Michou') .o-mail-MessageReactionPreview-twemoji[data-codepoints='👍']"
+    );
     await contains(".o-mail-MessageReactionMenu-persona", { text: "Michou" });
 });

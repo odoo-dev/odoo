@@ -38,12 +38,12 @@ registry.category("web_tour.tours").add("message_actions_tour", {
             run: "hover && click #chatterRoot:shadow button[title='Add a Reaction']",
         },
         {
-            trigger: "#chatterRoot:shadow .o-mail-QuickReactionMenu-emoji span:contains(❤️)",
+            trigger: "#chatterRoot:shadow .o-mail-QuickReactionMenu-emoji[data-codepoints='❤️']",
             run: "click",
         },
         {
             trigger:
-                "#chatterRoot:shadow .o-mail-Message:contains(New message) .o-mail-MessageReaction:contains(❤️)",
+                "#chatterRoot:shadow .o-mail-Message:contains(New message) .o-mail-MessageReaction-twemoji[data-codepoints='❤️']",
         },
         {
             trigger: "#chatterRoot:shadow .o-mail-Message:contains(New message)",

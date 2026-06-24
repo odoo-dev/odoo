@@ -3,7 +3,10 @@
         <div class="o-we-SuggestionList" t-custom-ref="suggestionList">
             <t t-foreach="this.props.state.list" t-as="item" t-key="item.value">
                 <div class="d-flex align-items-center py-1 px-2 w-100 cursor-pointer o-navigable" t-on-click.stop="() => this.onClick(item)">
-                    <strong class="px-2 fs-3" t-out="item.value" />
+                    <span t-if="item.hexcode" class="mx-2 my-1" t-att-data-codepoints="item.value">
+                        <t t-call="web.EmojiPicker.twemoji" emoji="item" twemojiClasses="'o-we-SuggestionList-twemoji align-bottom'" scale="20 / 52" />
+                    </span>
+                    <strong t-else="" class="px-2 fs-3" t-out="item.value" />
                     <em class="text-600 text-truncate" t-out="item.label" />
                 </div>
             </t>

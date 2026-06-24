@@ -20,7 +20,9 @@ test("add an emoji with powerbox", async () => {
     await expectElementCount(".o-EmojiPicker", 1);
 
     await click(".o-EmojiPicker .o-Emoji");
-    expect(getContent(el)).toBe("<p>ab😀[]</p>");
+    expect(getContent(el)).toBe(
+        '<p>ab<img class="o-web-twemoji" data-codepoints="😀" src="/web/static/img/twemoji/svg/1f600.svg">&nbsp;[]</p>'
+    );
 });
 
 test("click on emoji command to open emoji picker", async () => {
@@ -45,7 +47,9 @@ test("undo an emoji", async () => {
     await press("enter");
     await waitFor(".o-EmojiPicker", { timeout: 1000 });
     await click(".o-EmojiPicker .o-Emoji");
-    expect(getContent(el)).toBe("<p>abtest😀[]</p>");
+    expect(getContent(el)).toBe(
+        '<p>abtest<img class="o-web-twemoji" data-codepoints="😀" src="/web/static/img/twemoji/svg/1f600.svg">&nbsp;[]</p>'
+    );
 
     undo(editor);
     expect(getContent(el)).toBe("<p>abtest[]</p>");
@@ -85,13 +89,17 @@ describe("Emoji list picker", () => {
         await expectElementCount(".o-we-SuggestionList", 1);
         await animationFrame();
         press("enter");
-        expect(getContent(el)).toBe("<p>👋[]</p>");
+        expect(getContent(el)).toBe(
+            '<p><img class="o-web-twemoji" data-codepoints="👋" src="/web/static/img/twemoji/svg/1f44b.svg">&nbsp;[]</p>'
+        );
         await expectElementCount(".o-we-SuggestionList", 0);
         await insertText(editor, ":burger");
         await expectElementCount(".o-we-SuggestionList", 1);
         await animationFrame();
         await click(".o-we-SuggestionList > div");
-        expect(getContent(el)).toBe("<p>👋🍔[]</p>");
+        expect(getContent(el)).toBe(
+            '<p><img class="o-web-twemoji" data-codepoints="👋" src="/web/static/img/twemoji/svg/1f44b.svg">&nbsp;<img class="o-web-twemoji" data-codepoints="🍔" src="/web/static/img/twemoji/svg/1f354.svg">&nbsp;[]</p>'
+        );
     });
 
     test("should close emoji list picker on escape", async () => {
@@ -138,7 +146,9 @@ describe("Emoji shortcuts", () => {
         );
         await insertText(editor, ":/");
         await animationFrame();
-        expect(getContent(el)).toBe(`<p>😕[]</p>`);
+        expect(getContent(el)).toBe(
+            '<p><img class="o-web-twemoji" data-codepoints="😕" src="/web/static/img/twemoji/svg/1f615.svg">&nbsp;[]</p>'
+        );
         await expectElementCount(".o-we-powerbox", 0);
     });
 
@@ -147,6 +157,8 @@ describe("Emoji shortcuts", () => {
         expect(getContent(el)).toBe(`<p>abc []def</p>`);
         await insertText(editor, ":/");
         await animationFrame();
-        expect(getContent(el)).toBe(`<p>abc 😕[]def</p>`);
+        expect(getContent(el)).toBe(
+            '<p>abc <img class="o-web-twemoji" data-codepoints="😕" src="/web/static/img/twemoji/svg/1f615.svg">&nbsp;[]def</p>'
+        );
     });
 });

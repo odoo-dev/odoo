@@ -82,7 +82,8 @@
         t-att-data-id="category.sortId"
         t-on-click="() => this.selectCategory(category.sortId)"
     >
-        <span t-out="category.title" />
+        <t t-if="this.props.twemoji" t-call="web.EmojiPicker.twemoji" emoji="category" twemojiClasses="'o-Twemoji'" scale="26 / 52" />
+        <span t-else="" t-out="category.title" />
     </span>
 </t>
 
@@ -143,8 +144,13 @@
         t-on-mouseenter="(ev) => this.onMouseenterEmoji(ev, emoji)"
         t-on-mouseleave="(ev) => this.onMouseleaveEmoji(ev, emoji)"
     >
-        <span t-out="emoji.codepoints" />
+        <t t-if="this.props.twemoji" t-call="web.EmojiPicker.twemoji" twemojiClasses="'o-Twemoji'" scale="26 / 52" />
+        <span t-else="" t-out="emoji.codepoints" />
     </span>
+</t>
+
+<t t-name="web.EmojiPicker.twemoji">
+    <span t-attf-style="background-position: -{{emoji.p_x * scale}}px -{{emoji.p_y * scale}}px;" t-att-class="twemojiClasses" />
 </t>
 
 <t t-name="web.EmojiPicker.searchInput">

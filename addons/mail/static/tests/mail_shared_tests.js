@@ -43,13 +43,13 @@ export async function mailCanAddMessageReactionMobile() {
     expect(chatWindowZIndex).toBeLessThan(emojiPickerZIndex, {
         message: "emoji picker modal should be above chat window",
     });
-    await click(".modal .o-EmojiPicker .o-Emoji:contains('😀')");
-    await contains(".o-mail-MessageReaction:contains('😀')");
+    await click(".modal .o-EmojiPicker .o-Emoji[data-codepoints='😀']");
+    await contains(".o-mail-MessageReaction-twemoji[data-codepoints='😀']");
     // Can quickly add new reactions
     await click(".o-mail-MessageReactions button[title='Add a Reaction']");
-    await click(".modal .o-EmojiPicker .o-Emoji:contains('🤣')");
-    await contains(".o-mail-MessageReaction:contains('🤣')");
-    await contains(".o-mail-MessageReaction:contains('😀')");
+    await click(".modal .o-EmojiPicker .o-Emoji[data-codepoints='🤣']");
+    await contains(".o-mail-MessageReaction-twemoji[data-codepoints='🤣']");
+    await contains(".o-mail-MessageReaction-twemoji[data-codepoints='😀']");
 }
 
 export async function mailCanCopyTextToClipboardMobile() {

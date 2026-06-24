@@ -403,3 +403,15 @@
         -moz-appearance: textfield;
     }
 };
+
+@mixin o-twemoji($size: 26px) {
+    --Twemoji-scale: calc(#{$size} / 52px);
+    --Twemoji-background-size: calc(2268px * var(--Twemoji-scale))calc(1890px * var(--Twemoji-scale));
+
+    width: #{$size};
+    height: #{$size};
+    background-size: var(--Twemoji-background-size);
+    background-image: url("/web/static/img/twemoji_sprite.png");
+    background-repeat: no-repeat;
+    display: inline-block;
+}

@@ -7,6 +7,7 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { emojiLoader, useLoadEmoji } from "@web/core/emoji_picker/emoji_loader";
 import { useChildRef, useService } from "@web/core/utils/hooks";
 import { TabHeader, TabPanel, Tabs } from "./tabs";
+import { getTwemojiUrl } from "@web/core/emoji_picker/emoji_picker";
 
 export class MessageReactionMenu extends Component {
     static components = { Dialog, Tabs, TabHeader, TabPanel };
@@ -48,6 +49,10 @@ export class MessageReactionMenu extends Component {
 
     getEmojiShortcode(reaction) {
         return emojiLoader.getShortCode(reaction.content);
+    }
+
+    getReactionSvgUrl(reaction) {
+        return getTwemojiUrl(reaction.content);
     }
 
     get contentClass() {

@@ -6,12 +6,13 @@
  * added by livechat so it only happens when frontend modules are installed and
  * tested while livechat is not installed.
  */
-import { getInnerHtml, getOuterHtml } from "@mail/utils/common/html";
+import { getInnerHtml, getOuterHtml, isComposerEmpty } from "@mail/utils/common/html";
 
 import { htmlEscape, markup } from "@odoo/owl";
 
 import { router } from "@web/core/browser/router";
 import { emojiLoader } from "@web/core/emoji_picker/emoji_loader";
+import { getTwemojiUrl } from "@web/core/emoji_picker/emoji_picker";
 import { formatList } from "@web/core/l10n/utils";
 import {
     createDocumentFragmentFromContent,
@@ -20,7 +21,6 @@ import {
     htmlReplace,
     htmlReplaceAll,
     htmlTrim,
-    isHtmlEmpty,
     setElementContent,
 } from "@web/core/utils/html";
 import { escapeRegExp, nbsp } from "@web/core/utils/strings";
@@ -73,11 +73,12 @@ export function prettifyMessageText(rawBody, { validMentions = {}, thread, trim 
  */
 export async function generateEmojisOnHtml(htmlBody, { allowEmojiLoading = true } = {}) {
     let body = htmlBody;
-    if (allowEmojiLoading && !emojiLoader.loaded) {
-        await emojiLoader.load();
+    if (allowEmojiLoading && !emojiLoader.twemojiLoaded) {
+        await emojiLoader.load(true);
     }
-    if (emojiLoader.loaded) {
+    if (emojiLoader.twemojiLoaded) {
         body = _generateEmojisOnHtml(body);
+        body = replaceTwemojiWithEmoji(body);
     }
     return body;
 }
@@ -344,6 +345,7 @@ function _generateEmojisOnHtml(htmlString) {
  * @returns {ReturnType<markup>}
  */
 export function prepareBodyForEditing(body) {
+    body = htmlReplaceAll(body, EMOJI_REGEX, replaceEmojiWithTwemoji);
     const doc = createDocumentFragmentFromContent(body);
     for (const block of doc.body.querySelectorAll(".o_mail_reply_hide")) {
         block.classList.remove("o_mail_reply_hide");
@@ -401,7 +403,7 @@ export function convertLineBreakToBr(str) {
  * @returns {ReturnType<markup>}
  */
 export function trimEmptyBlocksAround(content) {
-    if (isHtmlEmpty(content)) {
+    if (isComposerEmpty(content)) {
         return content;
     }
     const body = createDocumentFragmentFromContent(content).body;
@@ -449,7 +451,7 @@ export function trimEmptyBlocksAround(content) {
     const trimEmptyParagraphs = (side) => {
         trimTextNodes(body, side);
         let paragraph = getBoundaryElement(body, side);
-        while (["P", "DIV"].includes(paragraph?.tagName) && isHtmlEmpty(paragraph.innerHTML)) {
+        while (["P", "DIV"].includes(paragraph?.tagName) && isComposerEmpty(paragraph.innerHTML)) {
             removeNode(paragraph);
             trimTextNodes(body, side);
             paragraph = getBoundaryElement(body, side);
@@ -611,6 +613,24 @@ export const EMOJI_REGEX = new RegExp(
     "gu"
 );
 
+/** @param {string|ReturnType<markup>} body */
+export function replaceTwemojiWithEmoji(body) {
+    const regex = /<img[^>]+data-codepoints="([^"]+)"[^>]*>/g;
+    return htmlReplaceAll(body, regex, (_, codepoints) => codepoints);
+}
+
+/** @param {string} codepoints */
+export function replaceEmojiWithTwemoji(codepoints) {
+    if (!emojiLoader.twemojiMap.has(codepoints)) {
+        return codepoints;
+    }
+    const title = formatList(emojiLoader.twemojiMap.get(codepoints).shortcodes, {
+        style: "unit-narrow",
+    });
+    const url = getTwemojiUrl(codepoints);
+    return markup`<img class="o-mail-emoji" title="${title}" data-codepoints="${codepoints}" src="${url}" />`;
+}
+
 /**
  * Wrap emojis present in the given text with a title and return a safe HTML
  * string.
@@ -635,15 +655,7 @@ export function decorateEmojis(content) {
         const span = document.createElement("span");
         setElementContent(
             span,
-            htmlReplaceAll(node.textContent, EMOJI_REGEX, (codepoints) => {
-                if (!emojiLoader.map.has(codepoints)) {
-                    return codepoints;
-                }
-                const title = formatList(emojiLoader.map.get(codepoints).shortcodes, {
-                    style: "unit-narrow",
-                });
-                return markup`<span class="o-mail-emoji" title="${title}">${codepoints}</span>`;
-            })
+            htmlReplaceAll(node.textContent, EMOJI_REGEX, replaceEmojiWithTwemoji)
         );
         node.replaceWith(...span.childNodes);
     }

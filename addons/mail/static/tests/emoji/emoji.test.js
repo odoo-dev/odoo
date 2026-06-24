@@ -245,9 +245,12 @@ test("shortcodes shown in emoji title in message", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-Message:has(:text('💑😇')");
-    await contains(".o-mail-Message span[title=':couple_with_heart:']:text('💑')");
-    await contains(".o-mail-Message span[title=':innocent: :halo:']:text('😇')");
+    await contains(
+        ".o-mail-Message .o-mail-emoji[title=':couple_with_heart:'][data-codepoints='💑']"
+    );
+    await contains(
+        ".o-mail-Message .o-mail-emoji[title=':innocent: :halo:'][data-codepoints='😇']"
+    );
 });
 
 test("Emoji picker shows failure to load emojis", async () => {

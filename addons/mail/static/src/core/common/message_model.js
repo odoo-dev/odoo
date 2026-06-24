@@ -46,13 +46,13 @@ export class Message extends Record {
     call_history_ids = fields.Many("discuss.call.history");
     richBody = fields.Html("", {
         compute() {
-            emojiLoader.load();
+            emojiLoader.load(true);
             return decorateEmojis(this.body) ?? "";
         },
     });
     richTranslationValue = fields.Html("", {
         compute() {
-            emojiLoader.load();
+            emojiLoader.load(true);
             return decorateEmojis(this.translationValue) ?? "";
         },
     });

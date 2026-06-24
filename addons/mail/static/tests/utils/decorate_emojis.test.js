@@ -14,14 +14,14 @@ preloadBundle("web.assets_emoji");
 
 beforeEach(async () => {
     await makeMockEnv();
-    await emojiLoader.load();
+    await emojiLoader.load(true);
 });
 
 test("emojis in text content are wrapped with title and marked up", async () => {
     const result = decorateEmojis("😇");
     expect(result).toBeInstanceOf(Markup);
     expect(result.toString()).toEqual(
-        '<span class="o-mail-emoji" title=":innocent: :halo:">😇</span>'
+        '<img class="o-mail-emoji" title=":innocent: :halo:" data-codepoints="😇" src="/web/static/img/twemoji/svg/1f607.svg">'
     );
 });
 
@@ -33,6 +33,6 @@ test("emojis in attributes are not wrapped with title", async () => {
 test("unsafe content is escaped when wrapping emojis with title", async () => {
     const result = decorateEmojis("<img src='javascript:alert(\"xss\")'/>😇");
     expect(result.toString()).toEqual(
-        '&lt;img src=&#x27;javascript:alert(&quot;xss&quot;)&#x27;/&gt;<span class="o-mail-emoji" title=":innocent: :halo:">😇</span>'
+        '&lt;img src=&#x27;javascript:alert(&quot;xss&quot;)&#x27;/&gt;<img class="o-mail-emoji" title=":innocent: :halo:" data-codepoints="😇" src="/web/static/img/twemoji/svg/1f607.svg">'
     );
 });

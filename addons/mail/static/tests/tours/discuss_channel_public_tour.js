@@ -143,15 +143,15 @@ registry.category("web_tour.tours").add("discuss_channel_public_tour.js", {
             run: "click",
         },
         {
-            trigger: ".o-EmojiPicker .o-Emoji:contains('🙂')",
+            trigger: ".o-EmojiPicker .o-Emoji[data-codepoints='🙂']",
             run: "click",
         },
         {
-            trigger: `${messageSelector} .o-mail-MessageReaction:contains('🙂')`,
+            trigger: `${messageSelector} .o-mail-MessageReaction-twemoji[data-codepoints='🙂']`,
             run: "click",
         },
         {
-            trigger: `${messageSelector}:not(:has(.o-mail-MessageReaction:contains('🙂')))`,
+            trigger: `${messageSelector}:not(:has(.o-mail-MessageReaction-twemoji[data-codepoints='🙂']))`,
         },
         {
             trigger: `${messageSelector}`,

@@ -2,7 +2,7 @@ import { SuggestionList } from "@html_editor/components/suggestion/suggestion_li
 import { Plugin } from "@html_editor/plugin";
 import { isContentEditable, isTextNode } from "@html_editor/utils/dom_info";
 import { emojiLoader } from "@web/core/emoji_picker/emoji_loader";
-import { EmojiPicker } from "@web/core/emoji_picker/emoji_picker";
+import { EmojiPicker, convertToTwemoji } from "@web/core/emoji_picker/emoji_picker";
 import { _t } from "@web/core/l10n/translation";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { debounce } from "@web/core/utils/timing";
@@ -52,7 +52,7 @@ export class EmojiPlugin extends Plugin {
     _abortController = new AbortController();
 
     setup() {
-        emojiLoader.load(this._abortController.signal);
+        emojiLoader.load(true, this._abortController.signal);
 
         this.overlay = this.dependencies.overlay.createOverlay(EmojiPicker, {
             hasAutofocus: true,
@@ -81,7 +81,7 @@ export class EmojiPlugin extends Plugin {
      * @param {InputEvent} ev
      */
     onInput(ev) {
-        if (!emojiLoader.loaded) {
+        if (!emojiLoader.twemojiLoaded) {
             return;
         }
         const selection = this.dependencies.selection.getEditableSelection();
@@ -98,7 +98,7 @@ export class EmojiPlugin extends Plugin {
 
         for (let candidatePosition = start - 1; candidatePosition >= 0; candidatePosition--) {
             const match = text.substring(candidatePosition, start);
-            if (!emojiLoader.map.has(match)) {
+            if (!emojiLoader.twemojiMap.has(match)) {
                 continue;
             }
             // Ensure the character before is a space or start of text
@@ -107,7 +107,7 @@ export class EmojiPlugin extends Plugin {
                 continue;
             }
             // Replace the matched text with the emoji
-            const emoji = emojiLoader.map.get(match);
+            const emoji = emojiLoader.twemojiMap.get(match);
             this.dependencies.selection.setSelection({
                 anchorNode: selection.anchorNode,
                 anchorOffset: candidatePosition,
@@ -115,7 +115,7 @@ export class EmojiPlugin extends Plugin {
                 focusOffset: start,
             });
             this.emojiListOverlay.close();
-            this.dependencies.dom.insert(emoji.codepoints);
+            this.dependencies.dom.insert(convertToTwemoji(emoji));
             this.dependencies.history.commit();
             this.match = match;
             return;
@@ -158,14 +158,15 @@ export class EmojiPlugin extends Plugin {
                     this.overlay.close();
                     this.dependencies.selection.focusEditable();
                 },
-                onSelect: (str) => {
+                onSelect: (emoji) => {
                     if (onSelect) {
-                        onSelect(str);
+                        onSelect(emoji.codepoints);
                         return;
                     }
-                    this.dependencies.dom.insert(str);
+                    this.dependencies.dom.insert(convertToTwemoji(emoji));
                     this.dependencies.history.commit();
                 },
+                twemoji: true,
             },
             target,
         });
@@ -173,7 +174,7 @@ export class EmojiPlugin extends Plugin {
 
     updateEmojiList = debounce(this._updateEmojiList, 100);
     _updateEmojiList() {
-        if (!this.shouldUpdateEmojiList || !emojiLoader.loaded) {
+        if (!this.shouldUpdateEmojiList || !emojiLoader.twemojiLoaded) {
             return;
         }
 
@@ -182,23 +183,27 @@ export class EmojiPlugin extends Plugin {
         // Keywords may contain spaces (e.g. "grinning face") which
         // would cause suggestion list to open on space. Replacing
         // them with underscores prevents this.
-        const emojis = fuzzyLookup(searchTerm, emojiLoader.emojis, (e) => [
+        const emojis = fuzzyLookup(searchTerm, emojiLoader.twemojis, (e) => [
             ...e.shortcodes,
             ...e.keywords.map((k) => k.replaceAll(" ", "_")),
         ]).slice(0, 8);
         this.emojiListState.list = emojis.map((e) => ({
             value: e.codepoints,
+            hexcode: e.hexcode,
+            p_x: e.p_x,
+            p_y: e.p_y,
             label: e.shortcodes[0],
         }));
         if (searchTerm.length > 2 && emojis.length) {
             this.emojiListOverlay.open({
                 props: {
                     state: this.emojiListState,
-                    onSelect: ({ value }) => {
+                    onSelect: (emoji) => {
+                        emoji.codepoints = emoji.value;
                         const selection = this.document.getSelection();
                         selection.extend(this.searchNode, this.offset);
                         this.dependencies.delete.deleteSelection();
-                        this.dependencies.dom.insert(value);
+                        this.dependencies.dom.insert(convertToTwemoji(emoji));
                         this.dependencies.history.commit();
                         this.emojiListOverlay.close();
                     },

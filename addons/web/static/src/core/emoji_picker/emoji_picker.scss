@@ -30,6 +30,9 @@
         }
     }
 
+    .o-Twemoji {
+        @include o-twemoji();
+    }
 
     .o-EmojiPicker-navbar {
         --border-opacity: .5;
@@ -95,4 +98,11 @@
             color: var(--EmojiPicker-text-color, $body-color);
         }
     }
+}
+
+.o-web-twemoji {
+    width: 1.43em;
+    height: 1.43em;
+    object-fit: contain;
+    vertical-align: bottom;
 }

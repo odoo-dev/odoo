@@ -350,6 +350,7 @@ let discussAsTabId = 0;
  *  authenticateAs?: any | { login: string; password: string; };
  *  env?: Partial<OdooEnv>;
  *  waitUntilSubscribe?: boolean;
+ *  loadTwemoji?: boolean;
  * }} [options]
  */
 export async function start(options) {
@@ -418,7 +419,7 @@ export async function start(options) {
     ]);
     // Note that loading the emojis cannot be called before setting up the env because
     // it depends on translations being loaded.
-    await emojiLoader.load();
+    await emojiLoader.load(options?.loadTwemoji);
     env ||= getMockEnv();
     const storeService = env.services["mail.store"];
     const popoutService = env.services["mail.popout"];

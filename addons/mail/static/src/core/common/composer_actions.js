@@ -1,7 +1,11 @@
 import { useComponent, useRef } from "@web/owl2/utils";
 import { CreatePollDialog } from "@mail/core/common/create_poll_dialog";
 
-import { EmojiPicker, useEmojiPickerStoreScroll } from "@web/core/emoji_picker/emoji_picker";
+import {
+    EmojiPicker,
+    useEmojiPickerStoreScroll,
+    convertToTwemoji,
+} from "@web/core/emoji_picker/emoji_picker";
 
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
@@ -74,9 +78,11 @@ registerComposerAction("send-message", {
 registerComposerAction("add-emoji", {
     actionPanelComponent: EmojiPicker,
     actionPanelComponentProps: ({ action, owner }) => ({
-        onSelect: (emoji) => owner.addEmoji(emoji),
+        onSelect: (emoji) =>
+            owner.addEmoji(owner.composerService.htmlEnabled ? convertToTwemoji(emoji) : emoji),
         onClose: () => action.actionPanelClose(),
         storeScroll: action.emojiStoreScroll,
+        twemoji: owner.composerService.htmlEnabled,
     }),
     actionPanelName: _t("Emoji"),
     actionPanelOpen(...args) {

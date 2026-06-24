@@ -53,10 +53,12 @@ export const PICKER_PROPS = [
     "state?",
     "storeScroll?",
     "mobile?",
+    "twemoji?",
 ];
 
 export class EmojiPicker extends Component {
     static props = [...PICKER_PROPS, "class?", "initialSearchTerm?"];
+    static defaultProps = { twemoji: false };
     static template = "web.EmojiPicker";
 
     shouldScrollElem = null;
@@ -64,7 +66,7 @@ export class EmojiPicker extends Component {
     keyboardNavigated = false;
 
     emojiMatrix = computed(() => {
-        if (!emojiLoader.loaded || !this.gridRef()) {
+        if (!this.emojisLoaded || !this.gridRef()) {
             return [];
         }
         const emojiEls = Array.from(this.gridRef().querySelectorAll(".o-Emoji"));
@@ -91,7 +93,7 @@ export class EmojiPicker extends Component {
     recentEmojis = computed(() => {
         const recent = Object.entries(this.frequentEmojiService.all)
             .sort(([, usage_1], [, usage_2]) => usage_2 - usage_1)
-            .map(([codepoints]) => emojiLoader.map.get(codepoints));
+            .map(([codepoints]) => this.emojiMap.get(codepoints));
         if (this.searchTerm() && recent.length > 0) {
             return fuzzyLookup(this.searchTerm(), recent, (emoji) =>
                 [emoji.name].concat(emoji.keywords, emoji.emoticons, emoji.shortcodes)
@@ -104,7 +106,7 @@ export class EmojiPicker extends Component {
         const activeCodepoints = this.gridRef()?.querySelector(
             `.o-EmojiPicker-content .o-Emoji[data-index="${this.activeEmojiIndex()}"]`
         )?.dataset.codepoints;
-        return emojiLoader.map.get(activeCodepoints);
+        return this.emojiMap.get(activeCodepoints);
     });
 
     setup() {
@@ -112,7 +114,7 @@ export class EmojiPicker extends Component {
         this.ui = useService("ui");
         this.isMobileOS = isMobileOS();
         this.frequentEmojiService = useService("frequent_emoji");
-        const loadEmoji = useLoadEmoji();
+        const loadEmoji = useLoadEmoji(this.props.twemoji);
         useAutofocus();
         onWillStart(async () => {
             await loadEmoji();
@@ -120,6 +122,9 @@ export class EmojiPicker extends Component {
                 name: "Frequently used",
                 displayName: _t("Frequently used"),
                 title: "🕓",
+                hexcode: "1f553",
+                p_x: 1135,
+                p_y: 1081,
                 sortId: 0,
             };
             this.categoryId.set(
@@ -129,7 +134,7 @@ export class EmojiPicker extends Component {
             );
         });
         onMounted(() => {
-            if (!emojiLoader.loaded) {
+            if (!this.emojisLoaded) {
                 return;
             }
             this.navbarResizeObserver = new ResizeObserver(() => this.adaptNavbar());
@@ -142,7 +147,7 @@ export class EmojiPicker extends Component {
             this.hoveredEmoji.set(this.activeEmoji());
         });
         onPatched(() => {
-            if (!emojiLoader.loaded) {
+            if (!this.emojisLoaded) {
                 return;
             }
             if (this.shouldScrollElem) {
@@ -238,8 +243,12 @@ export class EmojiPicker extends Component {
         this.emojiNavbarRepr.set(repr);
     }
 
+    get emojiMap() {
+        return this.props.twemoji ? emojiLoader.twemojiMap : emojiLoader.map;
+    }
+
     get emojisLoaded() {
-        return emojiLoader.loaded;
+        return this.props.twemoji ? emojiLoader.twemojiLoaded : emojiLoader.loaded;
     }
 
     get placeholder() {
@@ -394,7 +403,7 @@ export class EmojiPicker extends Component {
      * @param {Emoji[]} recentEmojis passed as argument as to not recompute `this.recentEmojis`
      */
     getEmojis(recentEmojis) {
-        let emojisToDisplay = emojiLoader.emojis;
+        let emojisToDisplay = this.props.twemoji ? emojiLoader.twemojis : emojiLoader.emojis;
         if (recentEmojis.length > 0 && this.searchTerm()) {
             emojisToDisplay = emojisToDisplay.filter((emoji) => !recentEmojis.includes(emoji));
         }
@@ -421,7 +430,12 @@ export class EmojiPicker extends Component {
     selectEmoji(ev) {
         const codepoints = ev.currentTarget.dataset.codepoints;
         let resetOnSelect = !ev.shiftKey;
-        const res = this.props.onSelect(codepoints, resetOnSelect);
+        const res = this.props.onSelect(
+            this.props.twemoji
+                ? { codepoints, hexcode: emojiLoader.twemojiMap.get(codepoints)?.hexcode }
+                : codepoints,
+            resetOnSelect
+        );
         if (res === false) {
             resetOnSelect = false;
         }
@@ -454,14 +468,15 @@ export class EmojiPicker extends Component {
  *   When explicit value `false` is returned, this will keep the picker open (= it won't auto-close it)
  * @param {() => {}} [props.onClose]
  * @param {import("@web/core/popover/popover_service").PopoverServiceAddOptions} [options]
+ * @param {boolean} [twemoji] whether to use twemojis or not
  */
-export function usePicker(PickerComponent, ref, props, options = {}) {
+export function usePicker(PickerComponent, ref, props, options = {}, twemoji = false) {
     const app = useApp();
     const targets = [];
     const state = proxy({ isOpen: false });
     const ui = useService("ui");
     const dialog = useService("dialog");
-    const loadEmoji = useLoadEmoji();
+    const loadEmoji = useLoadEmoji(twemoji);
     let remove;
     const newOptions = {
         ...options,
@@ -475,6 +490,7 @@ export function usePicker(PickerComponent, ref, props, options = {}) {
         animation: false,
         popoverClass: options.popoverClass ?? "" + " bg-100 border border-secondary",
     });
+    props.twemoji = twemoji;
     props.storeScroll = useEmojiPickerStoreScroll();
 
     /**
@@ -628,4 +644,23 @@ function isElementVisible(el, holder) {
     holderTop += offset * 2; // section are position sticky top so emoji can be "visible" under section name. Overestimate to assume invisible.
     holderBottom -= offset;
     return top - offset <= holderTop ? holderTop - top <= height : bottom - holderBottom <= height;
+}
+
+export function convertToTwemoji(emoji, addTrailingSpace = true) {
+    const svgUrl = `/web/static/img/twemoji/svg/${emoji.hexcode}.svg`;
+    const img = document.createElement("img");
+    img.classList.add("o-web-twemoji");
+    img.dataset.codepoints = emoji.codepoints;
+    img.src = svgUrl;
+    if (!addTrailingSpace) {
+        return img;
+    }
+    const fragment = document.createDocumentFragment();
+    fragment.appendChild(img);
+    fragment.appendChild(document.createTextNode("\u00A0"));
+    return fragment;
+}
+
+export function getTwemojiUrl(codepoints) {
+    return `/web/static/img/twemoji/svg/${emojiLoader.getHexCode(codepoints)}.svg`;
 }

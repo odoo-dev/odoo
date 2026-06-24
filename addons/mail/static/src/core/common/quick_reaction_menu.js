@@ -30,7 +30,8 @@ export class QuickReactionMenu extends Component {
             {
                 position: "bottom-middle",
                 popoverClass: "o-mail-QuickReactionMenu-pickerPopover",
-            }
+            },
+            true
         );
         this.dropdown = useDropdownState({
             onClose: () => {
@@ -68,7 +69,7 @@ export class QuickReactionMenu extends Component {
     }
 
     getEmojiShortcode(emoji) {
-        return emojiLoader.getShortCode(emoji);
+        return emojiLoader.getShortCode(emoji.codepoints);
     }
 
     onClick() {
@@ -87,13 +88,13 @@ export class QuickReactionMenu extends Component {
 
     toggleReaction(emoji) {
         const reaction = this.props.message.reactions.find(
-            (r) => r.content === emoji && this.props.message.effectiveSelf.in(r.personas)
+            (r) => r.content === emoji.codepoints && this.props.message.effectiveSelf.in(r.personas)
         );
         if (reaction) {
             reaction.remove();
         } else {
-            this.props.message.react(emoji);
-            this.frequentEmojiService.incrementEmojiUsage(emoji);
+            this.props.message.react(emoji.codepoints);
+            this.frequentEmojiService.incrementEmojiUsage(emoji.codepoints);
         }
         this.dropdown.close();
         this.picker.close();
@@ -115,19 +116,20 @@ export class QuickReactionMenu extends Component {
 
     reactedBySelf(emoji) {
         return this.props.message.reactions.some(
-            (r) => r.content === emoji && this.props.message.effectiveSelf.in(r.personas)
+            (r) => r.content === emoji.codepoints && this.props.message.effectiveSelf.in(r.personas)
         );
     }
 
     get mostFrequentEmojis() {
         const numberOfEmojis = 6;
-        const mostFrequent = this.frequentEmojiService.getMostFrequent(numberOfEmojis);
-        return mostFrequent.concat(
+        let mostFrequent = this.frequentEmojiService.getMostFrequent(numberOfEmojis);
+        mostFrequent = mostFrequent.concat(
             QuickReactionMenu.DEFAULT_EMOJIS.filter((emoji) => !mostFrequent.includes(emoji)).slice(
                 0,
                 Math.max(0, numberOfEmojis - mostFrequent.length)
             )
         );
+        return mostFrequent.map((codepoints) => emojiLoader.map.get(codepoints) || { codepoints });
     }
 
     get navigationOptions() {

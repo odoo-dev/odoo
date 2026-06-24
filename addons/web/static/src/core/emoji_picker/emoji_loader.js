@@ -6,6 +6,9 @@ export const emojiCategoryType = t.object({
     name: t.string(),
     sortId: t.number(),
     title: t.string(),
+    hexcode: t.string(),
+    p_x: t.number(),
+    p_y: t.number(),
 });
 /** @typedef {import("@odoo/owl").StripType<typeof emojiCategoryType>} EmojiCategory */
 
@@ -16,15 +19,18 @@ export const emojiType = t.object({
     keywords: t.array(t.string()),
     name: t.string(),
     shortcodes: t.array(t.string()),
+    hexcode: t.string(),
+    p_x: t.number(),
+    p_y: t.number(),
 });
 /** @typedef {import("@odoo/owl").StripType<typeof emojiType>} Emoji */
 
 /**
  * @returns {{ categories: EmojiCategory[], emojis: Emoji[] }}
  */
-function processEmojiData() {
+function processEmojiData(twemoji = false) {
     const { getCategories, getEmojis } = odoo.loader.modules.get(
-        "@web/core/emoji_picker/emoji_data"
+        twemoji ? "@web/core/emoji_picker/extra_emoji_data" : "@web/core/emoji_picker/emoji_data"
     );
 
     // Get and freeze categories & emojis (only list objects are frozen at this
@@ -62,8 +68,24 @@ class EmojiLoader {
     get emojis() {
         return this._emojis();
     }
+    get twemojis() {
+        return this._twemojis();
+    }
     get loaded() {
         return this._emojis().length > 0;
+    }
+    get twemojiLoaded() {
+        return this._twemojis().length > 0;
+    }
+
+    _insertEmoji(map, emoji) {
+        map.set(emoji.codepoints, emoji);
+        for (const emoticon of emoji.emoticons) {
+            map.set(emoticon, emoji);
+        }
+        for (const shortcode of emoji.shortcodes) {
+            map.set(shortcode, emoji);
+        }
     }
     /**
      * Mapping to emojis from:
@@ -79,16 +101,23 @@ class EmojiLoader {
         if (!this._map) {
             this._map = new Map();
             for (const emoji of this._emojis()) {
-                this._map.set(emoji.codepoints, emoji);
-                for (const emoticon of emoji.emoticons) {
-                    this._map.set(emoticon, emoji);
-                }
-                for (const shortcode of emoji.shortcodes) {
-                    this._map.set(shortcode, emoji);
-                }
+                this._insertEmoji(this._map, emoji);
             }
         }
         return this._map;
+    }
+
+    get twemojiMap() {
+        if (!this.twemojiLoaded) {
+            return DEFAULT_EMOJI_MAP;
+        }
+        if (!this._twemojiMap) {
+            this._twemojiMap = new Map();
+            for (const emoji of this._twemojis()) {
+                this._insertEmoji(this._twemojiMap, emoji);
+            }
+        }
+        return this._twemojiMap;
     }
 
     /**
@@ -103,14 +132,38 @@ class EmojiLoader {
     _emojis = signal.Array([]);
     /**
      * @private
+     * @type {import("@odoo/owl").Signal<Emoji[]>}
+     */
+    _twemojis = signal.Array([]);
+    /**
+     * @private
+     * @type {import("@odoo/owl").Signal<Emoji[]>}
+     *
+     * Stores only the extra twemoji entries coming from the twemoji bundle.
+     * Keeping these separate ensures we can merge them with the base emojis
+     * whichever bundle resolves first.
+     */
+    _twemojiExtras = signal.Array([]);
+    /**
+     * @private
      * @type {Promise<EmojiLoader>}
      */
     _loadingPromise = null;
     /**
      * @private
+     * @type {Promise<EmojiLoader> & { abort: () => void } | null}
+     */
+    _loadingTwemojiPromise = null;
+    /**
+     * @private
      * @type {Map<string, Emoji> | null}
      */
     _map = null;
+    /**
+     * @private
+     * @type {Map<string, Emoji> | null}
+     */
+    _twemojiMap = null;
 
     /**
      * Returns the first short code associated to a given emoji value.
@@ -118,7 +171,54 @@ class EmojiLoader {
      * @param {string} value
      */
     getShortCode(value) {
-        return this.map.get(value)?.shortcodes?.[0] ?? "?";
+        return (
+            this.twemojiMap.get(value)?.shortcodes?.[0] ??
+            this.map.get(value)?.shortcodes?.[0] ??
+            "?"
+        );
+    }
+
+    getHexCode(value) {
+        const hexcode = this.twemojiMap.get(value)?.hexcode;
+        if (hexcode) {
+            return hexcode;
+        }
+
+        if (value === "👁️‍🗨️") {
+            return "1f441-200d-1f5e8";
+        }
+        if (!value.includes("\u200d")) {
+            value = value.replace(/\ufe0f/g, "");
+        }
+        return [...value].map((char) => char.codePointAt(0).toString(16)).join("-");
+    }
+
+    _createBundlePromise(bundlePromise, abortSignal, twemoji, cacheKey) {
+        const promise = bundlePromise
+            .then(() => {
+                if (abortSignal?.aborted) {
+                    return Promise.reject("loading aborted");
+                }
+                const { categories, emojis } = processEmojiData(twemoji);
+                if (twemoji) {
+                    this._twemojiExtras.set(emojis);
+                    this._twemojis.set([...this._emojis(), ...this._twemojiExtras()]);
+                } else {
+                    this._categories.set(categories);
+                    this._emojis.set(emojis);
+                    if (this._loadingTwemojiPromise !== null) {
+                        this._twemojis.set([...this._emojis(), ...this._twemojiExtras()]);
+                    }
+                }
+                return this;
+            })
+            .catch(() => {
+                // Failure: could be intentional (tour ended successfully while emoji still loading)
+                // -> returns forever promise
+                this[cacheKey] = null;
+                return new Promise(() => {});
+            });
+        return promise;
     }
 
     /**
@@ -131,28 +231,42 @@ class EmojiLoader {
      * If the promise fails (e.g. by being aborted, or because it was run in a tour
      * that has ended), it is left pending forever, and the promise kept by the
      * loader is reset to allow retrying to fetch emoji data.
+     * @param {boolean} [twemoji] Whether to load the twemoji bundle.
      * @param {AbortSignal} [abortSignal]
      */
-    load(abortSignal) {
+    load(twemoji, abortSignal) {
         if (!this._loadingPromise) {
-            this._loadingPromise = this.loadEmojiBundle()
-                .then(() => {
-                    if (abortSignal?.aborted) {
-                        return Promise.reject("loading aborted");
-                    }
-                    const { categories, emojis } = processEmojiData();
-                    this._categories.set(categories);
-                    this._emojis.set(emojis);
-                    return this;
-                })
-                .catch(() => {
-                    // Failure: could be intentional (tour ended successfully while emoji still loading)
-                    // -> returns forever promise
-                    this._loadingPromise = null;
-                    return new Promise(() => {});
-                });
+            this._loadingPromise = this._createBundlePromise(
+                this.loadEmojiBundle(),
+                abortSignal,
+                false,
+                "_loadingPromise"
+            );
         }
-        return this._loadingPromise;
+        if (!twemoji) {
+            return this._loadingPromise;
+        }
+
+        if (!this._loadingTwemojiPromise) {
+            this._loadingTwemojiPromise = this._createBundlePromise(
+                this.loadTwemojiBundle(),
+                abortSignal,
+                true,
+                "_loadingTwemojiPromise"
+            );
+        }
+
+        const promise = Promise.all([this._loadingTwemojiPromise, this._loadingPromise]).then(
+            () => this
+        );
+        return promise;
+    }
+
+    loadTwemojiBundle() {
+        return Promise.all([
+            fetch("/web/static/img/twemoji_sprite.png"),
+            loadBundle("web.assets_extra_emoji"),
+        ]);
     }
 
     /**
@@ -166,11 +280,11 @@ class EmojiLoader {
 /** @type {Map<string, Emoji>} */
 const DEFAULT_EMOJI_MAP = new Map();
 
-export function useLoadEmoji() {
+export function useLoadEmoji(twemoji = false) {
     const { abortSignal } = useScope();
     return function loadEmoji() {
-        return emojiLoader.load(abortSignal);
-    };
+        return emojiLoader.load(twemoji, abortSignal);
+    }.bind(twemoji);
 }
 
 export const emojiLoader = new EmojiLoader();

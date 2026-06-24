@@ -3,6 +3,7 @@ import { Component, props, t } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { emojiLoader, useLoadEmoji } from "@web/core/emoji_picker/emoji_loader";
+import { getTwemojiUrl } from "@web/core/emoji_picker/emoji_picker";
 
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
@@ -17,7 +18,7 @@ export class MessageReactionList extends Component {
 
     setup() {
         super.setup(...arguments);
-        this.loadEmoji = useLoadEmoji();
+        this.loadEmoji = useLoadEmoji(true);
         this.store = useService("mail.store");
         this.message = propSignal("message", t.instanceOf(this.store["mail.message"].Class));
         this.openReactionMenu = props.static("openReactionMenu", openReactionMenuType(this.store));
@@ -29,6 +30,10 @@ export class MessageReactionList extends Component {
             onAway: () => (this.preview.isOpen = false),
             stateObserver: () => [this.preview?.isOpen],
         });
+    }
+
+    get reactionSvgUrl() {
+        return getTwemojiUrl(this.props.reaction.content);
     }
 
     /** @param {import("models").MessageReactions} reaction */

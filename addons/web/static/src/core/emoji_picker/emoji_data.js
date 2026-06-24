@@ -53,10 +53,10 @@
 // Since JSON grammar is way simpler than JavaScript's grammar, it is actually
 // faster to parse the data as a JSON object than as a JavaScript object.
 
-// import { appTranslateFn } from "@web/core/l10n/translation";
+import { appTranslateFn } from "@web/core/l10n/translation";
 
 // Escape translated strings to prevent parsing errors
-const _t = (str) => str;
+const _t = (str) => JSON.stringify(appTranslateFn(str, "web")).slice(1, -1);
 
 const _getCategories = () => `[
     {

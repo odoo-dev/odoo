@@ -39,10 +39,11 @@ export const postMessage = (text) => [editComposer(text), clickSend()];
  * same text appears more than once, and `selfAuthored` to require the message to
  * be authored by the current user.
  */
-export const waitForMessage = (text, { index, selfAuthored } = {}) => ({
+export const waitForMessage = (text, { index, selfAuthored, emoji } = {}) => ({
     trigger:
         ".o-livechat-root:shadow .o-mail-Message" +
         (selfAuthored ? ".o-selfAuthored" : "") +
         `:has(.o-mail-Message-body:text("${text}"))` +
+        (emoji ? `:has(.o-mail-emoji[data-codepoints='${emoji}'])` : "") +
         (index === undefined ? "" : `:eq(${index})`),
 });

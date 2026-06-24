@@ -558,6 +558,7 @@ export class MockServer {
             { final: true }
         );
         this._onRoute(["/web/dataset/resequence"], this.resequence);
+        this._onRoute(["/web/static/img/twemoji_sprite.png"], this.loadTwemojiSprite);
         this._onRoute(["/web/image/<string:model>/<int:id>/<string:field>"], this.loadImage);
         this._onRoute(["/web/webclient/load_menus"], this.loadMenus);
         this._onRoute(["/web/webclient/translations"], this.loadTranslations);
@@ -1276,6 +1277,15 @@ export class MockServer {
             }
         }
         return new Promise(() => {});
+    }
+
+    /** @type {RouteCallback} */
+    async loadTwemojiSprite() {
+        return new Response(new Blob(), {
+            headers: {
+                "Content-Type": "image/png",
+            },
+        });
     }
 
     /**

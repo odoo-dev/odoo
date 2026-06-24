@@ -5,7 +5,7 @@
 
 import { markup } from "@odoo/owl";
 
-import { htmlJoin } from "@web/core/utils/html";
+import { createElementWithContent, htmlJoin } from "@web/core/utils/html";
 
 /**
  * Returns whether the given tag is a void HTML element.
@@ -71,4 +71,13 @@ export function getInnerHtml(element) {
  */
 export function getOuterHtml(element) {
     return escapeNode(element);
+}
+
+/** @param {string|ReturnType<markup>} content */
+export function isComposerEmpty(content) {
+    const el = createElementWithContent("div", content);
+    if (el.textContent.trim() === "" && el.querySelector("img") === null) {
+        return true;
+    }
+    return false;
 }

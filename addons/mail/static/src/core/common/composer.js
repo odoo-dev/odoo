@@ -8,7 +8,7 @@ import { MAIL_PLUGINS, MAIL_SMALL_UI_PLUGINS } from "@mail/core/common/plugin/pl
 import { mapSuggestionsToOptions, useSuggestion } from "@mail/core/common/suggestion_hook";
 import { propComputed, useSelection } from "@mail/utils/common/hooks";
 import { generatePartnerMentionElement, trimEmptyBlocksAround } from "@mail/utils/common/format";
-import { getInnerHtml } from "@mail/utils/common/html";
+import { getInnerHtml, isComposerEmpty } from "@mail/utils/common/html";
 import { isDragSourceExternalFile } from "@mail/utils/common/misc";
 import { Wysiwyg } from "@html_editor/wysiwyg";
 
@@ -40,7 +40,6 @@ import {
     createDocumentFragmentFromContent,
     htmlFormatList,
     htmlJoin,
-    isHtmlEmpty,
     isMarkup,
     setElementContent,
 } from "@web/core/utils/html";
@@ -137,6 +136,7 @@ export class Composer extends Component {
             type: t.or([t.selection(["message", "note"]), t.literal(false)]).optional(),
         });
         this.composer = propComputed("composer", t.instanceOf(this.store["Composer"].Class));
+        this.composerService = useService("mail.composer");
         this.composerActions = useComposerActions(this.composerActionsParams);
         this.EDIT_CLICK_TYPE = EDIT_CLICK_TYPE;
         this.OR_PRESS_SEND_KEYBIND = _t("or press %(send_keybind)s", {
@@ -150,7 +150,6 @@ export class Composer extends Component {
             { composer: this.composer }
         );
         this.ui = useService("ui");
-        this.composerService = useService("mail.composer");
         this.ref = useRef("textarea");
         this.fakeTextarea = useRef("fakeTextarea");
         this.inputContainerRef = signal.ref(HTMLSpanElement);
@@ -530,7 +529,7 @@ export class Composer extends Component {
         const attachments = this.props.composer.attachments;
         return (
             !this.state.active ||
-            (isHtmlEmpty(this.props.composer.composerHtml) && attachments.length === 0) ||
+            (isComposerEmpty(this.props.composer.composerHtml) && attachments.length === 0) ||
             attachments.some(({ uploading }) => Boolean(uploading))
         );
     }
@@ -688,7 +687,7 @@ export class Composer extends Component {
         }
         const attachmentIds = this.props.composer.attachments.map((attachment) => attachment.id);
         let default_body = this.props.composer.composerHtml;
-        if (isHtmlEmpty(default_body)) {
+        if (isComposerEmpty(default_body)) {
             // Reset signature when recovering an empty body.
             this.props.composer.emailAddSignature = true;
         }
@@ -821,7 +820,7 @@ export class Composer extends Component {
 
     get canProcessMessage() {
         return (
-            !isHtmlEmpty(this.props.composer.composerHtml) ||
+            !isComposerEmpty(this.props.composer.composerHtml) ||
             this.props.composer.attachments.length > 0 ||
             (this.message && this.message.attachment_ids.length > 0)
         );
@@ -954,7 +953,7 @@ export class Composer extends Component {
     onClickInsertCannedResponse(ev) {
         markEventHandled(ev, "composer.clickInsertCannedResponse");
         if (this.editor) {
-            if (!isHtmlEmpty(this.props.composer.composerHtml)) {
+            if (!isComposerEmpty(this.props.composer.composerHtml)) {
                 this.editor.shared.dom.insert(" ");
             }
             this.editor.shared.dom.insert("::");
@@ -989,9 +988,10 @@ export class Composer extends Component {
         this.editor = editor;
     }
 
-    addEmoji(str) {
+    /** @param {string|DocumentFragment} content */
+    addEmoji(content) {
         if (this.editor) {
-            this.editor.shared.dom.insert(str);
+            this.editor.shared.dom.insert(content);
             this.editor.shared.history.commit();
         } else {
             const composerText = this.props.composer.composerText;
@@ -1000,8 +1000,8 @@ export class Composer extends Component {
                 this.props.composer.selection.end,
                 composerText.length
             );
-            this.props.composer.composerText = firstPart + str + secondPart;
-            this.selection.moveCursor((firstPart + str).length);
+            this.props.composer.composerText = firstPart + content + secondPart;
+            this.selection.moveCursor((firstPart + content).length);
         }
         if (this.ui.isSmall && !this.env.inChatter) {
             return false;
@@ -1038,7 +1038,7 @@ export class Composer extends Component {
             replyToMessageId,
             fromFullComposer = this.props.composer.restoredFromFullComposer,
         }) => {
-            if (isHtmlEmpty(composerHtml)) {
+            if (isComposerEmpty(composerHtml)) {
                 await this.deleteSavedContent();
             } else {
                 const db = new IndexedDB("mail");
@@ -1077,7 +1077,7 @@ export class Composer extends Component {
             await this.deleteSavedContent();
             return;
         }
-        if (!isHtmlEmpty(config.composerHtml)) {
+        if (!isComposerEmpty(config.composerHtml)) {
             if (this.props.composer.thread && !this.props.composer.thread.channel) {
                 this.props.composer.restoredFromFullComposer = config.fromFullComposer;
             }

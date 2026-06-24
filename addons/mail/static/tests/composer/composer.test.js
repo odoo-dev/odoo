@@ -162,20 +162,24 @@ test.tags("html composer");
 test("add an emoji", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "swamp-safari" });
-    await start();
+    await start({ loadTwemoji: true });
     const composerService = getService("mail.composer");
     composerService.setHtmlComposer();
     await openDiscuss(channelId);
     await click("button[title='Add Emojis']");
-    await click(".o-Emoji:text('😤')");
-    await contains(".o-mail-Composer-html.odoo-editor-editable:text('😤')");
+    await click(".o-Emoji[data-codepoints='😤']");
+    await contains(".o-mail-Composer-html .o-web-twemoji[data-codepoints='😤']");
+    const composerContent = queryFirst(".odoo-editor-editable div.o-paragraph").innerHTML;
+    expect(composerContent).toBe(
+        '<img class="o-web-twemoji" data-codepoints="😤" src="/web/static/img/twemoji/svg/1f624.svg">&nbsp;'
+    );
 });
 
 test.tags("html composer");
 test("press Enter with emoji suggestions inserts emoji and does not send", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "swamp-safari" });
-    await start();
+    await start({ loadTwemoji: true });
     const composerService = getService("mail.composer");
     composerService.setHtmlComposer();
     await openDiscuss(channelId);
@@ -185,32 +189,32 @@ test("press Enter with emoji suggestions inserts emoji and does not send", async
         editable: document.querySelector(".o-mail-Composer-html.odoo-editor-editable"),
     };
     await htmlInsertText(editor, ":smil");
-    await contains(".o-we-SuggestionList .o-navigable:has(:text('😃'))");
+    await contains(".o-we-SuggestionList .o-navigable [data-codepoints='😃']");
     await press("Enter");
-    await contains(".o-mail-Composer-html.odoo-editor-editable:text('😃')");
+    await contains(".o-mail-Composer-html .o-web-twemoji[data-codepoints='😃']");
 });
 
 test("[text composer] emojis are auto-substituted from text", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "swamp-safari" });
-    await start();
+    await start({ loadTwemoji: true });
     await openDiscuss(channelId);
     await insertText(".o-mail-Composer-input", ":)");
     await press("Enter");
-    await contains(".o-mail-Message-body:text('😊')");
+    await contains(".o-mail-Message-body .o-mail-emoji[data-codepoints='😊']");
     await insertText(".o-mail-Composer-input", "x'D");
     await press("Enter");
-    await contains(".o-mail-Message-body:text('😂')");
+    await contains(".o-mail-Message-body .o-mail-emoji[data-codepoints='😂']");
     await insertText(".o-mail-Composer-input", ">:)");
     await press("Enter");
-    await contains(".o-mail-Message-body:text('😈')");
+    await contains(".o-mail-Message-body .o-mail-emoji[data-codepoints='😈']");
 });
 
 test.tags("html composer");
 test("emojis are auto-substituted from text", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "" });
-    await start();
+    await start({ loadTwemoji: true });
     await openDiscuss(channelId);
     const composerService = getService("mail.composer");
     composerService.setHtmlComposer();
@@ -220,17 +224,17 @@ test("emojis are auto-substituted from text", async () => {
         editable: document.querySelector(".o-mail-Composer-html.odoo-editor-editable"),
     };
     await htmlInsertText(editor, ":)");
-    await contains(".o-mail-Composer-html.odoo-editor-editable:text('😊')");
+    await contains(".o-mail-Composer-html .o-web-twemoji[data-codepoints='😊']");
     await press("Enter");
-    await contains(".o-mail-Message-body:text('😊')");
+    await contains(".o-mail-Message-body .o-mail-emoji[data-codepoints='😊']");
     await htmlInsertText(editor, "x'D");
-    await contains(".o-mail-Composer-html.odoo-editor-editable:text('😂')");
+    await contains(".o-mail-Composer-html .o-web-twemoji[data-codepoints='😂']");
     await press("Enter");
-    await contains(".o-mail-Message-body:text('😂')");
+    await contains(".o-mail-Message-body .o-mail-emoji[data-codepoints='😂']");
     await htmlInsertText(editor, ">:)");
-    await contains(".o-mail-Composer-html.odoo-editor-editable:text('😈')");
+    await contains(".o-mail-Composer-html .o-web-twemoji[data-codepoints='😈']");
     await press("Enter");
-    await contains(".o-mail-Message-body:text('😈')");
+    await contains(".o-mail-Message-body .o-mail-emoji[data-codepoints='😈']");
 });
 
 test.tags("focus required");
@@ -249,7 +253,7 @@ test.tags("focus required", "html composer");
 test("Exiting emoji picker brings the focus back to the Composer textarea", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "" });
-    await start();
+    await start({ loadTwemoji: true });
     await openDiscuss(channelId);
     const composerService = getService("mail.composer");
     composerService.setHtmlComposer();
@@ -275,7 +279,7 @@ test.tags("html composer");
 test("add an emoji after some text", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "beyblade-room" });
-    await start();
+    await start({ loadTwemoji: true });
     await openDiscuss(channelId);
     const composerService = getService("mail.composer");
     composerService.setHtmlComposer();
@@ -287,8 +291,12 @@ test("add an emoji after some text", async () => {
     await htmlInsertText(editor, "Blabla");
     await contains(".o-mail-Composer-html.odoo-editor-editable:text('Blabla')");
     await click("button[title='Add Emojis']");
-    await click(".o-Emoji:text('🤑')");
-    await contains(".o-mail-Composer-html.odoo-editor-editable:text('Blabla🤑')");
+    await click(".o-Emoji[data-codepoints='🤑']");
+    await contains(".o-mail-Composer-html .o-web-twemoji[data-codepoints='🤑']");
+    const composerContent = queryFirst(".odoo-editor-editable div.o-paragraph").innerHTML;
+    expect(composerContent).toBe(
+        'Blabla<img class="o-web-twemoji" data-codepoints="🤑" src="/web/static/img/twemoji/svg/1f911.svg">&nbsp;'
+    );
 });
 
 test("add emoji replaces (keyboard) text selection", async () => {
@@ -1477,7 +1485,7 @@ test("can quickly add emoji with ':' keyword", async () => {
             Command.create({ guest_id: guestId }),
         ],
     });
-    await start();
+    await start({ loadTwemoji: true });
     const composerService = getService("mail.composer");
     composerService.setHtmlComposer();
     await openDiscuss(channelId);
@@ -1488,12 +1496,12 @@ test("can quickly add emoji with ':' keyword", async () => {
     };
     await htmlInsertText(editor, ":sweat");
     await contains(".o-we-SuggestionList");
-    await click(".o-navigable:text('😅 :sweat_smile:')");
-    await contains(".o-mail-Composer-html.odoo-editor-editable:text('😅')");
+    await click(".o-navigable [data-codepoints='😅']");
+    await contains(".o-mail-Composer-html .o-web-twemoji[data-codepoints='😅']");
     await contains(".o-we-SuggestionList", { count: 0 });
     await htmlInsertText(editor, " :sw");
     await contains(".o-we-SuggestionList");
-    await contains(".o-navigable:text('😅 :sweat_smile:')");
+    await contains(".o-navigable [data-codepoints='😅']");
     await htmlInsertText(editor, ":s", { replace: true });
     await contains(".o-we-SuggestionList", { count: 0 });
 });

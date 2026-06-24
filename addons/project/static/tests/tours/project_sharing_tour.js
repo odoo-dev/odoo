@@ -221,7 +221,7 @@ registry.category("web_tour.tours").add("test_04_project_sharing_chatter_message
         { trigger: ".o_project_sharing" },
         { trigger: ".o_kanban_record:contains('Test Task with messages')", run: "click" },
         { trigger: ".o-mail-Message" },
-        { trigger: ".o-mail-Message .o-mail-MessageReaction:contains('👀')" },
+        { trigger: ".o-mail-Message .o-mail-MessageReaction-twemoji[data-codepoints='👀']" },
     ],
 });
 

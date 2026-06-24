@@ -236,8 +236,9 @@ test("Can add reaction to a message on an ipad", async () => {
     await pointerDown(".o-mail-Message");
     await advanceTime(LONG_PRESS_DELAY);
     await click("button:contains('Add a Reaction')");
-    await click(".o-EmojiPicker-content .o-Emoji:contains('😀')");
-    await contains(".o-mail-MessageReaction:contains('😀 1')");
+    await click(".o-EmojiPicker-content .o-Emoji[data-codepoints='😀']");
+    await contains(".o-mail-MessageReaction-twemoji[data-codepoints='😀']");
+    await contains(".o-mail-MessageReaction:text('1')");
 });
 
 test("Editing message keeps the mentioned roles", async () => {
@@ -886,8 +887,9 @@ test("Can add a reaction", async () => {
     await openDiscuss(channelId);
     await click("[title='Add a Reaction']");
     await click(".o-mail-QuickReactionMenu [title='Toggle Emoji Picker']");
-    await click(".o-Emoji:text('😅')");
-    await contains(".o-mail-MessageReaction:text('😅 1')");
+    await click(".o-Emoji[data-codepoints='😅']");
+    await contains(".o-mail-MessageReaction-twemoji[data-codepoints='😅']");
+    await contains(".o-mail-MessageReaction:text('1')");
 });
 
 test("Can add a reaction (small but desktop)", async () => {
@@ -906,8 +908,9 @@ test("Can add a reaction (small but desktop)", async () => {
     await start();
     await openDiscuss(channelId);
     await click("[title='Add a Reaction']");
-    await click(".o-Emoji", { text: "😅" });
-    await contains(".o-mail-MessageReaction", { text: "😅1" });
+    await click(".o-Emoji[data-codepoints='😅']");
+    await contains(".o-mail-MessageReaction-twemoji[data-codepoints='😅']");
+    await contains(".o-mail-MessageReaction", { text: "1" });
 });
 
 test("Can remove a reaction", async () => {
@@ -925,7 +928,7 @@ test("Can remove a reaction", async () => {
     await start();
     await openDiscuss(channelId);
     await click("[title='Add a Reaction']");
-    await click(".o-mail-QuickReactionMenu button:text('😅')");
+    await click(".o-mail-QuickReactionMenu button[data-codepoints='😅']");
     await click(".o-mail-MessageReaction");
     await contains(".o-mail-MessageReaction", { count: 0 });
 });
@@ -957,9 +960,10 @@ test("Two users reacting with the same emoji", async () => {
     ]);
     await start();
     await openDiscuss(channelId);
-    await click(".o-mail-MessageReaction:text('😅 2')");
-    await click(".o-mail-MessageReaction:text('😅 1')");
-    await contains(".o-mail-MessageReaction:text('😅 2')");
+    await contains(".o-mail-MessageReaction-twemoji[data-codepoints='😅']");
+    await click(".o-mail-MessageReaction:text('2')");
+    await click(".o-mail-MessageReaction:text('1')");
+    await contains(".o-mail-MessageReaction:text('2')");
 });
 
 test("Can quickly add a reaction", async () => {
@@ -977,11 +981,11 @@ test("Can quickly add a reaction", async () => {
     await start();
     await openDiscuss(channelId);
     await click("[title='Add a Reaction']");
-    await click(".o-mail-QuickReactionMenu button:text('😅')");
-    await contains(".o-mail-MessageReaction:text('😅 1')");
+    await click(".o-mail-QuickReactionMenu button[data-codepoints='😅']");
+    await contains(".o-mail-MessageReaction:text('1')");
     await click(".o-mail-MessageReactions button[title='Add a Reaction']");
-    await click(".o-mail-QuickReactionMenu button:text('🤣')");
-    await contains(".o-mail-MessageReaction:text('🤣 1')");
+    await click(".o-mail-QuickReactionMenu button[data-codepoints='🤣']");
+    await contains(".o-mail-MessageReaction:text('1')");
 });
 
 test("Reaction summary", async () => {
@@ -1001,11 +1005,11 @@ test("Reaction summary", async () => {
     await contains(".o-mail-Message:has(:text('Hello world'))");
     const partnerNames = ["Foo", "Bar", "FooBar", "Bob", "Baz"];
     const expectedSummaries = [
-        "😅 :sweat_smile: reacted by Foo",
-        "😅 :sweat_smile: reacted by Foo and Bar",
-        "😅 :sweat_smile: reacted by Foo, Bar, and FooBar",
-        "😅 :sweat_smile: reacted by Foo, Bar, FooBar, and 1 other",
-        "😅 :sweat_smile: reacted by Foo, Bar, FooBar, and 2 others",
+        ":sweat_smile: reacted by Foo",
+        ":sweat_smile: reacted by Foo and Bar",
+        ":sweat_smile: reacted by Foo, Bar, and FooBar",
+        ":sweat_smile: reacted by Foo, Bar, FooBar, and 1 other",
+        ":sweat_smile: reacted by Foo, Bar, FooBar, and 2 others",
     ];
     for (const [idx, name] of partnerNames.entries()) {
         const partner_id = pyEnv["res.partner"].create({ name });
@@ -1013,12 +1017,13 @@ test("Reaction summary", async () => {
         pyEnv["res.partner"].create({ name, user_ids: [Command.link(userId)] });
         await withUser(userId, async () => {
             await click(".o-mail-Message-actions [title='Add a Reaction']");
-            await click(".o-mail-QuickReactionMenu button:text('😅')");
-            await waitFor(`.o-mail-MessageReaction:text(😅 ${idx + 1})`, {
+            await click(".o-mail-QuickReactionMenu button[data-codepoints='😅']");
+            await waitFor(`.o-mail-MessageReaction:text(${idx + 1})`, {
                 exact: true,
                 timeout: 3000,
             });
             await hover(".o-mail-MessageReaction");
+            await contains(".o-mail-MessageReactionPreview-twemoji[data-codepoints='😅']");
             await contains(`.o-mail-MessageReactionList-preview:text('${expectedSummaries[idx]}')`);
             await leave(".o-mail-MessageReaction");
         });
@@ -1040,10 +1045,10 @@ test("Select already reacted emoji from quick reaction removes the reaction on m
     await start();
     await openDiscuss(channelId);
     await click(".o-mail-Message-actions [title='Add a Reaction']");
-    await click(".o-mail-QuickReactionMenu button:text('😅')");
-    await contains(".o-mail-MessageReaction:text('😅 1')");
+    await click(".o-mail-QuickReactionMenu button[data-codepoints='😅']");
+    await contains(".o-mail-MessageReaction:text('1')");
     await click(".o-mail-Message-actions [title='Add a Reaction']");
-    await click(".o-mail-QuickReactionMenu button:text('😅')");
+    await click(".o-mail-QuickReactionMenu button[data-codepoints='😅']");
     await contains(".o-mail-MessageReaction", { count: 0 });
 });
 
@@ -2289,11 +2294,15 @@ test("Click on view reactions shows the reactions on the message", async () => {
     await start();
     await openDiscuss(channelId);
     await click("[title='Add a Reaction']");
-    await click(".o-mail-QuickReactionMenu button:text('😅')");
-    await contains(".o-mail-MessageReaction:text('😅 1')");
+    await click(".o-mail-QuickReactionMenu button[data-codepoints='😅']");
+    await contains(".o-mail-MessageReaction-twemoji[data-codepoints='😅']");
+    await contains(".o-mail-MessageReaction:text('1')");
     await click(".o-mail-Message [title='Expand']");
     await click(".o-dropdown-item:text('View Reactions')");
-    await contains(".o-mail-MessageReactionMenu:has(:text('😅 1'))");
+    await contains(".o-mail-MessageReactionMenu-twemoji[data-codepoints='😅']");
+    await contains(
+        ".o-mail-MessageReactionMenu .o-mail-TabHeader[data-header-id='😅']:has(:text('1'))"
+    );
     await click(".o-mail-MessageReactionMenu-persona button[title=Remove]");
     await contains(".o-mail-MessageReactionMenu", { count: 0 });
 });
@@ -2321,7 +2330,10 @@ test("Click on view reactions from right-click on message shows the reactions", 
     await contains(".o-mail-Message");
     await rightClick(".o-mail-Message");
     await click(".o-dropdown-item:contains('View Reactions')");
-    await contains(".o-mail-MessageReactionMenu:has(:text('😅 1'))");
+    await contains(".o-mail-MessageReactionMenu-twemoji[data-codepoints='😅']");
+    await contains(
+        ".o-mail-MessageReactionMenu .o-mail-TabHeader[data-header-id='😅']:has(:text('1'))"
+    );
 });
 
 test("Reactions are ordered by id", async () => {
@@ -2348,8 +2360,8 @@ test("Reactions are ordered by id", async () => {
     });
     await start();
     await openDiscuss(channelId);
-    await contains(".o-mail-MessageReaction:eq(0):text('🔰 1')");
-    await contains(".o-mail-MessageReaction:eq(1):text('🔢 1')");
+    await contains(".o-mail-MessageReaction-twemoji:eq(0)[data-codepoints='🔰']");
+    await contains(".o-mail-MessageReaction-twemoji:eq(1)[data-codepoints='🔢']");
 });
 
 test("discuss - bigger font size when there is only emoji", async () => {
@@ -2362,10 +2374,12 @@ test("discuss - bigger font size when there is only emoji", async () => {
     await openDiscuss(channelId);
     await insertText(".o-mail-Composer-input", "🥳");
     await press("Enter");
-    await contains(".o-mail-Message-body:text('🥳')");
+    await contains(".o-mail-Message-body .o-mail-emoji[data-codepoints='🥳']");
     await insertText(".o-mail-Composer-input", "not only emoji!! 😅");
     await press("Enter");
-    await contains(".o-mail-Message-body:text('not only emoji!! 😅')");
+    await contains(
+        ".o-mail-Message-body:text('not only emoji!!') .o-mail-emoji[data-codepoints='😅']"
+    );
     const [emojiMessage, textMessage] = document.querySelectorAll(".o-mail-Message-body");
     expect(
         parseFloat(getComputedStyle(emojiMessage).getPropertyValue("font-size"))
@@ -2379,11 +2393,13 @@ test("chatter - font size unchanged when there is only emoji", async () => {
     await click(".o-mail-Chatter-sendMessage");
     await insertText(".o-mail-Composer-input", "🥳");
     await click(".o-mail-Composer-send:enabled");
-    await contains(".o-mail-Message-body:text('🥳')");
+    await contains(".o-mail-Message-body .o-mail-emoji[data-codepoints='🥳']");
     await click(".o-mail-Chatter-sendMessage");
     await insertText(".o-mail-Composer-input", "not only emoji!! 😅");
     await click(".o-mail-Composer-send:enabled");
-    await contains(".o-mail-Message-body:text('not only emoji!! 😅')");
+    await contains(
+        ".o-mail-Message-body:text('not only emoji!!') .o-mail-emoji[data-codepoints='😅']"
+    );
     const [emojiMessage, textMessage] = document.querySelectorAll(".o-mail-Message-body");
     expect(parseFloat(getComputedStyle(emojiMessage).getPropertyValue("font-size"))).toBe(
         parseFloat(getComputedStyle(textMessage).getPropertyValue("font-size"))

@@ -5,8 +5,10 @@ $o-discuss-talkingColor: lighten($success, 10%);
 }
 
 .o-mail-emoji {
-    font-size: 121%;
-    line-height: $display-line-height;
+    width: 1.43em; // equivalent to 20px with base font-size 14px
+    height: 1.43em;
+    vertical-align: bottom;
+    object-fit: contain;
 }
 
 .o-bg-black {
