@@ -7,8 +7,7 @@ export class HabitCard extends Component {
         metrics: t.object(),
         onToggleToday: t.function(),
         onEdit: t.function(),
-        onArchive: t.function(),
-        onUnarchive: t.function(),
+        onDelete: t.function(),
     });
 
     get streakClass() {

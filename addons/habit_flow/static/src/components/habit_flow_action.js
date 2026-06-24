@@ -1,11 +1,11 @@
-import { Component, plugin } from "@odoo/owl";
+import { Component, plugin, providePlugins } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 import { HabitStorePlugin } from "../plugins/habit_store_plugin";
 import { FilterBar } from "./filter_bar";
+import { HabitCard } from "./habit_card";
 import { HabitForm } from "./habit_form";
-import { HabitList } from "./habit_list";
 
 export class HabitFlowAction extends Component {
     static template = "habit_flow.HabitFlowAction";
@@ -13,11 +13,12 @@ export class HabitFlowAction extends Component {
         ControlPanel,
         HabitForm,
         FilterBar,
-        HabitList,
+        HabitCard,
     };
     static props = { ...standardActionServiceProps };
 
     setup() {
+        providePlugins([HabitStorePlugin]);
         this.store = plugin(HabitStorePlugin);
     }
 

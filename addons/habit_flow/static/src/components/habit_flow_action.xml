@@ -15,27 +15,30 @@
                 <div class="o_hf_workspace">
                     <main class="o_hf_main">
                         <HabitForm
-                            t-if="this.store.isFormVisible()"
-                            t-key="this.store.formKey()"
+                            t-if="this.store.isFormOpen()"
+                            t-key="this.store.editingHabitId() || 'create'"
                             mode="this.store.formMode()"
                             habit="this.store.editingHabit()"
-                            hasHabits="this.store.hasAnyHabits()"
                             onSave.bind="this.onSaveHabit"
                             onCancel="() => this.store.closeForm()"/>
 
                         <FilterBar
                             search="this.store.filters().search"
                             activeFilter="this.store.filters().status"
-                            counts="this.store.filterCounts()"
                             onSearch="(value) => this.store.setSearch(value)"
                             onFilter="(value) => this.store.setFilter(value)"/>
 
-                        <HabitList
-                            habits="this.store.visibleHabitViewModels()"
-                            onToggleToday="(habitId) => this.store.toggleToday(habitId)"
-                            onEdit="(habitId) => this.store.openEdit(habitId)"
-                            onArchive="(habitId) => this.store.archiveHabit(habitId)"
-                            onUnarchive="(habitId) => this.store.unarchiveHabit(habitId)"/>
+                        <section class="o_hf_habit_list">
+                            <HabitCard
+                                t-foreach="this.store.visibleHabitViewModels()"
+                                t-as="item"
+                                t-key="item.habit.id"
+                                habit="item.habit"
+                                metrics="item.metrics"
+                                onToggleToday="(habitId) => this.store.toggleToday(habitId)"
+                                onEdit="(habitId) => this.store.openEdit(habitId)"
+                                onDelete="(habitId) => this.store.deleteHabit(habitId)"/>
+                        </section>
                     </main>
                 </div>
             </div>

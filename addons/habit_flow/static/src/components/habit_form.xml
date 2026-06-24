@@ -6,11 +6,10 @@
             <div class="d-flex justify-content-between align-items-start mb-3">
                 <h2 t-out="this.title"/>
                 <button
-                    t-if="this.props.hasHabits"
                     type="button"
                     class="btn btn-sm btn-light"
                     t-on-click="this.onCancel">
-                    Cancel
+                    ⛌
                 </button>
             </div>
             <form t-on-submit="this.onSubmit">
@@ -24,7 +23,7 @@
                             placeholder="e.g., Meditate"
                             t-att-value="this.draft.name"
                             t-on-input="(ev) => this.draft.name = ev.target.value"/>
-                        <div t-if="this.errors.name" class="text-danger small mt-1" t-out="this.errors.name"/>
+                        <div t-if="this.nameError()" class="text-danger small mt-1" t-out="this.nameError()"/>
                     </div>
                     <div>
                         <label class="form-label">Icon</label>

@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="habit_flow.HabitCard">
-        <article class="o_hf_habit_card" t-att-class="{ 'o_hf_archived': this.props.habit.archived }">
+        <article class="o_hf_habit_card">
             <div class="o_hf_habit_identity">
                 <div class="o_hf_habit_icon" t-out="this.props.habit.icon"/>
                 <div>
@@ -27,7 +27,6 @@
 
             <div class="o_hf_card_actions">
                 <button
-                    t-if="!this.props.habit.archived"
                     type="button"
                     t-att-class="{
                         'btn': true,
@@ -39,23 +38,15 @@
                     <i t-att-class="this.props.metrics.doneToday ? 'fa fa-check-circle' : 'fa fa-circle-o'"/>
                     <span t-out="this.props.metrics.doneToday ? 'Done Today' : 'Mark Done'"/>
                 </button>
-                <button
-                    t-if="this.props.habit.archived"
-                    type="button"
-                    class="btn btn-outline-primary"
-                    t-on-click="() => this.props.onUnarchive(this.props.habit.id)">
-                    Unarchive
-                </button>
                 <button type="button" class="btn btn-light o_hf_icon_button" t-on-click="() => this.props.onEdit(this.props.habit.id)" title="Edit habit">
                     <i class="fa fa-pencil"/>
                 </button>
                 <button
-                    t-if="!this.props.habit.archived"
                     type="button"
-                    class="btn btn-light o_hf_icon_button"
-                    t-on-click="() => this.props.onArchive(this.props.habit.id)"
-                    title="Archive habit">
-                    <i class="fa fa-archive"/>
+                    class="btn btn-light o_hf_icon_button text-danger"
+                    t-on-click="() => this.props.onDelete(this.props.habit.id)"
+                    title="Delete habit">
+                    <i class="fa fa-trash"/>
                 </button>
             </div>
         </article>

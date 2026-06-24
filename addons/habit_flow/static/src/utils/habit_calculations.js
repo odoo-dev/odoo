@@ -8,6 +8,7 @@ export function isDoneToday(habit, today) {
     return Boolean(habit.completionDates?.includes(today));
 }
 
+// Calculates the current streak of completed days for a habit, including today if it's completed.
 export function currentStreak(habit, today) {
     const completed = new Set(uniqueSortedDates(habit.completionDates));
     let cursor = completed.has(today) ? today : addDaysISO(today, -1);
@@ -20,6 +21,7 @@ export function currentStreak(habit, today) {
     return streak;
 }
 
+// Calculates the best streak of completed days for a habit.
 export function bestStreak(habit) {
     const dates = uniqueSortedDates(habit.completionDates);
     if (!dates.length) {

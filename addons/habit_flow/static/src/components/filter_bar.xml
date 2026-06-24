@@ -17,10 +17,9 @@
                     t-as="filter"
                     t-key="filter.id"
                     type="button"
-                    t-attf-class="o_hf_segment o_hf_segment_{{ filter.id }} {{ this.props.activeFilter === filter.id ? 'active' : '' }}"
+                    t-attf-class="o_hf_segment {{ this.props.activeFilter === filter.id ? 'active' : '' }}"
                     t-on-click="() => this.props.onFilter(filter.id)">
                     <span t-out="filter.label"/>
-                    <small t-out="this.props.counts[filter.id]"/>
                 </button>
             </div>
         </section>

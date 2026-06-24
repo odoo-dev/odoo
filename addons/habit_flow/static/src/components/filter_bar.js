@@ -5,7 +5,6 @@ export class FilterBar extends Component {
     props = props({
         search: t.string(),
         activeFilter: t.string(),
-        counts: t.object(),
         onSearch: t.function(),
         onFilter: t.function(),
     });
@@ -13,8 +12,7 @@ export class FilterBar extends Component {
     filters = [
         { id: "all", label: "All" },
         { id: "done", label: "Done Today" },
-        { id: "pending", label: "Pending" },
-        { id: "archived", label: "Archived" },
+        { id: "pending", label: "Pending Today" },
     ];
 
     onSearchInput(ev) {
