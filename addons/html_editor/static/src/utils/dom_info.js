@@ -236,7 +236,7 @@ export function isVisibleTextNode(testedNode) {
  * @param {Node} node
  * @returns {boolean}
  */
-const selfClosingElementTags = ["BR", "IMG", "INPUT", "HR"];
+const selfClosingElementTags = ["BR", "IMG", "INPUT", "T", "HR"];
 export function isSelfClosingElement(node) {
     return node && selfClosingElementTags.includes(node.nodeName);
 }
