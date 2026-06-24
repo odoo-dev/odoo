@@ -50,6 +50,8 @@ class StockMove(models.Model):
     analytic_account_line_ids = fields.Many2many('account.analytic.line', copy=False)
     account_move_id = fields.Many2one('account.move', 'stock_move_id', copy=False, index="btree_not_null")
     invoice_line_ids = fields.One2many('account.move.line', 'stock_move_id', 'Invoice Line', index='btree_not_null')
+    qty_invoiced = fields.Float(string='Invoiced Quantity', compute='_compute_qty_invoiced', digits='Product Unit')
+    qty_to_invoice = fields.Float(string='Quantity To Invoice', compute='_compute_qty_to_invoice', digits='Product Unit')
 
     def search_remaining_qty(self, operator, value):
         if operator != '=' or not isinstance(value, bool) or value is not True:
@@ -138,6 +140,21 @@ class StockMove(models.Model):
                 move.remaining_value = ratio * move.value if ratio else 0
             else:
                 move.remaining_value = move.remaining_qty * move.standard_price
+
+    @api.depends('invoice_line_ids.move_id.state', 'invoice_line_ids.quantity')
+    def _compute_qty_invoiced(self):
+        invoiced_quantities = self._prepare_qty_invoiced()
+        for move in self:
+            move.qty_invoiced = invoiced_quantities[move]
+
+    @api.depends('qty_invoiced', 'uom_id', 'state')
+    def _compute_qty_to_invoice(self):
+        for move in self:
+            # move_qty = move.product_uom_qty if move.state != 'done' else move.quantity
+            if move.product_id.invoice_policy == 'delivery':
+                move.qty_to_invoice = move.quantity - move.qty_invoiced
+                continue
+            move.qty_to_invoice = move.product_uom_qty - move.qty_invoiced
 
     def _inverse_picked(self):
         super()._inverse_picked()
@@ -687,3 +704,20 @@ class StockMove(models.Model):
             for sml in consigned_lines
         )
         return consigned_qty
+
+    def _prepare_qty_invoiced(self):
+        invoiced_qties = defaultdict(float)
+        for move in self:
+            for invoice_line in move.invoice_line_ids:
+                if (
+                    invoice_line.move_id.state != 'cancel'
+                    or invoice_line.move_id.payment_state == 'invoicing_legacy'
+                ):
+                    invoice_qty = invoice_line.product_uom_id._compute_quantity(
+                        invoice_line.quantity, move.uom_id, round=False
+                    )
+                    if invoice_line.move_id.move_type == 'out_invoice':
+                        invoiced_qties[move] += invoice_qty
+                    elif invoice_line.move_id.move_type == 'out_refund':
+                        invoiced_qties[move] -= invoice_qty
+        return invoiced_qties
