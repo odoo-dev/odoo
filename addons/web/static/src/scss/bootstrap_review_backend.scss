@@ -85,15 +85,6 @@
     }
 }
 
-// Button group
-// ============================================================================
-.btn-group {
-    > :not(.btn-check:first-child) + .btn,
-    > .btn-group:not(:first-child) {
-        margin-left: var(--btn-group-gap, $btn-border-width);
-    }
-}
-
 // Bootstrap '$theme-colors' text-x and bg-x classes generation
 // ============================================================================
 // Bootstrap's default behavior is to generate classes directly from its
