@@ -232,3 +232,35 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
 
         with self.assertRaises(ValidationError):
             work_entry_type.count_days_as = 'working'
+
+    def test_search_virtual_remaining_leaves(self):
+        """Test search method on virtual_remaining_leaves."""
+        employee = self.env['hr.employee'].create({
+            'name': 'Test Employee',
+        })
+
+        work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Test Type',
+            'code': 'TEST_TYPE',
+            'requires_allocation': True,
+            'request_unit': 'day',
+        })
+
+        self.env['hr.leave.allocation'].sudo().create({
+            'state': 'confirm',
+            'employee_id': employee.id,
+            'work_entry_type_id': work_entry_type.id,
+            'number_of_days': 1,
+        }).action_approve()
+
+        work_entry_types = self.env['hr.work.entry.type'].with_context(
+            employee_id=employee.id,
+        ).search([
+            ('virtual_remaining_leaves', '>', 0),
+        ])
+
+        self.assertIn(
+            work_entry_type,
+            work_entry_types,
+            "Search on virtual_remaining_leaves should return the work entry type with available leaves."
+        )
