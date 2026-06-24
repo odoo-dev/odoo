@@ -1,0 +1,332 @@
+.o_habit_flow {
+    .o_hf_content {
+        padding: 24px 32px 32px;
+    }
+
+    .o_hf_workspace {
+        display: grid;
+        grid-template-columns: 64% 35%;
+        gap: 24px;
+    }
+
+    .o_hf_main,
+    .o_hf_stats_stack {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .o_hf_panel,
+    .o_hf_summary_card,
+    .o_hf_filterbar,
+    .o_hf_habit_card,
+    .o_hf_empty {
+        border: 1px solid $border-color;
+    }
+
+    .o_hf_form_panel {
+        padding: 20px;
+
+        h2 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+    }
+
+    .o_hf_form_grid {
+        display: grid;
+        grid-template-columns: minmax(180px, 1.35fr) 112px minmax(180px, 1.4fr) 128px;
+        gap: 16px;
+        align-items: end;
+    }
+
+    .form-label {
+        color: $body-color;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .o_hf_filterbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .o_hf_segments {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(96px, 1fr));
+        gap: 10px;
+        flex: 1 1 460px;
+    }
+
+    .o_hf_segment {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 40px;
+        border: 0;
+        font-weight: 600;
+
+        small {
+            color: $text-muted;
+            font-weight: 700;
+        }
+
+        &.active {
+            color: $primary;
+            background: $primary-bg-subtle;
+        }
+    }
+
+    .o_hf_habit_list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .o_hf_habit_card {
+        display: grid;
+        grid-template-columns: minmax(240px, 1.7fr) minmax(100px, 0.55fr) minmax(100px, 0.55fr) auto;
+        align-items: center;
+        gap: 18px;
+        padding: 18px 16px;
+    }
+
+    .o_hf_archived {
+        opacity: 0.72;
+    }
+
+    .o_hf_habit_identity {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+
+        h3 {
+            margin: 0 0 8px;
+            overflow: hidden;
+            color: $body-emphasis-color;
+            font-size: 17px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    .o_hf_habit_icon {
+        display: grid;
+        flex: 0 0 auto;
+        width: 64px;
+        height: 64px;
+        place-items: center;
+        border-radius: 50%;
+        background: $info-bg-subtle;
+        font-size: 30px;
+    }
+
+    .o_hf_tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .o_hf_tag {
+        display: inline-flex;
+        max-width: 120px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        color: $primary;
+        background: $primary-bg-subtle;
+        font-size: 12px;
+        font-weight: 600;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &:nth-child(2n) {
+            color: $info-text-emphasis;
+            background: $info-bg-subtle;
+        }
+
+        &.muted {
+            color: $text-muted;
+            background: $body-tertiary-bg;
+        }
+    }
+
+    .o_hf_metric {
+        min-width: 0;
+        padding-left: 18px;
+        border-left: 1px solid $border-color;
+        text-align: center;
+
+        span {
+            display: block;
+            margin-bottom: 4px;
+            color: $text-muted;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        strong {
+            display: block;
+            font-size: 22px;
+            line-height: 1.1;
+        }
+
+        small {
+            color: $text-muted;
+        }
+    }
+
+    .o_hf_card_actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    .o_hf_done_btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 126px;
+        border: 1px solid $border-color;
+        color: $text-muted;
+        background: $o-view-background-color;
+
+        &.is_done {
+            border-color: $success-border-subtle;
+            color: $success;
+            background: $success-bg-subtle;
+        }
+    }
+
+    .o_hf_icon_button {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: 1px solid $border-color;
+        color: $text-muted;
+        background: $o-view-background-color;
+    }
+
+    .o_hf_empty {
+        display: grid;
+        min-height: 280px;
+        place-items: center;
+        padding: 32px;
+        text-align: center;
+
+        h3 {
+            margin: 14px 0 6px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        p {
+            max-width: 420px;
+            color: $text-muted;
+        }
+    }
+
+    .o_hf_empty_icon {
+        display: grid;
+        width: 64px;
+        height: 64px;
+        place-items: center;
+        border-radius: 50%;
+        color: $primary;
+        background: $primary-bg-subtle;
+        font-size: 28px;
+    }
+
+    .o_hf_summary_card {
+        padding: 16px;
+
+        header {
+            padding-bottom: 14px;
+            border-bottom: 1px solid $border-color;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+        }
+    }
+
+    .o_hf_summary_icon {
+        display: grid;
+        width: 32px;
+        height: 32px;
+        place-items: center;
+        border-radius: 8px;
+        color: $primary;
+        background: $primary-bg-subtle;
+    }
+
+    .o_hf_summary_body {
+        padding-top: 16px;
+    }
+
+    .o_hf_today_grid,
+    .o_hf_streak_grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+
+        > div {
+            min-width: 0;
+            padding: 0 14px;
+            border-left: 1px solid $border-color;
+
+            &:first-child {
+                padding-left: 0;
+                border-left: 0;
+            }
+        }
+
+        span {
+            display: block;
+            margin-bottom: 8px;
+            color: $text-muted;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        strong {
+            font-size: 28px;
+            line-height: 1.1;
+        }
+    }
+
+    .o_hf_streak_grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .o_hf_best_habit {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px !important;
+    }
+
+    .o_hf_completion_pair {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .o_hf_ring {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background:
+            radial-gradient(circle at center, $o-view-background-color 55%, transparent 56%),
+            conic-gradient($info var(--hf-progress), $body-tertiary-bg 0);
+    }
+
+}

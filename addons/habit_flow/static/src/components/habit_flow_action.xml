@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="habit_flow.HabitFlowAction">
+        <div class="o_action o_habit_flow">
+            <ControlPanel>
+                <t t-set-slot="control-panel-buttons">
+                    <button type="button" class="btn btn-primary" t-on-click="this.onAddHabit">
+                        Add Habit
+                    </button>
+                </t>
+            </ControlPanel>
+
+            <div class="o_content o_hf_content overflow-auto">
+                <div class="o_hf_workspace">
+                    <main class="o_hf_main">
+                        <HabitForm
+                            t-if="this.store.isFormVisible()"
+                            t-key="this.store.formKey()"
+                            mode="this.store.formMode()"
+                            habit="this.store.editingHabit()"
+                            hasHabits="this.store.hasAnyHabits()"
+                            onSave.bind="this.onSaveHabit"
+                            onCancel="() => this.store.closeForm()"/>
+
+                        <FilterBar
+                            search="this.store.filters().search"
+                            activeFilter="this.store.filters().status"
+                            counts="this.store.filterCounts()"
+                            onSearch="(value) => this.store.setSearch(value)"
+                            onFilter="(value) => this.store.setFilter(value)"/>
+
+                        <HabitList
+                            habits="this.store.visibleHabitViewModels()"
+                            activeFilter="this.store.filters().status"
+                            hasAnyHabits="this.store.hasAnyHabits()"
+                            onCreate.bind="this.onAddHabit"
+                            onToggleToday="(habitId) => this.store.toggleToday(habitId)"
+                            onEdit="(habitId) => this.store.openEdit(habitId)"
+                            onArchive="(habitId) => this.store.archiveHabit(habitId)"
+                            onUnarchive="(habitId) => this.store.unarchiveHabit(habitId)"/>
+                    </main>
+
+                    <aside class="o_hf_aside">
+                        <StatsPanel
+                            stats="this.store.stats()"
+                            bestHabit="this.store.bestHabit()"/>
+                    </aside>
+                </div>
+            </div>
+        </div>
+    </t>
+
+</templates>

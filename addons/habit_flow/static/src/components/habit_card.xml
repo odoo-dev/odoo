@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="habit_flow.HabitCard">
+        <article class="o_hf_habit_card" t-att-class="{ 'o_hf_archived': this.props.habit.archived }">
+            <div class="o_hf_habit_identity">
+                <div class="o_hf_habit_icon" t-out="this.props.habit.icon"/>
+                <div>
+                    <h3 t-out="this.props.habit.name"/>
+                    <div class="o_hf_tags">
+                        <span t-foreach="this.props.habit.tags" t-as="tag" t-key="tag" class="o_hf_tag" t-out="tag"/>
+                        <span t-if="!this.props.habit.tags.length" class="o_hf_tag muted">No tags</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="o_hf_metric">
+                <span>Current Streak</span>
+                <strong t-att-class="this.streakClass" t-out="this.props.metrics.currentStreak"/>
+                <small>days</small>
+            </div>
+            <div class="o_hf_metric">
+                <span>Best Streak</span>
+                <strong class="text-primary" t-out="this.props.metrics.bestStreak"/>
+                <small>days</small>
+            </div>
+
+            <div class="o_hf_card_actions">
+                <button
+                    t-if="!this.props.habit.archived"
+                    type="button"
+                    t-att-class="{
+                        'btn': true,
+                        'o_hf_done_btn': true,
+                        'is_done': this.props.metrics.doneToday,
+                    }"
+                    t-on-click="() => this.props.onToggleToday(this.props.habit.id)"
+                    t-att-title="this.props.metrics.doneToday ? 'Undo today completion' : 'Mark done today'">
+                    <i t-att-class="this.props.metrics.doneToday ? 'fa fa-check-circle' : 'fa fa-circle-o'"/>
+                    <span t-out="this.props.metrics.doneToday ? 'Done Today' : 'Mark Done'"/>
+                </button>
+                <button
+                    t-if="this.props.habit.archived"
+                    type="button"
+                    class="btn btn-outline-primary"
+                    t-on-click="() => this.props.onUnarchive(this.props.habit.id)">
+                    Unarchive
+                </button>
+                <button type="button" class="btn btn-light o_hf_icon_button" t-on-click="() => this.props.onEdit(this.props.habit.id)" title="Edit habit">
+                    <i class="fa fa-pencil"/>
+                </button>
+                <button
+                    t-if="!this.props.habit.archived"
+                    type="button"
+                    class="btn btn-light o_hf_icon_button"
+                    t-on-click="() => this.props.onArchive(this.props.habit.id)"
+                    title="Archive habit">
+                    <i class="fa fa-archive"/>
+                </button>
+            </div>
+        </article>
+    </t>
+
+</templates>

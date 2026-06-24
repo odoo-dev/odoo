@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="habit_flow.HabitForm">
+        <section class="o_hf_panel o_hf_form_panel">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h2 t-out="this.title"/>
+                <button
+                    t-if="this.props.hasHabits"
+                    type="button"
+                    class="btn btn-sm btn-light"
+                    t-on-click="this.onCancel">
+                    Cancel
+                </button>
+            </div>
+            <form t-on-submit="this.onSubmit">
+                <div class="o_hf_form_grid">
+                    <div>
+                        <label class="form-label">Habit Name</label>
+                        <input
+                            t-ref="this.nameRef"
+                            type="text"
+                            class="form-control"
+                            placeholder="e.g., Meditate"
+                            t-att-value="this.draft.name"
+                            t-on-input="(ev) => this.draft.name = ev.target.value"/>
+                        <div t-if="this.errors.name" class="text-danger small mt-1" t-out="this.errors.name"/>
+                    </div>
+                    <div>
+                        <label class="form-label">Icon</label>
+                        <select
+                            class="form-select"
+                            t-on-change="(ev) => this.draft.icon = ev.target.value">
+                            <option
+                                t-foreach="this.iconOptions"
+                                t-as="icon"
+                                t-key="icon"
+                                t-att-value="icon"
+                                t-att-selected="icon === this.draft.icon"
+                                t-out="icon"/>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Tags</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            placeholder="e.g., Mind, Health"
+                            t-att-value="this.draft.tagsText"
+                            t-on-input="(ev) => this.draft.tagsText = ev.target.value"/>
+                    </div>
+                    <div class="o_hf_form_submit">
+                        <button type="submit" class="btn btn-primary w-100" t-out="this.submitLabel"/>
+                    </div>
+                </div>
+            </form>
+        </section>
+    </t>
+
+</templates>

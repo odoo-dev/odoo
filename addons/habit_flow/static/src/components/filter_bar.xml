@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="habit_flow.FilterBar">
+        <section class="o_hf_filterbar">
+            <div class="flex-grow-1">
+                <input
+                    type="search"
+                    class="form-control"
+                    placeholder="Search habits or tags"
+                    t-att-value="this.props.search"
+                    t-on-input="this.onSearchInput"/>
+            </div>
+            <div class="o_hf_segments">
+                <button
+                    t-foreach="this.filters"
+                    t-as="filter"
+                    t-key="filter.id"
+                    type="button"
+                    t-attf-class="o_hf_segment o_hf_segment_{{ filter.id }} {{ this.props.activeFilter === filter.id ? 'active' : '' }}"
+                    t-on-click="() => this.props.onFilter(filter.id)">
+                    <span t-out="filter.label"/>
+                    <small t-out="this.props.counts[filter.id]"/>
+                </button>
+            </div>
+        </section>
+    </t>
+
+</templates>
