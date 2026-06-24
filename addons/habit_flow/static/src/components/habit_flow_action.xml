@@ -37,12 +37,6 @@
                             onArchive="(habitId) => this.store.archiveHabit(habitId)"
                             onUnarchive="(habitId) => this.store.unarchiveHabit(habitId)"/>
                     </main>
-
-                    <aside class="o_hf_aside">
-                        <StatsPanel
-                            stats="this.store.stats()"
-                            bestHabit="this.store.bestHabit()"/>
-                    </aside>
                 </div>
             </div>
         </div>

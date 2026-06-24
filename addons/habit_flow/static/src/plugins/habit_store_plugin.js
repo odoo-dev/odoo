@@ -10,7 +10,6 @@ import { browser } from "@web/core/browser/browser";
 import { user } from "@web/core/user";
 import { session } from "@web/session";
 import {
-    getGlobalStats,
     getHabitMetrics,
     isDoneToday,
 } from "../utils/habit_calculations";
@@ -122,8 +121,6 @@ export class HabitStorePlugin extends Plugin {
         }))
     );
 
-    stats = computed(() => getGlobalStats(this.activeHabits(), this.today()));
-
     filterCounts = computed(() => {
         const today = this.today();
         const activeHabits = this.activeHabits();
@@ -133,17 +130,6 @@ export class HabitStorePlugin extends Plugin {
             pending: activeHabits.filter((habit) => !isDoneToday(habit, today)).length,
             archived: this.archivedHabits().length,
         };
-    });
-
-    bestHabit = computed(() => {
-        let best = null;
-        for (const habit of this.activeHabits()) {
-            const metrics = getHabitMetrics(habit, this.today());
-            if (!best || metrics.bestStreak > best.metrics.bestStreak) {
-                best = { habit, metrics };
-            }
-        }
-        return best;
     });
 
     setup() {

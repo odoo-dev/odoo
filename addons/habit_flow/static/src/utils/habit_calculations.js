@@ -46,22 +46,3 @@ export function getHabitMetrics(habit, today) {
         bestStreak: bestStreak(habit),
     };
 }
-
-export function getGlobalStats(activeHabits, today) {
-    const metrics = activeHabits.map((habit) => getHabitMetrics(habit, today));
-    const activeHabitCount = activeHabits.length;
-    const completedTodayCount = metrics.filter((metric) => metric.doneToday).length;
-    const pendingTodayCount = Math.max(0, activeHabitCount - completedTodayCount);
-    const todayCompletionPercentage = activeHabitCount
-        ? Math.round((completedTodayCount / activeHabitCount) * 100)
-        : 0;
-
-    return {
-        activeHabitCount,
-        completedTodayCount,
-        pendingTodayCount,
-        todayCompletionPercentage,
-        longestCurrentStreak: Math.max(0, ...metrics.map((metric) => metric.currentStreak)),
-        activeStreakCount: metrics.filter((metric) => metric.currentStreak > 0).length,
-    };
-}

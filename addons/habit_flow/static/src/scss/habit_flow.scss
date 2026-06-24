@@ -5,19 +5,16 @@
 
     .o_hf_workspace {
         display: grid;
-        grid-template-columns: 64% 35%;
-        gap: 24px;
+        grid-template-columns: minmax(0, 1fr);
     }
 
-    .o_hf_main,
-    .o_hf_stats_stack {
+    .o_hf_main {
         display: flex;
         flex-direction: column;
         gap: 16px;
     }
 
     .o_hf_panel,
-    .o_hf_summary_card,
     .o_hf_filterbar,
     .o_hf_habit_card {
         border: 1px solid $border-color;
@@ -211,91 +208,6 @@
         border: 1px solid $border-color;
         color: $text-muted;
         background: $o-view-background-color;
-    }
-
-    .o_hf_summary_card {
-        padding: 16px;
-
-        header {
-            padding-bottom: 14px;
-            border-bottom: 1px solid $border-color;
-        }
-
-        h2 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 700;
-        }
-    }
-
-    .o_hf_summary_icon {
-        display: grid;
-        width: 32px;
-        height: 32px;
-        place-items: center;
-        border-radius: 8px;
-        color: $primary;
-        background: $primary-bg-subtle;
-    }
-
-    .o_hf_summary_body {
-        padding-top: 16px;
-    }
-
-    .o_hf_today_grid,
-    .o_hf_streak_grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-
-        > div {
-            min-width: 0;
-            padding: 0 14px;
-            border-left: 1px solid $border-color;
-
-            &:first-child {
-                padding-left: 0;
-                border-left: 0;
-            }
-        }
-
-        span {
-            display: block;
-            margin-bottom: 8px;
-            color: $text-muted;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        strong {
-            font-size: 28px;
-            line-height: 1.1;
-        }
-    }
-
-    .o_hf_streak_grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .o_hf_best_habit {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 14px !important;
-    }
-
-    .o_hf_completion_pair {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .o_hf_ring {
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background:
-            radial-gradient(circle at center, $o-view-background-color 55%, transparent 56%),
-            conic-gradient($info var(--hf-progress), $body-tertiary-bg 0);
     }
 
 }

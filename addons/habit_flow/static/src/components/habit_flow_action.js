@@ -6,7 +6,6 @@ import { HabitStorePlugin } from "../plugins/habit_store_plugin";
 import { FilterBar } from "./filter_bar";
 import { HabitForm } from "./habit_form";
 import { HabitList } from "./habit_list";
-import { StatsPanel } from "./stats_panel";
 
 export class HabitFlowAction extends Component {
     static template = "habit_flow.HabitFlowAction";
@@ -15,7 +14,6 @@ export class HabitFlowAction extends Component {
         HabitForm,
         FilterBar,
         HabitList,
-        StatsPanel,
     };
     static props = { ...standardActionServiceProps };
 
