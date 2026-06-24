@@ -7,9 +7,25 @@ from odoo import api, models
 class WebsitePage(models.Model):
     _inherit = 'website.page'
 
+    def _get_cache_quantity(self, html):
+        my_cart_quantity_re = re.compile(r"""
+            <sup\s
+            class="(?P<classname>my_cart_quantity[^"]*)"
+            (?P<attributes>[^>]*?)
+            >
+            (?P<quantity>[^<]*)
+            </sup>
+            """, re.VERBOSE)
+
+        return re.search(my_cart_quantity_re, html)
+
     @api.model
     def _allow_cache_insertion(self, layout):
-        return ' data-order-id=' not in layout and super()._allow_cache_insertion(layout)
+        return (
+            ' data-order-id=' not in layout
+            and self._get_cache_quantity(layout) is not None
+            and super()._allow_cache_insertion(layout)
+        )
 
     @api.model
     def _post_process_response_from_cache(self, request, response):
@@ -22,17 +38,8 @@ class WebsitePage(models.Model):
 
         # update generated html from "webiste_sale.header_cart_link" used on all page
 
-        my_cart_quantity_re = re.compile(r"""
-            <sup\s
-            class="(?P<classname>my_cart_quantity[^"]*)"
-            (?P<attributes>[^>]*?)
-            >
-            (?P<quantity>[^<]*)
-            </sup>
-            """, re.VERBOSE)
-
         html = response.response[0]
-        cache_quantity = re.search(my_cart_quantity_re, html)
+        cache_quantity = self._get_cache_quantity(html)
         classname = cache_quantity.group('classname').replace('d-none', '') + ('' if quantity else 'd-none')
         attributes = cache_quantity.group('attributes') + (f' data-order-id="{order_id}"' if quantity else '')
         html_quantity = f'''<sup class="{classname}"{attributes}>{quantity}</sup>'''
