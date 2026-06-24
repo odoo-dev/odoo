@@ -204,6 +204,8 @@ class RegistryModel:
             if getattr(base, '_is_model_definition', False):
                 if not base._shareable:
                     return False
+                if base._inherits:
+                    return False
             elif not base._shareable:
                 return False
         return True
