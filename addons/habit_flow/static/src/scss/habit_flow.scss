@@ -19,8 +19,7 @@
     .o_hf_panel,
     .o_hf_summary_card,
     .o_hf_filterbar,
-    .o_hf_habit_card,
-    .o_hf_empty {
+    .o_hf_habit_card {
         border: 1px solid $border-color;
     }
 
@@ -212,36 +211,6 @@
         border: 1px solid $border-color;
         color: $text-muted;
         background: $o-view-background-color;
-    }
-
-    .o_hf_empty {
-        display: grid;
-        min-height: 280px;
-        place-items: center;
-        padding: 32px;
-        text-align: center;
-
-        h3 {
-            margin: 14px 0 6px;
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        p {
-            max-width: 420px;
-            color: $text-muted;
-        }
-    }
-
-    .o_hf_empty_icon {
-        display: grid;
-        width: 64px;
-        height: 64px;
-        place-items: center;
-        border-radius: 50%;
-        color: $primary;
-        background: $primary-bg-subtle;
-        font-size: 28px;
     }
 
     .o_hf_summary_card {

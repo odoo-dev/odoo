@@ -32,9 +32,6 @@
 
                         <HabitList
                             habits="this.store.visibleHabitViewModels()"
-                            activeFilter="this.store.filters().status"
-                            hasAnyHabits="this.store.hasAnyHabits()"
-                            onCreate.bind="this.onAddHabit"
                             onToggleToday="(habitId) => this.store.toggleToday(habitId)"
                             onEdit="(habitId) => this.store.openEdit(habitId)"
                             onArchive="(habitId) => this.store.archiveHabit(habitId)"

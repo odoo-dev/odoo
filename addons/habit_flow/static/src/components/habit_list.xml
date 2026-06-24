@@ -3,29 +3,16 @@
 
     <t t-name="habit_flow.HabitList">
         <section class="o_hf_habit_list">
-            <t t-if="this.props.habits.length">
-                <HabitCard
-                    t-foreach="this.props.habits"
-                    t-as="item"
-                    t-key="item.habit.id"
-                    habit="item.habit"
-                    metrics="item.metrics"
-                    onToggleToday="this.props.onToggleToday"
-                    onEdit="this.props.onEdit"
-                    onArchive="this.props.onArchive"
-                    onUnarchive="this.props.onUnarchive"/>
-            </t>
-            <div t-else="" class="o_hf_empty">
-                <div class="o_hf_empty_icon">
-                    <i class="fa fa-check-circle-o"/>
-                </div>
-                <h3 t-out="this.emptyTitle"/>
-                <p t-out="this.emptyBody"/>
-                <button type="button" class="btn btn-primary" t-on-click="this.props.onCreate">
-                    <i class="fa fa-plus me-2"/>
-                    Add Habit
-                </button>
-            </div>
+            <HabitCard
+                t-foreach="this.props.habits"
+                t-as="item"
+                t-key="item.habit.id"
+                habit="item.habit"
+                metrics="item.metrics"
+                onToggleToday="this.props.onToggleToday"
+                onEdit="this.props.onEdit"
+                onArchive="this.props.onArchive"
+                onUnarchive="this.props.onUnarchive"/>
         </section>
     </t>
 
