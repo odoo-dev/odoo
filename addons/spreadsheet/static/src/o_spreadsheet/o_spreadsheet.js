@@ -36527,10 +36527,10 @@
 			const minValue = this.parsePoint(sheetId, range, rule.minimum, "min");
 			const midValue = rule.midpoint ? this.parsePoint(sheetId, range, rule.midpoint) : null;
 			const maxValue = this.parsePoint(sheetId, range, rule.maximum, "max");
-			if (minValue === null || maxValue === null || minValue >= maxValue || midValue && (minValue >= midValue || midValue >= maxValue)) return;
+			if (minValue === null || maxValue === null || minValue >= maxValue || (midValue !== null && (minValue >= midValue || midValue >= maxValue))) return;
 			const zone = this.getters.getRangeFromSheetXC(sheetId, range).zone;
 			const colorCellArgs = [];
-			if (rule.midpoint && midValue) {
+			if (rule.midpoint && midValue !== null) {
 				colorCellArgs.push({
 					minValue,
 					minColor: rule.minimum.color,
@@ -36555,7 +36555,7 @@
 				if (cell.type === "number") {
 					const value = clip(cell.value, minValue, maxValue);
 					let color;
-					if (colorCellArgs.length === 2 && midValue) color = value <= midValue ? this.colorCell(value, colorCellArgs[0].minValue, colorCellArgs[0].minColor, colorCellArgs[0].colorDiffUnit) : this.colorCell(value, colorCellArgs[1].minValue, colorCellArgs[1].minColor, colorCellArgs[1].colorDiffUnit);
+					if (colorCellArgs.length === 2 && midValue !== null) color = value <= midValue ? this.colorCell(value, colorCellArgs[0].minValue, colorCellArgs[0].minColor, colorCellArgs[0].colorDiffUnit) : this.colorCell(value, colorCellArgs[1].minValue, colorCellArgs[1].minColor, colorCellArgs[1].colorDiffUnit);
 					else color = this.colorCell(value, colorCellArgs[0].minValue, colorCellArgs[0].minColor, colorCellArgs[0].colorDiffUnit);
 					if (!computedStyle[col]) computedStyle[col] = [];
 					computedStyle[col][row] = computedStyle[col]?.[row] || {};
