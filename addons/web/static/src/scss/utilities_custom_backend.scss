@@ -31,6 +31,31 @@ $utilities: map-merge(
     )
 );
 
+@if $enable-gradients {
+    :root {
+        --o-gradient:    #{$o-gradient};
+        --o-gradient-sm: #{$o-gradient-sm};
+        --o-gradient-lg: #{$o-gradient-lg};
+    }
+
+    $utilities: map-merge(
+        $utilities,
+        (
+            // Override Bootstrap's single 'bg-gradient' to also expose sm/lg variants
+            // backed by the --o-gradient* CSS custom properties.
+            "gradient": (
+                property: background-image,
+                class: bg,
+                values: (
+                    gradient: var(--o-gradient),
+                    gradient-sm: var(--o-gradient-sm),
+                    gradient-lg: var(--o-gradient-lg),
+                ),
+            ),
+        )
+    );
+}
+
 // Generate paddings print classes.
 @each $-padding-type in ("padding", "padding-x", "padding-y", "padding-top", "padding-end", "padding-bottom", "padding-start") {
     $utilities: map-merge(
