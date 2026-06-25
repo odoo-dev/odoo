@@ -39,6 +39,25 @@ class CalendarEvent(models.Model):
     _inherit = ['calendar.event', 'microsoft.calendar.sync']
 
     microsoft_recurrence_master_id = fields.Char('Microsoft Recurrence Master Id')
+    microsoft_unsynced_partner_ids = fields.Many2many(
+        'res.partner', string="Attendees not synced with Outlook",
+        compute='_compute_microsoft_unsynced_partner_ids')
+
+    @api.depends(
+        'partner_ids.user_ids.microsoft_calendar_rtoken',
+        'partner_ids.user_ids.microsoft_synchronization_stopped',
+    )
+    def _compute_microsoft_unsynced_partner_ids(self):
+        # Flag attendees that are Odoo users but have no active Outlook
+        # synchronization: their calendar won't reflect this event.
+        for event in self:
+            event.microsoft_unsynced_partner_ids = event.partner_ids.filtered(
+                lambda partner: partner.user_ids and not any(
+                    user.sudo().microsoft_calendar_rtoken
+                    and not user.sudo().microsoft_synchronization_stopped
+                    for user in partner.user_ids
+                )
+            )
 
     def _get_organizer(self):
         return self.user_id
