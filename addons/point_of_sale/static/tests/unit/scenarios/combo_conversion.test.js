@@ -5,6 +5,7 @@ import { click } from "@mail/../tests/mail_test_helpers";
 import { setupPosEnv } from "../utils";
 import { definePosModels } from "../data/generate_model_definitions";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
+import * as Utils from "../ui_utils";
 
 definePosModels();
 
@@ -285,14 +286,14 @@ test("test_convert_orderlines_to_combo_with_upsell: multiple combo suggestions a
     const store = await setupPosEnv();
     store.addNewOrder();
     const order = store.getOrder();
-    const productScreen = await mountWithCleanup(ProductScreen, {
+    await mountWithCleanup(ProductScreen, {
         props: { orderUuid: order.uuid },
     });
 
-    await productScreen.addProductToOrder(store.models["product.template"].get(8));
-    await productScreen.addProductToOrder(store.models["product.template"].get(10));
-    await productScreen.addProductToOrder(store.models["product.template"].get(8));
-    await productScreen.addProductToOrder(store.models["product.template"].get(10));
+    await Utils.clickDisplayedProduct("Wood chair");
+    await Utils.clickDisplayedProduct("Wood desk");
+    await Utils.clickDisplayedProduct("Wood chair");
+    await Utils.clickDisplayedProduct("Wood desk");
 
     await waitFor(".combo-proposition");
 
@@ -336,7 +337,7 @@ test("test_convert_orderlines_to_combo_with_upsell: multiple combo suggestions s
     const store = await setupPosEnv();
     store.addNewOrder();
     const order = store.getOrder();
-    const productScreen = await mountWithCleanup(ProductScreen, {
+    await mountWithCleanup(ProductScreen, {
         props: { orderUuid: order.uuid },
     });
     store.models["product.combo"].getAll().forEach((combo) => {
@@ -349,10 +350,10 @@ test("test_convert_orderlines_to_combo_with_upsell: multiple combo suggestions s
     store.models["product.product"].get(17).lst_price = 1;
     store.models["product.product"].get(18).lst_price = 1;
 
-    await productScreen.addProductToOrder(store.models["product.template"].get(8));
-    await productScreen.addProductToOrder(store.models["product.template"].get(10));
-    await productScreen.addProductToOrder(store.models["product.template"].get(8));
-    await productScreen.addProductToOrder(store.models["product.template"].get(10));
+    await Utils.clickDisplayedProduct("Wood chair");
+    await Utils.clickDisplayedProduct("Wood desk");
+    await Utils.clickDisplayedProduct("Wood chair");
+    await Utils.clickDisplayedProduct("Wood desk");
 
     await waitFor(".combo-proposition");
 

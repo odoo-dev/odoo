@@ -3,23 +3,17 @@ import { animationFrame, waitFor, waitUntil } from "@odoo/hoot-dom";
 import { click } from "@mail/../tests/mail_test_helpers";
 import { mountWithCleanup, contains, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { session } from "@web/session";
-import { Chrome } from "@point_of_sale/app/pos_app";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 import { definePosModels } from "../data/generate_model_definitions";
 import { scanBarcode, setupPosEnv } from "../utils";
+import * as Utils from "../ui_utils";
 
 definePosModels();
 
-async function mountChromeOnProductScreen(store, order = store.getOrder() || store.addNewOrder()) {
-    store.session.state = "opened";
-    store.setOrder(order);
-    store.navigate("ProductScreen", { orderUuid: order.uuid });
-
-    await mountWithCleanup(Chrome, {
-        props: { disableLoader: () => {} },
-    });
+async function openRegister(store) {
+    await Utils.mountPosApp(store);
+    await contains(".screen-login .btn.open-register-btn").click();
     await waitFor(".product-screen");
-    return order;
 }
 
 test.tags("desktop");
@@ -43,22 +37,20 @@ test("test_click_all_orders_keep_customer: all orders keeps the selected custome
         write_date: "2025-07-03 12:38:12",
     });
 
-    await mountChromeOnProductScreen(store);
+    await openRegister(store);
 
-    await contains(".set-partner").click();
-    await waitFor(".partner-list");
+    await Utils.clickPartnerButton();
     await contains(`.partner-line[data-id="${partner.id}"]`).click();
 
     expect(store.getOrder().partner_id.id).toBe(partner.id);
 
-    await contains(".set-partner").click();
-    await waitFor(".partner-list");
+    await Utils.clickPartnerButton();
     await contains(`.partner-line[data-id="${partner.id}"] .fa-bars`).click();
     await waitFor(".dropdown-item");
     await click(".dropdown-item", { text: "All Orders" });
     await waitFor(".ticket-screen");
 
-    await contains(".register-label").click();
+    await Utils.clickRegister();
     await waitFor(".product-screen");
 
     expect(store.getOrder().partner_id.id).toBe(partner.id);
@@ -76,7 +68,7 @@ test("test_ctrl_number_ignored: ctrl+number does not change the order line", asy
         props: { orderUuid: order.uuid },
     });
 
-    await contains('.product-sortable[data-product-id="5"]').click();
+    await Utils.clickDisplayedProduct("TEST");
     expect(order.lines).toHaveLength(1);
     expect(order.lines[0].qty).toBe(1);
 
@@ -179,20 +171,20 @@ test("test_preset_customer_selection: selecting a customer preserves the preset 
     store.config.use_presets = true;
     store.config.default_preset_id = preset;
     store.config.available_preset_ids = [preset];
-    const order = store.addNewOrder();
+
+    await openRegister(store);
+    const order = store.getOrder();
     order.setPreset(preset);
+    await animationFrame();
 
-    await mountChromeOnProductScreen(store, order);
-
-    await contains(".set-partner").click();
-    await waitFor(".partner-list");
+    await Utils.clickPartnerButton();
     await contains(".modal input").edit("Partner Full", { confirm: false });
     await contains(`.partner-line[data-id="${partner.id}"]`).click();
 
     expect(order.partner_id.id).toBe(partner.id);
     expect(document.querySelector(".set-partner").textContent.includes("Partner Full")).toBe(true);
 
-    await contains(".orders-button").click();
+    await Utils.clickOrders();
     await waitFor(".ticket-screen");
 
     expect(
@@ -205,17 +197,17 @@ test("test_preset_customer_selection: selecting a customer preserves the preset 
 test.tags("desktop");
 test("test_pos_large_amount_confirmation_dialog: validating a very large payment asks for confirmation", async () => {
     const store = await setupPosEnv();
-    store.session.state = "opened";
-    const order = store.addNewOrder();
+
+    await openRegister(store);
+    const order = store.getOrder();
     const product = store.models["product.template"].get(5);
     await store.addLineToOrder({ product_tmpl_id: product, qty: 1 }, order);
+    await animationFrame();
 
-    await mountChromeOnProductScreen(store, order);
-
-    await contains(".pay-order-button").click();
+    await Utils.clickPayButton();
     await waitFor(".payment-screen");
 
-    await click(".paymentmethod", { text: "Cash" });
+    await Utils.clickPaymentMethod("Cash");
     order.payment_ids[0].setAmount(5000);
     await animationFrame();
 
