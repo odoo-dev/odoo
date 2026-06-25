@@ -293,6 +293,18 @@ export class SelectionPlugin extends Plugin {
         // correct editable selection and prevent scrolling when not needed.
         this.editableOriginalFocus = this.editable.focus;
         this.editable.focus = () => this.focusEditable();
+
+        this.isPopoverClickAwayInProgress = false;
+        const onPopoverClickAway = () => {
+            this.isPopoverClickAwayInProgress = true;
+            Promise.resolve().then(() => {
+                this.isPopoverClickAwayInProgress = false;
+            });
+        };
+        this.services.popover.bus.addEventListener("CLOSE-ON-CLICK-AWAY", onPopoverClickAway);
+        this._cleanups.push(() =>
+            this.services.popover.bus.removeEventListener("CLOSE-ON-CLICK-AWAY", onPopoverClickAway)
+        );
     }
 
     destroy() {
@@ -778,6 +790,9 @@ export class SelectionPlugin extends Plugin {
                     this.preservedCursors.splice(index, 1);
                 }
                 if (!hadSelection) {
+                    return;
+                }
+                if (this.isPopoverClickAwayInProgress) {
                     return;
                 }
                 this.setSelection(

@@ -1,4 +1,4 @@
-import { markRaw } from "@odoo/owl";
+import { EventBus, markRaw } from "@odoo/owl";
 import { Popover } from "@web/core/popover/popover";
 import { registry } from "@web/core/registry";
 
@@ -70,7 +70,7 @@ export const popoverService = {
             return remove;
         };
 
-        return { add };
+        return { add, bus: new EventBus() };
     },
 };
 

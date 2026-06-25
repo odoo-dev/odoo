@@ -5,7 +5,7 @@ import { usePosition } from "@web/core/position/position_hook";
 import { reverseForRTL } from "@web/core/position/utils";
 import { useActiveElement } from "@web/core/ui/ui_service";
 import { mergeClasses } from "@web/core/utils/classname";
-import { useForwardRefToParent } from "@web/core/utils/hooks";
+import { useForwardRefToParent, useService } from "@web/core/utils/hooks";
 
 /**
  * @param {EventTarget} target
@@ -123,6 +123,8 @@ export class Popover extends Component {
     static animationTime = 200;
 
     setup() {
+        this.popoverService = useService("popover");
+
         if (this.props.setActiveElement) {
             useActiveElement("ref");
         }
@@ -201,6 +203,7 @@ export class Popover extends Component {
 
     onClickAway(target) {
         if (this.props.closeOnClickAway(target) && !this.isInside(target)) {
+            this.popoverService.bus.trigger("CLOSE-ON-CLICK-AWAY");
             this.props.close();
         }
     }
