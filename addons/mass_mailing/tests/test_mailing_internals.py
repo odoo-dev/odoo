@@ -83,6 +83,7 @@ class TestMassMailValues(MassMailCommon):
         This test ensures that the base64 images are correctly converted to
         attachments, even when they appear in MSO conditional comments.
         """
+        self.maxDiff = None
         attachments = []
         original_images_to_urls = self.env['mailing.mailing']._create_attachments_from_inline_images
         def patched_images_to_urls(self, b64images):
