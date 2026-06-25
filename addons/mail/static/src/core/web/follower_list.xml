@@ -2,6 +2,13 @@
 <templates xml:space="preserve">
 
     <t t-name="mail.FollowerList">
+        <div t-if="this.canSearchFollowers" class="px-2 pt-2 pb-1">
+            <SearchInput
+                search="this.search"
+                placeholder="this.inputPlaceholder"
+                onClear="() => this.clearSearch()"
+            />
+        </div>
         <DropdownItem t-if="this.props.thread.selfFollower" class="'d-flex px-1 o-mail-FollowerList-unfollow'" onSelected="() => this.onClickUnfollow()">
             <span class="o-mail-FollowerList-unfollowBtn text-danger d-flex align-items-center flex-grow-1 px-3 fw-bold">
                 Unfollow
@@ -20,13 +27,18 @@
             </DropdownItem>
             <div t-if="this.props.thread.followers.length > 0" role="separator" class="dropdown-divider opacity-50"/>
         </t>
-        <div t-if="this.props.thread.followers.length > 0" class="d-flex flex-column gap-1">
+        <div t-custom-ref="follower-list" t-if="this.props.thread.followers.length > 0" class="d-flex flex-column gap-1">
             <t t-foreach="this.props.thread.followers" t-as="follower" t-key="follower.id">
-                <Follower follower="follower" onFollowerChanged="this.props.onFollowerChanged" close="this.props.dropdown.close"/>
+                <div t-att-data-follower-id="follower.id" class="w-100">
+                    <Follower follower="follower" onFollowerChanged="this.props.onFollowerChanged" close="this.props.dropdown.close"/>
+                </div>
             </t>
-            <span t-if="!this.props.thread.followersFullyLoaded" class="btn btn-link" t-on-click="this.props.thread.loadMoreFollowers" t-custom-ref="load-more">Load more</span>
+            <span t-if="this.showLoadMoreFollowers" class="btn btn-link" t-on-click="() => this.onLoadMoreFollowers()">Load more</span>
         </div>
-        <div t-elif="!this.props.thread.hasWriteAccess" class="dropdown-item disabled">
+        <div t-elif="this.isSearchingFollowers and this.props.thread.followers.length === 0" class="dropdown-item disabled">
+            No matching followers
+        </div>
+        <div t-elif="this.showNoFollowers and !this.props.thread.hasWriteAccess" class="dropdown-item disabled">
             No Followers
         </div>
     </t>

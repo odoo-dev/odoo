@@ -12,22 +12,52 @@ import {
 
 const { DateTime } = luxon;
 
+function getFollowerSortTuple(env, follower) {
+    const [partner] = env["res.partner"].browse(follower.partner_id);
+    return {
+        id: follower.id,
+        name: (partner?.name || "").toLowerCase(),
+    };
+}
+
+function compareFollowerSortTuples(tuple1, tuple2) {
+    if (tuple1.name < tuple2.name) {
+        return -1;
+    }
+    if (tuple1.name > tuple2.name) {
+        return 1;
+    }
+    return tuple1.id - tuple2.id;
+}
+
 export class MailThread extends models.ServerModel {
     _name = "mail.thread";
     _inherit = ["base"];
 
     /**
      * @param {number[]} ids
-     * @param {number} [after]
+     * @param {Object} [after]
      * @param {number} [limit=100]
+     * @param {string} [search_term]
      * @param {boolean} [filter_recipients]
+     * @param {boolean} [reset]
      */
-    message_get_followers(ids, after, limit, filter_recipients) {
-        const kwargs = getKwArgs(arguments, "ids", "after", "limit", "filter_recipients");
+    message_get_followers(ids, after, limit, search_term, filter_recipients, reset) {
+        const kwargs = getKwArgs(
+            arguments,
+            "ids",
+            "after",
+            "limit",
+            "search_term",
+            "filter_recipients",
+            "reset"
+        );
         ids = kwargs.ids;
-        after = kwargs.after || 0;
+        after = kwargs.after;
         limit = kwargs.limit || 100;
+        search_term = kwargs.search_term || "";
         filter_recipients = kwargs.filter_recipients || false;
+        reset = kwargs.reset || false;
         /** @type {import("mock_models").MailThread} */
         const MailThread = this.env["mail.thread"];
 
@@ -38,50 +68,99 @@ export class MailThread extends models.ServerModel {
             store,
             after,
             limit,
+            search_term,
             filter_recipients
         );
         return store.get_result();
     }
 
-    _message_followers_to_store(ids, store, after, limit, filter_recipients, reset) {
+    _message_followers_to_store(ids, store, after, limit, search_term, filter_recipients, reset) {
         const kwargs = getKwArgs(
             arguments,
             "ids",
             "store",
             "after",
             "limit",
+            "search_term",
             "filter_recipients",
             "reset"
         );
         ids = kwargs.ids;
         store = kwargs.store;
-        after = kwargs.after || 0;
+        after = kwargs.after;
         limit = kwargs.limit || 100;
+        search_term = kwargs.search_term || "";
         filter_recipients = kwargs.filter_recipients || false;
         reset = kwargs.reset || false;
 
         /** @type {import("mock_models").MailFollowers} */
         const MailFollowers = this.env["mail.followers"];
 
-        const domain = [
+        if (filter_recipients) {
+            const domain = [
+                ["res_id", "=", ids[0]],
+                ["res_model", "=", this._name],
+                ["partner_id", "!=", this.env.user.partner_id],
+            ];
+            if (after) {
+                domain.push(["id", ">", after]);
+            }
+            // not implemented for simplicity
+            const followers = MailFollowers._filter(domain).sort(
+                (f1, f2) => f1.id - f2.id // sorted from lowest ID to highest ID (i.e. from oldest to youngest)
+            );
+            followers.length = Math.min(followers.length, limit);
+            store.add(
+                this.browse(ids[0]),
+                {
+                    [filter_recipients ? "recipients" : "followers"]: mailDataHelpers.Store.many(
+                        followers,
+                        makeKwArgs({ mode: reset ? "REPLACE" : "ADD" })
+                    ),
+                },
+                makeKwArgs({ as_thread: true })
+            );
+            return;
+        }
+        let followers = MailFollowers._filter([
             ["res_id", "=", ids[0]],
             ["res_model", "=", this._name],
             ["partner_id", "!=", this.env.user.partner_id],
-        ];
-        if (after) {
-            domain.push(["id", ">", after]);
-        }
-        if (filter_recipients) {
-            // not implemented for simplicity
-        }
-        const followers = MailFollowers._filter(domain).sort(
-            (f1, f2) => f1.id - f2.id // sorted from lowest ID to highest ID (i.e. from oldest to youngest)
-        );
-        followers.length = Math.min(followers.length, limit);
+        ])
+            .filter((follower) => {
+                if (!search_term) {
+                    return true;
+                }
+                const [partner] = this.env["res.partner"].browse(follower.partner_id);
+                return (
+                    (partner?.name || "").toLowerCase().includes(search_term.toLowerCase()) ||
+                    (partner?.email || "").toLowerCase().includes(search_term.toLowerCase())
+                );
+            })
+            .sort((f1, f2) =>
+                compareFollowerSortTuples(
+                    getFollowerSortTuple(this.env, f1),
+                    getFollowerSortTuple(this.env, f2)
+                )
+            )
+            .filter((follower) => {
+                if (!after) {
+                    return true;
+                }
+                return (
+                    compareFollowerSortTuples(getFollowerSortTuple(this.env, follower), {
+                        name: (after.name || "").toLowerCase(),
+                        id: after.id || 0,
+                    }) > 0
+                );
+            });
+        const hasMore = followers.length > limit;
+        followers = followers.slice(0, limit);
         store.add(
             this.browse(ids[0]),
             {
-                [filter_recipients ? "recipients" : "followers"]: mailDataHelpers.Store.many(
+                followersHasMore: hasMore,
+                followers: mailDataHelpers.Store.many(
                     followers,
                     makeKwArgs({ mode: reset ? "REPLACE" : "ADD" })
                 ),
@@ -320,7 +399,7 @@ export class MailThread extends models.ServerModel {
                 lang,
                 reason,
                 create_values: {},
-                recipient_type: 'to',
+                recipient_type: "to",
             });
         } else {
             const partnerCreateValues = this._get_customer_information(id);
@@ -330,7 +409,7 @@ export class MailThread extends models.ServerModel {
                 lang,
                 reason,
                 create_values: partnerCreateValues,
-                recipient_type: 'to',
+                recipient_type: "to",
             });
         }
         return result;
@@ -694,6 +773,7 @@ export class MailThread extends models.ServerModel {
                 ["res_id", "=", thread.id],
                 ["res_model", "=", this._name],
             ]);
+            res["followersSearchThreshold"] = 100;
             res["selfFollower"] = mailDataHelpers.Store.one(
                 MailFollowers.browse(
                     MailFollowers.search([
@@ -707,7 +787,7 @@ export class MailThread extends models.ServerModel {
                 this,
                 [thread.id],
                 store,
-                makeKwArgs({ reset: true })
+                makeKwArgs({ limit: 20, reset: true })
             );
             res["recipientsCount"] = this.env["mail.followers"].search_count([
                 ["res_id", "=", thread.id],

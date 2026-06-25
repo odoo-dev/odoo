@@ -142,6 +142,8 @@ class MailThread(models.AbstractModel):
     _mail_thread_customer = False  # subscribe customer when being in post recipients
     _mail_post_access = 'write'  # access required on the document to post on it
     _primary_email = 'email'  # Must be set for the models that can be created by alias
+    _FOLLOWER_LIST_PAGE_SIZE = 20
+    _FOLLOWER_LIST_SEARCH_THRESHOLD = 100
 
     _CUSTOMER_HEADERS_LIMIT_COUNT = 50
 
@@ -4936,11 +4938,17 @@ class MailThread(models.AbstractModel):
         return True
 
     @api.readonly
-    def message_get_followers(self, after=None, limit=100, filter_recipients=False):
+    def message_get_followers(self, after=None, limit=100, search_term=None, filter_recipients=False, reset=False):
         return Store().add(
             self,
             "_store_message_followers_fields",
-            fields_params={"after": after, "limit": limit, "filter_recipients": filter_recipients},
+            fields_params={
+                "after": after,
+                "limit": limit,
+                "search_term": search_term,
+                "filter_recipients": filter_recipients,
+                "reset": reset,
+            },
             as_thread=True,
         )
 
@@ -4949,21 +4957,73 @@ class MailThread(models.AbstractModel):
         res: Store.FieldList,
         after=None,
         limit=100,
+        search_term=None,
         filter_recipients=False,
         reset=False,
     ):
+        followers_has_more_by_tid = {}
+
         def followers_by_thread(thread):
             # Not batched by simplicity as it is always called on a single thread.
-            domain = Domain("res_id", "in", thread.id)
-            domain &= Domain("res_model", "=", thread._name)
-            domain &= Domain("partner_id", "!=", thread.env.user.partner_id.id)
+            cursor_after = after
             if filter_recipients:
+                domain = Domain("res_id", "in", thread.id)
+                domain &= Domain("res_model", "=", thread._name)
+                domain &= Domain("partner_id", "!=", thread.env.user.partner_id.id)
                 mt_comment_id = thread.env["ir.model.data"]._xmlid_to_res_id("mail.mt_comment")
                 domain &= Domain("subtype_ids", "=", mt_comment_id)
                 domain &= Domain("partner_id.active", "=", True)
-            if after:
-                domain &= Domain("id", ">", after)
-            return thread.env["mail.followers"].search_fetch(domain, limit=limit, order="id ASC")
+                if cursor_after:
+                    domain &= Domain("id", ">", cursor_after)
+                return thread.env["mail.followers"].search_fetch(domain, limit=limit, order="id ASC")
+
+            follower_model = thread.env["mail.followers"]
+            query = [
+                f"SELECT fol.id FROM {follower_model._table} fol",
+                "JOIN res_partner partner ON partner.id = fol.partner_id",
+                "WHERE fol.res_model = %s",
+                "AND fol.res_id = %s",
+                "AND fol.partner_id != %s",
+            ]
+            params = [thread._name, thread.id, thread.env.user.partner_id.id]
+            if search_term:
+                query.append(
+                    "AND (lower(COALESCE(partner.name, '')) LIKE %s OR lower(COALESCE(partner.email, '')) LIKE %s)"
+                )
+                search_term_like = f"%{search_term.lower()}%"
+                params.extend([search_term_like, search_term_like])
+            if cursor_after:
+                if not isinstance(cursor_after, dict):
+                    cursor_after = {}
+                query.append(
+                    "AND ("
+                    "lower(COALESCE(partner.name, '')), "
+                    "lower(COALESCE(partner.email, '')), "
+                    "fol.id"
+                    ") > (%s, %s, %s)"
+                )
+                params.extend(
+                    [
+                        (cursor_after.get("name") or "").lower(),
+                        (cursor_after.get("email") or "").lower(),
+                        cursor_after.get("id") or 0,
+                    ]
+                )
+            query.append(
+                "ORDER BY "
+                "lower(COALESCE(partner.name, '')) ASC, "
+                "lower(COALESCE(partner.email, '')) ASC, "
+                "fol.id ASC "
+                "LIMIT %s"
+            )
+            params.append(limit + 1)
+            thread.env.cr.execute("\n".join(query), params)
+            follower_ids = [row[0] for row in thread.env.cr.fetchall()]
+            has_more = len(follower_ids) > limit
+            if has_more:
+                follower_ids = follower_ids[:limit]
+            followers_has_more_by_tid[thread.id] = has_more
+            return follower_model.browse(follower_ids)
 
         res.many(
             "recipients" if filter_recipients else "followers",
@@ -4971,6 +5031,8 @@ class MailThread(models.AbstractModel):
             value=followers_by_thread,
             mode="REPLACE" if reset else "ADD",
         )
+        if not filter_recipients:
+            res.attr("followersHasMore", lambda thread: followers_has_more_by_tid.get(thread.id, False))
 
     # ------------------------------------------------------
     # THREAD MESSAGE UPDATE
@@ -5180,6 +5242,7 @@ class MailThread(models.AbstractModel):
             follower_count = self.env["mail.followers"]._read_group(domain, **count_by_tid)
             follower_count_by_tid = defaultdict(int, follower_count)
             res.attr("followersCount", lambda t: follower_count_by_tid[t.id])
+            res.attr("followersSearchThreshold", self._FOLLOWER_LIST_SEARCH_THRESHOLD)
             # follower of current user
             self_partner_domain = Domain("partner_id", "=", self.env.user.partner_id.id)
             self_followers = self.env["mail.followers"].search_fetch(domain & self_partner_domain)
@@ -5193,7 +5256,11 @@ class MailThread(models.AbstractModel):
                 value=lambda t: self_follower_by_tid[t.id],
             )
             # follower list with limit
-            self._store_message_followers_fields(res, reset=True)
+            self._store_message_followers_fields(
+                res,
+                limit=self._FOLLOWER_LIST_PAGE_SIZE,
+                reset=True,
+            )
             # recipient count
             mt_comment_id = self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_comment")
             recipient_count = self.env["mail.followers"]._read_group(

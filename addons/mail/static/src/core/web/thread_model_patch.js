@@ -3,17 +3,42 @@ import { Thread } from "@mail/core/common/thread_model";
 import { patch } from "@web/core/utils/patch";
 import { rpc } from "@web/core/network/rpc";
 
+const FOLLOWER_LIST_PAGE_SIZE = 20;
+
 /** @type {import("models").Thread} */
 const threadPatch = {
     get recipientsFullyLoaded() {
         return this.recipientsCount === this.recipients.length;
     },
-    async loadMoreFollowers() {
-        const data = await this.store.env.services.orm.call(this.model, "message_get_followers", [
-            [this.id],
-            this.followers.at(-1).id,
-        ]);
+    async fetchFollowers({ after = null, reset = false, searchTerm = "" } = {}) {
+        const data = await this.store.env.services.orm.call(
+            this.model,
+            "message_get_followers",
+            [[this.id]],
+            {
+                after,
+                limit: FOLLOWER_LIST_PAGE_SIZE,
+                reset,
+                search_term: searchTerm,
+            }
+        );
         this.store.insert(data);
+    },
+    async loadMoreFollowers(searchTerm = "") {
+        const follower = this.followers.at(-1);
+        if (!follower) {
+            return;
+        }
+        await this.fetchFollowers({
+            after: {
+                id: follower.id,
+                name: follower.partner_id?.name || "",
+            },
+            searchTerm,
+        });
+    },
+    async reloadFollowers(searchTerm = "") {
+        await this.fetchFollowers({ reset: true, searchTerm });
     },
     async loadMoreRecipients() {
         const data = await this.store.env.services.orm.call(

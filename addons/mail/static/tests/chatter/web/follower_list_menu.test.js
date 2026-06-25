@@ -9,7 +9,7 @@ import {
 } from "@mail/../tests/mail_test_helpers";
 
 import { describe, expect, test } from "@odoo/hoot";
-import { tick } from "@odoo/hoot-dom";
+import { queryFirst, tick } from "@odoo/hoot-dom";
 import { mockService, serverState } from "@web/../tests/web_test_helpers";
 import { range } from "@web/core/utils/numbers";
 
@@ -113,7 +113,7 @@ test("click on remove follower", async () => {
     await contains(".o-mail-Followers-dropdown");
 });
 
-test("Load 100 followers at once", async () => {
+test("Load followers in pages of 20", async () => {
     const pyEnv = await startServer();
     const partnerIds = pyEnv["res.partner"].create(
         range(210).map((i) => ({ display_name: `Partner${i}`, name: `Partner${i}` }))
@@ -130,14 +130,16 @@ test("Load 100 followers at once", async () => {
     await openFormView("res.partner", partnerIds[0]);
     await contains("button[title='Show Followers']:text('210')");
     await click("[title='Show Followers']");
-    await contains(".o-mail-Follower", { count: 100 });
+    await contains(".o-mail-SearchInput");
+    await contains(".o-mail-Follower", { count: 20 });
     await contains(".o-mail-Followers-dropdown:has(:text('Load more'))");
     await scroll(".o-mail-Followers-dropdown", "bottom");
-    await contains(".o-mail-Follower", { count: 200 });
+    await contains(".o-mail-Follower", { count: 40 });
+    expect(queryFirst(".o-mail-Followers-dropdown").scrollTop).toBeGreaterThan(0);
     await tick(); // give enough time for the useVisible hook to register load more as hidden
     await scroll(".o-mail-Followers-dropdown", "bottom");
-    await contains(".o-mail-Follower", { count: 209 });
-    await contains(".o-mail-Followers-dropdown:has(:text('Load more'))", { count: 0 });
+    await contains(".o-mail-Follower", { count: 60 });
+    expect(queryFirst(".o-mail-Followers-dropdown").scrollTop).toBeGreaterThan(0);
 });
 
 test("Load 100 recipients at once", async () => {

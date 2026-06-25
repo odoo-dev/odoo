@@ -131,6 +131,10 @@ export class Thread extends Record {
     });
     /** @type {integer|undefined} */
     followersCount;
+    /** @type {integer|undefined} */
+    followersSearchThreshold;
+    /** @type {boolean|undefined} */
+    followersHasMore = false;
     loadOlder = false;
     loadNewer = false;
     get isFocused() {
