@@ -3,7 +3,7 @@ import {
     onMounted,
     onPatched,
     onWillStart,
-    onWillUpdateProps,
+    useEffect,
     props,
     signal,
     t,
@@ -65,12 +65,16 @@ export class Image extends Component {
     setup() {
         this.svg = {};
 
+        let previousSrc = this.props.src;
         onWillStart(async () => this.handleImgLoad(this.props.src));
-        onWillUpdateProps(async (nextProps) => {
-            if (this.props.src !== nextProps.src) {
-                this.loaded.set(false);
-                await this.handleImgLoad(nextProps.src);
+        useEffect(() => {
+            const src = this.props.src;
+            if (src === previousSrc) {
+                return;
             }
+            previousSrc = src;
+            this.loaded.set(false);
+            this.handleImgLoad(src);
         });
         const insertSvgChildren = () => {
             if (
