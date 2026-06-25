@@ -40,6 +40,7 @@ $o-navbar-badge-text-shadow: 1px 1px 0 rgba($o-black, .3) !default;
     user-select: none;
     background-color: inherit;
     font-size: $o-navbar-entry-font-size;
+    font-weight: var(--NavBar-entry-fontWeight, 400);
 
     @include o-hover-text-color(
         var(--NavBar-entry-color, #{$o-navbar-entry-color}),
