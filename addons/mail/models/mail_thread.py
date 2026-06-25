@@ -2198,7 +2198,8 @@ class MailThread(models.AbstractModel):
             record_su = record_su if hasattr(record_su, '_partner_find_from_emails_single') else self.env['mail.thread'].sudo()
 
         partner = record_su._partner_find_from_emails_single([email_value], filter_found=lambda p: p.user_ids, no_create=True)
-        return partner.main_user_id
+        users = partner.user_ids.filtered('active')
+        return (users.filtered(lambda u: not u.share) or users)[:1]
 
     @api.model
     def _mail_find_partner_from_emails(self, emails, records=None, force_create=False, extra_domain=False):
