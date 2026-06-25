@@ -121,7 +121,7 @@ export class Homepage extends Component {
                 </div>
                 <div t-if="!this.store.base().certificate_end_date and !this.store.base().is_access_point_up" class="alert alert-warning" role="alert">
                     <p class="m-0 fw-bold">
-                        This IoT Box doesn't have a valid certificate.
+                        This IoT Box doesn't have a valid certificate.You won't be able to use it with your Odoo database until it gets one.
                     </p>
                     <small>
                         The IoT Box should get a certificate automatically when paired with a database. If it doesn't, 
