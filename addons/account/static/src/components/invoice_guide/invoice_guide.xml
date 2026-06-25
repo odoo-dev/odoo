@@ -5,7 +5,7 @@
             <div class="bill_guide_left d-flex align-items-center justify-content-center py-3">
                 <div>
                     <div class="text-center">
-                        <img src="/web/static/img/folder.svg" alt="Invoice Guide"/>
+                        <img src="/web/static/img/e-invoicing.svg" alt="e-invoicing"/>
                     </div>
                     <div class="text-center mt-2">
                         <a class="btn btn-link px-0 fw-normal"
@@ -28,7 +28,7 @@
             </div>
             <div class="bill_guide_right d-flex flex-column align-items-center justify-content-center py-3">
                 <div class="text-center">
-                    <img src="/web/static/img/folder.svg" alt="Invoice Guide"/>
+                    <img src="/web/static/img/company.svg" alt="Company"/>
                 </div>
                 <div class="text-center mt-2">
                     <a href="#"
