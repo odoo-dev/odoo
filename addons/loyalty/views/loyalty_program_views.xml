@@ -165,6 +165,10 @@
                                 force_save="1"
                                 readonly="program_type != 'loyalty'"
                             />
+                            <label for="expire_after" invisible="program_type != 'loyalty'"/>
+                            <div invisible="program_type != 'loyalty'">
+                                <field name="expire_after" class="oe_inline"/> days
+                            </div>
                         </group>
                     </group>
                     <notebook>

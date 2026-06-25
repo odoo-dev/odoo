@@ -73,11 +73,15 @@ class PosConfig(models.Model):
     def use_coupon_code(self, code, creation_date, partner_id, pricelist_id):
         self.ensure_one()
         # Points desc so that in coupon mode one could use a coupon multiple times
-        coupon = self.env['loyalty.card'].search(
+        coupons = self.env['loyalty.card'].search_fetch(
             [('program_id', 'in', self._get_program_ids().ids),
              '|', ('partner_id', 'in', (False, partner_id)), ('program_type', '=', 'gift_card'),
              ('code', '=', code)],
-            order='partner_id, points desc', limit=1)
+            ['partner_id', 'points'],
+            order='partner_id')
+        coupon = coupons[:1]
+        if len(coupons) > 1:
+            coupon = coupons.sorted(lambda card: (card.partner_id.id or 0, -card.points))[:1]
         program = coupon.program_id
         if not coupon or not program.active:
             return {

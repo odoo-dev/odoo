@@ -84,29 +84,62 @@ class SaleOrderLine(models.Model):
         self.write(vals)
         return self
 
+    def _get_confirmed_loyalty_pairs(self):
+        return {
+            (line.order_id.id, line.coupon_id.id)
+            for line in self
+            if line.state == "sale" and line.coupon_id
+        }
+
+    def _rebuild_loyalty_history_usage(self, pairs):
+        loyalty_history = self.env["loyalty.history"].sudo()
+        for order_id, coupon_id in pairs:
+            order = self.env["sale.order"].browse(order_id).exists()
+            coupon = self.env["loyalty.card"].browse(coupon_id).exists()
+            if not order or not coupon:
+                continue
+            usage_history = loyalty_history.search([
+                ("card_id", "=", coupon.id),
+                ("order_model", "=", order._name),
+                ("order_id", "=", order.id),
+                ("used", ">", 0),
+            ])
+            if usage_history:
+                loyalty_history.search([
+                    ("linked_loyalty_history_id", "in", usage_history.ids),
+                    ("issued", ">", 0),
+                ])._release_compensation()
+                usage_history.unlink()
+            points_cost = sum(
+                order.order_line.filtered(lambda line: line.coupon_id == coupon).mapped(
+                    "points_cost"
+                )
+            )
+            if points_cost:
+                loyalty_history._create_consuming_history(
+                    coupon,
+                    points_cost,
+                    {
+                        "description": self.env._("Order %s", order.display_name),
+                        "order_model": order._name,
+                        "order_id": order.id,
+                    },
+                )
+
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
-        # Update our coupon points if the order is in a confirmed state
-        for line in res:
-            if line.coupon_id and line.points_cost and line.state == "sale":
-                line.coupon_id.points -= line.points_cost
-                line.order_id._update_loyalty_history(line.coupon_id, line.points_cost)
+        res._rebuild_loyalty_history_usage(res._get_confirmed_loyalty_pairs())
         return res
 
     def write(self, vals):
-        cost_in_vals = "points_cost" in vals
-        if cost_in_vals:
-            previous_vals = {line: (line.points_cost, line.coupon_id) for line in self}
+        update_loyalty_history = bool({"points_cost", "coupon_id"} & vals.keys())
+        if update_loyalty_history:
+            loyalty_pairs = self._get_confirmed_loyalty_pairs()
         res = super().write(vals)
-        if cost_in_vals:
-            # Update our coupon points if the order is in a confirmed state
-            for line, (previous_cost, previous_coupon) in previous_vals.items():
-                if line.state != "sale":
-                    continue
-                if line.points_cost != previous_cost or line.coupon_id != previous_coupon:
-                    previous_coupon.points += previous_cost
-                    line.coupon_id.points -= line.points_cost
+        if update_loyalty_history:
+            loyalty_pairs |= self._get_confirmed_loyalty_pairs()
+            self._rebuild_loyalty_history_usage(loyalty_pairs)
         return res
 
     def unlink(self):
@@ -147,12 +180,9 @@ class SaleOrderLine(models.Model):
                             lambda r: r.program_id != line.coupon_id.program_id
                         )
                     )
-        # Give back the points if the order is confirmed, points are given back if the order is
-        # canceled but in this case we need to do it directly.
-        for line in related_lines:
-            if line.state == "sale":
-                line.coupon_id.points += line.points_cost
+        loyalty_pairs = related_lines._get_confirmed_loyalty_pairs()
         res = super(SaleOrderLine, self | related_lines).unlink()
+        self.env["sale.order.line"]._rebuild_loyalty_history_usage(loyalty_pairs)
         coupons_to_unlink.sudo().unlink()
         return res
 

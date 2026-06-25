@@ -141,6 +141,10 @@ class LoyaltyProgram(models.Model):
         required=True,
         default="current",
     )
+    expire_after = fields.Integer(
+        string="Loyalty points expire after",
+        help="Number of days after which earned loyalty points expire. 0 means they never expire.",
+    )
     trigger = fields.Selection(
         help="""
         Automatic: Customers will be eligible for a reward automatically in their cart.

@@ -19,17 +19,14 @@ class LoyaltyCardUpdateBalance(models.TransientModel):
                 self.env._("New Balance should be positive and different then old balance.")
             )
         difference = self.new_balance - self.old_balance
-        used = 0
-        issued = 0
-        if difference > 0:
-            issued = difference
-        else:
-            used = abs(difference)
+        loyalty_history = self.env["loyalty.history"]
+        description = self.description or self.env._("Gift for customer")
 
-        self.env["loyalty.history"].create({
-            "card_id": self.card_id.id,
-            "description": self.description or self.env._("Gift for customer"),
-            "used": used,
-            "issued": issued,
-        })
-        self.card_id.points = self.new_balance
+        if difference > 0:
+            loyalty_history._create_issuing_history(
+                self.card_id, difference, {"description": description}
+            )
+        else:
+            loyalty_history._create_consuming_history(
+                self.card_id, abs(difference), {"description": description}
+            )

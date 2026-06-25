@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.tools import format_amount
+from odoo.tools import float_is_zero, format_amount
 
 
 class LoyaltyCard(models.Model):
@@ -36,7 +36,7 @@ class LoyaltyCard(models.Model):
     currency_id = fields.Many2one(related="program_id.currency_id")
     # Reserved for this partner if non-empty
     partner_id = fields.Many2one(comodel_name="res.partner", index=True)
-    points = fields.Float(tracking=True)
+    points = fields.Float(compute="_compute_points", search="_search_points")
     point_name = fields.Char(related="program_id.portal_point_name", readonly=True)
     points_display = fields.Char(compute="_compute_points_display")
 
@@ -90,6 +90,21 @@ class LoyaltyCard(models.Model):
                     card.env._("A customer can only have one active loyalty card per program.")
                 )
 
+    @api.depends(
+        "history_ids.issued",
+        "history_ids.used",
+        "history_ids.expiration_date",
+        "history_ids.linked_loyalty_history_id.expiration_date",
+    )
+    def _compute_points(self):
+        history_domain = self.env["loyalty.history"]._get_valid_history_domain(self.ids)
+        history_data = self.env["loyalty.history"]._read_group(
+            domain=history_domain, groupby=["card_id"], aggregates=["issued:sum", "used:sum"]
+        )
+        points_per_card = {card.id: issued - used for card, issued, used in history_data}
+        for card in self:
+            card.points = points_per_card.get(card.id, 0.0)
+
     @api.depends("points", "point_name")
     def _compute_points_display(self):
         for card in self:
@@ -106,6 +121,17 @@ class LoyaltyCard(models.Model):
     # Meant to be overriden
     def _compute_use_count(self):
         self.use_count = 0
+
+    def _search_points(self, operator, value):
+        if operator != ">" or not float_is_zero(float(value), precision_digits=12):
+            return NotImplemented
+
+        history_domain = self.env["loyalty.history"]._get_valid_history_domain()
+        history_data = self.env["loyalty.history"]._read_group(
+            domain=history_domain, groupby=["card_id"], aggregates=["issued:sum", "used:sum"]
+        )
+        matching_ids = [card.id for card, issued, used in history_data if issued > used]
+        return [("id", "in", matching_ids)]
 
     def _get_default_template(self):
         self.ensure_one()
@@ -222,17 +248,6 @@ class LoyaltyCard(models.Model):
     def create(self, vals_list):
         res = super().create(vals_list)
         res._send_creation_communication()
-        return res
-
-    def write(self, vals):
-        if not self.env.context.get("loyalty_no_mail", False) and "points" in vals:
-            points_before = {coupon: coupon.points for coupon in self}
-        res = super().write(vals)
-        if not self.env.context.get("loyalty_no_mail", False) and "points" in vals:
-            points_changes = {
-                coupon: {"old": points_before[coupon], "new": coupon.points} for coupon in self
-            }
-            self._send_points_reach_communication(points_changes)
         return res
 
     def action_loyalty_update_balance(self):

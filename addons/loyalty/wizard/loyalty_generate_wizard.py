@@ -83,7 +83,6 @@ class LoyaltyGenerateWizard(models.TransientModel):
         self.ensure_one()
         return {
             "program_id": self.program_id.id,
-            "points": self.points_granted,
             "expiration_date": self.valid_until,
             "partner_id": partner.id if self.mode == "selected" else False,
         }
@@ -93,17 +92,25 @@ class LoyaltyGenerateWizard(models.TransientModel):
             raise ValidationError(self.env._("Can not generate coupon, no program is set."))
         if any(wizard.coupon_qty <= 0 for wizard in self):
             raise ValidationError(self.env._("Invalid quantity."))
-        coupon_create_vals = []
+        coupons = self.env["loyalty.card"]
+        loyalty_history = self.env["loyalty.history"].with_context(loyalty_no_mail=True)
         for wizard in self:
             customers = wizard._get_partners() or range(wizard.coupon_qty)
-            coupon_create_vals.extend(wizard._get_coupon_values(partner) for partner in customers)
-        coupons = self.env["loyalty.card"].create(coupon_create_vals)
-        self.env["loyalty.history"].create([
-            {
-                "description": self.description or self.env._("Gift For Customer"),
-                "card_id": coupon.id,
-                "issued": self.points_granted,
-            }
-            for coupon in coupons
-        ])
+            new_coupons = (
+                self
+                .env["loyalty.card"]
+                .with_context(action_no_send_mail=True)
+                .create([wizard._get_coupon_values(partner) for partner in customers])
+            )
+            coupons |= new_coupons
+            if wizard.points_granted:
+                loyalty_history.create([
+                    {
+                        "description": wizard.description or self.env._("Gift For Customer"),
+                        "card_id": coupon.id,
+                        "issued": wizard.points_granted,
+                    }
+                    for coupon in new_coupons
+                ])
+        coupons.with_context(action_no_send_mail=False)._send_creation_communication()
         return coupons

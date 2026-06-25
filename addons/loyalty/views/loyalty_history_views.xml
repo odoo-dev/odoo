@@ -5,18 +5,20 @@
         <field name="name">loyalty.history.view.form</field>
         <field name="model">loyalty.history</field>
         <field name="arch" type="xml">
-            <form>
+            <form create="false" edit="false" delete="false">
                 <sheet>
                     <group>
                         <group>
                             <field name="card_id"/>
                             <field name="description"/>
+                            <field name="linked_loyalty_history_id"/>
                             <field name="order_id" invisible="not order_id"/>
                             <field name="order_model" invisible="True"/>
                         </group>
                         <group>
                             <field name="issued"/>
                             <field name="used"/>
+                            <field name="expiration_date" invisible="program_type != 'loyalty'"/>
                         </group>
                     </group>
                 </sheet>
