@@ -73,12 +73,20 @@ export class StockValuationReport extends Component {
         });
     }
 
+    get isPerpetualValuation() {
+        return this.data.is_perpetual;
+    }
+
     get stockInitial() {
         return this.formatMonetary(this.data.stock_initial);
     }
 
     get stockVariation() {
         return this.formatMonetary(this.data.stock_variation);
+    }
+
+    get stockVariationLabel() {
+        return this.isPerpetualValuation ? _t("Other") : _t("Stock Variation");
     }
 
     // On Click Methods --------------------------------------------------------

@@ -94,6 +94,7 @@ class StockValuationReport(models.AbstractModel):
             'currency_id': company.currency_id.id,
             'ending_stock': ending_stock,
             'initial_balance': initial_balance,
+            'is_perpetual': company.inventory_valuation == 'real_time',
         }
 
         if self._must_include_inventory_loss():

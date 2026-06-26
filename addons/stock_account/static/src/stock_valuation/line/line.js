@@ -5,7 +5,6 @@ export class StockValuationReportLine extends Component {
     static template = "stock_account.StockValuationReport.InventoryValuationLine";
     props = props({
         class: t.string().optional(),
-        displayDebitCredit: t.boolean().optional(),
         label: t.string().optional(),
         level: t.number().optional(0),
         line: t.object().optional(),

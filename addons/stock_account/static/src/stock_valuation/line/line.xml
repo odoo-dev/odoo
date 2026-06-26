@@ -2,13 +2,28 @@
 <templates>
     <t t-name="stock_account.StockValuationReport.InventoryValuationLine">
         <tr t-att-class="this.cssClass">
-            <td class="line_name w-50" t-on-click="this.onClick">
+            <td class="w-5">
+
+            </td>
+            <td class="line_name w-45">
                 <div class="wrapper">
-                    <t t-if="this.label">
-                        <a t-if="this.props.onClickMethod" href="#" t-out="this.label"/>
-                        <span t-else="" t-out="this.label"/>
-                    </t>
+                    <div class="w-10">
+                        <span
+                            class="btn btn-light p-0"
+                            t-if="!this.credit and this.hasSublines"
+                            t-on-click="this.onClickToggle"
+                            t-att-tabindex="this.props.lines ? 0 : -1">
+                            <i t-attf-class="fa fa-caret-#{this.state.displaySublines ? 'down' : 'right'}"/>
+                        </span>
+                    </div>
+                    <div class="w-90" t-on-click="this.onClick">
+                        <t t-if="this.label">
+                            <a t-if="this.props.onClickMethod" href="#" t-out="this.label"/>
+                            <span t-else="" t-out="this.label"/>
+                        </t>
+                    </div>
                 </div>
+
             </td>
             <td class="w-25">
                 <div t-if="this.formattedValue" t-out="this.formattedValue"/>
@@ -26,13 +41,6 @@
             </td>
         </tr>
         <t t-if="this.state.displaySublines &amp;&amp; this.hasSublines">
-            <t t-if="this.props.displayDebitCredit">
-                <tr>
-                    <td/>
-                    <td>Debit</td>
-                    <td>Credit</td>
-                </tr>
-            </t>
             <t t-foreach="this.props.sublines" t-as="line" t-key="line.account_id">
                 <StockValuationReportLine
                     label="line.display_name || line.label"

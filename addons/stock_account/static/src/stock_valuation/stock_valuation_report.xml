@@ -23,6 +23,11 @@
                 <div class="fit-content w-print-100">
                     <table class="table table-borderless table-hover w-print-100 mx-auto">
                         <tbody>
+                            <tr>
+                                <td/>
+                                <td>Debit</td>
+                                <td>Credit</td>
+                            </tr>
                             <t t-call="stock_account.StockValuationReport.InitialBalance"/>
                             <t t-if="this.data.inventory_loss" t-call="stock_account.StockValuationReport.InventoryLoss"/>
                             <t t-call="stock_account.StockValuationReport.StockVariation"/>
@@ -51,10 +56,9 @@
 
     <t t-name="stock_account.StockValuationReport.StockVariation">
         <StockValuationReportLine
-            label.translate="Stock Variation"
+            label="this.stockVariationLabel"
             level="0"
             sublines="this.data.stock_variation.lines"
-            displayDebitCredit="true"
             value="this.data.stock_variation.value"/>
         <t t-call="stock_account.StockValuationReport.EmptyLine"/>
     </t>
@@ -73,7 +77,6 @@
         <StockValuationReportLine
             label.translate="Inventory Loss"
             level="0"
-            displayDebitCredit="true"
             onClickMethod.bind="this.openInventoryLoss"
             sublines="this.data.inventory_loss.lines"
             value="this.data.inventory_loss.value"/>
