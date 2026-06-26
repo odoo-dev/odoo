@@ -48,24 +48,24 @@ def channel_with_db(dbname, channel):
     return channel
 
 
-def get_notify_payloads(channels):
+def get_notify_payloads(items):
     """
-    Generates the json payloads for the imbus NOTIFY.
+    Generates the json payloads for a NOTIFY (imbus or imbus_fw).
     Splits recursively payloads that are too large.
 
-    :param list channels:
+    :param list items:
     :return: list of payloads of json dumps
     :rtype: list[str]
     """
-    if not channels:
+    if not items:
         return []
-    payload = json_dump(channels)
-    if len(channels) == 1 or len(payload.encode()) < NOTIFY_PAYLOAD_MAX_LENGTH:
+    payload = json_dump(items)
+    if len(items) == 1 or len(payload.encode()) < NOTIFY_PAYLOAD_MAX_LENGTH:
         return [payload]
     else:
-        pivot = math.ceil(len(channels) / 2)
-        return (get_notify_payloads(channels[:pivot]) +
-                get_notify_payloads(channels[pivot:]))
+        pivot = math.ceil(len(items) / 2)
+        return (get_notify_payloads(items[:pivot]) +
+                get_notify_payloads(items[pivot:]))
 
 
 class BusBus(models.Model):
@@ -89,7 +89,7 @@ class BusBus(models.Model):
         self.env.cr.execute("DELETE FROM bus_bus WHERE create_date < %s", (timeout_ago,))
 
     @api.model
-    def _sendone(self, target, notification_type, message):
+    def _sendone(self, target, notification_type, message, ephemeral=False):
         """Low-level method to send ``notification_type`` and ``message`` to ``target``.
 
         Using ``_bus_send()`` from ``bus.listener.mixin`` is recommended for simplicity and
@@ -106,7 +106,11 @@ class BusBus(models.Model):
                 " Partners do not receive notifications unless they have dedicated user(s)."
                 " So please send on the expected res.users instead.",
             )
-        self.env.cr.precommit.data["bus.bus.values"].append((channel, notification_type, message))
+
+        if ephemeral:
+            self.env.cr.postcommit.data["bus.bus.ephemeral"].append((channel, notification_type, message))
+        else:
+            self.env.cr.precommit.data["bus.bus.values"].append((channel, notification_type, message))
 
     def _prepare_payload(self, payload):
         """Compute and return the final payload for a bus notification. This method is
@@ -135,6 +139,30 @@ class BusBus(models.Model):
                 if values:
                     self.sudo().create(values)
                     self._ensure_notify_hook(channels)
+
+        if "bus.bus.ephemeral" not in self.env.cr.postcommit.data:
+            self.env.cr.postcommit.data["bus.bus.ephemeral"] = []
+
+            @self.env.cr.postcommit.add
+            def notify_ephemeral():
+                if notifications := [
+                    {"channel": channel, "type": type_, "payload": formatted_payload}
+                    for channel, type_, message in self.env.cr.postcommit.data.pop("bus.bus.ephemeral")
+                    if (formatted_payload := self._prepare_payload(message)) is not SKIP_NOTIFICATION
+                ]:
+                    payloads = get_notify_payloads(notifications)
+                    if len(payloads) > 1:
+                        _logger.info(
+                            "The imbus_fw notification payload was too large, it's been split into %d payloads.",
+                            len(payloads),
+                        )
+                    with odoo.sql_db.db_connect(config['db_system']).cursor() as cr:
+                        for payload in payloads:
+                            cr.execute(SQL(
+                                "SELECT %s('imbus_fw', %s)",
+                                SQL.identifier(ODOO_NOTIFY_FUNCTION),
+                                payload,
+                            ))
 
     def _ensure_notify_hook(self, channels):
         """Notify the given channels once the rows are committed. Called from the precommit

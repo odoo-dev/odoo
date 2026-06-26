@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
+from collections import defaultdict
 
 from odoo import models
+from odoo.exceptions import AccessError
 from odoo.http import request
 from odoo.http.session import check
 from odoo.tools.misc import OrderedSet
@@ -9,10 +11,34 @@ from odoo.addons.bus.bus_dispatcher import dispatch
 from odoo.addons.bus.models.bus import channel_with_db
 from odoo.addons.bus.websocket import wsrequest
 
+_FORM_WATCH_PREFIX = "web.form_watch:"
+
 
 class IrWebsocket(models.AbstractModel):
     _name = 'ir.websocket'
     _description = 'websocket message handling'
+
+    def _filter_watchable_records(self, channels):
+        out_channels = []
+        model_name2ids = defaultdict(list)
+        for channel in channels:
+            if isinstance(channel, str) and channel.startswith(_FORM_WATCH_PREFIX):
+                try:
+                    suffix = channel[len(_FORM_WATCH_PREFIX):]
+                    model_name, record_id = suffix.rsplit(":", 1)
+                    if isinstance(self.env.get(model_name), self.pool['web.form.record.watch.mixin']):
+                        model_name2ids[model_name].append(int(record_id))
+                except (KeyError, ValueError):
+                    continue
+            else:
+                out_channels.append(channel)
+        for model_name, ids in model_name2ids.items():
+            try:
+                records = self.env[model_name].search([('id', 'in', ids)])  # check for existence and access
+            except AccessError:
+                continue
+            out_channels.extend(records.mapped(lambda r: f"{_FORM_WATCH_PREFIX}{r._name}:{r.id}"))
+        return out_channels
 
     def _build_bus_channel_list(self, channels):
         """
@@ -22,6 +48,7 @@ class IrWebsocket(models.AbstractModel):
 
             :param channels: The channel list sent by the client.
         """
+        channels = self._filter_watchable_records(channels)
         req = request or wsrequest
         channels.append('broadcast')
         channels.extend(self.env.user.all_group_ids)

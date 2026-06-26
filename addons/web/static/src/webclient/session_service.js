@@ -13,11 +13,11 @@ export const lazySession = {
         const webClientReadyPromise = new Promise((r) => (resolveWebClientReady = r));
         env.bus.addEventListener("WEB_CLIENT_READY", resolveWebClientReady, { once: true });
         return {
-            getValue(key, callback) {
+            async getValue(key, callback) {
                 if (!lazyConfigPromise) {
                     lazyConfigPromise = fetchServerData();
                 }
-                lazyConfigPromise.then((config) => callback(deepCopy(config)[key]));
+                await lazyConfigPromise.then((config) => callback(deepCopy(config)[key]));
             },
         };
     },

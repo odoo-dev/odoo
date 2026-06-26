@@ -6,6 +6,7 @@ from . import test_account_move_in_invoice
 from . import test_account_move_in_refund
 from . import test_account_move_duplicate
 from . import test_account_move_entry
+from . import test_account_move_form_watch
 from . import test_account_move_date_algorithm
 from . import test_account_inalterable_hash
 from . import test_account_journal

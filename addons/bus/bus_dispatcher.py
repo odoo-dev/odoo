@@ -261,6 +261,7 @@ class BusDispatcher(threading.Thread):
 
     def __init__(self):
         super().__init__(daemon=True, name=f"{__name__}.Bus")
+        self._direct_counter = 0
         self._start_lock = threading.Lock()
         # Queue of database names waiting for dispatch.
         self._pending_dbname_queue: queue.Queue[str] = queue.Queue()
@@ -315,7 +316,9 @@ class BusDispatcher(threading.Thread):
 
     def _listener_loop(self):
         """Listen for NOTIFY imbus and queue the channels for a worker to dispatch
-        notifications to the topic's subscribers."""
+        notifications to the topic's subscribers. NOTIFY imbus_fw is dispatched directly
+        instead, without going through a worker or a bus_bus read-back (see
+        ``_dispatch_direct``)."""
         db_system = config["db_system"]
         _logger.info("Bus._listener_loop listen imbus on db %s", db_system)
         with (
@@ -323,6 +326,7 @@ class BusDispatcher(threading.Thread):
             selectors.DefaultSelector() as sel,
         ):
             cr.execute("listen imbus")
+            cr.execute("listen imbus_fw")
             cr.commit()
             conn = cr._cnx
             sel.register(conn, selectors.EVENT_READ)
@@ -332,11 +336,16 @@ class BusDispatcher(threading.Thread):
                 conn.poll()
                 channels_by_dbname = defaultdict(list)
                 while conn.notifies:
-                    for channel in orjson.loads(conn.notifies.pop().payload):
-                        try:  # noqa: SIM105
-                            channels_by_dbname[channel[0]].append(tuplify(channel))
-                        except (IndexError, TypeError):
-                            pass  # Protect against malformed channels.
+                    notify = conn.notifies.pop()
+                    if notify.channel == 'imbus_fw':
+                        for raw in orjson.loads(notify.payload):
+                            self._dispatch_direct(raw)
+                    else:
+                        for channel in orjson.loads(notify.payload):
+                            try:  # noqa: SIM105
+                                channels_by_dbname[channel[0]].append(tuplify(channel))
+                            except (IndexError, TypeError):
+                                pass  # Protect against malformed channels.
                 for dbname, channels in channels_by_dbname.items():
                     with self._lock_for_db(dbname):
                         for channel in channels:
@@ -545,6 +554,16 @@ class BusDispatcher(threading.Thread):
             return
         for topic in topics:
             topic.dispatch_notifications(notifications_by_channel.get(topic._channel, []))
+
+    def _dispatch_direct(self, raw):
+        """Deliver a form-watch notification directly without a bus_bus read-back."""
+        self._direct_counter -= 1
+        notification = {
+            "id": self._direct_counter,
+            "message": {"type": raw["type"], "payload": raw["payload"]},
+        }
+        if topic := self._topic_by_channel.get(tuplify(raw["channel"])):
+            topic._forward_notifications([notification], topic._websockets)
 
     def _kick_invalid_sessions(self, cr, topics: set[ChannelTopic] | frozenset[ChannelTopic]):
         """Validate every websocket's session and close those that fail."""

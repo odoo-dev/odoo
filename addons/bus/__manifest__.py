@@ -9,6 +9,7 @@
             'bus/static/src/*.js',
             'bus/static/src/debug/**/*',
             'bus/static/src/services/**/*.js',
+            'bus/static/src/views/**/*.js',
             'bus/static/src/workers/*',
             ('remove', 'bus/static/src/workers/bus_worker_script.js'),
         ],
