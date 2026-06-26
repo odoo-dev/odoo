@@ -12,6 +12,9 @@ $o-webclient-media: screen !default;
 // Color-scheme
 $o-webclient-color-scheme: bright !default;
 
+// Options
+$o-enable-backdrop-blur: false !default;
+
 // Font sizes
 $o-root-font-size: 1rem !default;
 $o-font-size-base: o-to-rem(14px) !default;

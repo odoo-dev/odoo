@@ -56,6 +56,30 @@ $utilities: map-merge(
     );
 }
 
+@if $o-enable-backdrop-blur {
+    :root {
+        --o-backdrop-blur:    #{$o-backdrop-blur};
+        --o-backdrop-blur-sm: #{$o-backdrop-blur-sm};
+        --o-backdrop-blur-lg: #{$o-backdrop-blur-lg};
+    }
+
+    $utilities: map-merge(
+        $utilities,
+        (
+            // Backdrop blur utility classes backed by --o-backdrop-blur* CSS custom properties.
+            "backdrop-blur": (
+                property: backdrop-filter,
+                class: backdrop-blur,
+                values: (
+                    null: var(--o-backdrop-blur),
+                    sm: var(--o-backdrop-blur-sm),
+                    lg: var(--o-backdrop-blur-lg),
+                ),
+            ),
+        )
+    );
+}
+
 // Generate paddings print classes.
 @each $-padding-type in ("padding", "padding-x", "padding-y", "padding-top", "padding-end", "padding-bottom", "padding-start") {
     $utilities: map-merge(
