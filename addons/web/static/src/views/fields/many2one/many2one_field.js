@@ -238,9 +238,7 @@ export class Many2OneField extends Component {
         return domain;
     }
     async openAction() {
-        const action = await this.orm.call(this.relation, "get_formview_action", [[this.resId]], {
-            context: this.context,
-        });
+        const action = await this.orm.call(this.relation, "get_formview_action", [[this.resId]]);
         await this.action.doAction(action);
     }
     async openDialog(resId) {
