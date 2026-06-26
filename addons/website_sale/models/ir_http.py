@@ -2,7 +2,12 @@
 
 from odoo import models
 from odoo.http import request
-from odoo.tools import lazy
+from ..models.website import (
+    CART_SESSION_CACHE_KEY,
+    FISCAL_POSITION_SESSION_CACHE_KEY,
+    PRICELIST_SESSION_CACHE_KEY,
+    PRICELIST_SELECTED_SESSION_CACHE_KEY,
+)
 
 
 class IrHttp(models.AbstractModel):
@@ -19,12 +24,14 @@ class IrHttp(models.AbstractModel):
     def _frontend_pre_dispatch(cls):
         super()._frontend_pre_dispatch()
 
-        # lazy to make sure those are only evaluated when requested
-        # All those records are sudoed !
-        website = request.env.website
-        request.cart = lazy(website._get_and_cache_current_cart)
-        request.fiscal_position = lazy(website._get_and_cache_current_fiscal_position)
-        request.pricelist = lazy(website._get_and_cache_current_pricelist)
+        if CART_SESSION_CACHE_KEY in request.session:
+            request.update_context(CART_SESSION_CACHE_KEY=request.session[CART_SESSION_CACHE_KEY])
+        if FISCAL_POSITION_SESSION_CACHE_KEY in request.session:
+            request.update_context(FISCAL_POSITION_SESSION_CACHE_KEY=request.session[FISCAL_POSITION_SESSION_CACHE_KEY])
+        if PRICELIST_SESSION_CACHE_KEY in request.session:
+            request.update_context(PRICELIST_SESSION_CACHE_KEY=request.session[PRICELIST_SESSION_CACHE_KEY])
+        if PRICELIST_SELECTED_SESSION_CACHE_KEY in request.session:
+            request.update_context(PRICELIST_SELECTED_SESSION_CACHE_KEY=request.session[PRICELIST_SELECTED_SESSION_CACHE_KEY])
 
     @classmethod
     def _slug(cls, value: models.BaseModel | tuple[int, str]) -> str:

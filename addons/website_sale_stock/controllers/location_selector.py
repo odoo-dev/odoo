@@ -20,7 +20,7 @@ class LocationSelector(Delivery):
             delivery_method.check_access("read")
             delivery_method = delivery_method.sudo()
             country = self.env["res.country"].browse(country_id)
-        elif order_sudo := request.cart:  # From the frontend checkout
+        elif order_sudo := self.env.website.cart.sudo():  # From the frontend checkout
             delivery_method = order_sudo.carrier_id
             country = order_sudo.partner_shipping_id.country_id
         else:
@@ -38,6 +38,6 @@ class LocationSelector(Delivery):
         :return: The order summary values.
         :rtype: dict
         """
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         order_sudo.set_pickup_location(pickup_location_data)
         return self._order_summary_values(order_sudo)

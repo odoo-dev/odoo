@@ -4,6 +4,11 @@ import re
 
 from odoo import api, models
 
+from odoo.addons.website_sale.models.website import (
+    CART_SESSION_CACHE_KEY,
+    CART_QUANTITY_SESSION_CACHE_KEY,
+)
+
 
 class WebsitePage(models.Model):
     _inherit = "website.page"
@@ -16,8 +21,8 @@ class WebsitePage(models.Model):
     def _post_process_response_from_cache(self, request, response):
         super()._post_process_response_from_cache(request, response)
 
-        order_id = request.session.get("sale_order_id", "")
-        quantity = request.session.get("website_sale_cart_quantity", 0)
+        order_id = self.env.context.get(CART_SESSION_CACHE_KEY, "")
+        quantity = self.env.context.get(CART_QUANTITY_SESSION_CACHE_KEY, 0)
         if not order_id or not quantity:
             return
 

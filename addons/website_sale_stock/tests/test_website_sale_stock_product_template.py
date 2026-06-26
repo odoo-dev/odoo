@@ -87,8 +87,8 @@ class TestWebsiteSaleStockProductTemplate(HttpCase, WebsiteSaleStockCommon):
                     quantity=3,
                     uom=combo_product.uom_id,
                     website=self.website,
-                    pricelist=request.pricelist,
-                    fiscal_position=request.fiscal_position,
+                    pricelist=self.env.website.pricelist,
+                    fiscal_position=self.env.website.fiscal_position,
                 )
             )
 
@@ -112,8 +112,8 @@ class TestWebsiteSaleStockProductTemplate(HttpCase, WebsiteSaleStockCommon):
                     quantity=3,
                     uom=combo_product.uom_id,
                     website=self.website,
-                    pricelist=request.pricelist,
-                    fiscal_position=request.fiscal_position,
+                    pricelist=self.env.website.pricelist,
+                    fiscal_position=self.env.website.fiscal_position,
                 )
             )
 
@@ -133,8 +133,8 @@ class TestWebsiteSaleStockProductTemplate(HttpCase, WebsiteSaleStockCommon):
                     quantity=9,
                     uom=self.env.ref("uom.product_uom_pack_6"),
                     website=self.website,
-                    pricelist=request.pricelist,
-                    fiscal_position=request.fiscal_position,
+                    pricelist=self.env.website.pricelist,
+                    fiscal_position=self.env.website.fiscal_position,
                 )
             )
         self.assertEqual(combination_info["free_qty"], 1)

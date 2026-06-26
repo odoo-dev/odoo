@@ -128,7 +128,7 @@ class ProductProduct(models.Model):
         base_url = website.get_base_url()
         product_price = kwargs.get("precomputed_price")
         if product_price is None:
-            product_price = request.pricelist._get_product_price(
+            product_price = self.env.website.pricelist._get_product_price(
                 self, quantity=1, currency=website.currency_id
             )
         # Use sudo to access cross-company taxes.

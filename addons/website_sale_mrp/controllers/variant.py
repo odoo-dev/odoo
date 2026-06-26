@@ -16,7 +16,7 @@ class WebsiteSaleMrpVariantController(WebsiteSaleVariantController):
         )
 
         if (
-            (so := request.cart)
+            (so := self.env.website.cart)
             and combination_info['product_id']
             and combination_info.get('is_storable')
             and not combination_info.get('allow_out_of_stock_order')

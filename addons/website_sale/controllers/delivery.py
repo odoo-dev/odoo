@@ -17,7 +17,7 @@ class Delivery(WebsiteSale):
         :return: The rendered delivery form.
         :rtype: str
         """
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         values = {
             "delivery_methods": order_sudo._get_delivery_methods(),
             "selected_dm_id": order_sudo.carrier_id.id,
@@ -41,7 +41,7 @@ class Delivery(WebsiteSale):
         :return: The order summary values, if any.
         :rtype: dict
         """
-        if not (order_sudo := request.cart):
+        if not (order_sudo := self.env.website.cart.sudo()):
             return {}
 
         dm_id = int(dm_id)
@@ -102,7 +102,7 @@ class Delivery(WebsiteSale):
         :return: The delivery rate data.
         :rtype: dict
         """
-        if not (order_sudo := request.cart):
+        if not (order_sudo := self.env.website.cart.sudo()):
             raise ValidationError(self.env._("Your cart is empty."))
 
         if int(dm_id) not in order_sudo._get_delivery_methods().ids:
@@ -140,7 +140,7 @@ class Delivery(WebsiteSale):
         :return: The available delivery methods, sorted by lowest price.
         :rtype: dict
         """
-        if not (order_sudo := request.cart):
+        if not (order_sudo := self.env.website.cart.sudo()):
             return []
 
         self._include_country_and_state_in_address(partial_delivery_address)
@@ -300,5 +300,5 @@ class Delivery(WebsiteSale):
         :param str delivery_date: The selected delivery date.
         :return: None
         """
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         order_sudo.commitment_date = delivery_date

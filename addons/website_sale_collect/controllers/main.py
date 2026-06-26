@@ -14,7 +14,7 @@ class WebsiteSaleCollect(WebsiteSale):
             return res
 
         in_store_dm_sudo = self.env.website.sudo().in_store_dm_id
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         selected_location_data = {}
         single_location = len(in_store_dm_sudo.warehouse_ids) == 1
         if (

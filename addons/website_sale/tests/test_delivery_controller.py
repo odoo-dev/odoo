@@ -7,6 +7,7 @@ from odoo.tests import tagged
 from odoo.addons.payment.tests.common import PaymentCommon
 from odoo.addons.website_sale.controllers.delivery import Delivery
 from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
+from odoo.addons.website_sale.models.website import CART_SESSION_CACHE_KEY
 
 
 @tagged("post_install", "-at_install")
@@ -31,7 +32,7 @@ class TestWebsiteSaleDeliveryController(PaymentCommon, WebsiteSaleCommon):
             self.mock_request(sale_order_id=self.empty_cart.id) as request,
             self.assertRaises(UserError),
         ):
-            request.cart = self.empty_cart
+            request.update_context(**{CART_SESSION_CACHE_KEY: self.empty_cart.id})
             self.Controller.shop_set_delivery_method(dm_id=self.free_delivery.id)
 
     # test that changing the delivery method while there is a draft transaction is successful

@@ -29,22 +29,17 @@ def MockRequest(  # noqa: N802
     **kwargs,
 ):
     with websiteMockRequest(*args, **kwargs) as request:
-        website = request.env.website
-
         if sale_order_id is not None:
-            request.session[CART_SESSION_CACHE_KEY] = sale_order_id
-        request.cart = lazy(website._get_and_cache_current_cart)
+            request.update_context(**{CART_SESSION_CACHE_KEY: sale_order_id})
 
         if website_sale_current_pl is not None:
-            request.session[PRICELIST_SESSION_CACHE_KEY] = website_sale_current_pl
-        request.pricelist = lazy(website._get_and_cache_current_pricelist)
+            request.update_context(**{PRICELIST_SESSION_CACHE_KEY: website_sale_current_pl})
 
         if website_sale_selected_pl_id is not None:
-            request.session[PRICELIST_SELECTED_SESSION_CACHE_KEY] = website_sale_selected_pl_id
+            request.update_context(**{PRICELIST_SELECTED_SESSION_CACHE_KEY: website_sale_selected_pl_id})
 
         if fiscal_position_id is not None:
-            request.session[FISCAL_POSITION_SESSION_CACHE_KEY] = fiscal_position_id
-        request.fiscal_position = lazy(website._get_and_cache_current_fiscal_position)
+            request.update_context(**{FISCAL_POSITION_SESSION_CACHE_KEY: fiscal_position_id})
 
         yield request
 

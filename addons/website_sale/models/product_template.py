@@ -843,9 +843,9 @@ class ProductTemplate(models.Model):
                 quantity=add_qty or 1.0,
                 uom=uom,
                 website=website,
-                pricelist=pricelist if pricelist is not None else request.pricelist,
+                pricelist=pricelist if pricelist is not None else self.env.website.pricelist,
                 fiscal_position=(
-                    fiscal_position if fiscal_position is not None else request.fiscal_position
+                    fiscal_position if fiscal_position is not None else self.env.website.fiscal_position
                 ),
             ),
         }
@@ -994,7 +994,7 @@ class ProductTemplate(models.Model):
             max_quantities = [
                 max_quantity
                 for combo in product_or_template.sudo().combo_ids
-                if (max_quantity := combo._get_max_quantity(website, request.cart)) is not None
+                if (max_quantity := combo._get_max_quantity(website, self.env.website.cart)) is not None
             ]
             if max_quantities:
                 # No uom conversion: combo are not supposed to be sold with other uoms.
@@ -1030,7 +1030,7 @@ class ProductTemplate(models.Model):
             cart_quantity = 0.0
             if not product_sudo.allow_out_of_stock_order:
                 cart_quantity = product_sudo.uom_id._compute_quantity(
-                    request.cart._get_cart_qty(product_sudo.id), to_unit=uom
+                    self.env.website.cart._get_cart_qty(product_sudo.id), to_unit=uom
                 )
 
             digits = self.env["decimal.precision"].precision_get("Product Unit")
@@ -1123,7 +1123,7 @@ class ProductTemplate(models.Model):
             return price
 
         if taxes is None:
-            taxes = request.fiscal_position.map_tax(product_taxes)
+            taxes = self.env.website.fiscal_position.map_tax(product_taxes)
 
         price = product._get_tax_included_unit_price_from_price(
             price, product_taxes, product_taxes_after_fp=taxes
@@ -1521,7 +1521,7 @@ class ProductTemplate(models.Model):
         """Override to fallback on website current pricelist."""
         pricelist = super()._get_contextual_pricelist()
         if request and request.is_frontend and not pricelist:
-            return request.pricelist.with_context(self.env.context)
+            return self.env.website.pricelist.with_context(self.env.context)
         return pricelist
 
     def _website_show_quick_add(self, product=None):
@@ -1820,7 +1820,7 @@ class ProductTemplate(models.Model):
         )
 
         if (website := self.env.website) and product_or_template.is_product_variant:
-            max_quantity = product_or_template._get_max_quantity(website, request.cart, **kwargs)
+            max_quantity = product_or_template._get_max_quantity(website, self.env.website.cart, **kwargs)
             if max_quantity is not None:
                 if uom:
                     max_quantity = product_or_template.uom_id._compute_quantity(

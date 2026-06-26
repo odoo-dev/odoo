@@ -132,7 +132,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
         ):
             request.env.website._create_cart()
             # service_tracking 'no' should not raise error
-            request.cart._cart_add(product_id=product_service.id, quantity=1)
+            self.env.website.cart._cart_add(product_id=product_service.id, quantity=1)
 
     def test_add_to_cart_zero_price_product_with_no_variant_extra(self):
         """Ensure that a zero-priced product with a no-variant attribute
@@ -217,7 +217,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
                 product_id=self.product.id,
                 quantity=1,
             )
-            sale_order = request.cart
+            sale_order = self.env.website.cart
             sale_order.access_token = "test_token"
             old_amount = sale_order.amount_total
             self.WebsiteSaleCartController.add_to_cart(
@@ -265,7 +265,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
                 product_id=self.product.id,
                 quantity=1,
             )
-            sale_order = request.cart
+            sale_order = self.env.website.cart
             self.assertEqual(sale_order.amount_untaxed, 1000.0)
 
             # remove the product from the cart
@@ -298,14 +298,14 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
         })
 
         with self.mock_request(country_code="BE") as request:
-            self.assertEqual(request.fiscal_position, fpos_be)
+            self.assertEqual(self.env.website.fiscal_position, fpos_be)
             self.WebsiteSaleCartController.add_to_cart(
                 product_template_id=self.product.product_tmpl_id,
                 product_id=self.product.id,
                 quantity=1,
             )
             self.assertEqual(
-                request.cart.fiscal_position_id,
+                self.env.website.cart.fiscal_position_id,
                 fpos_be,
                 "Fiscal position should be determined from GEOIP country for public users.",
             )
@@ -505,7 +505,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
                 product_id=self.product.id,
                 quantity=1,
             )
-            cart = request.cart
+            cart = self.env.website.cart
             self.assertEqual(cart.pricelist_id, pricelist_not_eu)
             cart.partner_id = self.partner.sudo().create({"name": "New Partner"})
             self.assertEqual(cart.pricelist_id, pricelist_not_eu)
@@ -524,7 +524,7 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
             self.WebsiteSaleCartController.add_to_cart(
                 product_template_id=product.product_tmpl_id, product_id=product.id, quantity=1
             )
-            order = request.cart
+            order = self.env.website.cart
 
             # pre-condition: the order contains an active product
             self.assertRecordValues(order.order_line, [{"product_id": product.id}])
@@ -620,4 +620,4 @@ class TestWebsiteSaleCart(ProductVariantsCommon, WebsiteSaleCommon, HttpCase):
         with self.mock_request(user=internal_user) as request:
             # We shouldn't find any abandonned cart if the customer isn't allowed to
             # buy from this website (because their contact belongs to another company)
-            self.assertFalse(request.cart)
+            self.assertFalse(request.env.website.cart)

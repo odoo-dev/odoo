@@ -413,7 +413,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             post["search"] = search
 
         tax_display = website.show_line_subtotals_tax_selection
-        sale_tax = request.fiscal_position.map_tax(website.company_id.sudo().account_sale_tax_id)
+        sale_tax = self.env.website.fiscal_position.map_tax(website.company_id.sudo().account_sale_tax_id)
 
         if tax_display == "tax_included" and sale_tax:
             # Convert the boundaried to tax-excluded for internal processing
@@ -515,8 +515,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         sold_out_ids = set()
         if "sale" in ribbon_assign_values:
             sales_prices = search_product._get_sales_prices(
-                request.pricelist.with_context(self.env.context),
-                request.fiscal_position.with_context(self.env.context),
+                self.env.website.pricelist.with_context(self.env.context),
+                self.env.website.fiscal_position.with_context(self.env.context),
                 website.with_context(self.env.context),
             )
             on_sale_ids = {pid for pid, prices in sales_prices.items() if "base_price" in prices}
@@ -630,8 +630,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         attributes = ProductAttribute.union(pavs_per_attribute.keys())
         products_prices = products._get_sales_prices(
             # Make sure latest context is applied (see update_context calls in overrides)
-            request.pricelist.with_context(self.env.context),
-            request.fiscal_position.with_context(self.env.context),
+            self.env.website.pricelist.with_context(self.env.context),
+            self.env.website.fiscal_position.with_context(self.env.context),
             website.with_context(self.env.context),
         )
         product_query_params = self._get_product_query_params(**post)
@@ -1078,7 +1078,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
     def pricelist_change(self, pricelist, **_post):
         website = self.env.website
         redirect_url = request.httprequest.referrer
-        prev_pricelist = request.pricelist
+        prev_pricelist = self.env.website.pricelist
         if (
             self._apply_selectable_pricelist(pricelist.id)
             and redirect_url
@@ -1161,9 +1161,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
         if pricelist is None:  # Reset the pricelist
             request.session.pop(PRICELIST_SESSION_CACHE_KEY, None)
             request.session.pop(PRICELIST_SELECTED_SESSION_CACHE_KEY, None)
-            request.pricelist = lazy(self.env.website._get_and_cache_current_pricelist)
 
-            if order_sudo := request.cart:
+            if order_sudo := self.env.website.cart.sudo():
                 pl_before = order_sudo.pricelist_id
                 order_sudo._compute_pricelist_id()
                 if order_sudo.pricelist_id != pl_before:
@@ -1172,15 +1171,15 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
         pricelist.ensure_one()
 
-        if pricelist.id == request.pricelist.id:
+        if pricelist.id == self.env.website.pricelist.id:
             # Nothing to do
             return
 
         request.session[PRICELIST_SESSION_CACHE_KEY] = pricelist.id
         request.session[PRICELIST_SELECTED_SESSION_CACHE_KEY] = pricelist.id
-        request.pricelist = pricelist.sudo()
+        self.env.website.pricelist = pricelist.sudo()
 
-        if order_sudo := request.cart:
+        if order_sudo := self.env.website.cart.sudo():
             order_sudo.pricelist_id = pricelist
             order_sudo._recompute_prices()
 
@@ -1210,7 +1209,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :rtype: str
         """
         try_skip_step = str2bool(try_skip_step or "false")
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
 
         if redirect := self.env["website.checkout.step"].validate_checkout_progress(
             "/shop/checkout", order_sudo
@@ -1283,7 +1282,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :rtype: str
         """
         use_delivery_as_billing = str2bool(use_delivery_as_billing or "false")
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
 
         if redirect := self.env["website.checkout.step"].validate_checkout_progress(
             "/shop/address", order_sudo
@@ -1390,7 +1389,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :return: A JSON-encoded feedback, with either the success URL or an error message.
         :rtype: str
         """
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         redirect_dict = {}
         if redirect := self.env["website.checkout.step"].validate_checkout_progress(
             "/shop/address", order_sudo
@@ -1553,7 +1552,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :param dict kwargs: Optional data. This parameter is not used here.
         :return int: The order's partner id.
         """
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
 
         # Update the partner with all the information
         self._include_country_and_state_in_address(billing_address)
@@ -1667,7 +1666,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
     ):
         partner_id = int(partner_id)
 
-        if not (order_sudo := request.cart):
+        if not (order_sudo := self.env.website.cart.sudo()):
             return
 
         ResPartner = self.env["res.partner"].sudo()
@@ -1710,7 +1709,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         list_as_website_content=system_page_extra_info,
     )
     def extra_info(self, **post):
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         extra_step = self.env.website.viewref("website_sale.extra_info")
         if not extra_step.active or not self.env.website._cart_has_extra_step_category(order_sudo):
             return request.redirect(
@@ -1780,7 +1779,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
            did go to a payment.provider website but closed the tab without
            paying / canceling.
         """
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart.sudo()
         if redirect := self.env["website.checkout.step"].validate_checkout_progress(
             "/shop/payment", order_sudo
         ):
@@ -1798,7 +1797,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         - UDPATE ME.
         """
         if sale_order_id is None:
-            order_sudo = request.cart
+            order_sudo = self.env.website.cart
             if not order_sudo and "sale_last_order_id" in request.session:
                 # Retrieve the last known order from the session if the session key `sale_order_id`
                 # was prematurely cleared. This is done to prevent the user from updating their cart
@@ -2075,7 +2074,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
     def _populate_currency_and_pricelist(kwargs):
         kwargs.update({
             "currency_id": request.env.website.currency_id.id,
-            "pricelist_id": request.pricelist.id,
+            "pricelist_id": request.env.website.pricelist.id,
         })
 
     @staticmethod

@@ -26,8 +26,8 @@ class TestProductTemplate(ClickAndCollectCommon):
                 quantity=1,
                 uom=self.uom_unit,
                 website=self.website,
-                pricelist=request.pricelist,
-                fiscal_position=request.fiscal_position,
+                pricelist=self.env.website.pricelist,
+                fiscal_position=self.env.website.fiscal_position,
             )
         self.assertTrue(comb_info["delivery_stock_data"]["in_stock"])
         self.assertTrue(comb_info["in_store_stock_data"]["in_stock"])
@@ -43,7 +43,7 @@ class TestProductTemplate(ClickAndCollectCommon):
                 quantity=3,
                 uom=self.uom_unit,
                 website=self.website,
-                pricelist=request.pricelist,
-                fiscal_position=request.fiscal_position,
+                pricelist=self.env.website.pricelist,
+                fiscal_position=self.env.website.fiscal_position,
             )
         self.assertFalse(combination_info.get("in_store_stock_data"))

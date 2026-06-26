@@ -21,7 +21,7 @@ class ProductWishlist(Controller):
             partner_id = self.env.user.partner_id.id
 
         wish = Wishlist._add_to_wishlist(
-            request.pricelist.id,
+            self.env.website.pricelist.id,
             self.env.website.currency_id.id,
             self.env.website.id,
             price,

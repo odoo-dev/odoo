@@ -12,6 +12,7 @@ from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.controllers.portal import PaymentPortal
 from odoo.addons.sale.controllers.portal import CustomerPortal
 from odoo.addons.website_sale.controllers.main import WebsiteSale
+from odoo.addons.website_sale.models.website import CART_SESSION_CACHE_KEY
 
 
 class Cart(PaymentPortal):
@@ -29,7 +30,7 @@ class Cart(PaymentPortal):
         if not self.env.website.has_ecommerce_access():
             return request.redirect("/web/login")
 
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
 
         values = {}
         if id and access_token:
@@ -40,12 +41,12 @@ class Cart(PaymentPortal):
                 raise NotFound
             if abandoned_order.state not in ("draft", "sent"):  # abandoned cart already finished
                 values.update({"abandoned_proceed": True})
-            elif not request.session.get("sale_order_id"):
-                request.session["sale_order_id"] = abandoned_order.id
-                request.cart = abandoned_order
+            elif not request.session.get(CART_SESSION_CACHE_KEY):
+                request.session[CART_SESSION_CACHE_KEY] = abandoned_order.id
+                request.update_context(**{CART_SESSION_CACHE_KEY: abandoned_order.id})
                 order_sudo = abandoned_order
-            elif abandoned_order.id != request.session.get("sale_order_id"):
-                abandoned_order.order_line.write({"order_id": request.session["sale_order_id"]})
+            elif abandoned_order.id != request.session.get(CART_SESSION_CACHE_KEY):
+                abandoned_order.order_line.write({"order_id": request.session[CART_SESSION_CACHE_KEY]})
                 abandoned_order.action_cancel()
 
         values.update({
@@ -111,7 +112,7 @@ class Cart(PaymentPortal):
         :return: The values
         :rtype: dict
         """
-        order_sudo = request.cart or self.env.website._create_cart()
+        order_sudo = self.env.website.cart or self.env.website._create_cart()
         # Do not allow float values in ecommerce by default
         quantity = (quantity and int(quantity)) or 1
 
@@ -251,7 +252,7 @@ class Cart(PaymentPortal):
     def quick_add(self, product_template_id, product_id, quantity=1.0, **kwargs):
         values = self.add_to_cart(product_template_id, product_id, quantity=quantity, **kwargs)
 
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         values.update(self._get_updated_cart_page_values(order_sudo))
         # If the cart was empty, no cart summary was rendered on the page. However, we just
         # added a product, so render it now.
@@ -318,7 +319,7 @@ class Cart(PaymentPortal):
             is falsy
         :params dict kwargs: additional parameters given to _cart_update_line_quantity calls.
         """
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         quantity = int(quantity)  # Do not allow float values in ecommerce by default
 
         # This method must be only called from the cart page BUT in some advanced logic
@@ -414,7 +415,7 @@ class Cart(PaymentPortal):
 
         # Prepare the order history.
         SaleOrderLineSudo = self.env["sale.order.line"].sudo()
-        cart_lines_sudo = request.cart.order_line if request.cart else SaleOrderLineSudo
+        cart_lines_sudo = self.env.website.cart.order_line if self.env.website.cart else SaleOrderLineSudo
         seen_lines_sudo = SaleOrderLineSudo
         lines_per_order_date = {}
         for line_sudo in previous_orders_lines_sudo:

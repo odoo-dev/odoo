@@ -26,7 +26,7 @@ class WebsiteSaleForm(WebsiteForm):
         except ValidationError as e:
             return json.dumps({"error_fields": e.args[0]})
 
-        if not (order_sudo := request.cart):
+        if not (order_sudo := self.env.website.cart.sudo()):
             return json.dumps({"error": "No order found; please add a product to your cart."})
 
         if data["record"]:
@@ -97,7 +97,7 @@ class Website(main.Website):
 
     @route()
     def change_lang(self, lang, **kwargs):
-        if cart := request.cart:
+        if cart := self.env.website.cart:
             self.env.add_to_compute(
                 cart.order_line._fields["name"], cart.order_line.with_context(lang=lang)
             )

@@ -9,6 +9,10 @@ from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools import html_sanitize
 
+from odoo.addons.website_sale.models.website import (
+    CART_QUANTITY_SESSION_CACHE_KEY,
+)
+
 
 class SaleOrder(models.Model):
     _inherit = "sale.order"
@@ -195,7 +199,7 @@ class SaleOrder(models.Model):
         self._update_programs_and_rewards()
         self._auto_apply_rewards()
         if request:  # In case the rewards application modifies the cart quantity
-            request.session["website_sale_cart_quantity"] = self.cart_quantity
+            request.session[CART_QUANTITY_SESSION_CACHE_KEY] = self.cart_quantity
 
     def _get_non_delivery_lines(self):
         """Override of `website_sale` to exclude delivery reward lines."""

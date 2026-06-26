@@ -57,8 +57,8 @@ class TestL10nArWebsiteSale(TestArCommon):
                 quantity=quantity,
                 uom=self.uom_unit,
                 website=self.ar_website,
-                pricelist=request.pricelist,
-                fiscal_position=request.fiscal_position,
+                pricelist=self.env.website.pricelist,
+                fiscal_position=self.env.website.fiscal_position,
             )
 
     def test_default_website_sale_legal_values(self):

@@ -55,11 +55,12 @@ class WebsiteSaleL10nTW(WebsiteSale):
 
     @route('/shop/l10n_tw_invoicing_info', type='http', auth='public', methods=['GET'], website=True, sitemap=False)
     def l10n_tw_invoicing_info_get(self, **kw):
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         if redirect := self.env['website.checkout.step'].validate_checkout_progress(
             '/shop/l10n_tw_invoicing_info', order_sudo
         ):
             return request.redirect(redirect)
+
 
         default_vals = {
             'is_donate': "on" if order_sudo.l10n_tw_edi_love_code else False,
@@ -76,7 +77,7 @@ class WebsiteSaleL10nTW(WebsiteSale):
 
     @route('/shop/l10n_tw_invoicing_info/submit', type='http', auth='public', methods=['POST'], website=True, sitemap=False)
     def l10n_tw_invoicing_info_post(self, **kw):
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         errors = {}
         default_vals = {
             'love_code': kw.get('l10n_tw_edi_love_code'),
@@ -181,7 +182,7 @@ class WebsiteSaleL10nTW(WebsiteSale):
             if address_values.get('parent_name'):  # B2B customer
                 if not address_values.get('vat'):
                     missing_fields.add('vat')
-                if not self._is_valid_tax_id(address_values.get('vat'), request.cart):
+                if not self._is_valid_tax_id(address_values.get('vat'), self.env.website.cart):
                     invalid_fields.add('vat')
                     error_messages.append(request.env._("Please enter a valid Tax ID"))
 
@@ -210,7 +211,7 @@ class WebsiteSaleL10nTW(WebsiteSale):
         address_values, extra_form_data = self._parse_form_data(form_data)
 
         if self.env.website.sudo().company_id.account_fiscal_country_id.code == 'TW' and self.env.website.sudo().company_id._is_ecpay_enabled():
-            order_sudo = request.cart
+            order_sudo = self.env.website.cart
             if address_values.get('parent_name'):
                 l10n_tw_edi_is_print = True
             else:

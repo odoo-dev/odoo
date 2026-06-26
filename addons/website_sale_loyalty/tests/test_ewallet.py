@@ -78,7 +78,7 @@ class TestEwallet(HttpCase, WebsiteSaleCommon):
                 product_id=self.product.id,
                 quantity=1,
             )
-            order = request.cart
+            order = self.env.website.cart
             self.assertEqual(order.amount_total, 20)
             self.WebsiteSaleController.claim_reward(self.ewallet_program.reward_ids[0].id)
             self.assertEqual(order.amount_total, 10)

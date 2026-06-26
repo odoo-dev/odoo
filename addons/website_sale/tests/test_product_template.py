@@ -140,8 +140,8 @@ class TestWebsiteSaleProductTemplate(WebsiteSaleCommon):
                 1.0,
                 self.product.uom_id,
                 self.website,
-                request.pricelist,
-                request.fiscal_position,
+                self.env.website.pricelist,
+                self.env.website.fiscal_position,
             )
         # Expected converted price
         expected_price = company_currency._convert(

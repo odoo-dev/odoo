@@ -12,6 +12,7 @@ from odoo.http import request
 from odoo.tools import float_round
 
 from odoo.addons.website_sale.models.website import (
+    CART_QUANTITY_SESSION_CACHE_KEY,
     FISCAL_POSITION_SESSION_CACHE_KEY,
     PRICELIST_SELECTED_SESSION_CACHE_KEY,
     PRICELIST_SESSION_CACHE_KEY,
@@ -971,7 +972,7 @@ class SaleOrder(models.Model):
                 self._remove_delivery_line()
 
         if request:
-            request.session["website_sale_cart_quantity"] = self.cart_quantity
+            request.session[CART_QUANTITY_SESSION_CACHE_KEY] = self.cart_quantity
 
     def _verify_cart(self):
         """Check cart content and clear outdated/invalid lines."""

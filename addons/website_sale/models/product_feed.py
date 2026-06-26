@@ -152,7 +152,7 @@ class ProductFeed(models.Model):
         # Override the pricelist of the request to localize the currency and prices, otherwise, uses
         # the website default pricelist.
         if self.pricelist_id:
-            request.pricelist = self.pricelist_id
+            self.env.website.pricelist = self.pricelist_id
 
         homepage_url = self.website_id.homepage_url or "/"
         website_homepage = self.website_id._get_website_pages(
@@ -297,8 +297,8 @@ class ProductFeed(models.Model):
             quantity=1.0,
             uom=product.uom_id,
             website=self.website_id,
-            pricelist=request.pricelist,
-            fiscal_position=request.fiscal_position,
+            pricelist=self.env.website.pricelist,
+            fiscal_position=self.env.website.fiscal_position,
         )
         if combination_info["prevent_sale"]:
             return {}

@@ -8,20 +8,20 @@ from odoo.addons.website_sale.controllers.cart import Cart as WebsiteSaleCart
 class Cart(WebsiteSaleCart):
     @route()
     def cart(self, **post):
-        if order_sudo := request.cart:
+        if order_sudo := self.env.website.cart.sudo():
             order_sudo._update_programs_and_rewards()
             order_sudo._auto_apply_rewards()
         return super().cart(**post)
 
     def _cart_values(self, **post):
         values = super()._cart_values(**post)
-        if order_sudo := request.cart:
+        if order_sudo := self.env.website.cart.sudo():
             values["promotion_progress_bars"] = order_sudo._get_promotion_progress_bars()
         return values
 
     def _total_values(self):
         values = super()._total_values()
-        if order_sudo := request.cart:
+        if order_sudo := self.env.website.cart.sudo():
             values["promotion_progress_bars"] = order_sudo._get_promotion_progress_bars()
         return values
 
@@ -34,12 +34,12 @@ class Cart(WebsiteSaleCart):
     @route()
     def add_to_cart(self, *args, **kwargs):
         applied_before = (
-            {p.id for p in request.cart._get_applied_programs()} if request.cart else set()
+            {p.id for p in self.env.website.cart._get_applied_programs()} if self.env.website.cart else set()
         )
 
         result = super().add_to_cart(*args, **kwargs)
 
-        order_sudo = request.cart
+        order_sudo = self.env.website.cart
         if order_sudo:
             bars = [
                 bar

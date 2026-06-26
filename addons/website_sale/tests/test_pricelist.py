@@ -340,9 +340,9 @@ class TestWebsitePriceList(WebsiteSaleCommon):
         })
         self.assertEqual(product_template.standard_price, 5)
         with self.mock_request(website_sale_current_pl=pricelist.id) as request:
-            self.assertEqual(request.pricelist, pricelist)
+            self.assertEqual(self.env.website.pricelist, pricelist)
             price = product_template._get_sales_prices(
-                request.pricelist, request.fiscal_position, self.website
+                self.env.website.pricelist, self.env.website.fiscal_position, self.website
             )[product_template.id]["price_reduce"]
             msg = "Template has no variants, the price should be computed based on the template's"
             " cost."
@@ -359,7 +359,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             self.assertEqual(product_template.product_variant_ids[0].standard_price, 0)
 
             price = product_template._get_sales_prices(
-                request.pricelist, request.fiscal_position, self.website
+                self.env.website.pricelist, self.env.website.fiscal_position, self.website
             )[product_template.id]["price_reduce"]
             msg = "Template has variants, the price should be computed based on the 1st variant's"
             " cost."
@@ -368,7 +368,7 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             product_template.product_variant_ids[0].standard_price = 20
 
             price = product_template._get_sales_prices(
-                request.pricelist, request.fiscal_position, self.website
+                self.env.website.pricelist, self.env.website.fiscal_position, self.website
             )[product_template.id]["price_reduce"]
             self.assertEqual(price, 18, msg)
 
@@ -404,9 +404,9 @@ class TestWebsitePriceList(WebsiteSaleCommon):
             ]
         })
         with self.mock_request(website_sale_current_pl=self.pricelist.id) as request:
-            self.assertEqual(request.pricelist, self.pricelist)
+            self.assertEqual(self.env.website.pricelist, self.pricelist)
             res = product_tmpl._get_sales_prices(
-                request.pricelist, request.fiscal_position, self.website
+                self.env.website.pricelist, self.env.website.fiscal_position, self.website
             )
             self.assertEqual(res[product_tmpl.id]["base_price"], 75)
 

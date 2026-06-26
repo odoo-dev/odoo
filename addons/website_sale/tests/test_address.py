@@ -252,12 +252,12 @@ class TestCheckoutAddress(WebsiteSaleCommon):
         with self.mock_request(
             sale_order_id=so.id, website_sale_current_pl=so.pricelist_id.id
         ) as request:
-            self.assertEqual(request.pricelist, self.pricelist)
-            order = request.cart
+            self.assertEqual(self.env.website.pricelist, self.pricelist)
+            order = self.env.website.cart
             self.assertEqual(order, so)
             self.assertEqual(order.pricelist_id, self.pricelist)
 
-            order_b = request.env.website.with_user(test_user)._get_and_cache_current_cart()
+            order_b = request.env.website.with_user(test_user).cart
             self.assertEqual(order, order_b)
             self.assertEqual(order_b.pricelist_id, pl_with_code)
 
