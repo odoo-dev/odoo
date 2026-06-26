@@ -1195,3 +1195,9 @@ class Website(models.Model):
         :rtype: float
         """
         return product._get_free_qty(**kwargs)
+
+    def _get_available_delivery_methods_domain(self, *, product=None, **_kwargs):
+        domain = Domain([("website_id", "in", self.ids + [False]), ("is_published", "=", True)])
+        if product:
+            domain &= Domain("excluded_tag_ids", "not in", product.all_product_tag_ids.ids)
+        return domain

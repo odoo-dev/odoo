@@ -814,6 +814,9 @@ export class ProductPage extends Interaction {
                 this.services['public.interactions'].startInteractions(messageEl);
             }
         }
+
+        // Inform others of the new combination
+        this.env.bus.trigger('updateCombinationInfo', combination);
     }
 
     async _getUnavailableQty(combination) {

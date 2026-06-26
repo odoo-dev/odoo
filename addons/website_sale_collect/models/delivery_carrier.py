@@ -3,8 +3,8 @@
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.fields import Command
-from odoo.http import request
 
+from odoo.addons.website_sale.utils import format_quantity
 from odoo.addons.website_sale_collect import utils
 
 
@@ -105,29 +105,23 @@ class DeliveryCarrier(models.Model):
 
         pickup_locations = []
         location_countries = set()
-        order_sudo = (request and request.cart) or False
         for wh in self.warehouse_ids:
             pickup_location_values = wh._prepare_pickup_location_data()
             if not pickup_location_values:  # Ignore warehouses with badly configured addresses.
                 continue
 
             # Prepare the stock data based on either the product or the order.
-            in_store_stock_data = {}
+            quantity_in_store = None
             if product:  # Called from the product page.
                 uom = self.env["uom.uom"].browse(uom_id)
-                cart_qty = (order_sudo and order_sudo._get_cart_qty(product.id)) or 0
-                in_store_stock_data = utils.format_product_stock_values(
-                    product, wh_id=wh.id, uom=uom, cart_qty=cart_qty
+                quantity_in_store = format_quantity(
+                    product._get_free_qty(warehouse_id=wh.id), product.uom_id, uom
                 )
-            elif order_sudo:  # Called from the checkout page.
-                in_store_stock_data = {"in_stock": order_sudo._is_in_stock(wh.id)}
 
             location_countries.add(wh.partner_id.country_id)
             # Calculate the distance between the partner address and the warehouse location.
             pickup_location_values.update({
-                "additional_data": (
-                    {"in_store_stock_data": in_store_stock_data} if in_store_stock_data else {}
-                ),
+                "additional_data": {"quantity_in_store": quantity_in_store},
                 "distance": utils.calculate_partner_distance(partner_address, wh.partner_id),
             })
             pickup_locations.append(pickup_location_values)

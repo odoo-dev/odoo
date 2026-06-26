@@ -13,6 +13,7 @@ from odoo.tools.sql import SQL, column_exists, create_column
 from odoo.tools.translate import adapt_translated_field_value, html_translate
 
 from odoo.addons.website.tools import text_from_html
+from odoo.addons.website_sale.utils import format_quantity
 
 # A delimiter that users aren't likely to search for in product codes.
 RARE_DELIMITER = "\u241e"
@@ -975,11 +976,27 @@ class ProductTemplate(models.Model):
                 "has_stock_notification": has_stock_notification,
                 "stock_notification_email": stock_notification_email,
                 "is_in_wishlist": product_sudo._is_in_wishlist(),
+                **self._prepare_delivery_availability_info(product_sudo, uom, website),
             })
         else:
             combination_info.update({"free_qty": 0, "cart_qty": 0})
 
         return combination_info
+
+    def _prepare_delivery_availability_info(self, product_sudo, uom, website, **kwargs):
+        DeliveryCarrier = self.env["delivery.carrier"].sudo()
+        valid_dms = DeliveryCarrier.search(
+            website._get_available_delivery_methods_domain(product=product_sudo, **kwargs)
+        )
+
+        return {
+            "show_delivery_availability": bool(valid_dms),
+            "quantity_in_stock": format_quantity(
+                product_sudo._get_free_qty(**kwargs), product_sudo.uom_id, uom
+            )
+            if valid_dms
+            else None,
+        }
 
     def _get_dynamic_attribute_images(self, combination_ids, website_id):
         """Compute the 'closest variant' image for every value based on the current selection.
@@ -1042,9 +1059,7 @@ class ProductTemplate(models.Model):
         )
 
         if not tax_display:
-            show_tax = (
-                website or self.env.website
-            ).show_line_subtotals_tax_selection
+            show_tax = (website or self.env.website).show_line_subtotals_tax_selection
             tax_display = "total_excluded" if show_tax == "tax_excluded" else "total_included"
 
         return tax_details[tax_display]
@@ -1603,9 +1618,7 @@ class ProductTemplate(models.Model):
             product_or_template, date, currency, pricelist, **kwargs
         )
 
-        if (
-            website := self.env.website
-        ) and product_or_template.is_product_variant:
+        if (website := self.env.website) and product_or_template.is_product_variant:
             max_quantity = product_or_template._get_max_quantity(website, request.cart, **kwargs)
             if max_quantity is not None:
                 if uom:

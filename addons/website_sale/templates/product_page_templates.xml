@@ -144,6 +144,7 @@
                                         class="o_wsale_product_details_content_section o_wsale_product_details_content_section_cta mb-4"
                                     >
                                         <t t-call="website_sale.cta_wrapper"/>
+                                        <t t-call="website_sale.delivery_availability"/>
                                     </div>
 
                                     <div
@@ -681,6 +682,24 @@
                 separator=" "
             />
         </xpath>
+    </template>
+
+     <template id="website_sale.delivery_availability">
+        <t t-if="combination_info.get('show_delivery_availability')">
+            <t t-set="props" t-value="{
+                'uomName': combination_info['uom_name'],
+                'cartQuantity': combination_info['cart_qty'],
+                'showAvailability': combination_info['show_availability'],
+                'availableThreshold': combination_info['available_threshold'],
+                'showDeliveryAvailability': combination_info['show_delivery_availability'],
+                'quantityInStock': combination_info['quantity_in_stock'],
+            }"/>
+            <owl-component
+                name="website_sale.DeliveryAvailability"
+                t-att-props="json.dumps(props)"
+                t-attf-class="d-flex o_not_editable mb-4 #{'w-100' if not is_50_pc else 'w-100 w-sm-75'}"
+            />
+        </t>
     </template>
 
     <template

@@ -1,42 +1,44 @@
-import { Component, props, proxy, t } from '@odoo/owl';
-import { rpc } from '@web/core/network/rpc';
+import { Component, computed, props, proxy, t } from '@odoo/owl';
 import { registry } from '@web/core/registry';
-import { useBus, useService } from '@web/core/utils/hooks';
+import { useBus } from '@web/core/utils/hooks';
 
-import {
-    LocationSelectorDialog
-} from '@website_sale_stock/js/location_selector/location_selector_dialog/location_selector_dialog';
+export const deliveryAvailabilityProps = {
+    showDeliveryAvailability: t.boolean(),
+    uomName: t.string(),
+    cartQuantity: t.number(),
+    showAvailability: t.boolean(),
+    availableThreshold: t.number(),
+    quantityInStock: t.or([t.number(), t.literal(null)]),
+};
 
-export class ClickAndCollectAvailability extends Component {
-    static template = 'website_sale_collect.ClickAndCollectAvailability';
-    props = props({
-        productId: t.number(),
-        active: t.boolean().optional(true),
-        zipCode: t.string().optional(),
-        selectedLocationData: t.object().optional(),
-        inStoreStockData: t.object().optional(),
-        deliveryStockData: t.object().optional(),
-        showSelectStoreButton: t.boolean().optional(),
-        countryCode: t.string().optional(),
-        deliveryMethodId: t.number(),
-        deliveryMethodType: t.string(),
-        deliveryMethodName: t.string(),
-    });
+
+export class DeliveryAvailability extends Component {
+    static template = 'website_sale.DeliveryAvailability';
+    props = props(deliveryAvailabilityProps);
+
     setup() {
         super.setup();
-        this.dialog = useService('dialog');
         this.state = proxy({
-            productId: this.props.productId,
-            selectedLocationData: this.props.selectedLocationData,
-            inStoreStockData: this.props.inStoreStockData,
-            deliveryStockData: this.props.deliveryStockData,
-            active: this.props.active,
+            showDeliveryAvailability: this.props.showDeliveryAvailability,
+            uomName: this.props.uomName,
+            cartQuantity: this.props.cartQuantity,
+            quantityInStock: this.props.quantityInStock,
         });
+        this.virtualInStock = computed(() => this._virtualQuantity(this.state.quantityInStock));
+        this.showVirtualInStock = computed(() => this._showQuantity(this.virtualInStock));
         useBus(
             this.env.bus,
             'updateCombinationInfo',
             (ev) => this._updateStateWithCombinationInfo(ev.detail),
         );
+    }
+
+    _virtualQuantity(quantity) {
+        return quantity && Math.max(quantity - this.state.cartQuantity, 0);
+    }
+
+    _showQuantity(quantitySignal) {
+        return this.props.showAvailability && quantitySignal() <= this.props.availableThreshold;
     }
 
     /**
@@ -47,47 +49,13 @@ export class ClickAndCollectAvailability extends Component {
      * @return {void}
      */
     _updateStateWithCombinationInfo(combinationInfo) {
-        this.state.productId = combinationInfo.product_id;
-        this.state.inStoreStockData = combinationInfo.in_store_stock_data;
-        this.state.deliveryStockData = combinationInfo.delivery_stock_data;
-        this.state.active = combinationInfo.is_combination_possible;
-        this.state.uomId = combinationInfo.uom_id;
+        this.state.showDeliveryAvailability = combinationInfo.show_delivery_availability;
+        this.state.uomName = combinationInfo.uom_name;
+        this.state.cartQuantity = combinationInfo.cart_qty;
+        this.state.quantityInStock = combinationInfo.quantity_in_stock;
     }
-
-    /**
-     * Configure and open the location selector.
-     *
-     * @return {void}
-     */
-    async openLocationSelector() {
-        if (!this.state.active) { // Combination is not possible.
-            return; // Do not open the location selector.
-        }
-        const { zip_code, country_code, id } = this.state.selectedLocationData;
-        this.dialog.add(LocationSelectorDialog, {
-            isProductPage: true,
-            isFrontend: true,
-            productId: this.state.productId,
-            uomId: this.state.uomId,
-            zipCode: zip_code || this.props.zipCode,
-            selectedLocationId: String(id),
-            countryCode: country_code || this.props.countryCode,
-            deliveryMethodId: this.props.deliveryMethodId,
-            deliveryMethodType: this.props.deliveryMethodType,
-            save: async location => {
-                this.state.selectedLocationData = location;
-                this.state.inStoreStockData = location.additional_data.in_store_stock_data;
-                const jsonLocation = JSON.stringify(location);
-                // Set the in-store delivery method and the selected pickup location on the order.
-                await rpc(
-                    '/shop/set_click_and_collect_location', { pickup_location_data: jsonLocation }
-                );
-            },
-        });
-    }
-
 }
 
 registry.category('public_components').add(
-    'website_sale_collect.ClickAndCollectAvailability', ClickAndCollectAvailability
+    'website_sale.DeliveryAvailability', DeliveryAvailability
 );
