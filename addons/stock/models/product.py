@@ -1205,6 +1205,8 @@ class ProductTemplate(models.Model):
         self.ensure_one()
         if not self.env.user._get_default_warehouse_id():
             self.env['stock.warehouse']._warehouse_redirect_warning()
+        elif not self.product_variant_ids:
+            raise UserError(self.env._("No variant exists for this product. Create a purchase order for a specific variant first."))
         action = self.env["ir.actions.actions"]._for_xml_id('stock.stock_forecasted_product_template_action')
         return action
 
