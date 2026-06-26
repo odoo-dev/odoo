@@ -1727,7 +1727,8 @@ class ChromeBrowser:
             '--no-crash-upload': '',  # Prevent uploading crash dumps to Google servers
             '--no-sandbox': '',  # Disable OS-level sandboxing
             '--disable-gpu': '',  # Disable hardware GPU acceleration
-            '--enable-unsafe-swiftshader': '',  # Allow software rendering fallback for WebGL when GPU is disabled
+            # '--enable-unsafe-swiftshader': '',  # Allow software rendering fallback for WebGL when GPU is disabled
+            '--disable-software-rasterizer': '',
             '--mute-audio': '',  # Prevent audio playback from allocating system resources
             '--font-render-hinting': 'none',  # Disable sub-pixel font rendering calculations
         }
