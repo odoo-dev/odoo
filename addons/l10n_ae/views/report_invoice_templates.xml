@@ -10,7 +10,7 @@
             </p>
         </xpath>
         <xpath expr="//h2/span" position="before">
-            <span t-if="o.company_id.country_id.code == 'AE' and o.move_type in ['out_invoice', 'out_refund']">TAX
+            <span t-if="o.company_id.vat and o.company_id.country_id.code == 'AE' and o.move_type in ['out_invoice', 'out_refund']">TAX
             </span>
         </xpath>
 
