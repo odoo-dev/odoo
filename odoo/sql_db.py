@@ -68,6 +68,11 @@ PG_CONCURRENCY_EXCEPTIONS_TO_RETRY = (
     psycopg2.errors.SerializationFailure,
     psycopg2.errors.DeadlockDetected,
 )
+PG_CONCURRENCY_ERRORS_TO_RETRY = (
+    psycopg2.errorcodes.LOCK_NOT_AVAILABLE,
+    psycopg2.errorcodes.SERIALIZATION_FAILURE,
+    psycopg2.errorcodes.DEADLOCK_DETECTED,
+)
 
 
 def categorize_query(decoded_query: str) -> tuple[typing.Literal['from', 'into'], str] | tuple[typing.Literal['other'], None]:
