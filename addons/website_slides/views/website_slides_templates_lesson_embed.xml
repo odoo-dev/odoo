@@ -84,7 +84,7 @@
                             </t>
                         </div>
                         <!-- Fixed bottom navbar -->
-                        <div id="PDFViewerNav" class="pt-2 pb-2 bg-light text-white" role="navigation" t-if="slide.slide_category == 'document'">
+                        <div id="PDFViewerNav" class="pt-2 pb-2 text-white" role="navigation" t-if="slide.slide_category == 'document'">
                             <div class="container-fluid oe_slides_panel_footer">
                                 <div class="row align-items-center">
                                     <div class="col-5 col-sm-3 d-flex align-items-center">

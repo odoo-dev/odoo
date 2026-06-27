@@ -27,7 +27,6 @@ const websiteSlidesService = {
                 completed: undefined,
                 hasNext: undefined,
                 nextSlideUrl: undefined,
-                uncompletedIcon: undefined,
                 // fullscreen only fields
                 htmlContent: undefined,
                 embedUrl: undefined,

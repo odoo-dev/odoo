@@ -13,12 +13,12 @@
     </xpath>
 </template>
 
-<template name="Buy Course To Download Resource" id="slide_aside_training_category_buy_course" inherit_id="website_slides.slide_aside_training_category">
-    <xpath expr="//div[hasclass('o_wslides_js_course_join') and hasclass('o_wslides_no_access')]" position="inside">
-        <li t-elif="aside_slide.channel_id.enroll == 'payment'" class="text-decoration-none small">
-            <i class="oi me-1" data-icon="download"/>
-            <t t-call="website_sale_slides.course_buy_course_link" for_resources="1" slide="aside_slide"/>
-        </li>
+<template name="Buy Course For Lesson Sidebar" id="slide_lesson_aside_enroll_alert_payment" inherit_id="website_slides.slide_lesson_aside_enroll_alert">
+    <xpath expr="//div[hasclass('o_wslides_lesson_aside_enroll_alert')]" position="inside">
+        <t t-if="channel.enroll == 'payment'">
+            <p class="mb-2">Enroll to access all course content.</p>
+            <t t-call="website_sale_slides.course_buy_course_link" slide="slide"/>
+        </t>
     </xpath>
 </template>
 
@@ -53,15 +53,6 @@
         <attribute name="t-att-data-has-discounted-price">product_info['has_discounted_price'] if product_info else None</attribute>
         <attribute name="t-att-data-product-id">slide.channel_id.product_id.id if product_info else None</attribute>
         <attribute name="t-att-data-list-price">product_info['list_price'] if product_info else None</attribute>
-    </xpath>
-</template>
-
-<template name="Buy Course To Download Resource Fullscreen" id="slide_fullscreen_sidebar_category_buy_course" inherit_id="website_slides.slide_fullscreen_sidebar_category">
-    <xpath expr="//div[hasclass('o_wslides_js_course_join') and hasclass('o_wslides_no_access')]" position="inside">
-        <li t-elif="slide.channel_id.enroll == 'payment'" class="o_wslides_fs_slide_link mb-1">
-            <i class="oi me-1" data-icon="download"/>
-            <t t-call="website_sale_slides.course_buy_course_link" for_resources="1"/>
-        </li>
     </xpath>
 </template>
 

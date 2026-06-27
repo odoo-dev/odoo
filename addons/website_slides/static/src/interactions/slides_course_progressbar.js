@@ -94,7 +94,6 @@ export class WebsiteSlidesProgressBar extends Interaction {
         const data = ev.currentTarget.closest(".o_wslides_sidebar_done_button").dataset;
         const slide = {
             id: Number(data.id),
-            uncompletedIcon: data.uncompletedIcon,
             completed: !!data.completed,
             canSelfMarkCompleted: !!data.canSelfMarkCompleted,
             canSelfMarkUncompleted: !!data.canSelfMarkUncompleted,

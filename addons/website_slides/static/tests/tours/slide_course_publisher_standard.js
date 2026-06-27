@@ -122,7 +122,7 @@ registry.category("web_tour.tours").add("course_publisher_standard", {
                 },
                 {
                     trigger:
-                        ":iframe main:has(.o_wslides_course_nav a:contains(Déboulonnate)):has(.o_wslides_lesson_header_container:contains(completed)):has(.o_wslides_lesson_content:contains(screen to edit))",
+                        ":iframe main:has(.o_wslides_course_nav a:contains(Déboulonnate)):has(.o_wslides_lesson_content:contains(screen to edit))",
                 },
                 {
                     content: "eLearning: use breadcrumb to go back to channel",

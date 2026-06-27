@@ -348,12 +348,11 @@ export class WebsiteSlidesFullscreen extends WebsiteSlidesCommon {
             return;
         }
         this.slidesService.setSlide(slide, true);
-        this.el.querySelector(".o_wslides_fs_sidebar_list_item.active").classList.remove("active");
-        this.el
-            .querySelector(
-                `.o_wslides_fs_sidebar_list_item[data-id="${slide.id}"]:not([data-is-quiz="True"])`
-            )
-            .classList.add("active");
+        this.el.querySelector(".o_wslides_fs_sidebar_list_item.active")?.classList.remove("active");
+        const activeSelector = slide.isQuiz
+            ? `.o_wslides_fs_sidebar_list_item[data-id="${slide.id}"][data-is-quiz="True"]`
+            : `.o_wslides_fs_sidebar_list_item[data-id="${slide.id}"]:not([data-is-quiz="True"])`;
+        this.el.querySelector(activeSelector)?.classList.add("active");
         this.changeSlide();
     }
 

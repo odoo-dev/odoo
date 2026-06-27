@@ -6,22 +6,46 @@
        t-att-data-channel-id="slide.channel_id.id">Join this Course</a><t t-if="for_resources"> to access resources</t>
 </template>
 
+<template id="slide_lesson_aside_enroll_alert" name="Slide Lesson: Sidebar Enroll Alert">
+    <t t-set="channel" t-value="channel or slide.channel_id"/>
+    <div t-if="not channel.is_member and not channel.can_publish"
+        class="o_wslides_lesson_aside_enroll_alert alert alert-light border small my-3 mx-2"
+        role="status">
+        <t t-if="channel.enroll == 'invite' and not channel.is_member_invited">
+            <span class="text-muted">Content only accessible to course attendees.</span>
+        </t>
+        <t t-elif="channel.enroll == 'public' or (channel.enroll == 'invite' and channel.is_member_invited)">
+            <p class="mb-2">Enroll to access all course content.</p>
+            <a role="button" class="btn btn-primary d-block o_wslides_js_course_join_link" href="#"
+                t-att-data-channel-id="channel.id"
+                t-att-data-channel-enroll="channel.enroll"
+                t-att-data-invite-hash="invite_hash"
+                t-att-data-invite-partner-id="invite_partner_id"
+                t-att-data-invite-preview="invite_preview"
+                t-att-data-is-member-or-invited="channel.is_member or channel.is_member_invited"
+                t-att-data-is-partner-without-user="is_partner_without_user">
+                Join this Course
+            </a>
+        </t>
+        <!-- Paid Course (xpath)-->
+    </div>
+</template>
+
 <!-- Python equivalent of the JS template "website.slides.sidebar.done.button" -->
 <template id="slide_sidebar_done_button" name="Sidebar Done Button">
     <t t-set="uncompleted_icon" t-value="use_slide_icon and slide.slide_icon_class or 'radio_button_unchecked'"/>
     <div t-if="is_member"
-        class="o_wslides_sidebar_done_button align-self-start"
+        class="o_wslides_sidebar_done_button align-self-start lh-sm ms-auto"
         t-att-data-id="slide.id"
-        t-att-data-uncompleted-icon="uncompleted_icon"
         t-att-data-completed="slide_completed"
         t-att-data-can-self-mark-completed="slide.can_self_mark_completed"
         t-att-data-can-self-mark-uncompleted="slide.can_self_mark_uncompleted"
         t-att-data-is-member="is_member">
-        <button class="o_wslides_button_complete btn btn-sm" t-if="slide_completed and slide.can_self_mark_uncompleted or not slide_completed and slide.can_self_mark_completed">
-            <i t-if="slide_completed" class="o_wslides_slide_completed oi oi-fw oi-lg text-success" data-icon="check_circle" t-att-data-slide-id="slide.id" title="Mark as not done"/>
+        <button class="o_wslides_button_complete btn btn-sm lh-sm p-0 border-0" t-if="slide_completed and slide.can_self_mark_uncompleted or not slide_completed and slide.can_self_mark_completed">
+            <i t-if="slide_completed" class="o_wslides_slide_completed oi oi-filled oi-fw oi-lg text-success" data-icon="check_circle" t-att-data-slide-id="slide.id" title="Mark as not done"/>
             <i t-else="" class="oi oi-fw oi-lg" t-attf-data-icon="#{uncompleted_icon}" t-att-data-slide-id="slide.id" title="Mark as done"/>
         </button>
-        <button class="o_wslides_button_complete o_wslides_button_uncompleted btn btn-sm border-0" t-else="" disabled="1">
+        <button class="o_wslides_button_complete o_wslides_button_uncompleted btn btn-sm lh-sm p-0 border-0" t-else="" disabled="1">
             <i t-if="slide_completed" class="o_wslides_slide_completed oi oi-fw oi-lg text-success" data-icon="check" t-att-data-slide-id="slide.id" title="Can not be marked as not done"/>
             <i t-else="" class="oi oi-fw oi-lg" t-attf-data-icon="#{uncompleted_icon}" t-att-data-slide-id="slide.id" title="Can not be marked as done"/>
         </button>
