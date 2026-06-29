@@ -599,10 +599,10 @@ export function makeDraggableHook(hookParams) {
                     dom.addClass(iframe, "pe-none", "user-select-none");
                 }
 
-                // FIXME: adding pe-none and cursor on the same element makes
-                // no sense as pe-none prevents the cursor to be displayed.
                 if (ctx.cursor) {
-                    dom.addStyle(document.body, { cursor: ctx.cursor });
+                    dom.addStyle(document.documentElement, {
+                        cursor: ctx.cursor,
+                    });
                 }
 
                 if (
