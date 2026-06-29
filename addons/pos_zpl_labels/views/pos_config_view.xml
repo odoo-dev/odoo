@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_config_view_form_zpl" model="ir.ui.view">
+        <field name="name">pos.config.form.zpl</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='other_devices']" position="after">
+                <setting id="zpl_printer" string="ZPL Label Printer" help="Select the printer for ZPL product labels.">
+                    <field name="zpl_printer_id" context="{'default_paper_size': 'label'}"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

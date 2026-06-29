@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <template id="pos_product_label_zpl">
+            <t t-translation="off">
+^XA^CI28
+^FO50,30^A0N,30,30^FD<t t-out="name"/>^FS
+^FO50,70^A0N,20,20^FDQuantity: <t t-out="qty"/>^FS
+^FO50,100^A0N,20,20^FDUnit Price: <t t-out="price_unit"/>^FS
+^FO50,130^A0N,28,28^FDTotal: <t t-out="price_total"/>^FS
+<t t-if="barcode">
+^FO50,170^BY2^BCN,40,Y,N,N^FD<t t-out="barcode"/>^FS
+</t>
+^XZ
+            </t>
+        </template>
+    </data>
+</odoo>

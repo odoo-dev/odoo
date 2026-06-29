@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="point_of_sale.OrderlineZpl" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('line-details')]/div[hasclass('product-name')]" position="after">
+            <div t-if="this.line.product_id.to_print_label" class="print-label-btn-container ms-2">
+                <button class="btn btn-secondary btn-sm p-1 rounded-circle" t-on-click.stop="() => this.pos.printZplLabel(this.line)" title="Print Label">
+                    <i class="fa fa-print" role="img" aria-label="Print Label"/>
+                </button>
+            </div>
+        </xpath>
+    </t>
+</templates>
