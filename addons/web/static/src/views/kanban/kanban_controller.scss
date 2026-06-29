@@ -349,7 +349,7 @@
 
         .o_kanban_record {
             width: var(--KanbanRecord-width);
-            margin: calc(var(--KanbanRecord-margin-v) * 0.5) var(--KanbanRecord-margin-h);
+            margin: var(--KanbanRecord-margin-v) var(--KanbanRecord-margin-h);
 
             @include media-breakpoint-down(md) {
                 margin: 0 0 #{-$border-width};
