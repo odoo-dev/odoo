@@ -24,6 +24,7 @@ class OnboardingItem extends Component {
 }
 
 const stepSchema = {
+    content: t.string().optional(),
     trigger: t.string(),
     id: t.string().optional(),
     isActive: t.array(t.string()).optional(),
@@ -38,17 +39,12 @@ const stepSchema = {
 
 const stepSchemaAuto = {
     ...stepSchema,
-    content: t.string().optional(),
     expectUnloadPage: t.boolean().optional(),
     timeout: t.customValidator(t.number(), (value) => value >= 0 && value <= 60000).optional(),
-    tooltipPosition: t
-        .customValidator(t.string(), (value) => ["top", "bottom", "left", "right"].includes(value))
-        .optional(),
 };
 
 const stepSchemaOnboarding = {
     ...stepSchema,
-    content: t.or([t.string(), t.object()]).optional(), //allow object(_t && markup)
     tooltipPosition: t
         .customValidator(t.string(), (value) => ["top", "bottom", "left", "right"].includes(value))
         .optional(),
