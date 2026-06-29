@@ -115,7 +115,7 @@ const toDateItem = ({ isOutOfRange = false, isValid = true, label, range, extraC
     includesToday: isInRange(today(), range),
     isOutOfRange,
     isValid,
-    label: String(range[0][label]),
+    label: String(range[0].toLocaleString(label)),
     range,
     extraClass,
 });
@@ -163,10 +163,12 @@ const PRECISION_LEVELS = new Map()
                         const dayItem = toDateItem({
                             isOutOfRange: !isInRange(day, monthRange),
                             isValid: isInRange(range, [minDate, maxDate]) && isDateValid?.(day),
-                            label: "day",
+                            label: { day: 'numeric' },
                             range,
                             extraClass: dayCellClass?.(day) || "",
                         });
+                        console.log(day.toISODate(), day['day'], day.toFormat('dd'), day.toFormat('d'), day.toLocaleString('d', {locale: 'ne-NP-u-nu-deva'}));
+                        console.log(day.setLocale('ne-NP-u-nu-deva').toFormat('d'), day.toLocaleString({ day: 'numeric' }));
                         weekDayItems.push(dayItem);
                         if (d === DAYS_PER_WEEK - 1) {
                             startOfNextWeek = day.plus({ day: 1 });
@@ -175,6 +177,7 @@ const PRECISION_LEVELS = new Map()
                             shouldAddLastWeek = true;
                         }
                     }
+                    console.log(weekDayItems);
 
                     const weekItem = toWeekItem(weekDayItems);
                     if (w === WEEKS_PER_MONTH - 1) {
@@ -225,7 +228,7 @@ const PRECISION_LEVELS = new Map()
                 const range = [startOfMonth, startOfMonth.endOf("month")];
                 return toDateItem({
                     isValid: isInRange(range, [minDate, maxDate]),
-                    label: "monthShort",
+                    label: {month: 'short'},
                     range,
                 });
             });
@@ -245,7 +248,7 @@ const PRECISION_LEVELS = new Map()
                 return toDateItem({
                     isOutOfRange: i < 0 || i >= GRID_COUNT,
                     isValid: isInRange(range, [minDate, maxDate]),
-                    label: "year",
+                    label: {year: 'numeric'},
                     range,
                 });
             });
@@ -263,7 +266,7 @@ const PRECISION_LEVELS = new Map()
                 const startOfDecade = startOfCentury.plus({ year: i * 10 });
                 const range = [startOfDecade, startOfDecade.plus({ year: 10, millisecond: -1 })];
                 return toDateItem({
-                    label: "year",
+                    label: {year: 'numeric'},
                     isOutOfRange: i < 0 || i >= GRID_COUNT,
                     isValid: isInRange(range, [minDate, maxDate]),
                     range,
