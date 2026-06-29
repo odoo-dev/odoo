@@ -22,7 +22,8 @@ export class EventScanView extends Component {
         this.orm = useService("orm");
 
         const { default_event_id, active_model, active_id } = this.props.action.context;
-        this.eventId = default_event_id || (active_model === "event.event" && active_id);
+        const isEventContext = active_model === "event.event" || this.props.action?.xml_id === "event.event_barcode_action_main_view";
+        this.eventId = default_event_id || (isEventContext && active_id);
         this.isMultiEvent = !this.eventId;
         this.isDisplayStandalone = isDisplayStandalone();
 
@@ -40,7 +41,7 @@ export class EventScanView extends Component {
      */
     async onWillStart() {
         this.data = await rpc("/event/init_barcode_interface", {
-            event_id: this.eventId,
+            event_id: this.eventId ?? false,
         });
         const fileExtension = new Audio().canPlayType("audio/ogg") ? "ogg" : "mp3";
         this.sounds = {
