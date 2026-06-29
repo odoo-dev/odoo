@@ -37,11 +37,18 @@ class PosMollie(http.Controller):
             'status': payment_info["status"],
         }
         if message['status'] == "paid":
-            message |= {
+            card_info = {
                 'card_type': payment_details.get("cardFunding"),
                 'card_no': payment_details.get("cardNumber"),
                 'card_brand': payment_details.get("cardLabel"),
             }
+            message |= card_info
+            self_order = decoded_payload.get("self_order")
+            if self_order and not self._mollie_validate_self_payment(decoded_payload.get("order_id"), pos_session_sudo,
+                                                                     payment_method_sudo,
+                                                                     payment_info, card_info):
+                return "OK"
+
         elif message['status'] in ['expired', 'failed', 'canceled']:
             message |= {
                 'status_reason': payment_info.get("statusReason"),
@@ -49,3 +56,19 @@ class PosMollie(http.Controller):
         pos_session_sudo.config_id._notify('MOLLIE_PAYMENT_STATUS', message)
 
         return "OK"
+
+    def _mollie_validate_self_payment(self, order_id, pos_session_sudo, payment_method_sudo, payment_info, card_info):
+        pos_order = pos_session_sudo.config_id.env['pos.order'].browse(order_id).exists()
+        if not pos_order:
+            _logger.warning("No order found matching Mollie webhook, ignoring")
+            return False
+        order_mollie_amount = payment_method_sudo._mollie_format_amount(pos_order.amount_total)['amount']
+        payment_amount = payment_info['amount']
+        if order_mollie_amount['value'] != payment_amount['value'] or order_mollie_amount['currency'] != payment_amount['currency']:
+            _logger.warning("Payment amount does not match order amount, ignoring")
+            return False
+        payment_method_sudo._finalize_kiosk_payment(pos_order, {
+            **card_info,
+            'amount': pos_order.amount_total,
+        })
+        return True

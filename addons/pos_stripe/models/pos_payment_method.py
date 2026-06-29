@@ -3,6 +3,7 @@ import werkzeug
 
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError, UserError, AccessError
+from odoo.tools import float_is_zero
 
 
 class PosPaymentMethod(models.Model):
@@ -21,7 +22,7 @@ class PosPaymentMethod(models.Model):
         return params
 
     def _allowed_actions_in_self_order(self):
-        return super()._allowed_actions_in_self_order() + ['stripe_connection_token', 'stripe_payment_intent', 'stripe_capture_payment']
+        return super()._allowed_actions_in_self_order() + ['stripe_connection_token', 'stripe_payment_intent']
 
     @api.constrains('stripe_serial_number')
     def _check_stripe_serial_number(self):
@@ -97,7 +98,6 @@ class PosPaymentMethod(models.Model):
         except ValidationError as error:
             return {"error": error}
 
-    @api.model
     def stripe_capture_payment(self, paymentIntentId, amount=None):
         """Captures the payment identified by paymentIntentId.
 
@@ -119,6 +119,26 @@ class PosPaymentMethod(models.Model):
             }
 
         return self.sudo()._get_stripe_payment_provider()._send_api_request('POST', endpoint, data=data)
+
+    def _call_kiosk_payment_validation_action(self, order, payment_method_name, payment_method_args):
+        if payment_method_name != 'stripe_capture_payment':
+            return super()._call_kiosk_payment_validation_action(order, payment_method_name, payment_method_args)
+
+        stripe_confirmation = self.stripe_capture_payment(*payment_method_args)
+        if stripe_confirmation.get("error"):
+            return stripe_confirmation
+
+        order_amount = order.amount_total
+        stripe_order_amount = self._stripe_calculate_amount(order_amount)
+        if not float_is_zero(stripe_order_amount - stripe_confirmation['amount'],
+                             precision_rounding=order.currency_id.rounding):
+            raise UserError(_("Stripe payment amount does not match order amount."))
+        self._finalize_kiosk_payment(order, {
+            'amount': order_amount,
+            'transaction_id': stripe_confirmation['id'],
+            'payment_status': stripe_confirmation['status'],
+        })
+        return stripe_confirmation
 
     def action_stripe_key(self):
         res_id = self._get_stripe_payment_provider().id

@@ -115,6 +115,10 @@ export class PaymentInterface {
         return await this.env.services.orm.silent.call("pos.payment.method", method, params);
     }
 
+    async callPaymentValidationMethod(method, params) {
+        return await this.callPaymentMethod(method, params);
+    }
+
     /**
      * Return true if the amount that was authorized can be modified,
      * false otherwise

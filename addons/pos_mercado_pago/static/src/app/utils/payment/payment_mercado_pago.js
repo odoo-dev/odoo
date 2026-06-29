@@ -43,7 +43,7 @@ export class PaymentMercadoPago extends PaymentInterface {
     async getPayment(payment_id) {
         const line = this.pos.getOrder().getSelectedPaymentline();
         // mp_get_payment_status will call the Mercado Pago api
-        return await this.callPaymentMethod("mp_get_payment_status", [
+        return await this.callPaymentValidationMethod("mp_get_payment_status", [
             [line.payment_method_id.id],
             payment_id,
         ]);
@@ -127,11 +127,23 @@ export class PaymentMercadoPago extends PaymentInterface {
                 return showMessageAndResolve(_t("Payment has been canceled"), "info", false);
             }
             if (["FINISHED", "PROCESSED"].includes(paymentIntent.state)) {
-                const payment = await this.getPayment(paymentIntent.payment.id);
-                if (payment.status === "approved") {
-                    return showMessageAndResolve(_t("Payment has been processed"), "info", true);
+                try {
+                    const payment = await this.getPayment(paymentIntent.payment.id);
+                    if (payment.status === "approved") {
+                        return showMessageAndResolve(
+                            _t("Payment has been processed"),
+                            "info",
+                            true
+                        );
+                    }
+                    return showMessageAndResolve(_t("Payment has been rejected"), "info", false);
+                } catch (error) {
+                    return showMessageAndResolve(
+                        error.data?.message || error.message,
+                        "info",
+                        false
+                    );
                 }
-                return showMessageAndResolve(_t("Payment has been rejected"), "info", false);
             }
         };
 

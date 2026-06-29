@@ -182,7 +182,7 @@ export class PaymentVivaCom extends PaymentInterface {
 
                 let result;
                 try {
-                    result = await this.callPaymentMethod("viva_com_get_payment_status", [
+                    result = await this.callPaymentValidationMethod("viva_com_get_payment_status", [
                         [this.payment_method_id.id],
                         sessionId,
                     ]);

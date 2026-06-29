@@ -14,6 +14,7 @@ patch(TipScreen.prototype, {
                 paymentline.payment_method_id.payment_terminal
             ) {
                 await paymentline.payment_method_id.payment_terminal.capturePayment(
+                    paymentline.payment_method_id,
                     paymentline.transaction_id
                 );
             }

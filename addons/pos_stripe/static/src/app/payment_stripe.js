@@ -252,7 +252,10 @@ export class PaymentStripe extends PaymentInterface {
         // Don't capture if the customer can tip, in that case we
         // will capture later.
         if (!this.canBeAdjusted(line.uuid)) {
-            const capturePayment = await this.capturePayment(processPayment.paymentIntent.id);
+            const capturePayment = await this.capturePayment(
+                line.payment_method_id,
+                processPayment.paymentIntent.id
+            );
             if (!capturePayment) {
                 return false;
             }
@@ -269,7 +272,7 @@ export class PaymentStripe extends PaymentInterface {
     async sendPaymentAdjust(uuid) {
         var order = this.pos.getOrder();
         var line = order.getPaymentlineByUuid(uuid);
-        this.capturePayment(line.transaction_id, line.amount, {
+        this.capturePayment(line.payment_method_id, line.transaction_id, line.amount, {
             stripe_currency_rounding: line.currency_id.rounding,
         });
     }
@@ -285,12 +288,16 @@ export class PaymentStripe extends PaymentInterface {
         );
     }
 
-    async capturePayment(paymentIntentId, amount = null, context = {}) {
+    async capturePayment(paymentMethod, paymentIntentId, amount = null, context = {}) {
         try {
-            const data = await this.callPaymentMethod("stripe_capture_payment", [paymentIntentId], {
-                amount,
-                context,
-            });
+            const data = await this.callPaymentValidationMethod(
+                "stripe_capture_payment",
+                [paymentMethod.id, paymentIntentId],
+                {
+                    amount,
+                    context,
+                }
+            );
             if (data.error) {
                 throw data.error;
             }

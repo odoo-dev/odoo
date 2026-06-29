@@ -142,7 +142,7 @@ class TestSelfOrderController(SelfOrderCommonTest):
         self.assertEqual(len(data['pos.order']), 1)
         self.assertEqual(data['pos.order'][0]['id'], order2.id)
 
-    def test_process_order_in_kiosk_allows_payment(self):
+    def test_process_order_in_kiosk_should_not_allows_payment(self):
         self.pos_config.self_ordering_mode = 'kiosk'
         self.pos_config.with_user(self.pos_user).open_ui()
 
@@ -158,7 +158,7 @@ class TestSelfOrderController(SelfOrderCommonTest):
         data = self.make_request_to_controller('/pos-self-order/process-order/kiosk', order_data)
         pos_order = self.env['pos.order'].browse(data['pos.order'][0]['id'])
 
-        self.assertEqual(len(pos_order.payment_ids), 1)
+        self.assertEqual(len(pos_order.payment_ids), 0)
 
     def test_process_order_in_mobile_does_not_allow_payment(self):
         self.pos_config.self_ordering_mode = 'mobile'

@@ -5,6 +5,7 @@ import requests
 
 from odoo import api, fields, models, modules, _
 from odoo.exceptions import UserError, AccessError
+from odoo.tools import float_round, float_is_zero
 
 _logger = logging.getLogger(__name__)
 TIMEOUT = 10
@@ -66,7 +67,7 @@ class PosPaymentMethod(models.Model):
 
     @api.model
     def _allowed_actions_in_self_order(self):
-        return super()._allowed_actions_in_self_order() + ["viva_com_send_payment_request", "viva_com_get_payment_status", "get_latest_viva_com_status"]
+        return super()._allowed_actions_in_self_order() + ["viva_com_send_payment_request"]
 
     def _bearer_token(self, session):
         self.ensure_one()
@@ -141,6 +142,45 @@ class PosPaymentMethod(models.Model):
                 'applicationLabel': data.get('applicationLabel'),
                 'primaryAccountNumberMasked': data.get('primaryAccountNumberMasked'),
             })
+
+    def _viva_validate_kiosk_payment(self, pos_session, data):
+        pos_config = pos_session.config_id
+        if not data.get('success'):
+            return False
+        if not hasattr(pos_config, 'self_ordering_mode') or pos_config.self_ordering_mode != "kiosk":
+            return False
+        order_uuid = data["sessionId"].split(" ")[0]
+        order = pos_session.order_ids.search([("uuid", "=", order_uuid)], limit=1)
+        if not order:
+            _logger.warning("Received Viva notification for unknown kiosk order %s", order_uuid)
+            return False
+        return self._viva_finalize_kiosk_payment(order, data)
+
+    def _viva_finalize_kiosk_payment(self, order, data):
+        if not data.get('success') or order.state == 'paid':
+            return False
+
+        viva_amount = data['amount']
+        viva_order_amount = float_round(order.amount_total * 100, precision_digits=0)
+        if not float_is_zero(viva_order_amount - viva_amount, precision_digits=0):
+            raise UserError(_("Viva payment amount does not match order amount."))
+
+        payment_data = {
+            'amount': order.amount_total,
+            'card_type': data.get('cardType'),
+            'card_brand': data.get('applicationLabel'),
+            'card_no': data.get('primaryAccountNumberMasked'),
+            'transaction_id': data.get('transactionId'),
+        }
+        self._finalize_kiosk_payment(order, payment_data)
+        return True
+
+    def _call_kiosk_payment_validation_action(self, order, payment_method_name, payment_method_args):
+        if payment_method_name != 'viva_com_get_payment_status':
+            return super()._call_kiosk_payment_validation_action(order, payment_method_name, payment_method_args)
+        viva_response = self.viva_com_get_payment_status(*payment_method_args)
+        self._viva_finalize_kiosk_payment(order, viva_response)
+        return viva_response
 
     def _load_pos_data_fields(self, config):
         return [*super()._load_pos_data_fields(config), 'viva_com_terminal_id']

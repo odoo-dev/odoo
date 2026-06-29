@@ -12,12 +12,15 @@ class PosPaymentMethod(models.Model):
         return super()._get_payment_terminal_selection() + [("mollie", "Mollie")]
 
     def _allowed_actions_in_self_order(self):
-        return super()._allowed_actions_in_self_order() + ["mollie_create_payment", "mollie_create_refund", "mollie_cancel_payment"]
+        return super()._allowed_actions_in_self_order() + ["mollie_cancel_payment"]
 
     mollie_terminal_id = fields.Char("Mollie Terminal ID", copy=False)
     mollie_payment_provider_id = fields.Many2one("payment.provider", domain=[("code", "=", "mollie")])
 
     def mollie_create_payment(self, amount: float, payment_uuid: str, pos_session_id: int):
+        return self._mollie_create_payment(amount, payment_uuid, pos_session_id)
+
+    def _mollie_create_payment(self, amount: float, payment_uuid: str, pos_session_id: int, payload_data=None):
         self.ensure_one()
 
         if not self.sudo().mollie_payment_provider_id.mollie_api_key:
@@ -29,6 +32,7 @@ class PosPaymentMethod(models.Model):
             "payment_uuid": payment_uuid,
             "payment_method_id": self.id,
             "pos_session_id": pos_session_id,
+            **(payload_data or {}),
         }
         signed_payload = hash_sign(self.sudo().env, "pos_mollie", payload, expiration_hours=27)  # Mollie webhooks can retry for up to 26 hours
         payment_request = {
@@ -45,18 +49,38 @@ class PosPaymentMethod(models.Model):
         }
         return self.sudo().mollie_payment_provider_id._send_api_request("POST", "/payments", json=payment_request)
 
+    def _call_kiosk_payment_validation_action(self, order, payment_method_name, payment_method_args):
+        if payment_method_name != 'mollie_create_payment':
+            return super()._call_kiosk_payment_validation_action(order, payment_method_name, payment_method_args)
+        response = self._mollie_create_payment(payment_method_args[0], payment_method_args[1], payment_method_args[2], {
+            'order_id': order.id,
+            'self_order': True,
+        })
+        return {
+            "id": response['id'],
+            "status": response['status'],
+            "_links": response.get("_links"),
+        }
+
     def mollie_create_refund(self, original_payment_id: str, amount: float, payment_uuid: str, pos_session_id: int):
         self.ensure_one()
-
-        currency = self.journal_id.currency_id or self.company_id.currency_id
         payment_request = {
+            **self._mollie_format_amount(amount),
+            "description": f"pos_session_id={pos_session_id},payment_uuid={payment_uuid}",
+        }
+        return self.sudo().mollie_payment_provider_id._send_api_request("POST",
+                                                                        f"/payments/{original_payment_id}/refunds",
+                                                                        json=payment_request)
+
+    def _mollie_format_amount(self, amount: float):
+        self.ensure_one()
+        currency = self.journal_id.currency_id or self.company_id.currency_id
+        return {
             "amount": {
                 "currency": currency.name,
                 "value": f"{amount:.{currency.decimal_places}f}"
-            },
-            "description": f"pos_session_id={pos_session_id},payment_uuid={payment_uuid}",
+            }
         }
-        return self.sudo().mollie_payment_provider_id._send_api_request("POST", f"/payments/{original_payment_id}/refunds", json=payment_request)
 
     def mollie_cancel_payment(self, payment_id: str):
         self.ensure_one()

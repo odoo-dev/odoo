@@ -159,15 +159,39 @@ class PosSelfOrderController(http.Controller):
         payment_method_env = pos_config.env["pos.payment.method"]
         if pos_config.self_ordering_mode != "kiosk":
             raise Forbidden("Method only allowed in kiosk mode")
+
+        payment_method = None
         if args and isinstance(args[0], list):
             if len(args[0]) != 1:
                 raise BadRequest("Only one payment method ID should be provided")
-            if not payment_method_env.search_count([("id", "=", args[0]), ("config_ids", "in", pos_config.id)]):
+            payment_method = payment_method_env.search(
+                [("id", "=", args[0]), ("config_ids", "in", pos_config.id)], limit=1)
+            if not payment_method.exists():
                 raise NotFound("Payment method not found in config")
-        if action not in payment_method_env._allowed_actions_in_self_order():
+
+        if action == "payment_validation":
+            if not payment_method:
+                raise BadRequest("Payment method ID required")
+            return self._payment_validation_from_kiosk(pos_config, payment_method,
+                                                kwargs.get("order_id"),
+                                                kwargs.get("order_access_token"),
+                                                kwargs.get("payment_method_name"),
+                                                kwargs.get("payment_method_args"))
+
+        elif action not in payment_method_env._allowed_actions_in_self_order():
             raise Forbidden(f"Method '{action}' is forbidden in the self order kiosk")
 
         return call_kw(payment_method_env, action, args, kwargs)
+
+    def _payment_validation_from_kiosk(self, pos_config, payment_method, order_id, order_access_token,
+                                       payment_method_name,
+                                payment_method_args):
+        pos_order = pos_config.env['pos.order'].browse(order_id)
+        if not pos_order.exists() or not consteq(pos_order.access_token, order_access_token):
+            raise MissingError(self.env._("Your order does not exist or has been removed"))
+
+        return payment_method._call_kiosk_payment_validation_action(pos_order, payment_method_name,
+                                                               payment_method_args)
 
     @http.route('/pos_self_order/kiosk/increment_nb_print/', auth='public', type='jsonrpc', website=True)
     def pos_kiosk_increment_nb_print(self, access_token, order_id, order_access_token):

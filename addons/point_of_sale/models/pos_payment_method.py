@@ -247,6 +247,23 @@ class PosPaymentMethod(models.Model):
         # the payment terminal modules don't need to depend on it.
         return []
 
+    def _call_kiosk_payment_validation_action(self, order, payment_method_name, payment_method_args):
+        return {}
+
+    def _finalize_kiosk_payment(self, order, payment_data):
+        self.ensure_one()
+        if order.state == 'paid':
+            return False
+
+        order.add_payment({
+            **payment_data,
+            'payment_date': fields.Datetime.now(),
+            'payment_method_id': self.id,
+            'pos_order_id': order.id
+        })
+        order.action_pos_order_paid()
+        return True
+
     def get_qr_code(self, amount, free_communication, structured_communication, currency, debtor_partner):
         """ Generates and returns a QR-code
         """

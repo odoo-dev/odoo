@@ -28,7 +28,7 @@ class PosPaymentMethod(models.Model):
         return super()._get_payment_terminal_selection() + [('mercado_pago', 'Mercado Pago')]
 
     def _allowed_actions_in_self_order(self):
-        return super()._allowed_actions_in_self_order() + ['mp_payment_intent_create', 'mp_payment_intent_get', 'mp_get_payment_status', 'mp_payment_intent_cancel']
+        return super()._allowed_actions_in_self_order() + ['mp_payment_intent_create', 'mp_payment_intent_get', 'mp_payment_intent_cancel']
 
     def _check_special_access(self):
         if not self.env.user.has_group('point_of_sale.group_pos_user'):
@@ -98,6 +98,27 @@ class PosPaymentMethod(models.Model):
         resp = mercado_pago.call_mercado_pago("delete", f"/point/integration-api/devices/{self.mp_id_point_smart_complet}/payment-intents/{payment_intent_id}", {})
         _logger.debug("mp_payment_intent_cancel(), response from Mercado Pago: %s", resp)
         return resp
+
+    def _call_kiosk_payment_validation_action(self, order, payment_method_name, payment_method_args):
+        if payment_method_name != 'mp_get_payment_status':
+            return super()._call_kiosk_payment_validation_action(order, payment_method_name, payment_method_args)
+
+        payment_status = self.mp_get_payment_status(*payment_method_args)
+
+        if payment_status.get('status') == 'approved':
+            # Intent amount is computed in JS as cents: parseInt(line.amount * 100, 10)
+            pago_intent_amount = int(float(order.amount_total) * 100)
+            pago_transaction_amount = int(float(payment_status["transaction_amount"]) * 100)
+            if pago_transaction_amount < pago_intent_amount:  # The amount may contain a tip
+                raise UserError(_("Mercado Pago payment amount does not match order amount."))
+
+            self._finalize_kiosk_payment(order, {
+                'amount': order.amount_total,
+                'transaction_id': payment_status.get('id'),
+                'payment_status': payment_status.get('status'),
+            })
+
+        return payment_status
 
     def _find_terminal(self, token, point_smart):
         mercado_pago = MercadoPagoPosRequest(token)

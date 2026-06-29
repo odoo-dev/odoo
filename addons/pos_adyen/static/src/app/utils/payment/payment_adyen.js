@@ -77,11 +77,15 @@ export class PaymentAdyen extends PaymentInterface {
     }
 
     _callAdyen(data, operation = false) {
-        return this.callPaymentMethod("proxy_adyen_request", [
-            [this.payment_method_id.id],
-            data,
-            operation,
-        ]).catch(this._handleOdooConnectionFailure.bind(this));
+        const fn = (
+            operation === "payment_status"
+                ? this.callPaymentValidationMethod
+                : this.callPaymentMethod
+        ).bind(this);
+
+        return fn("proxy_adyen_request", [[this.payment_method_id.id], data, operation]).catch(
+            this._handleOdooConnectionFailure.bind(this)
+        );
     }
 
     _adyenGetSaleId() {
@@ -362,7 +366,7 @@ export class PaymentAdyen extends PaymentInterface {
      * confirmation from Adyen is received via the webhook.
      */
     async handleAdyenStatusResponse() {
-        const notification = await this.callPaymentMethod("get_latest_adyen_status", [
+        const notification = await this.callPaymentValidationMethod("get_latest_adyen_status", [
             [this.payment_method_id.id],
         ]);
 

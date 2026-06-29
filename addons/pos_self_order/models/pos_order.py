@@ -225,8 +225,6 @@ class PosOrder(models.Model):
         pricelist_id = preset_id.pricelist_id if preset_id else pos_config.pricelist_id
         lines = [self._check_pos_order_lines(pos_config, order, line, fiscal_position_id) for line in order.get('lines', [])]
         lines = [line for line in lines if len(line)]
-        payment_lines = self._check_pos_order_payment(device_type, order, order.get("payment_ids"))
-        payment_lines = [line for line in payment_lines if len(line)]
         partner_id = order.get('partner_id')
         partner = pos_config.env['res.partner'].browse(partner_id) if partner_id else None
 
@@ -269,7 +267,7 @@ class PosOrder(models.Model):
             'uuid': order.get('uuid'),
             'has_deleted_line': order.get('has_deleted_line'),
             'lines': lines,
-            'payment_ids': payment_lines,
+            'payment_ids': [],
             'relations_uuid_mapping': order.get('relations_uuid_mapping', {}),
         }
 

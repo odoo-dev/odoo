@@ -62,7 +62,7 @@ export class PaymentMollie extends PaymentInterface {
 
     async _createMolliePayment(paymentLine) {
         try {
-            const data = await this.callPaymentMethod("mollie_create_payment", [
+            const data = await this.callPaymentValidationMethod("mollie_create_payment", [
                 this.payment_method_id.id,
                 paymentLine.amount,
                 paymentLine.uuid,

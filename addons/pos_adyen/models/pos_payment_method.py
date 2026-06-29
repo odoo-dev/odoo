@@ -44,7 +44,7 @@ class PosPaymentMethod(models.Model):
 
     @api.model
     def _allowed_actions_in_self_order(self):
-        return super()._allowed_actions_in_self_order() + ['proxy_adyen_request', 'get_latest_adyen_status']
+        return super()._allowed_actions_in_self_order() + ['proxy_adyen_request']
 
     @api.constrains('adyen_terminal_identifier')
     def _check_adyen_terminal_identifier(self):
@@ -305,3 +305,46 @@ class PosPaymentMethod(models.Model):
             return True
 
         return req.json()
+
+    def _call_kiosk_payment_validation_action(self, order, payment_method_name, payment_method_args):
+        if payment_method_name not in ('get_latest_adyen_status', 'proxy_adyen_request'):
+            return super()._call_kiosk_payment_validation_action(order, payment_method_name, payment_method_args)
+
+        if payment_method_name == 'proxy_adyen_request':
+            adyen_response = self.proxy_adyen_request(*payment_method_args)
+            adyen_payment_response = self._extract_adyen_payment_response_from_transaction_status(adyen_response)
+        else:
+            adyen_response = self.get_latest_adyen_status()
+            adyen_payment_response = (adyen_response or {}).get('SaleToPOIResponse', {}).get('PaymentResponse')
+
+        if not adyen_payment_response or order.state == 'paid':
+            return adyen_response
+
+        payment_result = adyen_payment_response.get('Response', {}).get('Result')
+        if payment_result == 'Success':
+            payment_result_data = adyen_payment_response.get('PaymentResult', {})
+            self._finalize_kiosk_payment(order, {
+                'amount': payment_result_data.get('AmountsResp', {}).get('AuthorizedAmount'),
+                'card_type': payment_result_data.get('PaymentInstrumentData', {}).get('CardData', {}).get(
+                    'PaymentBrand'),
+                'transaction_id': adyen_payment_response.get('SaleData', {}).get('SaleTransactionID', {}).get(
+                    'TransactionID'),
+                'payment_status': payment_result,
+            })
+        return adyen_response
+
+    def _extract_adyen_payment_response_from_transaction_status(self, adyen_status):
+        sale_to_poi_response = (adyen_status or {}).get('SaleToPOIResponse')
+        if not sale_to_poi_response:
+            return None
+
+        transaction_status_response = sale_to_poi_response.get('TransactionStatusResponse', {})
+        if transaction_status_response.get('Response', {}).get('Result') != 'Success':
+            return None
+
+        return (
+            transaction_status_response
+            .get('RepeatedMessageResponse', {})
+            .get('RepeatedResponseMessageBody', {})
+            .get('PaymentResponse')
+        )
