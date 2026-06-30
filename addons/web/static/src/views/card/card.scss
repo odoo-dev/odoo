@@ -3,12 +3,10 @@
     --Card-min-width: 240px;
     --Card-padding-v: 0;
     --Card-padding-h: 0;
-    --Card__image-width: #{$o-kanban-image-width};
-    --Card__image--fill-width: #{$o-kanban-image-fill-width};
-
+    --Card__image-width: 64px;
+    --Card__image--fill-width: 95px;
 }
 
-// TODO AAB: clean this (a lot of references to kanban)
 .o_card_record {
     --fieldWidget-display: block;
     --Tag-max-width: 100%;
@@ -106,7 +104,7 @@
 
             .o_card_image_fill {
                 min-height: var(--Card__image-fill-width);
-                max-height: var(--Card__image-max-height, $o-kanban-image-fill-width * 1.5);
+                max-height: var(--Card__image-max-height, calc(var(--Card__image--fill-width) * 1.5));
 
                 @include media-only(print) {
                     height: auto;

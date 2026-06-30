@@ -1,6 +1,8 @@
 .o_account_kanban .o_kanban_renderer {
-    --Card-padding-v: #{$o-kanban-dashboard-vpadding};
-    --Card-padding-h: #{$o-kanban-dashboard-hpadding};
+    // Since rows and containers are used inside cards, we're
+    // forced to set the padding relative to the grid system.
+    --Card-padding-v: #{$o-horizontal-padding / 2};
+    --Card-padding-h: #{$o-horizontal-padding};
 
     .o_kanban_record {
 

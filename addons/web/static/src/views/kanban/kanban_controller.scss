@@ -109,10 +109,8 @@
     --o-view-nocontent-zindex: 1;
 
     --Card-border-width: 1px;
-    --Card-padding-v: #{$o-kanban-inside-vgutter};
-    --Card-padding-h: #{$o-kanban-inside-hgutter};
-    --Card__image-width: #{$o-kanban-image-width};
-    --Card__image--fill-width: #{$o-kanban-image-fill-width};
+    --Card-padding-v: #{$o-spacer * 0.5};
+    --Card-padding-h: #{$o-spacer * 0.5};
     --Card-Footer-gap: 4px;
 
     // ----------------------------------------------------------------------------
@@ -138,7 +136,7 @@
 
     @include media-only(print) {
         @include media-breakpoint-down(md) {
-            --Card-padding-h: #{$o-kanban-inside-hgutter * 2};
+            --Card-padding-h: #{$o-spacer};
         }
     }
 
