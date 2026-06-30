@@ -73,6 +73,13 @@ class HrVersion(models.Model):
                                          groups="hr.group_hr_user")
 
     # Personal Information
+    permit_no = fields.Char("Work Permit No", groups="hr.group_hr_user", tracking=True)
+    work_permit_expiration_date = fields.Date(
+        "Work Permit Expiration Date",
+        groups="hr.group_hr_user",
+        tracking=True,
+    )
+
     country_id = fields.Many2one(
         'res.country', 'Nationality (Country)', index='btree_not_null', groups="hr.group_hr_user", tracking=1)
     identification_id = fields.Char(
