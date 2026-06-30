@@ -196,6 +196,9 @@ class StockMove(models.Model):
                 move.move_orig_ids = [Command.link(m.id) for m in move_orig_to_link]
         return res
 
+    def _should_update_quantity_on_merge(self):
+        return self.picking_id.sale_id.state != 'cancel' if self.picking_id.sale_id else super()._should_update_quantity_on_merge()
+
 
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
