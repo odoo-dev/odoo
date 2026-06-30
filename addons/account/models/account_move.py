@@ -3351,9 +3351,9 @@ class AccountMove(models.Model):
         def get_base_line_tracked_fields(line):
             grouping_key = AccountTax._prepare_base_line_grouping_key(fake_base_line)
             if line.move_id.is_invoice(include_receipts=True):
-                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_percentage']
+                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_percentage', 'extra_tax_data']
             else:
-                extra_fields = ['amount_currency']
+                extra_fields = ['amount_currency', 'extra_tax_data']
             return list(grouping_key.keys()) + extra_fields
 
         def field_has_changed(values, record, field):
