@@ -6,7 +6,7 @@
         </t>
     </template>
 
-    <template id="report_invoice_document_preview" inherit_id="account.report_invoice_document" primary="True">
+    <template id="report_invoice_document_preview" inherit_id="account.report_invoice_document">
         <xpath expr="//div[@id='qrcode']" position="replace">
             <t t-if="qr_code" t-call="account.report_invoice_qr_code_preview"/>
         </xpath>
