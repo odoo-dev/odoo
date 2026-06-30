@@ -3,6 +3,7 @@ import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 
 import { status, onWillUnmount, t, toRaw, onMounted, onPatched, proxy } from "@odoo/owl";
 import { router } from "@web/core/browser/router";
+import { couldBeScrollableY } from "@web/core/utils/scrolling";
 
 /**
  * This file contains various custom hooks.
@@ -299,6 +300,47 @@ export function useRefListener(ref, ...listener) {
         },
         () => [ref.el]
     );
+}
+
+// -----------------------------------------------------------------------------
+// useSticky
+// -----------------------------------------------------------------------------
+
+/**
+ * Detects when a `position: sticky; top: 0` element is actually stuck.
+ * Listens to scroll events on the element's parent (or an explicit container)
+ * and sets `isSticky` whenever `scrollTop > 0`.
+ *
+ * @param {import("@odoo/owl").Signal<HTMLElement|null>|Ref} ref
+ * @param {Object} [options]
+ * @param {Element} [options.root] scroll container. Defaults to `el.parentElement`.
+ * @returns {{ readonly isSticky: boolean }}
+ */
+export function useSticky(ref, { root } = {}) {
+    const state = proxy({ isSticky: false });
+    const getEl = () => ("el" in ref ? ref.el : ref());
+    useLayoutEffect(
+        (el) => {
+            if (!el) {
+                return;
+            }
+            let node = el.parentElement;
+            while (node && !couldBeScrollableY(node)) {
+                node = node.parentElement;
+            }
+            const container = root ?? node ?? document.documentElement;
+            const onScroll = () => {
+                state.isSticky = container.scrollTop > 0;
+            };
+            container.addEventListener("scroll", onScroll);
+            return () => {
+                container.removeEventListener("scroll", onScroll);
+                state.isSticky = false;
+            };
+        },
+        () => [getEl()]
+    );
+    return state;
 }
 
 /**
