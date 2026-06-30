@@ -25,6 +25,7 @@ import {
     defineActions,
     getService,
     mockService,
+    pagerNext,
     serverState,
 } from "@web/../tests/web_test_helpers";
 
@@ -602,6 +603,25 @@ test("chatter updating", async () => {
     });
     await click(".o_pager_next");
     await contains(".o-mail-Message");
+});
+
+test("chatter loads each thread's data exactly once on pager navigation", async () => {
+    const pyEnv = await startServer();
+    const [partnerId_1, partnerId_2] = pyEnv["res.partner"].create([{}, {}]);
+    onRpcBefore("/mail/store", ({ fetch_params }) => {
+        for (const [name, params] of fetch_params) {
+            if (name === "mail.thread") {
+                expect.step(`mail.thread:${params.thread_id}`);
+            }
+        }
+    });
+    await start();
+    await openFormView("res.partner", partnerId_1, { resIds: [partnerId_1, partnerId_2] });
+    await contains(".o-mail-Followers-counter");
+    await expect.waitForSteps([`mail.thread:${partnerId_1}`]);
+    await pagerNext();
+    await contains(".o-mail-Followers-counter");
+    await expect.waitForSteps([`mail.thread:${partnerId_2}`]);
 });
 
 test("chatter message actions appear only after saving the form", async () => {

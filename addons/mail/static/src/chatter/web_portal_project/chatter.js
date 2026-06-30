@@ -53,14 +53,7 @@ export class Chatter extends Component {
         );
         useOnChange(
             () => [this.state.thread],
-            (thread) => {
-                if (!this.env.chatter || this.env.chatter?.fetchThreadData) {
-                    if (this.env.chatter) {
-                        this.env.chatter.fetchThreadData = false;
-                    }
-                    this.load(thread, this.requestList);
-                }
-            },
+            (thread) => this.load(thread, this.requestList),
             { initialRun: false }
         );
     }
@@ -145,12 +138,6 @@ export class Chatter extends Component {
 
     _onMounted() {
         this.changeThread(this.threadModel(), this.threadId());
-        if (!this.env.chatter || this.env.chatter?.fetchThreadData) {
-            if (this.env.chatter) {
-                this.env.chatter.fetchThreadData = false;
-            }
-            this.load(this.state.thread, this.requestList);
-        }
     }
 
     onPostCallback() {
