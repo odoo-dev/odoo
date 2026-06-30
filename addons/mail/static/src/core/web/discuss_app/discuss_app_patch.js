@@ -1,12 +1,12 @@
 import { useLayoutEffect } from "@web/owl2/utils";
 
 import { Discuss } from "@mail/core/public_web/discuss_app/discuss_app";
-import { MessagingMenu } from "@mail/core/public_web/messaging_menu";
+import { MessagingMenuInDropdown } from "@mail/core/web/messaging_menu_in_dropdown";
 
 import { ControlPanel } from "@web/search/control_panel/control_panel";
 import { patch } from "@web/core/utils/patch";
 
-Object.assign(Discuss.components, { ControlPanel, MessagingMenu });
+Object.assign(Discuss.components, { ControlPanel, MessagingMenuInDropdown });
 
 patch(Discuss.prototype, {
     setup() {
