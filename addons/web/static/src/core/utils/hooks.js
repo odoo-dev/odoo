@@ -2,6 +2,7 @@ import { onMounted, onPatched, onWillUnmount, proxy, t, toRaw, untrack, useScope
 import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 import { router } from "@web/core/browser/router";
 import { useEnv, useLayoutEffect } from "@web/owl2/utils";
+import { couldBeScrollableY } from "@web/core/utils/scrolling";
 
 /**
  * This file contains various custom hooks.
@@ -240,6 +241,48 @@ export function useOwnedDialogs(options = {}) {
         return close;
     };
     return addDialog;
+}
+
+// -----------------------------------------------------------------------------
+// useSticky
+// -----------------------------------------------------------------------------
+
+/**
+ * Detects when a `position: sticky; top: 0` element is actually stuck.
+ * Listens to scroll events on the element's parent (or an explicit container)
+ * and sets `isSticky` whenever `scrollTop > 0`.
+ *
+ * @param {import("@odoo/owl").Signal<HTMLElement|null>|Ref} ref
+ * @param {Object} [options]
+ * @param {Element} [options.root] scroll container. Defaults to `el.parentElement`.
+ * @returns {{ readonly isSticky: boolean }}
+ */
+export function useSticky(ref, { root } = {}) {
+    const state = proxy({ isSticky: false });
+    const getEl = () => (ref ? untrack(ref) : undefined);
+
+    useLayoutEffect(
+        (el) => {
+            if (!el) {
+                return;
+            }
+            let node = el.parentElement;
+            while (node && !couldBeScrollableY(node)) {
+                node = node.parentElement;
+            }
+            const containerEl = root ?? node ?? document.documentElement;
+            const onScroll = () => {
+                state.isSticky = containerEl.scrollTop > 0;
+            };
+            containerEl.addEventListener("scroll", onScroll);
+            return () => {
+                containerEl.removeEventListener("scroll", onScroll);
+                state.isSticky = false;
+            };
+        },
+        () => [getEl()]
+    );
+    return state;
 }
 
 /**
