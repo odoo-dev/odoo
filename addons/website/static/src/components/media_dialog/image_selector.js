@@ -4,6 +4,8 @@ import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_dialog/file_selec
 import { ImageSelector as HtmlImageSelector } from "@html_editor/main/media/media_dialog/image_selector";
 
 patch(HtmlImageSelector.prototype, {
+    // todo : reproduce this but better :
+    // this patch seems to be applied as soon as website is installed, not only in website page !
     get attachmentsDomain() {
         const domain = super.attachmentsDomain;
         domain.push("|", ["url", "=", false], "!", ["url", "=like", "/web/image/website.%"]);
