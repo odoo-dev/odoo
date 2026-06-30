@@ -1360,7 +1360,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                 new_total_value = pos_move.product_qty * pos_move.price_unit + neg_move.product_qty * neg_move.price_unit
                 # If quantity can be fully absorbed by a single move, update its quantity and remove the negative move
                 if pos_move.uom_id.compare(pos_move.product_uom_qty, abs(neg_move.product_uom_qty)) >= 0:
-                    pos_move.product_uom_qty += neg_move.product_uom_qty
+                    # pos_move.product_uom_qty += neg_move.product_uom_qt
                     pos_move.write({
                         'price_unit': float_round(new_total_value / pos_move.product_qty, precision_digits=price_unit_prec) if pos_move.product_qty else 0,
                         'move_dest_ids': [Command.link(m.id) for m in neg_move.mapped('move_dest_ids') if m.location_id == pos_move.location_dest_id],
@@ -1368,12 +1368,12 @@ Please change the quantity done or the rounding precision in your settings.""",
                     })
                     merged_moves |= pos_move
                     moves_to_unlink |= neg_move
-                    if pos_move.uom_id.is_zero(pos_move.product_uom_qty):
-                        moves_to_cancel |= pos_move
+                    # if pos_move.uom_id.is_zero(pos_move.product_uom_qty):
+                    moves_to_cancel |= pos_move
                     break
                 neg_move.product_uom_qty += pos_move.product_uom_qty
                 neg_move.price_unit = float_round(new_total_value / neg_move.product_qty, precision_digits=price_unit_prec)
-                pos_move.product_uom_qty = 0
+                # pos_move.product_uom_qty = 0
                 moves_to_cancel |= pos_move
 
         # We are using propagate to False in order to not cancel destination moves merged in moves[0]
