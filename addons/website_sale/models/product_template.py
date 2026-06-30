@@ -142,14 +142,6 @@ class ProductTemplate(models.Model):
         relation="product_public_category_product_template_rel",
     )
 
-    publish_date = fields.Datetime(
-        string="Publish Date",
-        compute="_compute_publish_date",
-        store=True,
-        required=True,
-        default=fields.Datetime.now,
-    )
-
     product_template_image_ids = fields.One2many(
         string="Extra Product Media",
         comodel_name="product.image",
@@ -253,11 +245,6 @@ class ProductTemplate(models.Model):
             for template in self:
                 # Maintain consistency for feature enablement: suggest only when empty
                 template.suggest_alternative_products = not template.alternative_product_ids
-
-    @api.depends("is_published")
-    def _compute_publish_date(self):
-        """Set `publish_date` to the moment of (re-)publishing."""
-        self.filtered("is_published").publish_date = fields.Datetime.now()
 
     def _compute_website_url(self):
         super()._compute_website_url()
