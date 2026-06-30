@@ -9,7 +9,7 @@
 
     <record id="group_project_user" model="res.groups">
         <field name="name">User</field>
-        <field name="comment">User can user the your employees' schedule</field>
+        <field name="comment">User can use their employees' schedule</field>
         <field name="sequence">10</field>
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
         <field name="privilege_id" ref="res_groups_privilege_project"/>
