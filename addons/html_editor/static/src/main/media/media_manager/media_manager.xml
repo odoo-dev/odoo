@@ -1,0 +1,110 @@
+<templates id="template" xml:space="preserve">
+    
+<t t-name="html_editor.MediaManagerMediaItem">
+    <div t-custom-ref="media-item-container"
+         class="media-item position-relative" t-att-class="{ 'selected': this.state.selected, 'starred': this.state.starred}"
+         t-on-click="this.displayMedia">
+        <div class="media-item-preview">
+            <img t-att-src="this.props.attachment.image_src" t-att-alt="this.props.attachment.name"/>
+        </div>
+        <div class="media-item-select position-absolute" t-on-click="this.toggleSelected">
+            <input type="checkbox" t-att-checked="this.state.selected"/>
+        </div>
+        <div class="media-item-star position-absolute" t-on-click="this.toggleStarred">
+            <span t-if="this.state.starred" class="fa fa-star"></span>
+            <span t-else="" class="fa fa-star-o"></span>
+        </div>
+        <div class="media-item-remove position-absolute" t-on-click="this.removeItem">
+             <span class="fa fa-trash"></span>
+        </div>
+        <div class="media-item-info position-absolute">
+            <span class="media-item-name" t-out="this.props.attachment.name || '-'"/>
+            <span class="media-item-description" t-out="this.props.attachment.description || ''"/>
+        </div>
+    </div>
+</t>
+
+<t t-name="html_editor.MediaManager">
+    <!-- TODO: is contentClass needed ? -->
+    <!-- TODO: is modalRef needed ? -->
+    <Dialog contentClass="this.contentClass"
+        size="this.size"
+        title="this.title"
+        modalRef="this.modalRef">
+        <div class="media-manager-drop-zone position-absolute"
+             t-att-class="{ 'active': this.state.isDraggingFile}"
+             t-on-dragleave="this.uploadDragLeave"
+             t-on-dragover.prevent="() => {}"
+             t-on-drop.prevent="this.uploadDrop">
+            <div>
+                Drop files here<br/><br/>
+                <span class="fa fa-upload"></span>
+            </div>
+        </div>
+        <div class="media-manager-container position-relative d-flex flex-column flex-md-row h-100"
+             t-on-dragenter.prevent="this.uploadDragEnter"
+        >
+            <div class="media-manager-left-bar h-100 pr-3 border-end overflow-auto d-md-flex flex-md-shrink-0" >
+                <div class="w-100">
+                    <div class="left-bar-buttons">
+                        <input type="file" t-custom-ref="file-input" class="d-none o_file_input"
+                               t-on-change="this.onChangeFileInput"
+                               t-att-accept="this.props.accept"
+                               t-att-multiple="this.props.multiUpload and 'multiple'"
+                        />
+                        <div class="col-auto btn-group">
+                            <button class="btn btn-secondary" t-on-click="this.uploadFileClicked.bind(this)">Upload</button>
+                            <button class="btn btn-secondary" t-on-click="this.importLinkClicked"><span class="fa fa-link"></span></button>
+                        </div>
+                    </div>
+                    <div class="left-bar-filters mt-4">
+                        <div class="filter-button">
+                            <a t-on-click="this.resetFilters" href="#">All</a>
+                        </div>
+                        <div class="filter-button" t-att-class="{ 'active-filter': this.state.activeFilters?.type === 'document'}">
+                            <a t-on-click="() => this.applyFilters({type: 'document'})" href="#">Documents</a>
+                        </div>
+                        <div class="filter-button" t-att-class="{ 'active-filter': this.state.activeFilters?.type === 'image'}">
+                            <a t-on-click="() => this.applyFilters({type: 'image'})" href="#">Images</a>
+                        </div>
+                        <div class="filter-button" t-att-class="{ 'active-filter': this.state.activeFilters?.order === 'recent'}">
+                            <a t-on-click="() => this.applyFilters({order: 'recent'})" href="#">Recent</a>
+                        </div>
+                        <div class="filter-button" t-att-class="{ 'active-filter': this.state.activeFilters?.order === 'oldest'}">
+                            <a t-on-click="() => this.applyFilters({order: 'oldest'})" href="#">Oldest</a>
+                        </div>
+                        <div class="filter-button" t-att-class="{ 'active-filter': this.state.activeFilters?.misc === 'owned'}">
+                            <a t-on-click="() => this.applyFilters({misc: 'owned'})" href="#">Uploaded by me</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="media-manager-content d-md-flex flex-column flex-grow-1 min-w-0 overflow-hidden">
+                <div class="media-grid">
+                    <t t-if="this.state.isLoading" >
+                        <div class="media-manager-content-loading"><span class="fa fa-spinner fa-spin"></span></div>
+                    </t>
+                    <t t-elif="!this.state.mediaItems.length" >
+                        <span>No media found.</span>
+                    </t>
+                    <t t-else="" >
+                        <div class="media-items-container d-flex flex-row flex-wrap justify-content-between align-content-start">
+                            <MediaManagerMediaItem t-foreach="this.state.mediaItems" t-as="item" t-key="item.id"
+                               id="item.id"
+                               attachment="item.attachment"
+                               onStarToggleCallback="this.itemStarToggled.bind(this)"
+                               onSelectedToggleCallback="this.itemSelectedToggled.bind(this)"
+                               onRemovedCallback="this.itemRemoved.bind(this)"
+                            />
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </div>
+        <t t-set-slot="footer">
+            <button class="btn btn-primary" t-on-click="this.confirmClicked" t-custom-ref="confirm-button" data-hotkey="q">Select</button>
+            <button class="btn btn-secondary" t-on-click="this.discardClicked" data-hotkey="x">Discard</button>
+        </t>
+    </Dialog>
+</t>
+</templates>
