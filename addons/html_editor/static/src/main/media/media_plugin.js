@@ -10,7 +10,8 @@ import {
     paragraphRelatedElementsSelector,
 } from "@html_editor/utils/dom_info";
 import { _t } from "@web/core/l10n/translation";
-import { MediaDialog } from "./media_dialog/media_dialog";
+// import { MediaDialog } from "./media_dialog/media_dialog";
+import { MediaManager } from "./media_manager/media_manager";
 import { TABS } from "./media_dialog/media_dialog_utils";
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { boundariesOut, rightPos } from "@html_editor/utils/position";
@@ -18,6 +19,7 @@ import { withSequence } from "@html_editor/utils/resource";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { FORMATTABLE_TAGS } from "@html_editor/utils/formatting";
+import { MediaDialog } from "@html_editor/main/media/media_dialog/media_dialog";
 
 export const ATTACHMENT_PENDING_RECORD_ID = "o_attachment_pending_record_id";
 
@@ -66,8 +68,20 @@ export class MediaPlugin extends Plugin {
                 id: "insertMedia",
                 title: _t("Media"),
                 description: this.config.allowVideo
-                    ? _t("Insert image, icon or video")
-                    : _t("Insert image or icon"),
+                    ? _t("Insert image or video")
+                    : _t("Insert image"),
+                icon: "fa-file-image-o",
+                run: (params, context = {}) =>
+                    this.openMediaDialog({
+                        activeTab: this.getActiveDialogTab(context.searchTerm),
+                        tempMediaManagerSwitch: true,
+                    }),
+                isAvailable: isHtmlContentSupported,
+            },
+            {
+                id: "insertMediaOLD",
+                title: _t("OLD Media"),
+                description: _t("Open the old media dialog"),
                 icon: "image",
                 run: (params, context = {}) =>
                     this.openMediaDialog({
@@ -129,14 +143,24 @@ export class MediaPlugin extends Plugin {
 
     getInsertMediaPowerboxItem() {
         const self = this;
-        return {
-            categoryId: "media",
-            commandId: "insertMedia",
-            // Evaluation is deferred because this.availableTabs is only ready after setup.
-            get keywords() {
-                return self.availableTabs.map((tab) => tab.title);
+        return [
+            {
+                categoryId: "media",
+                commandId: "insertMedia",
+                // Evaluation is deferred because this.availableTabs is only ready after setup.
+                get keywords() {
+                    return self.availableTabs.map((tab) => tab.title);
+                },
             },
-        };
+            {
+                categoryId: "media",
+                commandId: "insertMediaOLD",
+                // Evaluation is deferred because this.availableTabs is only ready after setup.
+                get keywords() {
+                    return self.availableTabs.map((tab) => tab.title);
+                },
+            },
+        ];
     }
 
     getRecordInfo(editableEl = null) {
@@ -198,7 +222,8 @@ export class MediaPlugin extends Plugin {
         return root;
     }
 
-    async onSaveMediaDialog(element, { node }) {
+    async onSaveMediaDialog(element, nodeToReplace = false) {
+        console.log("onSaveMediaDialog", element, nodeToReplace);
         if (!element) {
             // @todo @phoenix to remove
             throw new Error("Element is required: onSaveMediaDialog");
@@ -207,17 +232,17 @@ export class MediaPlugin extends Plugin {
         if (element.dataset?.attachmentId) {
             element.classList.add(ATTACHMENT_PENDING_RECORD_ID);
         }
-        if (node) {
-            const changedIcon = isIconElement(node) && isIconElement(element);
+        if (nodeToReplace) {
+            const changedIcon = isIconElement(nodeToReplace) && isIconElement(element);
             if (changedIcon) {
                 // Preserve tag name when changing an icon and not recreate the
                 // editors unnecessarily.
                 for (const attribute of element.attributes) {
-                    node.setAttribute(attribute.nodeName, attribute.nodeValue);
+                    nodeToReplace.setAttribute(attribute.nodeName, attribute.nodeValue);
                 }
-                element = node;
+                element = nodeToReplace;
             } else {
-                node.replaceWith(element);
+                nodeToReplace.replaceWith(element);
             }
             this.trigger("on_media_replaced_handlers", { newMediaEl: element });
         } else {
@@ -246,13 +271,43 @@ export class MediaPlugin extends Plugin {
     }
 
     openMediaDialog(params = {}, editableEl = null) {
+        console.warn("open media dialog ", params, editableEl);
+        const { resModel, resId, field, type } = this.getRecordInfo(editableEl);
+        let imageToReplace = params.node || null;
+        if (params.tempMediaManagerSwitch) {
+            return this.dependencies.dialog.addDialog(MediaManager, {
+                resModel,
+                resId,
+                multiUpload: true,
+                // field,
+                validateCallback: async (elements) => {
+                    // todo : make sure we reproduce the all the necessary old save behaviour
+                    const promises = [];
+                    for (const el of elements) {
+                        promises.push(this.onSaveMediaDialog(el, imageToReplace));
+                        imageToReplace = null;
+                    }
+                    await Promise.all(promises);
+                },
+                // useMediaLibrary: !!(
+                //     field &&
+                //     ((resModel === "ir.ui.view" && field === "arch") || type === "html")
+                // ), // @todo @phoenix: should be removed and moved to config.mediaModalParams
+                // media: params.node,
+                // onAttachmentChange: this.config.onAttachmentChange || (() => {}),
+                // noImages: !this.config.allowImage,
+                // extraTabs: this.getResource("media_dialog_extra_tabs"),
+                // ...this.config.mediaModalParams,
+                // ...params,
+            });
+        }
         const oldSave =
             params.save ||
             ((...args) => {
                 // The media dialog calls the save function with 4 params: this.props.save(elements, selectedMedia, this.activeTab(), this.props.media)
                 const [elements, , , oldMediaNode] = args;
                 const node = oldMediaNode || params.node;
-                this.onSaveMediaDialog(elements, { node });
+                this.onSaveMediaDialog(elements, node);
             });
         params.save = async (...args) => {
             const selection = args[0];
@@ -266,8 +321,7 @@ export class MediaPlugin extends Plugin {
             });
             return oldSave(...args);
         };
-        const { resModel, resId, field, type } = this.getRecordInfo(editableEl);
-        const mediaDialogClosedPromise = this.dependencies.dialog.addDialog(MediaDialog, {
+        return this.dependencies.dialog.addDialog(MediaDialog, {
             resModel,
             resId,
             field,
@@ -286,7 +340,6 @@ export class MediaPlugin extends Plugin {
             ...this.config.mediaModalParams,
             ...params,
         });
-        return mediaDialogClosedPromise;
     }
 
     /**

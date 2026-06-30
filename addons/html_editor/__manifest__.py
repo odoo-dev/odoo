@@ -69,6 +69,7 @@ This addon provides an extensible, maintainable editor.
             # Bundle to use the media dialog in the backend and the frontend
             'html_editor/static/src/components/switch/**/*',
             'html_editor/static/src/main/media/media_dialog/**/*',
+            'html_editor/static/src/main/media/media_manager/**/*',
         ],
         'html_editor.assets_readonly': [
             'html_editor/static/src/components/html_viewer/**/*',

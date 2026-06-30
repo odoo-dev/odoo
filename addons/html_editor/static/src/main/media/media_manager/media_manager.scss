@@ -1,0 +1,114 @@
+.media-manager-container {
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+}
+
+.media-manager-left-bar {
+    width: 260px;
+    .active-filter {
+        background-color: #25b6ae;
+    }
+}
+
+/* spin loader */
+.media-manager-content-loading {
+    font-size: 50px;
+    text-align: center;
+    padding-top: 50px;
+}
+
+/* media list items */
+.media-item {
+    background-color: #f1f1f1;
+    width: 148px;
+    height: 148px;
+    padding: 4px;
+    margin: 0 4px;
+    border: 1px solid #555;
+
+    .media-item-preview {
+        line-height: 140px;
+        text-align: center;
+        vertical-align: middle;
+    }
+    img {
+        max-width: 140px;
+        max-height: 140px;
+        object-fit: cover;
+    }
+
+    .media-item-select, .media-item-star, .media-item-remove, .media-item-info {
+        display: none;
+    }
+    &.starred{
+        background-color: #f3e5b4;
+    }
+    &:hover, &.selected {
+        background-color: #25b6ae;
+        .media-item-select, .media-item-star, .media-item-remove, .media-item-info {
+            display: block;
+        }
+    }
+}
+
+.media-item-select {
+    cursor: pointer;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+}
+.media-item-star {
+    cursor: pointer;
+    top: 4px;
+    left: 4px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+}
+.media-item-remove {
+    cursor: pointer;
+    top: 4px;
+    right: 24px;
+    width: 20px;
+    height: 20px;
+    background-color: white;
+}
+.media-item-info {
+    pointer-events: none;
+    bottom: 4px;
+    left: 4px;
+    height: 20px;
+    background-color: white;
+}
+
+/* Upload drop zone */
+.media-manager-drop-zone {
+    z-index: 100;
+    font-size: 50px;
+    text-align: center;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: none;
+    &.active {
+        display: block;
+        background: rgba(255,255,255,0.85);
+    }
+    >div {
+        pointer-events: none;
+        border: 4px solid #555;
+        border-radius: 30px;
+        margin: 30px;
+        position: absolute;
+        top: 30px;
+        bottom: 30px;
+        left: 30px;
+        right: 30px;
+        padding-top: 30px;
+    }
+}
