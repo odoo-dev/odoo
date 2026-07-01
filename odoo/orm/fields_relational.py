@@ -657,13 +657,9 @@ class _RelationalMulti(_Relational):
             for command in value:
                 if isinstance(command, (tuple, list)):
                     if command[0] == Command.CREATE:
-                        ids.add(comodel.new(command[2], ref=command[1]).id)
+                        ids.add(comodel.new(ref=command[1]).id)
                     elif command[0] == Command.UPDATE:
                         line = browse(command[1])
-                        if validate:
-                            line.update(command[2])
-                        else:
-                            line._update_cache(command[2], validate=False)
                         ids.add(line.id)
                     elif command[0] in (Command.DELETE, Command.UNLINK):
                         ids.discard(browse(command[1]).id)
