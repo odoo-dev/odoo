@@ -3,6 +3,7 @@ import { hasTouch, isMobileOS } from "@web/core/browser/feature_detection";
 
 import { status, onWillUnmount, t, toRaw, onMounted, onPatched, proxy } from "@odoo/owl";
 import { router } from "@web/core/browser/router";
+import { resolveRefEl } from "@web/core/utils/ref_utils";
 
 /**
  * This file contains various custom hooks.
@@ -187,9 +188,10 @@ export function useService(serviceName) {
  * longer in focus. We only add this attribute when needed. To disable this
  * behavior, use the spellcheck attribute on the element.
  */
-export function useSpellCheck({ refName } = {}) {
+export function useSpellCheck({ refName, ref } = {}) {
     const elements = [];
-    const ref = useRef(refName || "spellcheck");
+    // Accept an explicit ref/signal (Owl 3) or fall back to the legacy named ref.
+    const r = ref ?? useRef(refName || "spellcheck");
     function toggleSpellcheck(ev) {
         ev.target.spellcheck = document.activeElement === ev.target;
     }
@@ -215,7 +217,7 @@ export function useSpellCheck({ refName } = {}) {
                 });
             };
         },
-        () => [ref.el]
+        () => [resolveRefEl(r)]
     );
 }
 
@@ -237,31 +239,55 @@ export function useChildRef() {
     }
     // Define `el` eagerly (rather than on the first assignment) so that the ref
     // is recognizable as a ref-like object (`"el" in ref` is always true) even
-    // before it has been forwarded a child ref. The optional chaining keeps it
-    // null-safe: reading `.el` before mount (or while detached) yields
-    // `undefined` instead of throwing "Cannot read properties of undefined".
+    // before it has been forwarded a child ref. The forwarded value may be a
+    // legacy ref object (`.el`) or an Owl 3 signal ref (a zero-arg callable);
+    // `resolveRefEl` reads either form, and returns undefined before mount (or
+    // while detached) instead of throwing.
     Object.defineProperty(ref, "el", {
         get() {
-            return value?.el;
+            return resolveRefEl(value);
         },
     });
     return ref;
 }
 /**
- * Forwards the given refName to the parent by calling the corresponding
- * ForwardRef received as prop. @see useChildRef
+ * Forwards a ref to the parent by calling the corresponding ForwardRef received
+ * as prop. @see useChildRef
  *
- * @param {string} refName name of the ref to forward
- * @returns {Ref} the same ref that is forwarded to the
- *  parent
+ * Accepts either:
+ *  - a string `refName` (legacy Owl 2): a ref is created with `useRef(refName)`
+ *    (tied to the compat `t-custom-ref`) and forwarded to the prop of the same
+ *    name;
+ *  - an Owl 3 signal ref together with the prop name to forward it to: the
+ *    signal is forwarded as-is (the child already owns it via `t-ref`) and
+ *    returned unchanged.
+ *
+ * @overload
+ * @param {string} refName name of the ref to create, forward and return
+ * @returns {Ref} the ref that is forwarded to the parent
+ *
+ * @overload
+ * @param {(() => HTMLElement | null) | Ref} ref an Owl 3 signal ref (or legacy
+ *  ref object) to forward as-is
+ * @param {string} propName name of the prop to forward the ref to
+ * @returns {(() => HTMLElement | null) | Ref} the same ref, unchanged
  */
-export function useForwardRefToParent(refName) {
+export function useForwardRefToParent(refOrName, propName) {
     const component = useComponent();
-    const ref = useRef(refName);
-    if (component.props[refName]) {
-        component.props[refName](ref);
+    // Legacy: a string refName creates a (compat) ref and forwards it under the
+    // same prop name.
+    if (typeof refOrName === "string") {
+        const ref = useRef(refOrName);
+        if (component.props[refOrName]) {
+            component.props[refOrName](ref);
+        }
+        return ref;
     }
-    return ref;
+    // Owl 3: forward the given signal/ref as-is to the named prop.
+    if (component.props[propName]) {
+        component.props[propName](refOrName);
+    }
+    return refOrName;
 }
 /**
  * Use the dialog service while also automatically closing the dialogs opened
