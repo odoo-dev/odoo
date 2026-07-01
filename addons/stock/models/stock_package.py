@@ -546,6 +546,54 @@ class StockPackage(models.Model):
             weights_per_pack[package.id] = {'shipping_weight': shipping_weight or 0, 'base_weight': base_weight or 0}
         return weights_per_pack
 
+    def _get_effective_weight_in_pickings(self, picking_ids, defined_weights_per_pack, content_weights_per_pick, ongoing_package_ids, done_children_by_pack=None):
+        """
+        Return the effective weight of this package in the given pickings.
+        :param picking_ids: the pickings in the scope of the calculation of shipping_weight
+        :param defined_weights_per_pack: {package_id: {'shipping_weight': float, 'base_weight': float}}
+        :param content_weights_per_pick: {picking_id: {package_id: float}} represent the weight of the
+            packages content on the pickings.
+        :param ongoing_package_ids: set of package_ids in scope and on ongoing pickings, used to decide
+            whether to navigate done children packages or child_package_dest_ids
+        :param done_children_by_pack: optional {package_id: stock.package} represent the direct children packages
+            per package in the pickings (used for done pickings only)
+        :return: effective weight of this package in the given pickings.
+        """
+        self.ensure_one()
+        if shipping_weight := defined_weights_per_pack[self.id]['shipping_weight']:
+            return shipping_weight
+        weight = defined_weights_per_pack[self.id]['base_weight']
+        weight += sum(content_weights_per_pick[pick_id][self.id] for pick_id in picking_ids.ids)
+        done_children = (done_children_by_pack or {}).get(self.id, self.env['stock.package'])
+        child_packages = self.child_package_dest_ids if self.id in ongoing_package_ids else done_children
+        for child_package in child_packages:
+            weight += child_package._get_effective_weight_in_pickings(picking_ids, defined_weights_per_pack, content_weights_per_pick, ongoing_package_ids, done_children_by_pack)
+        return weight
+
+    def _get_effective_volume_in_pickings(self, picking_ids, defined_volumes_per_pack, content_volumes_per_pick, ongoing_package_ids, done_children_by_pack=None):
+        """
+        Return the effective volume of this package in the given pickings.
+        :param picking_ids: the pickings in the scope of the calculation of shipping_volume
+        :param defined_volumes_per_pack: {package_id: float} represents the defined volume of the package either
+            by shipping_volume or by the package_type_id dimensions
+        :param content_volumes_per_pick: {picking_id: {package_id: float}} represent the volume of the
+            packages content on the pickings.
+        :param ongoing_package_ids: set of package_ids in scope and on ongoing pickings, used to decide
+            whether to navigate done children packages or child_package_dest_ids
+        :param done_children_by_pack: optional {package_id: stock.package} represent the direct children packages
+            per package in the pickings (used for done pickings only)
+        :return: effective volume of this package in the given pickings.
+        """
+        self.ensure_one()
+        if shipping_volume := defined_volumes_per_pack[self.id]:
+            return shipping_volume
+        volume = sum(content_volumes_per_pick[pick_id][self.id] for pick_id in picking_ids.ids)
+        done_children = (done_children_by_pack or {}).get(self.id, self.env['stock.package'])
+        child_packages = self.child_package_dest_ids if self.id in ongoing_package_ids else done_children
+        for child_package in child_packages:
+            volume += child_package._get_effective_volume_in_pickings(picking_ids, defined_volumes_per_pack, content_volumes_per_pick, ongoing_package_ids, done_children_by_pack)
+        return volume
+
     def _has_issues(self):
         self.ensure_one()
         return len(self.move_line_ids.location_dest_id) > 1

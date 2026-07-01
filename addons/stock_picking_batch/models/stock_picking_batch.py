@@ -82,44 +82,45 @@ class StockPickingBatch(models.Model):
             batch.show_lots_text = batch.picking_ids and batch.picking_ids[0].show_lots_text
 
     def _compute_shipping_weight(self):
-        def get_effective_weight(package, picking_ids, defined_weights_per_pack, content_weights_per_pick):
-            if shipping_weight := defined_weights_per_pack[package.id]['shipping_weight']:
-                return shipping_weight
-            weight = defined_weights_per_pack[package.id]['base_weight']
-            weight += sum(content_weights_per_pick[pick_id][package.id] for pick_id in picking_ids)
-            for child_package in package.child_package_dest_ids:
-                weight += get_effective_weight(child_package, picking_ids, defined_weights_per_pack, content_weights_per_pick)
-            return weight
+        done_pickings = self.picking_ids.filtered(lambda p: p.state == 'done')
 
-        relevant_packages = self.move_line_ids.result_package_id.outermost_package_id
-        __, all_pack_ids = relevant_packages._get_all_children_package_dest_ids()
-        defined_weights_per_pack = self.env['stock.package']._get_defined_weights_per_package(all_pack_ids)
-        content_weight_per_picking = self.env['stock.package']._get_content_weight_per_pickings(all_pack_ids, self.picking_ids.ids)
+        ongoing_outermost_packages = (self.picking_ids - done_pickings).move_line_ids.result_package_id.outermost_package_id
+        all_outermost_packages = ongoing_outermost_packages | done_pickings.package_history_ids.outermost_dest_id
+
+        __, all_ongoing_pack_ids = ongoing_outermost_packages._get_all_children_package_dest_ids()
+        direct_done_children_by_pack, all_done_pack_ids = done_pickings.package_history_ids._get_all_history_children_package_dest_ids()
+
+        in_scope_ongoing_pack_ids = set(self.env['stock.package'].search([('id', 'in', all_ongoing_pack_ids), ('picking_ids', 'in', self.picking_ids.ids)]).ids)
+        in_scope_pack_ids = in_scope_ongoing_pack_ids | all_done_pack_ids
+
+        defined_weights_per_pack = self.env['stock.package']._get_defined_weights_per_package(in_scope_pack_ids)
+        content_weight_per_picking = self.env['stock.package']._get_content_weight_per_pickings(in_scope_pack_ids, self.picking_ids.ids)
 
         for batch in self:
-            weight = sum(picking_id.weight_bulk for picking_id in batch.picking_ids)
-            for package in batch.move_line_ids.result_package_id.outermost_package_id:
-                weight += get_effective_weight(package, batch.picking_ids.ids, defined_weights_per_pack, content_weight_per_picking)
+            weight = sum(picking.weight_bulk for picking in batch.picking_ids)
+            for package in all_outermost_packages:
+                weight += package._get_effective_weight_in_pickings(batch.picking_ids, defined_weights_per_pack, content_weight_per_picking, in_scope_ongoing_pack_ids, direct_done_children_by_pack)
             batch.estimated_shipping_weight = weight
 
     def _compute_shipping_volume(self):
-        def get_effective_volume(package, picking_ids, defined_volumes_per_pack, content_volumes_per_pick):
-            if shipping_volume := defined_volumes_per_pack[package.id]:
-                return shipping_volume
-            volume = sum(content_volumes_per_pick[pick_id][package.id] for pick_id in picking_ids)
-            for child_package in package.child_package_dest_ids:
-                volume += get_effective_volume(child_package, picking_ids, defined_volumes_per_pack, content_volumes_per_pick)
-            return volume
+        done_pickings = self.picking_ids.filtered(lambda p: p.state == 'done')
 
-        relevant_packages = self.move_line_ids.result_package_id.outermost_package_id
-        __, all_pack_ids = relevant_packages._get_all_children_package_dest_ids()
-        defined_volumes_per_pack = self.env['stock.package']._get_defined_volume_per_package(all_pack_ids)
-        content_volume_per_picking = self.env['stock.package']._get_content_volume_per_pickings(all_pack_ids, self.picking_ids.ids)
+        ongoing_outermost_packages = (self.picking_ids - done_pickings).move_line_ids.result_package_id.outermost_package_id
+        all_outermost_packages = ongoing_outermost_packages | done_pickings.package_history_ids.outermost_dest_id
+
+        __, all_ongoing_pack_ids = ongoing_outermost_packages._get_all_children_package_dest_ids()
+        direct_done_children_by_pack, all_done_pack_ids = done_pickings.package_history_ids._get_all_history_children_package_dest_ids()
+
+        in_scope_ongoing_pack_ids = set(self.env['stock.package'].search([('id', 'in', all_ongoing_pack_ids), ('picking_ids', 'in', self.picking_ids.ids)]).ids)
+        in_scope_pack_ids = in_scope_ongoing_pack_ids | all_done_pack_ids
+
+        defined_volumes_per_pack = self.env['stock.package']._get_defined_volume_per_package(in_scope_pack_ids)
+        content_volume_per_picking = self.env['stock.package']._get_content_volume_per_pickings(in_scope_pack_ids, self.picking_ids.ids)
 
         for batch in self:
-            volume = sum(picking_id.volume_bulk for picking_id in batch.picking_ids)
-            for package in batch.move_line_ids.result_package_id.outermost_package_id:
-                volume += get_effective_volume(package, batch.picking_ids.ids, defined_volumes_per_pack, content_volume_per_picking)
+            volume = sum(picking.volume_bulk for picking in batch.picking_ids)
+            for package in all_outermost_packages:
+                volume += package._get_effective_volume_in_pickings(batch.picking_ids, defined_volumes_per_pack, content_volume_per_picking, in_scope_ongoing_pack_ids, direct_done_children_by_pack)
             batch.estimated_shipping_volume = volume
 
     @api.depends('company_id', 'picking_type_id', 'state')
