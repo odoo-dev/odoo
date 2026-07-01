@@ -1629,3 +1629,13 @@ class WebsiteSlides(WebsiteProfile):
         values.update(self._prepare_user_values(channel=channels[0] if len(channels) == 1 else True, **post))
         values.update(self._prepare_user_slides_profile(user))
         return values
+
+    @http.route('/slides/reload', type='jsonrpc', auth="public", website=True)
+    def slides_reload(self, **kwargs):
+        tags = kwargs.pop('tag', None)
+        kwargs['prevent_redirect'] = True
+        response = self.slides_channel(slug_tags=tags, **kwargs)
+        return {
+            'count': response.qcontext.get('search_count', 0),
+            'html': str(response.render()),
+        }

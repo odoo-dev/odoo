@@ -1543,6 +1543,37 @@
     </xpath>
 </template>
 
+<template id="website.offcanvas_filters_footer" name="Offcanvas filter actions">
+    <div class="d-flex flex-column flex-grow-0 overflow-hidden border-top px-4 py-3">
+        <a
+            t-attf-class="o_async_filters_clear btn btn-link w-100 py-1 mb-2 {{not has_active_filters and 'disabled'}}"
+            t-att-aria-disabled="'true' if not has_active_filters else 'false'"
+            t-att-href="clear_filters_url or '#'"
+            title="Clear Filters"
+        >
+            <small class="mx-auto">
+                <b>
+                    <t t-out="clear_filters_label or 'Clear Filters'" />
+                </b>
+            </small>
+        </a>
+        <button
+            t-att-id="apply_filters_btn_id or 'o_wsale_apply_filters_btn'"
+            class="o_async_filters_apply btn btn-primary w-100"
+            type="button"
+            t-att-data-bs-dismiss="data_bs_dismiss or 'offcanvas'"
+        >
+            <t t-out="apply_filters_label or 'Apply Filters'" />
+            <span
+                t-att-id="count_id or 'o_wsale_offcanvas_product_count'"
+                class="badge rounded-pill bg-o-color-3 text-o-color-1 ms-2"
+            >
+                <t t-out="count or 0" />
+            </span>
+        </button>
+    </div>
+</template>
+
 <!-- "Rounded box" template -->
 <template id="template_header_boxed" inherit_id="website.layout" name="Template Header Rounded Box" active="False">
     <xpath expr="//header//nav" position="replace">

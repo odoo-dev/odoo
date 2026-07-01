@@ -162,6 +162,14 @@ class WebsiteHrRecruitment(WebsiteForm):
             **job_filter_values,
         })
 
+    @http.route('/jobs/reload', type='jsonrpc', auth="public", website=True)
+    def jobs_reload(self, **kwargs):
+        response = self.jobs(**kwargs)
+        return {
+            'count': response.qcontext.get('search_count', 0),
+            'html': str(response.render()),
+        }
+
     @http.route('/jobs/add', type='jsonrpc', auth="user", website=True)
     def jobs_add(self, **kwargs):
         # avoid branding of website_description by setting rendering_bundle in context

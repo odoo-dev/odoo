@@ -712,13 +712,28 @@
         </button>
     </div>
     <!-- Off canvas filters on mobile-->
-    <div t-if="opt_jobs_filter_count &gt;= 1" id="o_jobs_offcanvas" class="o_website_offcanvas offcanvas offcanvas-end d-lg-none p-0 overflow-visible">
+    <div t-if="opt_jobs_filter_count &gt;= 1"
+        id="o_jobs_offcanvas"
+        class="o_async_filters o_website_offcanvas offcanvas offcanvas-end d-lg-none p-0 overflow-visible"
+        data-filter-url="/jobs"
+        t-att-data-filter-clear-url="'/jobs' + ('?search=' + search if search else '')"
+        data-filter-reload-route="/jobs/reload"
+        data-filter-root-selector=".o_website_hr_recruitment_jobs_list"
+        data-filter-loading-selector="#jobs_grid"
+        data-filter-replace-selectors="#jobs_grid,.oe_website_jobs .navbar,#o_jobs_offcanvas .offcanvas-body"
+        data-filter-count-selector="#o_jobs_offcanvas_count">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title">Filters</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"/>
         </div>
         <div class="offcanvas-body p-0">
             <div class="accordion accordion-flush"/>
+            <t t-call="website.offcanvas_filters_footer"
+                has_active_filters="opt_jobs_is_filter_applied"
+                clear_filters_url="'/jobs' + ('?search=' + search if search else '')"
+                count_id="'o_jobs_offcanvas_count'"
+                count="search_count"
+            />
         </div>
     </div>
 </template>
@@ -776,6 +791,7 @@
 
 <template id="job_filter_base_mobile">
     <div class="accordion-item">
+        <t t-set="radio_group_name" t-value="'o_jobs_mobile_%s' % dropdown_id" />
         <h2 class="accordion-header">
             <button
                 t-attf-class="accordion-button#{'' if selected_filter or is_unset_selected else ' collapsed'}"
@@ -795,51 +811,53 @@
                         <t t-set="selection" t-value="filter_item[0]"/>
                         <t t-set="count" t-value="filter_item[1]"/>
                         <t t-if="isinstance(selection, str) and selection == 'all'">
-                            <a t-attf-href="/jobs?#{all_arg}&amp;#{non_filter_params}"
-                            class="d-flex align-items-center justify-content-between text-reset text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between text-reset">
                                 <div class="form-check flex-basis-100">
                                     <input
-                                        class="form-check-input pe-none"
-                                        type="radio" t-attf-name="#{id_selected_arg}_all"
+                                        class="form-check-input"
+                                        type="radio"
+                                        t-att-name="radio_group_name"
+                                        t-att-value="all_arg"
                                         t-att-checked="bool(not(selected_filter or is_unset_selected))"
                                     />
-                                    <label class="form-check-label" t-attf-for="#{id_selected_arg}_all">
-                                        All <t t-out="filter_label"/>
+                                    <label class="form-check-label"> All <t t-out="filter_label"/>
                                     </label>
                                 </div>
                                 <span t-attf-class="badge pagination text-bg-primary ms-2" t-out="count"/>
-                            </a>
+                            </div>
                         </t>
                         <t t-elif="selection">
-                            <a t-attf-href="/jobs?#{id_selected_arg}=#{selection.id}&amp;#{non_filter_params}"
-                            class="d-flex align-items-center justify-content-between text-reset text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between text-reset">
                                 <div class="form-check flex-basis-100">
                                     <input
-                                        class="form-check-input pe-none"
-                                        type="radio" t-attf-name="#{id_selected_arg}_#{selection.id}"
+                                        class="form-check-input"
+                                        type="radio"
+                                        t-att-name="radio_group_name"
+                                        t-att-value="'%s=%s' % (id_selected_arg, selection.id)"
                                         t-att-checked="bool(selected_filter and selected_filter.id == selection.id)"
                                     />
-                                    <label class="form-check-label" t-attf-for="#{id_selected_arg}_#{selection.id}" t-out="selection.name"/>
+                                    <label class="form-check-label" t-out="selection.name"/>
                                 </div>
                                 <span t-attf-class="badge pagination text-bg-primary ms-2" t-out="count"/>
-                            </a>
+                            </div>
                         </t>
                         <t t-else="">
-                            <a t-attf-href="/jobs?#{unset_arg}&amp;#{non_filter_params}"
-                            class="d-flex align-items-center justify-content-between text-reset text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-between text-reset">
                                 <div class="form-check flex-basis-100">
                                     <input
-                                        class="form-check-input pe-none"
-                                        type="radio" t-attf-name="#{id_selected_arg}_unset"
+                                        class="form-check-input"
+                                        type="radio"
+                                        t-att-name="radio_group_name"
+                                        t-att-value="unset_arg"
                                         t-att-checked="bool(is_unset_selected)"
                                     />
-                                    <label class="form-check-label" t-attf-for="#{id_selected_arg}_unset">
+                                    <label class="form-check-label">
                                         <t t-if="untype_label" t-out="untype_label"/>
                                         <t t-else="">Unspecified <t t-out="filter_label"/></t>
                                     </label>
                                 </div>
                                 <span t-attf-class="badge pagination text-bg-primary ms-2" t-out="count"/>
-                            </a>
+                            </div>
                         </t>
                     </li>
                 </ul>
@@ -860,7 +878,7 @@
     </div>
 </template>
 
-<template id="job_filter_by_countries" inherit_id="website_hr_recruitment.topbar_customizations" active="False" priority="10">
+<template id="job_filter_by_countries" inherit_id="website_hr_recruitment.topbar_customizations" active="True" priority="10">
     <xpath expr="//div[hasclass('o_jobs_topbar_search_bar')]" position="before">
         <t t-call="website_hr_recruitment.job_filter_base"
             filter_label.translate="Countries"
@@ -887,7 +905,7 @@
     </xpath>
 </template>
 
-<template id="job_filter_by_industries" inherit_id="website_hr_recruitment.topbar_customizations" active="False" priority="15">
+<template id="job_filter_by_industries" inherit_id="website_hr_recruitment.topbar_customizations" active="True" priority="15">
     <xpath expr="//div[hasclass('o_jobs_topbar_search_bar')]" position="before">
         <t t-call="website_hr_recruitment.job_filter_base"
             filter_label.translate="Industries"
@@ -914,7 +932,7 @@
     </xpath>
 </template>
 
-<template id="job_filter_by_offices" inherit_id="website_hr_recruitment.topbar_customizations" active="False" priority="20">
+<template id="job_filter_by_offices" inherit_id="website_hr_recruitment.topbar_customizations" active="True" priority="20">
     <xpath expr="//div[hasclass('o_jobs_topbar_search_bar')]" position="before">
         <t t-call="website_hr_recruitment.job_filter_base"
             filter_label.translate="Offices"
@@ -943,7 +961,7 @@
     </xpath>
 </template>
 
-<template id="job_filter_by_departments" inherit_id="website_hr_recruitment.topbar_customizations" active="False" priority="30">
+<template id="job_filter_by_departments" inherit_id="website_hr_recruitment.topbar_customizations" active="True" priority="30">
     <xpath expr="//div[hasclass('o_jobs_topbar_search_bar')]" position="before">
         <t t-call="website_hr_recruitment.job_filter_base"
             filter_label.translate="Departments"
@@ -972,7 +990,7 @@
     </xpath>
 </template>
 
-<template id="job_filter_by_employment_type" inherit_id="website_hr_recruitment.topbar_customizations" active="False" priority="40">
+<template id="job_filter_by_employment_type" inherit_id="website_hr_recruitment.topbar_customizations" active="True" priority="40">
     <xpath expr="//div[hasclass('o_jobs_topbar_search_bar')]" position="before">
         <t t-call="website_hr_recruitment.job_filter_base"
             filter_label.translate="Types"
@@ -1002,7 +1020,7 @@
 <!-- reset filters -->
 <template id="job_reset_filters"
     inherit_id="website_hr_recruitment.topbar_customizations"
-    active="False"
+    active="True"
     priority="50">
     <xpath expr="//t[@t-set='opt_jobs_is_filter_applied']" position="after">
         <a t-if="opt_jobs_is_filter_applied and opt_jobs_filter_count &gt; 1"

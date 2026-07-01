@@ -79,8 +79,8 @@ class WebsiteEventController(http.Controller):
         event_count, details, fuzzy_search_term = self.env.website._search_with_fuzzy("events", search,
             offset=0, limit=page * step, order=order, options=options)
         event_details = details[0]
-        events = event_details.get('results', Event)
-        events = events[(page - 1) * step:page * step]
+        matching_events = event_details.get('results', Event)
+        events = matching_events[(page - 1) * step:page * step]
 
         default_country = None
         event_location = self.env.website.is_view_active('website_event.event_location')
@@ -172,6 +172,7 @@ class WebsiteEventController(http.Controller):
             'current_country': current_country,
             'current_type': current_type,
             'event_ids': events,  # event_ids used in website_event_track so we keep name as it is
+            'available_event_tags': matching_events.mapped('tag_ids'),
             'dates': dates,
             'categories': request.env['event.tag.category'].search(Domain('is_published', '=', True) & self.env.website.website_domain()),
             'countries': countries,
@@ -188,6 +189,16 @@ class WebsiteEventController(http.Controller):
         }
 
         return request.render("website_event.index", values)
+
+    @http.route(['/event/reload'], type='jsonrpc', auth="public", website=True)
+    def events_reload(self, **searches):
+        searches['prevent_redirect'] = True
+        slug_tags = searches.pop('tags', None)
+        response = self.events(slug_tags=slug_tags, **searches)
+        return {
+            'count': response.qcontext.get('search_count', 0),
+            'html': str(response.render()),
+        }
 
     # ------------------------------------------------------------
     # EVENT PAGE

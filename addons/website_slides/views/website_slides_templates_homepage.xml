@@ -125,11 +125,19 @@
             </div>
             <t t-call="website_slides.courses_footer"/>
             <!-- Off canvas filters on mobile -->
-            <div id="o_wslides_index_offcanvas" class="o_website_offcanvas offcanvas offcanvas-end d-lg-none p-0 overflow-visible">
-                <div class="offcanvas-header">
-                    <h5 class="offcanvas-title">Filters</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"/>
-                </div>
+            <div id="o_wslides_index_offcanvas"
+                class="o_async_filters o_website_offcanvas offcanvas offcanvas-end d-lg-none p-0 overflow-visible"
+                data-filter-url="/slides"
+                data-filter-clear-url="/slides"
+                data-filter-reload-route="/slides/reload"
+                data-filter-root-selector=".o_wslides_home_main"
+                data-filter-loading-selector=".o_wslides_home_main"
+                data-filter-replace-selectors=".o_wslides_home_main"
+                data-filter-count-selector="#o_wslides_offcanvas_count">
+                    <div class="offcanvas-header">
+                        <h5 class="offcanvas-title">Filters</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"/>
+                    </div>
                 <div class="offcanvas-body p-0">
                     <div class="accordion accordion-flush">
                         <!-- Tag Groups Filters -->
@@ -147,16 +155,21 @@
                                         <t t-out="tag_group.name"/>
                                     </button>
                                 </h2>
-                                <div t-attf-id="o_wslides_offcanvas_cat_#{tag_group.id}" t-attf-class="o_wslides_offcanvas_cat_#{tag_group.id} accordion-collapse collapse">
+                                <div t-attf-id="o_wslides_offcanvas_cat_#{tag_group.id}"
+                                    t-attf-class="o_wslides_offcanvas_cat_#{tag_group.id} accordion-collapse collapse">
                                     <div class="accordion-body pt-0">
                                         <ul class="list-group list-group-flush">
-                                            <li t-foreach="group_frontend_tags" t-as="tag" class="list-group-item border-0 px-0">
-                                                <div t-att-data-post="slide_query_url(tag=slugify_tags(search_tags.ids, toggle_tag_id=tag.id), my=search_my, search=search_term, slide_category=search_slide_category, prevent_redirect=True)"
-                                                    class="post_link text-reset cursor-pointer" t-att-title="tag.name">
-                                                    <div class="form-check">
-                                                        <input class="form-check-input pe-none" type="checkbox" t-attf-name="#{tag.color}" t-att-checked="tag in search_tags"/>
-                                                        <label class="form-check-label" t-attf-for="#{tag.color}" t-out="tag.name"/>
-                                                    </div>
+                                            <li t-foreach="group_frontend_tags" t-as="tag"
+                                                class="list-group-item border-0 px-0">
+                                                <div class="form-check" t-att-title="tag.name">
+                                                    <input
+                                                        class="form-check-input"
+                                                        type="checkbox"
+                                                        name="tag"
+                                                        t-att-value="tag.id"
+                                                        t-att-data-slug="request.env['ir.http']._slug(tag)"
+                                                        t-att-checked="tag in search_tags"/>
+                                                    <label class="form-check-label" t-out="tag.name"/>
                                                 </div>
                                             </li>
                                         </ul>
@@ -166,9 +179,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="offcanvas-body flex-grow-0 border-top overflow-hidden">
-                    <a href="/slides" class="btn btn-light">Clear Filters</a>
-                </div>
+                <t t-set="has_active_filters" t-value="bool(search_tags or search_my)"/>
+                <t t-call="website.offcanvas_filters_footer"
+                    has_active_filters="has_active_filters"
+                    clear_filters_url="'/slides'"
+                    count_id="'o_wslides_offcanvas_count'"
+                    count="search_count"/>
             </div>
         </div>
     </t>

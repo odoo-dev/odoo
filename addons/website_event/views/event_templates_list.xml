@@ -94,44 +94,63 @@
             <t t-if="search_tags" t-call="website_event.searched_tags"/>
         </section>
         <!-- Off canvas filters on mobile-->
-        <div id="o_wevent_index_offcanvas" class="o_website_offcanvas offcanvas offcanvas-end d-lg-none p-0 overflow-visible">
+        <div id="o_wevent_index_offcanvas"
+            class="o_async_filters o_website_offcanvas offcanvas offcanvas-end d-lg-none p-0 overflow-visible"
+            data-filter-url="/event"
+            data-filter-clear-url="/event"
+            data-filter-reload-route="/event/reload"
+            data-filter-root-selector=".o_wevent_index"
+            data-filter-loading-selector="#o_wevent_index_main_col"
+            data-filter-replace-selectors=".o_wevent_index_topbar_filters,#o_wevent_index_main_col,#o_wevent_index_offcanvas"
+            data-filter-count-selector="#o_wevent_offcanvas_count">
             <div class="offcanvas-header">
                 <h5 class="offcanvas-title">Filters</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"/>
             </div>
             <div class="offcanvas-body p-0">
                 <div class="accordion accordion-flush">
-                    <div class="accordion-item" t-foreach="categories" t-as="category">
-                        <h2 class="accordion-header">
-                            <button class="accordion-button collapsed"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                t-attf-aria-controls="o_wevent_offcanvas_cat_#{category.id}"
-                                t-att-data-bs-target="'.o_wevent_offcanvas_cat_%s' % category.id"
-                                aria-expanded="false">
-                                <t t-out="category.name"/>
-                            </button>
-                        </h2>
-                        <div t-attf-id="o_wevent_offcanvas_cat_#{category.id}" t-attf-class="o_wevent_offcanvas_cat_#{category.id} accordion-collapse collapse">
-                            <div class="accordion-body pt-0">
-                                <ul class="list-group list-group-flush">
-                                    <t t-if="category.is_published and category.tag_ids and any(tag.color for tag in category.tag_ids)" t-foreach="category.tag_ids" t-as="tag">
-                                        <li t-if="tag.color" class="list-group-item border-0 px-0">
-                                            <span t-att-data-post="keep_event_url(tags=slugify_tags(search_tags.ids, toggle_tag_id=tag.id), prevent_redirect=True)"
-                                                class="post_link text-reset cursor-pointer" t-att-title="tag.name">
-                                                <div class="form-check">
-                                                    <input class="form-check-input pe-none" type="checkbox" t-attf-name="#{tag.color}" t-att-checked="tag in search_tags"/>
-                                                    <label class="form-check-label" t-attf-for="#{tag.color}" t-out="tag.name"/>
-                                                </div>
-                                            </span>
+                    <t t-foreach="categories" t-as="category">
+                        <t t-set="category_tags" t-value="category.tag_ids.filtered(lambda tag: tag.color and (tag in available_event_tags or tag in search_tags))"/>
+                        <div t-if="category.is_published and category_tags" class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    t-attf-aria-controls="o_wevent_offcanvas_cat_#{category.id}"
+                                    t-att-data-bs-target="'.o_wevent_offcanvas_cat_%s' % category.id"
+                                    aria-expanded="false">
+                                    <t t-out="category.name"/>
+                                </button>
+                            </h2>
+                            <div t-attf-id="o_wevent_offcanvas_cat_#{category.id}" t-attf-class="o_wevent_offcanvas_cat_#{category.id} accordion-collapse collapse">
+                                <div class="accordion-body pt-0">
+                                    <ul class="list-group list-group-flush">
+                                        <li t-foreach="category_tags" t-as="tag" class="list-group-item border-0 px-0">
+                                            <div class="form-check" t-att-title="tag.name">
+                                                <input
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    name="tags"
+                                                    t-att-value="tag.id"
+                                                    t-att-data-slug="request.env['ir.http']._slug(tag)"
+                                                    t-att-checked="tag in search_tags" />
+                                                <label class="form-check-label" t-out="tag.name" />
+                                            </div>
                                         </li>
-                                    </t>
-                                </ul>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </t>
                 </div>
             </div>
+            <t t-set="has_active_filters" t-value="search_tags or searches['type'] != 'all' or searches['country'] != 'all' or searches['search']or searches['date'] not in ['scheduled', 'all']"/>
+            <t t-call="website.offcanvas_filters_footer"
+                has_active_filters="has_active_filters"
+                clear_filters_url="keep_event_url(tags='', prevent_redirect=True)"
+                count_id="'o_wevent_offcanvas_count'"
+                count="search_count"
+            />
         </div>
     </div>
 </template>
@@ -171,7 +190,7 @@
             </div>
         </div>
     </xpath>
-    <xpath expr="//div[hasclass('accordion-item')]" position="after">
+    <xpath expr="//div[hasclass('accordion-flush')]" position="inside">
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button collapsed"
@@ -189,13 +208,14 @@
                         <t t-foreach="dates" t-as="date">
                             <li t-if="date[3] or (date[0] in ('old','upcoming','all'))" class="list-group-item px-0 border-0">
                                 <t t-set="is_active" t-value="searches.get('date') == date[0]"/>
-                                <a t-att-href="keep_event_url(date=date[0])" class="d-flex align-items-center justify-content-between text-reset text-decoration-none" t-att-title="date[1]">
+                                <div class="d-flex align-items-center justify-content-between text-reset"
+                                    t-att-title="date[1]">
                                     <div class="form-check flex-basis-100">
-                                        <input class="form-check-input pe-none" type="radio" t-attf-name="#{date[1]}" t-att-checked="is_active"/>
-                                        <label class="form-check-label" t-attf-for="#{date[1]}" t-out="date[1]"/>
+                                        <input class="form-check-input" type="radio" t-attf-name="date" t-att-value="date[0]" t-att-checked="is_active"/>
+                                        <label class="form-check-label" t-attf-for="date" t-out="date[1]"/>
                                     </div>
                                     <span t-if="date[3]" t-out="date[3]" class="badge pagination text-bg-primary"/>
-                                </a>
+                                </div>
                             </li>
                         </t>
                     </ul>
@@ -243,7 +263,7 @@
             </div>
         </div>
     </xpath>
-    <xpath expr="//div[hasclass('accordion-item')]" position="after">
+    <xpath expr="//div[hasclass('accordion-flush')]" position="inside">
         <div class="accordion-item">
             <h2 class="accordion-header">
                 <button class="accordion-button collapsed"
@@ -261,23 +281,23 @@
                         <li t-foreach="countries" t-as="country" class="list-group-item px-0 border-0">
                             <t t-if="country['country_id']">
                                 <t t-set="is_active" t-value="searches.get('country') == str(country['country_id'] and country['country_id'][0])"/>
-                                <a t-att-href="keep_event_url(country=country['country_id'][0])" class="d-flex align-items-center justify-content-between text-reset text-decoration-none" t-att-title="country['country_id'][1]">
+                                <div class="d-flex align-items-center justify-content-between text-reset" t-att-title="country['country_id'][1]">
                                     <div class="form-check flex-basis-100">
-                                        <input class="form-check-input pe-none" type="radio" t-attf-name="#{country['country_id'][1]}" t-att-checked="is_active"/>
-                                        <label class="form-check-label" t-attf-for="#{country['country_id'][1]}" t-out="country['country_id'][1]"/>
+                                        <input class="form-check-input pe-none" type="radio" name="country" t-att-value="country['country_id'][0]" t-att-checked="is_active"/>
+                                        <label class="form-check-label" t-out="country['country_id'][1]"/>
                                     </div>
                                     <span t-out="country['country_id_count']" class="badge pagination text-bg-primary ms-auto"/>
-                                </a>
+                                </div>
                             </t>
                             <t t-else="">
                                 <t t-set="is_active" t-value="searches.get('country') == 'online'"/>
-                                <a t-att-href="keep_event_url(country='online')" class="d-flex align-items-center justify-content-between text-reset text-decoration-none">
+                                <div class="d-flex align-items-center justify-content-between text-reset">
                                     <div class="form-check flex-basis-100">
-                                        <input class="form-check-input pe-none" type="radio" name="Online Events" t-att-checked="is_active"/>
+                                        <input class="form-check-input pe-none" type="radio" name="Online Events" value="online" t-att-checked="is_active"/>
                                         <label class="form-check-label" for="Online Events">Online Events</label>
                                     </div>
                                     <span t-out="country['country_id_count']" class="badge pagination text-bg-primary ms-auto"/>
-                                </a>
+                                </div>
                             </t>
                         </li>
                     </ul>
