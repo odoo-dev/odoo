@@ -20,8 +20,9 @@
             <div class="d-flex overflow-auto align-items-center px-2 border-top">
                 <Dropdown menuClass="'my-2 mx-1'">
                     <span class="btn btn-secondary my-2 mx-1 o-dropdown-caret">
-                        <i class="d-inline-block flex-shrink-0 me-2" 
-                            t-attf-style="background: url('#{this.selectedModule.imgurl}') no-repeat center; background-size: contain; width: 23px; height: 23px;" />
+                        <i class="d-inline-block flex-shrink-0 me-2"
+                            t-attf-style="background-image: url('#{this.selectedModule.imgurl}');"
+                            style="width: 23px; height: 23px; background: center / contain no-repeat;" />
                         <span class="pe-2" t-out="this.selectedModule.string"/>
                     </span>
                     <t t-set-slot="content">
@@ -38,8 +39,8 @@
                                 onSelected="() => this.onSettingTabClick(module.key)">
                                 
                                 <span class="flex-shrink-0 me-2" 
-                                    t-attf-style="background: url('#{module.imgurl}') no-repeat center; background-size: contain; width: 23px; height: 23px; display: inline-block;" />
-                                
+                                    t-attf-style="background-image: url('#{module.imgurl}');"
+                                    style="display: inline-block; width: 23px; height: 23px; background: center / contain no-repeat;" />
                                 <span class="app_name text-truncate">
                                     <t t-out="module.string"/>
                                 </span>
