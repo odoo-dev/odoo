@@ -253,6 +253,14 @@ export class SearchArchParser {
                 this.optionsParams = { customOptions: [] };
                 visitChildren();
                 preSearchItem.optionsParams = this.optionsParams;
+                const defaultOptions = this.optionsParams.customOptions
+                    .filter((o) => o.isDefault)
+                    .map((o) => o.id);
+
+                if (defaultOptions.length) {
+                    preSearchItem.isDefault = true;
+                    preSearchItem.defaultGeneratorIds = defaultOptions;
+                }
                 this.optionsParams = null;
             }
 
@@ -313,6 +321,9 @@ export class SearchArchParser {
         preInnerFilterOption.id = `custom_${node.getAttribute("name")}`;
         preInnerFilterOption.description = node.getAttribute("string");
         preInnerFilterOption.domain = node.getAttribute("domain");
+        if (node.getAttribute("name") in this.searchDefaults) {
+            preInnerFilterOption.isDefault = true;
+        }
         this.optionsParams.customOptions.push(preInnerFilterOption);
     }
 
