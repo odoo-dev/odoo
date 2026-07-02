@@ -124,11 +124,11 @@ registry.category("web_tour.tours").add("course_member", {
             run: "click",
         },
         {
-            trigger: ".o_wslides_js_lesson_quiz_question:first .list-group a:first",
+            trigger: ".o_wslides_js_lesson_quiz_question:first .o_wslides_quiz_answer:first",
             run: "click",
         },
         {
-            trigger: ".o_wslides_js_lesson_quiz_question:last .list-group a:first",
+            trigger: ".o_wslides_js_lesson_quiz_question:last .o_wslides_quiz_answer:first",
             run: "click",
         },
         {

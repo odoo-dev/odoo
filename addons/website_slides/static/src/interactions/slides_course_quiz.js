@@ -11,7 +11,7 @@ export class WebsiteSlidesQuiz extends Interaction {
     static selector = ".o_wslides_js_quiz_container";
     dynamicContent = {
         ".o_wslides_js_lesson_quiz_reset": { "t-on-click": this.onResetClick },
-        ".o_wslides_quiz_answer": { "t-on-click.prevent": this.onAnswerClick },
+        ".o_wslides_quiz_answer": { "t-on-click": this.onAnswerClick },
         ".o_wslides_js_lesson_quiz_submit": { "t-on-click": this.onQuizSubmit },
         ".o_wslides_quiz_continue": { "t-on-click": this.onNextClick },
         ".o_wslides_js_lesson_quiz_validation": {
@@ -135,9 +135,9 @@ export class WebsiteSlidesQuiz extends Interaction {
     disableAnswers() {
         for (const el of this.el.querySelectorAll(".o_wslides_js_lesson_quiz_question")) {
             el.classList.add("completed-disabled");
-        }
-        for (const el of this.el.querySelectorAll("input[type='radio'")) {
-            el.disabled = this.slide.completed;
+            for (const inputEl of el.querySelectorAll("input[type=radio]")) {
+                inputEl.disabled = true;
+            }
         }
     }
 
@@ -149,28 +149,28 @@ export class WebsiteSlidesQuiz extends Interaction {
         for (const questionEl of this.el.querySelectorAll(".o_wslides_js_lesson_quiz_question")) {
             const questionId = Number(questionEl.dataset.questionId);
             const isCorrect = this.quiz.answers[questionId].is_correct;
-            for (const answerEl of questionEl.querySelectorAll("a.o_wslides_quiz_answer")) {
-                for (const iconEl of answerEl.querySelectorAll("i.oi")) {
+            for (const answerEl of questionEl.querySelectorAll(".o_wslides_quiz_answer")) {
+                answerEl.classList.remove(
+                    "o_wslides_quiz_answer_correct",
+                    "o_wslides_quiz_answer_incorrect"
+                );
+                for (const iconEl of answerEl.querySelectorAll(
+                    "i[data-icon='check_circle'], i[data-icon='cancel']"
+                )) {
                     iconEl.classList.add("d-none");
                 }
+
                 if (answerEl.querySelector("input[type=radio]").checked) {
                     if (isCorrect) {
-                        answerEl.classList.remove("list-group-item-danger");
-                        answerEl.classList.add("list-group-item-success");
+                        answerEl.classList.add("o_wslides_quiz_answer_correct");
                         answerEl
                             .querySelector("i[data-icon='check_circle']")
                             .classList.remove("d-none");
                     } else {
-                        answerEl.classList.remove("list-group-item-success");
-                        answerEl.classList.add("list-group-item-danger");
+                        answerEl.classList.add("o_wslides_quiz_answer_incorrect");
                         answerEl.querySelector("i[data-icon='cancel']").classList.remove("d-none");
-                        answerEl.querySelector("label input").checked = false;
+                        answerEl.querySelector("input[type=radio]").checked = false;
                     }
-                } else {
-                    answerEl.classList.remove("list-group-item-danger", "list-group-item-success");
-                    answerEl
-                        .querySelector("i[data-icon='circle'].oi-filled")
-                        .classList.remove("d-none");
                 }
             }
             const comment = this.quiz.answers[questionId].comment;
@@ -303,7 +303,7 @@ export class WebsiteSlidesQuiz extends Interaction {
             return;
         }
         for (const questionEl of this.el.querySelectorAll(".o_wslides_js_lesson_quiz_question")) {
-            for (const answerEl of questionEl.querySelectorAll("a.o_wslides_quiz_answer")) {
+            for (const answerEl of questionEl.querySelectorAll(".o_wslides_quiz_answer")) {
                 if (
                     !answerEl.querySelector("input[type=radio]").checked &&
                     this.quiz.sessionAnswers.includes(Number(answerEl.dataset.answerId))

@@ -114,10 +114,41 @@
     }
 
     .o_wslides_js_lesson_quiz_question {
-        .list-group-item  {
-            input:checked + i[data-icon="circle"] {
-                color: $primary !important;
+        .o_wslides_quiz_answer {
+            background-color: var(--o-wslides-color-lighter);
+            border: $border-width solid transparent;
+            color: rgba(white, 0.8);
+            cursor: pointer;
+
+            &:hover {
+                background-color: var(--o-wslides-color-lightest);
             }
+
+            &:has(input:checked) {
+                background-color: rgba($primary, 0.4);
+                color: white;
+            }
+
+            &:focus-within {
+                outline: 2px solid $primary;
+                outline-offset: -2px;
+            }
+
+            &.o_wslides_quiz_answer_correct {
+                background-color: rgba($success, 0.25);
+                color: white;
+            }
+
+            &.o_wslides_quiz_answer_incorrect {
+                background-color: rgba($danger, 0.25);
+                color: white;
+            }
+        }
+
+        .o_wslides_quiz_answer_info {
+            background-color: var(--o-wslides-color-lighter);
+            border-color: transparent;
+            color: rgba(white, 0.8);
         }
 
         &.disabled {
@@ -125,8 +156,12 @@
             pointer-events: none;
         }
 
-        &.completed-disabled{
+        &.completed-disabled {
             pointer-events: none;
+
+            .o_wslides_quiz_answer {
+                cursor: default;
+            }
         }
     }
 

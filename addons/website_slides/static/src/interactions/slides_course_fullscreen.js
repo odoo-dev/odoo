@@ -226,11 +226,6 @@ export class WebsiteSlidesFullscreen extends WebsiteSlidesCommon {
         ".o_footer": {
             "t-att-class": () => ({ "d-none": true }),
         },
-        ".o_wslides_fs_content": {
-            "t-att-class": () => ({
-                "bg-white": this.slide.category === "quiz" || this.slide.isQuiz,
-            }),
-        },
         ".o_wslides_fs_sidebar_list_item .o_wslides_fs_slide_name": {
             "t-on-click.stop": this.onSidebarItemClick,
         },
