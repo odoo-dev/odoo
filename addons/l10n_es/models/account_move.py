@@ -21,6 +21,8 @@ class AccountMove(models.Model):
                                                  compute='_compute_l10n_es_invoice_type_available')
 
     l10n_es_invoice_type = fields.Selection(selection='l10n_es_invoice_type_selection',
+                                            compute='_compute_l10n_es_invoice_type',
+                                            store=True, readonly=False,
                                             copy=False)
 
     # Note: We depend on 'line_ids.balance' instead of 'amount_total_signed' directly.
@@ -74,21 +76,30 @@ class AccountMove(models.Model):
             else:
                 move.l10n_es_invoice_type_available = ''
 
-    def default_get(self, fields_list):
-        defaults = super().default_get(fields_list)
-        move_type = defaults.get('move_type') or self.env.context.get('default_move_type')
-        if move_type in ('out_invoice', 'in_invoice'):
-            defaults['l10n_es_invoice_type'] = 'F1'
-        elif move_type in ('out_refund', 'in_refund'):
-            defaults['l10n_es_invoice_type'] = 'R4'
-        return defaults
-
-    @api.onchange('move_type', 'l10n_es_is_simplified')
-    def _onchange_l10n_es_invoice_type(self):
-        if self.move_type in ('out_invoice', 'in_invoice'):
-            self.l10n_es_invoice_type = 'F2' if self.l10n_es_is_simplified else 'F1'
-        elif self.move_type in ('out_refund', 'in_refund'):
-            self.l10n_es_invoice_type = 'R5' if self.l10n_es_is_simplified else 'R4'
+    # Note: F2/R5 are mandatory whenever the move is simplified, so a change of
+    # 'l10n_es_is_simplified' to True always forces the value. When it is False however, we only
+    # normalize the value if it is currently missing or no longer valid (F2/R5); any other value
+    # (F1/F4/F5/F6/LC, R1/R2/R3/R4) is left untouched, whether it was picked manually (e.g. a refund
+    # reason chosen through the reversal wizard) or already correct. This matters because
+    # 'l10n_es_is_simplified' can be recomputed to the *same* value for unrelated reasons (e.g. the
+    # balance-negating `write()` that `_reverse_moves()` performs on `line_ids` right after creating
+    # the reversal move) — without this guard, such a spurious recompute would silently discard an
+    # explicitly chosen value.
+    @api.depends('move_type', 'l10n_es_is_simplified')
+    def _compute_l10n_es_invoice_type(self):
+        for move in self:
+            if move.move_type in ('out_invoice', 'in_invoice'):
+                if move.l10n_es_is_simplified:
+                    move.l10n_es_invoice_type = 'F2'
+                elif move.l10n_es_invoice_type in (False, 'F2'):
+                    move.l10n_es_invoice_type = 'F1'
+            elif move.move_type in ('out_refund', 'in_refund'):
+                if move.l10n_es_is_simplified:
+                    move.l10n_es_invoice_type = 'R5'
+                elif move.l10n_es_invoice_type in (False, 'R5'):
+                    move.l10n_es_invoice_type = 'R4'
+            else:
+                move.l10n_es_invoice_type = False
 
     def _l10n_es_vat_regime_get_use(self):
         self.ensure_one()

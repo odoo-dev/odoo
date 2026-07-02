@@ -1,4 +1,9 @@
 from odoo import _, api, fields, models
+from odoo.addons.l10n_es_edi_verifactu.const import (
+    VERIFACTU_EXTRA_LABELS,
+    VERIFACTU_REGIME_CODES_IGIC,
+    VERIFACTU_REGIME_CODES_IVA,
+)
 from odoo.exceptions import ValidationError
 
 
@@ -53,6 +58,31 @@ class AccountMove(models.Model):
         comodel_name='account.move',
         inverse_name='l10n_es_edi_verifactu_substituted_entry_id',
     )
+
+    @api.model
+    def _l10n_es_vat_regime_code_labels(self):
+        labels = super()._l10n_es_vat_regime_code_labels()
+        labels.update(VERIFACTU_EXTRA_LABELS)
+        return labels
+
+    @api.depends('l10n_es_edi_verifactu_required', 'invoice_line_ids.tax_ids')
+    def _compute_l10n_es_vat_regime_available(self):
+        super()._compute_l10n_es_vat_regime_available()
+
+    @api.depends('l10n_es_edi_verifactu_required')
+    def _compute_l10n_es_vat_regime_codes(self):
+        super()._compute_l10n_es_vat_regime_codes()
+
+    def _l10n_es_vat_regime_get_available_codes(self):
+        self.ensure_one()
+        # VeriFactu only applies to sale documents (out_invoice/out_refund); purchase
+        # moves always fall back to the generic catalog, even on a VeriFactu company.
+        if self.l10n_es_edi_verifactu_required and self._l10n_es_vat_regime_get_use() == 'sale':
+            applicability = self._l10n_es_edi_verifactu_get_tax_applicability()
+            if applicability == '03':  # IGIC
+                return VERIFACTU_REGIME_CODES_IGIC
+            return VERIFACTU_REGIME_CODES_IVA  # IVA ('01'), IPSI ('02') and unset/"Other" default here
+        return super()._l10n_es_vat_regime_get_available_codes()
 
     def _l10n_es_edi_verifactu_get_tax_applicability(self):
         """

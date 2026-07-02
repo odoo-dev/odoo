@@ -12,6 +12,7 @@ from werkzeug.urls import url_quote_plus, url_encode
 
 from odoo import _, api, fields, models
 from odoo.addons.certificate.tools import CertificateAdapter
+from odoo.addons.l10n_es_edi_verifactu.const import VERIFACTU_REGIME_CODES_IGIC, VERIFACTU_REGIME_CODES_IVA
 from odoo.exceptions import UserError
 from odoo.tools import float_repr, float_round, frozendict, zeep, BinaryBytes
 
@@ -27,7 +28,15 @@ VERIFACTU_VERSION = "1.0"
 
 BATCH_LIMIT = 1000
 
-VERIFACTU_VALID_CLAVE_REGIMEN = {'01', '02', '11', '17', '18', '19', '20'}
+
+def _verifactu_valid_clave_regimen(applicability):
+    """The "clave de régimen" (ClaveRegimen) values accepted by VeriFactu for a given tax
+    applicability ('l10n_es_applicability': '01'=VAT, '02'=IPSI, '03'=IGIC, '05'=Other), derived
+    from VERIFACTU_REGIME_CODES_IVA/_IGIC by stripping the disambiguation suffix (e.g. '11_vf' -> '11').
+    IPSI and unset/"Other" fall back to the IVA list — the AEAT spec doesn't define a separate one.
+    """
+    codes = VERIFACTU_REGIME_CODES_IGIC if applicability == '03' else VERIFACTU_REGIME_CODES_IVA
+    return {code.split('_', 1)[0] for code in codes}
 
 
 def _sha256(string):
@@ -390,7 +399,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
             errors.append(_("Missing Veri*Factu Regime Key (ClaveRegimen)."))
 
         clave = vals['clave_regimen']
-        if clave and clave not in VERIFACTU_VALID_CLAVE_REGIMEN:
+        if clave and clave not in _verifactu_valid_clave_regimen(vals['l10n_es_applicability']):
             errors.append(_("La clave de régimen '%s' no es válida para VeriFactu.", clave))
 
         sujeto_tax_types = self.env['account.tax']._l10n_es_get_sujeto_tax_types()
@@ -636,8 +645,10 @@ class L10nEsEdiVerifactuDocument(models.Model):
             delivery_date = self._format_date_type(vals['delivery_date'])
             fecha_operacion = delivery_date if delivery_date and delivery_date != invoice_date else None
         elif vals['verifactu_move_type'] == 'reversal_for_substitution':
+            # The AEAT requires this intermediate cancellation step to always be reported as a
+            # regular invoice (F1/F2), regardless of the (refund-reason) 'invoice_type'.
             tipo_rectificativa = None
-            tipo_factura = vals['invoice_type']
+            tipo_factura = 'F2' if vals['is_simplified'] else 'F1'
             fecha_operacion = None
         elif vals['verifactu_move_type'] == 'correction_substitution':
             tipo_rectificativa = 'S'
@@ -737,7 +748,8 @@ class L10nEsEdiVerifactuDocument(models.Model):
     @api.model
     def _render_vals_monetary_amounts(self, vals):
         # Note: We only support a single verifactu tax applicabilty, clave regimen pair per record.
-        # For moves the clave regime is stored on each move in field `l10n_es_edi_verifactu_clave_regimen`
+        # For moves the clave regime is stored on each move in field `l10n_es_vat_regime_code_id`
+        # (from the l10n.es.vat.regime.mixin), stripped of its disambiguation suffix (e.g. '11_vf' -> '11').
         if vals['cancellation']:
             return {}
 

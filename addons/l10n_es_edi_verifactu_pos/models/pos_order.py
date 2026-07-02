@@ -167,19 +167,22 @@ class PosOrder(models.Model):
             refunded_document = refunded_order.l10n_es_edi_verifactu_document_ids._get_last('submission')
 
         name = self.l10n_es_edi_verifactu_get_invoice_name()
+        is_simplified = not refunded_order or self.l10n_es_invoice_type == 'R5'
         vals.update({
             'rejected_before': rejected_before,
             'verifactu_state': self.l10n_es_edi_verifactu_state,
             'delivery_date': False,
             'description': None,
             'invoice_date': self.date_order.date(),
-            'is_simplified': not refunded_order or self.l10n_es_invoice_type == 'R5',
+            'is_simplified': is_simplified,
             # NOTE: invoice with negative amounts possible (when no `refunded_order` specified)
             'verifactu_move_type': 'correction_incremental' if refunded_order else 'invoice',
             'sign': -1 if refunded_order else 1,
             'name': name,
             'partner': self.partner_id.commercial_partner_id,
-            'invoice_type': self.l10n_es_invoice_type,
+            # `l10n_es_invoice_type` only holds a refund reason (R1-R5) on pos.order; a regular sale
+            # (non-refund) always maps to F1/F2 based on whether it is simplified.
+            'invoice_type': self.l10n_es_invoice_type if refunded_order else ('F2' if is_simplified else 'F1'),
             'refunded_document': refunded_document,
             'substituted_document': None,
             'substituted_document_reversal_document': None,
@@ -270,7 +273,10 @@ class PosOrder(models.Model):
 
         if len(self) > 1:
             raise UserError(_("With Veri*Factu enabled, POS orders cannot be consolidated into one invoice."))
-        res['l10n_es_invoice_type'] = self.l10n_es_invoice_type
+        # `l10n_es_invoice_type` on pos.order only ever holds a refund reason (R1-R5). Only carry it
+        # over for refunds; for a regular sale, leave it unset so account.move computes F1/F2 itself.
+        if self.l10n_es_invoice_type:
+            res['l10n_es_invoice_type'] = self.l10n_es_invoice_type
         # There is no reason to create a simplified invoice instead of just creating an order.
         # (Currently "simplified" basically just removes the partner information.)
         res['l10n_es_is_simplified'] = False

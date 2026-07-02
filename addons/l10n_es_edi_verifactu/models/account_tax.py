@@ -1,4 +1,9 @@
 from odoo import _, api, fields, models
+from odoo.addons.l10n_es_edi_verifactu.const import (
+    VERIFACTU_EXTRA_LABELS,
+    VERIFACTU_REGIME_CODES_IGIC,
+    VERIFACTU_REGIME_CODES_IVA,
+)
 
 
 class AccountTax(models.Model):
@@ -12,6 +17,34 @@ class AccountTax(models.Model):
         ],
         string="Applicability (Spain)",
     )
+
+    @api.model
+    def _l10n_es_vat_regime_code_labels(self):
+        labels = super()._l10n_es_vat_regime_code_labels()
+        labels.update(VERIFACTU_EXTRA_LABELS)
+        return labels
+
+    @api.depends('company_id.l10n_es_edi_verifactu_required', 'l10n_es_applicability')
+    def _compute_l10n_es_vat_regime_available(self):
+        super()._compute_l10n_es_vat_regime_available()
+
+    @api.depends('company_id.l10n_es_edi_verifactu_required')
+    def _compute_l10n_es_vat_regime_codes(self):
+        super()._compute_l10n_es_vat_regime_codes()
+
+    def _l10n_es_vat_regime_get_available_codes(self):
+        self.ensure_one()
+        # VeriFactu only applies to sale taxes; purchase taxes always fall back to the
+        # generic catalog, even on a VeriFactu company.
+        if self.company_id.l10n_es_edi_verifactu_required and self._l10n_es_vat_regime_get_use() == 'sale':
+            # Read this tax's own applicability directly (NOT via
+            # _l10n_es_edi_verifactu_get_applicability(), which is designed to find the "main" tax
+            # within a group and deliberately ignores 'recargo'-type taxes — exactly the taxes for
+            # which the IGIC-specific '18_igic' matters here).
+            if self.l10n_es_applicability == '03':  # IGIC
+                return VERIFACTU_REGIME_CODES_IGIC
+            return VERIFACTU_REGIME_CODES_IVA  # IVA ('01'), IPSI ('02') and unset/"Other" default here
+        return super()._l10n_es_vat_regime_get_available_codes()
 
     @api.model
     def _l10n_es_edi_verifactu_get_applicability_name_map(self):
