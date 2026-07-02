@@ -11,6 +11,10 @@
 
     animation: animate .25s ease-out;
 
+    &:not(.o_facet_groupby):hover {
+        box-shadow: 0 0 0 1px $border-color;
+    }
+
     .btn, .btn:focus {
         // Boostrap plays around with the z-index of buttons, but this is not needed here
         // It was causing issues with the hotkey overlay
@@ -23,6 +27,31 @@
         @include media-breakpoint-down(md) {
             max-width: $o-search-bar-facet-value-width / 2;
         }
+    }
+
+    //TODO: probably extend $theme-colors, "bg-subtle", "text-*" and "text-emphasis" variables to use proper utility classes instead.
+
+    &.o_facet_groupby {
+        .o_searchview_facet_label {
+            background-color: mix($o-view-background-color, $o-enterprise-action-color, 75%);
+            color: $o-enterprise-action-color;
+        }
+    }
+
+    &.o_facet_favorite {
+        .o_searchview_facet_label, .o_facet_overlay {
+            background-color: mix($o-view-background-color, $o-main-favorite-color, 75%);
+            color: darken($o-main-favorite-color, 20%);
+        }
+    }
+
+    .o_searchview_facet_content:hover .o_facet_overlay {
+        transform: translateX(100%);
+    }
+    // Temporary workaround to get the subtle gradient when hovering facet that use the field name instead of the filter icon.
+    // This should probably be done using a pseudo element instead.
+    .o_facet_no_icon {
+        mask-image: linear-gradient(90deg,#000 0, #000 calc(100% - 8px), transparent 100%);
     }
 }
 
