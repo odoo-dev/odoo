@@ -77,7 +77,7 @@ class PosOrderLine(models.Model):
             'product_id', 'discount', 'tax_ids', 'customer_note',
             'refunded_qty', 'price_extra', 'full_product_name', 'refunded_orderline_id',
             'combo_parent_id', 'combo_line_ids', 'combo_item_id', 'refund_orderline_ids',
-            'extra_tax_data', 'write_date', 'prep_line_ids',
+            'extra_tax_data', 'write_date', 'prep_line_ids', 'product_uom_id',
         ]
 
     @api.depends('refund_orderline_ids', 'refund_orderline_ids.order_id.state')

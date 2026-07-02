@@ -887,7 +887,10 @@ export class PosStore extends WithLazyGetterTrap {
                     : values.filter((value) => attrValueIds.has(value.id))
             );
         }
-        if (attributeLinesValues.some((values) => values.length > 1 || values[0].is_custom)) {
+        if (
+            attributeLinesValues.some((values) => values.length > 1 || values[0].is_custom) ||
+            pTemplate.uom_ids.length
+        ) {
             return await makeAwaitable(this.dialog, ProductConfiguratorPopup, {
                 productTemplate: pTemplate,
                 hideAlwaysVariants: opts.hideAlwaysVariants,
@@ -1292,8 +1295,14 @@ export class PosStore extends WithLazyGetterTrap {
                         ]
                     ),
                     price_extra: values.price_extra + payload.price_extra,
-                    qty: payload.qty || values.qty,
+                    qty:
+                        payload.qty ||
+                        this.models["uom.uom"].get(payload.uom_id)?.factor ||
+                        values.qty,
                     product_id: candidate || productTemplate.product_variant_ids[0],
+                    product_uom_id: payload.uom_id
+                        ? this.models["uom.uom"].get(payload.uom_id)
+                        : values.product_uom_id,
                 });
             } else {
                 return false;

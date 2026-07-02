@@ -148,6 +148,27 @@
         </div>
     </t>
 
+    <t t-name="point_of_sale.UomSelection">
+        <div class="d-flex gap-2 flex-wrap">
+            <div t-foreach="this.props.uomSelections" t-as="uom" t-key="uom.id">
+                <input
+                    class="form-check-input d-none"
+                    type="checkbox"
+                    t-attf-id="multi-{{uom.id}}"
+                    t-attf-name="multi-{{uom.id}}"
+                    t-on-change="() => this.onChange(uom)"
+                    />
+                <label
+                    role="button"
+                    t-attf-class="form-check-label btn btn-secondary btn-lg lh-lg d-flex {{ uom.id == this.props.selected ? 'active' : '' }}"
+                    t-attf-name="multi-{{uom.id}}"
+                    t-attf-for="multi-{{uom.id}}">
+                    <span t-out="uom.name"/>
+                </label>
+            </div>
+        </div>
+    </t>
+
     <t t-name="point_of_sale.ImageProductAttribute">
         <div>
             <t t-set="is_custom" t-value="false"/>
@@ -227,6 +248,7 @@
                         customValue="this.state.attributes[attribute.attribute_id.id].custom_value" setCustomValue="this.setCustomValue(attribute)"
                         allSelectedValues="this.selectedValues"/>
                 </div>
+                <UomSelection t-if="this.uomSelections.length" uomSelections="this.uomSelections" setSelected="this.setSelectedUom.bind(this)" selected="this.selectedUom"/>
             </div>
             <t t-set-slot="footer">
                 <div class="d-flex flex-row gap-2 w-100">

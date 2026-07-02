@@ -30,6 +30,7 @@ export class PosOrderLine extends models.ServerModel {
             "refund_orderline_ids",
             "extra_tax_data",
             "write_date",
+            "product_uom_id",
         ];
     }
 }

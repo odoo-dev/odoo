@@ -73,6 +73,15 @@ export class MultiProductAttribute extends BaseProductAttribute {
     }
 }
 
+export class UomSelection extends Component {
+    static template = "point_of_sale.UomSelection";
+    static props = ["selected", "uomSelections"];
+
+    onChange(value) {
+        this.props.setSelected(this.props.uomSelections.find((uom) => uom.id == value.id));
+    }
+}
+
 export class ProductConfiguratorPopup extends Component {
     static template = "point_of_sale.ProductConfiguratorPopup";
     static components = {
@@ -83,6 +92,7 @@ export class ProductConfiguratorPopup extends Component {
         ColorProductAttribute,
         ImageProductAttribute,
         MultiProductAttribute,
+        UomSelection,
         Dialog,
     };
     static props = {
@@ -106,6 +116,20 @@ export class ProductConfiguratorPopup extends Component {
                     };
                     return acc;
                 }, {}),
+            uomSelections: this.props.productTemplate.uom_ids.length
+                ? [...this.props.productTemplate.uom_ids, this.props.productTemplate.uom_id].reduce(
+                      (acc, uom) => {
+                          acc[uom.id] = {
+                              selected:
+                                  uom.id ===
+                                  (this.props.line?.product_uom_id?.id ||
+                                      this.props.productTemplate.uom_id.id),
+                          };
+                          return acc;
+                      },
+                      {}
+                  )
+                : {},
         });
 
         if (!this.props.line?.selectedAttributes) {
@@ -224,6 +248,7 @@ export class ProductConfiguratorPopup extends Component {
                     return acc;
                 }, []),
             price_extra: this.priceExtra,
+            uom_id: this.selectedUom,
         };
     }
 
@@ -284,5 +309,25 @@ export class ProductConfiguratorPopup extends Component {
         } else {
             return this.props.productTemplate.attribute_line_ids;
         }
+    }
+
+    get uomSelections() {
+        return this.props.productTemplate.uom_ids.length
+            ? [...this.props.productTemplate.uom_ids, this.props.productTemplate.uom_id]
+            : [];
+    }
+
+    get selectedUom() {
+        return Object.entries(this.state.uomSelections).find(([_, uom]) => uom.selected)?.[0];
+    }
+    setSelectedUom(uom) {
+        return Object.entries(this.state.uomSelections).forEach(([key, value]) => {
+            console.log("Setting selected UOM:", key, value, uom);
+            if (key == uom.id) {
+                this.state.uomSelections[key].selected = true;
+            } else {
+                this.state.uomSelections[key].selected = false;
+            }
+        });
     }
 }
