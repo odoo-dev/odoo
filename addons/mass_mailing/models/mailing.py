@@ -20,7 +20,7 @@ from odoo import api, fields, models, modules, tools, _
 from odoo.addons.base_import.models.base_import import ImportValidationError
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Datetime, Domain
-from odoo.tools import SQL
+from odoo.tools import BinaryBytes, SQL
 from odoo.tools.float_utils import float_round
 from odoo.tools.image import ImageProcess
 
@@ -1436,8 +1436,8 @@ class MailingMailing(models.Model):
         checksums_set, checksum_original_id, new_attachment_by_checksum = set(), {}, {}
         next_img_id = len(existing_attachments)
         for (b64image, original_id) in b64images:
-            image_raw = base64.b64decode(b64image)
-            checksum = IrAttachment._compute_checksum(image_raw)
+            image_raw = BinaryBytes(base64.b64decode(b64image))
+            checksum = image_raw.checksum()
             checksums.append(checksum)
             existing_attach = existing_attachments.get(checksum)
             # Existing_attach can be None, in which case it acts as placeholder

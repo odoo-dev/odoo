@@ -252,7 +252,7 @@ class TestHttpWebJson_2(TestHttpBase):
             data=r'{"domain": [["id", "=", %d]], "fields": ["raw"], "limit": 1}' % attachment.id,
             headers=CT_JSON | self.bearer_header,
         ).raise_for_status()
-        self.assertEqual(res.text, '[{"id": %d, "raw": {"filename": "test", "size": %s}}]' % (attachment.id, attachment.raw.size))
+        self.assertEqual(res.text, '[{"id": %d, "raw": {"filename": "test", "size": %s, "checksum": "%s"}}]' % (attachment.id, attachment.raw.size, attachment.checksum))
         self.assertEqual(res.headers.get('Content-Type'), 'application/json; charset=utf-8')
 
         res = self.db_url_open(
@@ -260,7 +260,7 @@ class TestHttpWebJson_2(TestHttpBase):
             data=r'{"domain": [["id", "=", %d]], "fields": ["raw"], "limit": 1, "context": {"include_binary_content": true}}' % attachment.id,
             headers=CT_JSON | self.bearer_header,
         ).raise_for_status()
-        self.assertEqual(res.text, '[{"id": %d, "raw": {"filename": "test", "content": "%s", "size": %s}}]' % (attachment.id, expected_datas, attachment.raw.size))
+        self.assertEqual(res.text, '[{"id": %d, "raw": {"filename": "test", "content": "%s", "size": %s, "checksum": "%s"}}]' % (attachment.id, expected_datas, attachment.raw.size, attachment.checksum))
         self.assertEqual(res.headers.get('Content-Type'), 'application/json; charset=utf-8')
 
         # writing

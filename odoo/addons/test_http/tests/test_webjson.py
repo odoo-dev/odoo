@@ -8,7 +8,7 @@ from urllib.parse import parse_qs, urlsplit
 from odoo.api import Environment
 from odoo.fields import Command
 from odoo.tests import tagged
-from odoo.tools import file_open, mute_logger
+from odoo.tools import BinaryBytes, file_open, mute_logger
 
 from .test_common import TestHttpBase
 
@@ -51,6 +51,7 @@ class TestHttpWebJson_1(TestHttpBase):
         with file_open('test_http/static/src/img/gizeh.png', 'rb') as file:
             cls.gizeh_data = file.read()
             cls.gizeh_b64 = b64encode(cls.gizeh_data).decode()
+            cls.gizeh_checksum = BinaryBytes(cls.gizeh_data).checksum()
 
     def url_open_json(self, url, *, expected_code=0):
         url = f"/json/1{url}"
@@ -141,7 +142,7 @@ class TestHttpWebJson_1(TestHttpBase):
     def test_webjson_form(self):
         self.authenticate_demo()
         res = self.url_open_json(f'/test_http.stargate/{self.earth.id}')
-        gizeh = {'size': len(self.gizeh_data)}
+        gizeh = {'size': len(self.gizeh_data), 'checksum': self.gizeh_checksum}
         self.assertEqual(res.json(), {
             'id': self.earth.id,
             'name': self.earth.name,

@@ -15,6 +15,7 @@ from odoo.exceptions import AccessError, MissingError, UserError
 from odoo.fields import Domain
 from odoo.http import Controller, request, route
 from odoo.http.stream import STATIC_CACHE_LONG
+from odoo.tools.binary import BinaryBytes
 from odoo.tools.image import image_process
 from odoo.tools.mimetypes import guess_mimetype
 
@@ -69,7 +70,7 @@ def get_existing_attachment(IrAttachment, vals):
     else:
         if not raw:
             return None
-        domain.append(('checksum', '=', IrAttachment._compute_checksum(raw)))
+        domain.append(('checksum', '=', BinaryBytes(raw).checksum()))
     return IrAttachment.search(domain, limit=1) or None
 
 

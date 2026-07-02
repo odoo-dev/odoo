@@ -2806,6 +2806,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
     def test_82_binary_read(self):
         binary_value = BinaryBytes(b'content')
         record = self.env['test_orm.model_binary'].create({'binary': binary_value})
+        checksum = record.binary.checksum()
 
         def assertBinaryValue(read_value, fields=('binary', 'binary_related_store', 'binary_related_no_store')):
             for field in fields:
@@ -2815,11 +2816,11 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
                 self.assertEqual(vals[field], read_value)
 
         record = record.with_context(include_binary_content=False)
-        assertBinaryValue({'size': binary_value.size})
+        assertBinaryValue({'checksum': checksum, 'size': binary_value.size})
 
         record = record.with_context(include_binary_content=True)
         content = base64.b64encode(binary_value.content).decode()
-        assertBinaryValue({'size': binary_value.size, 'content': content})
+        assertBinaryValue({'checksum': checksum, 'size': binary_value.size, 'content': content})
 
     def test_85_binary_guess_zip(self):
         # Regular ZIP files can be uploaded by non-admin users

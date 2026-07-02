@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import uuid
@@ -8,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.tools.mimetypes import guess_mimetype
+from odoo.tools import BinaryBytes
 
 FLOOR_PLAN_SUPPORTED_IMAGE_MIMETYPES = {
     'image/gif': '.gif',
@@ -89,12 +88,11 @@ class RestaurantFloor(models.Model):
 
     @api.model
     def add_floor_plan_image(self, name, data):
-        img = b64decode(data)
-        mimetype = guess_mimetype(img)
+        img = BinaryBytes(b64decode(data))
+        mimetype = img.mimetype
         if mimetype not in FLOOR_PLAN_SUPPORTED_IMAGE_MIMETYPES:
             raise UserError(_("Uploaded image's format is not supported. Try with: %s", ', '.join(FLOOR_PLAN_SUPPORTED_IMAGE_MIMETYPES.values())))
-        IrAttachment = self.env['ir.attachment']
-        checksum = IrAttachment._compute_checksum(img)
+        checksum = img.checksum()
         if not name:
             name = f"{str(uuid.uuid4())[:6]}{FLOOR_PLAN_SUPPORTED_IMAGE_MIMETYPES[mimetype]}"
         attachment_data = {
@@ -104,6 +102,7 @@ class RestaurantFloor(models.Model):
         }
         domain = [(field, '=', value) for field, value in attachment_data.items()]
         domain.append(('checksum', '=', checksum))
+        IrAttachment = self.env['ir.attachment']
         attachment = IrAttachment.search(domain, limit=1) or None
         if not attachment:
             attachment_data['raw'] = img

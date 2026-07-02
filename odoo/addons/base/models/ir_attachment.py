@@ -423,7 +423,7 @@ class IrAttachment(models.Model):
                 self._file_write(fname, f)
 
     def _get_datas_related_values(self, data: BinaryValue, mimetype):
-        checksum = self._compute_checksum(data)
+        checksum = data.checksum()
         try:
             if data:
                 index_content = self._index(data, mimetype, checksum=checksum)
@@ -448,6 +448,7 @@ class IrAttachment(models.Model):
         """ compute the checksum for the given bytes
             :param bin_data : data in its binary form
         """
+        warnings.warn("Since 20.0, use BinaryValue.checksum()", DeprecationWarning, stacklevel=2)
         # an empty file has a checksum too (for caching)
         return hashlib.sha1(bin_data or b'').hexdigest()
 
@@ -974,7 +975,7 @@ class IrAttachment(models.Model):
                 vals = self._check_contents(vals)
             except ValueError:
                 raise UserError(_("Attachment is not encoded in base64."))
-            checksum = self._compute_checksum(vals['raw'] or b'')
+            checksum = (vals['raw'] or EMPTY_BINARY).checksum()
             # Create only if record does not already exist for checksum and mimetype
             result += self.sudo().search([
                 ['id', '!=', False],  # No implicit condition on res_field.
@@ -1163,7 +1164,7 @@ class IrAttachment(models.Model):
 
 class LocalBinaryFile(BinaryValue):
     """Lazily loaded file."""
-    __slots__ = ('__content', '__mimetype', '__path', '__stat', 'filename')
+    __slots__ = ('__checksum', '__content', '__mimetype', '__path', '__stat', 'filename')
 
     def __init__(self, path: str, model: IrAttachment):
         """ Open a file as a binary value.
@@ -1177,6 +1178,7 @@ class LocalBinaryFile(BinaryValue):
         self.__stat = os.stat(path)  # checks that the file exists
         if not stat.S_ISREG(self.__stat.st_mode):
             raise FileNotFoundError(f"Path is not a regular file: {path}")
+        self.__checksum: str | None = None
         self.__content: bytes | None = None
         self.__mimetype: str | None = None
         self.filename = ''  # mutable property
@@ -1204,6 +1206,18 @@ class LocalBinaryFile(BinaryValue):
     @property
     def size(self):
         return self.__stat.st_size
+
+    def checksum(self):
+        if self.__checksum is None:
+            if self.__content:
+                self.__checksum = super().checksum()
+            else:
+                with self.open() as f:
+                    sha = hashlib.sha1()
+                    while chunk := f.read(io.DEFAULT_BUFFER_SIZE):  # 16kiB
+                        sha.update(chunk)
+                    self.__checksum = sha.hexdigest()
+        return self.__checksum
 
     def __repr__(self):
         return f"LocalBinaryFile({self.__path!r})"

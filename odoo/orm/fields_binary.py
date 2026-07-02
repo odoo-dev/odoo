@@ -146,6 +146,7 @@ class Binary(Field[BinaryValue]):
         if include_content:
             res['content'] = value.to_base64()
         res['size'] = value.size
+        res['checksum'] = value.checksum()
         return res
 
     def read(self, records):
@@ -326,10 +327,9 @@ class Image(Binary):
                 return data
             # Fetch resized version.
             Attachment = env['ir.attachment']
-            checksum = Attachment._compute_checksum(data)
             origins = Attachment.search([
                 ['id', '!=', False],  # No implicit condition on res_field.
-                ['checksum', '=', checksum],
+                ['checksum', '=', data.checksum()],
             ])
             if origins:
                 origin_ids = [attachment.id for attachment in origins]
@@ -402,6 +402,9 @@ class BinaryValueAttachment(BinaryValue):
         # get from the attachment
         # if we don't have a size, read raw to be consistent
         return self.__attachment.file_size or super().size
+
+    def checksum(self):
+        return self.__checksum
 
     def open(self):
         self._check_concurrent_modification()

@@ -361,7 +361,7 @@ class Website(models.CachedModel):
         """ Clone the bound logo as a media-library attachment so it shows up
         in the media manager, which hides res_field rows. """
         Attachment = self.env['ir.attachment']
-        default_logo_checksum = Attachment._compute_checksum(self._default_logo())
+        default_logo_checksum = self._default_logo().checksum()
         bounds = Attachment.search([
             ('res_model', '=', 'website'),
             ('res_field', '=', 'logo'),

@@ -1,4 +1,5 @@
 import base64
+import hashlib
 import io
 from collections.abc import Buffer
 
@@ -63,6 +64,10 @@ class BinaryValue(Buffer):
     def decode(self, encoding="utf-8", errors="strict") -> str:
         """Decode the raw contents to a string."""
         return self.content.decode(encoding, errors)
+
+    def checksum(self) -> str:
+        """SHA-1 of the value."""
+        return hashlib.sha1(self).hexdigest()
 
 
 class BinaryBytes(BinaryValue):
