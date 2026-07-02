@@ -24,6 +24,7 @@ tfoot {
   direction: ltr;
   position: relative; // normally useless but required by bootstrap-datepicker
   background-color: $o-webclient-background-color;
+  background-image: if($o-webclient-background-image != null, $o-webclient-background-image, none);
   color-scheme: $o-webclient-color-scheme;
 }
 
