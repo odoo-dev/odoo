@@ -30,6 +30,25 @@ class L10nInEwaybill(models.Model):
         readonly=False
     )
 
+    @api.depends('account_move_id', 'picking_id')
+    def _compute_warning(self):
+        super()._compute_warning()
+        self.warning = {}
+        for ewaybill in self:
+            if ewaybill.state != 'pending' or not (duplicates := self._find_duplicate_ewaybill().filtered(lambda e: e.state == 'generated')):
+                continue
+            if ewaybill.account_move_id:
+                document_name = _("Receipts") if not ewaybill._is_incoming else _("Deliveries")
+            else:
+                document_name = _("Invoices") if not ewaybill._is_incoming() else _("Bills")
+            ewaybill.warning = {
+                'duplicate':{
+                'message': _("e-Waybill(s) was already generated through related %s", document_name),
+                'action': duplicates._get_records_action(name=_("Duplicate e-Waybill(s)")),
+                'action_text': _("View e-Waybill(s)"),
+                }
+            }
+
     @api.depends('name', 'state')
     def _compute_display_name(self):
         challan = self.filtered(lambda ewb: ewb.state == 'challan')
@@ -290,3 +309,10 @@ class L10nInEwaybill(models.Model):
         if self.picking_id and self.type_id.sub_type_code == '8':
             ewaybill_json["subSupplyDesc"] = self.type_description
         return ewaybill_json
+
+    def _find_duplicate_ewaybill(self):
+        if moves := self.picking_id._l10n_in_related_account_moves():
+            return moves.l10n_in_ewaybill_ids
+        if picking := self.account_move_id._l10n_in_related_pickings():
+            return picking.l10n_in_ewaybill_ids
+        return self.browse()
