@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from odoo.fields import Command
 from odoo.tests import tagged
 
 from odoo.addons.sale.tests.common import TestSaleCommon
@@ -123,3 +124,31 @@ class TestSaleFlow(TestSaleCommon):
         ])
 
         self.assertFalse(sale_order.show_deliver_button)
+
+    def test_free_qty_with_overdelivered_so(self):
+        """Test that free_qty is computed correctly when the delivered quantity exceeds the ordered quantity.
+        """
+        product = self.env["product.product"].create({
+            "name": "Test Product",
+            "type": "consu",
+            "is_storable": True,
+            "qty_available": 100,
+        })
+
+        sale_order = self.env["sale.order"].create({
+            "partner_id": self.partner_a.id,
+            "order_line": [
+                Command.create({
+                    "product_id": product.id,
+                    "product_uom_qty": 10,
+                }),
+            ],
+        })
+
+        sale_order.action_confirm()
+        self.assertEqual(product.free_qty, 90)
+
+        sale_order.order_line.qty_delivered = 20
+        product.invalidate_recordset(["free_qty"])
+
+        self.assertEqual(product.free_qty, 80)
