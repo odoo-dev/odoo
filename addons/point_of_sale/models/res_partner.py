@@ -24,7 +24,7 @@ class ResPartner(models.Model):
 
     def _compute_application_statistics_hook(self):
         data_list = super()._compute_application_statistics_hook()
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.has_group('point_of_sale.group_pos_user'):
             return data_list
         for partner in self.filtered('pos_order_count'):
             stat_info = {'iconClass': 'fa-shopping-bag', 'value': partner.pos_order_count, 'label': _('Shopping cart')}

@@ -26,7 +26,7 @@ class StockPutawayRule(models.Model):
     def _default_location_id(self):
         if self.env.context.get('active_model') == 'stock.location':
             return self.env.context.get('active_id')
-        if not self.env.user.has_group('stock.group_stock_multi_warehouses'):
+        if not self.env.has_group('stock.group_stock_multi_warehouses'):
             wh = self.env['stock.warehouse'].search(self.env['stock.warehouse']._check_company_domain(self.env.company), limit=1)
             input_loc, _ = wh._get_input_output_locations(wh.reception_steps, wh.delivery_steps)
             return input_loc

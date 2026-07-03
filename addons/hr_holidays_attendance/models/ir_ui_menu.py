@@ -9,8 +9,8 @@ class IrUiMenu(models.Model):
     def _load_menus_blacklist(self):
         res = super()._load_menus_blacklist()
         if not (
-            self.env.user.has_group('hr_attendance.group_hr_attendance_manager') and
-            self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+            self.env.has_group('hr_attendance.group_hr_attendance_manager') and
+            self.env.has_group('hr_holidays.group_hr_holidays_user')
         ):
             res.append(self.env.ref('hr_holidays_attendance.hr_leave_attendance_report').id)
         return res

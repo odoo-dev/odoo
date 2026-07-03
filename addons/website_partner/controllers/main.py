@@ -22,7 +22,7 @@ class WebsitePartnerPage(http.Controller):
         _, partner_id = request.env['ir.http']._unslug(partner_id)
         if partner_id:
             partner_sudo = request.env['res.partner'].sudo().browse(partner_id)
-            is_website_restricted_editor = request.env.user.has_group('website.group_website_restricted_editor')
+            is_website_restricted_editor = request.env.has_group('website.group_website_restricted_editor')
             if partner_sudo.exists() and (partner_sudo.website_published or is_website_restricted_editor):
                 partner_slug = request.env['ir.http']._slug(partner_sudo)
                 if partner_slug != current_slug:

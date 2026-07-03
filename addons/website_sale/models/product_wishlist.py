@@ -51,7 +51,7 @@ class ProductWishlist(models.Model):
         return wish.filtered(
             lambda wish: (
                 (
-                    self.env.user.has_group("base.group_system")
+                    self.env.has_group("base.group_system")
                     or wish.sudo().product_id.product_tmpl_id.website_published
                 )
                 and wish.sudo().product_id.product_tmpl_id._is_add_to_cart_possible()

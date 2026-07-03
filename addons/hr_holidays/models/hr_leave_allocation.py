@@ -23,7 +23,7 @@ class HrLeaveAllocation(models.Model):
     _mail_post_access = 'read'
 
     def _default_work_entry_type_id(self):
-        if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+        if self.env.has_group('hr_holidays.group_hr_holidays_user'):
             domain = [('id', 'in', self.allowed_work_entry_type_ids.ids), ('has_valid_allocation', '=', True), ('requires_allocation', '=', True)]
         else:
             domain = [('id', 'in', self.allowed_work_entry_type_ids.ids), ('has_valid_allocation', '=', True), ('requires_allocation', '=', True), ('employee_requests', '=', True)]
@@ -39,7 +39,7 @@ class HrLeaveAllocation(models.Model):
                 ('has_valid_allocation', '=', True),
                 ('requires_allocation', '=', True)
             ]
-        if not self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+        if not self.env.has_group('hr_holidays.group_hr_holidays_user'):
             domain = Domain.AND(
                 [domain, [('employee_requests', '=', True)]]
             )
@@ -52,13 +52,13 @@ class HrLeaveAllocation(models.Model):
         domain = [
             ('requires_allocation', '=', True),
         ]
-        if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+        if self.env.has_group('hr_holidays.group_hr_holidays_user'):
             return domain
         return Domain.AND([domain, [('employee_requests', '=', True)]])
 
     def _domain_employee_id(self):
         domain = [('company_id', 'in', self.env.companies.ids)]
-        if not self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+        if not self.env.has_group('hr_holidays.group_hr_holidays_user'):
             domain += [
                 ('leave_manager_id', '=', self.env.user.id)
             ]
@@ -152,7 +152,7 @@ class HrLeaveAllocation(models.Model):
     @api.depends_context('uid')
     @api.depends('accrual_plan_id')
     def _compute_is_officer(self):
-        self.is_officer = self.env.user.has_group("hr_holidays.group_hr_holidays_user")
+        self.is_officer = self.env.has_group("hr_holidays.group_hr_holidays_user")
 
     def _get_title(self):
         self.ensure_one()
@@ -714,7 +714,7 @@ class HrLeaveAllocation(models.Model):
         }
         validation_type = self.validation_type
 
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.has_group('hr_holidays.group_hr_holidays_user')
         is_time_off_manager = self.employee_id.leave_manager_id == self.env.user
 
         if is_officer:
@@ -925,7 +925,7 @@ class HrLeaveAllocation(models.Model):
         if self.env.is_superuser():
             return True
         current_employee = self.env.user.employee_id
-        is_administrator = self.env.user.has_group('hr_holidays.group_hr_holidays_manager')
+        is_administrator = self.env.has_group('hr_holidays.group_hr_holidays_manager')
         for allocation in self:
             is_time_off_manager = allocation.employee_id.leave_manager_id == self.env.user
             error_message = ""

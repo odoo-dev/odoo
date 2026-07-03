@@ -46,7 +46,7 @@ class WebsitePartnership(WebsitePartnerPage):
             Domain('website_published', '=', True),
             Domain('grade_id.active', '=', True),
         ])
-        if not request.env.user.has_group('website.group_website_restricted_editor'):
+        if not request.env.has_group('website.group_website_restricted_editor'):
             base_partner_domain = Domain.AND([base_partner_domain, Domain('grade_id.website_published', '=', True)])
         if self.env.website.is_view_active("website_partnership.search_setting") and search:
             base_partner_domain = Domain.AND([base_partner_domain, Domain.OR(

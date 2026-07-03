@@ -19,7 +19,7 @@ class ExhibitorController(WebsiteEventController):
             ('event_id', '=', event.id),
             ('exhibitor_type', 'in', ['exhibitor', 'online']),
         ]
-        if not request.env.user.has_group('event.group_event_registration_desk'):
+        if not request.env.has_group('event.group_event_registration_desk'):
             search_domain_base = Domain.AND([search_domain_base, [('is_published', '=', True)]])
         return search_domain_base
 
@@ -81,7 +81,7 @@ class ExhibitorController(WebsiteEventController):
         # organize sponsors into categories to help display
         sponsor_categories_dict = OrderedDict()
         sponsor_categories = []
-        is_event_user = request.env.user.has_group('event.group_event_registration_desk')
+        is_event_user = request.env.has_group('event.group_event_registration_desk')
         for sponsor in sorted_sponsors:
             if not sponsor_categories_dict.get(sponsor.sponsor_type_id):
                 sponsor_categories_dict[sponsor.sponsor_type_id] = request.env['event.sponsor'].sudo()
@@ -169,10 +169,10 @@ class ExhibitorController(WebsiteEventController):
             'sponsors_other': sponsors_other[:30],
             # options
             'option_widescreen': option_widescreen,
-            'option_can_edit': request.env.user.has_group('event.group_event_user'),
+            'option_can_edit': request.env.has_group('event.group_event_user'),
             # environment
             'hostname': request.httprequest.host.split(':')[0],
-            'is_event_user': request.env.user.has_group('event.group_event_registration_desk'),
+            'is_event_user': request.env.has_group('event.group_event_registration_desk'),
             'website_visitor_timezone': request.env['website.visitor']._get_visitor_timezone(),
         }
 

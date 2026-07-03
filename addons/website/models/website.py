@@ -281,7 +281,7 @@ class Website(models.CachedModel):
         for website in websites:
             website._bootstrap_homepage()
 
-        if not self.env.user.has_group('website.group_multi_website') and self.search_count([]) > 1:
+        if not self.env.has_group('website.group_multi_website') and self.search_count([]) > 1:
             all_user_groups = 'base.group_portal,base.group_user,base.group_public'
             groups = self.env['res.groups'].concat(self.env.ref(it) for it in all_user_groups.split(','))
             groups.write({'implied_ids': [(4, self.env.ref('website.group_multi_website').id)]})
@@ -1755,7 +1755,7 @@ class Website(models.CachedModel):
         :returns: Dict mapping website ID (or None) to list of website.page IDs.
         :rtype: dict[int | None, list[int]]
         """
-        if not self.env.user.has_group('website.group_website_restricted_editor'):
+        if not self.env.has_group('website.group_website_restricted_editor'):
             # Note that `website.pages` have `0,0,0,0` ACL rights by default for
             # everyone except for the website designer which receive `1,0,0,0`.
             # So the "Website/Site/Content/Pages" menu to reach the page manager
@@ -1875,8 +1875,8 @@ class Website(models.CachedModel):
 
     @api.model
     def action_dashboard_redirect(self):
-        if (self.env.user.has_group('base.group_system')
-                or self.env.user.has_group('website.group_website_designer')):
+        if (self.env.has_group('base.group_system')
+                or self.env.has_group('website.group_website_designer')):
             return self.env["ir.actions.actions"]._for_xml_id("website.backend_dashboard")
         raise AccessError(_("You don't have the necessary access rights to access this dashboard."))
 
@@ -2444,7 +2444,7 @@ class Website(models.CachedModel):
         return (self.cookies_bar
             and self.block_third_party_domains
             and not self.env['ir.http']._is_allowed_cookie('optional')
-            and not self.env.user.has_group('website.group_website_restricted_editor'))
+            and not self.env.has_group('website.group_website_restricted_editor'))
 
     def _remove_third_party_trackers(self, tagName, atts, cookies_watchlist):
         # If the cookie banner is activated, 3rd-party embedded iframes and

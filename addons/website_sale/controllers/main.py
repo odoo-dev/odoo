@@ -791,7 +791,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :param type: [...] can be either image or video
         :raises NotFound : If the user is not allowed to access Attachment model
         """
-        if not self.env.user.has_group("website.group_website_restricted_editor"):
+        if not self.env.has_group("website.group_website_restricted_editor"):
             raise NotFound
 
         if type == "image":  # Image case
@@ -852,7 +852,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
     @route(["/shop/product/clear-images"], type="jsonrpc", auth="user", website=True)
     def clear_product_images(self, product_product_id, product_template_id):
         """Unlink all images from the product."""
-        if not self.env.user.has_group("website.group_website_restricted_editor"):
+        if not self.env.has_group("website.group_website_restricted_editor"):
             raise NotFound
 
         product_product = (
@@ -891,7 +891,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :return: None
         """
         if (
-            not self.env.user.has_group("website.group_website_restricted_editor")
+            not self.env.has_group("website.group_website_restricted_editor")
             or image_res_model not in {"product.product", "product.template", "product.image"}
             or move not in {"first", "left", "right", "last"}
         ):
@@ -1909,7 +1909,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     @route(["/shop/config/product"], type="jsonrpc", auth="user")
     def change_product_config(self, product_id, **options):
-        if not self.env.user.has_group("website.group_website_restricted_editor"):
+        if not self.env.has_group("website.group_website_restricted_editor"):
             raise NotFound
 
         product = self.env["product.template"].browse(product_id)
@@ -1928,7 +1928,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     @route(["/shop/config/attribute"], type="jsonrpc", auth="user")
     def change_attribute_config(self, attribute_id, **options):
-        if not self.env.user.has_group("website.group_website_restricted_editor"):
+        if not self.env.has_group("website.group_website_restricted_editor"):
             raise NotFound
 
         attribute = self.env["product.attribute"].browse(attribute_id)
@@ -1938,7 +1938,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
 
     @route(["/shop/config/website"], type="jsonrpc", auth="user", website=True)
     def _change_website_config(self, **options):
-        if not self.env.user.has_group("website.group_website_restricted_editor"):
+        if not self.env.has_group("website.group_website_restricted_editor"):
             raise NotFound
 
         # Restrict options we can write to.
@@ -2055,7 +2055,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         :param int attachment_id: ID of the attachment containing the image data.
         :raise Forbidden: If the user does not have website editing access
         """
-        if not self.env.user.has_group("website.group_website_restricted_editor"):
+        if not self.env.has_group("website.group_website_restricted_editor"):
             raise Forbidden
         category = self.env["product.public.category"].browse(category_id).exists()
         if category:

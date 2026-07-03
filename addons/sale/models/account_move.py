@@ -79,7 +79,7 @@ class AccountMove(models.Model):
         "invoice_line_ids.product_id.display_name",
     )
     def _compute_sale_warning_text(self):
-        if not self.env.user.has_group("sale.group_warning_sale"):
+        if not self.env.has_group("sale.group_warning_sale"):
             self.sale_warning_text = ""
             return
         for move in self:

@@ -163,7 +163,7 @@ class StockWarehouse(models.Model):
     def _warehouse_redirect_warning(self):
         warehouse_action = self.env.ref('stock.action_warehouse_form')
         msg = _('Please create a warehouse for company %s.', self.env.company.display_name)
-        if not self.env.user.has_group('stock.group_stock_manager'):
+        if not self.env.has_group('stock.group_stock_manager'):
             raise UserError(self.env._('Please contact your administrator to configure your warehouse.'))
         raise RedirectWarning(msg, warehouse_action.id, _('Go to Warehouses'))
 
@@ -905,7 +905,7 @@ class StockWarehouse(models.Model):
         for warehouse in self:
             sequence_data = warehouse._get_sequence_values(name=new_name, code=new_code)
             # `ir.sequence` write access is limited to system user
-            if self.env.user.has_group('stock.group_stock_manager'):
+            if self.env.has_group('stock.group_stock_manager'):
                 warehouse = warehouse.sudo()
             warehouse.in_type_id.sequence_id.write(sequence_data['in_type_id'])
             warehouse.qc_type_id.sequence_id.write(sequence_data['qc_type_id'])
@@ -1032,7 +1032,7 @@ class StockWarehouse(models.Model):
                 'use_existing_lots': True,
                 'default_location_src_id': self.lot_stock_id.id,
                 'default_location_dest_id': self.lot_stock_id.id,
-                'active': self.env.user.has_group('stock.group_stock_multi_locations'),
+                'active': self.env.has_group('stock.group_stock_multi_locations'),
                 'sequence': max_sequence + 4,
                 'company_id': self.company_id.id,
             }, 'xdock_type_id': {

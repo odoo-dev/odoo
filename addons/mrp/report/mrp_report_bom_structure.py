@@ -105,8 +105,8 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
             'variants': bom_product_variants,
             'bom_uom_name': bom_uom_name,
             'bom_qty': bom_quantity,
-            'is_variant_applied': self.env.user.has_group('product.group_product_variant') and len(bom_product_variants) > 1,
-            'is_uom_applied': self.env.user.has_group('uom.group_uom'),
+            'is_variant_applied': self.env.has_group('product.group_product_variant') and len(bom_product_variants) > 1,
+            'is_uom_applied': self.env.has_group('uom.group_uom'),
             'precision': self.env['decimal.precision'].precision_get('Product Unit'),
         }
 
@@ -543,7 +543,7 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
         pdf_lines = self._get_bom_array_lines(data, level, unfolded_ids, unfolded, True)
 
         data['lines'] = pdf_lines
-        data['show_uom'] = self.env.user.has_group('uom.group_uom')
+        data['show_uom'] = self.env.has_group('uom.group_uom')
         return data
 
     @api.model

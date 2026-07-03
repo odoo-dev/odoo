@@ -142,7 +142,7 @@ class IrModel(models.Model):
 
     @api.model
     def get_compatible_form_models(self):
-        if not self.env.user.has_group('website.group_website_restricted_editor'):
+        if not self.env.has_group('website.group_website_restricted_editor'):
             return []
         return self.sudo().search_read(
             [('website_form_access', '=', True)],
@@ -228,7 +228,7 @@ class IrModelFields(models.Model):
             return False
 
         # only allow users who can change the website structure
-        if not self.env.user.has_group('website.group_website_designer'):
+        if not self.env.has_group('website.group_website_designer'):
             return False
 
         unexisting_fields = [field for field in fields if field not in self.env[model]._fields.keys()]

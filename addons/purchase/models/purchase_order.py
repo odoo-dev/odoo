@@ -361,7 +361,7 @@ class PurchaseOrder(models.Model):
 
     @api.depends('partner_id.name', 'partner_id.purchase_warn_msg', 'order_line.purchase_line_warn_msg')
     def _compute_purchase_warning_text(self):
-        if not self.env.user.has_group('purchase.group_warning_purchase'):
+        if not self.env.has_group('purchase.group_warning_purchase'):
             self.purchase_warning_text = ''
             return
         for order in self:
@@ -1188,7 +1188,7 @@ class PurchaseOrder(models.Model):
         return result
 
     def _send_reminder_mail(self, send_single=False):
-        if not self.env.user.has_group('purchase.group_send_reminder'):
+        if not self.env.has_group('purchase.group_send_reminder'):
             return
 
         template = self.env.ref('purchase.email_template_edi_purchase_reminder', raise_if_not_found=False)
@@ -1208,7 +1208,7 @@ class PurchaseOrder(models.Model):
 
     def send_reminder_preview(self):
         self.ensure_one()
-        if not self.env.user.has_group('purchase.group_send_reminder'):
+        if not self.env.has_group('purchase.group_send_reminder'):
             return
 
         template = self.env.ref('purchase.email_template_edi_purchase_reminder', raise_if_not_found=False)
@@ -1392,7 +1392,7 @@ class PurchaseOrder(models.Model):
                 and self.amount_total < self.env.company.currency_id._convert(
                     self.company_id.po_double_validation_amount, self.currency_id, self.company_id,
                     self.date_order))
-            or self.env.user.has_group('purchase.group_purchase_manager'))
+            or self.env.has_group('purchase.group_purchase_manager'))
 
     def get_localized_date_planned(self, date_planned=False):
         """Returns the localized date planned in the timezone of the order's user or the

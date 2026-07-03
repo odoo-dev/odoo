@@ -88,7 +88,7 @@ class AccountMoveSendBatchWizard(models.TransientModel):
 
         account_move_send_cron = self.env.ref('account.ir_cron_account_move_send')
         if not account_move_send_cron.sudo().active:
-            if self.env.user.has_group('base.group_system'):
+            if self.env.has_group('base.group_system'):
                 raise RedirectWarning(
                     _("Batch invoice sending is unavailable. Please, activate the cron to enable batch sending of invoices."),
                     {

@@ -324,7 +324,7 @@ class BlogPost(models.Model):
                 ])
         if date_begin and date_end:
             domain.append([("published_date", ">=", date_begin), ("published_date", "<=", date_end)])
-        if self.env.user.has_group('website.group_website_designer'):
+        if self.env.has_group('website.group_website_designer'):
             if state == "published":
                 domain.append([("website_published", "=", True)])
             elif state == "unpublished":

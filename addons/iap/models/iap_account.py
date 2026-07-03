@@ -273,7 +273,7 @@ class IapAccount(models.Model):
         """ Called notably by ajax partner_autocomplete. """
         account = self.env['iap.account'].get('partner_autocomplete')
         menu = self.env.ref('iap.iap_account_menu')
-        if not self.env.user.has_group('base.group_no_one'):
+        if not self.env.has_group('base.group_no_one'):
             return False
         if account:
             url = f"/odoo/action-iap.iap_account_action/{account.id}?menu_id={menu.id}"

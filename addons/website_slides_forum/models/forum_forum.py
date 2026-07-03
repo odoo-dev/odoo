@@ -16,11 +16,11 @@ class ForumForum(models.Model):
     @api.depends('slide_channel_ids.visibility', 'slide_channel_ids.website_published', 'slide_channel_ids.visibility', 'slide_channel_ids.is_member')
     def _compute_can_access(self):
         """Extend the access on the forum based on the channels."""
-        if self.env.user.has_group('website_slides.group_website_slides_officer'):
+        if self.env.has_group('website_slides.group_website_slides_officer'):
             self.can_access = True
             return
 
-        if self.env.user.has_group('base.group_public'):
+        if self.env.has_group('base.group_public'):
             accessible = self.filtered(lambda f: any(
                 c.website_published and c.visibility == 'public'
                 for c in f.slide_channel_ids
@@ -40,12 +40,12 @@ class ForumForum(models.Model):
         if operator != '=' or value is not True:
             raise NotImplementedError()
 
-        if self.env.user.has_group('website_slides.group_website_slides_officer'):
+        if self.env.has_group('website_slides.group_website_slides_officer'):
             return Domain.TRUE
 
         domain = super()._search_can_access(operator, value)
 
-        if self.env.user.has_group('base.group_public'):
+        if self.env.has_group('base.group_public'):
             return domain | Domain([
                 ('slide_channel_id.website_published', '=', True),
                 ('slide_channel_id.visibility', '=', 'public'),

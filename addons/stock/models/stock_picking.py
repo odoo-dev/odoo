@@ -342,7 +342,7 @@ class StockPickingType(models.Model):
 
     @api.onchange('code')
     def _onchange_picking_code(self):
-        if self.code == 'internal' and not self.env.user.has_group('stock.group_stock_multi_locations'):
+        if self.code == 'internal' and not self.env.has_group('stock.group_stock_multi_locations'):
             return {
                 'warning': {
                     'message': _('You need to activate storage locations to be able to do internal operation types.')
@@ -805,7 +805,7 @@ class StockPicking(models.Model):
 
     @api.depends('move_line_ids', 'picking_type_id.use_create_lots', 'picking_type_id.use_existing_lots', 'state')
     def _compute_show_lots_text(self):
-        group_production_lot_enabled = self.env.user.has_group('stock.group_production_lot')
+        group_production_lot_enabled = self.env.has_group('stock.group_production_lot')
         for picking in self:
             if not picking.move_line_ids and not picking.picking_type_id.use_create_lots:
                 picking.show_lots_text = False
@@ -1034,7 +1034,7 @@ class StockPicking(models.Model):
 
     @api.depends('partner_id.name', 'partner_id.parent_id.name')
     def _compute_picking_warning_text(self):
-        if not self.env.user.has_group('stock.group_warning_stock'):
+        if not self.env.has_group('stock.group_warning_stock'):
             self.picking_warning_text = ''
             return
         for picking in self:
@@ -2216,7 +2216,7 @@ class StockPicking(models.Model):
         return self.move_ids.action_open_label_layout()
 
     def action_open_label_type(self):
-        if self.env.user.has_group('stock.group_production_lot') and self.move_line_ids.lot_id:
+        if self.env.has_group('stock.group_production_lot') and self.move_line_ids.lot_id:
             view = self.env.ref('stock.picking_label_type_form')
             return {
                 'name': _('Choose Type of Labels To Print'),
@@ -2313,7 +2313,7 @@ class StockPicking(models.Model):
             if action:
                 clean_action(action, self.env)
                 report_actions.append(action)
-        if self.env.user.has_group('stock.group_production_lot'):
+        if self.env.has_group('stock.group_production_lot'):
             pickings_print_lot_label = self.filtered(lambda p: p.picking_type_id.auto_print_lot_labels and p.move_line_ids.lot_id)
             pickings_by_print_formats = pickings_print_lot_label.grouped(lambda p: p.picking_type_id.lot_label_format)
             for print_format in pickings_print_lot_label.picking_type_id.mapped("lot_label_format"):
@@ -2327,7 +2327,7 @@ class StockPicking(models.Model):
                 if action:
                     clean_action(action, self.env)
                     report_actions.append(action)
-        if self.env.user.has_group('stock.group_tracking_lot'):
+        if self.env.has_group('stock.group_tracking_lot'):
             pickings_print_packages = self.filtered(lambda p: p.picking_type_id.auto_print_packages and p.move_line_ids.result_package_id)
             if pickings_print_packages:
                 action = self.env.ref("stock.action_report_picking_packages").report_action(pickings_print_packages.ids, config=False)

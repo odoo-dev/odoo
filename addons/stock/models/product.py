@@ -628,17 +628,17 @@ class ProductProduct(models.Model):
 
     # Be aware that the exact same function exists in product.template
     def action_open_quants(self):
-        hide_location = not self.env.user.has_group('stock.group_stock_multi_locations')
+        hide_location = not self.env.has_group('stock.group_stock_multi_locations')
         hide_lot = not any(product.tracking in ['lot', 'serial'] for product in self)
         self = self.with_context(
             hide_location=hide_location, hide_lot=hide_lot,
         )
 
         # If user have rights to write on quant, we define the view as editable.
-        if self.env.user.has_group('stock.group_stock_manager'):
+        if self.env.has_group('stock.group_stock_manager'):
             self = self.with_context(inventory_mode=True)
             # Set default location id if multilocations is inactive
-            if not self.env.user.has_group('stock.group_stock_multi_locations'):
+            if not self.env.has_group('stock.group_stock_multi_locations'):
                 user_company = self.env.company
                 warehouse = self.env['stock.warehouse'].search(
                     [('company_id', '=', user_company.id)], limit=1
@@ -1133,7 +1133,7 @@ class ProductTemplate(models.Model):
             'stock.group_tracking_lot',
         ]
         return (
-            any(self.env.user.has_group(g) for g in advanced_option_groups)
+            any(self.env.has_group(g) for g in advanced_option_groups)
             or self.tracking != "none"
         )
 
@@ -1189,7 +1189,7 @@ class ProductTemplate(models.Model):
             products = self.env['product.product'].browse(self.env.context['default_product_id'])
         if not products and self.env.context.get('default_product_tmpl_id'):
             products = self.env['product.template'].browse(self.env.context['default_product_tmpl_id']).product_variant_ids
-        if not self.env.user.has_group('stock.group_stock_multi_warehouses') and len(products) == 1:
+        if not self.env.has_group('stock.group_stock_multi_warehouses') and len(products) == 1:
             company = products.company_id or self.env.company
             warehouse = self.env['stock.warehouse'].search([('company_id', '=', company.id)], limit=1)
             return self.env.ref('stock.action_report_stock_rule').report_action(None, data={

@@ -55,7 +55,7 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
         doc['show_mo_costs'] = data.get('moCosts') == '1'
         doc['show_bom_costs'] = data.get('bomCosts') == '1'
         doc['show_real_costs'] = data.get('realCosts') == '1'
-        doc['show_uom'] = self.env.user.has_group('uom.group_uom')
+        doc['show_uom'] = self.env.has_group('uom.group_uom')
         if doc['show_uom']:
             footer_colspan += 1
         doc['data_mo_unit_cost'] = doc['summary'].get('mo_cost', 0) / (doc['summary'].get('quantity') or 1)
@@ -68,7 +68,7 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
 
     def _get_display_context(self):
         return {
-            'show_uom': self.env.user.has_group('uom.group_uom'),
+            'show_uom': self.env.has_group('uom.group_uom'),
         }
 
     def _get_report_data(self, production_id):

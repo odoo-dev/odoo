@@ -31,7 +31,7 @@ class ResPartner(models.Model):
 
     def _compute_sale_order_count(self):
         self.sale_order_count = 0
-        if not self.env.user.has_group("sales_team.group_sale_salesman"):
+        if not self.env.has_group("sales_team.group_sale_salesman"):
             return
 
         # retrieve all children partners and prefetch 'parent_id' on them
@@ -56,7 +56,7 @@ class ResPartner(models.Model):
 
     def _compute_application_statistics_hook(self):
         data_list = super()._compute_application_statistics_hook()
-        if not self.env.user.has_group("sales_team.group_sale_salesman"):
+        if not self.env.has_group("sales_team.group_sale_salesman"):
             return data_list
         for partner in self.filtered("sale_order_count"):
             data_list[partner.id].append({

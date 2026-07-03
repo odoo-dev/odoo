@@ -76,7 +76,7 @@ class MrpProduction(models.Model):
 
     @api.model
     def _get_default_is_locked(self):
-        return not self.env.user.has_group('mrp.group_unlocked_by_default')
+        return not self.env.has_group('mrp.group_unlocked_by_default')
 
     name = fields.Char('Reference', default=lambda self: _('New'), copy=False, readonly=True)
     priority = fields.Selection(
@@ -746,7 +746,7 @@ class MrpProduction(models.Model):
     def _compute_show_lock(self):
         for order in self:
             order.show_lock = order.state == 'done' or (
-                not self.env.user.has_group('mrp.group_unlocked_by_default')
+                not self.env.has_group('mrp.group_unlocked_by_default')
                 and order.id is not False
                 and order.state not in {'cancel', 'draft'}
             )
@@ -1863,7 +1863,7 @@ class MrpProduction(models.Model):
                     for line in missing_lines:
                         if line.product_id != move.product_id:
                             continue
-                        if self.env.user.has_group('uom.group_uom') and line.uom_id != move.uom_id:
+                        if self.env.has_group('uom.group_uom') and line.uom_id != move.uom_id:
                             continue
                         expected_qty = line.uom_id._compute_quantity(
                             line.product_qty * bom_factors[line.bom_id.id], move.uom_id)
@@ -3085,7 +3085,7 @@ class MrpProduction(models.Model):
             action = self.env['stock.move'].browse(print_label_move_ids).action_print_reception_report()
             clean_action(action, self.env)
             report_actions.append(action)
-        if self.env.user.has_group('stock.group_production_lot'):
+        if self.env.has_group('stock.group_production_lot'):
             productions_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_done_mrp_lot and p.move_finished_ids.move_line_ids.lot_id)
             productions_by_print_formats = productions_to_print.grouped(lambda p: p.picking_type_id.done_mrp_lot_label_to_print)
             for print_format in productions_to_print.picking_type_id.mapped('done_mrp_lot_label_to_print'):
@@ -3121,7 +3121,7 @@ class MrpProduction(models.Model):
 
     def action_open_label_type(self):
         move_line_ids = self.move_finished_ids.mapped('move_line_ids')
-        if self.env.user.has_group('stock.group_production_lot') and move_line_ids.lot_id:
+        if self.env.has_group('stock.group_production_lot') and move_line_ids.lot_id:
             view = self.env.ref('stock.picking_label_type_form')
             return {
                 'name': _('Choose Type of Labels To Print'),

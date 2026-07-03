@@ -196,7 +196,7 @@ class WebsiteCrmPartnerAssign(WebsitePartnership, GoogleMap):
         current_country = kw.get('current_country')
 
         domain = [('grade_id', '!=', False), ('is_company', '=', True)]
-        if not request.env.user.has_group('website.group_website_restricted_editor'):
+        if not request.env.has_group('website.group_website_restricted_editor'):
             domain += [('grade_id.website_published', '=', True)]
 
         if current_country:

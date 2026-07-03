@@ -130,7 +130,7 @@ class MailPluginController(mail_plugin.MailPluginController):
         )
 
         if (
-            request.env.user.has_group('crm.group_use_recurring_revenues')
+            request.env.has_group('crm.group_use_recurring_revenues')
             and lead.recurring_revenue
             and lead.recurring_plan
         ):

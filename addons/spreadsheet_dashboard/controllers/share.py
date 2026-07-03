@@ -35,7 +35,7 @@ class DashboardShareRoute(http.Controller):
     def download(self, token=None, share_id=None):
         share = self._get_active_dashboard_share_or_not_found(share_id)
         share._check_dashboard_access(token)
-        if not request.env.user.has_group('base.group_allow_export'):
+        if not request.env.has_group('base.group_allow_export'):
             raise UserError(
                 _("You don't have the rights to export data. Please contact an Administrator."))
         stream = request.env["ir.binary"]._get_stream_from(

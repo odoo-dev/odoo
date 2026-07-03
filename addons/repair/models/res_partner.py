@@ -12,7 +12,7 @@ class ResPartner(models.Model):
 
     def _compute_repair_order_count(self):
         self.repair_order_count = 0
-        if not self.env.user.has_group('stock.group_stock_user'):
+        if not self.env.has_group('stock.group_stock_user'):
             return
 
         repair_counts_per_partner = self.env['repair.order']._read_group(
@@ -30,7 +30,7 @@ class ResPartner(models.Model):
 
     def _compute_application_statistics_hook(self):
         data_list = super()._compute_application_statistics_hook()
-        if not self.env.user.has_group('stock.group_stock_user'):
+        if not self.env.has_group('stock.group_stock_user'):
             return data_list
 
         for partner in self:

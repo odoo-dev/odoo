@@ -30,7 +30,7 @@ class UserInputSession(http.Controller):
             return None, {'error': 'survey_wrong'}
         if survey_sudo.session_state in ['ready', 'in_progress']:
             return survey_sudo.get_start_url(), None
-        if request.env.user.has_group("survey.group_survey_user"):
+        if request.env.has_group("survey.group_survey_user"):
             return None, {'error': 'survey_session_not_launched', 'survey_id': survey_sudo.id}
         return None, {'error': 'survey_session_not_launched'}
 

@@ -195,7 +195,7 @@ class AccountMove(models.Model):
 
     @api.depends('partner_id.name', 'partner_id.purchase_warn_msg', 'invoice_line_ids.product_id.purchase_line_warn_msg', 'invoice_line_ids.product_id.display_name')
     def _compute_purchase_warning_text(self):
-        if not self.env.user.has_group('purchase.group_warning_purchase'):
+        if not self.env.has_group('purchase.group_warning_purchase'):
             self.purchase_warning_text = ''
             return
         for move in self:
@@ -219,7 +219,7 @@ class AccountMove(models.Model):
         # If the user doesn't have purchase access, `invoice_vendor_bill_id` is displayed,
         # as the user doesn't have access to `purchase_vendor_bill_id`.
         for move in self:
-            move.show_invoice_vendor_bill &= not self.env.user.has_group('purchase.group_purchase_user')
+            move.show_invoice_vendor_bill &= not self.env.has_group('purchase.group_purchase_user')
 
     def action_purchase_matching(self):
         self.ensure_one()
@@ -684,7 +684,7 @@ class AccountMoveLine(models.Model):
 
     @api.depends('product_id.purchase_line_warn_msg')
     def _compute_purchase_line_warn_msg(self):
-        has_group = self.env.user.has_group('purchase.group_warning_purchase')
+        has_group = self.env.has_group('purchase.group_warning_purchase')
         for line in self:
             line.purchase_line_warn_msg = line.product_id.purchase_line_warn_msg if has_group else ""
 

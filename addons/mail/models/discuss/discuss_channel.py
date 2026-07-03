@@ -542,7 +542,7 @@ class DiscussChannel(models.Model):
                     lambda channel: channel.channel_type in ["channel", "group"]
                     # sudo: discuss.channel.member - allow reading channel_role for access checks
                     and channel.self_member_id.sudo().channel_role != "owner"
-                    and not self.env.user.has_group("base.group_system")
+                    and not self.env.has_group("base.group_system")
                 ):
                     raise UserError(
                         self.env._(

@@ -54,8 +54,8 @@ class ResUsers(models.Model):
         return (
             self.env.user == self
             or self.env.su
-            or self.env.user.has_group('base.group_erp_manager')
-            or self.env.user.has_group('im_livechat.im_livechat_group_user')
+            or self.env.has_group('base.group_erp_manager')
+            or self.env.has_group('im_livechat.im_livechat_group_user')
         )
 
     @api.depends("livechat_channel_ids", "is_in_call")

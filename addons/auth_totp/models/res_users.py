@@ -57,7 +57,7 @@ class ResUsers(models.Model):
     @api.depends('totp_secret')
     @api.depends_context('uid')
     def _compute_totp_enabled(self):
-        if not (self.env.su or self.env.user.has_group('base.group_erp_manager')):
+        if not (self.env.su or self.env.has_group('base.group_erp_manager')):
             self.totp_enabled = False
             self = self.filtered(lambda u: u._origin == self.env.user).with_prefetch()  # noqa: PLW0642
         for r, v in zip(self, self.sudo()):
@@ -237,6 +237,6 @@ class ResUsers(models.Model):
             return fields.Domain.TRUE
         # HACK: totp_secret is not a stored field, but still present in table!
         domain = Domain.custom(to_sql=lambda table: SQL("%s.totp_secret <> ''", table))
-        if not (self.env.su or self.env.user.has_group('base.group_erp_manager')):
+        if not (self.env.su or self.env.has_group('base.group_erp_manager')):
             domain &= Domain('id', '=', self.env.uid)
         return domain

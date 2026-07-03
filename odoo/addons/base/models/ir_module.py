@@ -946,7 +946,7 @@ class IrModuleModule(models.Model):
                 'base.module_category_website_theme',
                 'base.module_category_theme',
             ]
-            if not self.env.user.has_group('base.group_no_one'):
+            if not self.env.has_group('base.group_no_one'):
                 excluded_xmlids.append('base.module_category_hidden')
 
             excluded_category_ids = []

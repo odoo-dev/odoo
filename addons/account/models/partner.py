@@ -709,7 +709,7 @@ class ResPartner(models.Model):
 
     def _compute_application_statistics_hook(self):
         data_list = super()._compute_application_statistics_hook()
-        if not self.env.user.has_group('account.group_account_invoice'):
+        if not self.env.has_group('account.group_account_invoice'):
             return data_list
         for partner in self.filtered(lambda p: p._get_account_statistics_count()):
             stat_info = {'iconClass': 'fa-pencil-square-o', 'value': partner._get_account_statistics_count(), 'label': _('Invoices/Bills/Mandates')}

@@ -293,7 +293,7 @@ class MailRenderMixin(models.AbstractModel):
             not self._unrestricted_rendering
             and self.env.context.get("bypass_restricted_rendering") is not BYPASS_RESTRICTED_RENDERING
             and not self.env.is_admin()
-            and not self.env.user.has_group('mail.group_mail_template_editor')
+            and not self.env.has_group('mail.group_mail_template_editor')
         )
 
     def _has_unsafe_expression(self):
@@ -328,7 +328,7 @@ class MailRenderMixin(models.AbstractModel):
         return False
 
     def _check_access_right_dynamic_template(self):
-        if not self.env.su and not self.env.user.has_group('mail.group_mail_template_editor') and self._has_unsafe_expression():
+        if not self.env.su and not self.env.has_group('mail.group_mail_template_editor') and self._has_unsafe_expression():
             group = self.env.ref('mail.group_mail_template_editor')
             raise AccessError(
                 _('Only members of %(group_name)s group are allowed to edit templates containing sensible placeholders',

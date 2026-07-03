@@ -1425,7 +1425,7 @@ actual arch.
 
     def _postprocess_debug(self, tree):
         """ Apply debug mode by making nodes invisible. """
-        is_debug = self.env.user.has_group('base.group_no_one')
+        is_debug = self.env.has_group('base.group_no_one')
         for node in tree.xpath('//*[@__debug__]'):
             debug = node.attrib.pop('__debug__') == 'True'
             if debug != is_debug:

@@ -77,7 +77,7 @@ class DigestDigest(models.Model):
         ``_compute_kpis`` of digest catches access errors and skip the kpi the user has no
         access to, hence providing an easy-skip for users without sufficient rights
         """
-        if not any(self.env.user.has_group(group_name) for group_name in group_names):
+        if not any(self.env.has_group(group_name) for group_name in group_names):
             raise AccessError(_("Do not have access, skip this data for user's digest email"))
 
     def _compute_kpi_res_users_connected_value(self):

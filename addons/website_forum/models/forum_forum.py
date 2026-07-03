@@ -178,7 +178,7 @@ class ForumForum(models.Model):
             self.can_access = True
             return
 
-        if self.env.user.has_group('base.group_public'):
+        if self.env.has_group('base.group_public'):
             public_forum = self.filtered(lambda f: f.privacy == 'public')
             public_forum.can_access = True
             (self - public_forum).can_access = False
@@ -201,7 +201,7 @@ class ForumForum(models.Model):
         if self.env.user._is_admin():
             return Domain.TRUE
 
-        if self.env.user.has_group('base.group_public'):
+        if self.env.has_group('base.group_public'):
             return Domain('privacy', '=', 'public')
 
         return (

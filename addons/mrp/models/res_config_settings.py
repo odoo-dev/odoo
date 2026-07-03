@@ -19,7 +19,7 @@ class ResConfigSettings(models.TransientModel):
     group_unlocked_by_default = fields.Boolean("Unlock Manufacturing Orders", implied_group='mrp.group_unlocked_by_default')
 
     def set_values(self):
-        routing_before = self.env.user.has_group('mrp.group_mrp_routings')
+        routing_before = self.env.has_group('mrp.group_mrp_routings')
         super().set_values()
         if routing_before and not self.group_mrp_routings:
             self.env['mrp.routing.workcenter'].search([]).active = False

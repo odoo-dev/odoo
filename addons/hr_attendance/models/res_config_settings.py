@@ -57,5 +57,5 @@ class ResConfigSettings(models.TransientModel):
             company.single_check_in = False
 
     def regenerate_kiosk_key(self):
-        if self.env.user.has_group("hr_attendance.group_hr_attendance_user"):
+        if self.env.has_group("hr_attendance.group_hr_attendance_user"):
             self.company_id._regenerate_attendance_kiosk_key()

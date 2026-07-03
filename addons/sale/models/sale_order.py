@@ -676,7 +676,7 @@ class SaleOrder(models.Model):
                 order.user_id = (
                     order.partner_id.user_id
                     or order.partner_id.commercial_partner_id.user_id
-                    or (self.env.user.has_group("sales_team.group_sale_salesman") and self.env.user)
+                    or (self.env.has_group("sales_team.group_sale_salesman") and self.env.user)
                 )
 
     @api.depends("user_id")
@@ -796,7 +796,7 @@ class SaleOrder(models.Model):
 
     @api.depends("transaction_ids")
     def _compute_transaction_count(self):
-        if not self.env.user.has_group("account.group_account_invoice"):
+        if not self.env.has_group("account.group_account_invoice"):
             self.transaction_count = 0
             return
         for order in self:
@@ -1175,7 +1175,7 @@ class SaleOrder(models.Model):
 
     @api.depends("partner_id.name", "partner_id.sale_warn_msg", "order_line.sale_line_warn_msg")
     def _compute_sale_warning_text(self):
-        if not self.env.user.has_group("sale.group_warning_sale"):
+        if not self.env.has_group("sale.group_warning_sale"):
             self.sale_warning_text = ""
             return
         for order in self:

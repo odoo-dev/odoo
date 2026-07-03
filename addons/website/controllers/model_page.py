@@ -21,7 +21,7 @@ class ModelPageController(Controller):
         website_page_domain = Domain("name_slugified", "=", page_name_slugified) & self.env.website.website_domain()
         page = request.env["website.controller.page"].search(website_page_domain, limit=1)
         if not page or\
-            (not page.website_published and not request.env.user.has_group('website.group_website_designer')):
+            (not page.website_published and not request.env.has_group('website.group_website_designer')):
             raise werkzeug.exceptions.NotFound()
 
         if record_slug is not None:
@@ -40,7 +40,7 @@ class ModelPageController(Controller):
         rec_domain = ast.literal_eval(page.record_domain or "[]")
         domains = [rec_domain]
         implements_published_mixin = "website_published" in Model._fields
-        if implements_published_mixin and not request.env.user.has_group('website.group_website_designer'):
+        if implements_published_mixin and not request.env.has_group('website.group_website_designer'):
             domains.append([("website_published", "=", True)])
 
         if record_slug:

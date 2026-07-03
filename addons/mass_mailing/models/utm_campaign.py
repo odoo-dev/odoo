@@ -120,7 +120,7 @@ class UtmCampaign(models.Model):
             campaign.update(vals)
 
     def _compute_is_mailing_campaign_activated(self):
-        self.is_mailing_campaign_activated = self.env.user.has_group('mass_mailing.group_mass_mailing_campaign')
+        self.is_mailing_campaign_activated = self.env.has_group('mass_mailing.group_mass_mailing_campaign')
 
     def _get_mailing_recipients(self, model=None):
         """Return the recipients of a mailing campaign. This is based on the statistics

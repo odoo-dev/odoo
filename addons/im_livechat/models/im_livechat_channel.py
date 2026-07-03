@@ -289,7 +289,7 @@ class Im_LivechatChannel(models.Model):
     # --------------------------
     def action_join(self):
         self.ensure_one()
-        if not self.env.user.has_group("im_livechat.im_livechat_group_user"):
+        if not self.env.has_group("im_livechat.im_livechat_group_user"):
             raise AccessError(_("Only Live Chat operators can join Live Chat channels"))
         # sudo: im_livechat.channel - operators can join channels
         self.sudo().user_ids = [Command.link(self.env.user.id)]

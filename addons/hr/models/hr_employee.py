@@ -485,7 +485,7 @@ class HrEmployee(models.Model):
         # list if you can specify the group on the field directly (as all the other fields).
         return super()._has_field_access(field, operation) and (
             self.env.su
-            or self.env.user.has_group("hr.group_hr_user")
+            or self.env.has_group("hr.group_hr_user")
             or field.name not in ('activity_calendar_event_id', 'rating_ids', 'message_has_sms_error')
         )
 
@@ -593,7 +593,7 @@ class HrEmployee(models.Model):
             Then this function returns the two last versions
         """
         self.ensure_one()
-        if not self.env.su and not self.env.user.has_group("hr.group_hr_user"):
+        if not self.env.su and not self.env.has_group("hr.group_hr_user"):
             raise AccessError(self.env._("Only HR users can access first version date on an employee."))
 
         def has_work_hours_between_versions(version_from, version_to):

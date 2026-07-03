@@ -352,7 +352,7 @@ class HrLeave(models.Model):
     def _compute_description(self):
         self.check_access('read')
 
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.has_group('hr_holidays.group_hr_holidays_user')
 
         for leave in self:
             if is_officer or leave.user_id == self.env.user or leave.employee_id.leave_manager_id == self.env.user:
@@ -361,14 +361,14 @@ class HrLeave(models.Model):
                 leave.name = '*****'
 
     def _inverse_description(self):
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.has_group('hr_holidays.group_hr_holidays_user')
 
         for leave in self:
             if is_officer or leave.user_id == self.env.user or leave.employee_id.leave_manager_id == self.env.user:
                 leave.sudo().private_name = leave.name
 
     def _search_description(self, operator, value):
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.has_group('hr_holidays.group_hr_holidays_user')
         domain = Domain('private_name', operator, value)
 
         if not is_officer:
@@ -504,7 +504,7 @@ class HrLeave(models.Model):
             ('active', '=', True),
             ('company_id', 'in', self.env.companies.ids),
         ]
-        if not self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+        if not self.env.has_group('hr_holidays.group_hr_holidays_user'):
             domain += [
                 '|',
                 ('user_id', '=', self.env.uid),
@@ -940,7 +940,7 @@ class HrLeave(models.Model):
                     else:
                         raise ValidationError(self.env._("There is no valid allocation to cover that request."))
 
-        is_leave_user = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_leave_user = self.env.has_group('hr_holidays.group_hr_holidays_user')
         if not is_leave_user and any(leave.has_mandatory_day for leave in self if leave.state not in ('cancel', 'refuse')):
             raise ValidationError(self.env._('You are not allowed to request time off on a Mandatory Day.'))
 
@@ -985,7 +985,7 @@ class HrLeave(models.Model):
                         date_to_utc=format_date(self.env, date_to_utc) or ""
                     )
                 if not target or self.env.context.get('hide_employee_name') and 'employee_id' in self.env.context.get('group_by', []):
-                    if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+                    if self.env.has_group('hr_holidays.group_hr_holidays_user'):
                         leave.display_name = self.env._("%(work_entry_type)s %(duration)s",
                             work_entry_type=time_off_type_display,
                             duration=custom_duration,
@@ -1024,10 +1024,10 @@ class HrLeave(models.Model):
             self.message_subscribe(partner_ids=employee.user_id.partner_id.ids)
 
     def _check_double_validation_rules(self, employees, state):
-        if self.env.user.has_group('hr_holidays.group_hr_holidays_manager'):
+        if self.env.has_group('hr_holidays.group_hr_holidays_manager'):
             return
 
-        is_leave_user = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_leave_user = self.env.has_group('hr_holidays.group_hr_holidays_user')
         if state == 'validate1':
             employees = employees.filtered(lambda employee: employee.leave_manager_id != self.env.user)
             if employees and not is_leave_user:
@@ -1071,7 +1071,7 @@ class HrLeave(models.Model):
                 holiday_sudo.add_follower(holiday.employee_id.id)
                 if holiday.validation_type == 'manager':
                     holiday_sudo.message_subscribe(partner_ids=holiday.employee_id.leave_manager_id.partner_id.ids)
-                if holiday.validation_type == 'no_validation' or self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+                if holiday.validation_type == 'no_validation' or self.env.has_group('hr_holidays.group_hr_holidays_user'):
                     # Automatic validation should be done in sudo, because user might not have the rights to do it by himself
                     holiday_sudo.action_approve()
                     holiday_sudo.message_subscribe(partner_ids=holiday._get_responsible_for_approval().partner_id.ids)
@@ -1088,7 +1088,7 @@ class HrLeave(models.Model):
 
     def write(self, vals):
         values = vals
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user') or self.env.is_superuser()
+        is_officer = self.env.has_group('hr_holidays.group_hr_holidays_user') or self.env.is_superuser()
         if not is_officer and values.keys() - {'attachment_ids', 'supported_attachment_ids', 'message_main_attachment_id'}:
             if any(hol.date_from.date() < fields.Date.today() and hol.employee_id.leave_manager_id != self.env.user
                    and hol.state not in ('confirm', 'draft') for hol in self):
@@ -1135,13 +1135,13 @@ class HrLeave(models.Model):
         state_description_values = {elem[0]: elem[1] for elem in self._fields['state']._description_selection(self.env)}
         now = fields.Datetime.now().date()
 
-        if not self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+        if not self.env.has_group('hr_holidays.group_hr_holidays_user'):
             for hol in self:
                 if hol.state not in ['confirm', 'validate1', 'cancel']:
                     raise UserError(error_message % {'state': state_description_values.get(self[:1].state)})
                 if hol.date_from.date() < now:
                     raise UserError(_("You can't delete a time off request that is in the past."))
-        elif not self.env.user.has_group('hr_holidays.group_hr_holidays_manager'):
+        elif not self.env.has_group('hr_holidays.group_hr_holidays_manager'):
             for holiday in self.filtered(lambda holiday: holiday.state not in ['cancel', 'confirm']):
                 error_message = self.env._('Oops! %(state)s Time-Off requests can only be deleted by Administrators.')
                 raise UserError(error_message % {'state': state_description_values.get(holiday.state)})
@@ -1556,7 +1556,7 @@ class HrLeave(models.Model):
         is_own_leave = self.employee_id in user_employees
         is_in_past = self.date_from and self.date_from.date() < fields.Date.context_today(self)
 
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.has_group('hr_holidays.group_hr_holidays_user')
         is_time_off_manager = self.employee_id.leave_manager_id == self.env.user
 
         if is_own_leave and (not is_in_past or is_officer):
@@ -1592,7 +1592,7 @@ class HrLeave(models.Model):
         if self.env.is_superuser():
             return True
 
-        is_officer = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        is_officer = self.env.has_group('hr_holidays.group_hr_holidays_user')
 
         for holiday in self:
             is_time_off_manager = holiday.employee_id.leave_manager_id == self.env.user

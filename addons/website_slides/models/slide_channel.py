@@ -383,7 +383,7 @@ class SlideChannel(models.Model):
             elif record.sudo().upload_group_ids:
                 record.can_upload = bool(record.sudo().upload_group_ids & self.env.user.group_ids)
             else:
-                record.can_upload = self.env.user.has_group('website_slides.group_website_slides_manager')
+                record.can_upload = self.env.has_group('website_slides.group_website_slides_manager')
 
     @api.depends('channel_type', 'user_id', 'can_upload')
     @api.depends_context('uid')
@@ -398,7 +398,7 @@ class SlideChannel(models.Model):
             elif record.user_id == self.env.user:
                 record.can_publish = True
             else:
-                record.can_publish = self.env.user.has_group('website_slides.group_website_slides_manager')
+                record.can_publish = self.env.has_group('website_slides.group_website_slides_manager')
 
     @api.model
     def _get_can_publish_error_message(self):

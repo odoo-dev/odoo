@@ -129,7 +129,7 @@ spirit. To be successful, you will have solid solving problem skills.''')
         elif is_untyped:
             domain.append([('employee_type_id', '=', None)])
 
-        if requires_sudo and not self.env.user.has_group('hr_recruitment.group_hr_recruitment_user'):
+        if requires_sudo and not self.env.has_group('hr_recruitment.group_hr_recruitment_user'):
             # Rule must be reinforced because of sudo.
             domain.append([('website_published', '=', True)])
 

@@ -42,7 +42,7 @@ class EventTrackController(http.Controller):
         the domain will contain an additional condition that will remove the
         unpublished tracks from the search results."""
         search_domain_base = self._get_event_tracks_agenda_domain(event)
-        if not request.env.user.has_group('event.group_event_registration_desk'):
+        if not request.env.has_group('event.group_event_registration_desk'):
             search_domain_base = Domain.AND([
                 search_domain_base,
                 [('is_published', '=', True)]
@@ -178,7 +178,7 @@ class EventTrackController(http.Controller):
             # environment
             'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
-            'is_event_user': request.env.user.has_group('event.group_event_user'),
+            'is_event_user': request.env.has_group('event.group_event_user'),
             'website_visitor_timezone': request.env['website.visitor']._get_visitor_timezone(),
         }
 
@@ -195,7 +195,7 @@ class EventTrackController(http.Controller):
             'main_object': event,
             'seo_object': seo_object,
             'tag': tag,
-            'is_event_user': request.env.user.has_group('event.group_event_user'),
+            'is_event_user': request.env.has_group('event.group_event_user'),
             'website_visitor_timezone': request.env['website.visitor']._get_visitor_timezone(),
         }
 
@@ -391,8 +391,8 @@ class EventTrackController(http.Controller):
             # environment
             'is_html_empty': is_html_empty,
             'hostname': request.httprequest.host.split(':')[0],
-            'is_event_user': request.env.user.has_group('event.group_event_user'),
-            'user_event_manager': request.env.user.has_group('event.group_event_manager'),
+            'is_event_user': request.env.has_group('event.group_event_user'),
+            'user_event_manager': request.env.has_group('event.group_event_manager'),
             'website_visitor_timezone': request.env['website.visitor']._get_visitor_timezone(),
         }
 

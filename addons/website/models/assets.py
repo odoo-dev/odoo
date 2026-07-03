@@ -331,7 +331,7 @@ class WebsiteAssets(models.AbstractModel):
         Only return the attachments related to the current website.
         """
         assert op in ('in', '='), 'Invalid operator'
-        if self.env.user.has_group('website.group_website_designer'):
+        if self.env.has_group('website.group_website_designer'):
             self = self.sudo()
         res = self.env['ir.attachment'].search([('url', op, custom_url), ('website_id', '=', self.env.website.id)])
         # It is guaranteed that the attachment we are looking for has a website_id.

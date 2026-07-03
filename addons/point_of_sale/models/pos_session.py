@@ -330,7 +330,7 @@ class PosSession(models.Model):
 
             vals.update(self._get_default_session_vals(config_id))
 
-        if self.env.user.has_group('point_of_sale.group_pos_user'):
+        if self.env.has_group('point_of_sale.group_pos_user'):
             sessions = super(PosSession, self.sudo()).create(vals_list)
         else:
             sessions = super().create(vals_list)
@@ -439,7 +439,7 @@ class PosSession(models.Model):
     def _process_session_validation(self, balancing_account, amount_to_balance, bank_payment_method_diffs):
         bank_payment_method_diffs = bank_payment_method_diffs or {}
         record = self.ensure_one()
-        if self.env.user.has_group('point_of_sale.group_pos_user'):
+        if self.env.has_group('point_of_sale.group_pos_user'):
             record = record.sudo()
         cash_difference_before_statements = self.cash_register_difference
         # when the user is POS, update the record in sudo
@@ -567,7 +567,7 @@ class PosSession(models.Model):
         wizard = self.env['pos.close.session.wizard'].create({
             'amount_to_balance': amount_to_balance,
             'account_id': default_account.id,
-            'account_readonly': not self.env.user.has_group('account.group_account_readonly'),
+            'account_readonly': not self.env.has_group('account.group_account_readonly'),
             'message': _("There is a difference between the amounts to post and the amounts of the orders, it is probably caused by taxes or accounting configurations changes.")
         })
         return {
@@ -742,7 +742,7 @@ class PosSession(models.Model):
                 return {'successful': False, 'message': message, 'redirect': False}
 
     def get_cash_in_out_list(self):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("You don't have the access rights to get the cash in/out list."))
         cash_in_count = 0
         cash_out_count = 0
@@ -764,7 +764,7 @@ class PosSession(models.Model):
         return cash_in_out_list
 
     def get_closing_control_data(self):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("You don't have the access rights to get the point of sale closing control data."))
         self.ensure_one()
         orders = self._get_closed_orders()
@@ -801,7 +801,7 @@ class PosSession(models.Model):
                 'id': pm.id,
                 'type': pm.type,
             } for pm in non_cash_payment_method_ids],
-            'is_manager': self.env.user.has_group("point_of_sale.group_pos_manager"),
+            'is_manager': self.env.has_group("point_of_sale.group_pos_manager"),
             'amount_authorized_diff': self.config_id.amount_authorized_diff if self.config_id.set_maximum_difference else None
         }
 

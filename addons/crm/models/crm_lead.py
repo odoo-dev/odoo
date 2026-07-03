@@ -125,7 +125,7 @@ class CrmLead(models.Model):
     active = fields.Boolean('Active', default=True, tracking=72)
     type = fields.Selection([
         ('lead', 'Lead'), ('opportunity', 'Opportunity')], required=True, tracking=15, index=True,
-        default=lambda self: 'lead' if self.env.user.has_group('crm.group_use_lead') else 'opportunity')
+        default=lambda self: 'lead' if self.env.has_group('crm.group_use_lead') else 'opportunity')
     # Pipeline management
     priority = fields.Selection(
         crm_stage.AVAILABLE_PRIORITIES, string='Priority', index=True,
@@ -955,7 +955,7 @@ class CrmLead(models.Model):
         # set default value in context, if not already set (Put stage to 'new' stage)
         # Set date_open to today if it is an opp
         default = dict(default or {})
-        if not self.env.user.has_group('crm.group_use_recurring_revenues'):
+        if not self.env.has_group('crm.group_use_recurring_revenues'):
             default['recurring_revenue'] = 0
             default['recurring_plan'] = False
         vals_list = super().copy_data(default=default)
@@ -1388,7 +1388,7 @@ class CrmLead(models.Model):
         ):
             sub_title = _("As you are a member of no Sales Team, you are showed the Pipeline of the "
                           "<b>first team by default.</b>")
-            if self.env.user.has_group('sales_team.group_sale_manager'):
+            if self.env.has_group('sales_team.group_sale_manager'):
                 suffix = _(
                     'To work with the CRM, you should <a name="%d" type="action" tabindex="-1">join a team.</a>',
                     self.env.ref('sales_team.crm_team_action_config').id

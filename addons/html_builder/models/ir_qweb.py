@@ -115,7 +115,7 @@ class IrQweb(models.AbstractModel):
         group = el.attrib.pop('group', None)
         label = el.attrib.pop('label', None)
         name = el.attrib.pop('string', 'Snippet')
-        if self.env.user.has_group('base.group_system'):
+        if self.env.has_group('base.group_system'):
             module = self.env['ir.module.module'].search([('name', '=', key)])
             if not module or module.state == 'installed':
                 return []

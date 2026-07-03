@@ -234,7 +234,7 @@ class TestTaskState(TestProjectCommon):
             14. Check the state of task 1 did not change.
         """
         self.assertTrue(self.project_goats.allow_task_dependencies)
-        self.assertTrue(self.env.user.has_group('project.group_project_task_dependencies'))
+        self.assertTrue(self.env.has_group('project.group_project_task_dependencies'))
         self.task_1.depend_on_ids = self.task_2
         self.assertEqual(self.task_1.state, '04_waiting_normal')
         self.project_goats.allow_task_dependencies = False

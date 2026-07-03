@@ -15,7 +15,7 @@ class TestUTMMixin(TestUTMCommon, HttpCaseWithUserDemo):
     def setUpClass(cls):
         super().setUpClass()
 
-        if cls.env.user.has_group('sales_team.group_sale_salesman'):
+        if cls.env.has_group('sales_team.group_sale_salesman'):
             # see utm.mixin "default_get": salesman bypasses the flow, we don't want that
             cls.user_demo.group_ids -= cls.env.ref('sales_team.group_sale_salesman')
 

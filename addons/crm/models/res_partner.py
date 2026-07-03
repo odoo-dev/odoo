@@ -25,7 +25,7 @@ class ResPartner(models.Model):
 
     def _compute_opportunity_count(self):
         self.opportunity_count = 0
-        if not self.env.user.has_group('sales_team.group_sale_salesman'):
+        if not self.env.has_group('sales_team.group_sale_salesman'):
             return
         opportunity_data = self.env['crm.lead'].with_context(active_test=False)._read_group(
             domain=self._get_contact_opportunities_domain(),
@@ -40,7 +40,7 @@ class ResPartner(models.Model):
 
     def _compute_application_statistics_hook(self):
         data_list = super()._compute_application_statistics_hook()
-        if not self.env.user.has_group('sales_team.group_sale_salesman'):
+        if not self.env.has_group('sales_team.group_sale_salesman'):
             return data_list
         for partner in self.filtered('opportunity_count'):
             data_list[partner.id].append(

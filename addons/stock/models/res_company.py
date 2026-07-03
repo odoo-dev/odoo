@@ -211,7 +211,7 @@ class ResCompany(models.Model):
 
     def _set_per_company_inter_company_locations(self, inter_company_location):
         self.ensure_one()
-        if not self.env.user.has_group('base.group_multi_company'):
+        if not self.env.has_group('base.group_multi_company'):
             return
         other_companies = self.env['res.company'].search([('id', '!=', self.id)])
         other_companies.partner_id.with_company(self).write({

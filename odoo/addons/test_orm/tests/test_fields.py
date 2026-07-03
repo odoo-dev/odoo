@@ -1658,7 +1658,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
         # a low priviledge user should be able to search on company_dependent fields
         company_record.env.user.group_ids -= self.env.ref('base.group_system')
-        self.assertFalse(company_record.env.user.has_group('base.group_system'))
+        self.assertFalse(company_record.env.has_group('base.group_system'))
         company_records = self.env['test_orm.company'].search([('foo', '=', 'DEF')])
         self.assertEqual(len(company_records), 1)
 

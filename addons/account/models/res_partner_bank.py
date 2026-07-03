@@ -312,8 +312,8 @@ class ResPartnerBank(models.Model):
     def _user_can_trust(self):
         return super()._user_can_trust() and (
             self.env.su
-            or self.env.user.has_group('account.group_validate_bank_account')
-            or self.env.user.has_group('base.group_system')
+            or self.env.has_group('account.group_validate_bank_account')
+            or self.env.has_group('base.group_system')
         ) and (
             # Prevent crons from trusting bank accounts (OdooBot), except when loading demo data
             self.env.user.id != SUPERUSER_ID

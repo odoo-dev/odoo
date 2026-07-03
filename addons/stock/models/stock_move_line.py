@@ -252,7 +252,7 @@ class StockMoveLine(models.Model):
     @api.onchange('result_package_id', 'product_id', 'uom_id', 'quantity')
     def _onchange_putaway_location(self):
         default_dest_location = self._get_default_dest_location()
-        if not self.id and self.env.user.has_group('stock.group_stock_multi_locations') and self.product_id and self.quantity_product_uom \
+        if not self.id and self.env.has_group('stock.group_stock_multi_locations') and self.product_id and self.quantity_product_uom \
                 and self.location_dest_id == default_dest_location:
             quantity = self.quantity_product_uom
             self.location_dest_id = default_dest_location.with_context(exclude_sml_ids=self.ids)._get_putaway_strategy(
@@ -292,7 +292,7 @@ class StockMoveLine(models.Model):
                     excluded_smls.discard(sml.id)
 
     def _get_default_dest_location(self):
-        if not self.env.user.has_group('stock.group_stock_multi_locations'):
+        if not self.env.has_group('stock.group_stock_multi_locations'):
             return self.location_dest_id[:1]
         if self.env.context.get('default_location_dest_id'):
             return self.env['stock.location'].browse([self.env.context.get('default_location_dest_id')])

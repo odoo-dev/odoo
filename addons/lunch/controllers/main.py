@@ -107,7 +107,7 @@ class LunchController(http.Controller):
     def _make_infos(self, user, **kwargs):
         res = dict(kwargs)
 
-        is_manager = request.env.user.has_group('lunch.group_lunch_manager')
+        is_manager = request.env.has_group('lunch.group_lunch_manager')
 
         currency = user.company_id.currency_id
 
@@ -142,7 +142,7 @@ class LunchController(http.Controller):
         return res
 
     def _check_user_impersonification(self, user_id=None):
-        if (user_id and request.env.uid != user_id and not request.env.user.has_group('lunch.group_lunch_manager')):
+        if (user_id and request.env.uid != user_id and not request.env.has_group('lunch.group_lunch_manager')):
             raise AccessError(_('You are trying to impersonate another user, but this can only be done by a lunch manager'))
 
     def _get_current_lines(self, user):

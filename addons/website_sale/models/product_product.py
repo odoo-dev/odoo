@@ -101,7 +101,7 @@ class ProductProduct(models.Model):
 
     def _is_add_to_cart_allowed(self):
         self.ensure_one()
-        if self.env.user.has_group("base.group_system"):
+        if self.env.has_group("base.group_system"):
             return True
         if self._is_donation():
             return True

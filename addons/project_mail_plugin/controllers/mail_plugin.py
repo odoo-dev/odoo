@@ -35,7 +35,7 @@ class MailPluginController(mail_plugin.MailPluginController):
         return super()._search_records(model, terms, limit)
 
     def _search_and_format_projects(self, queries, limit=30):
-        group_project_stages = request.env.user.has_group('project.group_project_stages')
+        group_project_stages = request.env.has_group('project.group_project_stages')
 
         # get the projects where the user is responsible first
         project_domain = (

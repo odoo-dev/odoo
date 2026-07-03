@@ -151,7 +151,7 @@ class IrActionsActions(models.Model):
             for action in all_actions:
                 action = dict(action)
                 groups = action.pop('group_ids', None)
-                if groups and not any(self.env.user.has_group(ext_id) for ext_id in groups):
+                if groups and not any(self.env.has_group(ext_id) for ext_id in groups):
                     # the user may not perform this action
                     continue
                 res_model = action.pop('res_model', None)

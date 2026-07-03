@@ -742,8 +742,8 @@ class HrApplicant(models.Model):
 
     @api.model
     def get_view(self, view_id=None, view_type='form', **options):
-        if view_type == 'form' and self.env.user.has_group('hr_recruitment.group_hr_recruitment_interviewer')\
-            and not self.env.user.has_group('hr_recruitment.group_hr_recruitment_user'):
+        if view_type == 'form' and self.env.has_group('hr_recruitment.group_hr_recruitment_interviewer')\
+            and not self.env.has_group('hr_recruitment.group_hr_recruitment_user'):
             view_id = self.env.ref('hr_recruitment.hr_applicant_view_form_interviewer').id
         return super().get_view(view_id, view_type, **options)
 
@@ -761,7 +761,7 @@ class HrApplicant(models.Model):
             })
 
         partners = self.partner_id | self.department_id.manager_id.user_id.partner_id
-        if self.env.user.has_group('hr_recruitment.group_hr_recruitment_interviewer') and not self.env.user.has_group('hr_recruitment.group_hr_recruitment_user'):
+        if self.env.has_group('hr_recruitment.group_hr_recruitment_interviewer') and not self.env.has_group('hr_recruitment.group_hr_recruitment_user'):
             partners |= self.env.user.partner_id
         else:
             partners |= self.recruiter_id.user_partner_id
@@ -1058,7 +1058,7 @@ class HrApplicant(models.Model):
         }
 
     def _check_interviewer_access(self):
-        if self.env.user.has_group('hr_recruitment.group_hr_recruitment_interviewer') and not self.env.user.has_group('hr_recruitment.group_hr_recruitment_user'):
+        if self.env.has_group('hr_recruitment.group_hr_recruitment_interviewer') and not self.env.has_group('hr_recruitment.group_hr_recruitment_user'):
             raise UserError(_('You are not allowed to perform this action.'))
 
     def archive_applicant(self):

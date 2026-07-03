@@ -461,7 +461,7 @@ class TestExpenses(TestExpenseCommon):
         Expense = self.env['hr.expense'].with_user(self.expense_user_employee)
 
         # Make sure the multi-uom is correctly disabled for the user creating the expense
-        self.assertFalse(Expense.env.user.has_group('uom.group_uom'))
+        self.assertFalse(Expense.env.has_group('uom.group_uom'))
 
         # Use a product not using the default uom "Unit(s)"
         product = Expense.env.ref('hr_expense.expense_product_mileage')

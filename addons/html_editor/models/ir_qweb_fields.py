@@ -318,7 +318,7 @@ class IrQwebFieldHtml(models.AbstractModel):
             field = record._fields[field_name]
             if field.sanitize:
                 if field.sanitize_overridable:
-                    if record.env.user.has_group('base.group_sanitize_override'):
+                    if record.env.has_group('base.group_sanitize_override'):
                         # Don't mark the field as 'sanitize' if the sanitize
                         # is defined as overridable and the user has the right
                         # to do so

@@ -91,7 +91,7 @@ class WebsiteBlog(http.Controller):
         published_count = 0
         unpublished_count = 0
         scheduled_count = 0
-        if request.env.user.has_group('website.group_website_designer'):
+        if request.env.has_group('website.group_website_designer'):
             count_domain = domain & Domain("website_published", "=", True)
             scheduled_domain = domain & Domain("publish_on", "!=", False)
             published_count = BlogPost.search_count(count_domain)
@@ -304,7 +304,7 @@ class WebsiteBlog(http.Controller):
 
         # Find next Post
         blog_post_domain = [('blog_id', '=', blog.id)]
-        if not request.env.user.has_group('website_blog.group_website_blog_manager'):
+        if not request.env.has_group('website_blog.group_website_blog_manager'):
             blog_post_domain += [('website_published', '=', True)]
 
         all_post = BlogPost.search(blog_post_domain)

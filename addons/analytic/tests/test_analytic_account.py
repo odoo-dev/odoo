@@ -31,7 +31,7 @@ class TestAnalyticAccount(AnalyticCommon):
 
     def test_aggregates(self):
         # debit and credit are hidden by the group when account is installed
-        fields_to_agg = ['balance', 'debit', 'credit'] if self.env.user.has_group('account.group_account_readonly') else ['balance']
+        fields_to_agg = ['balance', 'debit', 'credit'] if self.env.has_group('account.group_account_readonly') else ['balance']
         model = self.env['account.analytic.account']
         self.assertEqual(
             model.fields_get(fields_to_agg, ['aggregator']),

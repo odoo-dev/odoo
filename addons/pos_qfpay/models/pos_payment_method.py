@@ -47,7 +47,7 @@ class PosPaymentMethod(models.Model):
 
     def qfpay_sign_request(self, payload):
         self.ensure_one()
-        if not self.env.su and not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.su and not self.env.has_group('point_of_sale.group_pos_user'):
             raise AccessDenied()
 
         if self.payment_provider != 'qfpay':

@@ -78,7 +78,7 @@ class HrEmployee(models.Model):
         return actions.read(['id', 'name', 'value'])
 
     def _action_set_manual_presence(self, state):
-        if not self.env.user.has_group('hr.group_hr_manager'):
+        if not self.env.has_group('hr.group_hr_manager'):
             raise UserError(_("You don't have the right to do this. Please contact an Administrator."))
         self.write({
             'manually_set_present': state,
@@ -119,7 +119,7 @@ class HrEmployee(models.Model):
     # --------------------------------------------------
 
     def action_send_sms(self):
-        if not self.env.user.has_group('hr.group_hr_manager'):
+        if not self.env.has_group('hr.group_hr_manager'):
             raise UserError(_("You don't have the right to do this. Please contact an Administrator."))
 
         context = dict(self.env.context)

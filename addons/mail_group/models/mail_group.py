@@ -185,7 +185,7 @@ class MailGroup(models.Model):
     @api.depends('is_moderator')
     @api.depends_context('uid')
     def _compute_can_manage_group(self):
-        is_admin = self.env.user.has_group('mail_group.group_mail_group_manager') or self.env.su
+        is_admin = self.env.has_group('mail_group.group_mail_group_manager') or self.env.su
         for group in self:
             group.can_manage_group = is_admin or group.is_moderator
 

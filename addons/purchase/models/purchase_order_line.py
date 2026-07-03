@@ -255,7 +255,7 @@ class PurchaseOrderLine(models.Model):
 
     @api.depends('product_id.purchase_line_warn_msg')
     def _compute_purchase_line_warn_msg(self):
-        has_warning_group = self.env.user.has_group('purchase.group_warning_purchase')
+        has_warning_group = self.env.has_group('purchase.group_warning_purchase')
         for line in self:
             line.purchase_line_warn_msg = line.product_id.purchase_line_warn_msg if has_warning_group else ""
 

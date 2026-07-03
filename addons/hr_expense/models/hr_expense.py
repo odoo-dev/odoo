@@ -51,7 +51,7 @@ class HrExpense(models.Model):
     @api.model
     def _default_employee_id(self):
         employee = self.env.user.employee_id
-        if not employee and not self.env.user.has_group('hr_expense.group_hr_expense_team_approver'):
+        if not employee and not self.env.has_group('hr_expense.group_hr_expense_team_approver'):
             raise ValidationError(_('The current user has no related employee. Please, create one.'))
         return employee
 
@@ -378,11 +378,11 @@ class HrExpense(models.Model):
     @api.depends('employee_id', 'manager_id', 'state')
     def _compute_is_editable(self):
         is_hr_admin = (
-            self.env.user.has_group('hr_expense.group_hr_expense_manager')
+            self.env.has_group('hr_expense.group_hr_expense_manager')
             or self.env.su
         )
-        is_team_approver = self.env.user.has_group('hr_expense.group_hr_expense_team_approver')
-        is_all_approver = self.env.user.has_group('hr_expense.group_hr_expense_user')
+        is_team_approver = self.env.has_group('hr_expense.group_hr_expense_team_approver')
+        is_all_approver = self.env.has_group('hr_expense.group_hr_expense_user')
 
         expenses_employee_ids_under_user_ones = set()
         if is_team_approver:
@@ -956,7 +956,7 @@ class HrExpense(models.Model):
     @api.depends_context('uid')
     @api.depends('state')
     def _compute_can_edit_account(self):
-        if not self.env.user.has_group('account.group_account_invoice'):
+        if not self.env.has_group('account.group_account_invoice'):
             self.can_edit_account = False
         else:
             for expense in self:
@@ -1638,9 +1638,9 @@ class HrExpense(models.Model):
 
     def _get_cannot_approve_reason(self):
         """ Returns the reason why the user cannot approve the expense """
-        is_team_approver = self.env.user.has_group('hr_expense.group_hr_expense_team_approver') or self.env.su
-        is_approver = self.env.user.has_group('hr_expense.group_hr_expense_user') or self.env.su
-        is_hr_admin = self.env.user.has_group('hr_expense.group_hr_expense_manager') or self.env.su
+        is_team_approver = self.env.has_group('hr_expense.group_hr_expense_team_approver') or self.env.su
+        is_approver = self.env.has_group('hr_expense.group_hr_expense_user') or self.env.su
+        is_hr_admin = self.env.has_group('hr_expense.group_hr_expense_manager') or self.env.su
 
         valid_company_ids = set(self.env.companies.ids)
 

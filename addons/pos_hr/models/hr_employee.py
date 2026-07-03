@@ -54,7 +54,7 @@ class HrEmployee(models.Model):
         return read_records
 
     def get_barcodes_and_pin_hashed(self):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.has_group('point_of_sale.group_pos_user'):
             return []
         # Apply visibility filters (record rules)
         visible_emp_ids = self.search([('id', 'in', self.ids)])

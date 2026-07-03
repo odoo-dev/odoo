@@ -698,7 +698,7 @@ class Survey(http.Controller):
 
     @http.route(['/survey/<model("survey.survey"):survey>/get_certification_preview'], type="http", auth="user", methods=['GET'], website=True)
     def survey_get_certification_preview(self, survey, **kwargs):
-        if not request.env.user.has_group('survey.group_survey_user'):
+        if not request.env.has_group('survey.group_survey_user'):
             raise werkzeug.exceptions.Forbidden()
 
         fake_user_input = survey._create_answer(user=request.env.user, test_entry=True)

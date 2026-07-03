@@ -254,7 +254,7 @@ class TestSelfAccessRights(TestHrCommon):
         })
         hubert.partner_id.sudo().employee_ids = hubert_emp
 
-        self.assertFalse(hubert.env.user.has_group('hr.group_hr_user'))
+        self.assertFalse(hubert.env.has_group('hr.group_hr_user'))
         self.assertFalse(hubert.env.su)
         self.assertEqual(hubert.sudo().employee_bank_account_ids.display_name, 'FR******7890')
         self.assertEqual(hubert_emp.with_user(hubert).sudo().bank_account_ids.display_name, 'FR******7890')

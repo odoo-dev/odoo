@@ -42,7 +42,7 @@ class ResPartnerBank(models.Model):
 
     def _compute_display_name(self):
         account_employee = self.browse()
-        if not self.env.user.has_group('hr.group_hr_user'):
+        if not self.env.has_group('hr.group_hr_user'):
             account_employee = self.sudo().filtered("partner_id.employee_ids")
             for account in account_employee:
                 account.sudo(self.env.su).display_name = \

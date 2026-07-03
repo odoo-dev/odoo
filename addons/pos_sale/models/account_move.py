@@ -5,7 +5,7 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     def reflect_cancelled_sol(self, isCancelled):
-        if self.env.user.has_group('point_of_sale.group_pos_user'):
+        if self.env.has_group('point_of_sale.group_pos_user'):
             for invoice in self:
                 for pos_order_line in invoice.pos_order_ids.mapped('lines'):
                     if pos_order_line.sale_order_line_id:

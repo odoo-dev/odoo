@@ -37,11 +37,11 @@ class TestHasGroup(TransactionCase):
     def test_env_uid(self):
         Partner = self.env['res.partner'].with_user(self.test_user)
         self.assertTrue(
-            Partner.env.user.has_group(self.group0),
+            Partner.env.has_group(self.group0),
             "the test user should belong to group0"
         )
         self.assertFalse(
-            Partner.env.user.has_group(self.group1),
+            Partner.env.has_group(self.group1),
             "the test user should *not* belong to group1"
         )
 

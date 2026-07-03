@@ -47,13 +47,13 @@ class AccountAnalyticLine(models.Model):
 
     def _domain_project_id(self):
         domain = Domain([('allow_timesheets', '=', True), ('is_template', '=', False)])
-        if not self.env.user.has_group('hr_timesheet.group_timesheet_manager'):
+        if not self.env.has_group('hr_timesheet.group_timesheet_manager'):
             domain &= Domain('privacy_visibility', 'in', ['employees', 'portal']) | Domain('message_partner_ids', 'in', [self.env.user.partner_id.id])
         return domain
 
     def _domain_employee_id(self):
         domain = Domain('company_id', 'in', self.env.context.get('allowed_company_ids'))
-        if not self.env.user.has_group('hr_timesheet.group_hr_timesheet_approver'):
+        if not self.env.has_group('hr_timesheet.group_hr_timesheet_approver'):
             domain &= Domain('user_id', '=', self.env.user.id)
         return domain
 
@@ -117,7 +117,7 @@ class AccountAnalyticLine(models.Model):
     def _compute_readonly_timesheet(self):
         # Since the mrp_module gives write access to portal user on timesheet, we check that the user is an internal one before giving the write access.
         # It is not supposed to be needed, since portal user are not supposed to have access to the views using this field, but better be safe than sorry
-        if not self.env.user.has_group('base.group_user'):
+        if not self.env.has_group('base.group_user'):
             self.readonly_timesheet = True
         else:
             readonly_timesheets = self.filtered(lambda timesheet: timesheet._is_readonly())
@@ -202,7 +202,7 @@ class AccountAnalyticLine(models.Model):
     def _check_can_write(self, values):
         # If it's a basic user then check if the timesheet is his own.
         if (
-            not (self.env.user.has_group('hr_timesheet.group_hr_timesheet_approver') or self.env.su)
+            not (self.env.has_group('hr_timesheet.group_hr_timesheet_approver') or self.env.su)
             and any(analytic_line.user_id != self.env.user for analytic_line in self)
         ):
             raise AccessError(_("You cannot access timesheets that are not yours."))
@@ -405,7 +405,7 @@ class AccountAnalyticLine(models.Model):
         return res
 
     def _timesheet_get_portal_domain(self):
-        if self.env.user.has_group('hr_timesheet.group_hr_timesheet_user'):
+        if self.env.has_group('hr_timesheet.group_hr_timesheet_user'):
             # Then, he is internal user, and we take the domain for this current user
             return self._access_domain('read')
         return (

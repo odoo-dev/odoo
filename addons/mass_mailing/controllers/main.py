@@ -37,7 +37,7 @@ class MassMailController(http.Controller):
         if not hash_token:
             if request.env.user._is_public():
                 raise BadRequest()
-            if mailing_id and not request.env.user.has_group('mass_mailing.group_mass_mailing_user'):
+            if mailing_id and not request.env.has_group('mass_mailing.group_mass_mailing_user'):
                 raise BadRequest()
         if hash_token and (not mailing_id or not email or not document_id):
             raise BadRequest()

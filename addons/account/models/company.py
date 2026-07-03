@@ -1021,7 +1021,7 @@ class ResCompany(models.Model):
         """Checks that all hashed moves have still the same data as when they were hashed
         and raises an error with the result.
         """
-        if not self.env.user.has_group('account.group_account_user'):
+        if not self.env.has_group('account.group_account_user'):
             raise UserError(_('Please contact your accountant to print the Hash integrity result.'))
 
         journals = self.env['account.journal'].search(self.env['account.journal']._check_company_domain(self))

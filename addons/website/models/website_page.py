@@ -109,7 +109,7 @@ class WebsitePage(models.Model):
     def _compute_can_publish(self):
         # Note: this `if`'s purpose it to optimize the way this is computed for
         # multiple records.
-        if self.env.user.has_group('website.group_website_designer'):
+        if self.env.has_group('website.group_website_designer'):
             for record in self:
                 record.can_publish = True
         else:
@@ -242,7 +242,7 @@ class WebsitePage(models.Model):
         # Read access on website.page requires sudo.
         requires_sudo = True
         domain = [website.website_domain()]
-        if not self.env.user.has_group('website.group_website_designer'):
+        if not self.env.has_group('website.group_website_designer'):
             # Rule must be reinforced because of sudo.
             domain.append([
                 ('website_published', '=', True),
@@ -477,7 +477,7 @@ class WebsitePage(models.Model):
         website = self.env.website
 
         if (
-            (self.env.user.has_group('website.group_website_designer') or self.is_visible)
+            (self.env.has_group('website.group_website_designer') or self.is_visible)
             and (
                 # If a generic page (niche case) has been COWed and that COWed
                 # page received a URL change, it should not let you access the

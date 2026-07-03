@@ -33,7 +33,7 @@ def post_init_hook(env):
         website.company_id._compute_website_id()
         website._bootstrap_homepage()
 
-    if not env.user.has_group('website.group_multi_website') and len(websites) > 1:
+    if not env.has_group('website.group_multi_website') and len(websites) > 1:
         all_user_groups = 'base.group_portal,base.group_user,base.group_public'
         groups = env['res.groups'].concat(env.ref(it) for it in all_user_groups.split(','))
         groups.write({'implied_ids': [(4, env.ref('website.group_multi_website').id)]})

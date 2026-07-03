@@ -575,7 +575,7 @@ class AccountMove(models.Model):
     def _l10n_in_get_hsn_summary_table(self):
         self.ensure_one()
         base_lines, _tax_lines = self._get_rounded_base_and_tax_lines()
-        display_uom = self.env.user.has_group('uom.group_uom')
+        display_uom = self.env.has_group('uom.group_uom')
         return self.env['account.tax']._l10n_in_get_hsn_summary_table(base_lines, display_uom)
 
     def _l10n_in_get_bill_from_irn(self, irn):

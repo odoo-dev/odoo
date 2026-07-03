@@ -115,7 +115,7 @@ class StockPackage(models.Model):
             quantity = str(int(qty) if qty == int(qty) else qty)
             return " ".join([quantity, uom_name, product_name] if display_uom else [quantity, product_name])
 
-        display_uom = self.env.user.has_group('uom.group_uom')
+        display_uom = self.env.has_group('uom.group_uom')
         for package in self:
             package_content = package.contained_quant_ids.grouped(lambda q: (q.uom_id, q.product_id))
             package_content = [(uom.name, product.display_name, sum(quants.mapped('quantity'))) for ((uom, product), quants) in package_content.items()]

@@ -42,7 +42,7 @@ class LivechatChannelController(ChannelController):
             raise BadRequest(
                 self.env._("Write expertises: Only LINK and UNLINK commands are allowed.")
             )
-        if not self.env.user.has_group("im_livechat.im_livechat_group_user"):
+        if not self.env.has_group("im_livechat.im_livechat_group_user"):
             return
         if channel := request.env["discuss.channel"].search(
             [("id", "=", channel_id), ("channel_type", "=", "livechat")]

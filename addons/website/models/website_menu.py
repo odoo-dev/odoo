@@ -59,7 +59,7 @@ class WebsiteMenu(models.Model):
     @api.depends('website_id')
     @api.depends_context('display_website')
     def _compute_display_name(self):
-        if not self.env.context.get('display_website') and not self.env.user.has_group('website.group_multi_website'):
+        if not self.env.context.get('display_website') and not self.env.has_group('website.group_multi_website'):
             return super()._compute_display_name()
 
         for menu in self:

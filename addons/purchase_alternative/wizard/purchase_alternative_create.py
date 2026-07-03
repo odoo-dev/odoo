@@ -25,7 +25,7 @@ class PurchaseAlternativeCreate(models.TransientModel):
     def _compute_purchase_warn_msg(self):
         self.purchase_warn_msg = ''
         # follows partner warning logic from PurchaseOrder
-        if not self.env.user.has_group('purchase.group_warning_purchase'):
+        if not self.env.has_group('purchase.group_warning_purchase'):
             return
         for partner in self.partner_ids:
             # If partner has no warning, check its company

@@ -338,7 +338,7 @@ class LoyaltyReward(models.Model):
     @api.depends_context("uid")
     @api.depends("reward_type")
     def _compute_user_has_debug(self):
-        self.user_has_debug = self.env.user.has_group("base.group_no_one")
+        self.user_has_debug = self.env.has_group("base.group_no_one")
 
     @api.constrains("reward_product_id")
     def _check_reward_product_id_no_combo(self):

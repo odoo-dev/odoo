@@ -153,7 +153,7 @@ class WebsiteSlides(WebsiteProfile):
         return slide._compute_quiz_info(request.env.user.partner_id, quiz_done=quiz_done)[slide.id]
 
     def _get_slide_quiz_data(self, slide):
-        is_designer = request.env.user.has_group('website.group_website_designer')
+        is_designer = request.env.has_group('website.group_website_designer')
         slides_resources = slide.slide_resource_ids if slide.channel_id.is_member else []
         values = {
             'slide_description': slide.description,
@@ -702,7 +702,7 @@ class WebsiteSlides(WebsiteProfile):
 
         # for sys admins: prepare data to install directly modules from eLearning when
         # uploading slides. Currently supporting only survey, because why not.
-        if request.env.user.has_group('base.group_system'):
+        if request.env.has_group('base.group_system'):
             module = request.env.ref('base.module_survey')
             if module.state != 'installed':
                 render_values['modules_to_install'] = json.dumps([{

@@ -97,7 +97,7 @@ class HrLeaveReportCalendar(models.Model):
     def _compute_name(self):
         for leave in self:
             leave.name = leave.employee_id.name
-            if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+            if self.env.has_group('hr_holidays.group_hr_holidays_user'):
                 # Include the time type name
                 leave.name += f" {leave.leave_id.work_entry_type_id.display_code or leave.leave_id.work_entry_type_id.name}"
             # Include the time off duration.
@@ -106,7 +106,7 @@ class HrLeaveReportCalendar(models.Model):
     @api.depends('leave_manager_id')
     def _compute_is_manager(self):
         for leave in self:
-            leave.is_manager = self.env.user.has_group('hr_holidays.group_hr_holidays_user') or leave.leave_manager_id == self.env.user
+            leave.is_manager = self.env.has_group('hr_holidays.group_hr_holidays_user') or leave.leave_manager_id == self.env.user
 
     def action_approve(self):
         current_user = self.env.user

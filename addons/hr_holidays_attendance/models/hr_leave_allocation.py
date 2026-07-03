@@ -46,7 +46,7 @@ class HrLeaveAllocation(models.Model):
         res = super().write(vals)
         if 'number_of_days' not in vals and 'work_entry_type_id' not in vals:
             return res
-        if not self.env.user.has_group("hr_holidays.group_hr_holidays_user") and any(allocation.state not in ('draft', 'confirm') for allocation in self):
+        if not self.env.has_group("hr_holidays.group_hr_holidays_user") and any(allocation.state not in ('draft', 'confirm') for allocation in self):
             raise ValidationError(_('Only an Officer or Administrator is allowed to edit the allocation duration in this status.'))
         self._check_employee_overtime_balance()
         return res

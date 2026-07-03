@@ -256,7 +256,7 @@ class HrLeave(models.Model):
             leave_days, hours = result[leave.id]
             if not leave_days or (
                 leave.state in ["validate", "validate1"]
-                and not self.env.user.has_group("hr_holidays.group_hr_holidays_user")
+                and not self.env.has_group("hr_holidays.group_hr_holidays_user")
             ):
                 continue
             default_hours = leave._l10n_in_get_default_leave_hours()

@@ -146,21 +146,21 @@ class PosPaymentMethod(models.Model):
         return [*super()._load_pos_data_fields(config), 'viva_com_terminal_id']
 
     def viva_com_send_payment_request(self, data):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Only 'group_pos_user' are allowed to send a Viva.com payment request"))
 
         endpoint = "transactions:sale"
         return self._call_viva_com(endpoint, 'post', data)
 
     def viva_com_send_refund_request(self, data):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Only 'group_pos_user' are allowed to send a Viva.com refund request"))
 
         endpoint = "transactions:refund" if data.get("parentSessionId") else "transactions:unreferenced-refund"
         return self._call_viva_com(endpoint, 'post', data)
 
     def viva_com_send_payment_cancel(self, data):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Only 'group_pos_user' are allowed to cancel a Viva.com payment"))
 
         session_id = data.get('sessionId')
@@ -169,7 +169,7 @@ class PosPaymentMethod(models.Model):
         return self._call_viva_com(endpoint, 'delete')
 
     def viva_com_get_payment_status(self, session_id):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Only 'group_pos_user' are allowed to get the payment status from Viva.com"))
 
         endpoint = f"sessions/{session_id}"

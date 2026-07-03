@@ -181,7 +181,7 @@ class ResUsers(models.Model):
 
     @api.depends_context('uid')
     def _compute_is_hr_user(self):
-        is_hr_user = self.env.user.has_group('hr.group_hr_user')
+        is_hr_user = self.env.has_group('hr.group_hr_user')
         self.is_hr_user = is_hr_user
 
     @api.depends('employee_ids')
@@ -342,7 +342,7 @@ class ResUsers(models.Model):
     def action_open_employees(self):
         self.ensure_one()
         employees = self.employee_ids
-        model = 'hr.employee' if self.env.user.has_group('hr.group_hr_user') else 'hr.employee.public'
+        model = 'hr.employee' if self.env.has_group('hr.group_hr_user') else 'hr.employee.public'
         if len(employees) > 1:
             return {
                 'name': _('Related Employees'),

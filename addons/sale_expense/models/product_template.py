@@ -31,7 +31,7 @@ class ProductTemplate(models.Model):
     @api.depends('can_be_expensed')
     def _compute_visible_reinvoice_policy(self):
         super()._compute_visible_reinvoice_policy()
-        if self.env.user.has_group('hr_expense.group_hr_expense_user'):
+        if self.env.has_group('hr_expense.group_hr_expense_user'):
             self.filtered('can_be_expensed').visible_reinvoice_policy = True
 
     @api.depends('can_be_expensed')

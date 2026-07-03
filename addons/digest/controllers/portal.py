@@ -61,7 +61,7 @@ class DigestController(Controller):
 
     @route('/digest/<int:digest_id>/set_periodicity', type='http', website=True, auth='user')
     def digest_set_periodicity(self, digest_id, periodicity='weekly'):
-        if not request.env.user.has_group('base.group_erp_manager'):
+        if not request.env.has_group('base.group_erp_manager'):
             raise Forbidden()
         if periodicity not in ('daily', 'weekly', 'monthly', 'quarterly'):
             raise ValueError(_('Invalid periodicity set on digest'))

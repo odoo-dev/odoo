@@ -51,7 +51,7 @@ class SaleOrder(models.Model):
             order.is_product_milestone = order.order_line.product_id.filtered(lambda p: p.service_policy == 'delivered_milestones')
 
     def _compute_show_project_and_task_button(self):
-        is_project_manager = self.env.user.has_group('project.group_project_manager')
+        is_project_manager = self.env.has_group('project.group_project_manager')
         for order in self:
             order.show_project_button = order.project_count
             order.show_create_project_button = is_project_manager

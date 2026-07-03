@@ -354,7 +354,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _get_exception_code_values(cls, exception):
         code, values = super()._get_exception_code_values(exception)
-        if isinstance(exception, werkzeug.exceptions.NotFound) and request.env.user.has_group('website.group_website_designer'):
+        if isinstance(exception, werkzeug.exceptions.NotFound) and request.env.has_group('website.group_website_designer'):
             code = 'page_404'
             values['path'] = request.httprequest.path[1:]
         if isinstance(exception, werkzeug.exceptions.Forbidden) and \
@@ -386,7 +386,7 @@ class IrHttp(models.AbstractModel):
                     )
                     values['view'] = values['view'] and values['view'][0]
         # Needed to show reset template on translated pages (`_prepare_environment` will set it for main lang)
-        values['editable'] = request.env.uid and request.env.user.has_group('website.group_website_designer')
+        values['editable'] = request.env.uid and request.env.has_group('website.group_website_designer')
         return values
 
     @api.model
@@ -409,7 +409,7 @@ class IrHttp(models.AbstractModel):
             'geoip_phone_code': geoip_phone_code,
             'lang_url_code': request.lang.url_code,
         })
-        if request.env.user.has_group('website.group_website_restricted_editor'):
+        if request.env.has_group('website.group_website_restricted_editor'):
             session_info.update({
                 'website_id': website.id,
                 'website_company_id': website.company_id.id,

@@ -233,7 +233,7 @@ class HrEmployee(models.Model):
                 employee.leave_manager_id = False
 
     def _compute_show_leaves(self):
-        show_leaves = self.env.user.has_group('hr_holidays.group_hr_holidays_user')
+        show_leaves = self.env.has_group('hr_holidays.group_hr_holidays_user')
         for employee in self:
             if show_leaves or employee.user_id == self.env.user:
                 employee.show_leaves = True

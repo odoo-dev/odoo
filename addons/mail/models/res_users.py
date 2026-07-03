@@ -154,7 +154,7 @@ class ResUsers(models.Model):
     @api.depends("email")
     @api.depends_context("uid")
     def _compute_outgoing_mail_server_id(self):
-        if not (self.env.su or self.env.user.has_group('base.group_user')):
+        if not (self.env.su or self.env.has_group('base.group_user')):
             self.outgoing_mail_server_id = False
             self.outgoing_mail_server_type = 'default'
             # compute only for the current user

@@ -45,7 +45,7 @@ class EventEvent(models.Model):
         The method is ran synchronously if there is a low amount of registrations, otherwise it
         goes through a CRON job that runs in batches. """
 
-        if not self.env.user.has_group('event.group_event_manager'):
+        if not self.env.has_group('event.group_event_manager'):
             raise UserError(_("Only Event Managers are allowed to re-generate all leads."))
 
         registrations_count = self.env['event.registration'].search_count([

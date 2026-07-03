@@ -245,7 +245,7 @@ class DiscussChannel(models.Model):
                     and c.self_member_id.livechat_member_type != "visitor"
                 ),
             )
-        ) and not self.env.user.has_group("base.group_system"):
+        ) and not self.env.has_group("base.group_system"):
             raise UserError(self.env._("Only customers can rate a live chat conversation."))
         if "livechat_status" not in vals and "livechat_expertise_ids" not in vals:
             return super().write(vals)

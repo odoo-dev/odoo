@@ -199,7 +199,7 @@ class ProjectProject(models.Model):
 
     @api.onchange('company_id')
     def _onchange_company_id(self):
-        if (self.env.user.has_group('project.group_project_stages') and self.stage_id.company_id
+        if (self.env.has_group('project.group_project_stages') and self.stage_id.company_id
                 and self.stage_id.company_id != self.company_id):
             self.stage_id = self.env['project.project.stage'].search(
                 [('company_id', 'in', [self.company_id.id, False])],
@@ -519,7 +519,7 @@ class ProjectProject(models.Model):
         copy_from_template = self.env.context.get('copy_from_template')
         has_project_stage_feature = False
         if copy_from_template and 'stage_id' not in default:
-            has_project_stage_feature = self.env.user.has_group('project.group_project_stages')
+            has_project_stage_feature = self.env.has_group('project.group_project_stages')
         for project, vals in zip(self, vals_list):
             if project.is_template and not copy_from_template:
                 vals['is_template'] = True
@@ -647,7 +647,7 @@ class ProjectProject(models.Model):
             for vals in vals_list:
                 if 'label_tasks' in vals and not vals['label_tasks']:
                     vals['label_tasks'] = task_label
-        if self.env.user.has_group('project.group_project_stages'):
+        if self.env.has_group('project.group_project_stages'):
             if 'default_stage_id' in self.env.context:
                 stage = self.env['project.project.stage'].browse(self.env.context['default_stage_id'])
                 # The project's company_id must be the same as the stage's company_id
@@ -690,7 +690,7 @@ class ProjectProject(models.Model):
         # Here we modify the project's stage according to the selected company (selecting the first
         # stage in sequence that is linked to the company).
         company_id = vals.get('company_id')
-        if self.env.user.has_group('project.group_project_stages') and company_id:
+        if self.env.has_group('project.group_project_stages') and company_id:
             projects_already_with_company = self.filtered(lambda p: p.company_id.id == company_id)
             if projects_already_with_company:
                 projects_already_with_company.write({key: value for key, value in vals.items() if key != 'company_id'})
@@ -847,7 +847,7 @@ class ProjectProject(models.Model):
         Otherwise, add the group 'group_name' to the user base group.
         Returns True if the group was added, False if it was removed, None if no change was made.
         """
-        has_user_group = bool(self.env.user.has_group(group_name))
+        has_user_group = bool(self.env.has_group(group_name))
         group = self.env.ref(group_name)
         base_group_user = self.env.ref('base.group_user')
         has_project_field_set = bool(self.env['project.project'].sudo().search_count([(field_name, '=', True)], limit=1))
@@ -877,16 +877,16 @@ class ProjectProject(models.Model):
 
     @api.model
     def check_features_enabled(self, updated_features=None):
-        if not self.env.user.has_group('project.group_project_user'):
+        if not self.env.has_group('project.group_project_user'):
             return {}
         if updated_features:
             return {
-                field_name: self.env.user.has_group(group)
+                field_name: self.env.has_group(group)
                 for field_name, group in self._get_project_features_mapping().items()
                 if field_name in updated_features
             }
         return {
-            field_name: self.env.user.has_group(group)
+            field_name: self.env.has_group(group)
             for field_name, group in self._get_project_features_mapping().items()
         }
 
@@ -897,7 +897,7 @@ class ProjectProject(models.Model):
     def _track_template_parameters(self, tracked_fields):
         res = super()._track_template_parameters(tracked_fields)
         project = self[0]
-        if self.env.user.has_group('project.group_project_stages') and 'stage_id' in tracked_fields and project.stage_id.mail_template_id:
+        if self.env.has_group('project.group_project_stages') and 'stage_id' in tracked_fields and project.stage_id.mail_template_id:
             res['stage_id'] = (project.stage_id.mail_template_id, {
                 'auto_delete_keep_log': False,
                 'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),

@@ -11,7 +11,7 @@ class StockForecasted_Product_Product(models.AbstractModel):
     def _get_report_header(self, product_template_ids, product_ids, wh_location_ids):
         """ Overrides to computes the valuations of the stock. """
         res = super()._get_report_header(product_template_ids, product_ids, wh_location_ids)
-        if not self.env.user.has_group('stock.group_stock_manager') or not wh_location_ids:
+        if not self.env.has_group('stock.group_stock_manager') or not wh_location_ids:
             return res
         company = self.env['stock.location'].browse(wh_location_ids[0]).company_id
         domain_quants = [

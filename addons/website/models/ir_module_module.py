@@ -105,7 +105,7 @@ class IrModuleModule(models.Model):
                 (the name must be one of the keys present in ``_theme_model_names``)
             :return: recordset of theme template models (of type defined by ``model_name``)
         """
-        if not self.env.user.has_group('website.group_website_restricted_editor'):
+        if not self.env.has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.Forbidden()
 
         self_sudo = self.sudo()
@@ -294,7 +294,7 @@ class IrModuleModule(models.Model):
             :param website: ``website`` model for which the models have to be cleaned
 
         """
-        if not self.env.user.has_group('website.group_website_restricted_editor'):
+        if not self.env.has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.Forbidden()
 
         self.ensure_one()
@@ -363,7 +363,7 @@ class IrModuleModule(models.Model):
 
     def _theme_upgrade_upstream(self):
         """ Upgrade the upstream dependencies of a theme, and install it if necessary. """
-        if not self.env.user.has_group('website.group_website_restricted_editor'):
+        if not self.env.has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.Forbidden()
 
         def install_or_upgrade(theme):

@@ -13,8 +13,8 @@ class SurveySurvey(models.Model):
     @api.depends_context('uid')
     def _compute_allowed_survey_types(self):
         super()._compute_allowed_survey_types()
-        if self.env.user.has_group('hr_recruitment.group_hr_recruitment_interviewer') or \
-                self.env.user.has_group('survey.group_survey_user'):
+        if self.env.has_group('hr_recruitment.group_hr_recruitment_interviewer') or \
+                self.env.has_group('survey.group_survey_user'):
             for survey in self:
                 survey.allowed_survey_types = [*(survey.allowed_survey_types or []), 'recruitment']
 

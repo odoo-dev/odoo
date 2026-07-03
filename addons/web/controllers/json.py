@@ -66,7 +66,7 @@ class WebJsonController(http.Controller):
         :param end_date: When applicable, maximum date (exclusive bound)
         """
         self._check_json_route_active()
-        if not request.env.user.has_group('base.group_allow_export'):
+        if not request.env.has_group('base.group_allow_export'):
             raise AccessError(request.env._("You need export permissions to use the /json route"))
 
         # redirect when the computed kwargs and the kwargs from the URL are different

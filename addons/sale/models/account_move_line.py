@@ -22,7 +22,7 @@ class AccountMoveLine(models.Model):
 
     @api.depends("product_id.sale_line_warn_msg")
     def _compute_sale_line_warn_msg(self):
-        has_warning_group = self.env.user.has_group("sale.group_warning_sale")
+        has_warning_group = self.env.has_group("sale.group_warning_sale")
         for line in self:
             line.sale_line_warn_msg = (
                 line.product_id.sale_line_warn_msg if has_warning_group else ""

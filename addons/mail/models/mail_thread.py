@@ -179,7 +179,7 @@ class MailThread(models.AbstractModel):
 
     @api.depends('message_follower_ids')
     def _compute_message_partner_ids(self):
-        is_internal = self.env.su or self.env.user.has_group('base.group_user')
+        is_internal = self.env.su or self.env.has_group('base.group_user')
         if is_internal:
             for thread in self:
                 thread.message_partner_ids = thread.message_follower_ids.partner_id
@@ -192,7 +192,7 @@ class MailThread(models.AbstractModel):
                 thread.message_partner_ids = partners
 
     def _inverse_message_partner_ids(self):
-        is_internal = self.env.su or self.env.user.has_group('base.group_user')
+        is_internal = self.env.su or self.env.has_group('base.group_user')
         if not is_internal:
             raise AccessError(self.env._("Cannot write on message partners"))
 
@@ -219,7 +219,7 @@ class MailThread(models.AbstractModel):
         """Search function for message_follower_ids"""
         if operator in Domain.NEGATIVE_OPERATORS:
             return NotImplemented
-        is_internal = self.env.su or self.env.user.has_group('base.group_user')
+        is_internal = self.env.su or self.env.has_group('base.group_user')
         if not is_internal:
             user_partner = self.env.user.partner_id
             allow_partner_ids = set((user_partner | user_partner.commercial_partner_id).ids)

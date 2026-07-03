@@ -515,7 +515,7 @@ class IrAccess(models.Model):
                     "have access to the proper company to access the record anyhow."
                 )
 
-        if self.env.user.has_group('base.group_no_one') and self.env.user._is_internal():
+        if self.env.has_group('base.group_no_one') and self.env.user._is_internal():
             # this extended AccessError is only displayed in debug mode
             failing_records = '\n'.join(f'- {get_description(record)}' for record in records_sudo)
             access_description = '\n'.join(f'- {access.display_name}' for access in accesses)

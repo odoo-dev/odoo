@@ -14,7 +14,7 @@ class HrDepartment(models.Model):
         compute='_compute_recruitment_stats', string='Expected Employee')
 
     def _compute_new_applicant_count(self):
-        if self.env.user.has_group('hr_recruitment.group_hr_recruitment_interviewer'):
+        if self.env.has_group('hr_recruitment.group_hr_recruitment_interviewer'):
             applicant_data = self.env['hr.applicant']._read_group(
                 [('department_id', 'in', self.ids), ('stage_id.sequence', '<=', '1')],
                 ['department_id'], ['__count'])

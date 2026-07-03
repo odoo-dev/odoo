@@ -560,7 +560,7 @@ class ResUsers(models.Model):
             operation != 'write'
             or getattr(field, 'user_writeable', False)
             or self.env.su
-            or self.env.user.has_group('base.group_erp_manager')
+            or self.env.has_group('base.group_erp_manager')
         )
 
     @api.model_create_multi
@@ -790,7 +790,7 @@ class ResUsers(models.Model):
         auth_info = self._login(credential, user_agent_env=user_agent_env)
         if user_agent_env and user_agent_env.get('base_location'):
             env = self.env(user=auth_info['uid'])
-            if env.user.has_group('base.group_system'):
+            if env.has_group('base.group_system'):
                 # Successfully logged in as system user!
                 # Attempt to guess the web base url...
                 try:

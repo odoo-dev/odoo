@@ -22,7 +22,7 @@ class ProductProduct(models.Model):
     def _compute_sales_count(self):
         r = {}
         self.sales_count = 0
-        if not self.env.user.has_group("sales_team.group_sale_salesman"):
+        if not self.env.has_group("sales_team.group_sale_salesman"):
             return r
         date_from = fields.Date.today() - timedelta(days=365)
 

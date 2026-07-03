@@ -19,7 +19,7 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
             if self.company_id
             else Domain([("company_id", "in", self.env.companies.ids)])
         )
-        if not self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+        if not self.env.has_group('hr_holidays.group_hr_holidays_user'):
             domain &= Domain(['|', ('leave_manager_id', '=', self.env.user.id), ('user_id', '=', self.env.user.id)])
         return domain
 
@@ -56,7 +56,7 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
     def _prepare_employees_holiday_values(self, employees, date_from_tz, date_to_tz):
         self.ensure_one()
         work_days_data = employees.sudo()._get_work_days_data_batch(date_from_tz, date_to_tz)
-        validated = self.env.user.has_group('hr_holidays.group_hr_holidays_user') or self.work_entry_type_id.leave_validation_type == 'no_validation'
+        validated = self.env.has_group('hr_holidays.group_hr_holidays_user') or self.work_entry_type_id.leave_validation_type == 'no_validation'
         values = []
         for employee in employees:
             if work_days_data[employee.id]['days'] > 0:

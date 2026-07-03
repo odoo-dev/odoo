@@ -256,6 +256,6 @@ class ProductPublicCategory(models.Model):
         """
         domain = Domain("website_id", "in", [False, website_id])
         # Public and portal users should only see categories with published products.
-        if not self.env.user.has_group("website.group_website_designer"):
+        if not self.env.has_group("website.group_website_designer"):
             domain &= Domain("has_published_products", "=", True)
         return domain

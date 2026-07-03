@@ -33,7 +33,7 @@ class StockRequestCount(models.TransientModel):
         self.ensure_one()
         quants_to_count = self.quant_ids
         tracked_quants = self.quant_ids.filtered(lambda q: q.product_id.tracking in ['lot', 'serial'])
-        if not self.env.user.has_group('stock.group_production_lot') or not tracked_quants:
+        if not self.env.has_group('stock.group_production_lot') or not tracked_quants:
             return quants_to_count
         # Searches sibling quants for tracked product.
         if tracked_quants:

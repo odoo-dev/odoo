@@ -40,8 +40,8 @@ class HrAttendanceOvertimeLine(models.Model):
 
     @api.depends('attendance_id.employee_id')
     def _compute_is_manager(self):
-        has_manager_right = self.env.user.has_group('hr_attendance.group_hr_attendance_manager')
-        has_officer_right = self.env.user.has_group('hr_attendance.group_hr_attendance_officer')
+        has_manager_right = self.env.has_group('hr_attendance.group_hr_attendance_manager')
+        has_officer_right = self.env.has_group('hr_attendance.group_hr_attendance_officer')
         for overtime in self:
             overtime.is_manager = (
                 has_manager_right or

@@ -20,13 +20,13 @@ class HrLeaveAllocationGenerateMultiWizard(models.TransientModel):
             if self.company_id
             else Domain([("company_id", "in", self.env.companies.ids)])
         )
-        if not self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+        if not self.env.has_group('hr_holidays.group_hr_holidays_user'):
             domain &= Domain(['|', ('leave_manager_id', '=', self.env.user.id), ('user_id', '=', self.env.user.id)])
         return domain
 
     def _domain_work_entry_type_id(self):
         domain = [('requires_allocation', '=', True)]
-        if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+        if self.env.has_group('hr_holidays.group_hr_holidays_user'):
             return domain
         return Domain.AND([domain, [('employee_requests', '=', True)]])
 
@@ -107,7 +107,7 @@ class HrLeaveAllocationGenerateMultiWizard(models.TransientModel):
                     allocation.update(update_vals)
                     allocation._process_accrual_plans(date_to)
             allocations.filtered(lambda c: c.validation_type not in ('no_validation', 'hr')).action_approve()
-            if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
+            if self.env.has_group('hr_holidays.group_hr_holidays_user'):
                 allocations.filtered(lambda c: c.validation_type == 'hr').action_approve()
 
             return {

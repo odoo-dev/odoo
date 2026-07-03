@@ -211,8 +211,8 @@ class Website(Home):
         session, AFTER landing on that website domain (if set) as this will be a
         different session.
         """
-        if not (request.env.user.has_group('website.group_multi_website')
-           and request.env.user.has_group('website.group_website_restricted_editor')):
+        if not (request.env.has_group('website.group_multi_website')
+           and request.env.has_group('website.group_website_restricted_editor')):
             # The user might not be logged in on the forced website, so he won't
             # have rights. We just redirect to the path as the user is already
             # on the domain (basically a no-op as it won't change domain or
@@ -447,7 +447,7 @@ class Website(Home):
 
     @http.route(['/website/configurator', '/website/configurator/<int:step>'], type='http', auth="user", website=True, multilang=False)
     def website_configurator(self, step=1, **kwargs):
-        if not request.env.user.has_group('website.group_website_designer'):
+        if not request.env.has_group('website.group_website_designer'):
             raise werkzeug.exceptions.NotFound()
         if self.env.website.configurator_done:
             return request.redirect('/')
@@ -834,7 +834,7 @@ class Website(Home):
 
     @http.route('/website/snippet/options_filters', type='jsonrpc', auth='user', website=True, readonly=True)
     def get_dynamic_snippet_filters(self, model_name=None, search_domain=None):
-        if not request.env.user.has_group('website.group_website_restricted_editor'):
+        if not request.env.has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.NotFound()
         domain = self.env.website.website_domain()
         if search_domain:
@@ -883,7 +883,7 @@ class Website(Home):
 
     @http.route("/website/get_new_pages", type="jsonrpc", auth="user")
     def get_new_page_records(self, page_ids):
-        if not request.env.user.has_group('website.group_website_restricted_editor'):
+        if not request.env.has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.Forbidden()
         page_records = request.env["website.page"].sudo().search_read(
             [("id", "in", page_ids)],
@@ -1403,7 +1403,7 @@ class Website(Home):
 
     @http.route(['/website/update_alt_images'], type='jsonrpc', auth="user", website=True)
     def update_alt_images(self, imgs):
-        if not request.env.user.has_group('website.group_website_restricted_editor'):
+        if not request.env.has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.Forbidden()
         for img in imgs:
             record = request.env[img['res_model']].browse(img['res_id'])
@@ -1428,7 +1428,7 @@ class Website(Home):
 
     @http.route(['/website/update_broken_links'], type='jsonrpc', auth="user", website=True)
     def update_broken_links(self, links):
-        if not request.env.user.has_group('website.group_website_restricted_editor'):
+        if not request.env.has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.Forbidden()
         for link in links:
             record = request.env[link['res_model']].browse(link['res_id'])
@@ -1492,7 +1492,7 @@ class Website(Home):
             return translations.get(lang_code or request.lang.code, '')
 
         # Access checks
-        if not request.env.user.has_group('website.group_website_restricted_editor'):
+        if not request.env.has_group('website.group_website_restricted_editor'):
             # Still ok if user can access the record anyway.
             try:
                 record = request.env[res_model].browse(res_id)
@@ -1514,7 +1514,7 @@ class Website(Home):
             self.env.website._check_user_can_modify(record)
         except AccessError:
             res['can_edit_seo'] = False
-        if request.env.user.has_group('website.group_website_restricted_editor'):
+        if request.env.has_group('website.group_website_restricted_editor'):
             record = record.sudo()
 
         # Basic field values
@@ -1550,7 +1550,7 @@ class Website(Home):
 
     @http.route(['/website/check_can_modify_any'], type='jsonrpc', auth="user", website=True, readonly=True)
     def check_can_modify_any(self, records):
-        if not request.env.user.has_group('website.group_website_restricted_editor'):
+        if not request.env.has_group('website.group_website_restricted_editor'):
             raise werkzeug.exceptions.Forbidden()
         first_error = None
         for rec in records:

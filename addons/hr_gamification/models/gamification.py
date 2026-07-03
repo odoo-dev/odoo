@@ -20,7 +20,7 @@ class GamificationBadgeUser(models.Model):
                 raise ValidationError(_('The selected employee does not correspond to the selected user.'))
 
     def _compute_has_edit_delete_access(self):
-        is_hr_user = self.env.user.has_group('hr.group_hr_user')
+        is_hr_user = self.env.has_group('hr.group_hr_user')
         for badge_user in self:
             badge_user.has_edit_delete_access = is_hr_user or self.env.uid == self.create_uid.id
 

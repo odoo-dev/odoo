@@ -55,7 +55,7 @@ class SaleOrderLine(models.Model):
     @api.depends('purchase_line_count')
     def _compute_product_updatable(self):
         super()._compute_product_updatable()
-        if self.env.user.has_group('purchase.group_purchase_user'):
+        if self.env.has_group('purchase.group_purchase_user'):
             for line in self:
                 if line.purchase_line_count > 0:
                     line.product_updatable = False

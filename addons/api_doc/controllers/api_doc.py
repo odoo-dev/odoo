@@ -38,7 +38,7 @@ class DocController(http.Controller):
 
     @http.route(['/doc', '/doc/<model_name>', '/doc/index.html'], type='http', auth='user')
     def doc_client(self, mod=None, **kwargs):
-        if not self.env.user.has_group('api_doc.group_allow_doc'):
+        if not self.env.has_group('api_doc.group_allow_doc'):
             raise AccessError(self.env._(
                 "This page is only accessible to %s users.",
                 self.env.ref('api_doc.group_allow_doc').sudo().name))
@@ -76,7 +76,7 @@ class DocController(http.Controller):
                 ]
             }
         """
-        if not self.env.user.has_group('api_doc.group_allow_doc'):
+        if not self.env.has_group('api_doc.group_allow_doc'):
             raise AccessError(self.env._(
                 "This page is only accessible to %s users.",
                 self.env.ref('api_doc.group_allow_doc').sudo().name))
@@ -189,7 +189,7 @@ class DocController(http.Controller):
                 'methods': dict[str, dict],  # _doc_method indexed by method name
             }
         """
-        if not self.env.user.has_group('api_doc.group_allow_doc'):
+        if not self.env.has_group('api_doc.group_allow_doc'):
             raise AccessError(self.env._(
                 "This page is only accessible to %s users.",
                 self.env.ref('api_doc.group_allow_doc').sudo().name))

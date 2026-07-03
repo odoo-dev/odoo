@@ -3893,8 +3893,8 @@ class AccountMove(models.Model):
 
     def _get_review_state_access_groups(self):
         """Return a tuple (is_user_able_to_review, is_user_able_to_supervise) for the current user."""
-        is_user_able_to_supervise = self.env.user.has_group('account.group_account_manager')
-        is_user_able_to_review = self.env.user.has_group('account.group_account_user') or is_user_able_to_supervise
+        is_user_able_to_supervise = self.env.has_group('account.group_account_manager')
+        is_user_able_to_review = self.env.has_group('account.group_account_user') or is_user_able_to_supervise
         return is_user_able_to_review, is_user_able_to_supervise
 
     def _check_review_state_access(self, review_state):
@@ -4053,7 +4053,7 @@ class AccountMove(models.Model):
                 )))
 
             if move.journal_id.sequence_override_regex and vals.get('name') and vals['name'] != '/' and not re.match(move.journal_id.sequence_override_regex, vals['name']):
-                if not self.env.user.has_group('account.group_account_manager'):
+                if not self.env.has_group('account.group_account_manager'):
                     raise UserError(_('The Journal Entry sequence is not conform to the current format. Only the Accountant can change it.'))
                 move.journal_id.sequence_override_regex = False
 
@@ -4157,7 +4157,7 @@ class AccountMove(models.Model):
         but they can delete the moves even if it creates a sequence gap.
         """
         if not (
-            self.env.user.has_group('account.group_account_manager')
+            self.env.has_group('account.group_account_manager')
             or any(self.company_id.mapped('document_sequence_editable'))
             or self.env.context.get('force_delete')
             or self.check_move_sequence_chain()
@@ -5862,7 +5862,7 @@ class AccountMove(models.Model):
             Nothing will be performed on those documents before the accounting date.
         :returns: the Model<account.move> documents that have been posted
         """
-        if not self.env.su and not self.env.user.has_group('account.group_account_invoice'):
+        if not self.env.su and not self.env.has_group('account.group_account_invoice'):
             raise AccessError(_("You don't have the access rights to post an invoice."))
 
         # Avoid marking is_manually_modified as True when posting an invoice
@@ -5888,7 +5888,7 @@ class AccountMove(models.Model):
                     "So you cannot confirm the invoice."
                 ))
             if invoice.partner_bank_id and invoice.is_inbound() and not invoice.partner_bank_id.allow_out_payment:
-                if self.env.user.id == SUPERUSER_ID or self.env.user.has_group('base.group_public') or self.env.user.has_group('base.group_portal'):
+                if self.env.user.id == SUPERUSER_ID or self.env.has_group('base.group_public') or self.env.has_group('base.group_portal'):
                     # Do not block in case of automated flows, simply remove the information
                     invoice.partner_bank_id = False
                 elif invoice.partner_bank_id._user_can_trust():
@@ -6038,7 +6038,7 @@ class AccountMove(models.Model):
             'posted_before': True,
         })
 
-        if not self.env.user.has_group('account.group_partial_purchase_deductibility') and \
+        if not self.env.has_group('account.group_partial_purchase_deductibility') and \
                 self.filtered(lambda move: move.move_type == 'in_invoice' and move.invoice_line_ids.filtered(lambda l: l.deductible_percentage != 1)):
             self.env.user.sudo().group_ids = [Command.link(self.env.ref('account.group_partial_purchase_deductibility').id)]
 

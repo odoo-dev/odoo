@@ -108,7 +108,7 @@ class ProductTemplate(models.Model):
     @api.depends("purchase_ok", "sale_ok")
     def _compute_visible_reinvoice_policy(self):
         self.visible_reinvoice_policy = False
-        if self.env.user.has_group("analytic.group_analytic_accounting") or self.env.user.has_group(
+        if self.env.has_group("analytic.group_analytic_accounting") or self.env.has_group(
             "sale.group_services_and_material"
         ):
             self.filtered(lambda pt: pt.purchase_ok or pt.sale_ok).visible_reinvoice_policy = True
@@ -221,7 +221,7 @@ class ProductTemplate(models.Model):
     def get_import_templates(self):
         res = super().get_import_templates()
         if self.env.context.get("sale_multi_pricelist_product_template"):
-            if self.env.user.has_group("product.group_product_pricelist"):
+            if self.env.has_group("product.group_product_pricelist"):
                 return [
                     {
                         "label": self.env._("Import Template for Products"),

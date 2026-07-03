@@ -8,7 +8,7 @@ class Website(models.Model):
     _inherit = 'website'
 
     def _get_crm_default_team_domain(self):
-        if not self.env.user.has_group('crm.group_use_lead'):
+        if not self.env.has_group('crm.group_use_lead'):
             return [('use_opportunities', '=', True)]
         return [('use_leads', '=', True)]
 

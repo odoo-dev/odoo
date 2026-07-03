@@ -161,9 +161,9 @@ class HrAttendance(models.Model):
     @api.depends_context('uid')
     @api.depends('employee_id')
     def _compute_is_manager(self):
-        have_manager_right = self.env.user.has_group('hr_attendance.group_hr_attendance_user')
-        have_officer_right = self.env.user.has_group('hr_attendance.group_hr_attendance_officer')
-        have_own_right = self.env.user.has_group('hr_attendance.group_hr_attendance_own')
+        have_manager_right = self.env.has_group('hr_attendance.group_hr_attendance_user')
+        have_officer_right = self.env.has_group('hr_attendance.group_hr_attendance_officer')
+        have_own_right = self.env.has_group('hr_attendance.group_hr_attendance_own')
         for attendance in self:
             attendance.is_manager = have_manager_right or \
                 (have_officer_right and attendance.attendance_manager_id.id == self.env.user.id)
@@ -380,7 +380,7 @@ class HrAttendance(models.Model):
     def write(self, vals):
         if vals.get('employee_id') and \
             vals['employee_id'] not in self.env.user.employee_ids.ids and \
-            not self.env.user.has_group('hr_attendance.group_hr_attendance_manager') and \
+            not self.env.has_group('hr_attendance.group_hr_attendance_manager') and \
             self.env['hr.employee'].sudo().browse(vals['employee_id']).attendance_manager_id.id != self.env.user.id:
             raise AccessError(_("Do not have access, user cannot edit the attendances that are not their own or if they are not the attendance manager of the employee."))
         domain_pre = self._get_overtimes_to_update_domain()
@@ -422,7 +422,7 @@ class HrAttendance(models.Model):
 
     @api.model
     def has_demo_data(self):
-        if not self.env.user.has_group("hr_attendance.group_hr_attendance_user"):
+        if not self.env.has_group("hr_attendance.group_hr_attendance_user"):
             return True
         # This record only exists if the scenario has been already launched
         demo_tag = self.env.ref('hr_attendance.resource_calendar_std_38h', raise_if_not_found=False)
@@ -557,7 +557,7 @@ class HrAttendance(models.Model):
         }
 
     def action_try_kiosk(self):
-        if not self.env.user.has_group("hr_attendance.group_hr_attendance_user"):
+        if not self.env.has_group("hr_attendance.group_hr_attendance_user"):
             return {
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',

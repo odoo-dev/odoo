@@ -57,7 +57,7 @@ class PosPaymentMethod(models.Model):
         return round(amount / currency.rounding)
 
     def _stripe_check_access(self):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Stripe"))
 
     def stripe_payment_intent(self, amount):

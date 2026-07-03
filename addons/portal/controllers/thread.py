@@ -84,7 +84,7 @@ class PortalWebClientController(WebclientController):
     ):
         access_params = access_params or {}
         store.add_global_values(request.env.user.sudo(False)._store_init_global_fields)
-        if request.env.user.has_group("website.group_website_restricted_editor"):
+        if request.env.has_group("website.group_website_restricted_editor"):
             store.add(request.env.user.partner_id, {"is_user_publisher": True})
         if thread := self._get_thread_with_access(
             thread_model,

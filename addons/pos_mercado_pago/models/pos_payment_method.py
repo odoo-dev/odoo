@@ -31,7 +31,7 @@ class PosPaymentMethod(models.Model):
         return super()._allowed_actions_in_self_order() + ['mp_payment_intent_create', 'mp_payment_intent_get', 'mp_get_payment_status', 'mp_payment_intent_cancel']
 
     def _check_special_access(self):
-        if not self.env.user.has_group('point_of_sale.group_pos_user'):
+        if not self.env.has_group('point_of_sale.group_pos_user'):
             raise AccessError(_("Do not have access to fetch token from Mercado Pago"))
 
     def force_pdv(self):

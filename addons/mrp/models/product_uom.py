@@ -12,7 +12,7 @@ class ProductUom(models.Model):
         if self.env.context.get('active_model') == 'uom.uom':
             return
 
-        has_byproducts = self.env.user.has_group('mrp.group_mrp_byproducts')
+        has_byproducts = self.env.has_group('mrp.group_mrp_byproducts')
         if has_byproducts:
             byproducts_by_product = (
                 self.env['mrp.bom.byproduct']

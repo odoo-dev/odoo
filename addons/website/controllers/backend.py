@@ -10,8 +10,8 @@ class WebsiteBackend(http.Controller):
     @http.route('/website/fetch_dashboard_data', type="jsonrpc", auth='user', readonly=True)
     def fetch_dashboard_data(self, website_id):
         Website = request.env['website']
-        has_group_system = request.env.user.has_group('base.group_system')
-        has_group_designer = request.env.user.has_group('website.group_website_designer')
+        has_group_system = request.env.has_group('base.group_system')
+        has_group_designer = request.env.has_group('website.group_website_designer')
         dashboard_data = {
             'groups': {
                 'system': has_group_system,
@@ -21,7 +21,7 @@ class WebsiteBackend(http.Controller):
         }
 
         current_website = website_id and Website.browse(website_id) or self.env.website
-        multi_website = request.env.user.has_group('website.group_multi_website')
+        multi_website = request.env.has_group('website.group_multi_website')
         websites = multi_website and request.env['website'].search([]) or current_website
         dashboard_data['websites'] = websites.read(['id', 'name'])
         for website in dashboard_data['websites']:

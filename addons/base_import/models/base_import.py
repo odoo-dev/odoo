@@ -343,7 +343,7 @@ class Base_ImportImport(models.TransientModel):
                 field_value['comodel_name'] = field['relation']
             elif field['type'] == 'one2many':
                 field_value['fields'] = self.get_fields_tree(field['relation'], depth=depth-1)
-                if self.env.user.has_group('base.group_no_one'):
+                if self.env.has_group('base.group_no_one'):
                     field_value['fields'].append(
                         dict(field_value, model_name=field['relation'], fields=[], name='.id', string=_("Database ID"), type='id')
                     )
@@ -1201,7 +1201,7 @@ class Base_ImportImport(models.TransientModel):
                 'preview': column_example,
                 'options': options,
                 'advanced_mode': advanced_mode,
-                'debug': self.env.user.has_group('base.group_no_one'),
+                'debug': self.env.has_group('base.group_no_one'),
                 'batch': batch,
                 'num_rows': len(data_rows),
             }

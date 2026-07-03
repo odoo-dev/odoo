@@ -18,7 +18,7 @@ class HrEmployeeCV(Controller):
 
         ids = [int(s) for s in employee_ids.split(',')]
         employees = request.env['hr.employee'].browse(ids)
-        if not request.env.user.has_group('hr.group_hr_user') and employees.ids != request.env.user.employee_id.ids:
+        if not request.env.has_group('hr.group_hr_user') and employees.ids != request.env.user.employee_id.ids:
             return request.not_found()
 
         resume_type_education = request.env.ref('hr_skills.resume_type_education', raise_if_not_found=False)

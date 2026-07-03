@@ -370,7 +370,7 @@ class CalendarEvent(models.Model):
             if event._origin:
                 editor_candidates |= set(event._origin.partner_ids.user_ids)
             # Non-private events must be editable by uninvited administrators.
-            if self.env.user.has_group('base.group_system') and event.privacy != 'private':
+            if self.env.has_group('base.group_system') and event.privacy != 'private':
                 editor_candidates.add(self.env.user)
             event.user_can_edit = self.env.user in editor_candidates
 

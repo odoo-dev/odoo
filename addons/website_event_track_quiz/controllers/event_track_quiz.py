@@ -53,7 +53,7 @@ class WebsiteEventTrackQuiz(EventTrackController):
         # identifed as an event manager, we do not allow the user to reset
         # the quiz. The event managers will always be able to reset the quiz
         # even if the option is disabled (for testing purposes).
-        if not request.env.user.has_group('event.group_event_manager') and not track.sudo().quiz_id.repeatable:
+        if not request.env.has_group('event.group_event_manager') and not track.sudo().quiz_id.repeatable:
             raise Forbidden()
 
         event_track_visitor = track._get_event_track_visitors(force_create=True)

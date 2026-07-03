@@ -32,7 +32,7 @@ class ResUsers(models.Model):
     @api.depends('oauth_access_token')
     @api.depends_context('uid')
     def _compute_has_oauth_access_token(self):
-        if not (self.env.su or self.env.user.has_group('base.group_erp_manager')):
+        if not (self.env.su or self.env.has_group('base.group_erp_manager')):
             self.has_oauth_access_token = False
             self = self.filtered(lambda u: u._origin == self.env.user).with_prefetch()  # noqa: PLW0642
         for user in self:

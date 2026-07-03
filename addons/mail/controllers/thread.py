@@ -111,7 +111,7 @@ class ThreadController(StoreController):
         partners = [
             {"id": partner.id, "name": partner.name, "email": partner.email}
             for partner in request.env[thread_model].browse(thread_id)._partner_find_from_emails_single(
-                emails, no_create=not request.env.user.has_group("base.group_partner_manager")
+                emails, no_create=not request.env.has_group("base.group_partner_manager")
             )
         ]
         return partners
@@ -181,12 +181,12 @@ class ThreadController(StoreController):
             if partner_emails:
                 partners |= thread._partner_find_from_emails_single(
                     partner_emails,
-                    no_create=not request.env.user.has_group("base.group_partner_manager"),
+                    no_create=not request.env.has_group("base.group_partner_manager"),
                 )
             if partner_cc_emails:
                 partners_cc |= thread._partner_find_from_emails_single(
                     partner_cc_emails,
-                    no_create=not request.env.user.has_group("base.group_partner_manager"),
+                    no_create=not request.env.has_group("base.group_partner_manager"),
                 )
             for source, target in ((partners, 'partner_ids'), (partners_cc, 'partner_cc_ids')):
                 res[target] = source.filtered(
