@@ -210,9 +210,35 @@ export class ControlPanel extends Component {
     onMainButtonsKeydown(ev) {
         const hotkey = getActiveHotkey(ev);
         if (hotkey === "arrowdown") {
-            this.env.searchModel.trigger("focus-view");
-            ev.preventDefault();
-            ev.stopPropagation();
+            const dropdownToggle = ev.target.closest(".dropdown-toggle");
+            // If on a closed dropdown button, open it
+            if (dropdownToggle && dropdownToggle.getAttribute("aria-expanded") !== "true") {
+                dropdownToggle.click();
+                ev.preventDefault();
+                ev.stopPropagation();
+                return;
+            }
+
+            // If navigating inside an open dropdown menu, let native behavior work
+            if (ev.target.closest(".dropdown-menu")) {
+                return;
+            }
+
+            if (this.env.searchModel) {
+                this.env.searchModel.trigger("focus-view");
+                ev.preventDefault();
+                ev.stopPropagation();
+            }
+        } else if (hotkey === "enter") {
+            // Focus sits on the <span> wrapper; redirect Enter key to click the inner <button>
+            if (ev.target.classList.contains("dropdown-item")) {
+                const innerButton = ev.target.querySelector("button");
+                if (innerButton) {
+                    innerButton.click();
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                }
+            }
         }
     }
 }
