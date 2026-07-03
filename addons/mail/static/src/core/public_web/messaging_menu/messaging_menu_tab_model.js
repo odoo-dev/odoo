@@ -42,7 +42,12 @@ export class MessagingMenuTab extends Record {
      */
     domain;
     /**
-     * @type {{ title?: string, subtitle?: string, component?: typeof import("@odoo/owl").Component }}
+     * @type {{
+     *  title?: string,
+     *  subtitle?: string,
+     *  component?: typeof import("@odoo/owl").Component,
+     *  action?: { text: string, onClick: () => void }
+     * }}
      */
     emptyState = { title: _t("Nothing here yet.") };
     /** Additional counter not tracked server-side (e.g. failures, push permission request). */

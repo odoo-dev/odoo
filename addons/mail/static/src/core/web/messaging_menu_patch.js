@@ -39,40 +39,43 @@ patch(MessagingMenu.prototype, {
             partner: this.store.odoobot,
         };
     },
-    onClickFailure(failure) {
+    onClickFailure(failure, newWindow) {
         const threadIds = new Set(
             failure.notifications.map(({ mail_message_id: message }) => message.thread.id)
         );
         if (threadIds.size === 1) {
             const message = failure.notifications[0].mail_message_id;
-            this.openThread(message.thread);
+            this.openThread(message.thread, newWindow);
         } else {
-            this.openFailureView(failure);
+            this.openFailureView(failure, newWindow);
             this.close?.();
         }
     },
-    async openThread(thread) {
-        thread.open({ focus: true, fromMessagingMenu: true });
+    async openThread(thread, newWindow) {
+        thread.open({ focus: true, fromMessagingMenu: true, newWindow });
         this.close?.();
     },
-    openFailureView(failure) {
+    openFailureView(failure, newWindow) {
         if (failure.type !== "email") {
             return;
         }
-        this.action.doAction({
-            name: _t("Mail Failures"),
-            type: "ir.actions.act_window",
-            view_mode: "kanban,list,form",
-            views: [
-                [false, "kanban"],
-                [false, "list"],
-                [false, "form"],
-            ],
-            target: "current",
-            res_model: failure.resModel,
-            domain: [["message_has_error", "=", true]],
-            context: { create: false },
-        });
+        this.action.doAction(
+            {
+                name: _t("Mail Failures"),
+                type: "ir.actions.act_window",
+                view_mode: "kanban,list,form",
+                views: [
+                    [false, "kanban"],
+                    [false, "list"],
+                    [false, "form"],
+                ],
+                target: "current",
+                res_model: failure.resModel,
+                domain: [["message_has_error", "=", true]],
+                context: { create: false },
+            },
+            { newWindow }
+        );
     },
     cancelNotifications(failure) {
         return this.env.services.orm.call(failure.resModel, "notify_cancel_by_type", [], {

@@ -12,6 +12,7 @@ import { useService } from "@web/core/utils/hooks";
 const { DateTime } = luxon;
 
 const isMarkAsRead = t.boolean();
+const isMiddleClick = t.boolean();
 
 export class NotificationItem extends Component {
     static components = { ActionSwiper, DiscussAvatar, MessageSeenIndicator };
@@ -33,7 +34,7 @@ export class NotificationItem extends Component {
             isActive: t.boolean().optional(),
             muted: t.number().optional(0),
             nameMaxLine: t.number().optional(),
-            onClick: t.function([isMarkAsRead]),
+            onClick: t.function([isMarkAsRead, isMiddleClick.optional()]),
             onSwipeLeft: onSwipeType.optional(),
             onSwipeRight: onSwipeType.optional(),
             persona: t
@@ -78,7 +79,7 @@ export class NotificationItem extends Component {
         };
     }
 
-    onClick(ev) {
-        this.props.onClick(this.markAsReadRef.el?.contains(ev.target));
+    onClick(ev, isMiddleClick) {
+        this.props.onClick(this.markAsReadRef.el?.contains(ev.target), isMiddleClick);
     }
 }

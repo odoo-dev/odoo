@@ -25,12 +25,14 @@ const threadPatch = {
         this.store.insert(data);
     },
     /** @override */
-    open() {
+    open(options) {
         const res = super.open(...arguments);
         if (res) {
             return res;
         }
-        return this.store.env.services.action.doAction(this.openRecordActionRequest);
+        return this.store.env.services.action.doAction(this.openRecordActionRequest, {
+            newWindow: options?.newWindow,
+        });
     },
     get openRecordActionRequest() {
         return {

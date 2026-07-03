@@ -14,7 +14,7 @@ patch(MessagingMenu.prototype, {
         if (message.thread?.model === "gamification.badge.user") {
             this.openEmployeeView(message.thread);
         } else {
-            super.onClickMessage(message);
+            super.onClickMessage(...arguments);
         }
     },
 

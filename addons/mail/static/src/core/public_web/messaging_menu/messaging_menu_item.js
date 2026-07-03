@@ -152,7 +152,7 @@ export class MessagingMenuItem extends Component {
                           bgColor: "bg-success",
                       }
                     : undefined,
-                onClick: () => this.onClick(message),
+                onClick: (isMarkAsRead, isMiddleClick) => this.onClick(message, isMiddleClick),
             };
         }
         return null;

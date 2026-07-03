@@ -737,6 +737,11 @@ export class DiscussChannel extends Record {
         return false;
     }
 
+    /** @returns {boolean} true if the channel was opened in a new window, false otherwise */
+    openInNewWindow() {
+        return false;
+    }
+
     pinRpc({ pinned = true } = {}) {
         return this.store.fetchStoreData("/discuss/channel/pin", { channel_id: this.id, pinned });
     }

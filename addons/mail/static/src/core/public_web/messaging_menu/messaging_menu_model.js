@@ -7,12 +7,12 @@ export class MessagingMenu extends Record {
     static singleton = true;
 
     static new() {
-        const nav = super.new(...arguments);
-        nav.initializeCountersFetcher = nav.store.makeCachedFetchData(
+        const menu = super.new(...arguments);
+        menu.initializeCountersFetcher = menu.store.makeCachedFetchData(
             "/mail/messaging_menu/initialize_counters",
             () => {
                 const domain_by_tab_id_by_record_type = {};
-                for (const tab of nav.allTabs) {
+                for (const tab of menu.allTabs) {
                     if (!tab.domain || tab.hidden) {
                         continue;
                     }
@@ -26,7 +26,7 @@ export class MessagingMenu extends Record {
                 return { domain_by_tab_id_by_record_type };
             }
         );
-        return nav;
+        return menu;
     }
 
     bookmarkTab = fields.One("MessagingMenuTab", {

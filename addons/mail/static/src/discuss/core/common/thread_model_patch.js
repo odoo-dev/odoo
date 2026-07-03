@@ -83,6 +83,9 @@ const threadPatch = {
     /** @override */
     open(options) {
         if (this.channel) {
+            if (options?.newWindow) {
+                return this.channel.openInNewWindow();
+            }
             const res = this.channel.openChannel();
             if (res) {
                 return res;

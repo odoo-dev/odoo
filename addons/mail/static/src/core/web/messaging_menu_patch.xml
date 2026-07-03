@@ -26,7 +26,7 @@
             datetime="failure.datetime"
             persona="this.store.odoobot"
             hasMarkAsReadButton="!this.ui.isSmall"
-            onClick="(isMarkAsRead) => isMarkAsRead ? this.cancelNotifications(failure) : this.onClickFailure(failure)"
+            onClick="(isMarkAsRead, isMiddleClick) => isMarkAsRead ? this.cancelNotifications(failure) : this.onClickFailure(failure, isMiddleClick)"
             onSwipeRight="this.hasTouch() ? { action: () => this.cancelNotifications(failure), icon: 'fa-times-circle', bgColor: 'bg-warning' } : undefined"
         >
             <t t-set-slot="body" t-out="failure.body"/>

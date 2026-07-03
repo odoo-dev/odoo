@@ -201,6 +201,16 @@ const discussChannelPatch = {
         }
         return super._openChannel();
     },
+    /** @override */
+    openInNewWindow() {
+        return this.store.env.services.action.doAction(
+            this.store.action_discuss_id ?? "mail.action_discuss",
+            {
+                newWindow: true,
+                additionalContext: { active_id: `discuss.channel_${this.id}` },
+            }
+        );
+    },
     get shouldSubscribeToBusChannel() {
         return super.shouldSubscribeToBusChannel || this.isLocallyPinned;
     },
