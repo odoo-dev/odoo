@@ -563,6 +563,11 @@ class CustomerPortal(Controller):
             if hasattr(partner_sudo, '_onchange_phone_validation'):
                 # The `phone_validation` module is installed.
                 partner_sudo._onchange_phone_validation()
+            if parent_name_value:
+                partner_sudo._create_parent_from_name(
+                    parent_name_value, additional_values={'is_company': True}
+                )
+                parent_name_value = None
         elif not self._are_same_addresses(address_values, partner_sudo):
             # If name is not changed then pop it from the address_values, as it affects the bank account holder name
             if address_values['name'].strip() == (partner_sudo.name or '').strip():

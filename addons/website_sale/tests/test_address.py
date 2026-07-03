@@ -765,3 +765,18 @@ class TestCheckoutAddress(WebsiteSaleCommon):
             }
             res = self.WebsiteSaleController.shop_address_submit(**values).data
             self.assertIsNotNone(json.loads(res).get('redirectUrl'), "We should get a 'redirectUrl' in the response")
+
+    def test_public_user_new_billing_creates_company_from_vat(self):
+        """Public user submits a billing address with a company VAT and
+        company name. A company partner should be created, and the
+        submitted contact should be linked to it via parent_id.
+        """
+        self.default_billing_address_values.update({"vat": "BE0477472701", "parent_name": "Odoo"})
+
+        website = self.website.with_user(self.public_user).with_context({})
+        so = self._create_so(partner_id=self.website.user_id.partner_id.id)
+
+        with MockRequest(website.env, website=website, sale_order_id=so.id) as req:
+            req.httprequest.method = "POST"
+            self.WebsiteSaleController.shop_address_submit(**self.default_billing_address_values)
+            self.assertEqual(so.partner_id.parent_id.name, "Odoo")
