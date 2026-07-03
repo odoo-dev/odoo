@@ -4,6 +4,7 @@
 from odoo import SUPERUSER_ID, api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Command
+from odoo.tools import formatLang
 
 
 class SaleAdvancePaymentInv(models.TransientModel):
@@ -11,7 +12,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
     _description = "Sales Advance Payment Invoice"
 
     advance_payment_method = fields.Selection(
-        selection=[("delivered", "Regular Invoice"), ("fixed", "Down Payment")],
+        selection=[("delivered", "Regular Invoice"), ("downpayment", "Down Payment")],
         string="Create Invoice",
         default="delivered",
         required=True,
@@ -34,7 +35,9 @@ class SaleAdvancePaymentInv(models.TransientModel):
     )
     deduct_down_payments = fields.Boolean(string="Deduct down payments", default=True)
 
-    amount = fields.Float(string="Down Payment", compute="_compute_amount", readonly=False)
+    amount = fields.Float(
+        string="Down Payment", compute="_compute_amount", store=True, readonly=False
+    )
     fixed_amount = fields.Monetary(
         help="The fixed amount to be invoiced in advance.",
         compute="_compute_fixed_amount",
@@ -163,7 +166,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
     @api.onchange("advance_payment_method")
     def _onchange_advance_payment_method(self):
         for wizard in self:
-            if wizard.advance_payment_method == "fixed":
+            if wizard.advance_payment_method == "downpayment":
                 wizard.fixed_amount = max(wizard.amount_paid - wizard.amount_invoiced, 0.0)
 
                 total = sum(wizard.sale_order_ids._origin.mapped("amount_total"))
@@ -174,7 +177,9 @@ class SaleAdvancePaymentInv(models.TransientModel):
 
     def _check_amount_is_positive(self):
         for wizard in self:
-            if wizard.advance_payment_method == "fixed" and (wizard.fixed_amount <= 0.00):
+            if wizard.advance_payment_method == "downpayment" and (
+                wizard.amount <= 0.00 or wizard.fixed_amount <= 0.00
+            ):
                 raise UserError(
                     wizard.env._("The value of the down payment amount must be positive.")
                 )
@@ -222,18 +227,11 @@ class SaleAdvancePaymentInv(models.TransientModel):
         AccountTax._add_tax_details_in_base_lines(base_lines, order.company_id)
         AccountTax._round_base_lines_tax_details(base_lines, order.company_id)
 
-        if self.advance_payment_method == "percentage":
-            amount_type = "percent"
-            amount = self.amount
-        else:  # self.advance_payment_method == 'fixed':
-            amount_type = "fixed"
-            amount = self.fixed_amount
-
         down_payment_base_lines = AccountTax._prepare_down_payment_lines(
             base_lines=base_lines,
             company=self.company_id,
-            amount_type=amount_type,
-            amount=amount,
+            amount_type="percent",
+            amount=self.amount,
             computation_key=f"down_payment,{self.id}",
         )
 
@@ -300,7 +298,9 @@ class SaleAdvancePaymentInv(models.TransientModel):
         self.ensure_one()
         self = self.with_context(lang=order._get_lang())
 
-        if self.advance_payment_method == "fixed":
+        if self.advance_payment_method == "percentage":
+            name = self.env._("Down payment of %s%%", formatLang(self.env, self.amount))
+        else:
             name = self.env._("Down Payment")
 
         return so_line._prepare_invoice_line(

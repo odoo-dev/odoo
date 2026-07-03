@@ -900,38 +900,27 @@ class AccountTestInvoicingCommon(ProductCommon):
         )
 
     @classmethod
-    def _create_down_payment_invoice(
-        cls,
-        sale_order,
-        amount_type: str,
-        amount: float,
-        post=False,
-        down_payment_method: str | None = None,
-    ):
+    def _create_down_payment_invoice(cls, sale_order, amount_type: str, amount: float, post=False):
         """
-        :param sale_order:          The SO as a sale.order record.
-        :param amount_type:         'percent'/'percentage', 'fixed', or 'delivered'.
-        :param amount:              Amount to consider.
-        :param down_payment_method: Optional override for down payments:
-                                    'fixed' or 'percentage'.
-                                    Used when amount_type='fixed'.
+        :param sale_order:      The SO as a sale.order record.
+        :param amount_type:     The type of the global discount: ('percent'/'percentage'), 'fixed', or 'delivered'.
+        :param amount:          The amount to consider.
+                                For 'percent', it should be a percentage [0-100].
+                                For 'fixed', any amount.
+                                For 'delivered', this value is not used.
         """
         cls.ensure_installed('sale')
 
-        if amount_type == 'fixed':
-            # New behavior for the redesigned UI
-            if down_payment_method in ('percent', 'percentage'):
-                create_values = {
-                    'advance_payment_method': 'fixed',
-                    'amount': amount,
-                }
-            else:
-                # Existing behavior preserved
-                create_values = {
-                    'advance_payment_method': 'fixed',
-                    'fixed_amount': amount,
-                }
-
+        if amount_type in ('percent', 'percentage'):
+            create_values = {
+                'advance_payment_method': 'downpayment',
+                'amount': amount,
+            }
+        elif amount_type == 'fixed':
+            create_values = {
+                'advance_payment_method': 'downpayment',
+                'fixed_amount': amount,
+            }
         else:  # amount_type == 'delivered'
             create_values = {
                 'advance_payment_method': 'delivered',

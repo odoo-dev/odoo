@@ -33,7 +33,7 @@ class TestSaleReportCurrencyRate(SaleCommon):
             self
             .env["sale.advance.payment.inv"]
             .with_context(active_ids=order.ids)
-            .create({"advance_payment_method": "fixed", "fixed_amount": 200})
+            .create({"advance_payment_method": "downpayment", "fixed_amount": 200})
         )
         downpayment.create_invoices()
         order.invoice_ids.action_post()

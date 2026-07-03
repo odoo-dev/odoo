@@ -187,11 +187,8 @@ class SaleOrder(models.Model):
         "otherwise the sales journal with the lowest sequence is used.",
     )
     document_tax_mode = fields.Selection(
-        selection=[
-            ('tax_excluded', "Tax Excl."),
-            ('tax_included', "Tax Incl."),
-        ],
-        compute='_compute_document_tax_mode',
+        selection=[("tax_excluded", "Tax Excl."), ("tax_included", "Tax Incl.")],
+        compute="_compute_document_tax_mode",
         precompute=True,
         store=True,
         readonly=False,
@@ -1203,7 +1200,7 @@ class SaleOrder(models.Model):
         for order in self:
             order.has_overages = any(line.qty_overage for line in order.order_line)
 
-    @api.depends('company_id')
+    @api.depends("company_id")
     def _compute_document_tax_mode(self):
         for order in self:
             if not order.document_tax_mode:
@@ -2620,7 +2617,7 @@ class SaleOrder(models.Model):
         for order in self:
             downpayment_wizard = order.env["sale.advance.payment.inv"].create({
                 "sale_order_ids": order,
-                "advance_payment_method": "fixed",
+                "advance_payment_method": "downpayment",
                 "fixed_amount": order.amount_paid,
             })
             generated_invoices |= downpayment_wizard._create_invoices(order)

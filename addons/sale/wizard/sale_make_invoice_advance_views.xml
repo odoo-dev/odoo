@@ -31,25 +31,25 @@
                     <field name="invoice_overages"/>
                 </group>
                 <group name="down_payment_specification"
-                    invisible="advance_payment_method not in ('fixed', 'percentage')">
+                    invisible="advance_payment_method not in ('downpayment')">
                     <field name="company_id" invisible="1"/>
-                    <label for="fixed_amount" invisible="advance_payment_method == 'fixed'"/>
-                    <label for="amount" invisible="advance_payment_method != 'fixed'"/>
+                    <label for="fixed_amount" invisible="advance_payment_method == 'downpayment'"/>
+                    <label for="amount" invisible="advance_payment_method != 'downpayment'"/>
                     <div id="payment_method_details">
                         <field name="currency_id" invisible="1"/>
                         <field name="fixed_amount"
-                            invisible="advance_payment_method != 'fixed'"
+                            invisible="advance_payment_method != 'downpayment'"
                             class="oe_inline"/>
 
-                        <span invisible="advance_payment_method != 'fixed'">
+                        <span invisible="advance_payment_method != 'downpayment'">
                             (
                         </span>
 
                         <field name="amount"
-                            invisible="advance_payment_method != 'fixed'"
+                            invisible="advance_payment_method != 'downpayment'"
                          style="width: 40px;"/>
 
-                        <span invisible="advance_payment_method != 'fixed'">
+                        <span invisible="advance_payment_method != 'downpayment'">
                             %)
                         </span>
                     </div>

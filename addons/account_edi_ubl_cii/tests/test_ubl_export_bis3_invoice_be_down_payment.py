@@ -33,13 +33,9 @@ class TestUblExportBis3InvoiceBEDownPayment(TestUblExportBis3BE):
 
         invoice = self._create_down_payment_invoice(
             sale_order=sale_order,
-            amount_type='fixed',
+            amount_type='percentage',
             amount=40.0,
             post=True,
-            down_payment_method='percent'
         )
         self._generate_invoice_ubl_file(invoice)
-        self._assert_invoice_ubl_file(
-            invoice,
-            'test_sale_order_down_payment_first_invoice',
-        )
+        self._assert_invoice_ubl_file(invoice, 'test_sale_order_down_payment_first_invoice')

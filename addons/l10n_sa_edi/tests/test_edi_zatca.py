@@ -705,7 +705,7 @@ class TestEdiZatca(TestSaEdiCommon):
         }
 
         downpayment_wizard = self.env['sale.advance.payment.inv'].with_context(context).create({  # noqa: OLS03001
-            'advance_payment_method': 'fixed',
+            'advance_payment_method': 'downpayment',
             'amount': 100,
         })
         downpayment = downpayment_wizard._create_invoices(sale_order)
