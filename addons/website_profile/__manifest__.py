@@ -19,8 +19,8 @@
     ],
     'assets': {
         'web.assets_frontend': [
-            'web/static/src/views/fields/file_handler.*',
             'website_profile/static/src/scss/website_profile.scss',
+            'web/static/src/views/fields/file_handler.*',
             'website_profile/static/src/components/**/*',
             'website_profile/static/src/interactions/**/*',
             ('remove', 'website_profile/static/src/interactions/**/*.edit.js'),

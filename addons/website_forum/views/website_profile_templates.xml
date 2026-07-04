@@ -10,19 +10,15 @@
     </template>
 
     <template id="user_profile_content" inherit_id="website_profile.user_profile_content">
-        <xpath expr="//table[@id='o_wprofile_sidebar_table']//tr[last()]" position="after">
+        <xpath expr="//div[@name='user_profile_sidebar_info']" position="inside">
             <t t-if="forum and (up_votes or down_votes)">
-                <tr id="profile_abstract_info_company">
-                    <th><small class="fw-bold">Votes</small></th>
-                    <td>
-                        <span>
-                            <i class="oi oi-filled text-success" data-icon="thumb_up" role="img" aria-label="Positive votes" title="Positive votes"/>
-                            <span class="fw-bold" t-out="up_votes"/>
-                            <i class="oi oi-filled text-danger ms-3" data-icon="thumb_down" role="img" aria-label="Negative votes" title="Negative votes"/>
-                            <span class="fw-bold" t-out="down_votes"/>
-                        </span>
-                    </td>
-                </tr>
+                <small class="text-muted">Votes</small>
+                <small class="fw-medium text-end">
+                    <i class="oi oi-filled text-success" data-icon="thumb_up" role="img" aria-label="Positive votes" title="Positive votes"/>
+                    <span t-out="up_votes"/>
+                    <i class="oi oi-filled text-danger ms-3" data-icon="thumb_down" role="img" aria-label="Negative votes" title="Negative votes"/>
+                    <span t-out="down_votes"/>
+                </small>
             </t>
         </xpath>
         <xpath expr="//ul[@id='profile_extra_info_tablist']" position="inside">
@@ -40,7 +36,7 @@
                 <t t-set="is_profile" t-value="true"/>
                 <div role="tabpanel" t-attf-class="o_wforum_profile_tab tab-pane o_wprofile_forum_activity #{ 'show active' if active_tab == 'activities' else '' }" id="activities"
                      t-att-data-active-tab="activities_active_tab">
-                    <h5 class="border-bottom pb-1 d-flex align-items-start align-items-md-center justify-content-between">
+                    <h5 class="d-flex align-items-start align-items-md-center justify-content-between mb-3">
                         <div>Activity</div>
                         <div class="d-flex flex-wrap gap-1">
                             <div class="m-auto"/>
@@ -103,28 +99,30 @@
                                         <t t-call="website_forum.display_post"/>
                                     </div>
                                 </t>
-                                <div t-elif="my_profile" class="text-muted">
+                                <div t-elif="my_profile" class="alert alert-light mb-0" role="status">
                                     <t t-if="activity_search_question">No results.</t>
-                                    <t t-else="">You have not posted any questions yet.</t>
-                                    <br />
-                                    <a href="/forum/" class="btn btn-link px-0">
-                                        <i class="oi d-inline-block" data-icon="east"/> Go to Forums
-                                    </a>
+                                    <t t-else="">
+                                        You have not posted any questions yet.
+                                        <a href="/forum/" class="d-block">
+                                            <i class="oi me-1" data-icon="east"/>Go to Forums
+                                        </a>
+                                    </t>
                                 </div>
                                 <t t-else="">
-                                    <div class="text-muted">
+                                    <div class="alert alert-light mb-0" role="status">
                                         <t t-if="activity_search_question">No results.</t>
-                                        <t t-else="">This user hasn't posted any questions yet.</t>
-                                        <br/>
-                                        <a href="/forum/" class="btn btn-link px-0">
-                                            <i class="oi d-inline-block" data-icon="east"/> Go to Forums
-                                        </a>
+                                        <t t-else="">
+                                            This user hasn't posted any questions yet.
+                                            <a href="/forum/" class="d-block">
+                                                <i class="oi me-1" data-icon="east"/>Go to Forums
+                                            </a>
+                                        </t>
                                     </div>
                                 </t>
                             </div>
                             <t t-if="favourite">
                                 <div class="mb-4">
-                                    <h5 class="border-bottom pb-1">Favourite Questions</h5>
+                                    <h5>Favourite Questions</h5>
                                     <div class="mb-1" t-foreach="favourite" t-as="question">
                                         <t t-call="website_forum.display_post" hide_fav_icon="True"/>
                                     </div>
@@ -132,7 +130,7 @@
                             </t>
                             <t t-if="followed">
                                 <div class="mb-4">
-                                    <h5 class="border-bottom pb-1">Followed Questions</h5>
+                                    <h5>Followed Questions</h5>
                                     <div class="mb-1" t-foreach="followed" t-as="question">
                                         <t t-call="website_forum.display_post"/>
                                     </div>
@@ -146,21 +144,23 @@
                                         <t t-call="website_forum.display_post_answer"/>
                                     </div>
                                 </t>
-                                <div t-elif="my_profile" class="text-muted">
+                                <div t-elif="my_profile" class="alert alert-light mb-0" role="status">
                                     <t t-if="activity_search_answer">No results.</t>
-                                    <t t-else="">You have not answered any questions yet.</t>
-                                    <br />
-                                    <a href="/forum/" class="btn btn-link px-0">
-                                        <i class="oi d-inline-block" data-icon="east"/> Go to Forums
-                                    </a>
+                                    <t t-else="">
+                                        You have not answered any questions yet.
+                                        <a href="/forum/" class="d-block">
+                                            <i class="oi me-1" data-icon="east"/>Go to Forums
+                                        </a>
+                                    </t>
                                 </div>
-                                <div t-else="" class="text-muted">
+                                <div t-else="" class="alert alert-light mb-0" role="status">
                                     <t t-if="activity_search_answer">No results.</t>
-                                    <t t-else="">This user hasn't answered any questions yet.</t>
-                                    <br/>
-                                    <a href="/forum/" class="btn btn-link px-0">
-                                        <i class="oi d-inline-block" data-icon="east"/> Go to Forums
-                                    </a>
+                                    <t t-else="">
+                                        This user hasn't answered any questions yet.
+                                        <a href="/forum/" class="d-block">
+                                            <i class="oi me-1" data-icon="east"/>Go to Forums
+                                        </a>
+                                    </t>
                                 </div>
                             </div>
                         </div>
@@ -173,8 +173,8 @@
                 </div>
                 <div role="tabpanel" class="o_wforum_profile_tab tab-pane" id="votes" t-if="uid == user.id">
                     <div class="mb-4">
-                        <div class="d-flex justify-content-between mb-2 border-bottom">
-                            <h5> Votes </h5>
+                        <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
+                            <h5 class="mb-0">Votes</h5>
                             <t t-if="my_profile" t-call="website.website_search_box_input"
                                 search_type.f="forums"
                                 action="'/forum/%s%s' % (forum_id or 'all', '/tag/%s/questions' % slug(tag) if tag else '')"
@@ -205,20 +205,20 @@
 
     <template id="display_activities" name="Forum Profile Activities">
         <t t-if="activities">
-            <div t-foreach="activities" t-as="activity" class="card mb-2">
-                <t t-set="date" t-value="format_datetime(activity[0])"/>
-                <t t-set="label" t-value="activity[1]"/>
-                <t t-set="post" t-value="activity[2]"/>
+            <div class="list-group">
+                <div t-foreach="activities" t-as="activity" class="list-group-item d-flex flex-wrap align-items-center gap-2 py-3">
+                    <t t-set="date" t-value="format_datetime(activity[0])"/>
+                    <t t-set="label" t-value="activity[1]"/>
+                    <t t-set="post" t-value="activity[2]"/>
 
-                <div class="card-body">
-                    <span t-out="label" class="badge text-bg-info me-2 mt-1"/>
-                    <span t-out="date" class="me-2"/>
-                    <span t-if="post.parent_id">
+                    <span t-out="label" class="badge text-bg-info"/>
+                    <small class="text-muted" t-out="date"/>
+                    <span t-if="post.parent_id" class="min-w-0">
                         <a t-attf-href="/forum/#{ slug(post.forum_id) }/#{ slug(post.parent_id) }#answer-#{post.id}">
                             <span t-out="post.parent_id.name"/>
                         </a>
                     </span>
-                    <span t-else="">
+                    <span t-else="" class="min-w-0">
                         <a t-attf-href="/forum/#{ slug(post.forum_id) }/#{ slug(post) }">
                             <span t-out="post.name"/>
                         </a>
@@ -227,28 +227,28 @@
             </div>
         </t>
         <t t-else="">
-            <span class="text-muted">There is no activity yet.</span>
+            <div class="alert alert-light mb-0" role="status">There is no activity yet.</div>
         </t>
     </template>
 
     <template id="user_votes" name="Forum User Votes">
-        <div t-foreach="vote_post" t-as="vote" class="card mb-2">
-            <div class="card-body">
-                <span t-if="vote.vote == '1'" class="oi oi-filled text-success me-2" data-icon="thumb_up" role="img" aria-label="Positive vote" title="Positive vote"/>
-                <span t-if="vote.vote == '-1'" class="oi oi-filled text-warning me-2" data-icon="thumb_down" role="img" aria-label="Negative vote" title="Negative vote"/>
-                <span t-field="vote.post_id.create_date"/>
-                <a t-if="vote.post_id.parent_id" class="ms-2" t-attf-href="/forum/#{ slug(vote.post_id.forum_id) }/#{ vote.post_id.parent_id.id }/#answer-#{ vote.post_id.id }" t-out="vote.post_id.parent_id.name"/>
-                <a t-else="" class="text-black ms-2" t-attf-href="/forum/#{ slug(vote.post_id.forum_id) }/#{ vote.post_id.id }" t-out="vote.post_id.name"/>
+        <div t-if="vote_post" class="list-group">
+            <div t-foreach="vote_post" t-as="vote" class="list-group-item d-flex flex-wrap align-items-center gap-2 py-3">
+                <span t-if="vote.vote == '1'" class="oi oi-filled text-success" data-icon="thumb_up" role="img" aria-label="Positive vote" title="Positive vote"/>
+                <span t-if="vote.vote == '-1'" class="oi oi-filled text-warning" data-icon="thumb_down" role="img" aria-label="Negative vote" title="Negative vote"/>
+                <small class="text-muted" t-field="vote.post_id.create_date"/>
+                <a t-if="vote.post_id.parent_id" class="min-w-0" t-attf-href="/forum/#{ slug(vote.post_id.forum_id) }/#{ vote.post_id.parent_id.id }/#answer-#{ vote.post_id.id }" t-out="vote.post_id.parent_id.name"/>
+                <a t-else="" class="min-w-0 text-reset" t-attf-href="/forum/#{ slug(vote.post_id.forum_id) }/#{ vote.post_id.id }" t-out="vote.post_id.name"/>
             </div>
         </div>
-        <div class="mb16" t-if="not vote_post">
-            <div t-if="my_profile" class="text-muted">
-                Help moderating the forums by upvoting and downvoting posts. <br />
-                <a href="/forum/" class="btn-link">
-                    <i class="oi" data-icon="arrow_forward"></i> Go To Forums
+        <div t-else="" class="alert alert-light mb-0" role="status">
+            <t t-if="my_profile">
+                Help moderating the forums by upvoting and downvoting posts.
+                <a href="/forum/" class="d-block">
+                    <i class="oi me-1" data-icon="east"/>Go To Forums
                 </a>
-            </div>
-            <p t-else="" class="text-muted">You haven't given any votes yet.</p>
+            </t>
+            <t t-else="">You haven't given any votes yet.</t>
         </div>
     </template>
 </data></odoo>

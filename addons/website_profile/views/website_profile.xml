@@ -4,7 +4,7 @@
     <template id="user_profile_sub_nav" name="User profile subnav">
         <div class="o_wprofile_all_users_nav">
             <div class="container">
-                <div class="row align-items-center justify-content-between">
+                <div class="row align-items-center justify-content-between mt-3 mb-4">
                     <!-- Desktop Mode -->
                     <div t-if="url_from" class="o_wprofile_all_users_nav_btn_container col pe-0 flex-grow-0 d-none d-md-flex">
                         <a t-att-href="url_from" class="o_wprofile_all_users_nav_btn btn text-nowrap">
@@ -23,16 +23,12 @@
                     </nav>
 
                     <div class="col d-none d-md-flex flex-row align-items-center justify-content-end">
-                        <!-- search -->
-                        <form t-attf-action="/profile/users" role="search" method="get">
-                            <div class="input-group o_wprofile_course_nav_search ms-1 position-relative">
-                                <button class="btn btn-link text-white border-1 rounded-0 pe-1 me-2" type="submit" aria-label="Search" title="Search">
-                                    <i class="oi border-1" data-icon="search"></i>
-                                </button>
-                                <input type="text" class="form-control border-0 rounded-0 bg-transparent text-white ms-auto" name="search" placeholder="Search users"/>
-                                <input type="hidden" name="group_by" t-att-value="group_by"/>
-                            </div>
-                        </form>
+                        <t t-call="website.website_search_box_input"
+                            action.f="/profile/users"
+                            placeholder.translate="Search users"
+                            search="search">
+                            <input t-if="group_by" type="hidden" name="group_by" t-att-value="group_by"/>
+                        </t>
                     </div>
 
                     <!-- Mobile Mode -->
@@ -55,17 +51,13 @@
                             </div>
 
                             <div class="btn-group">
-                                <a class="btn bg-black-25 text-white dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="oi" data-icon="search"></i></a>
-                                <div class="dropdown-menu dropdown-menu-end w-100">
-                                    <form class="px-3" t-attf-action="/profile/users" role="search" method="get">
-                                        <div class="input-group">
-                                            <input type="text" class="form-control" name="search" placeholder="Search users"/>
-                                            <button class="btn btn-primary" type="submit" aria-label="Search" title="Search">
-                                                <i class="oi" data-icon="search"/>
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
+                                <t t-call="website.website_search_box_input"
+                                    action.f="/profile/users"
+                                    placeholder.translate="Search users"
+                                    search="search"
+                                    _simple_button_layout="True">
+                                    <input t-if="group_by" type="hidden" name="group_by" t-att-value="group_by"/>
+                                </t>
                             </div>
                         </div>
                     </div>
@@ -90,98 +82,51 @@
     </template>
 
     <template id="user_profile_header" name="Profile Page Header">
-        <div class="o_wprofile_header o_wprofile_gradient position-relative text-white">
+        <div>
             <t t-set="view_user"><t t-out="user.name"/></t>
             <t t-call="website_profile.user_profile_sub_nav" view_user="view_user"/>
-
-            <div class="container pb-3 pb-md-0 pt-2 pt-md-5">
-                <div class="row">
-                    <!-- ==== Header Left ==== -->
-                    <div class="col-12 col-md-4 col-lg-3">
-                        <div t-attf-class="d-flex align-items-start h-100 #{'justify-content-between' if (env.user == user) else 'justify-content-around' }">
-                            <div class="o_wprofile_pict d-inline-block mb-3 mb-md-0" t-attf-style="background-image: url(#{website.image_url(user, 'avatar_1024')});"/>
-                            <a class="btn o_wprofile_editor btn-primary d-inline-block d-md-none"
-                                t-if="(env.user == user and user.karma != 0) or env.user._is_admin()"
-                                t-att-data-user-id="user.id" t-att-data-can-edit-country="'true' if user.partner_id._can_edit_country() else None">
-                                <i class="oi oi-filled me-1" data-icon="edit"/>EDIT
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- ==== Header Right ==== -->
-                    <div class="col-12 col-md-8 col-lg-9 d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <h1 class="o_card_people_name">
-                                <span t-field="user.name"/><small t-if="user.karma == 0"> (not verified)</small>
-                            </h1>
-                            <a class="btn o_wprofile_editor btn-primary d-none d-md-inline-block" t-if="(env.user == user and user.karma != 0) or env.user._is_admin()"
-                                t-att-data-user-id="user.id" t-att-data-can-edit-country="'true' if user.partner_id._can_edit_country() else None">
-                                <i class="oi oi-filled me-2" data-icon="edit"/>EDIT PROFILE
-                            </a>
-                        </div>
-
-                        <div class="d-flex flex-column justify-content-center flex-grow-1 mb-0 mb-md-5">
-                            <div t-if="user.partner_id.parent_name" class="lead mb-2">
-                                <i class="oi oi-fw me-1" data-icon="business"/><span t-field="user.partner_id.parent_name"/>
-                            </div>
-                            <div t-if="user.city or user.country_id" class="lead mb-2">
-                                <i class="oi oi-fw me-1" data-icon="location_on"/>
-                                <span t-field="user.city"/><span class="text-nowrap ms-1" t-if="user.country_id">(<span t-field="user.country_id"/>)</span>
-                            </div>
-                            <div t-if="user.website" class="lead mb-2">
-                                <i class="oi oi-fw me-1" data-icon="public"/><span t-field="user.website"/>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </template>
 
     <template id="user_profile_content" name="Profile Page Content">
         <div class="container">
             <div class="row">
-
-                <!-- ========== SIDEBAR ========== -->
-                <div class="col-12 col-md-4 col-lg-3 mt-3 mt-md-0">
-                    <div class="o_wprofile_sidebar px-3 py-2 py-md-3 mb-3 mb-md-5">
-                        <div class="o_wprofile_sidebar_top d-flex justify-content-between">
-                            <div t-if="user.rank_id" class="d-flex align-items-center">
-                                <small class="fw-bold me-2">Current rank:</small>
-                                <img t-att-src="website.image_url(user.rank_id, 'image_128')" width="16" height="16" alt="" class="object-fit-cover me-1"/>
-                                <a t-attf-href="/profile/ranks_badges" t-field="user.rank_id"/>
-                            </div>
-                            <button class="btn btn-sm d-md-none bg-white border" type="button" data-bs-toggle="collapse" data-bs-target="#o_wprofile_sidebar_collapse" aria-expanded="false" aria-controls="o_wprofile_sidebar_collapse">More info</button>
-                        </div>
-                        <div class="collapse d-md-block" id="o_wprofile_sidebar_collapse">
-                            <t t-set="next_rank_id" t-value="user._get_next_rank()"/>
-                            <small t-if="next_rank_id" class="fw-bold mt-1">Next rank:</small>
-                            <t t-if="next_rank_id or user.rank_id" t-call="website_profile.profile_next_rank_card"
-                                img_max_width.f="40%"/>
-
-                            <table class="table table-sm w-100" id="o_wprofile_sidebar_table">
-                                <tbody>
-                                    <tr>
-                                        <th><small class="fw-bold">Joined</small></th>
-                                        <td><span t-field="user.create_date" t-options='{"format": "d MMM Y"}'/></td>
-                                    </tr>
-                                    <tr t-if="user.badge_ids">
-                                        <th><small class="fw-bold">Badges</small></th>
-                                        <td t-out="len(user.badge_ids.filtered(lambda b: b.badge_id.website_published))"/>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- ========== PROFILE CONTENT ========== -->
                 <div class="col-12 col-md-8 col-lg-9 position-relative">
-                    <ul class="nav nav-tabs o_wprofile_nav_tabs flex-nowrap" role="tablist" id="profile_extra_info_tablist">
+                    <!-- Profile Header -->
+                    <div class="d-flex flex-column flex-lg-row align-items-lg-start justify-content-between mb-4">
+                        <div class="d-flex gap-3">
+                            <div t-field="user.image_1024" t-options="{'widget': 'image', 'preview_image': 'avatar_1024', 'width': '80px', 'height': '80px', 'class': 'rounded'}"/>
+                            <div>
+                                <h1 class="h3">
+                                    <span t-field="user.name"/><small t-if="user.karma == 0"> (not verified)</small>
+                                </h1>
+                                <div class="d-flex flex-wrap gap-3">
+                                    <div t-if="user.partner_id.parent_name">
+                                        <i class="oi oi-fw me-1" data-icon="business"/><span t-field="user.partner_id.parent_name"/>
+                                    </div>
+                                    <div t-if="user.city or user.country_id">
+                                        <i class="oi oi-fw me-1" data-icon="location_on"/>
+                                        <span t-field="user.city"/><span class="text-nowrap ms-1" t-if="user.country_id">(<span t-field="user.country_id"/>)</span>
+                                    </div>
+                                    <div t-if="user.website">
+                                        <i class="oi oi-fw me-1" data-icon="public"/><a t-att-href="user.website" target="_blank"><span t-field="user.website"/></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="btn o_wprofile_editor btn-primary mt-3 mt-lg-0" t-if="(env.user == user and user.karma != 0) or env.user._is_admin()"
+                            t-att-data-user-id="user.id" t-att-data-can-edit-country="'true' if user.partner_id._can_edit_country() else None"><i class="oi oi-filled me-1" data-icon="edit"/> Edit profile</a>
+                    </div>
+
+                    <!-- Profile Tabs -->
+                    <ul class="nav nav-underline o_wprofile_nav_tabs border-bottom" role="tablist" id="profile_extra_info_tablist">
                         <li class="nav-item">
                             <a role="tab" aria-controls="about" href="#profile_tab_content_about" t-attf-class="nav-link #{'active' if not active_tab or active_tab == 'about' else ''}" data-bs-toggle="tab">About</a>
                         </li>
                     </ul>
+
+                    <!-- Profile Content -->
                     <div class="tab-content py-4 o_wprofile_tabs_content mb-4" id="profile_extra_info_tabcontent">
                         <div role="tabpanel" t-attf-class="tab-pane #{ 'show active' if not active_tab or active_tab == 'about' else '' }" id="profile_tab_content_about">
                             <div class="o_wprofile_email_validation_container">
@@ -189,19 +134,36 @@
                                     redirect_url="'/profile/user/%s' % user.id"
                                     additional_validation_email_message.translate=""/>
                             </div>
+                            <!-- Biography -->
+                            <div t-if="user.partner_id.website_description" class="mb32">
+                                <h5>Biography</h5>
+                                <div class="text-muted" t-field="user.partner_id.website_description"/>
+                            </div>
+                            <!-- Badges -->
                             <div id="profile_about_badge" class="mb32">
-                                <h5 class="border-bottom pb-1">Badges</h5>
+                                <h5>Badges</h5>
                                 <t t-call="website_profile.user_badges"/>
                             </div>
-                            <div t-if="user.partner_id.website_description" class="mb32">
-                                <t t-if="env.user == user and user.karma != 0 or env.user._is_admin()">
-                                    <a href="#" class="o_wprofile_editor btn btn-link float-end"
-                                        t-att-data-user-id="user.id" t-att-data-can-edit-country="'true' if user.partner_id._can_edit_country() else None" data-focus-website-description="true">
-                                        <i class="oi oi-filled me-1" data-icon="edit"/>Edit
-                                    </a>
+                        </div>
+                    </div>
+                </div>
+                <!-- ========== SIDEBAR ========== -->
+                <div class="col-12 col-md-4 col-lg-3 mt-3 mt-md-0">
+                    <div class="o_wprofile_sidebar border rounded p-3">
+                        <div class="o_wprofile_sidebar_top d-flex justify-content-end">
+                            <button class="btn btn-sm d-md-none bg-white border" type="button" data-bs-toggle="collapse" data-bs-target="#o_wprofile_sidebar_collapse" aria-expanded="false" aria-controls="o_wprofile_sidebar_collapse">More info</button>
+                        </div>
+                        <div class="collapse d-md-block" id="o_wprofile_sidebar_collapse">
+                            <t t-set="next_rank_id" t-value="user._get_next_rank()"/>
+                            <t t-if="next_rank_id or user.rank_id" t-call="website_profile.profile_next_rank_card"/>
+                            <hr t-if="next_rank_id or user.rank_id"/>
+                            <div class="row row-cols-2 gy-3" name="user_profile_sidebar_info">
+                                <small class="text-muted">Joined</small>
+                                <small class="fw-medium text-end" t-field="user.create_date" t-options='{"format": "d MMM Y"}'/>
+                                <t t-if="user.badge_ids">
+                                    <small class="text-muted">Badges</small>
+                                    <small class="fw-medium text-end" t-out="len(user.badge_ids.filtered(lambda b: b.badge_id.website_published))"/>
                                 </t>
-                                <h5 class="border-bottom pb-1">Biography</h5>
-                                <span class="o_forum_profile_bio text-break" t-field="user.partner_id.website_description"/>
                             </div>
                         </div>
                     </div>
@@ -211,54 +173,68 @@
     </template>
 
     <template id="profile_next_rank_card" name="Profile Next Rank Card">
-        <div class="o_wprofile_progress_circle">
-            <svg viewBox="0 0 36 36" class="o_pc_circular_chart">
-                <t t-set="next_rank_id" t-value="next_rank_id or user._get_next_rank()"/>
-                <t t-if="next_rank_id and user.rank_id">
-                    <t t-if="(next_rank_id.karma_min - user.rank_id.karma_min) > 0">
-                        <t t-set="user_points" t-value="int(100*(user.karma - user.rank_id.karma_min)/(next_rank_id.karma_min - user.rank_id.karma_min))"/>
-                    </t>
-                    <t t-else="">
-                        <t t-set="user_points" t-value="0"/>
-                    </t>
-                </t>
-                <t t-elif="user.rank_id">
-                    <t t-set="user_points" t-value="100"/>
-                </t>
-                <t t-else="">
-                    <t t-set="user_points" t-value="0"/>
-                </t>
-                <g data-bs-toggle="tooltip" data-bs-delay="0"
-                    t-attf-title="{{ '%s/%s xp' % (user.karma, next_rank_id.karma_min) if next_rank_id else ''}}">
-                    <path class="o_pc_circle_bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path class="o_pc_circle" t-attf-stroke-dasharray="#{user_points}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke="url(#gradient)" mask="url(#mask)"/>
-                </g>
-                <mask id="mask">
-                    <polygon points="0,0 17.2,0 17.2,10 18,10 18,0 36,0 36,36 0,36" fill="white"/>
-                </mask>
-                <linearGradient id="gradient">
-                    <stop offset="0%" stop-color="var(--o-pc-color-stop-1)"/>
-                    <stop offset="100%" stop-color="var(--o-pc-color-stop-2)"/>
-                </linearGradient>
-            </svg>
-            <div class="o_pc_overlay d-flex flex-column align-items-center justify-content-center p-4">
-                <t t-set="rank_id" t-value="next_rank_id if next_rank_id else user.rank_id"/>
-                <div t-field="rank_id.image_1920"
-                    t-attf-style="max-width: {{img_max_width or '50%'}};"
-                    t-options="{'widget': 'image', 'preview_image': 'image_128'}"/>
-                <h4 class="text-center" t-field="rank_id.name"/>
-                <small class="w-75 text-center o_line_clamp">
-                    <t t-set="karma_value" t-value="next_rank_id.karma_min - user.karma if next_rank_id else user.karma"/>
-                    <t t-if="next_rank_id">
-                        Get
-                        <span class="fw-bold text-primary" t-out="karma_value" t-options="{'widget': 'integer', 'format_decimalized_number': True, 'precision_digits': 2}"/> xp
-                        to level up!
-                    </t>
-                    <t t-else="">
-                        <span class="fw-bold text-primary" t-out="karma_value" t-options="{'widget': 'integer', 'format_decimalized_number': True, 'precision_digits': 2}"/> xp
-                    </t>
-                </small>
-            </div>
+        <t t-set="next_rank_id" t-value="next_rank_id or user._get_next_rank()"/>
+        <t t-if="next_rank_id and user.rank_id">
+            <t t-if="(next_rank_id.karma_min - user.rank_id.karma_min) > 0">
+                <t t-set="user_points" t-value="int(100*(user.karma - user.rank_id.karma_min)/(next_rank_id.karma_min - user.rank_id.karma_min))"/>
+            </t>
+            <t t-else="">
+                <t t-set="user_points" t-value="0"/>
+            </t>
+        </t>
+        <t t-elif="user.rank_id">
+            <t t-set="user_points" t-value="100"/>
+        </t>
+        <t t-else="">
+            <t t-set="user_points" t-value="0"/>
+        </t>
+        <t t-set="karma_value" t-value="next_rank_id.karma_min - user.karma if next_rank_id else user.karma"/>
+        <div class="o_wprofile_rank_progress">
+            <t t-if="user.rank_id">
+                <small class="text-muted">Current rank</small>
+                <div class="d-flex align-items-center gap-2 mt-1 mb-3">
+                    <div class="rounded-circle overflow-hidden flex-shrink-0">
+                        <div t-field="user.rank_id.image_1920"
+                            t-options="{'widget': 'image', 'preview_image': 'image_128', 'width': '24px', 'height': '24px', 'class': 'object-fit-cover'}"/>
+                    </div>
+                    <a class="text-decoration-none" t-attf-href="/profile/ranks_badges" t-field="user.rank_id.name"/>
+                </div>
+            </t>
+            <t t-if="next_rank_id and user.rank_id">
+                <small class="text-muted">Next rank</small>
+                <div class="d-flex gap-2 mt-1 mb-3">
+                    <div class="rounded-circle overflow-hidden flex-shrink-0">
+                        <div t-field="next_rank_id.image_1920"
+                            t-options="{'widget': 'image', 'preview_image': 'image_128', 'width': '40px', 'height': '40px', 'class': 'object-fit-cover'}"/>
+                    </div>
+                    <div class="lh-sm small">
+                        <b t-field="next_rank_id.name"/>
+                        <div>
+                            <span class="text-muted">
+                                <span class="fw-bold text-primary" t-out="karma_value" t-options="{'widget': 'integer', 'format_decimalized_number': True, 'precision_digits': 2}"/> xp
+                                to level up
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="progress flex-grow-1"
+                        style="height: .5rem;"
+                        role="progressbar"
+                        t-att-aria-valuenow="user_points"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        data-bs-toggle="tooltip"
+                        data-bs-delay="0"
+                        t-attf-title="{{ '%s/%s xp' % (user.karma, next_rank_id.karma_min)}}">
+                        <div class="progress-bar rounded-pill bg-primary" t-attf-style="width: #{user_points}%;"/>
+                    </div>
+                    <small><t t-out="user_points"/>%</small>
+                </div>
+            </t>
+            <t t-elif="user.rank_id">
+                <p class="small text-muted mb-0">Maximum rank reached.</p>
+            </t>
         </div>
     </template>
 
@@ -268,17 +244,22 @@
                 <t t-if="badge.badge_id.website_published">
                     <div class="col px-1 mb-2 col-xl-4">
                         <div class="card">
-                            <div class="card-body p-2 pe-3">
-                                <div class="d-flex align-items-center">
-                                    <div t-if="badge.badge_id.image_1920 and badge.badge_id.level" t-field="badge.badge_id.image_1920"
-                                        t-options="{'widget': 'image', 'preview_image': 'image_128', 'class': 'object-fit-cover me-0', 'style': 'height: 38px; width: 38px'}"/>
-                                    <img t-else=""
-                                        width="38" height="38"
-                                        t-attf-src="/website_profile/static/src/img/badge_#{badge.badge_id.level}.svg"
-                                        class="object-fit-cover me-0"
-                                        t-att-alt="badge.badge_id.name"/>
-                                    <div class="flex-grow-1 col-md-10 p-0">
-                                        <h6 class="my-0 ps-1 text-truncate" t-field="badge.badge_id.name"/>
+                            <div class="card-body p-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="flex-shrink-0">
+                                        <div t-if="badge.badge_id.image_1920 and badge.badge_id.level" t-field="badge.badge_id.image_1920"
+                                            t-options="{'widget': 'image', 'preview_image': 'image_128', 'class': 'rounded-circle object-fit-cover', 'style': 'height: 38px; width: 38px'}"/>
+                                        <img t-else=""
+                                            width="38" height="38"
+                                            t-attf-src="/website_profile/static/src/img/badge_#{badge.badge_id.level}.svg"
+                                            class="object-fit-cover"
+                                            t-att-alt="badge.badge_id.name"/>
+                                    </div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <h6 class="mb-0 text-truncate" t-field="badge.badge_id.name"/>
+                                        <small class="text-muted text-truncate d-block">
+                                            Earned <span t-field="badge.create_date" t-options="{'widget': 'date'}"/>
+                                        </small>
                                     </div>
                                 </div>
                             </div>
@@ -288,20 +269,20 @@
             </t>
         </div>
          <div class="mb-3" t-elif="env.user == user">
-            Badges are your collection of achievements. Wear them proudly! <br />
+            <p class="text-muted mb-2">Badges are your collection of achievements. Wear them proudly!</p>
             <a t-if="not user.badge_ids and badge_category" t-attf-href="/profile/ranks_badges?badge_category=#{badge_category}"
-            class="btn-link"><i class="oi" data-icon="arrow_forward"/> Get Badges</a>
+                class="btn btn-link px-0"><i class="oi me-1" data-icon="east"/>Get Badges</a>
             <a t-else="" t-attf-href="/profile/ranks_badges"
-            class="btn-link"><i class="oi" data-icon="arrow_forward"/> Get Badges</a>
+                class="btn btn-link px-0"><i class="oi me-1" data-icon="east"/>Get Badges</a>
         </div>
-        <div t-else="" class="mb-3 d-inline-block">
-            <p class="text-muted">No badges yet!</p>
+        <div t-else="" class="mb-3">
+            <p class="text-muted mb-0">No badges yet!</p>
         </div>
-        <div t-if="env.user.id != user.id" class="text-end d-inline-block pull-right">
+        <div t-if="env.user.id != user.id" class="text-end">
             <a t-if="not user.badge_ids and badge_category" t-attf-href="/profile/ranks_badges?badge_category=#{badge_category}"
-            class="btn-link btn-sm"><i class="oi" data-icon="east"/> All Badges</a>
+                class="btn btn-link btn-sm px-0"><i class="oi me-1" data-icon="east"/>All Badges</a>
             <a t-else="" t-attf-href="/profile/ranks_badges"
-            class="btn-link btn-sm"><i class="oi me-1" data-icon="east"/>All Badges</a>
+                class="btn btn-link btn-sm px-0"><i class="oi me-1" data-icon="east"/>All Badges</a>
         </div>
     </template>
 
