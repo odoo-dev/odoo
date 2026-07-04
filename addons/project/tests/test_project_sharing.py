@@ -464,6 +464,17 @@ class TestProjectSharing(TestProjectSharingCommon):
         with self.assertRaisesRegex(AccessError, "top-secret records"):
             task.write({'child_ids': [Command.delete(self.task_no_collabo.id)]})
         with self.assertRaisesRegex(AccessError, "top-secret records"):
+            # self.task_no_collabo must be accessible and in the relation,
+            # otherwise the ORM detects that the command does not modify the
+            # field and does nothing
+            self.env['ir.access'].create({
+                'name': 'make task_no_collabo readable',
+                'model_id': self.env['ir.model']._get(task._name).id,
+                'group_id': self.env.ref('base.group_portal').id,
+                'operation': 'r',
+                'domain': str([('id', '=', self.task_no_collabo.id)]),
+            })
+            task.sudo().write({'child_ids': [Command.link(self.task_no_collabo.id)]})
             task.write({'child_ids': [Command.unlink(self.task_no_collabo.id)]})
         with self.assertRaisesRegex(AccessError, "top-secret records"):
             task.write({'child_ids': [Command.link(self.task_no_collabo.id)]})
