@@ -198,8 +198,9 @@ class ProductTemplateAttributeLine(models.Model):
         ProductTemplateAttributeValue = self.env['product.template.attribute.value']
         ptav_to_create = []
         ptav_to_unlink = ProductTemplateAttributeValue
+        ptav_to_activate = ProductTemplateAttributeValue
         for ptal in self:
-            ptav_to_activate = ProductTemplateAttributeValue
+            current_ptav_to_activate = ProductTemplateAttributeValue
             remaining_pav = ptal.value_ids
             for ptav in ptal.product_template_value_ids:
                 if ptav.product_attribute_value_id not in remaining_pav:
@@ -212,7 +213,7 @@ class ProductTemplateAttributeLine(models.Model):
                     # Activate corresponding values that are currently archived.
                     remaining_pav -= ptav.product_attribute_value_id
                     if not ptav.ptav_active:
-                        ptav_to_activate += ptav
+                        current_ptav_to_activate += ptav
 
             for pav in remaining_pav:
                 # The previous loop searched for archived values that belonged to
@@ -231,6 +232,7 @@ class ProductTemplateAttributeLine(models.Model):
                 ], limit=1)
                 if ptav:
                     ptav.write({'ptav_active': True, 'attribute_line_id': ptal.id})
+                    current_ptav_to_activate += ptav
                     # If the value was marked for deletion, now keep it.
                     ptav_to_unlink -= ptav
                 else:
@@ -242,12 +244,15 @@ class ProductTemplateAttributeLine(models.Model):
                     })
             # Handle active at each step in case a following line might want to
             # re-use a value that was archived at a previous step.
-            ptav_to_activate.write({'ptav_active': True})
+            current_ptav_to_activate.write({'ptav_active': True})
+            ptav_to_activate += current_ptav_to_activate
             ptav_to_unlink.write({'ptav_active': False})
         if ptav_to_unlink:
             ptav_to_unlink.unlink()
         ProductTemplateAttributeValue.create(ptav_to_create)
-        self.product_tmpl_id._create_variant_ids()
+        self.product_tmpl_id.with_context(
+            activated_product_template_attribute_value_ids=ptav_to_activate.ids,
+        )._create_variant_ids()
 
     def _without_no_variant_attributes(self):
         return self.filtered(lambda ptal: ptal.attribute_id.create_variant != 'no_variant')

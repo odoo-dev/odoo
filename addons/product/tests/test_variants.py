@@ -307,6 +307,53 @@ class TestVariants(ProductVariantsCommon):
         self.assertTrue(template.active)
 
     @mute_logger('odoo.models.unlink')
+    def test_archived_variants_stay_archived_when_adding_value(self):
+        template = self.env['product.template'].create({
+            'name': 'template',
+            'attribute_line_ids': [
+                Command.create({
+                    'attribute_id': self.size_attribute.id,
+                    'value_ids': [Command.set([
+                        self.size_attribute_s.id,
+                        self.size_attribute_m.id,
+                        self.size_attribute_l.id,
+                    ])],
+                }),
+                Command.create({
+                    'attribute_id': self.color_attribute.id,
+                    'value_ids': [Command.set([
+                        self.color_attribute_red.id,
+                        self.color_attribute_blue.id,
+                        self.color_attribute_green.id,
+                    ])],
+                }),
+            ],
+        })
+        variants_m = template.product_variant_ids.filtered(
+            lambda product: self.size_attribute_m
+            in product.product_template_attribute_value_ids.product_attribute_value_id
+        )
+        self.assertEqual(len(variants_m), 3)
+
+        variants_m.action_archive()
+        self.assertFalse(any(variants_m.mapped('active')))
+
+        size_xl = self.env['product.attribute.value'].create({
+            'name': 'XL',
+            'attribute_id': self.size_attribute.id,
+        })
+        size_line = template.attribute_line_ids.filtered(
+            lambda line: line.attribute_id == self.size_attribute
+        )
+        size_line.write({'value_ids': [Command.link(size_xl.id)]})
+
+        self.assertFalse(any(variants_m.mapped('active')))
+        self.assertEqual(len(template.product_variant_ids), 9)
+        self.assertEqual(
+            len(template.with_context(active_test=False).product_variant_ids), 12,
+        )
+
+    @mute_logger('odoo.models.unlink')
     def test_template_barcode(self):
         template = self.env['product.template'].create({
             'name': 'template',

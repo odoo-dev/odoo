@@ -7,6 +7,7 @@ from collections import defaultdict
 
 from odoo import api, fields, models, tools, _, SUPERUSER_ID
 from odoo.exceptions import UserError, ValidationError
+from odoo.fields import Command
 from odoo.models import PREFETCH_MAX
 from odoo.osv import expression
 
@@ -500,9 +501,22 @@ class ProductTemplate(models.Model):
 
     def write(self, vals):
         self._sanitize_vals(vals)
-        res = super(ProductTemplate, self).write(vals)
-        if self._context.get("create_product_product", True) and 'attribute_line_ids' in vals or (vals.get('active') and len(self.product_variant_ids) == 0):
-            self._create_variant_ids()
+        restrict_variant_reactivation = (
+            vals.get('attribute_line_ids')
+            and 'activated_product_template_attribute_value_ids' not in self.env.context
+            and all(
+                command[0] == Command.UPDATE
+                and isinstance(command[2], dict)
+                and 'value_ids' in command[2]
+                for command in vals['attribute_line_ids']
+            )
+        )
+        templates = self.with_context(
+            activated_product_template_attribute_value_ids=[],
+        ) if restrict_variant_reactivation else self
+        res = super(ProductTemplate, templates).write(vals)
+        if templates._context.get("create_product_product", True) and 'attribute_line_ids' in vals or (vals.get('active') and len(templates.product_variant_ids) == 0):
+            templates._create_variant_ids()
         if 'active' in vals and not vals.get('active'):
             self.with_context(active_test=False).mapped('product_variant_ids').write({'active': vals.get('active')})
         if 'image_1920' in vals:
@@ -733,6 +747,10 @@ class ProductTemplate(models.Model):
         variants_to_create = []
         variants_to_activate = Product
         variants_to_unlink = Product
+        activated_ptav_ids = set(
+            self.env.context.get('activated_product_template_attribute_value_ids', [])
+        )
+        reactivate_all_possible = 'activated_product_template_attribute_value_ids' not in self.env.context
 
         for tmpl_id in self:
             lines_without_no_variants = tmpl_id.valid_product_template_attribute_line_ids._without_no_variant_attributes()
@@ -741,6 +759,7 @@ class ProductTemplate(models.Model):
 
             current_variants_to_create = []
             current_variants_to_activate = Product
+            current_variants_to_keep = Product
 
             # adding an attribute with only one value should not recreate product
             # write this attribute on every product to make sure we don't lose them
@@ -779,7 +798,14 @@ class ProductTemplate(models.Model):
                     all_combinations, ignore_no_variant=True,
                 ):
                     if combination in existing_variants:
-                        current_variants_to_activate += existing_variants[combination]
+                        variant = existing_variants[combination]
+                        current_variants_to_keep += variant
+                        if (
+                            variant.active
+                            or reactivate_all_possible
+                            or activated_ptav_ids.intersection(combination.ids)
+                        ):
+                            current_variants_to_activate += variant
                     else:
                         current_variants_to_create.append(tmpl_id._prepare_variant_values(combination))
                         variant_limit = self.env['ir.config_parameter'].sudo().get_param('product.dynamic_variant_limit', 1000)
@@ -793,12 +819,15 @@ class ProductTemplate(models.Model):
 
             elif existing_variants:
                 variants_combinations = [variant.product_template_attribute_value_ids for variant in existing_variants.values()]
-                current_variants_to_activate += Product.concat(*[existing_variants[possible_combination]
-                    for possible_combination in tmpl_id._filter_combinations_impossible_by_config(variants_combinations, ignore_no_variant=True)
-                ])
+                for possible_combination in tmpl_id._filter_combinations_impossible_by_config(
+                    variants_combinations, ignore_no_variant=True,
+                ):
+                    variant = existing_variants[possible_combination]
+                    current_variants_to_keep += variant
+                    current_variants_to_activate += variant
                 variants_to_activate += current_variants_to_activate
 
-            variants_to_unlink += all_variants - current_variants_to_activate
+            variants_to_unlink += all_variants - current_variants_to_keep
 
         if variants_to_activate:
             variants_to_activate.write({'active': True})
