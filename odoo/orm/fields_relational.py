@@ -1048,7 +1048,9 @@ class One2many(_RelationalMulti):
                     to_delete.clear()
                 if to_create:
                     # create() will add the new lines to the cache of records
-                    comodel.create(to_create)
+                    lines = comodel.create(to_create)
+                    if len(lines.filtered_domain(self.get_comodel_domain(model))) < len(lines):
+                        raise ValueError(f"Cannot create inaccessible records in {self}")
                     to_create.clear()
                 if to_link:
                     for record, line_ids in to_link.items():
@@ -1542,6 +1544,8 @@ class Many2many(_RelationalMulti):
             if to_create:
                 # create lines in batch, and link them
                 lines = comodel.create([vals for ids, vals in to_create])
+                if len(lines.filtered_domain(self.get_comodel_domain(model))) < len(lines):
+                    raise ValueError(f"Cannot create inaccessible records in {self}")
                 for line, (ids, _vals) in zip(lines, to_create):
                     relation_add(ids, line.id)
 
