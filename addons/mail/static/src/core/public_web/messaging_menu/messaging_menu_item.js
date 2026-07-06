@@ -48,7 +48,6 @@ export class MessagingMenuItem extends Component {
         );
         this.activeTab = propSignal("activeTab", this.store["MessagingMenuTab"].Class);
         this.onClick = props.static("onClick", types.function());
-        this.props = props({ onClick: types.string().optional() });
         this.hasTouch = hasTouch;
         this.isActive = computed(() => this._isActive);
         this.messageActions = useMessageActions({
