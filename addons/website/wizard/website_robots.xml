@@ -6,6 +6,7 @@
         <field name="model">website.robots</field>
         <field name="arch" type="xml">
             <form>
+                <field name="website_id" invisible="1"/>
                 <field name="content"/>
                 <small>
                     <a role="button" class="btn btn-link" target="_blank" href="https://www.google.com/webmasters/tools/robots-testing-tool">

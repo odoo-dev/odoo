@@ -5,9 +5,9 @@ from odoo import fields, models
 class WebsiteRobots(models.TransientModel):
     _name = 'website.robots'
     _description = "Robots.txt Editor"
+    _inherit = ['website.multi.mixin']
 
-    content = fields.Text(default=lambda s: s.env.website.robots_txt)
+    content = fields.Text(related='website_id.robots_txt', readonly=False)
 
     def action_save(self):
-        self.env.website.robots_txt = self.content
         return {'type': 'ir.actions.act_window_close'}
