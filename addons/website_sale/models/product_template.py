@@ -905,6 +905,7 @@ class ProductTemplate(models.Model):
             "hide_price": prevent_sale and is_zero_price,
             # additional info to simplify overrides
             "currency": currency,  # displayed currency
+            "currency_id": currency.id,
             "product_taxes": product_taxes,  # taxes before fpos mapping
             "taxes": taxes,  # taxes after fpos mapping
         })
@@ -923,6 +924,7 @@ class ProductTemplate(models.Model):
             # the product
             combination_info["compare_list_price"] = 0
 
+        combination_info["has_available_uoms"] = len(product_or_template._get_available_uoms() > 0)
         if product_or_template._has_multiple_uoms():
             # for packaging pricings
             combination_info["packaging_prices"] = {}
@@ -989,7 +991,7 @@ class ProductTemplate(models.Model):
                 "uom_name": uom.name,
                 "uom_rounding": rounding,
                 "show_availability": product_sudo.show_availability,
-                "out_of_stock_message": product_sudo.out_of_stock_message,
+                "out_of_stock_message": product_sudo.out_of_stock_message.strip(),
                 "has_stock_notification": has_stock_notification,
                 "stock_notification_email": stock_notification_email,
                 "is_in_wishlist": product_sudo._is_in_wishlist(),
@@ -1060,9 +1062,7 @@ class ProductTemplate(models.Model):
         )
 
         if not tax_display:
-            show_tax = (
-                website or self.env.website
-            ).show_line_subtotals_tax_selection
+            show_tax = (website or self.env.website).show_line_subtotals_tax_selection
             tax_display = "total_excluded" if show_tax == "tax_excluded" else "total_included"
 
         return tax_details[tax_display]
@@ -1447,7 +1447,7 @@ class ProductTemplate(models.Model):
         :rtype: dict
         """
         self.ensure_one()
-        website = self.env.website or self.env['website'].browse(self.env.context.get('host_id'))
+        website = self.env.website or self.env["website"].browse(self.env.context.get("host_id"))
 
         if self.product_variant_count == 1:
             vals = self.product_variant_id._prepare_jsonld_vals()
@@ -1494,7 +1494,7 @@ class ProductTemplate(models.Model):
             schemas.append(self._prepare_jsonld_vals())
         elif self:
             category = self.env["product.public.category"].browse(
-                self.env.context.get("shop_category_id"),
+                self.env.context.get("shop_category_id")
             )
             if category:
                 list_path = category.website_url
@@ -1521,7 +1521,7 @@ class ProductTemplate(models.Model):
             category = self.public_categ_ids[:1]
         else:
             category = self.env["product.public.category"].browse(
-                self.env.context.get("shop_category_id"),
+                self.env.context.get("shop_category_id")
             )
         if category:
             for cat in category.parents_and_self:
@@ -1683,9 +1683,7 @@ class ProductTemplate(models.Model):
             product_or_template, date, currency, pricelist, **kwargs
         )
 
-        if (
-            website := self.env.website
-        ) and product_or_template.is_product_variant:
+        if (website := self.env.website) and product_or_template.is_product_variant:
             max_quantity = product_or_template._get_max_quantity(website, request.cart, **kwargs)
             if max_quantity is not None:
                 if uom:

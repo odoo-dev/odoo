@@ -15,6 +15,8 @@ class TestWebsiteSalePerformanceNoPricelist(WebsiteSaleCommon, UtilPerf, Product
     def setUpClass(cls):
         super().setUpClass()
 
+        # TODO add combo product
+
         # Product with 9 variants
         cls.heavy_product = cls.env["product.template"].create({
             "name": "Multi-variants product",

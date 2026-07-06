@@ -1030,16 +1030,19 @@ class WebsiteSale(payment_portal.PaymentPortal):
         # Needed to trigger the recently viewed product rpc
         view_track = website.viewref("website_sale.product").track
 
+        product_variant = self.env["product.product"].browse(combination_info["product_id"])
+        product_or_template = product_variant or product
+
         return {
             "attribute_value_images": attribute_value_images,
             "categories": self.env["product.public.category"].search([("parent_id", "=", False)]),
             "category": category,
             "combination_info": combination_info,
-            "has_available_uoms": len(product._get_available_uoms()) > 0,
+            "has_available_uoms": len(product_or_template._get_available_uoms()) > 0,
             "keep": keep,
             "main_object": product,
             "product": product,
-            "product_variant": self.env["product.product"].browse(combination_info["product_id"]),
+            "product_variant": product_variant,
             "view_track": view_track,
             "structured_data": structured_data,
             "shop_path": SHOP_PATH,

@@ -9,8 +9,8 @@ patch(ProductPage.prototype, {
      *
      * @param {Object} combination
      */
-    async _getUnavailableQty(combination) {
-        const unavailableQty = await super._getUnavailableQty(combination);
+    _getUnavailableQty(combination) {
+        const unavailableQty = super._getUnavailableQty(combination);
         return unavailableQty + (combination.unavailable_kit_qty || 0);
     },
 });
