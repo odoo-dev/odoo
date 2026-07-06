@@ -1065,9 +1065,14 @@ class One2many(_RelationalMulti):
                             to_create.append(dict(command[2], **{inverse: record.id}))
                         allow_full_delete = False
                     elif command[0] == Command.UPDATE:
-                        prefetch_ids = recs[self.name]._prefetch_ids
-                        comodel.browse(command[1]).with_prefetch(prefetch_ids).write(command[2])
+                        corecords = recs[self.name]
+                        if comodel.browse((command[1],)) not in corecords:
+                            raise ValueError("Cannot update a not linked record")
+                        comodel.browse(command[1]).with_prefetch(corecords._prefetch_ids).write(command[2])
                     elif command[0] == Command.DELETE:
+                        corecords = recs[self.name]
+                        if comodel.browse((command[1],)) not in corecords:
+                            raise ValueError("Cannot delete a not linked record")
                         to_delete.append(command[1])
                     elif command[0] == Command.UNLINK:
                         unlink(comodel.browse(command[1]))
@@ -1112,8 +1117,14 @@ class One2many(_RelationalMulti):
                         for record in recs:
                             link(record, comodel.new(command[2], ref=command[1]))
                     elif command[0] == Command.UPDATE:
+                        corecords = recs[self.name]
+                        if comodel.browse((command[1],)) not in corecords:
+                            raise ValueError("Cannot update a not linked record")
                         comodel.browse(command[1]).write(command[2])
                     elif command[0] == Command.DELETE:
+                        corecords = recs[self.name]
+                        if comodel.browse((command[1],)) not in corecords:
+                            raise ValueError("Cannot delete a not linked record")
                         unlink(comodel.browse(command[1]))
                     elif command[0] == Command.UNLINK:
                         unlink(comodel.browse(command[1]))
@@ -1157,8 +1168,14 @@ class One2many(_RelationalMulti):
                             line = comodel.new(command[2], ref=command[1])
                             line[inverse] = record
                     elif command[0] == Command.UPDATE:
+                        corecords = recs[self.name]
+                        if comodel.browse((command[1],)) not in corecords:
+                            raise ValueError("Cannot update a not linked record")
                         browse([command[1]]).update(command[2])
                     elif command[0] == Command.DELETE:
+                        corecords = recs[self.name]
+                        if comodel.browse((command[1],)) not in corecords:
+                            raise ValueError("Cannot delete a not linked record")
                         browse([command[1]])[inverse] = False
                     elif command[0] == Command.UNLINK:
                         browse([command[1]])[inverse] = False
@@ -1188,8 +1205,14 @@ class One2many(_RelationalMulti):
                         for record in recs:
                             link(record, comodel.new(command[2], ref=command[1]))
                     elif command[0] == Command.UPDATE:
+                        corecords = recs[self.name]
+                        if comodel.browse((command[1],)) not in corecords:
+                            raise ValueError("Cannot update a not linked record")
                         browse([command[1]]).update(command[2])
                     elif command[0] == Command.DELETE:
+                        corecords = recs[self.name]
+                        if comodel.browse((command[1],)) not in corecords:
+                            raise ValueError("Cannot delete a not linked record")
                         unlink(browse([command[1]]))
                     elif command[0] == Command.UNLINK:
                         unlink(browse([command[1]]))
@@ -1526,9 +1549,14 @@ class Many2many(_RelationalMulti):
                 if command[0] == Command.CREATE:
                     to_create.append((recs._ids, command[2]))
                 elif command[0] == Command.UPDATE:
-                    prefetch_ids = recs[self.name]._prefetch_ids
-                    comodel.browse(command[1]).with_prefetch(prefetch_ids).write(command[2])
+                    corecords = recs[self.name]
+                    if comodel.browse((command[1],)) not in corecords:
+                        raise ValueError("Cannot update a not linked record")
+                    comodel.browse(command[1]).with_prefetch(corecords._prefetch_ids).write(command[2])
                 elif command[0] == Command.DELETE:
+                    corecords = recs[self.name]
+                    if comodel.browse((command[1],)) not in corecords:
+                        raise ValueError("Cannot delete a not linked record")
                     to_delete.append(command[1])
                 elif command[0] == Command.UNLINK:
                     relation_remove(recs._ids, command[1])
@@ -1683,9 +1711,15 @@ class Many2many(_RelationalMulti):
                     for line_ids in new_relation.values():
                         line_ids.add(line_id)
                 elif command[0] == Command.UPDATE:
+                    corecords = recs[self.name]
+                    if comodel.browse((command[1],)) not in corecords:
+                        raise ValueError("Cannot update a not linked record")
                     line_id = new(command[1])
                     comodel.browse([line_id]).update(command[2])
                 elif command[0] == Command.DELETE:
+                    corecords = recs[self.name]
+                    if comodel.browse((command[1],)) not in corecords:
+                        raise ValueError("Cannot delete a not linked record")
                     line_id = new(command[1])
                     for line_ids in new_relation.values():
                         line_ids.discard(line_id)
