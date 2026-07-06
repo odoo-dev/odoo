@@ -216,10 +216,8 @@ class HrEmployee(models.Model):
     }
     """
 
-    permit_no = fields.Char('Work Permit No', groups="hr.group_hr_user", tracking=True)
     visa_no = fields.Char('Visa No', groups="hr.group_hr_user", tracking=True)
     visa_expire = fields.Date('Visa Expiration Date', groups="hr.group_hr_user", tracking=True)
-    work_permit_expiration_date = fields.Date('Work Permit Expiration Date', groups="hr.group_hr_user", tracking=True)
     has_work_permit = fields.Binary(string="Work Permit", groups="hr.group_hr_user")
     work_permit_scheduled_activity = fields.Boolean(default=False, groups="hr.group_hr_user")
     work_permit_name = fields.Char('work_permit_name', compute='_compute_work_permit_name', groups="hr.group_hr_user")
@@ -238,6 +236,8 @@ class HrEmployee(models.Model):
         ("other", "Other")], compute="_compute_work_location_type", tracking=True)
 
     # All version fields needing a specific group to be accessible should also have `inherited=True` set on its definition to make sure those fields are linked to `_inherits` on `hr.version`
+    permit_no = fields.Char(readonly=False, groups="hr.group_hr_user", related="version_id.permit_no", inherited=True)
+    work_permit_expiration_date = fields.Date(readonly=False, groups="hr.group_hr_user", related="version_id.work_permit_expiration_date", inherited=True)
     first_contract_date = fields.Date(compute='_compute_first_contract_date', groups="hr.group_hr_manager", store=True,
                                     help="The date of the first contract of the employee in the company.")
     contract_date_start = fields.Date(readonly=False, related="version_id.contract_date_start", inherited=True, groups="hr.group_hr_manager")

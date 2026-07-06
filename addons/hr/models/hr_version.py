@@ -87,6 +87,12 @@ class HrVersion(models.Model):
         ('female', 'Female'),
         ('other', 'Other'),
     ], groups="hr.group_hr_user", tracking=1, help="This is the legal sex as recognized by the state, used for official and statutory purposes.")
+    permit_no = fields.Char("Work Permit No", groups="hr.group_hr_user", tracking=True)
+    work_permit_expiration_date = fields.Date(
+        "Work Permit Expiration Date",
+        groups="hr.group_hr_user",
+        tracking=True,
+    )
 
     private_street = fields.Char(string="Private Street", groups="hr.group_hr_user", tracking=1)
     private_street2 = fields.Char(string="Private Street2", groups="hr.group_hr_user", tracking=1)
