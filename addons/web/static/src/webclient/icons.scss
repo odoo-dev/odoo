@@ -45,8 +45,16 @@ $ms-size-multiplier: 1.214285; // Compensate pictogram's inner spacing
 }
 
 @mixin icon-content($icon-name) {
-    &::before {
+    @if str-index(#{&}, ':before') != null or str-index(#{&}, ':after') != null {
+        // If the selector contains :before or :after, it means that the mixin
+        // was called from another .scss file and that the "oi" class is 
+        // probably not defined on that element. So we need to set font-family.
+        font-family: var(--icon-font-family, #{$ms-font-family});
         content: $icon-name;
+    } @else {
+        &::before {
+            content: $icon-name;
+        }
     }
 }
 

@@ -38,8 +38,9 @@
                 justify-content: center;
                 align-items: center;
                 color: var(--color, #{$body-color});
-                font: normal normal normal 1em/1 FontAwesome;
-                content: "\f00c";
+                @include ms-icon("check");
+                font-size: 1em;
+                line-height: 1;
             }
         }
 

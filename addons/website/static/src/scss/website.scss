@@ -585,8 +585,7 @@ $-navbar-mobile-bg-color: o-color('menu-custom') or o-color('menu');
             &:after {
                 height: 100%;
                 background: none;
-                font-family: var(--icon-font-family, "Material Symbols Outlined");
-                content: 'keyboard_arrow_down';
+                @include ms-icon("keyboard_arrow_down");
             }
         }
     }
@@ -1138,7 +1137,6 @@ $-o-carousel-controllers-size: var(--CarouselControllers-size, #{map-get($spacer
         background-image: none;
         color: $body-color;
         &:before {
-            font-family: var(--icon-font-family, "Material Symbols Outlined");
             display: inline-block;
             background-color: #fff;
         }
@@ -1166,8 +1164,8 @@ $-o-carousel-controllers-size: var(--CarouselControllers-size, #{map-get($spacer
     // Default
     &.s_carousel_default {
         // Controls - chevron
-        .carousel-control-prev-icon:before { content: "chevron_left" #{"/*rtl:'chevron_right'*/"}; margin-left: 1.5rem; }
-        .carousel-control-next-icon:before { content: "chevron_right" #{"/*rtl:'chevron_left'*/"}; margin-right: 1.5rem; }
+        .carousel-control-prev-icon:before { @include ms-icon("chevron_left" #{"/*rtl:'chevron_right'*/"}); margin-left: 1.5rem; }
+        .carousel-control-next-icon:before { @include ms-icon("chevron_right" #{"/*rtl:'chevron_left'*/"}); margin-right: 1.5rem; }
         .carousel-control-prev-icon:before,
         .carousel-control-next-icon:before {
             background-color: rgba(0,0,0,0);
@@ -2126,9 +2124,8 @@ header {
     }
 
     .o_mega_menu_toggle::after {
-        content: 'chevron_forward';
+        @include ms-icon("chevron_forward");
         border: none;
-        font-family: var(--icon-font-family, "Material Symbols Outlined");
     }
 
     .o_mega_menu_left .o_mega_menu {

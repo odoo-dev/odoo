@@ -80,9 +80,10 @@ kbd {
       &:before {
         @include o-position-absolute(0);
         transform: translate(-1.5em, 90%);
-        font: .7em/1em FontAwesome;
+        font-size: .7em;
+        line-height: 1em;
         color: $link-color;
-        content: "\f00c";
+        @include ms-icon("check");
       }
 
       &.disabled:before {
@@ -98,10 +99,11 @@ kbd {
     &::after {
       @include o-position-absolute(0, $left: 90%);
       transform: translate(0, 90%);
-      font: .7em/1em FontAwesome;
+      font-size: .7em;
+      line-height: 1em;
       color: $link-color;
       display: inline-block;
-      content: "\f00c";
+      @include ms-icon("check");
       border: 0;
     }
 

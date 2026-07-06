@@ -29,6 +29,7 @@
             'web/static/lib/bootstrap/scss/_variables-dark.scss',
             'web/static/lib/bootstrap/scss/_maps.scss',
             'web/static/fonts/fonts.scss',
+            ('include', 'web.icons_fonts'),
             'html_builder/static/src/**/*',
             ('remove', 'html_builder/static/src/**/*.edit.*'),
             ('remove', 'html_builder/static/src/**/*.dark.scss'),

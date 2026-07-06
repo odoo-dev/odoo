@@ -40,8 +40,7 @@
         gap: 5px;
 
         &:after {
-            content: "\f0d7";
-            font-family: FontAwesome;
+            @include ms-icon("arrow_drop_down");
             display: inline-block;
             margin-left: auto;
 

@@ -33,9 +33,8 @@
     .o_save_current_view {
         &:before {
             margin-inline-end: map-get($spacers, 1);
-            font-family: FontAwesome;
             opacity: $o-opacity-muted;
-            content: "\f0c7";
+            @include ms-icon("save");
         }
     }
 }

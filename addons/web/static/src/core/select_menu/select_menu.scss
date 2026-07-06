@@ -63,8 +63,7 @@
         &:before {
             @include o-position-absolute($top: 50%);
             transform: translateY(-50%);
-            content: "\f002";
-            font-family: 'FontAwesome';
+            @include ms-icon("search");
         }
     }
 

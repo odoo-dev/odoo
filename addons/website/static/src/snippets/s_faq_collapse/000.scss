@@ -10,14 +10,13 @@
             border-radius: 0;
             outline: none;
             &:before {
-                content: '\f056';
-                font-family: 'FontAwesome';
+                @include ms-icon("remove_circle");
                 color: $gray-600;
                 position: absolute;
                 margin-left: -1.5em;
             }
             &.collapsed:before {
-                content: '\f055';
+                @include ms-icon("add_circle");
             }
             &:hover,
             &:focus {
@@ -52,10 +51,10 @@
             .card-header {
                 background-color: transparent;
                 &:before {
-                    content:'\f068';
+                    @include ms-icon("remove");
                 }
                 &.collapsed:before {
-                    content:'\f067';
+                    @include ms-icon("add");
                 }
             }
             .s_faq_collapse_right_icon {
@@ -74,10 +73,10 @@
                 background-color: transparent;
                 @include font-size($font-size-lg * 1.5);
                 &:before {
-                    content:'\f068';
+                    @include ms-icon("remove");
                 }
                 &.collapsed:before {
-                    content:'\f067';
+                    @include ms-icon("add");
                 }
             }
             .s_faq_collapse_right_icon {

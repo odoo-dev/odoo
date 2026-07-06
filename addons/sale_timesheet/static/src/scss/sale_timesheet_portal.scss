@@ -3,12 +3,10 @@
         a {
             text-decoration: none;
             &:after {
-                content: "\f0d7";
-                font-family: 'FontAwesome';
+                @include ms-icon("arrow_drop_down");
             }
             &.collapsed:after {
-                content: "\f0da";
-                font-family: 'FontAwesome';
+                @include ms-icon("arrow_right");
             }
         }
     }

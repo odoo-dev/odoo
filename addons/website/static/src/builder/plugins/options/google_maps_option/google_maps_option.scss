@@ -42,8 +42,7 @@
             margin-left: -1em;
 
             &::after {
-                content: '\f041';
-                font-family: FontAwesome;
+                @include ms-icon("location_on");
             }
         }
 

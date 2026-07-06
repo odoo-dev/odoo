@@ -43,6 +43,7 @@ This addon provides an extensible, maintainable editor.
         ],
         'html_editor.assets_editor': [
             'web/static/lib/dompurify/DOMpurify.js',
+            ('include', 'web.icons_fonts'),
             ('include', 'html_editor.assets_media_dialog'),
             ('include', 'html_editor.assets_readonly'),
             'html_editor/static/src/*',
