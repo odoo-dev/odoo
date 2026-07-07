@@ -8,7 +8,7 @@ from odoo.http import request
 
 
 class ProductProduct(models.Model):
-    _name = 'product.product'
+    _name = "product.product"
     _inherit = ["product.product", "website.structured_data.mixin"]
     _mail_post_access = "read"
 
@@ -90,14 +90,11 @@ class ProductProduct(models.Model):
 
     def _website_show_quick_add(self):
         self.ensure_one()
-        if self._is_sold_out() or not self.filtered_domain(self.env["website"]._product_domain()):
+        if self._is_sold_out() or not self.filtered_domain(self.env.website._product_domain()):
             return False
         if not self._get_available_uoms():
             return False
-        return not (
-            self.env.website.prevent_sale
-            and self.env.website._prevent_product_sale(self, not self._get_contextual_price())
-        )
+        return not self.env.website._prevent_product_sale(self)
 
     def _is_add_to_cart_allowed(self):
         self.ensure_one()
@@ -107,12 +104,10 @@ class ProductProduct(models.Model):
             return True
         if not self.active or not self.website_published:
             return False
-        if not self.filtered_domain(self.env["website"]._product_domain()):
+        if not self.filtered_domain(self.env.website._product_domain()):
             return False
         website = self.env.website
-        if website.prevent_sale and website._prevent_product_sale(
-            self, not self._get_contextual_price()
-        ):
+        if website._prevent_product_sale(self):
             return False
         return website.has_ecommerce_access()
 
@@ -127,7 +122,7 @@ class ProductProduct(models.Model):
         """JSON-LD payload describing the variant as a https://schema.org/Product."""
         self.ensure_one()
 
-        website = self.env.website or self.env['website'].browse(self.env.context.get('host_id'))
+        website = self.env.website or self.env["website"].browse(self.env.context.get("host_id"))
         base_url = website.get_base_url()
         product_price = request.pricelist._get_product_price(
             self, quantity=1, currency=website.currency_id
@@ -135,14 +130,11 @@ class ProductProduct(models.Model):
         # Use sudo to access cross-company taxes.
         price = self._apply_taxes_to_price(product_price, website.currency_id, website=website)
 
-        offer = {
-            "@type": "Offer",
-            "price": price,
-            "priceCurrency": website.currency_id.name,
-        }
+        offer = {"@type": "Offer", "price": price, "priceCurrency": website.currency_id.name}
         if self.is_product_variant and self.is_storable:
             offer["availability"] = (
-                "https://schema.org/OutOfStock" if self._is_sold_out()
+                "https://schema.org/OutOfStock"
+                if self._is_sold_out()
                 else "https://schema.org/InStock"
             )
 

@@ -695,7 +695,7 @@ class ProductTemplate(models.Model):
     def _can_be_added_to_cart(self):
         """Pre-check to `_is_add_to_cart_possible` to know if product can be sold."""
         self.ensure_one()
-        return bool(self.filtered_domain(self.env["website"]._product_domain()))
+        return bool(self.filtered_domain(self.env.website._product_domain()))
 
     def _is_add_to_cart_possible(self):
         """
@@ -899,7 +899,7 @@ class ProductTemplate(models.Model):
                     website=website,
                 )
         is_zero_price = currency.is_zero(combination_info["price"])
-        prevent_sale = website._prevent_product_sale(product_or_template, is_zero_price)
+        prevent_sale = website._prevent_product_sale(product_or_template, combination_info["price"])
         combination_info.update({
             "prevent_sale": prevent_sale,
             "hide_price": prevent_sale and is_zero_price,
@@ -1060,9 +1060,7 @@ class ProductTemplate(models.Model):
         )
 
         if not tax_display:
-            show_tax = (
-                website or self.env.website
-            ).show_line_subtotals_tax_selection
+            show_tax = (website or self.env.website).show_line_subtotals_tax_selection
             tax_display = "total_excluded" if show_tax == "tax_excluded" else "total_included"
 
         return tax_details[tax_display]
@@ -1401,14 +1399,11 @@ class ProductTemplate(models.Model):
 
     def _website_show_quick_add(self):
         self.ensure_one()
-        if self._is_sold_out() or not self.filtered_domain(self.env["website"]._product_domain()):
+        if self._is_sold_out() or not self.filtered_domain(self.env.website._product_domain()):
             return False
         if not self._get_available_uoms():
             return False
-        return not (
-            self.env.website.prevent_sale
-            and self.env.website._prevent_product_sale(self, not self._get_contextual_price())
-        )
+        return not self.env.website._prevent_product_sale(self)
 
     @api.model
     def _get_configurator_display_price(
@@ -1447,7 +1442,7 @@ class ProductTemplate(models.Model):
         :rtype: dict
         """
         self.ensure_one()
-        website = self.env.website or self.env['website'].browse(self.env.context.get('host_id'))
+        website = self.env.website or self.env["website"].browse(self.env.context.get("host_id"))
 
         if self.product_variant_count == 1:
             vals = self.product_variant_id._prepare_jsonld_vals()
@@ -1494,7 +1489,7 @@ class ProductTemplate(models.Model):
             schemas.append(self._prepare_jsonld_vals())
         elif self:
             category = self.env["product.public.category"].browse(
-                self.env.context.get("shop_category_id"),
+                self.env.context.get("shop_category_id")
             )
             if category:
                 list_path = category.website_url
@@ -1521,7 +1516,7 @@ class ProductTemplate(models.Model):
             category = self.public_categ_ids[:1]
         else:
             category = self.env["product.public.category"].browse(
-                self.env.context.get("shop_category_id"),
+                self.env.context.get("shop_category_id")
             )
         if category:
             for cat in category.parents_and_self:
@@ -1683,9 +1678,7 @@ class ProductTemplate(models.Model):
             product_or_template, date, currency, pricelist, **kwargs
         )
 
-        if (
-            website := self.env.website
-        ) and product_or_template.is_product_variant:
+        if (website := self.env.website) and product_or_template.is_product_variant:
             max_quantity = product_or_template._get_max_quantity(website, request.cart, **kwargs)
             if max_quantity is not None:
                 if uom:

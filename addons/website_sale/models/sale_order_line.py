@@ -2,6 +2,7 @@
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import lazy
 
 
 class SaleOrderLine(models.Model):
@@ -108,10 +109,9 @@ class SaleOrderLine(models.Model):
         website = self.order_id.website_id
         if (
             not self.combo_item_id
-            and website.prevent_sale
             and website._prevent_product_sale(
-                self.product_template_id,
-                sum(self._get_lines_with_price().mapped("price_unit")) == 0,
+                self.product_id,
+                lazy(lambda: sum(self._get_lines_with_price().mapped("price_unit"))),
             )
             # Only allow zero-price exemption for zero_price mode, not for category-based prevention
             and not (

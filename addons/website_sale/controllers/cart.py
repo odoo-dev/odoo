@@ -416,22 +416,16 @@ class Cart(PaymentPortal):
         lines_per_order_date = {}
         for line_sudo in previous_orders_lines_sudo:
             # Ignore lines that are combo parents, unsellable, or prevented from sale.
-            product_id = line_sudo.product_id.id
             if (
                 line_sudo.linked_line_id.product_type == "combo"
                 or not line_sudo._is_sellable()
-                or (
-                    self.env.website.prevent_sale
-                    and self.env.website._prevent_product_sale(
-                        line_sudo.product_id,
-                        line_sudo.product_id._get_combination_info_variant()["price"] == 0,
-                    )
-                )
+                or self.env.website._prevent_product_sale(line_sudo.product_id)
             ):
                 continue
 
             # Ignore lines that are already in the cart or have already been seen.
             is_combo = line_sudo.product_type == "combo"
+            product_id = line_sudo.product_id.id
             if any(
                 line.product_id.id == product_id
                 and (not is_combo or is_same_combo(line_sudo, line))

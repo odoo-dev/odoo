@@ -1055,7 +1055,7 @@ class Website(models.Model):
     def _get_snippet_defaults(self, snippet):
         return super()._get_snippet_defaults(snippet) | const.SNIPPET_DEFAULTS.get(snippet, {})
 
-    def _prevent_product_sale(self, product_or_template, is_zero_price_product):
+    def _prevent_product_sale(self, product_or_template, product_price=None):
         """Return whether selling the provided product online should be prevented, depending on
         price and categories.
 
@@ -1069,7 +1069,9 @@ class Website(models.Model):
 
         # If the sale of zero-priced products should be prevented.
         if self.prevent_sale_for == "zero_price":
-            return is_zero_price_product
+            if product_price is None:
+                product_price = product_or_template._get_contextual_price()
+            return self.currency_id.is_zero(product_price)
 
         # If the sale of products in specific categories should be prevented.
         if self.prevent_sale_for == "specific_categories" and self.prevent_sale_for_categories:
@@ -1159,8 +1161,11 @@ class Website(models.Model):
 
     @api.model
     def _get_settings_to_copy_onto_new_default_website(self):
-        """ Provides a list of settings that should always be set on the default
+        """Provides a list of settings that should always be set on the default
         website. When the default website changes, a check is performed. If some
         of these settings are not already set on the new default website, they
         are copied from the previous default website."""
-        return super()._get_settings_to_copy_onto_new_default_website() + ['salesperson_id', 'salesteam_id']
+        return super()._get_settings_to_copy_onto_new_default_website() + [
+            "salesperson_id",
+            "salesteam_id",
+        ]

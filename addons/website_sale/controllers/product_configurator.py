@@ -139,9 +139,8 @@ class WebsiteSaleProductConfiguratorController(SaleProductConfiguratorController
         )
 
         if request.is_frontend:
-            has_zero_price = currency.is_zero(basic_product_information["price"])
             basic_product_information["can_be_sold"] = not self.env.website._prevent_product_sale(
-                product_or_template, has_zero_price
+                product_or_template, basic_product_information["price"]
             )
             # Don't compute the strikethrough price if there's a custom price (i.e. if `price_info`
             # is populated).
