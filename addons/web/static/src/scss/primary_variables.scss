@@ -46,6 +46,9 @@ $o-font-weight-normal: 400 !default;
 $o-font-weight-medium: 500 !default;
 $o-font-weight-bold: 700 !default;
 
+//Webclient
+$o-webclient-background-image: null !default;
+
 // Colors
 // This is BS default
 $o-white: #FFFFFF !default;
@@ -98,6 +101,12 @@ $o-theme-text-colors: (
     "warning": #9a6b01,
     "danger": #d23f3a,
 )!default;
+
+// Gradients
+$o-gradient:    null !default;
+$o-gradient-sm: null !default;
+$o-gradient-lg: null !default;
+$o-gradient-btn:  null !default;
 
 // Opacities
 $o-opacity-disabled: .5 !default;
