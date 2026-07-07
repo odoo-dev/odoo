@@ -601,7 +601,11 @@ class HrVersion(models.Model):
                 employee = version.employee_id
                 tz = _get_tz(vals['version_id'])
                 vals['date'] = date_start.astimezone(tz).date()
-                vals['duration'] = mapped_version_data[date_start, date_stop][calendar][employee.id]['hours'] if calendar else 0.0
+                if calendar.duration_based:
+                    dt = date_stop - date_start
+                    vals['duration'] = round(dt.total_seconds()) / 3600
+                else:
+                    vals['duration'] = mapped_version_data[date_start, date_stop][calendar][employee.id]['hours'] if calendar else 0.0
             vals.pop('date_start', False)
             vals.pop('date_stop', False)
 
