@@ -1066,6 +1066,7 @@ class One2many(_RelationalMulti):
                         allow_full_delete = False
                     elif command[0] == Command.UPDATE:
                         corecords = recs[self.name]
+                        flush()
                         if comodel.browse((command[1],)) not in corecords:
                             raise ValueError("Cannot update a not linked record")
                         comodel.browse(command[1]).with_prefetch(corecords._prefetch_ids).write(command[2])
