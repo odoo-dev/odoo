@@ -52,5 +52,9 @@ export class WebsiteBorderConfigurator extends BorderConfigurator {
         }
         return ALLOWED_ACTION_PARAMS.includes(this.radiusActionParam.mainParam);
     }
+
+    getOnEditButtonClick(variable) {
+        return () => this.env.editBorderRadius(variable);
+    }
 }
 registry.category("website-options").add(WebsiteBorderConfigurator.id, WebsiteBorderConfigurator);

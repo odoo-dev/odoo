@@ -10,6 +10,7 @@ export class ThemeTab extends Component {
         // optionsContainers: t.array().optional([]),
         colorPresetToShow: t.or([t.number(), t.literal(null)]).optional(),
         shadowSizeToShow: t.or([t.string(), t.literal(null)]).optional(),
+        borderRadiusToShow: t.or([t.string(), t.literal(null)]).optional(),
     });
 
     setup() {
@@ -17,6 +18,7 @@ export class ThemeTab extends Component {
         useSubEnv({
             colorPresetToShow: this.props.colorPresetToShow,
             shadowSizeToShow: this.props.shadowSizeToShow,
+            borderRadiusToShow: this.props.borderRadiusToShow,
         });
         this.state = proxy({
             fontsData: {},

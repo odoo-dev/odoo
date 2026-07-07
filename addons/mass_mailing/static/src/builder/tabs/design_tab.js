@@ -8,6 +8,7 @@ export class DesignTab extends Component {
     static props = {
         colorPresetToShow: { optional: true },
         shadowSizeToShow: { optional: true },
+        borderRadiusToShow: { optional: true },
     };
 
     setup() {

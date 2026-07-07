@@ -7,19 +7,22 @@
 
             <t t-if="this.showRoundnessSuggestions">
                 <BuilderRow label.translate="Round Corners" level="this.props.level">
-                    <BuilderSelect dropdownClass="'o-hb-border-radius'">
+                    <BuilderSelect>
                         <t t-foreach="this.roundCorners.items" t-as="item" t-key="item.label">
 
                             <BuilderSelectItem
                                 id="item.label === 'Custom' ? 'custom_radius' : ''"
-                                className="'o-hb-border-radius-menuitem'"
                                 action="'setBorderRadius'"
                                 actionParam="{ mainParam: item.class, radiusActionParam: this.radiusActionParam }"
                             >
-                                <div class="d-flex o-hb-border-radius-item">
-                                    <t t-set="itemValueOrLabel" t-value="item.variable ? item.value : item.label"/>
-                                    <span class="w-25" t-out="itemValueOrLabel"></span>
-                                    <span t-if="item.variable" class="badge rounded-pill ms-3 o-hb-border-radius-badge" t-out="item.label"/>
+                                <div class="d-flex">
+                                    <div class="o-hb-border-radius-text" t-out="item.label"/>
+                                    <a
+                                        t-if="item.variable"
+                                        title="Edit"
+                                        class="fa fa-pencil btn o-hb-border-radius-button"
+                                        t-on-click="this.getOnEditButtonClick(item.variable)"
+                                    />
                                 </div>
                             </BuilderSelectItem>
 

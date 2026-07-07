@@ -266,6 +266,7 @@ export class Builder extends Component {
             triggerDomUpdated: this.triggerDomUpdated.bind(this),
             editColorCombination: this.editColorCombination.bind(this),
             editShadow: this.editShadow.bind(this),
+            editBorderRadius: this.editBorderRadius.bind(this),
         });
         onWillDestroy(() => {
             this.resizeObserver?.disconnect();
@@ -301,7 +302,7 @@ export class Builder extends Component {
      * @param {Number | null} presetId the color preset expanding on "theme" tab
      * open.
      */
-    onTabClick(tab, { presetId = null, shadowSize = null } = {}) {
+    onTabClick(tab, { presetId = null, shadowSize = null, borderRadius = null } = {}) {
         if (this.state.activeTab === tab) {
             // If the tab is already active, do nothing.
             return;
@@ -311,6 +312,7 @@ export class Builder extends Component {
         if (tab === "theme" || tab === "blocks") {
             this.colorPresetToShow = presetId;
             this.shadowSizeToShow = shadowSize;
+            this.borderRadiusToShow = borderRadius;
             this.activeTargetEl = this.activeTargetEl || this.getActiveTarget();
             this.editor.shared.builderOptions.deactivateContainers();
         } else if (this.activeTargetEl) {
@@ -359,6 +361,10 @@ export class Builder extends Component {
 
     editShadow(shadowSize) {
         this.onTabClick("theme", { shadowSize });
+    }
+
+    editBorderRadius(borderRadius) {
+        this.onTabClick("theme", { borderRadius });
     }
 
     getActiveTarget() {
