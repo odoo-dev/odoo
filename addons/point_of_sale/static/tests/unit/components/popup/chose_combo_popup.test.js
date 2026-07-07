@@ -1,8 +1,15 @@
 import { test, expect, describe } from "@odoo/hoot";
 import { mountWithCleanup } from "@web/../tests/web_test_helpers";
 import { ChoseComboPopup } from "@point_of_sale/app/components/popups/chose_combo_popup/chose_combo_popup";
-import { setupPosEnv } from "@point_of_sale/../tests/unit/utils";
 import { definePosModels } from "@point_of_sale/../tests/unit/data/generate_model_definitions";
+import {
+    setupPosEnv,
+    createCombo,
+    createComboTemplate,
+    createComboItemProduct,
+    createComboItemProducts,
+    createCompleteComboSetup,
+} from "@point_of_sale/../tests/unit/utils";
 
 definePosModels();
 
@@ -119,4 +126,393 @@ describe("chose_combo_popup.js", () => {
 
         await checkAllCombos(comboProduct_3, [potentialCombos_3], true);
     });
+});
+
+test("popup renders with single applicable combo", async () => {
+    const store = await setupPosEnv();
+    store.addNewOrder();
+
+    const product1 = createComboItemProduct(store, {
+        name: "Test Product 1",
+        price: 10,
+    });
+
+    const product2 = createComboItemProduct(store, {
+        name: "Test Product 2",
+        price: 15,
+    });
+
+    const combo = createCombo(store, {
+        name: "Test Combo",
+        items: [
+            { productId: product1.variant, extraPrice: 0 },
+            { productId: product2.variant, extraPrice: 0 },
+        ],
+        basePrice: 20,
+        qtyFree: 1,
+        qtyMax: 1,
+        isUpsell: false,
+    });
+
+    const comboTemplate = createComboTemplate(store, {
+        name: "Test Combo Template",
+        combos: [combo],
+    });
+
+    await store.addLineToCurrentOrder({
+        product_tmpl_id: product1.template,
+        qty: 1,
+    });
+
+    await store.addLineToCurrentOrder({
+        product_tmpl_id: product2.template,
+        qty: 1,
+    });
+
+    const potentialCombos = {
+        applicable: [
+            {
+                productTmpl: comboTemplate.template,
+                combinations: [
+                    {
+                        [combo.id]: {
+                            line1: { qty: 1, combo_item: combo.combo_item_ids[0] },
+                            line2: { qty: 1, combo_item: combo.combo_item_ids[1] },
+                        },
+                    },
+                ],
+            },
+        ],
+        upsell: [],
+    };
+
+    const popup = await mountWithCleanup(ChoseComboPopup, {
+        props: {
+            potentialCombos,
+            close: () => {},
+            getPayload: () => {},
+        },
+    });
+
+    expect(popup.allCombos).toHaveLength(1);
+    expect(popup.allCombos[0].productTmpl.name).toBe("Test Combo Template");
+    expect(popup.allCombos[0].lines).toHaveLength(2);
+});
+
+test("popup renders with multiple applicable combos", async () => {
+    const store = await setupPosEnv();
+    store.addNewOrder();
+
+    const setup = createCompleteComboSetup(store, {
+        templateId: 5600,
+        templateName: "Multi Combo",
+        numProducts: 9,
+    });
+
+    await store.addLineToCurrentOrder({
+        product_tmpl_id: setup.products[1].template,
+        qty: 1,
+    });
+    await store.addLineToCurrentOrder({
+        product_tmpl_id: setup.products[2].template,
+        qty: 1,
+    });
+    await store.addLineToCurrentOrder({
+        product_tmpl_id: setup.products[3].template,
+        qty: 1,
+    });
+
+    await store.addLineToCurrentOrder({
+        product_tmpl_id: setup.products[4].template,
+        qty: 1,
+    });
+    await store.addLineToCurrentOrder({
+        product_tmpl_id: setup.products[5].template,
+        qty: 1,
+    });
+
+    const potentialCombos = {
+        applicable: [
+            {
+                productTmpl: setup.template,
+                combinations: [
+                    {
+                        [setup.combos[0].id]: {
+                            line1: { qty: 1, combo_item: setup.combos[0].combo_item_ids[0] },
+                            line2: { qty: 1, combo_item: setup.combos[0].combo_item_ids[1] },
+                            line3: { qty: 1, combo_item: setup.combos[0].combo_item_ids[2] },
+                        },
+                    },
+                ],
+            },
+            {
+                productTmpl: setup.template,
+                combinations: [
+                    {
+                        [setup.combos[1].id]: {
+                            line4: { qty: 1, combo_item: setup.combos[1].combo_item_ids[0] },
+                            line5: { qty: 1, combo_item: setup.combos[1].combo_item_ids[1] },
+                        },
+                    },
+                ],
+            },
+        ],
+        upsell: [],
+    };
+
+    const popup = await mountWithCleanup(ChoseComboPopup, {
+        props: {
+            potentialCombos,
+            close: () => {},
+            getPayload: () => {},
+        },
+    });
+
+    expect(popup.allCombos).toHaveLength(2);
+});
+
+test("popup handles upsell combo correctly", async () => {
+    const store = await setupPosEnv();
+    store.addNewOrder();
+
+    const products = createComboItemProducts(store, 4, {
+        basePrice: 10,
+    });
+
+    const upsellCombo = createCombo(store, {
+        name: "Upsell Combo",
+        items: [
+            { productId: products[1].variant, extraPrice: 0 },
+            { productId: products[2].variant, extraPrice: 0 },
+        ],
+        basePrice: 20,
+        qtyFree: 0,
+        qtyMax: 2,
+        isUpsell: true,
+        sequence: 1,
+    });
+
+    const comboTemplate = createComboTemplate(store, {
+        name: "Upsell Combo Template",
+        combos: [upsellCombo],
+    });
+
+    const potentialCombos = {
+        applicable: [],
+        upsell: [
+            {
+                productTmpl: comboTemplate.template,
+                combinations: [
+                    {
+                        [upsellCombo.id]: {
+                            upsell: true,
+                        },
+                    },
+                ],
+            },
+        ],
+    };
+
+    const popup = await mountWithCleanup(ChoseComboPopup, {
+        props: {
+            potentialCombos,
+            close: () => {},
+            getPayload: () => {},
+        },
+    });
+
+    expect(popup.allCombos).toHaveLength(1);
+    expect(popup.allCombos[0].upsell).toBe(true);
+});
+
+test("popup with applicable and upsell combos mixed", async () => {
+    const store = await setupPosEnv();
+    store.addNewOrder();
+
+    const products = createComboItemProducts(store, 6, {
+        basePrice: 10,
+    });
+    const applicableCombo = createCombo(store, {
+        name: "Applicable Combo",
+        items: [
+            { productId: products[1].variant, extraPrice: 0 },
+            { productId: products[2].variant, extraPrice: 0 },
+        ],
+        basePrice: 20,
+        qtyFree: 1,
+        qtyMax: 1,
+        isUpsell: false,
+    });
+
+    const upsellCombo = createCombo(store, {
+        name: "Upsell Combo",
+        items: [
+            { productId: products[3].variant, extraPrice: 0 },
+            { productId: products[4].variant, extraPrice: 0 },
+        ],
+        basePrice: 25,
+        qtyFree: 0,
+        qtyMax: 2,
+        isUpsell: true,
+    });
+
+    const comboTemplate = createComboTemplate(store, {
+        name: "Mixed Combo Template",
+        combos: [applicableCombo, upsellCombo],
+    });
+
+    const potentialCombos = {
+        applicable: [
+            {
+                productTmpl: comboTemplate.template,
+                combinations: [
+                    {
+                        [applicableCombo.id]: {
+                            line1: { qty: 1, combo_item: applicableCombo.combo_item_ids[0] },
+                            line2: { qty: 1, combo_item: applicableCombo.combo_item_ids[1] },
+                        },
+                    },
+                ],
+            },
+        ],
+        upsell: [
+            {
+                productTmpl: comboTemplate.template,
+                combinations: [
+                    {
+                        [upsellCombo.id]: {
+                            upsell: true,
+                        },
+                    },
+                ],
+            },
+        ],
+    };
+
+    const popup = await mountWithCleanup(ChoseComboPopup, {
+        props: {
+            potentialCombos,
+            close: () => {},
+            getPayload: () => {},
+        },
+    });
+    const upsellCombos = popup.allCombos.filter((c) => c.upsell);
+    expect(upsellCombos).toHaveLength(1);
+});
+
+test("popup lines are correctly sorted by upsell and sequence", async () => {
+    const store = await setupPosEnv();
+    store.addNewOrder();
+
+    const products = createComboItemProducts(store, 4, {
+        basePrice: 10,
+    });
+    const combo = createCombo(store, {
+        name: "Sorted Combo",
+        items: [
+            { productId: products[1].variant, extraPrice: 0 },
+            { productId: products[2].variant, extraPrice: 0 },
+            { productId: products[3].variant, extraPrice: 0 },
+        ],
+        basePrice: 30,
+        qtyFree: 1,
+        qtyMax: 2,
+        isUpsell: false,
+        sequence: 2,
+    });
+
+    const comboTemplate = createComboTemplate(store, {
+        name: "Sorted Combo Template",
+        combos: [combo],
+    });
+
+    const potentialCombos = {
+        applicable: [
+            {
+                productTmpl: comboTemplate.template,
+                combinations: [
+                    {
+                        [combo.id]: {
+                            line1: { qty: 1, combo_item: combo.combo_item_ids[0] },
+                            line2: { qty: 1, combo_item: combo.combo_item_ids[1] },
+                            line3: { qty: 1, combo_item: combo.combo_item_ids[2] },
+                            upsell: true,
+                        },
+                    },
+                ],
+            },
+        ],
+        upsell: [],
+    };
+
+    const popup = await mountWithCleanup(ChoseComboPopup, {
+        props: {
+            potentialCombos,
+            close: () => {},
+            getPayload: () => {},
+        },
+    });
+
+    expect(popup.allCombos).toHaveLength(1);
+});
+
+test("popup confirm function calls getPayload correctly", async () => {
+    const store = await setupPosEnv();
+    store.addNewOrder();
+
+    const products = createComboItemProducts(store, 2);
+
+    const combo = createCombo(store, {
+        name: "Confirm Test Combo",
+        items: [
+            { productId: products[1].variant, extraPrice: 0 },
+            { productId: products[2].variant, extraPrice: 0 },
+        ],
+    });
+
+    const comboTemplate = createComboTemplate(store, {
+        name: "Confirm Test Template",
+        combos: [combo],
+    });
+
+    let payloadReceived = null;
+    const getPayloadMock = (payload) => {
+        payloadReceived = payload;
+    };
+
+    const potentialCombos = {
+        applicable: [
+            {
+                productTmpl: comboTemplate.template,
+                combinations: [
+                    {
+                        [combo.id]: {
+                            line1: { qty: 1, combo_item: combo.combo_item_ids[0] },
+                            line2: { qty: 1, combo_item: combo.combo_item_ids[1] },
+                        },
+                    },
+                ],
+            },
+        ],
+        upsell: [],
+    };
+
+    let closeCalled = false;
+    const closeMock = () => {
+        closeCalled = true;
+    };
+
+    const popup = await mountWithCleanup(ChoseComboPopup, {
+        props: {
+            potentialCombos,
+            close: closeMock,
+            getPayload: getPayloadMock,
+        },
+    });
+
+    const comboToConfirm = popup.allCombos[0];
+    popup.confirm(comboToConfirm);
+
+    expect(payloadReceived).toEqual(comboToConfirm);
+    expect(closeCalled).toBe(true);
 });

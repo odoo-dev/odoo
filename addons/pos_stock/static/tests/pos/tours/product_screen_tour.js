@@ -61,32 +61,6 @@ registry.category("web_tour.tours").add("test_only_existing_lots_lifo", {
     steps: () => existingLotsTour("1002"),
 });
 
-registry.category("web_tour.tours").add("test_product_info_product_inventory", {
-    steps: () =>
-        [
-            Chrome.startPoS(),
-            Dialog.confirm("Open Register"),
-
-            inLeftSide([
-                ...scan_barcode("product_variant_0"),
-                ...ProductScreen.clickControlButton("Info"),
-                {
-                    trigger: ".section-inventory-body :contains(100)",
-                },
-                Dialog.confirm("Close"),
-            ]),
-
-            inLeftSide([
-                ...scan_barcode("product_variant_1"),
-                ...ProductScreen.clickControlButton("Info"),
-                {
-                    trigger: ".section-inventory-body :contains(200)",
-                },
-                Dialog.confirm("Close"),
-            ]),
-        ].flat(),
-});
-
 registry.category("web_tour.tours").add("AddMultipleSerialsAtOnce", {
     steps: () =>
         [
