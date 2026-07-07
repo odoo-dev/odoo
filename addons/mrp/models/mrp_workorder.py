@@ -168,9 +168,9 @@ class MrpWorkorder(models.Model):
             has_qty_ready = workorder.uom_id.compare(workorder.qty_ready, 0) > 0
             continuous_production = not workorder.blocked_by_workorder_ids or workorder.production_bom_id.continuous
             if all_blocked_by_workorders_done or has_all_qties_ready or (has_qty_ready and continuous_production):
-                workorder.write({'state': 'ready'})
+                workorder.state = 'ready'
             else:
-                workorder.write({'state': 'blocked'})
+                workorder.state = 'blocked'
 
     def set_state(self, state):
         ids_to_update, ids_by_state = [], defaultdict(list)

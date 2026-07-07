@@ -2174,15 +2174,14 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             })],
         })
         with freeze_time('2023-09-01'):
-            accrual_allocation = self.env['hr.leave.allocation'].new({
-                'name': 'Employee allocation',
-                'work_entry_type_id': self.work_entry_type.id,
-                'date_from': '2023-01-01',
-                'employee_id': self.employee_emp.id,
-                'accrual_plan_id': accrual_plan.id,
-            })
-            # As the duration is set to a onchange, we need to force that onchange to run
-            accrual_allocation._onchange_date_from()
+            with Form(self.env['hr.leave.allocation']) as form:
+                form.name = 'Employee allocation'
+                form.work_entry_type_id = self.work_entry_type
+                form.employee_id = self.employee_emp
+                form.accrual_plan_id = accrual_plan
+                form.date_from = '2023-01-01'
+
+            accrual_allocation = form.record
             accrual_allocation.action_approve()
             # The amount of days should be computed as if it was accrued since
             # the start date of the allocation.
@@ -2279,15 +2278,14 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             })],
         })
         with freeze_time('2023-09-01'):
-            accrual_allocation = self.env['hr.leave.allocation'].new({
-                'name': 'Employee allocation',
-                'work_entry_type_id': self.work_entry_type.id,
-                'date_from': '2023-08-01',
-                'employee_id': self.employee_emp.id,
-                'accrual_plan_id': accrual_plan.id,
-            })
-            # As the duration is set to a onchange, we need to force that onchange to run
-            accrual_allocation._onchange_date_from()
+            with Form(self.env['hr.leave.allocation']) as form:
+                form.name = 'Employee allocation'
+                form.work_entry_type_id = self.work_entry_type
+                form.employee_id = self.employee_emp
+                form.accrual_plan_id = accrual_plan
+                form.date_from = '2023-08-01'
+
+            accrual_allocation = form.record
             accrual_allocation.action_approve()
             # The amount of days should be computed as if it was accrued since
             # the start date of the allocation.
@@ -2314,26 +2312,21 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             })],
         })
         with freeze_time('2024-03-02'):
-            accrual_allocation = self.env['hr.leave.allocation'].new({
-                'name': 'History allocation',
-                'work_entry_type_id': self.work_entry_type.id,
-                'date_from': '2024-03-01',
-                'employee_id': self.employee_emp.id,
-                'accrual_plan_id': accrual_plan.id,
-            })
-            # As the duration is set to an onchange, we need to force that onchange to run
-            accrual_allocation._onchange_date_from()
-            self.assertAlmostEqual(accrual_allocation.number_of_days, 0, places=0)
+            with Form(self.env['hr.leave.allocation']) as form:
+                form.name = 'History allocation'
+                form.work_entry_type_id = self.work_entry_type
+                form.employee_id = self.employee_emp
+                form.accrual_plan_id = accrual_plan
+                form.date_from = '2024-03-01'
+                self.assertAlmostEqual(form.number_of_days, 0, places=0)
 
-            # Yearly Report lost
-            accrual_allocation.write({'date_from': '2022-01-01'})
-            accrual_allocation._onchange_date_from()
-            self.assertAlmostEqual(accrual_allocation.number_of_days, 2, places=0)
+                # Yearly Report lost
+                form.date_from = '2022-01-01'
+                self.assertAlmostEqual(form.number_of_days, 2, places=0)
 
-            # Update date_to
-            accrual_allocation.write({'date_to': '2022-12-31'})
-            accrual_allocation._onchange_date_from()
-            self.assertAlmostEqual(accrual_allocation.number_of_days, 12, places=0)
+                # Update date_to
+                form.date_to = '2022-12-31'
+                self.assertAlmostEqual(form.number_of_days, 12, places=0)
 
     def test_accrual_with_report_creation_for_history(self):
         accrual_plan = self.env['hr.leave.accrual.plan'].create({
@@ -2355,26 +2348,21 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             })],
         })
         with freeze_time('2024-03-02'):
-            accrual_allocation = self.env['hr.leave.allocation'].new({
-                'name': 'History allocation',
-                'work_entry_type_id': self.work_entry_type.id,
-                'date_from': '2024-03-01',
-                'employee_id': self.employee_emp.id,
-                'accrual_plan_id': accrual_plan.id,
-            })
-            # As the duration is set to an onchange, we need to force that onchange to run
-            accrual_allocation._onchange_date_from()
-            self.assertAlmostEqual(accrual_allocation.number_of_days, 0, places=0)
+            with Form(self.env['hr.leave.allocation']) as form:
+                form.name = 'History allocation'
+                form.work_entry_type_id = self.work_entry_type
+                form.employee_id = self.employee_emp
+                form.accrual_plan_id = accrual_plan
+                form.date_from = '2024-03-01'
+                self.assertAlmostEqual(form.number_of_days, 0, places=0)
 
-            # Yearly Report capped to 5 after 2022 and after 2023
-            accrual_allocation.write({'date_from': '2022-01-01'})
-            accrual_allocation._onchange_date_from()
-            self.assertAlmostEqual(accrual_allocation.number_of_days, 7, places=0)
+                # Yearly Report capped to 5 after 2022 and after 2023
+                form.date_from = '2022-01-01'
+                self.assertAlmostEqual(form.number_of_days, 7, places=0)
 
-            # Update date_to
-            accrual_allocation.write({'date_to': '2022-12-31'})
-            accrual_allocation._onchange_date_from()
-            self.assertAlmostEqual(accrual_allocation.number_of_days, 12, places=0)
+                # Update date_to
+                form.date_to = '2022-12-31'
+                self.assertAlmostEqual(form.number_of_days, 12, places=0)
 
     def test_accrual_period_start_past_start_date(self):
         accrual_plan = self.env['hr.leave.accrual.plan'].create({
@@ -4347,15 +4335,13 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
         })
 
         with (freeze_time('2025-01-31')):
-            allocation = self.env['hr.leave.allocation'].new({
-                'name': 'January Allocation',
-                'employee_id': self.employee_emp.id,
-                'accrual_plan_id': accrual_plan.id,
-                'date_from': date(2025, 1, 1),
-                'work_entry_type_id': self.work_entry_type.id,
-            })
-            allocation._onchange_date_from()
-            self.assertEqual(allocation.number_of_days, 2.0)
+            with Form(self.env['hr.leave.allocation']) as form:
+                form.name = 'January Allocation'
+                form.employee_id = self.employee_emp
+                form.accrual_plan_id = accrual_plan
+                form.work_entry_type_id = self.work_entry_type
+                form.date_from = date(2025, 1, 1)
+                self.assertEqual(form.number_of_days, 2.0)
 
     @freeze_time('2025-01-01')
     def test_accrual_allocation_date_in_the_future(self):
