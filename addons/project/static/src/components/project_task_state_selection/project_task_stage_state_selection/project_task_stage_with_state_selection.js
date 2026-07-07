@@ -1,7 +1,6 @@
-import { Component } from "@odoo/owl";
+import { Component, props, t } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
-import { omit } from "@web/core/utils/objects";
 import { computeM2OProps, Many2One } from "@web/views/fields/many2one/many2one";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
@@ -9,16 +8,15 @@ import { ProjectTaskStateSelection } from "../project_task_state_selection";
 
 export class TaskStageWithStateSelection extends Component {
     static template = "project.TaskStageWithStateSelection";
-
-    static props = {
-        ...standardFieldProps,
-        viewType: { type: String },
-    };
-
     static components = {
         ProjectTaskStateSelection,
         Many2One,
     };
+
+    props = props({
+        ...standardFieldProps,
+        viewType: t.string(),
+    });
 
     get stageProps() {
         return computeM2OProps(this.props);
@@ -26,9 +24,8 @@ export class TaskStageWithStateSelection extends Component {
 
     get stateProps() {
         return {
-            ...omit(this.props, "viewType"),
+            ...this.props,
             name: "state",
-            viewType: this.props.viewType,
             showLabel: false,
         };
     }

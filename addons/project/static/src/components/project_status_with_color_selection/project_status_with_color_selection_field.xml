@@ -4,9 +4,9 @@
     <t t-name="project.ProjectStatusWithColorSelectionField" t-inherit="web.SelectionField" t-inherit-mode="primary">
         <xpath expr="//t[@t-if='this.props.readonly']/span" position="replace">
             <div class="d-flex align-items-center">
-                <span t-if="!this.props.hideIcon" t-attf-class="o_status {{ this.statusColor(this.currentValue) }} d-inline-block"/>
-                <div t-attf-class="ps-{{ this.props.initialPadding }}">
-                    <div class="o_stat_value" t-if="!this.props.hideValue" t-out="this.string" t-att-raw-value="this.value"/>
+                <span t-if="!this.projectStatusWithColorSelectionProps.hideIcon" t-attf-class="o_status {{ this.statusColor() }} d-inline-block"/>
+                <div t-attf-class="ps-{{ this.projectStatusWithColorSelectionProps.initialPadding }}">
+                    <div class="o_stat_value" t-if="!this.projectStatusWithColorSelectionProps.hideValue" t-out="this.string" t-att-raw-value="this.value"/>
                 </div>
             </div>
         </xpath>

@@ -4,19 +4,17 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { formatSelection } from "@web/views/fields/formatters";
-import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import {
     StateSelectionField,
     stateSelectionField,
+    stateSelectionFieldProps,
 } from "@web/views/fields/state_selection/state_selection_field";
 
 export class ProjectTaskStateSelection extends StateSelectionField {
     static template = "project.ProjectTaskStateSelection";
 
     props = props({
-        ...standardFieldProps,
-        showLabel: t.boolean().optional(true),
-        withCommand: t.boolean().optional(),
+        ...stateSelectionFieldProps,
         isToggleMode: t.boolean().optional(),
         viewType: t.string().optional(),
     });

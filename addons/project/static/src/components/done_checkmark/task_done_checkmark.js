@@ -1,12 +1,12 @@
+import { computed } from "@odoo/owl";
+
 import { registry } from "@web/core/registry";
 import { BooleanToggleField, booleanToggleField } from "@web/views/fields/boolean_toggle/boolean_toggle_field";
 
 export class TaskCheckMark extends BooleanToggleField {
     static template = "project.TaskCheckMark";
 
-    get isReached() {
-        return this.props.record.data[this.props.name];
-    }
+    isReached = computed(() => this.props.record.data[this.props.name]);
 
     async onChange(ev) {
         const { record, name } = this.props;
