@@ -12,6 +12,7 @@ import {
     CustomizeWebsiteFontWeightAction,
     getParsedWeight,
     ThemeFontWeightOption,
+    toFixedPixel,
 } from "./theme_font_weight_option";
 import {
     BORDER_RADIUS_MULTIPLIERS,
@@ -468,7 +469,8 @@ export class CustomizeBorderRadiusVariableAction extends BuilderAction {
 
         for (const [varName, multiplier] of Object.entries(BORDER_RADIUS_MULTIPLIERS)) {
             if (!isBorderRadiusCustomized(varName, this.document)) {
-                const computedValue = baseRadius * multiplier;
+                let computedValue = baseRadius * multiplier;
+                computedValue = toFixedPixel(computedValue, this.document);
                 scaledVariables[varName] = `${computedValue}${unit}`;
             }
         }
@@ -484,7 +486,8 @@ export class ResetBorderRadiusAction extends CustomizeWebsiteVariableAction {
             this.dependencies.customizeWebsite.getWebsiteVariableValue("border-radius");
         const [baseRadiusVal, unit] = getNumericAndUnit(baseRadius) || [0, "px"];
 
-        const normalizedVariableVal = baseRadiusVal * BORDER_RADIUS_MULTIPLIERS[variable];
+        let normalizedVariableVal = baseRadiusVal * BORDER_RADIUS_MULTIPLIERS[variable];
+        normalizedVariableVal = toFixedPixel(normalizedVariableVal, this.document);
         const normalizedVariable = `${normalizedVariableVal}${unit}`;
         return super.apply({ params: { mainParam: variable }, value: normalizedVariable });
     }

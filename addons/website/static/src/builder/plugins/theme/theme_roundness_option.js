@@ -1,6 +1,10 @@
 import { BaseOptionComponent } from "@html_builder/core/base_option_component";
 import { useDomState } from "@html_builder/core/utils";
-import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
+import {
+    convertNumericToUnit,
+    getCSSVariableValue,
+    getHtmlStyle,
+} from "@html_editor/utils/formatting";
 
 export const BORDER_RADIUS_MULTIPLIERS = {
     "border-radius": 1,
@@ -8,7 +12,7 @@ export const BORDER_RADIUS_MULTIPLIERS = {
     "border-radius-lg": 1.12,
 };
 
-const EPSILON = 0.0001;
+const EPSILON = 0.01;
 
 export class ThemeRoundnessOption extends BaseOptionComponent {
     static template = "website.ThemeRoundnessOption";
@@ -27,8 +31,16 @@ export class ThemeRoundnessOption extends BaseOptionComponent {
 
 export function isBorderRadiusCustomized(variable, doc) {
     const style = getHtmlStyle(doc);
-    const value =
-        parseFloat(getCSSVariableValue(variable, style)) / BORDER_RADIUS_MULTIPLIERS[variable];
-    const reference = parseFloat(getCSSVariableValue("border-radius", style));
+    let reference =
+        parseFloat(getCSSVariableValue("border-radius", style)) *
+        BORDER_RADIUS_MULTIPLIERS[variable];
+    reference = toFixedPixel(reference, doc);
+    const value = parseFloat(getCSSVariableValue(variable, style));
     return Math.abs(value - reference) >= EPSILON;
+}
+
+export function toFixedPixel(remValue, doc) {
+    const htmlStyle = getHtmlStyle(doc);
+    const pxValue = convertNumericToUnit(remValue, "rem", "px", htmlStyle);
+    return convertNumericToUnit(pxValue.toFixed(1), "px", "rem", htmlStyle);
 }
