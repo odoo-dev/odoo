@@ -5382,7 +5382,7 @@ class BaseModel(metaclass=MetaModel):
             ids = (ids,)
         else:
             ids = tuple(ids)
-            assert all(ids) or all(isinstance(x, NewId) or x for x in ids), "Invalid falsy real id"
+            assert all(ids) or all(isinstance(id_, NewId) for id_ in ids), f"browse() with mixed ids {ids}"
         return self.__class__(self.env, ids, ids)
 
     #
@@ -6456,7 +6456,7 @@ class BaseModel(metaclass=MetaModel):
                     records = model.search([(field.name, 'in', real_records.ids)], order='id')
                 if new_records:
                     field_cache = field._get_cache(model.env)
-                    cache_records = model.browse(field_cache)
+                    cache_records = model.browse(id_ for id_ in field_cache if not id_)
                     new_ids = set(self._ids)
                     records |= cache_records.filtered(lambda r: not set(r[field.name]._ids).isdisjoint(new_ids))
 
