@@ -126,7 +126,8 @@ class Test_Testing_UtilitiesF(models.Model):
 
     @api.onchange('m2o')
     def _on_change_m2o(self):
-        self.m2m = self.m2m | self.m2o
+        if self.m2o:
+            self.m2m = [Command.link(self.m2o.id)]
 
 
 class Test_Testing_UtilitiesG(models.Model):

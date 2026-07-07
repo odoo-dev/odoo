@@ -2253,6 +2253,24 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.assertEqual(new_origin.display_name, 'Barr')
         self.assertEqual(new_record.display_name, 'Bazz')
 
+    def test_40_real_and_new(self):
+        """ test browsing new ids and real ids """
+        Model = self.env['test_orm.category']
+        real_record = Model.create({'name': 'Foo'})
+        new_origin = Model.new({'name': 'Bar'}, origin=real_record)
+        new_record = Model.new({'name': 'Baz'})
+
+        real_id = real_record.id
+        new_id1 = new_origin.id
+        new_id2 = new_record.id
+
+        # browsing ids
+        Model.browse([new_id1, new_id2])
+        with self.assertRaises(ValueError):
+            Model.browse([real_id, new_id1])
+        with self.assertRaises(ValueError):
+            Model.browse([real_id, new_id2])
+
     def test_40_new_defaults(self):
         """ Test new records with defaults. """
         user = self.env.user
@@ -2770,7 +2788,6 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
     def test_70_x2many_write(self):
         discussion = self.env.ref('test_base.discussion_0')
 
-        Message = self.env['test_orm.message']
         # There must be 3 messages, 0 important
         self.assertEqual(len(discussion.messages), 3)
         self.assertEqual(len(discussion.important_messages), 0)
@@ -2783,10 +2800,10 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.assertEqual(len(discussion.messages), 4)
         self.assertEqual(len(discussion.important_messages), 1)
         self.assertEqual(len(discussion.very_important_messages), 1)
-        discussion.very_important_messages |= Message.new({
+        discussion.very_important_messages = [Command.create({
             'body': '42',
             'important': True,
-        })
+        })]
         # There must be 5 messages, 2 important
         self.assertEqual(len(discussion.messages), 5)
         self.assertEqual(len(discussion.important_messages), 2)

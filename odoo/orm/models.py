@@ -5499,7 +5499,8 @@ class BaseModel(metaclass=MetaModel):
             ids = (ids,)
         else:
             ids = tuple(ids)
-            assert all(ids) or all(isinstance(x, NewId) or x for x in ids), "Invalid falsy real id"
+            if not (all(ids) or all(map(NewId.__instancecheck__, ids))):
+                raise ValueError(f"browse() with invalid ids {ids}")
         return self.__class__(self.env, ids, ids)
 
     #
@@ -5975,9 +5976,8 @@ class BaseModel(metaclass=MetaModel):
         env = self.env
         fields = self._fields
 
-        # group updates by ids {ids: [(field, value)]} for new and real records
-        new_updates = defaultdict(list)
-        real_updates = defaultdict(list)
+        # group updates by ids {ids: [(field, value)]}
+        updates = defaultdict(list)
 
         for fname, value in values.items():
             field = fields[fname]
@@ -5993,17 +5993,23 @@ class BaseModel(metaclass=MetaModel):
                     continue
                 ids = tuple(id_ for id_ in ids if id_ not in protected_ids)
 
-            new_ids = tuple(id_ for id_ in ids if not id_)
-            if new_ids:
-                new_updates[new_ids].append((field, value))
-                if len(new_ids) == len(ids):
-                    continue
-                ids = tuple(id_ for id_ in ids if id_)
+            updates[ids].append((field, value))
 
-            real_updates[ids].append((field, value))
+        if not updates:
+            return
+
+        if any(self._ids):
+            # real records: full business logic
+            for ids, field_vals in updates.items():
+                records = self.__class__(env, ids, self._prefetch_ids)
+                records.write({
+                    field.name: field.convert_to_write(value, records)
+                    for field, value in field_vals
+                })
+            return
 
         # new records: no business logic
-        for ids, field_vals in new_updates.items():
+        for ids, field_vals in updates.items():
             new_records = self.__class__(env, ids, self._prefetch_ids)
             fields_to_protect = OrderedSet(
                 f
@@ -6023,14 +6029,6 @@ class BaseModel(metaclass=MetaModel):
                 if field.inherited:
                     parents = new_records[field.related.split('.')[0]]
                     parents.filtered(lambda r: not r.id)[field.name] = value
-
-        # base case: full business logic
-        for ids, field_vals in real_updates.items():
-            records = self.__class__(env, ids, self._prefetch_ids)
-            records.write({
-                field.name: field.convert_to_write(value, records)
-                for field, value in field_vals
-            })
 
     @api.private
     def flush_model(self, fnames: Collection[str] | None = None) -> None:
@@ -6660,7 +6658,7 @@ class BaseModel(metaclass=MetaModel):
                     records = model.search([(field.name, 'in', real_records.ids)], order='id')
                 if new_records:
                     field_cache = field._get_cache(model.env)
-                    cache_records = model.browse(field_cache)
+                    cache_records = model.browse(id_ for id_ in field_cache if not id_)
                     new_ids = set(self._ids)
                     records |= cache_records.filtered(lambda r: not set(r[field.name]._ids).isdisjoint(new_ids))
 
