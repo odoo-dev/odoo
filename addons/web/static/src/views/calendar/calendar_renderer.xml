@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
 
     <t t-name="web.CalendarRenderer">
-        <div class="o_calendar_renderer h-100 flex-grow-1">
+        <div class="o_calendar_renderer h-100 flex-grow-1 ms-3 border border-bottom-0 rounded-bottom-0 rounded-4">
             <ActionSwiper t-props="this.actionSwiperProps" t-key="this.calendarKey">
                 <t
                     t-component="this.concreteRenderer"

@@ -3,7 +3,7 @@
 
     <t t-name="web.CalendarFilterSection">
         <div t-if="this.section.filters.length gt 0 or this.section.canAddFilter"
-             class="o_calendar_filter d-flex flex-column gap-1 my-2"
+             class="o_calendar_filter d-flex flex-column gap-1 mt-3"
              t-att-data-name="this.section.fieldName"
         >
             <t t-if="this.section.label">
