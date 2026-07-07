@@ -13,13 +13,10 @@ class TestLotValuation(TestStockValuationCommon):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.product = cls.product_avco.create({
-            **cls.product_common_vals,
-            'name': 'Lot Valuated Product',
-            'categ_id': cls.category_avco.id,
+        cls.product = cls.product_avco
+        cls.product_avco.write({
             'lot_valuated': True,
             'tracking': 'lot',
-            'standard_price': 10,
         })
         cls.lot1, cls.lot2, cls.lot3 = cls.env['stock.lot'].create([
             {'name': 'lot1', 'product_id': cls.product.id},
@@ -106,7 +103,6 @@ class TestLotValuation(TestStockValuationCommon):
         """ Disabling lot valuation: product valuation unchanged, lot values go to 0.
             product valuation is standard """
         self.product.product_tmpl_id.categ_id.property_cost_method = 'standard'
-        self.product.product_tmpl_id.standard_price = 10
 
         self._make_in_move(self.product, 10, 5, lot_ids=[self.lot1, self.lot2])
         self._make_in_move(self.product, 10, 7, lot_ids=[self.lot3])
@@ -135,7 +131,6 @@ class TestLotValuation(TestStockValuationCommon):
         """ Enabling lot valuation should compute lot values from existing stock.
             product valuation is standard """
         self.product.product_tmpl_id.categ_id.property_cost_method = 'standard'
-        self.product.product_tmpl_id.standard_price = 10
 
         self.product.lot_valuated = False
 
@@ -250,15 +245,9 @@ class TestLotValuation(TestStockValuationCommon):
 
     def test_inventory_adjustment_existing_lot(self):
         """ If a lot exist, inventory takes its cost, if not, takes standard price """
-        self.product.product_tmpl_id.standard_price = 10
-        shelf1 = self.env['stock.location'].create({
-            'name': 'Shelf 1',
-            'usage': 'internal',
-            'location_id': self.stock_location.id,
-        })
         self._make_in_move(self.product, 10, 5, lot_ids=[self.lot1])
         inventory_quant = self.env['stock.quant'].create({
-            'location_id': shelf1.id,
+            'location_id': self.shelf1.id,
             'product_id': self.product.id,
             'lot_id': self.lot1.id,
             'inventory_quantity': 1
@@ -272,11 +261,6 @@ class TestLotValuation(TestStockValuationCommon):
 
     def test_inventory_adjustment_new_lot(self):
         """ If a lot exist, inventory takes its cost, if not, takes standard price """
-        shelf1 = self.env['stock.location'].create({
-            'name': 'Shelf 1',
-            'usage': 'internal',
-            'location_id': self.stock_location.id,
-        })
         self._make_in_move(self.product, 10, 5, lot_ids=[self.lot1])
         self._make_in_move(self.product, 10, 9, lot_ids=[self.lot2])
         self.assertEqual(self.product.standard_price, 7)
@@ -285,7 +269,7 @@ class TestLotValuation(TestStockValuationCommon):
             'product_id': self.product.id,
         })
         inventory_quant = self.env['stock.quant'].create({
-            'location_id': shelf1.id,
+            'location_id': self.shelf1.id,
             'product_id': self.product.id,
             'lot_id': lot4.id,
             'inventory_quantity': 1,
@@ -299,15 +283,9 @@ class TestLotValuation(TestStockValuationCommon):
 
     def test_lot_qty_in_nested_internal_location(self):
         """Lot/product valuation should include nested valued internal locations."""
-        shelf1 = self.env['stock.location'].create({
-            'name': 'Shelf 1',
-            'usage': 'internal',
-            'location_id': self.stock_location.id,
-            'company_id': self.company.id,
-        })
 
-        self._make_in_move(self.product, 10, 5, lot_ids=[self.lot1], location_dest_id=shelf1.id)
-        self._make_out_move(self.product, 4, lot_ids=[self.lot1], location_id=shelf1.id)
+        self._make_in_move(self.product, 10, 5, lot_ids=[self.lot1], location_dest_id=self.shelf1.id)
+        self._make_out_move(self.product, 4, lot_ids=[self.lot1], location_id=self.shelf1.id)
 
         self.assertEqual(self.product._with_valuation_context().qty_available, 6)
         self.assertEqual(self.product.total_value, 30)
@@ -316,21 +294,15 @@ class TestLotValuation(TestStockValuationCommon):
 
     def test_lot_qty_at_date_in_nested_internal_location(self):
         """Historical lot/product valuation should keep nested internal locations."""
-        shelf1 = self.env['stock.location'].create({
-            'name': 'Shelf 1',
-            'usage': 'internal',
-            'location_id': self.stock_location.id,
-            'company_id': self.company.id,
-        })
         date_in = fields.Datetime.now() - timedelta(days=2)
         date_out = fields.Datetime.now() - timedelta(days=1)
         after_in = fields.Datetime.to_string(date_in + timedelta(seconds=1))
         after_out = fields.Datetime.to_string(date_out + timedelta(seconds=1))
 
         with freeze_time(date_in):
-            self._make_in_move(self.product, 10, 5, lot_ids=[self.lot1], location_dest_id=shelf1.id)
+            self._make_in_move(self.product, 10, 5, lot_ids=[self.lot1], location_dest_id=self.shelf1.id)
         with freeze_time(date_out):
-            self._make_out_move(self.product, 4, lot_ids=[self.lot1], location_id=shelf1.id)
+            self._make_out_move(self.product, 4, lot_ids=[self.lot1], location_id=self.shelf1.id)
 
         self.assertEqual(self.product._with_valuation_context().with_context(to_date=after_in).qty_available, 10)
         self.assertEqual(self.product.with_context(to_date=after_in).total_value, 50)
@@ -377,6 +349,32 @@ class TestLotValuation(TestStockValuationCommon):
         self.assertEqual(self.lot2.with_company(c2).total_value, 18)
         self.assertEqual(self.lot3.with_company(c2).total_value, 18)
 
+    def test_lot_avg_cost_multicompany_fifo(self):
+        """Test that a shared lot's avg_cost is computed correctly per company context."""
+        c1 = self.company
+        c2 = self.other_company
+
+        product_fifo = self.product
+        self.product.categ_id = self.category_fifo
+
+        lot_b = self.env['stock.lot'].create({
+            'name': 'LOT-B-001',
+            'product_id': product_fifo.id,
+            'company_id': False,
+        })
+        lot_b.with_company(c2).standard_price = 100.0
+
+        self._make_in_move(product_fifo, quantity=1, company=c2, lot_ids=lot_b)
+
+        self.assertEqual(
+            lot_b.with_company(c1).avg_cost, 0.0,
+            "avg_cost should be 0 in Company A context"
+        )
+        self.assertEqual(
+            lot_b.with_company(c2).avg_cost, 100.0,
+            "avg_cost should be 100 EUR in Company B context"
+        )
+
     def test_change_cost_method(self):
         """ Prevent changing cost method if lot valuated """
         # change cost method on category
@@ -416,15 +414,8 @@ class TestLotValuation(TestStockValuationCommon):
         move = self._make_in_move(self.product, 8, 5, create_picking=True, lot_ids=[self.lot1, self.lot2])
         move.picking_id.action_toggle_is_locked()
         # 4 lot 1, 6 lot 2 and 3 lot 3
-        move.move_line_ids = [
-            Command.update(move.move_line_ids[1].id, {'quantity': 6}),
-            Command.create({
-                'product_id': self.product.id,
-                'product_uom_id': self.product.uom_id.id,
-                'quantity': 3,
-                'lot_id': self.lot3.id,
-            }),
-        ]
+        move.move_line_ids[1].quantity = 6
+        self._add_move_line(move, quantity=3, lot_id=self.lot3.id)
         move.value_manual = 13 * 5  # Small trick to simulate move revaluation
         self.assertEqual(self.lot1.product_qty, 4)
         self.assertEqual(self.lot2.product_qty, 6)
