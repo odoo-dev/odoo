@@ -1,6 +1,6 @@
 import { expect, test } from "@odoo/hoot";
 import { queryAll } from "@odoo/hoot-dom";
-import { contains, defineModels, fields, models, mountView } from "@web/../tests/web_test_helpers";
+import { contains, defineModels, fields, models, mountView, stepAllNetworkCalls } from "@web/../tests/web_test_helpers";
 
 class Partner extends models.Model {
     _name = "res.partner";
@@ -161,4 +161,61 @@ test("ColorPicker opens a BottomSheet on mobile", async () => {
     expect(".o_bottom_sheet").toHaveCount(1);
     await contains(".o_colorlist .o_colorlist_item_color_3").click();
     expect(".o_bottom_sheet").toHaveCount(0);
+});
+
+test.tags("desktop");
+test(`color picker field in list view => automatic save by default`, async () => {
+    stepAllNetworkCalls();
+    Partner._records.push({
+        int_field: 1,
+    });
+    await mountView({
+        resModel: "res.partner",
+        type: "list",
+        arch: `
+            <list editable="bottom">
+                <field name="display_name"/>
+                <field name="int_field" widget="color_picker"/>
+            </list>`,
+    });
+
+    await contains(`.o_data_row:nth-child(1) .o_field_color_picker button`).click();
+    await contains(`.o_colorlist .o_colorlist_item_color_6`).click();
+
+    expect.verifySteps([
+        "/web/webclient/translations",
+        "/web/webclient/load_menus",
+        "get_views",
+        "web_search_read",
+        "has_group",
+        "web_save",
+    ]);
+});
+
+test.tags("desktop");
+test(`color picker field in list view => no save if autosave is false`, async () => {
+    stepAllNetworkCalls();
+    Partner._records.push({
+        int_field: 1,
+    });
+    await mountView({
+        resModel: "res.partner",
+        type: "list",
+        arch: `
+            <list editable="bottom">
+                <field name="display_name"/>
+                <field name="int_field" widget="color_picker" options="{'autosave': False}"/>
+            </list>`,
+    });
+
+    await contains(`.o_data_row:nth-child(1) .o_field_color_picker button`).click();
+    await contains(`.o_colorlist .o_colorlist_item_color_6`).click();
+
+    expect.verifySteps([
+        "/web/webclient/translations",
+        "/web/webclient/load_menus",
+        "get_views",
+        "web_search_read",
+        "has_group",
+    ]);
 });
