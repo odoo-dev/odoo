@@ -396,6 +396,10 @@ FA_TO_MATERIAL: dict[str, tuple[str, bool]] = {
     "id-card": ("badge", True),
     "id-card-o": ("badge", False),
     "image": ("image", False),
+    "instagram": ("oi_instagram", False),
+    "pinterest": ("oi_pinterest", False),
+    "tiktok": ("oi_tiktok", False),
+    "discord": ("oi_discord", False),
     "photo": ("image", False),
     "picture-o": ("image", False),
     "inbox": ("inbox", False),
@@ -750,6 +754,7 @@ FA_UTIL_TO_OI = {
     "8x": "oi-8x",
     "9x": "oi-9x",
     "10x": "oi-10x",
+    "stack": "oi-stack",
     "stack-1x": "oi-stack-1x",
     "stack-2x": "oi-stack-2x",
     # "inverse" → dropped (no oi equivalent)
@@ -759,7 +764,7 @@ FA_UTIL_TO_OI = {
 OI_UTIL_CLASSES = frozenset({
     "oi-fw", "oi-spin", "oi-pulse", "oi-filled", "oi-outlined", "oi-lg",
     "oi-2x", "oi-3x", "oi-4x", "oi-5x", "oi-6x", "oi-7x", "oi-8x",
-    "oi-9x", "oi-10x", "oi-stack-1x", "oi-stack-2x",
+    "oi-9x", "oi-10x", "oi-stack", "oi-stack-1x", "oi-stack-2x",
 })
 
 
@@ -1052,12 +1057,26 @@ def _rewrite_tattf_class_in_tag(tag: str) -> str:
     rest_part = val[static_prefix_end:]
 
     new_static = static_part
-    if "fa" in static_part.split():
-        converted = _convert_static_fa_classes_to_oi(static_part.strip())
-        if converted is not None:
-            # Preserve trailing whitespace
+    # If the static part itself carries a mappable fa-ICON / oi-ICON, capture it
+    # so it can be emitted as a static data-icon attribute (the icon lives in the
+    # static class, not in a dynamic expression).
+    static_data_icon = None
+    static_classes = static_part.split()
+    if "fa" in static_classes or "oi" in static_classes:
+        result = (
+            _new_class_and_icon_fa(static_part.strip())
+            or _new_class_and_icon_oi(static_part.strip())
+        )
+        if result:
+            new_static_classes, static_data_icon = result
             trailing = static_part[len(static_part.rstrip()):]
-            new_static = converted + trailing
+            new_static = new_static_classes + trailing
+        elif "fa" in static_classes:
+            converted = _convert_static_fa_classes_to_oi(static_part.strip())
+            if converted is not None:
+                # Preserve trailing whitespace
+                trailing = static_part[len(static_part.rstrip()):]
+                new_static = converted + trailing
 
     new_val = new_static + rest_part
 
@@ -1169,6 +1188,13 @@ def _rewrite_tattf_class_in_tag(tag: str) -> str:
         if converted is not None:
             cq = cm.group(1)
             new_tag = new_tag[: cm.start()] + f"class={cq}{converted}{cq}" + new_tag[cm.end():]
+
+    # If the icon lived in the static class part, emit it as a static data-icon.
+    if static_data_icon is not None and not _DATA_ICON_RE.search(new_tag):
+        if new_tag.endswith("/>"):
+            new_tag = new_tag[:-2] + f' data-icon="{static_data_icon}"/>'
+        elif new_tag.endswith(">"):
+            new_tag = new_tag[:-1] + f' data-icon="{static_data_icon}">'
 
     return new_tag
 
