@@ -578,7 +578,7 @@ class CustomerPortal(Controller):
                     parent_company = partner_sudo.commercial_partner_id
                     if parent_company.name != parent_name_value:
                         parent_company.name = parent_name_value
-            elif partner_sudo.is_company:
+            elif partner_sudo.parent_id:
                 if partner_sudo.name != parent_name_value:
                     partner_sudo.name = parent_name_value
             else:  # Current partner is an individual with no parent
