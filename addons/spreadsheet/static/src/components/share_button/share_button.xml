@@ -14,16 +14,16 @@
       </button>
       <t t-set-slot="content">
         <t>
-          <div class="d-flex mx-3">
-            <div class="align-self-center d-flex justify-content-center align-items-center flex-shrink-0">
-              <i class="fa fa-globe fa-2x" title="Share to web"></i>
+          <div class="d-flex mx-3 lh-sm">
+            <div class="align-self-baseline d-flex justify-content-center align-items-center flex-shrink-0 pt-1">
+              <i class="fa fa-globe fa-lg" title="Share to web"></i>
             </div>
-            <div class="flex-grow-1 px-3">
-              <div class="lead">Spreadsheet published</div>
+            <div class="flex-grow-1 px-2">
+              <div class="lead fw-bold">Spreadsheet published</div>
               <div>Frozen version - Anyone can view</div>
             </div>
           </div>
-          <div class="mx-3 px-2 border rounded-2">
+          <div class="mt-2 mx-3 px-2 py-1 border rounded-2">
             <div t-if="this.state.url" class="d-flex justify-content-between gap-2">
               <span class="text-truncate" t-out="this.state.url"/>
               <CopyButton className="'btn-sm p-0'" content="this.state.url" successText="this.copiedText" icon="'fa-clipboard'"/>

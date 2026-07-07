@@ -1,0 +1,16 @@
+.o-spreadsheet:has(.o-dashboard-grid) {
+    --os-dashboard-background-color: light-dark(var(--os-background-gray-color), #1e1f29);
+}
+
+.o_spreadsheet_container .o-grid.o-dashboard-grid, 
+.o-public-dashboard .o-grid.o-dashboard-grid {
+    background-color: var(--os-dashboard-background-color);
+
+    .o-figure-container {
+        box-shadow: 0 0 0 20px light-dark(#ffffff, #1E1D25);
+    }
+}
+
+.o-dashboard-background {
+    background-color: var(--os-dashboard-background-color);
+}

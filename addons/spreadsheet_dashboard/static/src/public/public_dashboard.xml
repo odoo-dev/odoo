@@ -5,14 +5,14 @@
         <div class="o-public-dashboard h-100 d-flex flex-fill flex-row-reverse overflow-hidden">
             <div t-if="this.showFilterButton"
                 t-on-click="this.toggleGlobalFilters"
-                class="o-public-spreadsheet-filter-button position-absolute bg-white fw-bold my-0 mx-3 p-2 fs-6 rounded d-print-none">
+                class="o-public-spreadsheet-filter-button position-absolute bg-white fw-bold my-0 me-3 mt-2 p-2 fs-6 rounded d-print-none">
                 <t t-call="o-spreadsheet-Icon.GLOBAL_FILTERS"/>
                 <span class="ps-1">Show Filters</span>
             </div>
             <div class="o-public-spreadsheet-filters d-flex flex-column flex-nowrap overflow-y-scroll p-3" t-if="this.state.isFilterShown">
                 <div class="o-public-spreadsheet-filters-title d-flex justify-content-between align-items-center">
-                    <h3 class="m-0">Filters</h3>
-                    <div class="o-public-spreadsheet-filters-close-button text-center bg-white" t-on-click="this.toggleGlobalFilters">x</div>
+                    <h3 class="h4-fs m-0">Filters</h3>
+                    <div class="o-public-spreadsheet-filters-close-button rounded text-center bg-white" t-on-click="this.toggleGlobalFilters">x</div>
                 </div>
                 <div class="o-public-spreadsheet-filter" t-foreach="this.globalFilters" t-as="filter"
     t-key="filter.id">

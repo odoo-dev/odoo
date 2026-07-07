@@ -23,6 +23,7 @@
             "spreadsheet_dashboard/static/src/public/**/*.js",
             "spreadsheet_dashboard/static/src/public/**/*.xml",
             "spreadsheet_dashboard/static/src/public/**/*.scss",
+            "spreadsheet_dashboard/static/src/scss/*.scss",
         ],
         'web.assets_web_print': [
             'spreadsheet_dashboard/static/src/print_assets/**/*',

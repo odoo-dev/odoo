@@ -6,8 +6,9 @@ $filter-panel-width: 300px;
   width: $filter-panel-width;
 
   .o-public-spreadsheet-filters-close-button {
-    width: 20px;
-    height: 20px;
+    width: 1.5rem;
+    height: 1.5rem;
+    line-height: 1.4rem;
     cursor: pointer;
   }
 }
@@ -18,5 +19,9 @@ $filter-panel-width: 300px;
 
   &:hover {
     background-color: #E7E9ED;
+  }
+
+  svg {
+    margin-top: -1 * map-get($spacers, 1);
   }
 }
