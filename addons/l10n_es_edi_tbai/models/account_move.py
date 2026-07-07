@@ -344,12 +344,13 @@ class AccountMove(models.Model):
         tax_tags = self.invoice_line_ids.tax_ids.flatten_taxes_hierarchy().repartition_line_ids.tag_ids
         intracom = bool(tax_tags & (mod_303_10 + mod_303_11))
         reagyp = self.invoice_line_ids.tax_ids.filtered(lambda t: t.l10n_es_type == 'sujeto_agricultura')
-        if intracom:
-            values['regime_key'] = ['09']
-        elif reagyp:
-            values['regime_key'] = ['02']
+
+        if move.l10n_es_vat_regime_code_id:
+            regime_code = move.l10n_es_vat_regime_code[:2]
         else:
-            values['regime_key'] = ['01']
+            regime_code = '01'
+        
+        values['regime_key'] = '01'
         # Credit notes (factura rectificativa)
         if values['is_refund']:
             values['refund_reason'] = self.l10n_es_tbai_refund_reason
