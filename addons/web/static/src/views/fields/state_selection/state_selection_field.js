@@ -7,17 +7,19 @@ import { registry } from "@web/core/registry";
 import { formatSelection } from "../formatters";
 import { standardFieldProps } from "../standard_field_props";
 
+export const stateSelectionFieldProps = {
+    ...standardFieldProps,
+    showLabel: t.boolean().optional(true),
+    withCommand: t.boolean().optional(),
+};
+
 export class StateSelectionField extends Component {
     static template = "web.StateSelectionField";
     static components = {
         Dropdown,
         CheckboxItem,
     };
-    props = useProps({
-        ...standardFieldProps,
-        showLabel: t.boolean().optional(true),
-        withCommand: t.boolean().optional(),
-    });
+    props = useProps(stateSelectionFieldProps);
 
     setup() {
         this.colorPrefix = "o_status_";
