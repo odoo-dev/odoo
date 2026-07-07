@@ -78,6 +78,8 @@
         }
 
         .fc-event-main {
+            padding: map-get($spacers, 1) 0;
+
             > .o_event_title {
                 @include media-breakpoint-down(lg) {
                     text-overflow: unset;
@@ -203,6 +205,13 @@
                 &:hover {
                     background: none;
                 }
+            }
+        }
+
+        // Remove calendar right border
+        td, th {
+            &:last-child {
+                border-right: 0;
             }
         }
 
@@ -509,7 +518,6 @@
                     display: flex;
                     justify-content: start;
                     flex-direction: row;
-                    max-height: 1.2em;
                     line-height: 100%;
                 }
             }
