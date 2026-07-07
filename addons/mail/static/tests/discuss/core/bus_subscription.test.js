@@ -78,7 +78,10 @@ test("bus subscription updated when joining locally pinned thread", async () => 
 test("bus subscription is refreshed when channel is joined", async () => {
     patchWithCleanup(WebsocketWorker, { OUTGOING_BATCH_DELAY: 10 });
     const pyEnv = await startServer();
-    pyEnv["discuss.channel"].create([{ name: "General" }, { name: "Sales" }]);
+    pyEnv["discuss.channel"].create([
+        { name: "General" },
+        { name: "Sales", channel_member_ids: [] },
+    ]);
     const later = luxon.DateTime.now().plus({ seconds: 2 });
     mockDate(
         `${later.year}-${later.month}-${later.day} ${later.hour}:${later.minute}:${later.second}`
@@ -90,8 +93,9 @@ test("bus subscription is refreshed when channel is joined", async () => {
     await click("input[placeholder='Search']");
     await insertText(
         ".o_command_palette_search input[placeholder='Search conversations']",
-        "new channel"
+        "Sales"
     );
+    await click(".o-mail-DiscussCommand:text(Sales)");
     await expect.waitForSteps(["subscribe"]);
 });
 
