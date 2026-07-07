@@ -179,9 +179,10 @@ class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
         new_record_origin = records.new(origin=real_record)
         new_record_ref = records.new(ref='virtual_')
         new_record = records.new({'name': 'aaa'})
-        records = real_record + new_record_origin + new_record_ref + new_record
         with self.assertQueryCount(1):
-            records.fetch(['name'])
+            real_record.fetch(['name'])
+        with self.assertQueryCount(0):
+            (new_record_origin + new_record_ref + new_record).fetch(['name'])
 
     @warmup
     def test_search_fetch(self):
