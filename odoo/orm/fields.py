@@ -1807,7 +1807,8 @@ class Field[T]:
         # dirty only makes sense for stored column fields
         if self.column_type and self.store:
             if dirty:
-                env._field_dirty[self].update(id_ for id_ in records._ids if id_)
+                if any(ids := records._ids):
+                    env._field_dirty[self].update(ids)
             else:
                 dirty_ids = env._field_dirty.get(self)
                 if dirty_ids and not dirty_ids.isdisjoint(records._ids):

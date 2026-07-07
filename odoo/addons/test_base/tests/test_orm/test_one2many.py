@@ -62,9 +62,9 @@ class One2manyCase(TransactionExpressionCase):
         self.assertIn("hello", self.multi.lines.mapped('name'))
 
     def test_new_one_by_one(self):
-        """Check lines created with ``new()`` and appended one by one."""
+        """Check lines created with ``Command.create()`` and appended one by one."""
         for name in range(10):
-            self.multi.lines |= self.Line.new({"name": str(name)})
+            self.multi.lines = [Command.create({"name": str(name)})]
         self.operations()
 
     def test_new_single(self):

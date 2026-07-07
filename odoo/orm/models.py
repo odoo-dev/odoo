@@ -5450,7 +5450,7 @@ class BaseModel(metaclass=MetaModel):
             ids = (ids,)
         else:
             ids = tuple(ids)
-            assert all(ids) or all(isinstance(x, NewId) or x for x in ids), "Invalid falsy real id"
+            assert all(ids) or all(isinstance(id_, NewId) for id_ in ids), f"browse() with mixed ids {ids}"
         return self.__class__(self.env, ids, ids)
 
     #
@@ -5926,9 +5926,8 @@ class BaseModel(metaclass=MetaModel):
         env = self.env
         fields = self._fields
 
-        # group updates by ids {ids: [(field, value)]} for new and real records
-        new_updates = defaultdict(list)
-        real_updates = defaultdict(list)
+        # group updates by ids {ids: [(field, value)]}
+        updates = defaultdict(list)
 
         for fname, value in values.items():
             field = fields[fname]
@@ -5944,17 +5943,23 @@ class BaseModel(metaclass=MetaModel):
                     continue
                 ids = tuple(id_ for id_ in ids if id_ not in protected_ids)
 
-            new_ids = tuple(id_ for id_ in ids if not id_)
-            if new_ids:
-                new_updates[new_ids].append((field, value))
-                if len(new_ids) == len(ids):
-                    continue
-                ids = tuple(id_ for id_ in ids if id_)
+            updates[ids].append((field, value))
 
-            real_updates[ids].append((field, value))
+        if not updates:
+            return
+
+        if any(self._ids):
+            # real records: full business logic
+            for ids, field_vals in updates.items():
+                records = self.__class__(env, ids, self._prefetch_ids)
+                records.write({
+                    field.name: field.convert_to_write(value, records)
+                    for field, value in field_vals
+                })
+            return
 
         # new records: no business logic
-        for ids, field_vals in new_updates.items():
+        for ids, field_vals in updates.items():
             new_records = self.__class__(env, ids, self._prefetch_ids)
             fields_to_protect = OrderedSet(
                 f
@@ -5974,14 +5979,6 @@ class BaseModel(metaclass=MetaModel):
                 if field.inherited:
                     parents = new_records[field.related.split('.')[0]]
                     parents.filtered(lambda r: not r.id)[field.name] = value
-
-        # base case: full business logic
-        for ids, field_vals in real_updates.items():
-            records = self.__class__(env, ids, self._prefetch_ids)
-            records.write({
-                field.name: field.convert_to_write(value, records)
-                for field, value in field_vals
-            })
 
     @api.private
     def flush_model(self, fnames: Collection[str] | None = None) -> None:
@@ -6170,9 +6167,11 @@ class BaseModel(metaclass=MetaModel):
         try:
             if other._name != self._name:
                 raise TypeError(f"inconsistent models in: {self} + {other}")
-            if other:
-                ids = self._ids + other._ids
+            if (sids := self._ids) and (oids := other._ids):
+                assert bool(sids[0]) == bool(oids[0]), f"cannot concat {self} and {other}"
+                ids = sids + oids
                 return self.__class__(self.env, ids, Prefetch.union(ids, self._prefetch_ids, other._prefetch_ids))
+            return self if sids else other
         except AttributeError:
             raise TypeError(f"unsupported operand types in: {self} + {other!r}")
         return self
@@ -6200,6 +6199,7 @@ class BaseModel(metaclass=MetaModel):
             except AttributeError:
                 raise TypeError(f"unsupported operand types in: {self} + {arg!r}")
         ids = tuple(ids)
+        assert all(ids) or all(isinstance(id_, NewId) for id_ in ids), f"concat() with mixed ids {ids}"
         if len(prefetch_ids_list) == 1:
             prefetch_ids = prefetch_ids_list[0]
         else:
@@ -6239,9 +6239,11 @@ class BaseModel(metaclass=MetaModel):
         try:
             if other._name != self._name:
                 raise TypeError(f"inconsistent models in: {self} | {other}")
-            if other:
-                ids = tuple(dict.fromkeys(self._ids + other._ids))
+            if (sids := self._ids) and (oids := other._ids):
+                assert bool(sids[0]) == bool(oids[0]), f"cannot union {self} and {other}"
+                ids = tuple(dict.fromkeys(sids + oids))
                 return self.__class__(self.env, ids, Prefetch.union(ids, self._prefetch_ids, other._prefetch_ids))
+            return self if sids else other
         except AttributeError:
             raise TypeError(f"unsupported operand types in: {self} | {other!r}")
         return self
@@ -6269,6 +6271,7 @@ class BaseModel(metaclass=MetaModel):
             except AttributeError:
                 raise TypeError(f"unsupported operand types in: {self} | {arg!r}")
         ids = tuple(dict.fromkeys(ids))
+        assert all(ids) or all(isinstance(id_, NewId) for id_ in ids), f"union() with mixed ids {ids}"
         if len(prefetch_ids_list) == 1:
             prefetch_ids = prefetch_ids_list[0]
         else:
@@ -6611,7 +6614,7 @@ class BaseModel(metaclass=MetaModel):
                     records = model.search([(field.name, 'in', real_records.ids)], order='id')
                 if new_records:
                     field_cache = field._get_cache(model.env)
-                    cache_records = model.browse(field_cache)
+                    cache_records = model.browse(id_ for id_ in field_cache if not id_)
                     new_ids = set(self._ids)
                     records |= cache_records.filtered(lambda r: not set(r[field.name]._ids).isdisjoint(new_ids))
 
