@@ -329,7 +329,17 @@ class SaleOrderLine(models.Model):
         outgoing_moves_ids = set()
         incoming_moves_ids = set()
 
-        moves = self.move_ids.filtered(lambda r: r.state != 'cancel' and r.location_dest_usage != 'inventory' and self.product_id == r.product_id)
+        moves = self.move_ids.filtered(
+            lambda m:
+                m.state != 'cancel'
+                and m.location_dest_usage != 'inventory'
+                and self.product_id == m.product_id
+                and not (
+                    m.location_id == self.env.company.internal_transit_location_id
+                    and not m.picking_id.return_id
+                    and m.product_uom_qty >= 0
+                ),
+        )
         if moves and not strict:
             # The first move created was the one created from the intial rule that started it all.
             sorted_moves = moves.sorted('id')
