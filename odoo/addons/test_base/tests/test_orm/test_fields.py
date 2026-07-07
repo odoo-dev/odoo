@@ -2253,6 +2253,24 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.assertEqual(new_origin.display_name, 'Barr')
         self.assertEqual(new_record.display_name, 'Bazz')
 
+    def test_40_real_and_new(self):
+        """ test browsing new ids and real ids """
+        Model = self.env['test_orm.category']
+        real_record = Model.create({'name': 'Foo'})
+        new_origin = Model.new({'name': 'Bar'}, origin=real_record)
+        new_record = Model.new({'name': 'Baz'})
+
+        real_id = real_record.id
+        new_id1 = new_origin.id
+        new_id2 = new_record.id
+
+        # browsing ids
+        Model.browse([new_id1, new_id2])
+        with self.assertRaises(ValueError):
+            Model.browse([real_id, new_id1])
+        with self.assertRaises(ValueError):
+            Model.browse([real_id, new_id2])
+
     def test_40_new_defaults(self):
         """ Test new records with defaults. """
         user = self.env.user

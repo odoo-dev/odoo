@@ -166,25 +166,27 @@ class TestSort(TransactionCase):
         self.assertFalse(nx < ny or ny < nx)  # no order
 
     def test_sorted_new_id(self):
-        new_countries = self.env['test_orm.country'].concat(
-            self.env['test_orm.country'].new(vals)
-            for vals in [
-                {'name': 'B'},
-                {'name': 'A'},
-                {'name': 'C'},
-            ]
+        Country = self.countries.browse()
+
+        origins = Country.concat(
+            Country.new(origin=country)
+            for country in self.countries.sorted('id')
+        )
+        news = Country.concat(
+            Country.new(vals)
+            for vals in [{'name': 'B'}, {'name': 'A'}, {'name': 'C'}]
         )
 
         order = 'id'  # new id after existing ones
         self.assertEqual(
-            (self.countries + new_countries).sorted(order),
-            self.countries.sorted(order) + new_countries.sorted(order),
+            (news + origins).sorted(order),
+            origins + news,
         )
 
         order = 'id DESC'  # new id before existing ones
         self.assertEqual(
-            (self.countries + new_countries).sorted(order),
-            new_countries.sorted(order) + self.countries.sorted(order),
+            (origins + news).sorted(order),
+            news + Country.concat(reversed(origins)),
         )
 
     def test_prefetch(self):
