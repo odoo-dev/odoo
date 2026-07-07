@@ -36,12 +36,12 @@ export class TourAutomatic {
             .flatMap((step) => [
                 {
                     action: async () => {
+                        if (stepDelay > 0) {
+                            await hootDom.delay(stepDelay);
+                        }
                         if (this.debugMode) {
                             console.groupCollapsed(step.describeMe);
                             console.log(step.stringify);
-                            if (stepDelay > 0) {
-                                await hootDom.delay(stepDelay);
-                            }
                             if (step.break) {
                                 // eslint-disable-next-line no-debugger
                                 debugger;
@@ -120,22 +120,26 @@ export class TourAutomatic {
             name: this.name,
             steps: macroSteps,
             onError: ({ error }) => {
-                if (error.type === "Timeout") {
-                    this.throwError(...this.currentStep.describeWhyIFailed, error.message);
-                } else {
-                    this.throwError(error.message);
-                }
-                end();
+                setTimeout(() => {
+                    if (error.type === "Timeout") {
+                        this.throwError(...this.currentStep.describeWhyIFailed, error.message);
+                    } else {
+                        this.throwError(error.message);
+                    }
+                    end();
+                }, 1000);
             },
             onComplete: () => {
-                browser.console.log("tour succeeded");
-                // Used to see easily in the python console and to know which tour has been succeeded in suite tours case.
-                const succeeded = `║ TOUR ${this.name} SUCCEEDED ║`;
-                const msg = [succeeded];
-                msg.unshift("╔" + "═".repeat(succeeded.length - 2) + "╗");
-                msg.push("╚" + "═".repeat(succeeded.length - 2) + "╝");
-                browser.console.log(`\n\n${msg.join("\n")}\n`);
-                end();
+                setTimeout(() => {
+                    browser.console.log("tour succeeded");
+                    // Used to see easily in the python console and to know which tour has been succeeded in suite tours case.
+                    const succeeded = `║ TOUR ${this.name} SUCCEEDED ║`;
+                    const msg = [succeeded];
+                    msg.unshift("╔" + "═".repeat(succeeded.length - 2) + "╗");
+                    msg.push("╚" + "═".repeat(succeeded.length - 2) + "╝");
+                    browser.console.log(`\n\n${msg.join("\n")}\n`);
+                    end();
+                }, 1000);
             },
         });
 

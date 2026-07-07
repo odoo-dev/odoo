@@ -27,13 +27,7 @@ export class TourStartWidget extends CharField {
     }
 
     _onTestTour() {
-        this.tour.startTour(this.tourData.name, {
-            mode: "auto",
-            url: this.tourData.url,
-            fromDB: this.tourData.custom,
-            showPointerDuration: 250,
-            rainbowManMessage: this.tourData.rainbow_man_message,
-        });
+        this.tour.recordTourVideo(this.tourData.name);
     }
 }
 

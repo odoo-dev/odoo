@@ -12,6 +12,7 @@ import {
     TOUR_RECORDER_ACTIVE_LOCAL_STORAGE_KEY,
 } from "@web_tour/js/tour_recorder/tour_recorder_state";
 import { redirect } from "@web/core/utils/urls";
+import { rpc } from "@web/core/network/rpc";
 
 class OnboardingItem extends Component {
     static components = { DropdownItem };
@@ -60,8 +61,8 @@ const debugMenuRegistry = registry.category("debug").category("default");
 
 export const tourService = {
     // localization dependency to make sure translations used by tours are loaded
-    dependencies: ["orm", "effect", "overlay", "localization"],
-    start: async (env, { orm, effect, overlay }) => {
+    dependencies: ["orm", "effect", "overlay", "localization", "notification"],
+    start: async (env, { orm, effect, overlay, notification }) => {
         await whenReady();
         let toursEnabled = session?.tour_enabled;
         const tourRegistry = registry.category("web_tour.tours");
@@ -140,7 +141,7 @@ export const tourService = {
 
             let tourConfig = {
                 delayToCheckUndeterminisms: 0,
-                stepDelay: 0,
+                stepDelay: 3000,
                 keepWatchBrowser: false,
                 mode: "auto",
                 showPointerDuration: 0,
@@ -282,12 +283,67 @@ export const tourService = {
             }
         }
 
+        async function recordTourVideo(tourName) {
+            const closeNotification = notification.add(
+                "Tour recording has started on the server. Please wait...",
+                { title: "Video Recorder", type: "info", sticky: true }
+            );
+            try {
+                const result = await rpc("/web_tour/record_tour", { tour_name: tourName });
+                closeNotification();
+                if (result && result.success && result.video_data) {
+                    // Convert base64 back to binary data
+                    const binaryString = atob(result.video_data);
+                    const len = binaryString.length;
+                    const bytes = new Uint8Array(len);
+                    for (let i = 0; i < len; i++) {
+                        bytes[i] = binaryString.charCodeAt(i);
+                    }
+                    const blob = new Blob([bytes], { type: "video/mp4" });
+                    const url = URL.createObjectURL(blob);
+                    
+                    const a = document.createElement("a");
+                    a.style.display = "none";
+                    a.href = url;
+                    a.download = `tour_recording_${tourName}_${Date.now()}.mp4`;
+                    document.body.appendChild(a);
+                    a.click();
+                    
+                    setTimeout(() => {
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                    }, 100);
+                    
+                    notification.add("Video recording successfully compiled and downloaded!", {
+                        title: "Video Recorder",
+                        type: "success",
+                    });
+                } else {
+                    const msg = (result && result.message) || "Unknown error";
+                    notification.add(`Recording failed: ${msg}`, {
+                        title: "Video Recorder",
+                        type: "danger",
+                        sticky: true
+                    });
+                }
+            } catch (err) {
+                closeNotification();
+                console.error("Recording error:", err);
+                notification.add(`Recording error: ${err.message || err}`, {
+                    title: "Video Recorder",
+                    type: "danger",
+                    sticky: true
+                });
+            }
+        }
+
         odoo.startTour = startTour;
         odoo.isTourReady = (tourName) => getTourFromRegistry(tourName).wait_for.then(() => true);
 
         return {
             startTour,
             startTourRecorder,
+            recordTourVideo,
         };
     },
 };

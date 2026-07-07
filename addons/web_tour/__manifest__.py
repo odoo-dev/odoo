@@ -11,6 +11,9 @@ Odoo Web tours.
 """,
     'version': '1.0',
     'depends': ['web'],
+    'external_dependencies': {
+        'bin': ['ffmpeg'],
+    },
     'data': [
         'security/ir.model.access.csv',
         'views/tour_views.xml',
