@@ -337,6 +337,7 @@ save
 schedule
 school
 science
+screen_rotation_alt
 search
 security
 select_all
