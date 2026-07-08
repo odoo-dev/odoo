@@ -547,6 +547,7 @@ class CustomerPortal(Controller):
                 }
 
         parent_name_value = address_values.pop('parent_name', None)
+        had_vat = not partner_sudo and 'vat' in address_values and bool(address_values.get('vat'))
 
         if not partner_sudo:  # Creation of a new address.
             self._complete_address_values(
@@ -578,7 +579,7 @@ class CustomerPortal(Controller):
                     parent_company = partner_sudo.commercial_partner_id
                     if parent_company.name != parent_name_value:
                         parent_company.name = parent_name_value
-            elif partner_sudo.is_company:
+            elif partner_sudo.is_company and not had_vat:
                 if partner_sudo.name != parent_name_value:
                     partner_sudo.name = parent_name_value
             else:  # Current partner is an individual with no parent
