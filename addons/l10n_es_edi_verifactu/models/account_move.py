@@ -64,8 +64,57 @@ class AccountMove(models.Model):
 
         return super()._auto_init()
 
+<<<<<<< ebc88ff2b8d793697df0b5250f68b7455a736bf7
     def _l10n_es_get_tax_applicability(self):
         # EXTENDS 'l10n_es'
+||||||| 39d79dc963cfc494a7af1cbc4da9ac3c96566485
+    @api.model
+    def _l10n_es_edi_verifactu_clave_regimen_selection(self):
+        return [
+            # There are different possibilities for the ClaveRegimen field
+            # depending on the Impuesto field (IVA / IGIC)
+            # Format: '{clave_regimen}' or '{clave_regimen}_{l10n_es_applicability}'
+            #         - The first format is in case the code and label are the same in both lists
+            #         - The second format is in case the code, label pair is only in one of the lists
+            # VAT & IGIC
+            ('01', _("General regime operation")),
+            ('02', _("Export")),
+            ('11', _("Leasing of business premises")),
+            # VAT only
+            ('17_iva', _("Operation under one of the regimes provided for in Chapter XI of Title IX (OSS and IOSS).")),
+            ('18_iva', _("Recargo de equivalencia")),
+            ('19_iva', _("Operations of activities included in the Special Regime for Agriculture, Livestock and Fishing (REAGYP)")),
+            ('20_iva', _("Simplified Regime")),
+            # IGIC only
+            ('17_igic', _("Special retailer regime")),
+        ]
+
+    def _l10n_es_edi_verifactu_get_tax_applicability(self):
+=======
+    @api.model
+    def _l10n_es_edi_verifactu_clave_regimen_selection(self):
+        return [
+            # There are different possibilities for the ClaveRegimen field
+            # depending on the Impuesto field (IVA / IGIC)
+            # Format: '{clave_regimen}' or '{clave_regimen}_{l10n_es_applicability}'
+            #         - The first format is in case the code and label are the same in both lists
+            #         - The second format is in case the code, label pair is only in one of the lists
+            # VAT & IGIC
+            ('01', _("General regime operation")),
+            ('02', _("Export")),
+            ('08', _("IPSI/IGIC")),
+            ('11', _("Leasing of business premises")),
+            # VAT only
+            ('17_iva', _("Operation under one of the regimes provided for in Chapter XI of Title IX (OSS and IOSS).")),
+            ('18_iva', _("Recargo de equivalencia")),
+            ('19_iva', _("Operations of activities included in the Special Regime for Agriculture, Livestock and Fishing (REAGYP)")),
+            ('20_iva', _("Simplified Regime")),
+            # IGIC only
+            ('17_igic', _("Special retailer regime")),
+        ]
+
+    def _l10n_es_edi_verifactu_get_tax_applicability(self):
+>>>>>>> f68c51468d6ab6758321525942d01758844b6d33
         """
         Currently we only support a single Veri*Factu Tax Applicability per Veri*Factu document.
         In `_check_record_values` of model 'l10n_es_edi_verifactu.document' we check:
