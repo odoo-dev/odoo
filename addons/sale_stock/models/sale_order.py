@@ -240,11 +240,17 @@ class SaleOrder(models.Model):
                 sale_order_lines_quantities = {order_line: (order_line.product_uom_qty, 0) for order_line in sale_order.order_line}
                 documents = self.env['stock.picking'].with_context(include_draft_documents=True)._log_activity_get_documents(sale_order_lines_quantities, 'move_ids', 'UP')
         res = super()._action_cancel()
-        self.picking_ids.filtered(
-            lambda p: p.state not in ('done', 'cancel')
-            and p.return_id).with_context(skip_cancel_activity=True
-        ).action_cancel()
-        self.order_line.with_context(skip_cancel_activity=True)._action_launch_stock_rule()
+        if self.warehouse_id.delivery_steps != 'ship_only':
+            self.picking_ids.filtered(
+                lambda p: p.state not in ('done', 'cancel')
+                and p.return_id
+            ).with_context(skip_cancel_activity=True).action_cancel()
+            self.order_line.with_context(skip_cancel_activity=True)._action_launch_stock_rule()
+        else:
+            self.picking_ids.filtered(
+                lambda p: p.state != 'done'
+                and p.picking_type_code != 'internal'
+            ).with_context(skip_cancel_activity=True).action_cancel()
         if documents:
             filtered_documents = {}
             for (parent, responsible), rendering_context in documents.items():
