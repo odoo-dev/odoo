@@ -208,6 +208,28 @@ class WebsiteProfile(http.Controller):
             })
         return user_values
 
+    def _prepare_leaderboard_gamification_values(self):
+        # No challenge_category filter: this page is shared across apps (forum, elearning, ...).
+        achievements = tools.lazy(lambda: request.env['gamification.badge.user'].sudo().search(
+            [('badge_id.website_published', '=', True)], order='create_date desc, id desc', limit=5))
+        if request.env.user._is_public():
+            challenges = None
+            challenges_done = None
+        else:
+            challenges = tools.lazy(lambda: request.env['gamification.challenge'].sudo().search([
+                ('reward_id.website_published', '=', True)
+            ], order='id asc', limit=5))
+            challenges_done = tools.lazy(lambda: request.env['gamification.badge.user'].sudo().search([
+                ('challenge_id', 'in', challenges.ids),
+                ('user_id', '=', request.env.user.id),
+                ('badge_id.website_published', '=', True)
+            ]).mapped('challenge_id'))
+        return {
+            'achievements': achievements,
+            'challenges': challenges,
+            'challenges_done': challenges_done,
+        }
+
     @http.route(['/profile/users',
                  '/profile/users/page/<int:page>'], type='http', auth="public", website=True, sitemap=True, readonly=True, list_as_website_content=_lt("User Profiles"))
     def view_all_users_page(self, page=1, **kwargs):
@@ -289,6 +311,7 @@ class WebsiteProfile(http.Controller):
             'my_user': current_user_values,
             'pager': pager,
             **self._prepare_url_from_info(),
+            **self._prepare_leaderboard_gamification_values(),
         })
         return request.render("website_profile.users_page_main", render_values)
 

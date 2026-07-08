@@ -3,65 +3,28 @@
     <!-- Sub nav -->
     <template id="user_profile_sub_nav" name="User profile subnav">
         <div class="o_wprofile_all_users_nav">
-            <div class="container">
-                <div class="row align-items-center justify-content-between mt-3 mb-4">
-                    <!-- Desktop Mode -->
-                    <div t-if="url_from" class="o_wprofile_all_users_nav_btn_container col pe-0 flex-grow-0 d-none d-md-flex">
-                        <a t-att-href="url_from" class="o_wprofile_all_users_nav_btn btn text-nowrap">
-                            <i class="oi small" data-icon="chevron_backward"/> <t t-out="url_from_label"/>
-                        </a>
-                    </div>
-                    <nav aria-label="breadcrumb" class="col d-none d-md-flex">
-                        <ol class="breadcrumb bg-transparent mb-0 ps-0 py-0">
-                            <li t-attf-class="breadcrumb-item #{'active' if not view_user else ''}">
-                                <a href="/profile/users">Users</a>
-                            </li>
-                            <li t-if="view_user" class="breadcrumb-item active">
-                                <a><t t-out="view_user"/></a>
-                            </li>
-                        </ol>
-                    </nav>
-
-                    <div class="col d-none d-md-flex flex-row align-items-center justify-content-end">
-                        <t t-call="website.website_search_box_input"
-                            action.f="/profile/users"
-                            placeholder.translate="Search users"
-                            search="search">
-                            <input t-if="group_by" type="hidden" name="group_by" t-att-value="group_by"/>
-                        </t>
-                    </div>
-
-                    <!-- Mobile Mode -->
-                    <div class="col d-md-none py-1">
-                        <div class="btn-group d-flex justify-content-between gap-1" role="group" aria-label="Mobile sub-nav">
-                            <div t-if="url_from" class="btn-group">
-                                <a t-att-href="url_from" class="btn bg-black-25 text-white">
-                                    <i class="oi small" data-icon="chevron_backward"/>
-                                </a>
-                            </div>
-
-                            <div class="btn-group flex-grow-1">
-                                <a class="btn bg-black-25 text-white dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Nav</a>
-
-                                <ul class="dropdown-menu">
-                                    <a class="dropdown-item" t-att-href="home_url or '/'">Home</a>
-                                    <a class="dropdown-item" href="/profile/users">└ Users</a>
-                                    <a t-if="view_user" class="dropdown-item">└ <t t-out="view_user"/></a>
-                                </ul>
-                            </div>
-
-                            <div class="btn-group">
-                                <t t-call="website.website_search_box_input"
-                                    action.f="/profile/users"
-                                    placeholder.translate="Search users"
-                                    search="search"
-                                    _simple_button_layout="True">
-                                    <input t-if="group_by" type="hidden" name="group_by" t-att-value="group_by"/>
-                                </t>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="container mt-3 mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb flex-nowrap bg-transparent mb-0 ps-0 py-0 overflow-hidden">
+                        <li t-if="url_from" class="breadcrumb-item flex-shrink-0">
+                            <a t-att-href="url_from" class="text-nowrap">
+                                <i class="oi small" data-icon="chevron_backward"/>
+                                <t t-out="url_from_label"/>
+                            </a>
+                        </li>
+                        <li t-attf-class="breadcrumb-item text-truncate #{'active' if not view_user else 'flex-shrink-0'}" t-att-aria-current="'page' if not view_user else None">
+                            <t t-if="not view_user">
+                                <span class="text-truncate d-block">Users</span>
+                            </t>
+                            <t t-else="">
+                                <a href="/profile/users" class="text-truncate d-block">Users</a>
+                            </t>
+                        </li>
+                        <li t-if="view_user" class="breadcrumb-item text-truncate active" aria-current="page">
+                            <span class="text-truncate d-block" t-out="view_user" t-att-title="view_user"/>
+                        </li>
+                    </ol>
+                </nav>
             </div>
         </div>
     </template>
@@ -290,26 +253,29 @@
     <template id="rank_badge_main" name="Ranks Page">
         <t t-call="website.layout">
             <div class="container mb32 mt48">
-                <nav t-if="url_from" aria-label="breadcrumb">
-                    <ol class="breadcrumb p-0 bg-white">
-                        <li class="breadcrumb-item">
-                            <a t-att-href="url_from" t-out="url_from_label"/>
+                <nav t-if="url_from" aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb flex-nowrap bg-transparent mb-0 ps-0 py-0 overflow-hidden">
+                        <li class="breadcrumb-item flex-shrink-0">
+                            <a t-att-href="url_from" class="text-nowrap" t-out="url_from_label"/>
                         </li>
-                        <li class="breadcrumb-item">Badges</li>
+                        <li class="breadcrumb-item text-truncate active" aria-current="page">
+                            <span class="text-truncate d-block">Badges</span>
+                        </li>
                     </ol>
                 </nav>
-                <div class="row justify-content-between" t-if="ranks">
-                    <div class="col-12 col-md-6 col-lg-5">
-                        <h1>Ranks</h1>
-                        <p class="lead mb-4">Keep learning with <t t-out="website.company_id.name"/>. Collect points on the forum or on the eLearning platform. Those points will make you reach new ranks.</p>
-                        <h5>How do I earn badges?</h5>
+                <h1 class="h4">Ranks and Badges</h1>
+                <div t-if="ranks" class="row justify-content-between mt-5">
+                    <div class="col-12 col-md-6">
+                        <h2 class="h5-fs">Ranks</h2>
+                        <p>Keep learning with <t t-out="website.company_id.name"/>. Collect points on the forum or on the eLearning platform. Those points will make you reach new ranks.</p>
+                        <h3 class="h6-fs">How do I earn badges?</h3>
                         <p>When you finish a course or reach milestones, you're awarded badges.</p>
-                        <h5>How do I score more points?</h5>
+                        <h3 class="h6-fs">How do I score more points?</h3>
                         <p>You can score more points by answering quizzes at the end of each course content. Points can also be earned on the forum.</p>
                     </div>
                     <div class="col-12 col-md-5 col-lg-4">
                         <div class="card">
-                            <div class="card-header border-bottom-0">Ranks</div>
+                            <div class="card-header">Ranks</div>
                             <ul class="list-group list-group-flush">
                                 <t t-foreach="ranks" t-as="rank">
                                     <li t-attf-class="list-group-item">
@@ -317,8 +283,8 @@
                                             <div t-field="rank.image_1920"
                                                 t-options="{'widget': 'image', 'preview_image': 'image_128', 'class': 'me-2 o_image_40_cover'}"/>
                                             <div class="flex-grow-1">
-                                                <h5 class="mt-0 mb-0" t-field="rank.name"/>
-                                                <span class="badge text-bg-success"><span t-field="rank.karma_min"/></span> point<span t-if="rank.karma_min">s</span>
+                                                <h3 class="h6-fs mb-0" t-field="rank.name"/>
+                                                <small class="text-muted"><span t-field="rank.karma_min"/> point<span t-if="rank.karma_min">s</span></small>
                                             </div>
                                         </div>
                                     </li>
@@ -335,39 +301,41 @@
     <template id="badge_content" name="Badges Page content">
         <div id="website_profile_badges">
             <div class="row">
-                <div class="col-12">
-                    <h1 class="mt-4 mt-lg-2">Badges</h1>
-                    <p class="lead">
-                        Besides gaining reputation with your questions and answers,
-                        you receive badges for being especially helpful.<br class="d-none d-lg-inline-block"/>Badges
-                        appear on your profile page, and your posts.
-                    </p>
+                <div class="col-12 col-lg-6">
+                    <h2 class="h5-fs">Badges</h2>
+                    <p>Besides gaining reputation with your questions and answers, you receive badges for being especially helpful. Badges appear on your profile page, and your posts.</p>
                 </div>
             </div>
-            <div class="row col-12 align-items-center p-0" t-foreach="badges" t-as="badge">
-                <div class="col-3 d-flex align-items-center">
-                    <t t-call="website_profile.badge_header"/>
-                </div>
-                <div class="col-6">
-                    <span t-field="badge.description"/>
-                </div>
-                <div class="col-3 text-end">
-                    <b t-out="badge.granted_users_count"/>
-                    <i class="text-muted"> awarded users</i>
+            <div class="row row-cols-1 row-cols-md-3 g-3">
+                <div t-foreach="badges" t-as="badge">
+                    <t t-set="badge_unlocked" t-value="bool(badge.stat_my)"/>
+                    <div t-attf-class="card h-100 #{'' if badge_unlocked or request.env.user._is_public() else ' opacity-50'}">
+                        <div class="card-body d-flex gap-3 p-3">
+                            <div class="flex-shrink-0">
+                                <img t-if="not badge.image_1920 and badge.level"
+                                    t-attf-src="/website_profile/static/src/img/badge_#{badge.level}.svg"
+                                    class="rounded-circle o_image_40_cover"
+                                    t-att-alt="badge.name"/>
+                                <div t-else="" t-field="badge.image_1920"
+                                    t-options="{'widget': 'image', 'preview_image': 'image_128', 'class': 'rounded-circle o_image_40_cover'}"/>
+                            </div>
+                            <div class="flex-grow-1 min-w-0">
+                                <div class="d-flex align-items-center gap-1">
+                                    <a t-if="badge_url" t-att-href="badge_url" class="text-decoration-none text-reset">
+                                        <h6 t-field="badge.name" class="mb-0"/>
+                                    </a>
+                                    <h6 t-else="" t-field="badge.name" class="mb-0"/>
+                                </div>
+                                <div class="text-muted small" t-field="badge.description"/>
+                                <div class="small">
+                                    <t t-out="badge.granted_users_count"/> <span class="text-muted">awarded users</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </template>
-
-    <template id="badge_header">
-        <img t-if="not badge.image_1920 and badge.level" t-attf-src="/website_profile/static/src/img/badge_#{badge.level}.svg"
-                class="my-1 me-1 wprofile_badge_img" t-att-alt="badge.name"/>
-        <div t-else="" t-field="badge.image_1920"
-            t-options="{'widget': 'image', 'preview_image': 'image_1024', 'class': 'my-1 me-1 wprofile_badge_img'}"/>
-        <a t-if="badge_url" t-att-href="badge_url">
-            <h6 t-field="badge.name" class="d-inline my-0"/>
-        </a>
-        <h6 t-else="" t-field="badge.name" class="d-inline my-0"/>
     </template>
 
     <!--Access Denied - Profile Page-->
@@ -391,11 +359,11 @@
             <div class="h-100 d-flex flex-column">
                 <div id="wrap" class="o_wprofile_wrap mt-0 pb-5 ">
                     <t t-call="website_profile.users_page_header"/>
-                    <t t-if="users">
+                    <t t-if="users or search">
                         <t t-call="website_profile.users_page_content"/>
                     </t>
                 </div>
-                <t t-if="not users">
+                <t t-if="not users and not search">
                     <h2 class="text-black m-auto">No Leaderboard Yet :(</h2>
                 </t>
             </div>
@@ -403,19 +371,39 @@
     </template>
 
     <template id="users_page_header" name="Users Page Header">
-        <div class="o_wprofile_all_users_header o_wprofile_gradient mb-n5 pb-5">
+        <div class="o_wprofile_all_users_header">
             <t t-call="website_profile.user_profile_sub_nav"/>
             <div class="container">
-                <h1 class="py-4 text-white d-inline-block">All Users</h1>
-                <div class="py-4 float-end">
-                    <strong class="mb-3 text-white me-2">Rank by:</strong>
-                    <div class="mb-3 btn-group">
-                        <a t-attf-class="btn btn-light #{ 'active' if group_by == 'week' else ''}"
-                            t-att-href="'/profile/users?' + keep_query('search', group_by='week')">This week</a>
-                        <a t-attf-class="btn btn-light #{ 'active' if group_by == 'month' else ''}"
-                            t-att-href="'/profile/users?' + keep_query('search', group_by='month')">This month</a>
-                        <a t-attf-class="btn btn-light #{ 'active' if group_by == 'all' else ''}"
-                            t-att-href="'/profile/users?' + keep_query('search')">All time</a>
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4">
+                    <h1 class="h4">Leaderboard</h1>
+                    <div class="d-flex gap-3 align-items-center justify-content-between">
+                        <div class="d-flex flex-row align-items-center justify-content-end">
+                            <t t-call="website.website_search_box_input"
+                                action.f="/profile/users"
+                                placeholder.translate="Search users"
+                                search="search"
+                                _form_classes.f="d-none d-lg-flex">
+                                <input t-if="group_by" type="hidden" name="group_by" t-att-value="group_by"/>
+                            </t>
+                            <!-- Mobile Search button -->
+                            <t t-call="website.website_search_box_input"
+                                action.f="/profile/users"
+                                placeholder.translate="Search users"
+                                search="search"
+                                _simple_button_layout="True"
+                                _simple_button_classes.f="btn-light"
+                                _form_classes.f="d-lg-none">
+                                <input t-if="group_by" type="hidden" name="group_by" t-att-value="group_by"/>
+                            </t>
+                        </div>
+                        <div class="btn-group">
+                            <a t-attf-class="btn btn-light #{ 'active' if group_by == 'week' else ''}"
+                                t-att-href="'/profile/users?' + keep_query('search', group_by='week')">Week</a>
+                            <a t-attf-class="btn btn-light #{ 'active' if group_by == 'month' else ''}"
+                                t-att-href="'/profile/users?' + keep_query('search', group_by='month')">Month</a>
+                            <a t-attf-class="btn btn-light #{ 'active' if group_by == 'all' else ''}"
+                                t-att-href="'/profile/users?' + keep_query('search')">All time</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -424,92 +412,141 @@
 
     <template id="users_page_content">
         <div class="container mb32">
-            <div class="row mb-3">
-                <div class="col-md-4 d-flex flex-grow-1" t-foreach="top3_users" t-as="user" t-attf-onclick="location.href='/profile/user/#{user['id']}';">
-                    <t t-call="website_profile.top3_user_card"/>
+            <div class="row">
+                <div class="col-12 col-xl-9">
+                    <div class="d-none d-lg-flex row mb-4">
+                        <a class="col-md-4 d-flex flex-grow-1 text-decoration-none text-reset"
+                            t-foreach="top3_users" t-as="user"
+                            t-attf-href="/profile/user/#{user['id']}">
+                            <t t-call="website_profile.top3_user_card"/>
+                        </a>
+                    </div>
+                    <div class="list-group" t-if="users">
+                        <a t-foreach="users" t-as="user"
+                            t-attf-href="/profile/user/#{user['id']}"
+                            t-attf-class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 #{user['id'] == user_id.id and 'bg-primary-light' or ''}">
+                            <t t-call="website_profile.all_user_card"/>
+                        </a>
+                        <t t-if="my_user">
+                            <t t-set="user" t-value="my_user"/>
+                            <a t-attf-href="/profile/user/#{user['id']}"
+                                class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 border-top bg-primary-light">
+                                <t t-call="website_profile.all_user_card"/>
+                            </a>
+                        </t>
+                    </div>
+                    <t t-if='search and not users'>
+                        <div class='alert alert-warning'>No user found for <strong><t t-out="search"/></strong>. Try another search.</div>
+                    </t>
+                    <div class="d-flex justify-content-center">
+                        <t t-call="website.pager"/>
+                    </div>
                 </div>
-            </div>
-            <div class="table-responsive" t-if="users">
-                <table class="table table-sm" t-if="users">
-                    <t t-foreach="users" t-as="user">
-                        <tr t-attf-onclick="location.href='/profile/user/#{user['id']}';" t-attf-class="o_wprofile_pointer bg-white #{user['id'] == user_id.id and 'o_wprofile_border_focus'}">
-                            <t t-call="website_profile.all_user_card"/>
-                        </tr>
-                    </t>
-                    <t t-if="my_user">
-                        <!-- keep same table to avoid missaligment -->
-                        <tr>
-                            <td colspan="7"></td>
-                        </tr>
-                        <t t-set='user' t-value='my_user'/>
-                        <tr t-attf-onclick="location.href='/profile/user/#{user['id']}';" t-attf-class="o_wprofile_pointer bg-white o_wprofile_border_focus">
-                            <t t-call="website_profile.all_user_card"/>
-                        </tr>
-                    </t>
-                </table>
-            </div>
-            <t t-if='search and not users'>
-                <div class='alert alert-warning'>No user found for <strong><t t-out="search"/></strong>. Try another search.</div>
-            </t>
-            <div class="d-flex justify-content-center">
-                <t t-call="website_profile.pager_nobox"/>
+                <div class="col-12 col-xl-3 mt-4 mt-xl-0" t-if="challenges or achievements">
+                    <t t-if="challenges" t-call="website_profile.leaderboard_badges_card"/>
+                    <t t-if="achievements" t-call="website_profile.leaderboard_achievements_card"/>
+                </div>
             </div>
         </div>
     </template>
 
-    <template id="top3_user_card" name="Top 3 User Card">
-        <div class="card w-100 text-center mb-2 border-bottom-0 o_wprofile_pointer">
-            <div class="card-body">
-                <div class="d-inline-block position-relative">
-                    <img class="rounded-circle img-fluid"
-                        style="width: 128px; height: 128px; object-fit: cover;"
-                         t-att-src="'/profile/avatar/%s?field=avatar_256%s' % (user['id'], '&amp;res_model=%s&amp;res_id=%s' % (record._name, record.id) if record else '')"/>
-                    <img class="position-absolute" t-attf-src="/website_profile/static/src/img/rank_#{user_index + 1}.svg" alt="User rank" style="bottom: 0; right: -10px"/>
-                </div>
-                <h3 class="mt-2 mb-0" t-out="user['name']"></h3>
-                <strong class="text-muted" t-out="user['rank']"/>
-                <div class="h3 my-2" t-if="user['karma_gain']">
-                    <span t-attf-class="badge #{ 'text-bg-success' if user['karma_gain'] > 0 else 'text-bg-warning'}">
-                        <t t-if="user['karma_gain'] > 0">+ </t><t t-out="user['karma_gain']"/> XP
-                    </span>
-                </div>
+    <template id="leaderboard_badges_card" name="Leaderboard Badges Card">
+        <div class="border rounded p-3 mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2 class="h6 mb-0">Badges</h2>
+                <a href="/profile/ranks_badges" class="small">View all</a>
             </div>
-            <div class="row mx-0 o_wprofile_top3_card_footer text-nowrap">
-                <div class="col py-3"><b t-out="user['karma']"/> <span class="text-muted">XP</span></div>
-                <div class="col py-3"><b t-out="user['badge_count']"/> <span class="text-muted">Badges</span></div>
+            <t t-foreach="challenges" t-as="challenge">
+                <t t-set="challenge_done" t-value="challenge in challenges_done if challenges_done else False"/>
+                <div t-attf-class="d-flex align-items-center gap-2 #{'opacity-50' if challenge_done else ''}">
+                    <div t-if="challenge.reward_id.image_1920" class="flex-shrink-0 align-self-baseline" t-field="challenge.reward_id.image_1920"
+                        t-options="{'widget': 'image', 'preview_image': 'image_128', 'style': 'height: 32px; width: 32px', 'class': 'object-fit-cover'}"/>
+                    <img t-else="" t-attf-src="/website_profile/static/src/img/badge_#{challenge.reward_id.level}.svg" t-att-alt="challenge.reward_id.name" style="height: 32px; width: 32px" class="flex-shrink-0"/>
+                    <div class="flex-grow-1 lh-sm">
+                        <div t-out="challenge.reward_id.name"/>
+                        <small class="text-muted" t-out="challenge.reward_id.description"/>
+                    </div>
+                    <i t-if="challenge_done" class="fa fa-check text-success" aria-label="Done" title="Done" role="img"/>
+                </div>
+            </t>
+        </div>
+    </template>
+
+    <template id="leaderboard_achievements_card" name="Leaderboard Latest Achievements Card">
+        <div class="border rounded p-3 mb-3">
+            <h2 class="h6 mb-3">Latest achievements</h2>
+            <t t-foreach="achievements" t-as="achievement">
+                <div t-attf-class="d-flex align-items-center gap-2 #{'' if achievement_last else 'mb-3'}">
+                    <img class="o_avatar rounded-circle flex-shrink-0" style="--Avatar-size: 2rem;"
+                        t-att-src="'/profile/avatar/%s?field=avatar_128' % achievement.user_id.id"
+                        t-att-alt="achievement.user_id.name"/>
+                    <div class="small lh-sm">
+                        <div t-out="achievement.user_id.name"/>
+                        <span class="text-muted" t-out="achievement.badge_id.name"/>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </template>
+
+    <template id="top3_user_card" name="Top 3 User Card">
+        <div class="card flex-grow-1 text-center">
+            <div class="card-body">
+                <div class="d-inline-block position-relative mb-3">
+                    <img class="rounded-circle img-fluid"
+                        style="width: 80px; height: 80px; object-fit: cover;"
+                         t-att-src="'/profile/avatar/%s?field=avatar_256%s' % (user['id'], '&amp;res_model=%s&amp;res_id=%s' % (record._name, record.id) if record else '')"/>
+                    <div class="position-absolute rounded-pill bottom-0 end-0 me-n3" style="width: 2rem; height: 2rem;">
+                        <img t-attf-src="/website_profile/static/src/img/rank_#{user_index + 1}.svg" alt="User rank"/>
+                    </div>
+                </div>
+                <h2 class="mb-0 h6" t-out="user['name']"></h2>
+                <small class="text-muted" t-out="user['rank']"/>
+            </div>
+            <div class="o_wprofile_top3_card_footer card-footer d-flex gap-2 p-3">
+                <div class="flex-grow-1">
+                    <b t-out="user['karma']"/> <small class="d-block text-muted">XP</small>
+                    <t t-if="group_by and user.get('karma_gain')">
+                        <span t-attf-class="badge mt-1 #{'text-bg-success' if user['karma_gain'] > 0 else 'text-bg-warning'}">
+                            <t t-if="user['karma_gain'] > 0">+ </t><t t-out="user['karma_gain']"/> XP
+                            <t t-if="group_by == 'week'">this week</t>
+                            <t t-elif="group_by == 'month'">this month</t>
+                        </span>
+                    </t>
+                </div>
+                <div class="flex-grow-1"><b t-out="user['badge_count']"/> <small class="d-block text-muted">Badges</small></div>
             </div>
         </div>
     </template>
 
     <template id="all_user_card" name="All User Card">
-        <td class="align-middle text-end text-muted" style="width: 0">
+        <span class="text-muted text-center flex-shrink-0" style="min-width: 4ch;">
             <span t-out="user['position']"/>
-        </td>
-        <td class="align-middle d-none d-sm-table-cell">
-            <img class="object-fit-cover rounded-circle o_wprofile_img_small" width="30" height="30" t-att-src="'/profile/avatar/%s?field=avatar_128%s' % (user['id'], '&amp;res_model=%s&amp;res_id=%s' % (record._name, record.id) if record else '')"/>
-        </td>
-        <td class="align-middle w-md-75">
-            <span class="fw-bold" t-out="user['name']"/><br/>
-            <span class="text-muted fw-bold" t-out="user['rank']"></span>
-        </td>
-        <td class="align-middle text-nowrap">
-            <t t-if="user['karma_gain']">
-                <span t-attf-class="badge d-inline #{ 'text-bg-success' if user['karma_gain'] > 0 else 'text-bg-warning'}">
-                    <t t-if="user['karma_gain'] > 0">+ </t><t t-out="user['karma_gain']"/> XP
-                </span>
-                <span class="text-muted ps-2 pe-3">
-                    <t t-if="group_by == 'week'">this week</t>
-                    <t t-elif="group_by == 'month'">this month</t>
-                    <t t-else="">All time </t>
-                </span>
-            </t>
-        </td>
-        <td class="align-middle fw-bold text-end text-nowrap">
-            <b t-out="user['karma']"/> <span class="text-muted small fw-bold">XP</span>
-        </td>
-        <td class="align-middle fw-bold text-end pe-3 text-nowrap all_user_badge_count">
-            <b t-out="user['badge_count']"/> <span class="text-muted small fw-bold">Badges</span>
-        </td>
+        </span>
+        <img class="object-fit-cover rounded-circle o_wprofile_img_small flex-shrink-0 d-none d-sm-block"
+            width="32" height="32"
+            t-att-src="'/profile/avatar/%s?field=avatar_128%s' % (user['id'], '&amp;res_model=%s&amp;res_id=%s' % (record._name, record.id) if record else '')"/>
+        <div class="flex-grow-1 lh-1">
+            <h6 class="mb-0 small" t-out="user['name']"/>
+            <small class="text-muted" t-out="user['rank']"/>
+        </div>
+        <div class="d-flex align-items-center gap-3 ms-auto flex-shrink-0 small text-nowrap">
+            <div class="text-end">
+                <b t-out="user['karma']"/> <span class="text-muted">XP</span>
+                <div t-if="group_by and user.get('karma_gain')" class="mt-1">
+                    <span t-attf-class="badge #{'text-bg-success' if user['karma_gain'] > 0 else 'text-bg-warning'}">
+                        <t t-if="user['karma_gain'] > 0">+ </t><t t-out="user['karma_gain']"/> XP
+                    </span>
+                    <span class="text-muted ps-1">
+                        <t t-if="group_by == 'week'">this week</t>
+                        <t t-elif="group_by == 'month'">this month</t>
+                    </span>
+                </div>
+            </div>
+            <div class="all_user_badge_count text-end">
+                <b t-out="user['badge_count']"/> <span class="text-muted">Badges</span>
+            </div>
+        </div>
     </template>
 
     <!-- Custom Pager: lighter than existing one, no box around number, first / end displayed -->
