@@ -37,7 +37,6 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
         })
         cls.purchase_order.button_confirm()
         cls.account_expense = cls.company_data['default_account_expense']
-        cls.account_revenue = cls.company_data['default_account_revenue']
 
     def test_purchase_stock_accruals(self):
         # receive 2 on 2020-01-02
