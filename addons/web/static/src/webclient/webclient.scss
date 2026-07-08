@@ -8,6 +8,12 @@ html, body {
     position: relative;
     width: 100%;
     height: 100%;
+
+    &, :where(*) {
+        scrollbar-color: var(--CustomScrollBar__thumb-color, #{rgba($body-color, .5)}) var(--CustomScrollBar__track-color, transparent);
+        scrollbar-width: var(--CustomScrollBar-width, thin);
+        scrollbar-gutter: var(--CustomScrollBar-gutter, auto);
+    }
 }
 
 // Disable default border-style added by _reboot.scss

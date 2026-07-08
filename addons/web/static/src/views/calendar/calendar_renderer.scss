@@ -676,6 +676,13 @@
             z-index: $zindex-modal-backdrop - 1;
         }
     }
+
+    // custom scroll bar
+    .fc-scroller {
+        scrollbar-color: var(--CustomScrollBar__thumb-color, #{rgba($body-color, .5)}) var(--CustomScrollBar__track-color, transparent);
+        scrollbar-width: var(--CustomScrollBar-width, thin);
+        scrollbar-gutter: var(--CustomScrollBar-gutter, auto);
+    }
 }
 
 .o_calendar_renderer .fc-view {
