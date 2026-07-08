@@ -8,8 +8,8 @@ export class TimesheetDurationUOM extends TimesheetUOM {
         TimeHourField,
     };
     get timesheetComponent() {
-        if (this.timesheetUOMService.timesheetWidget === "float_time") {
-            return this.timesheetUOMService.getTimesheetComponent("time_hour_uom");
+        if (this.timesheetUOM.timesheetWidget === "float_time") {
+            return this.timesheetUOM.getTimesheetComponent("time_hour_uom");
         }
         return super.timesheetComponent;
     }

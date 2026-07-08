@@ -4,8 +4,8 @@ import { TimesheetUOM, timesheetUOM } from "../timesheet_uom/timesheet_uom";
 
 export class TimesheetUOMNoToggle extends TimesheetUOM {
     get timesheetComponent() {
-        if (this.timesheetUOMService.timesheetWidget === "float_toggle") {
-            return this.timesheetUOMService.getTimesheetComponent("float_factor");
+        if (this.timesheetUOM.timesheetWidget === "float_toggle") {
+            return this.timesheetUOM.getTimesheetComponent("float_factor");
         }
         return super.timesheetComponent;
     }

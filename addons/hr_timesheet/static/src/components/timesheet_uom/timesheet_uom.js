@@ -1,31 +1,28 @@
-import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { FloatFactorField } from "@web/views/fields/float_factor/float_factor_field";
 import { FloatToggleField } from "@web/views/fields/float_toggle/float_toggle_field";
 import { FloatTimeField } from "@web/views/fields/float_time/float_time_field";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
-import { Component } from "@odoo/owl";
+import { Component, plugin, props } from "@odoo/owl";
+import { TimesheetUOMPlugin } from "../../plugins/timesheetUOM_plugin";
 
 export class TimesheetUOM extends Component {
-    static props = {
+    props = props({
         ...standardFieldProps,
-    };
+    });
 
     static template = "hr_timesheet.TimesheetUOM";
-
     static components = { FloatFactorField, FloatToggleField, FloatTimeField };
 
-    setup() {
-        this.timesheetUOMService = useService("timesheet_uom");
-    }
+    timesheetUOM = plugin(TimesheetUOMPlugin);
 
     get timesheetComponent() {
-        return this.timesheetUOMService.getTimesheetComponent();
+        return this.timesheetUOM.getTimesheetComponent();
     }
 
     get timesheetComponentProps() {
-        return this.timesheetUOMService.getTimesheetComponentProps(this.props);
+        return this.timesheetUOM.getTimesheetComponentProps(this.props);
     }
 }
 
