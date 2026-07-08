@@ -264,14 +264,14 @@ class TestFrontend(TestFrontendCommon):
         order_tips.sort()
         self.assertEqual(order_tips, [0.0, 0.4, 1.0, 1.0, 1.5])
 
-        order4 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-000004')], limit=1, order='id desc')
+        order4 = self.env['pos.order'].search_fetch([('pos_reference', 'ilike', '%-000004')], limit=1, order='id desc')
         self.assertEqual(order4.customer_count, 2)
         self.pos_config.write({
             'preparation_printer_ids': False,
             'other_devices': False,
         })
         self.start_pos_tour('test_edit_payments_with_tip')
-        edited_orders = self.env['pos.order'].search([], limit=2)
+        edited_orders = self.env['pos.order'].search_fetch([], limit=2)
         # Tip from payment screen - tip should be the part of amount total and amount paid
         payments_order1 = {p.payment_method_id.name: p.amount for p in edited_orders[1].payment_ids}
         self.assertEqual(payments_order1, {'Cash': 6.0, 'Bank': 2.0})
@@ -306,7 +306,7 @@ class TestFrontend(TestFrontendCommon):
         self.pos_config.write({'order_edit_tracking': True})
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('OrderTrackingTour')
-        order1 = self.env['pos.order'].search([('pos_reference', 'ilike', '%-000001')], limit=1, order='id desc')
+        order1 = self.env['pos.order'].search_fetch([('pos_reference', 'ilike', '%-000001')], limit=1, order='id desc')
         self.assertTrue(order1.is_edited)
 
     def test_13_crm_team(self):
@@ -316,7 +316,7 @@ class TestFrontend(TestFrontendCommon):
         self.pos_config.crm_team_id = sale_team
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('CrmTeamTour')
-        order = self.env['pos.order'].search([], limit=1)
+        order = self.env['pos.order'].search_fetch([], limit=1)
         self.assertEqual(order.crm_team_id.id, sale_team.id)
 
     def test_14_pos_payment_sync(self):
@@ -346,7 +346,7 @@ class TestFrontend(TestFrontendCommon):
         self.pos_config.with_user(self.pos_admin).open_ui()
         self.start_pos_tour('LeaveResidualOrder', login="pos_admin")
         self.start_pos_tour('FinishResidualOrder', login="pos_user")
-        orders = self.env['pos.order'].search([])
+        orders = self.env['pos.order'].search_fetch([])
         self.assertEqual(orders[0].user_id.id, self.pos_user.id, "Pos user not registered on order")
         self.assertEqual(orders[1].user_id.id, self.pos_admin.id, "Pos admin not registered on order")
 
@@ -372,8 +372,8 @@ class TestFrontend(TestFrontendCommon):
         self.pos_config.use_order_printer = False
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_tax_in_merge_table_order_line_tour', login="pos_admin")
-        line_1 = self.env['pos.order.line'].search([('full_product_name', '=', 'product_1')])
-        line_2 = self.env['pos.order.line'].search([('full_product_name', '=', 'product_2')])
+        line_1 = self.env['pos.order.line'].search_fetch([('full_product_name', '=', 'product_1')])
+        line_2 = self.env['pos.order.line'].search_fetch([('full_product_name', '=', 'product_2')])
         self.assertEqual(line_1.tax_ids, self.tax_sale_a)
         self.assertEqual(line_2.tax_ids, self.tax_sale_a)
 

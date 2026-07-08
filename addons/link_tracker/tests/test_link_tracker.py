@@ -344,9 +344,9 @@ class TestLinkTracker(common.TransactionCase, MockLinkTracker):
 
         code1 = link1.code
         # Testing on the campaign, source, and medium
-        res1 = self.env['link.tracker'].search([('short_url', '=', base + code1), ('campaign_id', '=', campaign_2.id)]).code
-        res2 = self.env['link.tracker'].search([('short_url', '=', base + code1), ('source_id', '=', source_2.id)]).code
-        res3 = self.env['link.tracker'].search([('short_url', '=', base + code1), ('medium_id', '=', medium_2.id)]).code
+        res1 = self.env['link.tracker'].search_fetch([('short_url', '=', base + code1), ('campaign_id', '=', campaign_2.id)]).code
+        res2 = self.env['link.tracker'].search_fetch([('short_url', '=', base + code1), ('source_id', '=', source_2.id)]).code
+        res3 = self.env['link.tracker'].search_fetch([('short_url', '=', base + code1), ('medium_id', '=', medium_2.id)]).code
         self.assertFalse(res1)
         self.assertFalse(res2)
         self.assertFalse(res3)

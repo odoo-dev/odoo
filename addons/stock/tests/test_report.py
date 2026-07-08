@@ -143,7 +143,7 @@ class TestReports(TestReportsCommon):
         product_form.name = 'Product'
         product = product_form.save()
 
-        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([], limit=1)
         stock = self.env['stock.location'].create({
             'name': 'New Stock',
             'usage': 'internal',
@@ -259,7 +259,7 @@ class TestReports(TestReportsCommon):
         product_form.name = 'Product'
         product = product_form.save()
 
-        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([], limit=1)
         stock = self.env['stock.location'].create({
             'name': 'Stock Under Warehouse',
             'usage': 'internal',
@@ -316,7 +316,7 @@ class TestReports(TestReportsCommon):
         product_form.name = 'Product'
         product = product_form.save()
 
-        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([], limit=1)
         stock = self.env['stock.location'].create({
             'name': 'Rack',
             'usage': 'view',
@@ -737,7 +737,7 @@ class TestReports(TestReportsCommon):
         })
         reordering_rule.action_replenish()
         report_values, docs, lines = self.get_report_forecast(product_template_ids=self.product_template.ids)
-        pickings = self.env['stock.picking'].search([('product_id', '=', self.product.id)])
+        pickings = self.env['stock.picking'].search_fetch([('product_id', '=', self.product.id)])
         receipt = pickings.filtered(lambda p: p.picking_type_id.id == self.picking_type_in.id)
 
         # The Forecasted Report don't show intermediate moves, it must display only ingoing/outgoing documents.
@@ -878,7 +878,7 @@ class TestReports(TestReportsCommon):
         delivery.action_confirm()
 
         # Check the WH2 ressuply WH
-        inter_wh_delivery = self.env['stock.move'].search([
+        inter_wh_delivery = self.env['stock.move'].search_fetch([
             ('picking_type_id', '=', wh_2.int_type_id.id),
             ('location_id', '=', wh_2.lot_stock_id.id),
             ('location_dest_id', '=', wh.lot_stock_id.id),
@@ -900,7 +900,7 @@ class TestReports(TestReportsCommon):
         """
         # Configure second warehouse.
         company_2 = self.env['res.company'].create({'name': 'Aperture Science'})
-        wh_2 = self.env['stock.warehouse'].search([('company_id', '=', company_2.id)])
+        wh_2 = self.env['stock.warehouse'].search_fetch([('company_id', '=', company_2.id)])
         wh_2_picking_type_in = wh_2.in_type_id
 
         # Creates a receipt then checks draft picking quantities.

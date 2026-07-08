@@ -287,7 +287,7 @@ class TestWebAssets(odoo.tests.HttpCase):
         # generate website assets
         self.assertEqual(self.url_open(website_url, allow_redirects=False).status_code, 200)
         self.assertEqual(
-            self.env['ir.attachment'].search([('url', '=like', '%web.assets_frontend.min.js')]).mapped('url'),
+            self.env['ir.attachment'].search_fetch([('url', '=like', '%web.assets_frontend.min.js')]).mapped('url'),
             [website_url_versioned],
             'Only the website asset is expected to be present',
         )
@@ -300,7 +300,7 @@ class TestWebAssets(odoo.tests.HttpCase):
             logs.records[0].message,
             'The attachment was expected to be linked to an existing one')
         self.assertEqual(
-            self.env['ir.attachment'].search([('url', '=like', '%web.assets_frontend.min.js')]).mapped('url'),
+            self.env['ir.attachment'].search_fetch([('url', '=like', '%web.assets_frontend.min.js')]).mapped('url'),
             [base_url_versioned, website_url_versioned],
             'base asset is expected to be present',
         )

@@ -39,7 +39,7 @@ class AccountTaxGroup(models.Model):
         if self.env.context.get('force_delete'):
             return
         ar_companies = self.filtered(lambda g: g.company_id.chart_template.startswith('ar_')).mapped('company_id')
-        profits_tax_group_ids = self.env['ir.model.data'].search([
+        profits_tax_group_ids = self.env['ir.model.data'].search_fetch([
             ('name', 'in', [f'{company.id}_tax_group_percepcion_ganancias' for company in ar_companies]),
             ('module', '=', 'account'),
             ('res_id', '!=', False),

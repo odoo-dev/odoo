@@ -2282,8 +2282,8 @@ class TestStockValuation(TestStockValuationCommon):
         company_form.currency_id = currency_2
         company_2 = company_form.save()
         # Gets warehouses and locations.
-        warehouse_1 = self.env['stock.warehouse'].search([('company_id', '=', company_1.id)], limit=1)
-        warehouse_2 = self.env['stock.warehouse'].search([('company_id', '=', company_2.id)], limit=1)
+        warehouse_1 = self.env['stock.warehouse'].search_fetch([('company_id', '=', company_1.id)], limit=1)
+        warehouse_2 = self.env['stock.warehouse'].search_fetch([('company_id', '=', company_2.id)], limit=1)
         stock_1 = warehouse_1.lot_stock_id
         stock_2 = warehouse_2.lot_stock_id
         self.env.user.company_ids += company_1
@@ -2941,7 +2941,7 @@ class TestStockValuation(TestStockValuationCommon):
         self.assertEqual(product.qty_available, 20)
 
         # Check the creation of stock.valuation.layer
-        std_price_history = self.env['product.value'].search([('product_id', '=', product.id)], order="create_date desc, id desc", limit=1)
+        std_price_history = self.env['product.value'].search_fetch([('product_id', '=', product.id)], order="create_date desc, id desc", limit=1)
         self.assertEqual(std_price_history.value, 4)
 
         # Check the remaing value of current layers
@@ -3051,7 +3051,7 @@ class TestStockValuation(TestStockValuationCommon):
         self.assertEqual(product.qty_available, 10000)
 
         self.assertEqual(move1.value, 87.5)
-        product_value = self.env['product.value'].search([('product_id', '=', product.id)], order="create_date desc, id desc", limit=1)
+        product_value = self.env['product.value'].search_fetch([('product_id', '=', product.id)], order="create_date desc, id desc", limit=1)
         self.assertEqual(product_value.value, 0.00975)
 
     def test_stock_valuation_revaluation_fifo(self):
@@ -3255,12 +3255,12 @@ class TestStockValuation(TestStockValuationCommon):
             'name': 'Avco Product',
             'categ_id': self.category_avco.id,
         })
-        recs = self.env['stock.avco.report'].search([('product_id', '=', prod_avco.id)]).sorted('date, id')
+        recs = self.env['stock.avco.report'].search_fetch([('product_id', '=', prod_avco.id)]).sorted('date, id')
         self.assertEqual(len(recs), 1)
         self._make_in_move(prod_avco, 1, 10)
         self._make_in_move(prod_avco, 1, 10)
         self._make_in_move(prod_avco, 1, 10)
-        recs = self.env['stock.avco.report'].search([('product_id', '=', prod_avco.id)]).sorted('date, id')
+        recs = self.env['stock.avco.report'].search_fetch([('product_id', '=', prod_avco.id)]).sorted('date, id')
         self.assertEqual(len(recs), 4)
         recs[-2:]._compute_cumulative_fields()
         self.assertEqual(recs[-1].total_quantity, 3)
@@ -3287,7 +3287,7 @@ class TestStockValuation(TestStockValuationCommon):
         product_avco._update_standard_price()
         self.env.flush_all()
 
-        report_lines = self.env['stock.avco.report'].search([('product_id', '=', product_avco.id)]).sorted('date, id')[1:]
+        report_lines = self.env['stock.avco.report'].search_fetch([('product_id', '=', product_avco.id)]).sorted('date, id')[1:]
 
         self.assertEqual(report_lines[-1].avco_value, product_avco.standard_price)
 
@@ -3514,7 +3514,7 @@ class TestStockValuation(TestStockValuationCommon):
             'lot_valuated': True,
             'standard_price': 10,
         })
-        branch_warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.branch.id)], limit=1)
+        branch_warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.branch.id)], limit=1)
         branch_stock_location = branch_warehouse.lot_stock_id
         lot = self.env['stock.lot'].create({
             'name': 'Lot 1',

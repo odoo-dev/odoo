@@ -99,7 +99,7 @@ class TestHrLeaveReport(TestHrHolidaysCommon):
             ('employee_id', '=', self.employee_emp.id),
             ('work_entry_type_id', '=', self.overtime_work_entry_type.id),
         ]
-        leave_balance = self.env['hr.leave.employee.type.report'].search(domain)
+        leave_balance = self.env['hr.leave.employee.type.report'].search_fetch(domain)
 
         left_allocation = leave_balance.filtered(lambda l: l.holiday_status == 'left')
         taken_allocation = leave_balance.filtered(lambda l: l.holiday_status == 'taken')
@@ -136,7 +136,7 @@ class TestHrLeaveReport(TestHrHolidaysCommon):
             ('employee_id', '=', self.employee_emp.id),
             ('work_entry_type_id', '=', self.leave_type.id),
         ]
-        leave_balance = self.env['hr.leave.employee.type.report'].search(domain)
+        leave_balance = self.env['hr.leave.employee.type.report'].search_fetch(domain)
 
         left_records = leave_balance.filtered(lambda l: l.holiday_status == 'left')
         taken_records = leave_balance.filtered(lambda l: l.holiday_status == 'taken')
@@ -202,7 +202,7 @@ class TestHrLeaveReport(TestHrHolidaysCommon):
             ('employee_id', '=', self.employee_emp.id),
             ('work_entry_type_id', '=', self.leave_type.id),
         ]
-        leave_balance = self.env['hr.leave.employee.type.report'].search(domain)
+        leave_balance = self.env['hr.leave.employee.type.report'].search_fetch(domain)
 
         left_records = leave_balance.filtered(lambda l: l.holiday_status == 'left')
         taken_records = leave_balance.filtered(lambda l: l.holiday_status == 'taken')

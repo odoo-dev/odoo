@@ -54,7 +54,7 @@ class TestLeadTime(TestCommonSalePurchaseNoChart):
         })
         so.action_confirm()
 
-        po = self.env['purchase.order'].search([('partner_id', '=', self.vendor.id)])
+        po = self.env['purchase.order'].search_fetch([('partner_id', '=', self.vendor.id)])
         self.assertEqual(po.order_line.price_unit, self.product.seller_ids.price)
 
     def test_merge_procurement(self):

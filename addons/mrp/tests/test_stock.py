@@ -139,7 +139,7 @@ class TestWarehouseMrp(common.TestMrpCommon):
         ])
 
         # Make sure the production is delivering the goods in the location set on the rule.
-        production = self.env['mrp.production'].search([('product_id', '=', self.product_4.id)])
+        production = self.env['mrp.production'].search_fetch([('product_id', '=', self.product_4.id)])
         self.assertEqual(len(production), 1)
         self.assertEqual(production.picking_type_id.default_location_dest_id, self.warehouse_1.lot_stock_id)
         self.assertEqual(production.location_dest_id, freezer_loc)
@@ -348,7 +348,7 @@ class TestWarehouseMrp(common.TestMrpCommon):
             ('rule_ids.action', '=', 'manufacture'),
             ('company_id', 'in', [False, self.env.company.id]),
         ]
-        routes = self.env['stock.route'].search(route_domain)
+        routes = self.env['stock.route'].search_fetch(route_domain)
         routes.warehouse_ids = False
         orderpoint = self.env['stock.warehouse.orderpoint'].create({'product_id': self.laptop.id})
         self.assertEqual(routes[0].name, orderpoint.route_id_placeholder)
@@ -524,7 +524,7 @@ class TestKitPicking(common.TestMrpCommon):
             self.assertEqual(move_line.product_qty, self.expected_quantities[move_line.product_id])
 
     def test_add_sml_with_kit_to_confirmed_picking(self):
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         in_type = warehouse.in_type_id
 
         self.bom_4.type = 'phantom'
@@ -652,7 +652,7 @@ class TestKitPicking(common.TestMrpCommon):
         bom.bom_line_ids.product_qty = 10
 
         # create a delivery with 20 units of kit
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         stock_location = warehouse.lot_stock_id
 
         delivery = self.env['stock.picking'].create({

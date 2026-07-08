@@ -233,7 +233,7 @@ class CrmIapLeadMiningRequest(models.Model):
         lead_vals_list = []
         messages_to_post = {}
         for data in result:
-            country = self.env['res.country'].search([('code', '=', data['country_code'])])
+            country = self.env['res.country'].search_fetch([('code', '=', data['country_code'])])
             lead_vals_list.append(self._lead_vals_from_response(data))
 
             template_values = data

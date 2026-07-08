@@ -3,7 +3,7 @@
 from . import models
 
 def _create_picking_seq(env):
-    ptypes = env['stock.picking.type'].search([('code', '=', 'outgoing'), ('warehouse_id', '!=', False)])
+    ptypes = env['stock.picking.type'].search_fetch([('code', '=', 'outgoing'), ('warehouse_id', '!=', False)])
     for ptype in ptypes:
         wh = ptype.warehouse_id
         ptype.l10n_it_ddt_sequence_id = env['ir.sequence'].create({

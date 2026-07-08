@@ -411,7 +411,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
 
         with freeze_time('2023-08-10'):
             self.full_time_employee.resource_calendar_id = calendar_40h.id
-        timesheets_employee_40h = self.env['account.analytic.line'].search([('employee_id', '=', self.full_time_employee.id)])
+        timesheets_employee_40h = self.env['account.analytic.line'].search_fetch([('employee_id', '=', self.full_time_employee.id)])
         global_leaves_ids_40h = timesheets_employee_40h.global_leave_id
         self.assertEqual(len(global_leaves_ids_40h), 2)
         self.assertIn(gto_09_04, global_leaves_ids_40h)
@@ -419,7 +419,7 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
 
         with freeze_time('2023-10-10'):
             self.full_time_employee.resource_calendar_id = calendar_35h.id
-        timesheets_employee_35h = self.env['account.analytic.line'].search([('employee_id', '=', self.full_time_employee.id)])
+        timesheets_employee_35h = self.env['account.analytic.line'].search_fetch([('employee_id', '=', self.full_time_employee.id)])
         global_leaves_ids_35h = timesheets_employee_35h.global_leave_id
         self.assertEqual(len(global_leaves_ids_35h), 2)
         self.assertIn(gto_09_04, global_leaves_ids_35h)
@@ -610,5 +610,5 @@ class TestTimesheetGlobalTimeOff(common.TransactionCase):
             'date_from': datetime(2021, 1, 4, 0, 0, 0),
             'date_to': datetime(2021, 1, 4, 23, 59, 59),
         })
-        timesheet = self.env['account.analytic.line'].search([('employee_id', '=', self.flexible_employee.id)])
+        timesheet = self.env['account.analytic.line'].search_fetch([('employee_id', '=', self.flexible_employee.id)])
         self.assertEqual(timesheet.unit_amount, 7)

@@ -185,7 +185,7 @@ class TestEventMenus(OnlineEventCase, HttpCase):
         # Menu without views
         menu_without_view = event_3._create_menu(1, 'custom', f"/event/test-event-{event_3.id}/page/home-test-event", 'website_event.template_intro', 'introduction')
         self.assertEqual(
-            len(self.env['website.event.menu'].search([('menu_id', 'in', menu_without_view.ids)]).view_id), 0,
+            len(self.env['website.event.menu'].search_fetch([('menu_id', 'in', menu_without_view.ids)]).view_id), 0,
             "The menu should not have a view assigned because an URL has been given manually"
         )
 

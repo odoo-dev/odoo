@@ -176,7 +176,7 @@ class TestVNEDIStock(TransactionCase):
             'name': 'US Company',
             'country_id': self.env.ref('base.us').id,
         })
-        us_wh = self.env['stock.warehouse'].search(
+        us_wh = self.env['stock.warehouse'].search_fetch(
             [('company_id', '=', us_company.id)], limit=1,
         )
         us_picking = self.env['stock.picking'].with_company(us_company).create({

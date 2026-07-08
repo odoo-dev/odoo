@@ -89,7 +89,7 @@ class StockLot(models.Model):
             ('alert_date', '<=', fields.Date.today()),
             ('product_expiry_reminded', '=', False)])
 
-        lot_stock_quants = self.env['stock.quant'].search([
+        lot_stock_quants = self.env['stock.quant'].search_fetch([
             ('lot_id', 'in', alert_lots.ids),
             ('quantity', '>', 0),
             ('location_id.usage', '=', 'internal')])

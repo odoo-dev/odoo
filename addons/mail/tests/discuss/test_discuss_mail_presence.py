@@ -33,7 +33,7 @@ class TestMailPresence(WebsocketCase, MailCommon):
         self.trigger_notification_dispatching()
         notifications = json.loads(websocket.recv())
         self._close_websockets()
-        bus_record = self.env["bus.bus"].search([("id", "=", int(notifications[0]["id"]))])
+        bus_record = self.env["bus.bus"].search_fetch([("id", "=", int(notifications[0]["id"]))])
         self.assertEqual(
             bus_record.channel,
             json_dump(channel_with_db(self.env.cr.dbname, (target, "presence"))),

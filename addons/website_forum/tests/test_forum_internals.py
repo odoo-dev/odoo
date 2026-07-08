@@ -126,7 +126,7 @@ class TestTags(TestForumCommon):
             'forum_id': forum_2.id,
             'tag_ids': forum_2._tag_to_write_vals('_Food'),
         })
-        food_tags = self.env['forum.tag'].search([('name', '=', 'Food')])
+        food_tags = self.env['forum.tag'].search_fetch([('name', '=', 'Food')])
         self.assertEqual(len(food_tags), 2, "One Food tag should have been created in each forum.")
         self.assertIn(forum_1, food_tags.forum_id, "One Food tag should have been created for forum 1.")
         self.assertIn(forum_2, food_tags.forum_id, "One Food tag should have been created for forum 2.")

@@ -21,7 +21,7 @@ class TestDeliveryMrpKitBom(BaseCommon):
         """
 
         customer = self.env['res.partner'].create({'name': 'customer'})
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         kit_product, component_a, component_b = self.env['product.product'].create([
             {
                 'name': name,
@@ -102,7 +102,7 @@ class TestDeliveryMrpKitBom(BaseCommon):
                 ('Lovely Service', 10.0, 'service'),
             ]
         ])
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         for product in [component_1, component_2, give_away]:
             self.env['stock.quant']._update_available_quantity(product, warehouse.lot_stock_id, quantity=20.0)
         self.env['mrp.bom'].create([

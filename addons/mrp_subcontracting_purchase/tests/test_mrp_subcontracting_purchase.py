@@ -111,7 +111,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         """
         Test the source PO smart button both when the Resupply subcontractor rule is MTO and MTSO
         """
-        resupply_sub_on_order_route = self.env['stock.route'].search([('name', '=', 'Resupply Subcontractor on Order')])
+        resupply_sub_on_order_route = self.env['stock.route'].search_fetch([('name', '=', 'Resupply Subcontractor on Order')])
         (self.comp1 + self.comp2).write({'route_ids': [Command.link(resupply_sub_on_order_route.id)]})
 
         # Create 2 subcontracted PO's, one to be resupplied in MTO the other in MTSO
@@ -271,7 +271,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         po.button_confirm()
         # create bill
         po.action_create_invoice()
-        aml = self.env['account.move.line'].search([('purchase_line_id', '=', po.order_line.id)])
+        aml = self.env['account.move.line'].search_fetch([('purchase_line_id', '=', po.order_line.id)])
         # add 50 per unit ( 50 x 1 ) = 50 extra valuation
         aml.price_unit = 60
         aml.move_id.invoice_date = Date.today()
@@ -441,7 +441,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         self.assertEqual(self.finished.total_value, 130)
         # create bill
         purchase.action_create_invoice()
-        aml = self.env['account.move.line'].search([('purchase_line_id', '=', purchase.order_line.id)])
+        aml = self.env['account.move.line'].search_fetch([('purchase_line_id', '=', purchase.order_line.id)])
         # add 50 per unit ( 50 x 1 ) = 50 extra valuation
         aml.price_unit = 150
         aml.move_id.invoice_date = Date.today()
@@ -623,7 +623,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
 
         po.picking_type_id.warehouse_id.route_ids = [Command.link(self.env.ref('mrp_subcontracting.route_resupply_subcontractor_mto').id)]
         po.button_confirm()
-        ressuply_pick = self.env['stock.picking'].search([('location_dest_id', '=', self.company.subcontracting_location_id.id)])
+        ressuply_pick = self.env['stock.picking'].search_fetch([('location_dest_id', '=', self.company.subcontracting_location_id.id)])
         self.assertEqual(len(ressuply_pick.move_ids), 2)
         self.assertEqual(ressuply_pick.move_ids.mapped('product_id'), self.comp1 | self.comp2)
 
@@ -703,7 +703,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
             })]
         })
         mo.action_confirm()
-        po = self.env['purchase.order.line'].search([('product_id', '=', self.finished.id)]).order_id
+        po = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.finished.id)]).order_id
         po.button_confirm()
         self.assertEqual(len(po.picking_ids), 1)
         picking = po.picking_ids
@@ -874,7 +874,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         Form.from_action(self.env, receipt.button_validate()).save().process()
         backorder = receipt.backorder_ids
         # test the stock quantities after receiving 1 product
-        stock_quants = self.env['stock.quant'].search([('product_id', '=', self.finished.id)])
+        stock_quants = self.env['stock.quant'].search_fetch([('product_id', '=', self.finished.id)])
         self.assertEqual(len(stock_quants), 3)
         self.assertEqual(stock_quants.filtered(lambda q: q.location_id == final_loc).quantity, 1.0)
         self.assertEqual(stock_quants.filtered(lambda q: q.location_id == subcontract_loc).quantity, 0.0)
@@ -883,7 +883,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         backorder.move_ids.quantity = 1
         backorder.button_validate()
         # test the final stock quantities
-        stock_quants = self.env['stock.quant'].search([('product_id', '=', self.finished.id)])
+        stock_quants = self.env['stock.quant'].search_fetch([('product_id', '=', self.finished.id)])
         self.assertEqual(len(stock_quants), 3)
         self.assertEqual(stock_quants.filtered(lambda q: q.location_id == final_loc).quantity, 2.0)
         self.assertEqual(stock_quants.filtered(lambda q: q.location_id == subcontract_loc).quantity, 0.0)
@@ -947,7 +947,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         self.assertEqual(lead_horizon_date, Date.today() + timedelta(days=365))
 
         orderpoint.action_replenish()
-        purchase_order = self.env['purchase.order'].search([
+        purchase_order = self.env['purchase.order'].search_fetch([
             ('order_line', 'any', [
                 ('product_id', '=', self.finished.id),
             ]),
@@ -1079,7 +1079,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         replenish_wizard = self.env['product.replenish'].with_context(default_product_tmpl_id=self.finished.product_tmpl_id.id).create({
             'product_id': self.finished.id,
         })
-        buy_routes = self.env['stock.rule'].search([('action', '=', 'buy'), ('company_id', '=', self.company.id)]).route_id
+        buy_routes = self.env['stock.rule'].search_fetch([('action', '=', 'buy'), ('company_id', '=', self.company.id)]).route_id
         self.assertIn(replenish_wizard.route_id, buy_routes)
-        manufacture_route = self.env['stock.rule'].search([('action', '=', 'manufacture'), ('company_id', '=', self.company.id)]).route_id
+        manufacture_route = self.env['stock.rule'].search_fetch([('action', '=', 'manufacture'), ('company_id', '=', self.company.id)]).route_id
         self.assertNotIn(manufacture_route, replenish_wizard.allowed_route_ids)

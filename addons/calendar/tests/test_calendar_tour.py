@@ -65,5 +65,5 @@ class TestCalendarTours(HttpCaseWithUserDemo):
         action_id = self.env.ref('calendar.action_calendar_event')
         url = "/odoo/action-" + str(action_id.id)
         self.start_tour(url, 'test_calendar_decline_tour', login='demo')
-        attendee = self.env['calendar.attendee'].search([('event_id', '=', event.id), ('partner_id', '=', user_demo.partner_id.id)])
+        attendee = self.env['calendar.attendee'].search_fetch([('event_id', '=', event.id), ('partner_id', '=', user_demo.partner_id.id)])
         self.assertEqual(attendee.state, 'declined')  # Check if the event has been correctly declined

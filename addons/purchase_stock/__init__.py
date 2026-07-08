@@ -20,7 +20,7 @@ def _split_partial_purchase_order_lines(env):
         Domain('state', '=', 'purchase'),
         Domain('receipt_status', '=', 'partial')
     ])
-    partial_orders = env['purchase.order'].search([to_adjust])
+    partial_orders = env['purchase.order'].search_fetch([to_adjust])
     lines_to_create = []
 
     for line in partial_orders.order_line:
@@ -49,7 +49,7 @@ def _create_pickings_for_open_purchase_orders(env):
         Domain('state', '=', 'purchase'),
         Domain('receipt_status', '!=', 'full')
     ])
-    open_purchase_orders = env['purchase.order'].search([to_adjust])
+    open_purchase_orders = env['purchase.order'].search_fetch([to_adjust])
     partial_orders = open_purchase_orders.filtered(lambda o: o.receipt_status == 'partial')
     empty_lines = open_purchase_orders.order_line.filtered(
         lambda l: not l.display_type and not l.is_downpayment and l.uom_id.is_zero(l.qty_received)

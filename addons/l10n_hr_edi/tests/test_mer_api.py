@@ -211,7 +211,7 @@ class TestL10nHrEdiMerApi(TestL10nHrEdiCommon, TestAccountMoveSendCommon):
             undelivered_only=False,
             slc=(10, 20),  # Documents 3107515, 3110637, 3110651, 3111902, 3111911, 3114870, 3120196, 3120260, 3120276, 3120289
         )[self.env.company.id]
-        moves = self.env['account.move'].search([('l10n_hr_mer_document_eid', '!=', False)])
+        moves = self.env['account.move'].search_fetch([('l10n_hr_mer_document_eid', '!=', False)])
         for move in moves:
             self.assertNotEqual(move.invoice_date, False)
             self.assertNotEqual(move.partner_id, False)

@@ -652,7 +652,7 @@ class TestTraceability(TestMrpCommon):
         ])
         mo.button_mark_done()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(final_product, self.stock_location), 2)
-        self.assertRecordValues(self.env['stock.lot'].search([('product_id', '=', final_product.id)]).sorted('name'), [
+        self.assertRecordValues(self.env['stock.lot'].search_fetch([('product_id', '=', final_product.id)]).sorted('name'), [
             {'name': 'TEST0000001'},
             {'name': 'TEST0000002'},
         ])
@@ -677,7 +677,7 @@ class TestTraceability(TestMrpCommon):
         ])
         second_mo.button_mark_done()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(final_product, self.stock_location), 2 + 5)
-        self.assertRecordValues(self.env['stock.lot'].search([('product_id', '=', final_product.id)]).sorted('name'), [
+        self.assertRecordValues(self.env['stock.lot'].search_fetch([('product_id', '=', final_product.id)]).sorted('name'), [
             {'name': 'IPSUM101'},
             {'name': 'LOREM002'},
             {'name': 'TEST0000001'},
@@ -707,7 +707,7 @@ class TestTraceability(TestMrpCommon):
         })
         wizard.action_split_and_assign_serials()
 
-        split_mos = self.env['mrp.production'].search([('production_group_id', '=', mo.production_group_id.id)])
+        split_mos = self.env['mrp.production'].search_fetch([('production_group_id', '=', mo.production_group_id.id)])
         self.assertEqual(len(split_mos), 3)
 
         serials = ['SN001', 'SN002', 'SN003']
@@ -739,7 +739,7 @@ class TestTraceability(TestMrpCommon):
         ])
         mo.button_mark_done()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(final_product, self.stock_location), 2)
-        self.assertRecordValues(self.env['stock.lot'].search([('product_id', '=', final_product.id)]).sorted('name'), [
+        self.assertRecordValues(self.env['stock.lot'].search_fetch([('product_id', '=', final_product.id)]).sorted('name'), [
             {'name': '03-02-0000001'},
             {'name': '03-02-0000002'},
         ])

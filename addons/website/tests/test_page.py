@@ -74,7 +74,7 @@ class TestPage(common.TransactionCase):
         # Copying a specific page should create a new page with an unique URL (suffixed by -X)
         Page.clone_page(self.page_specific.id, clone_menu=True)
         cloned_page = Page.search([('url', '=', '/page_specific-1')])
-        cloned_menu = Menu.search([('url', '=', '/page_specific-1')])
+        cloned_menu = Menu.search_fetch([('url', '=', '/page_specific-1')])
         self.assertEqual(len(cloned_page), 1, "A page with an URL /page_specific-1 should've been created")
         self.assertEqual(Page.search_count([]), total_pages + 1, "Should have cloned the page")
         # It should also copy its menu with new url/name/page_id (if the page has a menu)
@@ -83,7 +83,7 @@ class TestPage(common.TransactionCase):
         self.assertEqual(Menu.search_count([]), total_menus + 1, "Should have cloned the page menu")
         Page.clone_page(self.page_specific.id, page_name="about-us", clone_menu=True)
         cloned_page_about_us = Page.search([('url', '=', '/about-us')])
-        cloned_menu_about_us = Menu.search([('url', '=', '/about-us')])
+        cloned_menu_about_us = Menu.search_fetch([('url', '=', '/about-us')])
         self.assertEqual(len(cloned_page_about_us), 1, "A page with an URL /about-us should've been created")
         self.assertEqual(len(cloned_menu_about_us), 1, "A specific page (with a menu) being cloned should have it's menu also cloned")
         self.assertEqual(cloned_menu_about_us.page_id, cloned_page_about_us, "The new cloned menu and the new cloned page should be linked (m2o)")
@@ -95,7 +95,7 @@ class TestPage(common.TransactionCase):
 
         # Copying a generic page should create a specific page with same URL
         Page.clone_page(self.page_1.id, clone_menu=True)
-        cloned_generic_page = Page.search([('url', '=', '/page_1'), ('id', '!=', self.page_1.id), ('website_id', '!=', False)])
+        cloned_generic_page = Page.search_fetch([('url', '=', '/page_1'), ('id', '!=', self.page_1.id), ('website_id', '!=', False)])
         self.assertEqual(len(cloned_generic_page), 1, "A generic page being cloned should create a specific one for the current website")
         self.assertEqual(cloned_generic_page.url, self.page_1.url, "The URL of the cloned specific page should be the same as the generic page it has been cloned from")
         self.assertEqual(Page.search_count([]), total_pages + 1, "Should have cloned the generic page as a specific page for this website")
@@ -174,7 +174,7 @@ class TestPage(common.TransactionCase):
         self.assertEqual(bool(self.page_1.website_id), False)
 
         website_id = self.ref('base.default_website')
-        new_page = Page.search([('url', '=', '/page_1'), ('id', '!=', self.page_1.id)])
+        new_page = Page.search_fetch([('url', '=', '/page_1'), ('id', '!=', self.page_1.id)])
         self.assertEqual(new_page.website_id.id, website_id)
         self.assertEqual(new_page.view_id.inherit_children_ids[0].website_id.id, website_id)
         self.assertEqual(new_page.arch, '<div>website 1 content</div>')
@@ -207,7 +207,7 @@ class TestPage(common.TransactionCase):
         self.assertEqual(self.extension_view.arch, '<div>modified extension content</div>')
         self.assertEqual(bool(self.page_1.website_id), False)
 
-        new_view = View.search([('name', '=', 'Extension'), ('website_id', '=', self.ref('base.default_website'))])
+        new_view = View.search_fetch([('name', '=', 'Extension'), ('website_id', '=', self.ref('base.default_website'))])
         self.assertEqual(new_view.arch, '<div>website 1 content</div>')
         self.assertEqual(new_view.website_id.id, self.ref('base.default_website'))
 
@@ -242,10 +242,10 @@ class TestPage(common.TransactionCase):
         # Not COU but deleting a page will delete its menu (cascade)
         self.assertEqual(bool(self.page_1_menu.exists()), False)
 
-        pages = Page.search([('url', '=', '/page_1')])
+        pages = Page.search_fetch([('url', '=', '/page_1')])
         self.assertEqual(len(pages), Website.search_count([]) - 1, "A specific page for every website should have been created, except for the one from where we deleted the generic one.")
         self.assertTrue(website_id not in pages.mapped('website_id').ids, "The website from which we deleted the generic page should not have a specific one.")
-        self.assertTrue(website_id not in View.search([('name', 'in', ('Base', 'Extension'))]).mapped('website_id').ids, "Same for views")
+        self.assertTrue(website_id not in View.search_fetch([('name', 'in', ('Base', 'Extension'))]).mapped('website_id').ids, "Same for views")
 
 
 @tagged('-at_install', 'post_install')
@@ -657,7 +657,7 @@ class WithContext(HttpCase):
 
         # COW a generic page
         generic_page.view_id.with_context(website_id=self.ref('base.default_website')).save(specific_arch, xpath='/div')
-        specific_page = Page.search([('url', '=', self.page.url), ('website_id', '=', website_id)])
+        specific_page = Page.search_fetch([('url', '=', self.page.url), ('website_id', '=', website_id)])
         self.assertEqual(specific_page.arch.replace('\n', ''), specific_arch)
         self.assertEqual(generic_page.arch, '<div>content</div>')
         # Change the URL of the specific page
@@ -681,8 +681,8 @@ class WithContext(HttpCase):
             lang_fr.code: {'BIDULE': 'BIDULE FR !'},
         })
 
-        self.assertEqual(self.env['website.page'].with_context({'lang': 'en_US'}).search([('url', '=', '/page_1')]).arch, '''<t name="Homepage" t-name="test.base_view">BIDULE EN !</t>''')
-        self.assertEqual(self.env['website.page'].with_context({'lang': lang_fr.code}).search([('url', '=', '/page_1')]).arch, '''<t name="Homepage" t-name="test.base_view">BIDULE FR !</t>''')
+        self.assertEqual(self.env['website.page'].with_context({'lang': 'en_US'}).search_fetch([('url', '=', '/page_1')]).arch, '''<t name="Homepage" t-name="test.base_view">BIDULE EN !</t>''')
+        self.assertEqual(self.env['website.page'].with_context({'lang': lang_fr.code}).search_fetch([('url', '=', '/page_1')]).arch, '''<t name="Homepage" t-name="test.base_view">BIDULE FR !</t>''')
 
 
 @tagged('-at_install', 'post_install')
@@ -692,7 +692,7 @@ class TestNewPage(common.TransactionCase):
         controller = Website()
         with MockRequest(self.env, website=website):
             controller.pagenew(path="snippets")
-        pages = self.env['website.page'].search([('url', '=', '/snippets')])
+        pages = self.env['website.page'].search_fetch([('url', '=', '/snippets')])
         self.assertEqual(len(pages), 1, "Exactly one page should be at /snippets.")
         self.assertNotEqual(pages.key, "website.snippets", "Page's key cannot be website.snippets.")
 

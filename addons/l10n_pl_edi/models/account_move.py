@@ -738,7 +738,7 @@ class AccountMove(models.Model):
             has_more = response['hasMore']
             page_offset += 1
 
-        already_processed = set(self.env['account.move'].search([
+        already_processed = set(self.env['account.move'].search_fetch([
             ('l10n_pl_edi_number', 'in', invoice_numbers),
             ('move_type', '=', 'in_invoice'),
             *self._check_company_domain(self.env.company),

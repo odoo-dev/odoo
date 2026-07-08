@@ -1340,7 +1340,7 @@ class AccountAccount(models.Model):
             ))
 
         # 3.2: Update Reference fields that reference account.account
-        reference_fields = self.env['ir.model.fields'].search([('ttype', '=', 'reference'), ('store', '=', True)])
+        reference_fields = self.env['ir.model.fields'].search_fetch([('ttype', '=', 'reference'), ('store', '=', True)])
         for field_to_update in reference_fields:
             model = field_to_update.model
             if not self.env[model]._auto:
@@ -1365,7 +1365,7 @@ class AccountAccount(models.Model):
             ))
 
         # 3.3: Update Many2OneReference fields that reference account.account
-        many2one_reference_fields = self.env['ir.model.fields'].search([
+        many2one_reference_fields = self.env['ir.model.fields'].search_fetch([
             ('ttype', '=', 'many2one_reference'),
             ('store', '=', True),
             '!', '&', ('model', '=', 'studio.approval.request'),  # A weird Many2oneReference which doesn't have its model field on the model.

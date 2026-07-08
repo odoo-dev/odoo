@@ -274,7 +274,7 @@ class TestCreatePicking(ProductVariantsCommon):
         even if the stock move are in MTS. """
         partner_demo_customer = self.partner_id
         final_location = partner_demo_customer.property_stock_customer
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
         mto_route.rule_ids.procure_method = 'mts_else_mto'
@@ -324,14 +324,14 @@ class TestCreatePicking(ProductVariantsCommon):
             ),
         ])
 
-        lines = self.env['purchase.order.line'].search([
+        lines = self.env['purchase.order.line'].search_fetch([
             ('product_id', '=', self.product_id_1.id),
         ])
         lines.order_id.button_confirm()
         self.assertEqual(len(lines.order_id), 2)
 
         lines[1].move_ids.picking_id.button_validate()
-        reserved_delivery = self.env['stock.move'].search([
+        reserved_delivery = self.env['stock.move'].search_fetch([
             ('product_id', '=', self.product_id_1.id),
             ('picking_type_id', '=', self.ref('stock.picking_type_out')),
             ('state', '=', 'assigned'),
@@ -587,7 +587,7 @@ class TestCreatePicking(ProductVariantsCommon):
         })
         po.picking_ids.button_validate()
 
-        pickings = self.env['stock.picking'].search([('reference_ids', '=', po.reference_ids.id)])
+        pickings = self.env['stock.picking'].search_fetch([('reference_ids', '=', po.reference_ids.id)])
         for picking in pickings:
             self.assertEqual(picking.scheduled_date.date(), date.today())
 
@@ -664,7 +664,7 @@ class TestCreatePicking(ProductVariantsCommon):
             'warehouse_id': picking_type_out.warehouse_id,
             'partner_id': vendor.id
         })
-        customer_move = self.env['stock.move'].search([('product_id', '=', product.id)])
+        customer_move = self.env['stock.move'].search_fetch([('product_id', '=', product.id)])
         purchase_order = self.env['purchase.order'].search([('partner_id', '=', partner.id)])
         self.assertTrue(purchase_order, 'No purchase order created.')
 
@@ -902,7 +902,7 @@ class TestCreatePicking(ProductVariantsCommon):
         Purchase, receive and return 1 unit of a product. Change the return operation type to be a delivery
         in one step. Check that the qty_received is udpated accordingly.
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse.delivery_steps = 'pick_ship'
         warehouse.in_type_id.return_picking_type_id = warehouse.pick_type_id
 

@@ -59,7 +59,7 @@ class TestAccruedTimeSheetSaleOrders(TestCommonSaleTimesheet):
 
         # 10 hours to invoice on 2020-01-03
         wizard.date = fields.Date.to_date('2020-01-03')
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_revenue.id, 'debit': 900, 'credit': 0},
             {'account_id': wizard.account_id.id, 'debit': 0, 'credit': 900},
@@ -70,7 +70,7 @@ class TestAccruedTimeSheetSaleOrders(TestCommonSaleTimesheet):
 
         # 20 hours to invoice on 2020-01-07
         wizard.date = fields.Date.to_date('2020-01-07')
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_revenue.id, 'debit': 1800, 'credit': 0},
             {'account_id': wizard.account_id.id, 'debit': 0, 'credit': 1800},
@@ -103,7 +103,7 @@ class TestAccruedTimeSheetSaleOrders(TestCommonSaleTimesheet):
             'account_id': self.company_data['default_account_expense'].id,
             'date': '2020-01-02',
         })
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_revenue.id, 'debit': 900, 'credit': 0},
             {'account_id': wizard.account_id.id, 'debit': 0, 'credit': 900},
@@ -119,7 +119,7 @@ class TestAccruedTimeSheetSaleOrders(TestCommonSaleTimesheet):
 
         # 20 hours to invoice on 2020-01-07
         wizard.date = fields.Date.to_date('2020-01-07')
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_revenue.id, 'debit': 900, 'credit': 0},
             {'account_id': wizard.account_id.id, 'debit': 0, 'credit': 900},

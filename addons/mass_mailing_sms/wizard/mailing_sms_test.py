@@ -13,7 +13,7 @@ class MailingSmsTest(models.TransientModel):
     _description = 'Test SMS Mailing'
 
     def _default_numbers(self):
-        previous_numbers = self.env['mailing.sms.test'].search([('create_uid', '=', self.env.uid)], order='create_date desc', limit=1).numbers
+        previous_numbers = self.env['mailing.sms.test'].search_fetch([('create_uid', '=', self.env.uid)], order='create_date desc', limit=1).numbers
         return previous_numbers or self.env.user.partner_id.phone_sanitized or ""
 
     numbers = fields.Text(string='Number(s)', required=True,

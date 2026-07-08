@@ -14,7 +14,7 @@ def pre_init_hook(env):
 def uninstall_hook(env):
     res_ids = (
         env["ir.model.data"]
-        .search([("model", "=", "ir.ui.menu"), ("module", "=", "sale")])
+        .search_fetch([("model", "=", "ir.ui.menu"), ("module", "=", "sale")])
         .mapped("res_id")
     )
     env["ir.ui.menu"].browse(res_ids).update({"active": False})
@@ -23,7 +23,7 @@ def uninstall_hook(env):
 def post_init_hook(env):
     res_ids = (
         env["ir.model.data"]
-        .search([("model", "=", "ir.ui.menu"), ("module", "=", "sale")])
+        .search_fetch([("model", "=", "ir.ui.menu"), ("module", "=", "sale")])
         .mapped("res_id")
     )
     env["ir.ui.menu"].browse(res_ids).update({"active": True})

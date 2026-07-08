@@ -31,7 +31,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
             })]
         })
         invoice.action_post()
-        message_sent = self.env['mail.message'].search([('id', '>', id_max), ('subject', '=', 'YOUR PRODUCT')])
+        message_sent = self.env['mail.message'].search_fetch([('id', '>', id_max), ('subject', '=', 'YOUR PRODUCT')])
         self.assertEqual(len(message_sent), 1, 'Should send 1 message for product')
         self.assertTrue(message_sent[0].email_from, 'Should have from email address')
 
@@ -57,6 +57,6 @@ class TestAccountMove(AccountTestInvoicingCommon):
             'group_ids': [(6, 0, [self.env.ref('base.group_public').id])]
         })
         invoice.with_user(pub_user).sudo().action_post()
-        message_sent = self.env['mail.message'].search([('id', '>', id_max), ('subject', '=', 'YOUR PRODUCT')])
+        message_sent = self.env['mail.message'].search_fetch([('id', '>', id_max), ('subject', '=', 'YOUR PRODUCT')])
         self.assertEqual(len(message_sent), 1, 'Should send 1 message for product')
         self.assertTrue(message_sent[0].email_from, 'Should have from email address')

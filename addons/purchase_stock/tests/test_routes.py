@@ -11,7 +11,7 @@ class TestRoutes(TransactionCase):
             'group_stock_multi_locations': True,
         })
 
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
 
         location_1 = self.env['stock.location'].create({
             'name': 'loc1',
@@ -59,7 +59,7 @@ class TestRoutes(TransactionCase):
         The user should be able to write on a warehouse even if the buy route
         does not exist anymore
         """
-        wh = self.env['stock.warehouse'].search([], limit=1)
+        wh = self.env['stock.warehouse'].search_fetch([], limit=1)
 
         buy_routes = self.env['stock.route'].search([('name', 'ilike', 'buy')])
         self.assertTrue(buy_routes)
@@ -88,7 +88,7 @@ class TestRoutes(TransactionCase):
         interfere with forecasted quantity.
         """
 
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         sub_location = self.env['stock.location'].create({
             'name': 'test sub location',
             'location_id': warehouse.lot_stock_id.id,

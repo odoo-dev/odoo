@@ -34,7 +34,7 @@ class HrWorkEntryType(models.Model):
 
     def get_allocation_data(self, employees, target_date=None):
         res = super().get_allocation_data(employees, target_date)
-        deductible_time_off_types = self.env['hr.work.entry.type'].search([
+        deductible_time_off_types = self.env['hr.work.entry.type'].search_fetch([
             ('overtime_deductible', '=', True),
             ('requires_allocation', '=', False)])
         work_entry_type_names = deductible_time_off_types.mapped('name')

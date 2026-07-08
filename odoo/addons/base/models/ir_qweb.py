@@ -3073,7 +3073,7 @@ class IrQweb(models.AbstractModel):
         return (js_views_bundles | lazy_bundles, css_views_bundles | lazy_bundles, bin_views_bundles)
 
     def _get_bundles_from_views(self):
-        views = self.env['ir.ui.view'].search([('type', '=', 'qweb'), ('arch_db', 'like', 't-call-assets')])
+        views = self.env['ir.ui.view'].search_fetch([('type', '=', 'qweb'), ('arch_db', 'like', 't-call-assets')])
         js_bundles = set()
         css_bundles = set()
         bin_bundles = set()
@@ -3092,7 +3092,7 @@ class IrQweb(models.AbstractModel):
         return (js_bundles, css_bundles, bin_bundles)
 
     def _get_lazy_bundles_from_js(self):
-        modules = self.env['ir.module.module'].search([('state', '=', 'installed')]).mapped('name')
+        modules = self.env['ir.module.module'].search_fetch([('state', '=', 'installed')]).mapped('name')
         lazy_bundle_regex = re.compile(r'\bloadBundle\((["\'`])([\w\.-]+)\1\)', flags=re.ASCII)
         bundles = set()
         for module in modules:

@@ -83,8 +83,8 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
             'order_id': sale_order.id,
         })
         sale_order.action_confirm()
-        task_serv2 = self.env['project.task'].search([('sale_line_id', '=', so_line_ordered_global_project.id)])
-        project_serv1 = self.env['project.project'].search([('sale_line_id', '=', so_line_ordered_project_only.id)])
+        task_serv2 = self.env['project.task'].search_fetch([('sale_line_id', '=', so_line_ordered_global_project.id)])
+        project_serv1 = self.env['project.project'].search_fetch([('sale_line_id', '=', so_line_ordered_project_only.id)])
 
         self.assertEqual(sale_order.tasks_count, 1, "One task should have been created on SO confirmation")
         self.assertEqual(len(sale_order.project_ids), 2, "One project should have been created by the SO, when confirmed + the one from SO line 2 'task in global project'")
@@ -213,7 +213,7 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
         sale_order.action_confirm()
         task_serv1 = self.env['project.task'].search([('sale_line_id', '=', so_line_deliver_global_project.id)])
         task_serv2 = self.env['project.task'].search([('sale_line_id', '=', so_line_deliver_task_project.id)])
-        project_serv2 = self.env['project.project'].search([('sale_line_id', '=', so_line_deliver_task_project.id)])
+        project_serv2 = self.env['project.project'].search_fetch([('sale_line_id', '=', so_line_deliver_task_project.id)])
 
         self.assertEqual(task_serv1.project_id, self.project_global, "Sale Timesheet: task should be created in global project")
         self.assertTrue(task_serv1, "Sale Timesheet: on SO confirmation, a task should have been created in global project")
@@ -424,8 +424,8 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
 
         # confirm SO
         sale_order.action_confirm()
-        task_serv1 = self.env['project.task'].search([('sale_line_id', '=', so_line_deliver_global_project.id)])
-        task_serv2 = self.env['project.task'].search([('sale_line_id', '=', so_line_deliver_task_project.id)])
+        task_serv1 = self.env['project.task'].search_fetch([('sale_line_id', '=', so_line_deliver_global_project.id)])
+        task_serv2 = self.env['project.task'].search_fetch([('sale_line_id', '=', so_line_deliver_task_project.id)])
         project_serv2 = self.env['project.project'].search([('sale_line_id', '=', so_line_deliver_task_project.id)])
 
         timesheet1 = self.env['account.analytic.line'].create({
@@ -644,7 +644,7 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
         sale_order2.action_confirm()
 
         task_so1 = self.env['project.task'].search([('sale_line_id', '=', so1_product_global_project_so_line.id)])
-        task_so2 = self.env['project.task'].search([('sale_line_id', '=', so2_product_global_project_so_line.id)])
+        task_so2 = self.env['project.task'].search_fetch([('sale_line_id', '=', so2_product_global_project_so_line.id)])
 
         self.assertEqual(self.partner_a, task_so1.partner_id, "The Customer of the first task should be equal to partner_a.")
         self.assertEqual(self.partner_b, task_so2.partner_id, "The Customer of the second task should be equal to partner_b.")

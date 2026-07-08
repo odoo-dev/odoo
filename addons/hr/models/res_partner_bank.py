@@ -25,7 +25,7 @@ class ResPartnerBank(models.Model):
                 bank.employee_salary_amount = 0
 
     def _search_employee_id(self, operator, value):
-        matching_employees = self.env['hr.employee'].sudo().search([('id', operator, value)])
+        matching_employees = self.env['hr.employee'].sudo().search_fetch([('id', operator, value)])
         return [('id', 'in', matching_employees.bank_account_ids.ids)]
 
     def action_open_allocation_wizard(self):

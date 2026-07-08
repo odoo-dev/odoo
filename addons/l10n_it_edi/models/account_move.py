@@ -998,7 +998,7 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         invoice_lines_tags = self.line_ids.tax_tag_ids
-        it_tax_report_vj3_lines = self.env['account.report.line'].search([
+        it_tax_report_vj3_lines = self.env['account.report.line'].search_fetch([
             ('report_id.country_id.code', '=', 'IT'),
             ('code', '=', 'VJ3'),
         ])

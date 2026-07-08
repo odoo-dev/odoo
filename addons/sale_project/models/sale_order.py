@@ -106,7 +106,7 @@ class SaleOrder(models.Model):
 
     @api.depends('order_line.product_id', 'order_line.project_id')
     def _compute_project_ids(self):
-        projects = self.env['project.project'].search(['|', ('sale_order_id', 'in', self.ids), ('reinvoiced_sale_order_id', 'in', self.ids)])
+        projects = self.env['project.project'].search_fetch(['|', ('sale_order_id', 'in', self.ids), ('reinvoiced_sale_order_id', 'in', self.ids)])
         projects_per_so = defaultdict(lambda: self.env['project.project'])
         for project in projects:
             projects_per_so[project.sale_order_id.id or project.reinvoiced_sale_order_id.id] |= project

@@ -30,10 +30,10 @@ class TestSelfOrderCombo(SelfOrderCommonTest):
         self_route = self.pos_config._get_self_order_route()
 
         self.start_tour(self_route, "self_combo_selector")
-        order = self.env['pos.order'].search([], order='id desc', limit=1)
+        order = self.env['pos.order'].search_fetch([], order='id desc', limit=1)
         self.assertEqual(len(order.lines), 4, "There should be 4 order lines - 1 combo parent and 3 combo lines")
         # check that the combo lines are correctly linked to each other
-        parent_line_id = self.env['pos.order.line'].search([('product_id.name', '=', 'Office Combo'), ('order_id', '=', order.id)])
+        parent_line_id = self.env['pos.order.line'].search_fetch([('product_id.name', '=', 'Office Combo'), ('order_id', '=', order.id)])
         combo_line_ids = self.env['pos.order.line'].search([('product_id.name', '!=', 'Office Combo'), ('order_id', '=', order.id)])
         self.assertEqual(parent_line_id.combo_line_ids, combo_line_ids, "The combo parent should have 3 combo lines")
         self.assertEqual(parent_line_id.qty, 2, "There should be 2 combo products")
@@ -412,7 +412,7 @@ class TestSelfOrderCombo(SelfOrderCommonTest):
         self.pos_config.current_session_id.set_opening_control(0, "")
         self_route = self.pos_config._get_self_order_route()
         self.start_tour(self_route, "test_self_order_combo_multiple_qty")
-        orders = self.env['pos.order'].search([], order='id desc', limit=2)
+        orders = self.env['pos.order'].search_fetch([], order='id desc', limit=2)
         self.assertEqual(orders[1].amount_total, 24)
         self.assertEqual(orders[0].amount_total, 36)
 

@@ -353,7 +353,7 @@ class TestEnv(common.TransactionCase):
             ),
         )
 
-        r = self.env['test_tools.convert.usered'].search([])
+        r = self.env['test_tools.convert.usered'].search_fetch([])
         self.assertEqual(r.name, 'b')
         self.assertEqual(r.create_uid, self.env.ref('base.user_admin'))
         self.assertEqual(r.user_id, self.env.ref('base.user_admin'))
@@ -388,7 +388,7 @@ class TestEnv(common.TransactionCase):
                 uid="base.user_root",
             ),
         )
-        r = self.env['test_tools.convert.usered'].search([])
+        r = self.env['test_tools.convert.usered'].search_fetch([])
         self.assertEqual(r.name, 'd')
         self.assertEqual(r.create_uid, self.env.ref('base.user_admin'))
         self.assertEqual(r.user_id, self.env.ref('base.user_admin'))
@@ -405,7 +405,7 @@ class TestEnv(common.TransactionCase):
                 context="{'tz': 'Asia/Kabul'}",
             ),
         )
-        r = self.env['test_tools.convert.usered'].search([])
+        r = self.env['test_tools.convert.usered'].search_fetch([])
         self.assertEqual(r.name, 'e')
         self.assertEqual(r.tz, 'Asia/Kabul')
 
@@ -422,7 +422,7 @@ class TestEnv(common.TransactionCase):
                 context="{'tz': 'Asia/Kabul'}",
             ),
         )
-        r = self.env['test_tools.convert.usered'].search([])
+        r = self.env['test_tools.convert.usered'].search_fetch([])
         self.assertEqual(r.name, 'e')
         self.assertEqual(r.tz, 'Pacific/Apia')
 
@@ -437,7 +437,7 @@ class TestEnv(common.TransactionCase):
                 context="{'tz': 'America/Knox_IN'}",
             ),
         )
-        r = self.env['test_tools.convert.usered'].search([])
+        r = self.env['test_tools.convert.usered'].search_fetch([])
         self.assertEqual(r.name, 'f')
         self.assertEqual(r.tz, 'America/Knox_IN')
 
@@ -453,6 +453,6 @@ class TestEnv(common.TransactionCase):
                 context="{'tz': 'America/Knox_IN'}",
             ),
         )
-        r = self.env['test_tools.convert.usered'].search([])
+        r = self.env['test_tools.convert.usered'].search_fetch([])
         self.assertEqual(r.name, 'f')
         self.assertEqual(r.tz, 'America/Adak')

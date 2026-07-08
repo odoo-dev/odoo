@@ -267,7 +267,7 @@ class TestPaymentTransaction(PaymentCommon):
         tx = self._create_transaction("redirect")
         payload = {"key": "value"}
         tx._record(payload)
-        payment_data = self.env["payment.data"].search([("transaction_id", "=", tx.id)])
+        payment_data = self.env["payment.data"].search_fetch([("transaction_id", "=", tx.id)])
         self.assertEqual(len(payment_data), 1)
         self.assertDictEqual(payment_data.payload, payload)
 

@@ -153,7 +153,7 @@ class TestHttpStatic(TestHttpStaticCommon):
 
     def test_static08_binary_field(self):
         earth = self.env.ref('test_http.earth')
-        attachment = self.env['ir.attachment'].search([
+        attachment = self.env['ir.attachment'].search_fetch([
             ('res_model', '=', 'test_http.stargate'),
             ('res_id', '=', earth.id),
             ('res_field', '=', 'glyph_attach')

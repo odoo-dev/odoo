@@ -11,7 +11,7 @@ class PosPaymentMethod(models.Model):
     _check_company_auto = True
 
     def _default_sequence(self):
-        return (self.search([], order="sequence desc", limit=1).sequence or 0) + 1
+        return (self.search_fetch([], order="sequence desc", limit=1).sequence or 0) + 1
 
     def _get_terminal_provider_selection(self):
         return []

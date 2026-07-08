@@ -264,7 +264,7 @@ ZeroDivisionError: division by zero""" % self.test_server_action.id
         run_res = self.action.with_context(self.context).run()
         self.assertFalse(run_res, 'ir_actions_server: create record action correctly finished should return False')
         # Test: partner updated
-        partner = self.test_partner.search([('name', 'ilike', 'TestNew')])
+        partner = self.test_partner.search_fetch([('name', 'ilike', 'TestNew')])
         self.assertEqual(len(partner), 1, 'ir_actions_server: TODO')
         self.assertEqual(partner.city, 'OrigCity', 'ir_actions_server: TODO')
 

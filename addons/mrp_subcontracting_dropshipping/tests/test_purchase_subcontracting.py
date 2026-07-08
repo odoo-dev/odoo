@@ -57,7 +57,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         self.assertEqual(picking_finished.location_id, self.subcontractor_partner1.property_stock_supplier)
         self.assertEqual(picking_finished.state, 'assigned')
 
-        picking_delivery = self.env['stock.move'].search([
+        picking_delivery = self.env['stock.move'].search_fetch([
             ('product_id', '=', self.comp1.id),
             ('location_id', '=', self.stock_location.id),
             ('location_dest_id', '=', self.subcontractor_partner1.property_stock_subcontractor.id),
@@ -65,7 +65,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         self.assertTrue(picking_delivery)
         self.assertEqual(picking_delivery.state, 'waiting')
 
-        po = self.env['purchase.order.line'].search([
+        po = self.env['purchase.order.line'].search_fetch([
             ('product_id', '=', self.comp1.id),
             ('partner_id', '=', self.vendor.id),
         ]).order_id
@@ -88,7 +88,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         # Confirm the purchase
         po.button_confirm()
         # Check one delivery order with the component has been created for the subcontractor
-        mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
+        mo = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)])
         self.assertEqual(mo.state, 'confirmed')
         # Check that 1 delivery with 1 component for the subcontractor has been created
         picking_delivery = mo.picking_ids
@@ -140,7 +140,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         })
         subcontract_po.button_confirm()
 
-        dropship_po = self.env['purchase.order'].search([('partner_id', '=', self.vendor.id)])
+        dropship_po = self.env['purchase.order'].search_fetch([('partner_id', '=', self.vendor.id)])
         self.assertEqual(dropship_po.dest_address_id, self.subcontractor_partner1)
 
     def test_po_to_customer(self):
@@ -153,7 +153,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
         self.env.user.write({'group_ids': [(4, grp_multi_loc.id)]})
 
-        dropship_picking_type = self.env['stock.picking.type'].search([
+        dropship_picking_type = self.env['stock.picking.type'].search_fetch([
             ('company_id', '=', self.env.company.id),
             ('default_location_src_id.usage', '=', 'supplier'),
             ('default_location_dest_id.usage', '=', 'customer'),
@@ -171,8 +171,8 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         })
         po.button_confirm()
 
-        mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
-        wos = self.env['stock.warehouse'].search([('company_id', '=', self.company.id)])
+        mo = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)])
+        wos = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.company.id)])
         self.assertIn(mo.picking_type_id, wos.subcontracting_type_id)
 
         delivery = po.picking_ids
@@ -240,8 +240,8 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         })
         po.button_confirm()
 
-        mo = self.env['mrp.production'].search([('bom_id', '=', bom_product.id)])
-        wos = self.env['stock.warehouse'].search([('company_id', '=', self.company.id)])
+        mo = self.env['mrp.production'].search_fetch([('bom_id', '=', bom_product.id)])
+        wos = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.company.id)])
         self.assertIn(mo.picking_type_id, wos.subcontracting_type_id)
 
         delivery = po.picking_ids
@@ -263,7 +263,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
         """
         route_buy = self.env.ref('purchase_stock.route_warehouse0_buy')
         dropship_route = self.env['stock.route'].search([('name', '=', 'Dropship')], limit=1)
-        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([], limit=1)
         warehouse.manufacture_pull_id.route_id.write({'sequence': 20})
 
         compo_drop, compo_rr = self.env['product.product'].create([{
@@ -346,7 +346,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
             'product_max_qty': 2,
         })
         self.env['stock.rule'].run_scheduler()
-        delivery = self.env["stock.move"].search([("product_id", "=", self.comp1.id)]).picking_id
+        delivery = self.env["stock.move"].search_fetch([("product_id", "=", self.comp1.id)]).picking_id
         self.assertEqual(delivery.partner_id, p1)
 
     def test_shared_purchase_from_so(self):
@@ -446,7 +446,7 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
             })],
         })
         po.button_confirm()
-        subcontracted_mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)], limit=1)
+        subcontracted_mo = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)], limit=1)
         # confirm the po to resuply the subcontractor
         po_dropship_subcontractor = self.env['purchase.order'].search([('partner_id', '=', self.vendor.id)], limit=1)
         po_dropship_subcontractor.button_confirm()
@@ -492,6 +492,6 @@ class TestSubcontractingDropshippingFlows(TestMrpSubcontractingCommon, TestStock
             ],
         })
         po.button_confirm()
-        dropship_po = self.env['purchase.order'].search([('reference_ids', '=', po.reference_ids.id), ('id', '!=', po.id)])
+        dropship_po = self.env['purchase.order'].search_fetch([('reference_ids', '=', po.reference_ids.id), ('id', '!=', po.id)])
         self.assertEqual(len(dropship_po), 1, 'A single PO should be created for the dropshipped component')
         self.assertEqual(dropship_po.order_line.product_id, (self.comp1 | self.comp2comp))

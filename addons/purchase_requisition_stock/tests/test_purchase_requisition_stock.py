@@ -44,7 +44,7 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
         move1._action_confirm()
 
         # Verification : there should be a purchase order created with the good price
-        purchase1 = self.env['purchase.order'].search([('partner_id', '=', vendor1.id)])
+        purchase1 = self.env['purchase.order'].search_fetch([('partner_id', '=', vendor1.id)])
         self.assertEqual(purchase1.order_line.price_unit, 50, 'The price on the purchase order is not the supplierinfo one')
 
         # Blanket order creation
@@ -91,7 +91,7 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
         move3._action_confirm()
 
         # Verifications
-        purchase2 = self.env['purchase.order'].search([('partner_id', '=', vendor2.id), ('requisition_id', '=', requisition_blanket.id)])
+        purchase2 = self.env['purchase.order'].search_fetch([('partner_id', '=', vendor2.id), ('requisition_id', '=', requisition_blanket.id)])
         self.assertEqual(len(purchase2), 1)
         self.assertEqual(purchase2.order_line.price_unit, 50, 'The price on the purchase order is not the blanquet order one')
 
@@ -168,8 +168,8 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
         move1._action_confirm()
         move2._action_confirm()
         # Verifications
-        POL1 = self.env['purchase.order.line'].search([('product_id', '=', product_1.id)]).order_id
-        POL2 = self.env['purchase.order.line'].search([('product_id', '=', product_2.id)]).order_id
+        POL1 = self.env['purchase.order.line'].search_fetch([('product_id', '=', product_1.id)]).order_id
+        POL2 = self.env['purchase.order.line'].search_fetch([('product_id', '=', product_2.id)]).order_id
         self.assertFalse(POL1 == POL2, 'The two blanket orders should generate two purchase different purchase orders')
         POL1.write({'order_line': [
             (0, 0, {
@@ -179,7 +179,7 @@ class TestPurchaseRequisitionStock(TestPurchaseRequisitionCommon):
                 'uom_id': product_2.uom_id.id,
             })
         ]})
-        order_line = self.env['purchase.order.line'].search([
+        order_line = self.env['purchase.order.line'].search_fetch([
             ('product_id', '=', product_2.id),
             ('product_qty', '=', 5.0),
         ])

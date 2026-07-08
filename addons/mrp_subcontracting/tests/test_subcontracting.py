@@ -106,7 +106,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         self.assertEqual(picking_receipt.state, 'assigned')
 
         # Check the created manufacturing order
-        mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
+        mo = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)])
         self.assertEqual(len(mo), 1)
         self.assertEqual(len(mo.picking_ids), 1)
         wh = picking_receipt.picking_type_id.warehouse_id
@@ -166,7 +166,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt = picking_form.save()
 
         # Pickings should directly be created
-        mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
+        mo = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)])
         self.assertEqual(len(mo.picking_ids), 1)
         self.assertEqual(mo.state, 'confirmed')
         self.assertEqual(len(mo.picking_ids.move_ids), 2)
@@ -235,7 +235,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt.action_confirm()
 
         # Pickings should directly be created
-        mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
+        mo = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)])
         self.assertEqual(mo.state, 'confirmed')
 
         picking_delivery = mo.picking_ids
@@ -305,7 +305,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         warehouse = picking_receipt.picking_type_id.warehouse_id
 
         # Pickings should directly be created
-        mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
+        mo = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)])
         self.assertEqual(mo.state, 'confirmed')
 
         moves = self.env['stock.move'].search([
@@ -496,7 +496,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt = picking_form.save()
         picking_receipt.action_confirm()
 
-        picking_delivery = self.env['stock.move'].search([
+        picking_delivery = self.env['stock.move'].search_fetch([
             ('product_id', 'in', (self.comp1 | self.comp2).ids)
         ]).picking_id
         self.assertTrue(picking_delivery)
@@ -631,7 +631,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         picking = picking_form.save()
         picking.action_confirm()
 
-        supply_picking = self.env['mrp.production'].search([('bom_id', '=', bom.id)]).picking_ids
+        supply_picking = self.env['mrp.production'].search_fetch([('bom_id', '=', bom.id)]).picking_ids
         process_picking(supply_picking, 5)
 
         process_picking(picking, 1.25)
@@ -916,7 +916,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         backorder_wizard_form = Form(self.env[backorder_wizard_dict['res_model']].with_context(backorder_wizard_dict['context']))
         backorder_wizard_form.save().process_cancel_backorder()
         self.assertEqual(receipt.state, 'done')
-        productions = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)]).sorted('id')
+        productions = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)]).sorted('id')
         self.assertRecordValues(productions, [
             {'product_qty': 19.8, 'qty_producing': 19.8, 'state': 'done'},
         ])
@@ -1017,8 +1017,8 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         })
         receipt.action_confirm()
         # Note that the subcontractor of the MO is the commercial_partner_id of subcontractor_partner1
-        subcontracted_mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)], limit=1)
-        resupply_subcontractor_delivery = self.env['stock.picking'].search([('partner_id', '=', subcontracted_mo.subcontractor_id.id)], limit=1)
+        subcontracted_mo = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)], limit=1)
+        resupply_subcontractor_delivery = self.env['stock.picking'].search_fetch([('partner_id', '=', subcontracted_mo.subcontractor_id.id)], limit=1)
         self.assertRecordValues(resupply_subcontractor_delivery.move_ids, [
             {'product_id': self.comp1.id, 'product_uom_qty': 10.0},
             {'product_id': self.comp2.id, 'product_uom_qty': 10.0},
@@ -1086,7 +1086,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt.move_ids.picked = True
 
         # Check the created manufacturing order
-        mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
+        mo = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)])
         self.assertEqual(len(mo), 1)
         self.assertEqual(len(mo.picking_ids), 0)
         self.assertEqual(mo.picking_type_id, self.warehouse.subcontracting_type_id)
@@ -1304,7 +1304,7 @@ class TestSubcontractingFlows(TestMrpSubcontractingCommon):
         picking_receipt = picking_form.save()
         picking_receipt.action_confirm()
 
-        mo = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)])
+        mo = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)])
 
         # Process the delivery of the components
         compo_picking = mo.picking_ids
@@ -1458,7 +1458,7 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
 
     def generate_subcontracting_receipt_and_mo(self, product_qty, warehouse=None):
         if not warehouse:
-            warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+            warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         receipt = self.env['stock.picking'].create({
             'picking_type_id': warehouse.in_type_id.id,
             'partner_id': self.subcontractor.id,
@@ -1490,7 +1490,7 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
         picking_receipt = picking_form.save()
         picking_receipt.action_confirm()
         # Process the delivery of the components
-        picking_deliver = self.env['mrp.production'].search([('bom_id', '=', self.bom.id)]).picking_ids
+        picking_deliver = self.env['mrp.production'].search_fetch([('bom_id', '=', self.bom.id)]).picking_ids
         picking_deliver.action_assign()
         picking_deliver.button_validate()
         # Receive
@@ -1581,7 +1581,7 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
             'type': 'subcontract',
             'subcontractor_ids': [Command.set(self.subcontractor.ids)],
         })
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse.in_type_id.create_backorder = 'always'
         receipt = self.env['stock.picking'].create({
             'picking_type_id': warehouse.in_type_id.id,
@@ -1650,7 +1650,7 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
         ])
         receipt.button_validate()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.finished, warehouse.lot_stock_id), 2)
-        self.assertRecordValues(self.env['stock.lot'].search([('product_id', '=', self.finished.id)]).sorted('name'), [
+        self.assertRecordValues(self.env['stock.lot'].search_fetch([('product_id', '=', self.finished.id)]).sorted('name'), [
             {'name': 'TEST0000001'},
             {'name': 'TEST0000002'},
         ])
@@ -1677,7 +1677,7 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
         ])
         second_receipt.button_validate()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.finished, warehouse.lot_stock_id), 2 + 5)
-        self.assertRecordValues(self.env['stock.lot'].search([('product_id', '=', self.finished.id)]).sorted('name'), [
+        self.assertRecordValues(self.env['stock.lot'].search_fetch([('product_id', '=', self.finished.id)]).sorted('name'), [
             {'name': 'IPSUM101'},
             {'name': 'LOREM002'},
             {'name': 'TEST0000001'},
@@ -1715,7 +1715,7 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
         ])
         receipt.button_validate()
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.finished, warehouse.lot_stock_id), 2)
-        self.assertRecordValues(self.env['stock.lot'].search([('product_id', '=', self.finished.id)]).sorted('name'), [
+        self.assertRecordValues(self.env['stock.lot'].search_fetch([('product_id', '=', self.finished.id)]).sorted('name'), [
             {'name': '03-02-0000001'},
             {'name': '03-02-0000002'},
         ])
@@ -1727,7 +1727,7 @@ class TestSubcontractingSerialMassReceipt(TransactionCase):
 
         Also ensure that applying the serial number generation wizard without
         generating any lot/serial numbers raises a UserError."""
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         receipt = self.env['stock.picking'].create({
             'picking_type_id': warehouse.in_type_id.id,
             'partner_id': self.subcontractor.id,

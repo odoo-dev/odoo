@@ -633,7 +633,7 @@ class MailComposeMessage(models.TransientModel):
                 if (pid and pdata['active']
                     and pid != self.env.user.partner_id.id)
             ]
-            notified_bcc = self.env['res.partner'].search([('id', 'in', partner_ids)])
+            notified_bcc = self.env['res.partner'].search_fetch([('id', 'in', partner_ids)])
             composer.notified_bcc_contains_share = any(notified_bcc.mapped('partner_share'))
 
     @api.depends('composition_mode', 'template_id')

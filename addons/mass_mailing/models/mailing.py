@@ -1164,7 +1164,7 @@ class MailingMailing(models.Model):
 
     @api.model
     def _process_mass_mailing_queue(self):
-        mass_mailings = self.search([('state', 'in', ('in_queue', 'sending')), '|', ('schedule_date', '<', fields.Datetime.now()), ('schedule_date', '=', False)])
+        mass_mailings = self.search_fetch([('state', 'in', ('in_queue', 'sending')), '|', ('schedule_date', '<', fields.Datetime.now()), ('schedule_date', '=', False)])
         self.env['ir.cron']._commit_progress(remaining=len(mass_mailings))
         for mass_mailing in mass_mailings:
             context_user = mass_mailing.user_id or mass_mailing.write_uid or self.env.user
@@ -1415,7 +1415,7 @@ class MailingMailing(models.Model):
             return []
 
         IrAttachment = self.env['ir.attachment']
-        existing_attachments = dict(IrAttachment.search([
+        existing_attachments = dict(IrAttachment.search_fetch([
             ('res_model', '=', 'mailing.mailing'),
             ('res_id', '=', self.id),
         ]).mapped(lambda record: (record.checksum, record)))

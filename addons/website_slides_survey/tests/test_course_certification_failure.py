@@ -92,7 +92,7 @@ class TestCourseCertificationFailureFlow(TestSurveyCommon):
         self.fill_in_answer(retry_user_input, certification.question_ids)
         # forces recompute of partner_ids as we delete directly in relation
         self.channel.invalidate_model()
-        channel_partner = self.env['slide.channel.partner'].with_context(active_test=False).search([
+        channel_partner = self.env['slide.channel.partner'].with_context(active_test=False).search_fetch([
             ('channel_id', 'in', self.channel.ids),
             ('partner_id', 'in', slide_partner.partner_id.ids),
         ])

@@ -79,7 +79,7 @@ class SaleOrderLine(models.Model):
             :param origin_values: map from sale line id to old value for the ordered quantity (dict)
         """
         purchase_to_notify_map = {}  # map PO -> set(SOL)
-        last_purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.ids)])
+        last_purchase_lines = self.env['purchase.order.line'].search_fetch([('sale_line_id', 'in', self.ids)])
         for purchase_line in last_purchase_lines:
             purchase_to_notify_map.setdefault(purchase_line.order_id, self.env['sale.order.line'])
             purchase_to_notify_map[purchase_line.order_id] |= purchase_line.sale_line_id
@@ -229,7 +229,7 @@ class SaleOrderLine(models.Model):
         return  [('sale_order_id', '=', self.order_id.id)]
 
     def _purchase_service_match_purchase_order(self, partner, company=False):
-        return self.env['purchase.order.line'].search(
+        return self.env['purchase.order.line'].search_fetch(
             Domain.AND([
                 [
                   ('partner_id', '=', partner.id),

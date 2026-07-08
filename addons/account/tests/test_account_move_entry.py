@@ -745,7 +745,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         (payment.move_id + move).line_ids.filtered(lambda x: x.account_id == self.company_data['default_account_receivable']).reconcile()
         # check caba move
         partial_rec = move.mapped('line_ids.matched_credit_ids')
-        caba_move = self.env['account.move'].search([('tax_cash_basis_rec_id', '=', partial_rec.id)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_rec_id', '=', partial_rec.id)])
         expected_values = [
             {
                 'tax_line_id': False,
@@ -791,7 +791,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         debit_aml = move.line_ids.filtered('debit')
         debit_aml.remove_move_reconcile()
         # check caba move reverse is same as caba move with only debit/credit inverted
-        reversed_caba_move = self.env['account.move'].search([('reversed_entry_id', '=', caba_move.id)])
+        reversed_caba_move = self.env['account.move'].search_fetch([('reversed_entry_id', '=', caba_move.id)])
         for value in expected_values:
             value.update({
                 'debit': value['credit'],

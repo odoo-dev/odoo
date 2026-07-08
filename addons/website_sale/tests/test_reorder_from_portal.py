@@ -72,7 +72,7 @@ class TestWebsiteSaleReorderFromPortal(HttpCaseWithUserPortal):
 
         self.start_tour("/my/orders", "website_sale.reorder_from_portal", login="admin")
 
-        reorder_cart = self.env["sale.order"].search([("website_id", "!=", False)], limit=1)
+        reorder_cart = self.env["sale.order"].search_fetch([("website_id", "!=", False)], limit=1)
         previous_lines = order.order_line
         order_lines = reorder_cart.order_line
 

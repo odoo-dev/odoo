@@ -11,7 +11,7 @@ class ProductPricelist(models.Model):
     def _load_pos_data_domain(self, data, config):
         pricelist_ids = [preset['pricelist_id'] for preset in data['pos.preset']]
         all_ids = config._get_available_pricelists().ids + pricelist_ids
-        referenced_base_pricelist_ids = self.env['product.pricelist.item'].search([
+        referenced_base_pricelist_ids = self.env['product.pricelist.item'].search_fetch([
             ('pricelist_id', 'in', all_ids),
             ('base', '=', 'pricelist'),
             ('base_pricelist_id', '!=', False),

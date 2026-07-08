@@ -10,7 +10,7 @@ class TestWebsiteTechnicalPage(TransactionCase):
     def _validate_routes(self, expected_routes):
         website_id = self.env['website'].get_all().ids[0]
         TechnicalPage = self.env['website.technical.page'].with_context(website_id=website_id)
-        routes = TechnicalPage.search([]).mapped('website_url')
+        routes = TechnicalPage.search_fetch([]).mapped('website_url')
 
         for route in expected_routes:
             self.assertIn(route, routes, f"Route {route} is missing from technical page records.")

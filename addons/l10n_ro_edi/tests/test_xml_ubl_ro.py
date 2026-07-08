@@ -390,7 +390,7 @@ class TestUBLRO(TestUBLROCommon):
 
         self.env['account.move']._l10n_ro_edi_fetch_invoices()
 
-        bills = self.env['account.move'].search([
+        bills = self.env['account.move'].search_fetch([
             ('move_type', 'in', self.env['account.move'].get_purchase_types()),
             ('company_id', '=', self.env.company.id),
         ])
@@ -553,7 +553,7 @@ class TestUBLRO(TestUBLROCommon):
 
         self.env['account.move']._l10n_ro_edi_fetch_invoices()
 
-        bill = self.env['account.move'].search([
+        bill = self.env['account.move'].search_fetch([
             ('move_type', 'in', self.env['account.move'].get_purchase_types()),
             ('company_id', '=', self.env.company.id),
         ])

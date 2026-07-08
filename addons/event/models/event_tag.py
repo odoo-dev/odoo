@@ -17,7 +17,7 @@ class EventTagCategory(models.Model):
         prevent adding a new related stored field in the 'event.tag' model that
         would hold the category id.
         """
-        return (self.search([], order="sequence desc", limit=1).sequence or 0) + 1
+        return (self.search_fetch([], order="sequence desc", limit=1).sequence or 0) + 1
 
     name = fields.Char("Name", required=True, translate=True)
     sequence = fields.Integer('Sequence', default=_default_sequence)

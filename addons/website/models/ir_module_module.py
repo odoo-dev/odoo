@@ -449,7 +449,7 @@ class IrModuleModule(models.Model):
         existing_urls = IrAttachment.search_read([['res_model', '=', self._name], ['type', '=', 'url']], ['url'])
         existing_urls = {url_wrapped['url'] for url_wrapped in existing_urls}
 
-        themes = self.env['ir.module.module'].with_context(active_test=False).search([
+        themes = self.env['ir.module.module'].with_context(active_test=False).search_fetch([
             ('category_id', 'child_of', self.env.ref('base.module_category_theme').id),
         ], order='name')
 

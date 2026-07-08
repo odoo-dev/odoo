@@ -106,7 +106,7 @@ class TestBLConsistency(common.TestMassMailCommon):
             {'email': 'Another Ned Stark <%s>' % self._base_list[1]},
         ])
 
-        new_bl = bl_sudo.search([('id', 'not in', self.bl_previous.ids)])
+        new_bl = bl_sudo.search_fetch([('id', 'not in', self.bl_previous.ids)])
 
         self.assertEqual(len(new_bl), 2)
         self.assertEqual(
@@ -124,7 +124,7 @@ class TestBLConsistency(common.TestMassMailCommon):
             {'email': 'Not Ned Stark <jaimie.lannister@example.com>'},
         ])
 
-        new_bl = bl_sudo.search([('id', 'not in', self.bl_previous.ids)])
+        new_bl = bl_sudo.search_fetch([('id', 'not in', self.bl_previous.ids)])
 
         self.assertEqual(len(new_bl), 3)
         self.assertEqual(

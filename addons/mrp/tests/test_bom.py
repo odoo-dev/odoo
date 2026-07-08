@@ -1427,7 +1427,7 @@ class TestBoM(TestMrpCommon):
         # We check the created orderpoint
         self.env.flush_all()
         self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
-        orderpoint = self.env['stock.warehouse.orderpoint'].search([('product_id', '=', product_gram.id)])
+        orderpoint = self.env['stock.warehouse.orderpoint'].search_fetch([('product_id', '=', product_gram.id)])
         orderpoint.replenishment_uom_id = self.uom_kg
         # No route is set by default
         self.assertEqual(orderpoint.route_id.id, False)

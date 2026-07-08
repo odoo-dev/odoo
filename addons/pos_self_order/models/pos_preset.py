@@ -89,7 +89,7 @@ class PosPreset(models.Model):
         defaults = super().default_get(fields)
         if not set(ADDRESS_FIELDS).intersection(fields):
             return defaults
-        company_configs = self.env['pos.config'].search([('company_id', '=', self.env.company.id)])
+        company_configs = self.env['pos.config'].search_fetch([('company_id', '=', self.env.company.id)])
         company_preset_ids = (company_configs.mapped('available_preset_ids') | company_configs.mapped('default_preset_id')).ids
         existing = self.search([('id', 'in', company_preset_ids), ('service_at', '=', 'delivery'), ('delivery_from_address', '!=', False)], limit=1)
         if existing:

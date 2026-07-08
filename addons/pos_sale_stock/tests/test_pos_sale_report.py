@@ -38,7 +38,7 @@ class TestPoSSaleStockReport(TestPoSSaleReport, TestPosStockCommon, TestPosStock
 
         session.action_pos_session_closing_control()
 
-        reports = self.env['sale.report'].sudo().search([('product_id', '=', self.product0.id)], order='id', limit=2)
+        reports = self.env['sale.report'].sudo().search_fetch([('product_id', '=', self.product0.id)], order='id', limit=2)
         self.assertEqual(reports[0].warehouse_id.id, self.config.picking_type_id.warehouse_id.id)
 
     def test_qty_deliverd_qty_to_deliver_in_sales_report(self):
@@ -61,7 +61,7 @@ class TestPoSSaleStockReport(TestPoSSaleReport, TestPosStockCommon, TestPosStock
 
         session.action_pos_session_closing_control()
 
-        report = self.env['sale.report'].sudo().search([('product_id', '=', self.product0.id)], order='id')
+        report = self.env['sale.report'].sudo().search_fetch([('product_id', '=', self.product0.id)], order='id')
 
         self.assertEqual(sum(report.mapped('qty_to_deliver')), 8)
         self.assertEqual(sum(report.mapped('qty_delivered')), 0)
@@ -72,7 +72,7 @@ class TestPoSSaleStockReport(TestPoSSaleReport, TestPosStockCommon, TestPosStock
         self.env.flush_all()
         self.env.transaction.clear()
 
-        report = self.env['sale.report'].sudo().search([('product_id', '=', self.product0.id)], order='id')
+        report = self.env['sale.report'].sudo().search_fetch([('product_id', '=', self.product0.id)], order='id')
 
         self.assertEqual(sum(report.mapped('qty_to_deliver')), 0)
         self.assertEqual(sum(report.mapped('qty_delivered')), 8)

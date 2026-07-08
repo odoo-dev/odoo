@@ -1222,7 +1222,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
     def test_return_multisteps_receipt(self):
         """test extra product returned are added to the sale order only once in 3 steps receipt"""
 
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse.reception_steps = 'three_steps'
         sale_order = self._get_new_sale_order()
         sale_order.action_confirm()
@@ -1244,7 +1244,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         next_pick.button_validate()
         next_pick = next_pick.move_ids.move_dest_ids.picking_id
         next_pick.button_validate()
-        sol = self.env['sale.order.line'].search([('product_id', '=', self.new_product.id)])
+        sol = self.env['sale.order.line'].search_fetch([('product_id', '=', self.new_product.id)])
         self.assertEqual(len(sol), 1)
         self.assertEqual(sol.qty_delivered, -2)
 
@@ -1678,7 +1678,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         On the SO, cancel the qty of the product
         On each picking, the SM should be canceled
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         customer_location = self.env.ref('stock.stock_location_customers')
 
         warehouse.delivery_steps = 'pick_ship'
@@ -1941,7 +1941,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
             If not everything was delivered: partial
             If everything was delivered: full
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse.delivery_steps = 'pick_ship'
 
         so = self.env['sale.order'].create({
@@ -2131,7 +2131,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         Test that forecast availability(icon) widget info on the Sales Order correctly appears green
         when enough stock is available in a 2-step/3-step delivery.
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse.delivery_steps = 'pick_ship'
 
         # Make quantity available for the product.
@@ -2309,7 +2309,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         Check that moves created from user-created push rules does not interfere with updating the
         quantity of pickings when the quanityt of the SO is updated
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse.delivery_steps = 'pick_pack_ship'
         stock_location = warehouse.lot_stock_id
         pack_location, out_location, _ = warehouse.delivery_route_id.rule_ids.picking_type_id.default_location_dest_id
@@ -2515,7 +2515,7 @@ class TestSaleStock(TestSaleStockCommon, ValuationReconciliationTestCommon):
         """
         Check that linking a delivery to a sale order sets its reference accordingly
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         delivery = self.env['stock.picking'].create({
             'picking_type_id': warehouse.out_type_id.id,
             'location_id': warehouse.lot_stock_id.id,

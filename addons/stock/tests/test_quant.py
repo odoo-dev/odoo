@@ -200,7 +200,7 @@ class TestStockQuant(TestStockCommon):
             'name': 'stock_location',
             'usage': 'internal',
         })
-        quant = self.env['stock.quant'].search([('location_id', '=', stock_location.id)], limit=1)
+        quant = self.env['stock.quant'].search_fetch([('location_id', '=', stock_location.id)], limit=1)
         if not quant:
             self.skipTest('Cannot test concurrent transactions without demo data.')
         product = quant.product_id
@@ -293,7 +293,7 @@ class TestStockQuant(TestStockCommon):
             'name': 'stock_location',
             'usage': 'internal',
         })
-        quant = self.env['stock.quant'].search([('location_id', '=', stock_location.id)], limit=1)
+        quant = self.env['stock.quant'].search_fetch([('location_id', '=', stock_location.id)], limit=1)
         if not quant:
             self.skipTest('Cannot test concurrent transactions without demo data.')
         product = quant.product_id
@@ -592,7 +592,7 @@ class TestStockQuant(TestStockCommon):
         self.env['stock.quant']._update_available_quantity(self.product_serial, self.stock_location, 1.0, lot_id=lot2, in_date=in_date_lot2)
 
         self.env['stock.quant']._update_reserved_quantity(self.product_serial, self.stock_location, 1)
-        quants = self.env['stock.quant'].search([('product_id', '=', self.product_serial.id), ('location_id', '=', self.stock_location.id)])
+        quants = self.env['stock.quant'].search_fetch([('product_id', '=', self.product_serial.id), ('location_id', '=', self.stock_location.id)])
 
         # Removal strategy is LIFO, so lot1 should be received as it was received later.
         self.assertEqual(quants[0][0].lot_id.id, lot1.id)
@@ -610,7 +610,7 @@ class TestStockQuant(TestStockCommon):
         in_date1 = Datetime.now()
         self.env['stock.quant']._update_available_quantity(self.product_lot, self.stock_location, 1.0, lot_id=lot1, in_date=in_date1)
 
-        quant = self.env['stock.quant'].search([
+        quant = self.env['stock.quant'].search_fetch([
             ('product_id', '=', self.product_lot.id),
             ('location_id', '=', self.stock_location.id),
         ])
@@ -622,7 +622,7 @@ class TestStockQuant(TestStockCommon):
         in_date2 = Datetime.now() - timedelta(days=5)
         self.env['stock.quant']._update_available_quantity(self.product_lot, self.stock_location, 1.0, lot_id=lot1, in_date=in_date2)
 
-        quant = self.env['stock.quant'].search([
+        quant = self.env['stock.quant'].search_fetch([
             ('product_id', '=', self.product_lot.id),
             ('location_id', '=', self.stock_location.id),
         ])
@@ -862,7 +862,7 @@ class TestStockQuant(TestStockCommon):
         })
         receipt01.button_validate()
 
-        quant = self.env['stock.quant'].search([('product_id', '=', self.product_serial.id), ('location_id', '=', self.stock_location.id)])
+        quant = self.env['stock.quant'].search_fetch([('product_id', '=', self.product_serial.id), ('location_id', '=', self.stock_location.id)])
 
         return_pick = receipt01._create_return()
         return_pick.move_ids.product_uom_qty = 1.0
@@ -892,7 +892,7 @@ class TestStockQuant(TestStockCommon):
         })
         receipt02.button_validate()
 
-        quant = self.env['stock.quant'].search([('product_id', '=', self.product_serial.id), ('location_id', '=', self.stock_location.id)])
+        quant = self.env['stock.quant'].search_fetch([('product_id', '=', self.product_serial.id), ('location_id', '=', self.stock_location.id)])
         self.assertEqual(len(quant), 1)
         self.assertEqual(quant.lot_id.name, 'Michel')
 
@@ -968,7 +968,7 @@ class TestStockQuant(TestStockCommon):
         self.assertEqual(relocate_wizard.is_partial_package, False)
         relocate_wizard.dest_location_id = self.shelf_2
         relocate_wizard.save().action_relocate_quants()
-        new_quant_a_bis = self.env['stock.quant'].search([('product_id', '=', self.productA.id), ('quantity', '=', 10)])
+        new_quant_a_bis = self.env['stock.quant'].search_fetch([('product_id', '=', self.productA.id), ('quantity', '=', 10)])
         self.assertEqual(new_quant_a_bis.location_id, self.shelf_2)
         self.assertEqual(new_quant_a_bis.package_id, package_02)
 
@@ -1061,7 +1061,7 @@ class TestStockQuant(TestStockCommon):
         })
         dummy_quant.action_apply_inventory()
 
-        creation_move_line = self.env['stock.move.line'].search([('product_id', '=', dummy_product.id)])
+        creation_move_line = self.env['stock.move.line'].search_fetch([('product_id', '=', dummy_product.id)])
         self.assertEqual(creation_move_line.package_id.id, False, "There should be no origin package")
         self.assertEqual(creation_move_line.result_package_id.id, dummy_package.id, "The destination package should be the dummy package")
         self.assertEqual(creation_move_line.location_dest_id.id, self.stock_location.id, "The destination location should be the stock location")
@@ -1069,7 +1069,7 @@ class TestStockQuant(TestStockCommon):
         dummy_quant.inventory_quantity = 0
         dummy_quant.action_apply_inventory()
 
-        destruction_move_line = self.env['stock.move.line'].search([('product_id', '=', dummy_product.id), ('id', '!=', creation_move_line.id)])
+        destruction_move_line = self.env['stock.move.line'].search_fetch([('product_id', '=', dummy_product.id), ('id', '!=', creation_move_line.id)])
         self.assertEqual(destruction_move_line.package_id.id, dummy_package.id, "The origin package should be the dummy package")
         self.assertEqual(destruction_move_line.result_package_id.id, False, "The destination package should be False")
         self.assertEqual(destruction_move_line.location_id.id, self.stock_location.id, "The origin location should be the stock location")
@@ -1409,7 +1409,7 @@ class TestStockQuant(TestStockCommon):
         self.productA.property_stock_inventory = False
 
         quant.with_context(inventory_report_mode=True).action_set_inventory_quantity_zero()
-        move_line = self.env['stock.move.line'].search([('product_id', '=', self.productA.id)])
+        move_line = self.env['stock.move.line'].search_fetch([('product_id', '=', self.productA.id)])
         loss_location_id = self.env['ir.default']._get_model_defaults('product.template').get('property_stock_inventory')
 
         self.assertEqual(

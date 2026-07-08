@@ -94,7 +94,7 @@ class PosController(PortalAccount):
 
         if not pos_config.current_session_id:
             pos_config.open_session_if_not_opened()  # Create a session after doing the necessary checks.
-            pos_session = request.env['pos.session'].sudo().search(domain, limit=1)
+            pos_session = request.env['pos.session'].sudo().search_fetch(domain, limit=1)
 
         # The POS only works in one company, so we enforce the one of the session in the context
         company = pos_session.company_id

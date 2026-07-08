@@ -71,7 +71,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         url = "/pos/ui/%d" % self.main_pos_config.id
         self.start_tour(url, 'test_ship_later_kit_and_mto_manufactured_product', login="pos_user")
 
-        picking = self.env['stock.picking'].search([('partner_id', '=', self.partner_full.id)], limit=1)
+        picking = self.env['stock.picking'].search_fetch([('partner_id', '=', self.partner_full.id)], limit=1)
         self.assertRecordValues(picking.move_ids, [
             {'product_id': self.finished.id, 'product_qty': 1.0},
             {'product_id': self.component_a.id, 'product_qty': 1.0},

@@ -22,7 +22,7 @@ class PosSelfEventController(PosSelfOrderController):
         if not order_id or not event_ticket_id:
             raise NotFound()
 
-        event_regs = pos_config.env['event.registration'].search([
+        event_regs = pos_config.env['event.registration'].search_fetch([
             ('pos_order_id', '=', int(order_id)),
             ('event_ticket_id', '=', int(event_ticket_id)),
         ])

@@ -61,7 +61,7 @@ class TestEditableQuant(TransactionCase):
             'location_id': self.stock.id,
             'inventory_quantity': 24
         }).action_apply_inventory()
-        quants = self.env['stock.quant'].search([
+        quants = self.env['stock.quant'].search_fetch([
             ('product_id', '=', self.product.id),
             ('quantity', '>', 0),
         ])
@@ -70,7 +70,7 @@ class TestEditableQuant(TransactionCase):
         self.assertEqual(len(quants), 1)
         self.assertEqual(quants.quantity, 24)
 
-        stock_move = self.env['stock.move'].search([
+        stock_move = self.env['stock.move'].search_fetch([
             ('product_id', '=', self.product.id),
         ])
         self.assertEqual(stock_move.location_id.id, self.inventory_loss.id)
@@ -172,7 +172,7 @@ class TestEditableQuant(TransactionCase):
         quant.inventory_quantity = 24
         quant.action_apply_inventory()
         self.assertEqual(quant.quantity, 24)
-        stock_move = self.env['stock.move'].search([
+        stock_move = self.env['stock.move'].search_fetch([
             ('product_id', '=', self.product.id),
         ])
         self.assertEqual(stock_move.location_id.id, self.inventory_loss.id)
@@ -189,7 +189,7 @@ class TestEditableQuant(TransactionCase):
         quant.inventory_quantity = 8
         quant.action_apply_inventory()
         self.assertEqual(quant.quantity, 8)
-        stock_move = self.env['stock.move'].search([
+        stock_move = self.env['stock.move'].search_fetch([
             ('product_id', '=', self.product.id),
         ])
         self.assertEqual(stock_move.location_id.id, self.room1.id)
@@ -225,7 +225,7 @@ class TestEditableQuant(TransactionCase):
 
     def test_edit_quant_4(self):
         """ Update the quantity with the inventory report mode """
-        default_wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        default_wh = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         default_stock_location = default_wh.lot_stock_id
         quant = self.Quant.create({
             'product_id': self.product.id,
@@ -247,7 +247,7 @@ class TestEditableQuant(TransactionCase):
     def test_edit_quant_5(self):
         """ Create a quant with inventory mode and check that the inventory adjustment reason
             is used as a reference in the `stock.move` """
-        default_wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        default_wh = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         default_stock_location = default_wh.lot_stock_id
         quant = self.Quant.create({
             'product_id': self.product.id,
@@ -292,7 +292,7 @@ class TestEditableQuant(TransactionCase):
 
     def test_revert_inventory_adjustment(self):
         """Try to revert inventory adjustment"""
-        default_wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        default_wh = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         default_stock_location = default_wh.lot_stock_id
         quant = self.Quant.create({
             'product_id': self.product.id,
@@ -308,7 +308,7 @@ class TestEditableQuant(TransactionCase):
 
     def test_multi_revert_inventory_adjustment(self):
         """Try to revert inventory adjustment with multiple lines"""
-        default_wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        default_wh = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         default_stock_location = default_wh.lot_stock_id
         quant = self.Quant.create({
             'product_id': self.product.id,
@@ -326,7 +326,7 @@ class TestEditableQuant(TransactionCase):
 
     def test_revert_scrap_move(self):
         """Try to revert a scrapped move"""
-        default_wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        default_wh = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         default_stock_location = default_wh.lot_stock_id
         scrap_location = default_wh.company_id.scrap_location_id
         # Put 1 unit in stock
@@ -356,7 +356,7 @@ class TestEditableQuant(TransactionCase):
 
     def test_set_inventory_quant_to_zero(self):
         """Try to set inventory quantity to zero and check that the quant is deleted after unlinking zero quants"""
-        default_wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        default_wh = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         default_stock_location = default_wh.lot_stock_id
         quant = self.Quant.create({
             'product_id': self.product.id,

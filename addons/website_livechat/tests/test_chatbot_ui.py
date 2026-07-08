@@ -372,7 +372,7 @@ class TestLivechatChatbotUI(TestLivechatChatbotUICommon):
         ])
         self.livechat_channel.rule_ids = self.env["im_livechat.channel.rule"].create({"chatbot_script_id": chatbot_script.id})
         self.start_tour("/", "website_livechat.chatbot_user_input_saved_on_last_step")
-        user_answer_message = self.env["chatbot.message"].search([
+        user_answer_message = self.env["chatbot.message"].search_fetch([
             ("script_step_id", "=", email_step.id),
             ("discuss_channel_id.livechat_channel_id", "=", self.livechat_channel.id),
         ], limit=1)
@@ -454,7 +454,7 @@ class TestLivechatChatbotUI(TestLivechatChatbotUICommon):
         ):
             self.start_tour("/", "website_livechat.chatbot_stop_when_agent_joins_tour")
 
-        channel = self.env["discuss.channel"].search([("id", "=", new_channel_id)])
+        channel = self.env["discuss.channel"].search_fetch([("id", "=", new_channel_id)])
 
         self.assertFalse(
             channel.message_ids.filtered(lambda m: "This step should not be reached" in m.body),

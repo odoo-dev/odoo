@@ -137,7 +137,7 @@ class TestDiscussChannelReadonly(MailCommon, HttpCase):
                 "name": "Subchannel created by user",
             },
         )
-        subchannel = self.env["discuss.channel"].search(
+        subchannel = self.env["discuss.channel"].search_fetch(
             [
                 ("name", "=", "Subchannel created by user"),
                 ("parent_channel_id", "=", self.test_channel.id),

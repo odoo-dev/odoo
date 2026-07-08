@@ -1103,7 +1103,7 @@ class TestFormattedReadGroup(common.TransactionCase):
                         'value:sum': 98,
                         '__extra_domain': [('datetime.iso_week_number', '=', 6)],
                     }])
-        result = Model.with_context({'tz': 'Pacific/Auckland'}).search(result[0]['__extra_domain'])
+        result = Model.with_context({'tz': 'Pacific/Auckland'}).search_fetch(result[0]['__extra_domain'])
         self.assertEqual(len(result), 1)
         self.assertEqual(result.value, 98)
 
@@ -1123,7 +1123,7 @@ class TestFormattedReadGroup(common.TransactionCase):
                 'value:sum': 98,
                 '__extra_domain': [('date.day_of_week', '=', 0)],
             }])
-        res = Model.with_context({'tz': 'fr_BE'}).search(result[0]['__extra_domain'])
+        res = Model.with_context({'tz': 'fr_BE'}).search_fetch(result[0]['__extra_domain'])
         self.assertEqual(len(res), 1)
         self.assertEqual(res.mapped('value'), [98])
 
@@ -1139,7 +1139,7 @@ class TestFormattedReadGroup(common.TransactionCase):
                 '__extra_domain': [('date.day_of_week', '=', 0)],
             }])
 
-        res = Model.with_context({'tz': 'NZ'}).search(result[0]['__extra_domain'])
+        res = Model.with_context({'tz': 'NZ'}).search_fetch(result[0]['__extra_domain'])
         self.assertEqual(len(res), 1)
         self.assertEqual(res.mapped('value'), [98])
 

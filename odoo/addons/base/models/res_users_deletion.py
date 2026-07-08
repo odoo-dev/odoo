@@ -43,7 +43,7 @@ class ResUsersDeletion(models.Model):
         create_uid, write_uid on each models, which are not always indexed). Because of
         that, this operation is done in a CRON.
         """
-        delete_requests = self.search([("state", "=", "todo")])
+        delete_requests = self.search_fetch([("state", "=", "todo")])
 
         # filter the requests related to a deleted user
         done_requests = delete_requests.filtered(lambda request: not request.user_id)

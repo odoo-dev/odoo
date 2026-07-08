@@ -268,7 +268,7 @@ class AccountMove(models.Model):
             & Domain('l10n_ro_edi_index', '=', False)
             & Domain('l10n_ro_edi_state', '=', 'invoice_not_indexed')
         )
-        non_indexed_invoices = self.env['account.move'].search(domain)
+        non_indexed_invoices = self.env['account.move'].search_fetch(domain)
 
         document_ids_to_delete = []
         for invoice in non_indexed_invoices:
@@ -458,7 +458,7 @@ class AccountMove(models.Model):
                 )
             )
         )
-        similar_bills = self.env['account.move'].search(domain)
+        similar_bills = self.env['account.move'].search_fetch(domain)
 
         indexed_similar_bills = similar_bills.filtered('l10n_ro_edi_index').mapped('l10n_ro_edi_index')
         non_indexed_similar_bills_dict = {

@@ -1153,11 +1153,11 @@ class ProductTemplate(models.Model):
             super()._init_column(column_name)
 
     def set_sequence_top(self):
-        min_sequence = self.sudo().search([], order="website_sequence ASC", limit=1)
+        min_sequence = self.sudo().search_fetch([], order="website_sequence ASC", limit=1)
         self.website_sequence = min_sequence.website_sequence - 5
 
     def set_sequence_bottom(self):
-        max_sequence = self.sudo().search([], order="website_sequence DESC", limit=1)
+        max_sequence = self.sudo().search_fetch([], order="website_sequence DESC", limit=1)
         self.website_sequence = max_sequence.website_sequence + 5
 
     def set_sequence_up(self):

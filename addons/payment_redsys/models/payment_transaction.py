@@ -189,7 +189,7 @@ class PaymentTransaction(models.Model):
         currency = (
             self
             .env["res.currency"]
-            .search([("iso_numeric", "=", payment_data.get("Ds_Currency"))], limit=1)
+            .search_fetch([("iso_numeric", "=", payment_data.get("Ds_Currency"))], limit=1)
             .name
         )
         return {"amount": amount, "currency_code": currency}

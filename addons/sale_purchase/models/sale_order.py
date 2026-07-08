@@ -60,7 +60,7 @@ class SaleOrder(models.Model):
         """
         purchase_to_notify_map = {}  # map PO -> recordset of SOL as {purchase.order: set(sale.orde.liner)}
 
-        purchase_order_lines = self.env['purchase.order.line'].search([
+        purchase_order_lines = self.env['purchase.order.line'].search_fetch([
             ('sale_line_id', 'in', self.mapped('order_line').ids),
             ('state', '!=', 'cancel'),
             ('product_id.service_tracking', '=', 'subcontract'),

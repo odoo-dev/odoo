@@ -305,22 +305,22 @@ class TestImportModule(odoo.tests.TransactionCase):
         # Import test module
         self.env['ir.module.module']._import_zipfile(stream)
 
-        attachment = self.env['ir.attachment'].search([('url', '=', path)])
+        attachment = self.env['ir.attachment'].search_fetch([('url', '=', path)])
         self.assertEqual(attachment.name, 'test.js')
         self.assertEqual(attachment.type, 'binary')
         self.assertEqual(attachment.raw.content, b"console.log('AAA');")
 
-        asset = self.env['ir.asset'].search([('name', '=', f'test_module.{bundle}.{path}')])
+        asset = self.env['ir.asset'].search_fetch([('name', '=', f'test_module.{bundle}.{path}')])
         self.assertEqual(asset.path, path)
         self.assertEqual(asset.bundle, bundle)
         self.assertEqual(asset.directive, 'append')
         self.assertEqual(asset.target, False)
 
-        asset_data = self.env['ir.model.data'].search([('model', '=', 'ir.asset'), ('res_id', '=', asset.id)])
+        asset_data = self.env['ir.model.data'].search_fetch([('model', '=', 'ir.asset'), ('res_id', '=', asset.id)])
         self.assertEqual(asset_data.module, 'test_module')
         self.assertEqual(asset_data.name, f'{bundle}_{path}'.replace(".", "_"))
 
-        module = self.env['ir.module.module'].search([('name', '=', 'test_module')])
+        module = self.env['ir.module.module'].search_fetch([('name', '=', 'test_module')])
         self.assertEqual(module.dependencies_id.mapped('name'), ['base'])
         self.assertEqual(module.category_id.name, 'Test Category')
 
@@ -362,22 +362,22 @@ class TestImportModule(odoo.tests.TransactionCase):
         # Import test module
         self.env['ir.module.module'].with_user(self.test_user)._import_zipfile(stream)
 
-        attachment = self.env['ir.attachment'].search([('url', '=', f'/{path}')])
+        attachment = self.env['ir.attachment'].search_fetch([('url', '=', f'/{path}')])
         self.assertEqual(attachment.name, 'test.js')
         self.assertEqual(attachment.type, 'binary')
         self.assertEqual(attachment.raw.content, b"console.log('AAA');")
 
-        asset = self.env['ir.asset'].search([('name', '=', f'test_module.{bundle}./{path}')])
+        asset = self.env['ir.asset'].search_fetch([('name', '=', f'test_module.{bundle}./{path}')])
         self.assertEqual(asset.path, f'/{path}')
         self.assertEqual(asset.bundle, bundle)
         self.assertEqual(asset.directive, 'append')
         self.assertEqual(asset.target, False)
 
-        asset_data = self.env['ir.model.data'].search([('model', '=', 'ir.asset'), ('res_id', '=', asset.id)])
+        asset_data = self.env['ir.model.data'].search_fetch([('model', '=', 'ir.asset'), ('res_id', '=', asset.id)])
         self.assertEqual(asset_data.module, 'test_module')
         self.assertEqual(asset_data.name, f'{bundle}_/{path}'.replace(".", "_"))
 
-        module = self.env['ir.module.module'].search([('name', '=', 'test_module')])
+        module = self.env['ir.module.module'].search_fetch([('name', '=', 'test_module')])
         self.assertEqual(module.latest_version, f'{release.series}.1.0')
 
         # Update test module
@@ -389,18 +389,18 @@ class TestImportModule(odoo.tests.TransactionCase):
         # Import test module
         self.env['ir.module.module'].with_user(self.test_user)._import_zipfile(stream)
 
-        attachment = self.env['ir.attachment'].search([('url', '=', f'/{path}')])
+        attachment = self.env['ir.attachment'].search_fetch([('url', '=', f'/{path}')])
         self.assertEqual(attachment.name, 'test.js')
         self.assertEqual(attachment.type, 'binary')
         self.assertEqual(attachment.raw.content, b"console.log('BBB');")
 
-        asset = self.env['ir.asset'].search([('name', '=', f'test_module.{bundle}./{path}')])
+        asset = self.env['ir.asset'].search_fetch([('name', '=', f'test_module.{bundle}./{path}')])
         self.assertEqual(asset.path, f'/{path}')
         self.assertEqual(asset.bundle, bundle)
         self.assertEqual(asset.directive, 'append')
         self.assertEqual(asset.target, False)
 
-        asset_data = self.env['ir.model.data'].search([('model', '=', 'ir.asset'), ('res_id', '=', asset.id)])
+        asset_data = self.env['ir.model.data'].search_fetch([('model', '=', 'ir.asset'), ('res_id', '=', asset.id)])
         self.assertEqual(asset_data.module, 'test_module')
         self.assertEqual(asset_data.name, f'{bundle}_/{path}'.replace(".", "_"))
 
@@ -445,7 +445,7 @@ class TestImportModule(odoo.tests.TransactionCase):
             ('bar/__manifest__.py', self.manifest_content(depends=['base', 'foo'])),
         ]
         self.import_zipfile(files)
-        module = self.env['ir.module.module'].search([('name', '=', 'baz')])
+        module = self.env['ir.module.module'].search_fetch([('name', '=', 'baz')])
         self.assertEqual(set(module.dependencies_id.mapped('name')), {'bar', 'base', 'foo'})
 
     def test_multiple_file_open_temporary_directory(self):

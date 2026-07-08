@@ -197,7 +197,7 @@ class TestBatchPicking(TransactionCase):
         wizard_form.wave_id = wave
         wizard_form.save().attach_pickings()
 
-        wave = self.env['stock.picking.batch'].search([
+        wave = self.env['stock.picking.batch'].search_fetch([
             ('is_wave', '=', True)
         ])
         self.assertEqual(len(wave), 1)
@@ -444,7 +444,7 @@ class TestBatchPicking(TransactionCase):
         """
         Check that the operation type of the picking is set correclty in the wave.
         """
-        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([], limit=1)
         warehouse.reception_steps = 'three_steps'
         self.productA = self.env['product.product'].create({
             'name': 'Product Test A',
@@ -485,7 +485,7 @@ class TestBatchPicking(TransactionCase):
 
         move_line = self.env["stock.move.line"].search([('product_id', '=', self.productA.id), ('location_id', '=', warehouse.wh_input_stock_loc_id.id)])
         move_line._add_to_wave()
-        wave = self.env['stock.picking.batch'].search([
+        wave = self.env['stock.picking.batch'].search_fetch([
             ('is_wave', '=', True)
         ])
         self.assertEqual(wave.picking_type_id, move_line.picking_type_id)

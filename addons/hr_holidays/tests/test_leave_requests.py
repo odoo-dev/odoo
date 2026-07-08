@@ -546,7 +546,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
         leave_wizard = leave_wizard_form.save()
         leave_wizard.company_id = company
         leave_wizard.action_generate_time_off()
-        employee_leave = self.env['hr.leave'].search([('employee_id', '=', employee.id)])
+        employee_leave = self.env['hr.leave'].search_fetch([('employee_id', '=', employee.id)])
         self.assertEqual(
             employee_leave.request_date_from, date(2019, 5, 6),
             "Timezone should be be adapted on the employee leave"
@@ -2136,7 +2136,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'employee_ids': (employee_1 + employee_2).ids,
         })
         leave_wizard.action_generate_time_off()
-        first_generated_leaves = self.env['hr.leave'].search([
+        first_generated_leaves = self.env['hr.leave'].search_fetch([
             ('employee_id', 'in', (employee_1 + employee_2).ids),
             ('work_entry_type_id', '=', self.holidays_type_1.id),
         ])
@@ -2261,7 +2261,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'date_to_period': 'pm',
         })
         leave_wizard.action_generate_time_off()
-        leaves = self.env['hr.leave'].search([
+        leaves = self.env['hr.leave'].search_fetch([
             ('employee_id', 'in', (employee_1 + employee_2).ids),
             ('work_entry_type_id', '=', self.holidays_type_half.id),
         ])
@@ -2662,7 +2662,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
             'employee_ids': [self.employee_emp_id],
         })
         leave_wizard.action_generate_time_off()
-        generated_training = self.env['hr.leave'].search([
+        generated_training = self.env['hr.leave'].search_fetch([
             ('employee_id', '=', self.employee_emp_id),
             ('work_entry_type_id', '=', training_type.id),
             ('request_date_from', '=', '2026-02-24')

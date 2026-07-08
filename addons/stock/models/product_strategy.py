@@ -124,7 +124,7 @@ class StockPutawayRule(models.Model):
 
     def _get_last_used_location(self, product):
         self.ensure_one()
-        return self.env['stock.move.line'].search(
+        return self.env['stock.move.line'].search_fetch(
             domain=self._get_last_used_search_domain(product),
             limit=1,
             order='date desc'

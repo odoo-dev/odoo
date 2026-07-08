@@ -79,7 +79,7 @@ class TestSurveyCrm(common.TestSurveyCommon, HttpCase):
 
         # Start page
         self._access_start(self.survey_crm)
-        user_input = self.env['survey.user_input'].search([('survey_id', '=', self.survey_crm.id)])
+        user_input = self.env['survey.user_input'].search_fetch([('survey_id', '=', self.survey_crm.id)])
         self.assertEqual(survey_sudo.lead_count, 0)
         answer_token = user_input.access_token
 

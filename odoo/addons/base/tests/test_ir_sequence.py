@@ -316,7 +316,7 @@ class TestIrSequenceDateRangeStandard(TransactionCase):
 
         # check the newly created sequence stops at the 17th of January
         domain = [('sequence_id.code', '=', 'test_sequence_date_range'), ('date_from', '=', january(1))]
-        seq_date_range = self.env['ir.sequence.date_range'].search(domain)
+        seq_date_range = self.env['ir.sequence.date_range'].search_fetch(domain)
         self.assertEqual(seq_date_range.date_to, january(17).date())
 
         seq = self.env['ir.sequence'].search([('code', '=', 'test_sequence_date_range')])
@@ -356,7 +356,7 @@ class TestIrSequenceDateRangeNoGap(TransactionCase):
 
         # check the newly created sequence stops at the 17th of January
         domain = [('sequence_id.code', '=', 'test_sequence_date_range_2'), ('date_from', '=', january(1))]
-        seq_date_range = self.env['ir.sequence.date_range'].search(domain)
+        seq_date_range = self.env['ir.sequence.date_range'].search_fetch(domain)
         self.assertEqual(seq_date_range.date_to, january(17).date())
 
         seq = self.env['ir.sequence'].search([('code', '=', 'test_sequence_date_range_2')])

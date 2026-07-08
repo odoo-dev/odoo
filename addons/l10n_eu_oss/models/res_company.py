@@ -26,7 +26,7 @@ class ResCompany(models.Model):
         '''Creates or updates Fiscal Positions for each EU country excluding the company's account_fiscal_country_id
         '''
         eu_countries = self.env.ref('base.europe').country_ids
-        oss_tax_groups = self.env['ir.model.data'].search([
+        oss_tax_groups = self.env['ir.model.data'].search_fetch([
             ('name', 'ilike', 'oss_tax_group'),
             ('module', '=', 'account'),
             ('model', '=', 'account.tax.group')])
@@ -34,14 +34,14 @@ class ResCompany(models.Model):
             # instantiate OSS taxes on the first branch with a TAX ID, default on root company
             company = company.parent_ids.filtered(lambda c: c.vat)[-1:] or company.root_id
             invoice_repartition_lines, refund_repartition_lines = company._get_repartition_lines_oss()
-            taxes = self.env['account.tax'].search([
+            taxes = self.env['account.tax'].search_fetch([
                 *self.env['account.tax']._check_company_domain(company),
                 ('type_tax_use', '=', 'sale'),
                 ('amount_type', '=', 'percent'),
                 ('tax_group_id', 'not in', oss_tax_groups.mapped('res_id'))
             ])
 
-            multi_tax_reports_countries_fpos = self.env['account.fiscal.position'].search([
+            multi_tax_reports_countries_fpos = self.env['account.fiscal.position'].search_fetch([
                 ('foreign_vat', '!=', False),
             ])
             oss_countries = eu_countries - company.account_fiscal_country_id - multi_tax_reports_countries_fpos.country_id

@@ -52,7 +52,7 @@ class TestFreeProductReward(HttpCaseWithUserPortal, WebsiteSaleCommon):
             ],
         })
 
-        installed_modules = cls.env["ir.module.module"].search([("state", "=", "installed")])
+        installed_modules = cls.env["ir.module.module"].search_fetch([("state", "=", "installed")])
         for _ in http.routing_map._generate_routing_rules(
             installed_modules.mapped("name"), nodb_only=False
         ):

@@ -28,7 +28,7 @@ class TestUi(TestPosHrHttpCommon, TestFrontendCommon):
             "test_employee_chatter_with_tracked_order",
             login="pos_admin",
         )
-        order = self.env['pos.order'].search([
+        order = self.env['pos.order'].search_fetch([
             ('config_id', '=', self.main_pos_config.id)
         ], order='id desc', limit=1)
         self.assertNotIn("Mitchell Admin", order.message_ids[0].body)

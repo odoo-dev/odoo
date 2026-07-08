@@ -10,7 +10,7 @@ class ReportBaseReport_Irmodulereference(models.AbstractModel):
     @api.model
     def _object_find(self, module):
         Data = self.env['ir.model.data'].sudo()
-        data = Data.search([
+        data = Data.search_fetch([
             ('model', '=', 'ir.model'),
             ('module', '=', module.name),
             ('res_id', '!=', False),

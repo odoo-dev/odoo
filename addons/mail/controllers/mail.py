@@ -242,7 +242,7 @@ class MailController(http.Controller):
     @http.route('/mail/message/<int:message_id>', type='http', auth='public')
     @add_guest_to_context
     def mail_thread_message_redirect(self, message_id, **kwargs):
-        message = request.env['mail.message'].search([('id', '=', message_id)])
+        message = request.env['mail.message'].search_fetch([('id', '=', message_id)])
         if not message:
             if request.env.user._is_public():
                 return request.redirect(f'/web/login?redirect=/mail/message/{message_id}')

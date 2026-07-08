@@ -225,7 +225,7 @@ class PosSession(models.Model):
             '|', ('date_start', '=', False), ('date_start', '<=', today),
             '|', ('date_end', '=', False), ('date_end', '>=', today)]
 
-        pricelist_item = self.env['product.pricelist.item'].search(pricelist_item_domain)
+        pricelist_item = self.env['product.pricelist.item'].search_fetch(pricelist_item_domain)
         pricelist = pricelist_item.pricelist_id
 
         return {
@@ -1572,7 +1572,7 @@ class PosSession(models.Model):
         # And yes, we are only concern for split bank payment methods.
         diff_lines_ref = [self._get_diff_account_move_ref(pm) for pm in self.payment_method_ids if pm.type == 'bank' and pm.split_transactions]
         cost_move_lines = ['pos_order_'+str(rec.id) for rec in self._get_closed_orders()]
-        return self.env['account.move.line'].search([('ref', 'in', diff_lines_ref + cost_move_lines)]).mapped('move_id')
+        return self.env['account.move.line'].search_fetch([('ref', 'in', diff_lines_ref + cost_move_lines)]).mapped('move_id')
 
     def _get_related_account_moves(self):
         invoices = self.mapped('order_ids.account_move')

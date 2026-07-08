@@ -85,7 +85,7 @@ class BaseFollowersTest(MailCommon):
         test_record = self.test_record.with_user(self.user_employee)
         test_record.message_subscribe(partner_ids=[self.partner_portal.id])
         self.assertEqual(test_record.message_partner_ids, self.partner_portal)
-        follower = self.env['mail.followers'].search([
+        follower = self.env['mail.followers'].search_fetch([
             ('res_model', '=', 'mail.test.simple'),
             ('res_id', '=', test_record.id),
             ('partner_id', '=', self.partner_portal.id)])
@@ -564,7 +564,7 @@ class AdvancedResponsibleNotifiedTest(MailCommon):
 
         self.assertEqual(sub.message_partner_ids, (self.user_employee.partner_id | notified_user.partner_id))
         # fetch created "You have been assigned to 'Test'" mail.message
-        mail_message = self.env['mail.message'].search([
+        mail_message = self.env['mail.message'].search_fetch([
             ('model', '=', 'mail.test.track'),
             ('res_id', '=', sub.id),
             ('partner_ids', 'in', partner.id),
@@ -667,7 +667,7 @@ class RecipientsNotificationTest(MailCommon):
             ('model', '=', 'mail.test.track'),
             ('message_type', '=', 'user_notification')
         ])
-        notif = self.env['mail.notification'].search([
+        notif = self.env['mail.notification'].search_fetch([
             ('mail_message_id', '=', mail_message.id),
             ('res_partner_id', '=', self.common_partner.id)
         ])

@@ -70,7 +70,7 @@ class TestPointOfSaleFlow(CommonPosStockTest):
         Test that read_converted returns correct lot quantities with 2-step
         "Pick then Deliver" after delivery is validated (no double-counting).
         """
-        warehouse = self.env['stock.warehouse'].search(
+        warehouse = self.env['stock.warehouse'].search_fetch(
             [('company_id', '=', self.env.company.id)], limit=1
         )
         warehouse.delivery_steps = 'pick_ship'

@@ -15,7 +15,7 @@ class ResUsersSettings(models.Model):
         if self.user_id == project_manager:
             return embedded_actions_settings_dict
 
-        user_configs = self.env['res.users.settings.embedded.action'].search(
+        user_configs = self.env['res.users.settings.embedded.action'].search_fetch(
             domain=[
                 ('user_setting_id', '=', self.id),
                 ('res_model', '=', res_model),

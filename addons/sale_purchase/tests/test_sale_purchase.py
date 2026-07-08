@@ -82,10 +82,10 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.sale_order_2.action_confirm()
 
         purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
-        purchase_lines_so1 = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
+        purchase_lines_so1 = self.env['purchase.order.line'].search_fetch([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_line1 = purchase_lines_so1[0]
 
-        purchase_lines_so2 = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_2.order_line.ids)])
+        purchase_lines_so2 = self.env['purchase.order.line'].search_fetch([('sale_line_id', 'in', self.sale_order_2.order_line.ids)])
         purchase_line2 = purchase_lines_so2[0]
 
         self.assertEqual(len(purchase_order), 2, "Two PO should have been created, from the 2 Sales orders")
@@ -137,7 +137,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.sale_order_1.action_confirm()
 
         purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
-        purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
+        purchase_lines = self.env['purchase.order.line'].search_fetch([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_line = purchase_lines[0]
 
         self.assertEqual(len(purchase_lines), 1, "Only one purchase line should be created on SO confirmation")
@@ -153,7 +153,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.assertEqual(len(purchase_order.activity_ids), 1, "One activity should be scheduled on the PO since a SO has been cancelled")
 
         purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
-        purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
+        purchase_lines = self.env['purchase.order.line'].search_fetch([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_line = purchase_lines[0]
 
         self.assertEqual(len(purchase_lines), 1, "Always one purchase line even after SO cancellation")
@@ -168,7 +168,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.sale_order_1.action_confirm()
 
         purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
-        purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
+        purchase_lines = self.env['purchase.order.line'].search_fetch([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_line = purchase_lines[0]
 
         self.assertEqual(len(purchase_lines), 1, "Still only one purchase line should be created even after SO reconfirmation")
@@ -192,7 +192,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.sale_order_1.action_confirm()
 
         purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
-        purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
+        purchase_lines = self.env['purchase.order.line'].search_fetch([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_line = purchase_lines[0]
 
         self.assertEqual(purchase_order.state, 'draft', "The created purchase should be in draft state")
@@ -232,7 +232,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         self.assertEqual(len(purchase_order.activity_ids), 2, "Always 2 activity on confirmed the PO")
 
         purchase_order2 = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
-        purchase_lines = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
+        purchase_lines = self.env['purchase.order.line'].search_fetch([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         purchase_lines2 = purchase_lines.filtered(lambda pol: pol.order_id == purchase_order2)
         purchase_line2 = purchase_lines2[0]
 
@@ -274,7 +274,7 @@ class TestSalePurchase(TestCommonSalePurchaseNoChart):
         })
         so.action_confirm()
 
-        po = self.env['purchase.order'].search([('partner_id', '=', self.partner_vendor_service.id)], order='id desc', limit=1)
+        po = self.env['purchase.order'].search_fetch([('partner_id', '=', self.partner_vendor_service.id)], order='id desc', limit=1)
         self.assertEqual(po.order_line.name, "[C01] Name01")
 
     def test_pol_custom_attribute(self):

@@ -169,10 +169,10 @@ class TestAllocations(TestHrHolidaysCommon):
         hour_type_allocation.action_generate_allocations()
 
         # Find allocations created for individual employees
-        employee_allocation = self.env['hr.leave.allocation'].search([
+        employee_allocation = self.env['hr.leave.allocation'].search_fetch([
             ('employee_id', '=', self.employee.id),
         ])
-        employee_emp_allocation = self.env['hr.leave.allocation'].search([
+        employee_emp_allocation = self.env['hr.leave.allocation'].search_fetch([
             ('employee_id', '=', self.employee_emp.id),
         ])
 
@@ -629,7 +629,7 @@ class TestAllocations(TestHrHolidaysCommon):
             'duration': 10,
         })
         wizard_group.action_generate_allocations()
-        allocations = self.env['hr.leave.allocation'].search([
+        allocations = self.env['hr.leave.allocation'].search_fetch([
             ('work_entry_type_id', '=', self.work_entry_type.id),
             ('name', '=', 'Company Wide Allocation')
         ])

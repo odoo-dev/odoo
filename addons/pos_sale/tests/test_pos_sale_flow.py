@@ -420,7 +420,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PoSDownPaymentLinesPerTax', login="accountman")
 
         # We check the content of the invoice to make sure Product A/B/C only appears only once
-        legal_documents = self.env['pos.order'].search([]).account_move._get_invoice_legal_documents('pdf', allow_fallback=True)
+        legal_documents = self.env['pos.order'].search_fetch([]).account_move._get_invoice_legal_documents('pdf', allow_fallback=True)
         self.assertEqual(len(legal_documents), 1)
         invoice_pdf_content = legal_documents[0]['content'].decode()
         self.assertEqual(invoice_pdf_content.count('Down Payment of 20%'), 3)
@@ -494,7 +494,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.main_pos_config.write({'crm_team_id': sale_team})
         self.main_pos_config.open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PosSaleTeam', login="accountman")
-        order = self.env['pos.order'].search([])
+        order = self.env['pos.order'].search_fetch([])
         self.assertEqual(len(order), 1)
         self.assertEqual(order.crm_team_id, sale_team)
 
@@ -1053,8 +1053,8 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
         self.assertEqual(sale_b.amount_untaxed, 10, "Sale order untaxed amount should be 10 with the tax override 2")
         self.start_pos_tour("test_sale_order_fp_different_from_partner_one", login="accountman")
 
-        pos_order_a = self.env['pos.order'].search([('fiscal_position_id', '=', fp_1.id)], limit=1, order='id desc')
-        pos_order_b = self.env['pos.order'].search([('fiscal_position_id', '=', fp_2.id)], limit=1, order='id desc')
+        pos_order_a = self.env['pos.order'].search_fetch([('fiscal_position_id', '=', fp_1.id)], limit=1, order='id desc')
+        pos_order_b = self.env['pos.order'].search_fetch([('fiscal_position_id', '=', fp_2.id)], limit=1, order='id desc')
         self.assertEqual(pos_order_a.amount_total, 20, "PoS order amount should be 20 with the tax override 1")
         self.assertEqual(pos_order_a.amount_tax, 10, "PoS order untaxed amount should be 10 with the tax override 1")
         self.assertEqual(pos_order_a.lines[0].tax_ids, tax_override_1, "PoS order should have the tax override 1")
@@ -1106,7 +1106,7 @@ class TestPoSSale(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.open_ui()
         self.start_pos_tour('PoSSettleQuotation', login="accountman")
-        pos_order = self.env['pos.order'].search([('partner_id', '=', test_partner.id)], limit=1)
+        pos_order = self.env['pos.order'].search_fetch([('partner_id', '=', test_partner.id)], limit=1)
 
         self.assertEqual(pos_order.lines[0].qty, 12.0, "quantity should be 12.0")
         self.assertEqual(pos_order.lines[0].price_unit, 0.83, "price of product should be 0.83")

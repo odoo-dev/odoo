@@ -35,7 +35,7 @@ class TestSparseFields(common.TransactionCase):
         # check reflection of sparse fields in 'ir.model.fields'
         names = [name for name, _ in values]
         domain = [('model', '=', 'sparse_fields.test'), ('name', 'in', names)]
-        fields = self.env['ir.model.fields'].search(domain)
+        fields = self.env['ir.model.fields'].search_fetch(domain)
         self.assertEqual(len(fields), len(names))
         for field in fields:
             self.assertEqual(field.serialization_field_id.name, 'data')

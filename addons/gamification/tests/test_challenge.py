@@ -115,7 +115,7 @@ class test_challenge(TestGamificationCommon):
         self.assertFalse(self.env['gamification.goal'].search([]))
 
         challenge.action_check()
-        goal_ids = self.env['gamification.goal'].search(
+        goal_ids = self.env['gamification.goal'].search_fetch(
             [('challenge_id', '=', challenge.id), ('state', '!=', 'draft'), ('user_id', 'in', challenge.user_ids.ids)]
         )
         self.assertEqual(len(goal_ids), 4)
@@ -134,7 +134,7 @@ class test_challenge(TestGamificationCommon):
 
         # Update goals as done by _cron_update
         challenge._update_all()
-        unchanged_goal_ids = self.env['gamification.goal'].search([
+        unchanged_goal_ids = self.env['gamification.goal'].search_fetch([
             ('challenge_id', '=', challenge.id),
             ('state', '=', 'inprogress'),  # others were updated to "reached"
             ('user_id', 'in', challenge.user_ids.ids),
@@ -153,8 +153,8 @@ class test_challenge(TestGamificationCommon):
             'reward_id': self.badge_good_job.id,
         })
 
-        model = self.env['ir.model'].search([('model', '=', 'gamification.badge')])[0]
-        field = self.env['ir.model.fields'].search([('model', '=', 'gamification.badge'), ('name', '=', 'rule_max_number')])[0]
+        model = self.env['ir.model'].search_fetch([('model', '=', 'gamification.badge')])[0]
+        field = self.env['ir.model.fields'].search_fetch([('model', '=', 'gamification.badge'), ('name', '=', 'rule_max_number')])[0]
 
         sum_goal = self.env['gamification.goal.definition'].create({
             'name': 'test',
@@ -181,7 +181,7 @@ class test_challenge(TestGamificationCommon):
     def test_40_create_challenge_with_sum_goal(self):
         model = self.env['ir.model'].search([('model', '=', 'gamification.badge')], limit=1)
 
-        field = self.env['ir.model.fields'].search([
+        field = self.env['ir.model.fields'].search_fetch([
             ('model', '=', 'gamification.badge'),
             ('name', '=', 'name')
         ], limit=1)

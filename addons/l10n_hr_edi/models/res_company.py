@@ -220,7 +220,7 @@ class ResCompany(models.Model):
             need_retrigger = need_retrigger or len(documents) > job_count
             documents = documents[:job_count]
 
-            existing_documents = self.env['l10n_hr_edi.addendum'].search([
+            existing_documents = self.env['l10n_hr_edi.addendum'].search_fetch([
                 ("mer_document_eid", "in", [i['mer_document_eid'] for i in documents]),
                 ('move_id.company_id', '=', company.id)])
             documents_to_import = [i for i in documents if i['mer_document_eid'] not in existing_documents.mapped('mer_document_eid')]
@@ -340,7 +340,7 @@ class ResCompany(models.Model):
                             'business_status_reason': str(item['messages'][-1].get('fiscalizationRequestId')),
                             'fiscalization_channel_type': str(item.get('channelType')),
                         })
-                addendums = self.env['l10n_hr_edi.addendum'].search([
+                addendums = self.env['l10n_hr_edi.addendum'].search_fetch([
                     ("mer_document_eid", "in", list(documents.keys())),
                     ('move_id.company_id', '=', company.id),
                 ])
@@ -353,7 +353,7 @@ class ResCompany(models.Model):
         :param company: The company record
         :param from_cron: If True, continue on errors instead of raising
         """
-        moves = self.env['l10n_hr_edi.addendum'].search([
+        moves = self.env['l10n_hr_edi.addendum'].search_fetch([
             ('mer_signed_xml_archived', '=', False),
             ('mer_document_eid', '!=', False),
             ('move_id.move_type', 'in', ['out_invoice', 'out_refund']),

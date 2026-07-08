@@ -20,7 +20,7 @@ class HrVersion(models.Model):
         start_dt = date_start.replace(tzinfo=datetime.UTC) if not date_start.tzinfo else date_start
         end_dt = date_stop.replace(tzinfo=datetime.UTC) if not date_stop.tzinfo else date_stop
         # l10n_fr_date_to_changed is False when no adjustment had to be done
-        all_leaves = self.env['hr.leave'].search([
+        all_leaves = self.env['hr.leave'].search_fetch([
             ('employee_id', 'in', fr_versions.employee_id.ids),
             ('state', '=', 'validate'),
             ('date_from', '<=', end_dt.astimezone(datetime.UTC).replace(tzinfo=None)),

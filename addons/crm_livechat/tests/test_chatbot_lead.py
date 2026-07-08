@@ -9,7 +9,7 @@ class CrmChatbotCase(chatbot_common.CrmChatbotCase):
     def test_chatbot_create_lead_public_user(self):
         self._play_session_with_lead()
 
-        created_lead = self.env['crm.lead'].sudo().search([], limit=1, order='id desc')
+        created_lead = self.env['crm.lead'].sudo().search_fetch([], limit=1, order='id desc')
         self.assertEqual(created_lead.name, "Testing Bot's New Lead")
         self.assertEqual(created_lead.email_from, 'test2@example.com')
         self.assertEqual(created_lead.phone, "+919876543210")
@@ -27,7 +27,7 @@ class CrmChatbotCase(chatbot_common.CrmChatbotCase):
         self.step_create_lead.write({'crm_team_id': self.sale_team_with_lead})
         self._play_session_with_lead()
 
-        created_lead = self.env['crm.lead'].sudo().search([], limit=1, order='id desc')
+        created_lead = self.env['crm.lead'].sudo().search_fetch([], limit=1, order='id desc')
         self.assertEqual(created_lead.name, "Testing Bot's New Lead")
         self.assertNotEqual(created_lead.email_from, 'test2@example.com', "User's email should'nt have been overridden")
         self.assertEqual(created_lead.phone, "+919876543210", "User's phone should have been updated")
@@ -130,6 +130,6 @@ class CrmChatbotCase(chatbot_common.CrmChatbotCase):
         self.start_tour(
             f"/im_livechat/support/{livechat_channel.id}", "crm_livechat.create_lead_from_chatbot"
         )
-        lead = self.env["crm.lead"].search([("origin_channel_id", "=", livechat_channel.channel_ids.id)])
+        lead = self.env["crm.lead"].search_fetch([("origin_channel_id", "=", livechat_channel.channel_ids.id)])
         self.assertEqual(lead.name, "I'd like to know more about the CRM application.")
         self.assertTrue(lead.origin_channel_id.has_crm_lead)

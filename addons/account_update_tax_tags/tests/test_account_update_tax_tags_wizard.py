@@ -351,7 +351,7 @@ class TestAccountUpdateTaxTagsWizard(AccountTestInvoicingCommon):
             'payment_date': invoice.date,
         })._create_payments()
         partial_rec = invoice.line_ids.matched_credit_ids
-        caba_move = self.env['account.move'].search([('tax_cash_basis_rec_id', '=', partial_rec.id)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_rec_id', '=', partial_rec.id)])
 
         self._change_tax_tag(tax, 'invoice_base_tag_changed', invoice=True, base=True)
         self._change_tax_tag(tax, 'invoice_tax_tag_changed', invoice=True, base=False)
@@ -401,7 +401,7 @@ class TestAccountUpdateTaxTagsWizard(AccountTestInvoicingCommon):
         self.assertEqual(tax_lines.tax_tag_ids.name, 'invoice_tax_tag_changed', 'Tax lines tags should have changed.')
         self.assertFalse(counterpart_lines.tax_tag_ids, 'Counterpart lines should not have changed.')
 
-        caba_move = self.env['account.move'].search([('tax_cash_basis_rec_id', '=', partial_rec.id)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_rec_id', '=', partial_rec.id)])
         caba_base_line = caba_move.line_ids.filtered('tax_ids')
         caba_tax_line = caba_move.line_ids.filtered('tax_line_id')
         caba_counterpart_lines = caba_move.line_ids - caba_base_line - caba_tax_line

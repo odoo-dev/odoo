@@ -30,10 +30,10 @@ class TestAnalyticToSaleTimesheet(TestCommonSaleTimesheet):
 
         cls.timesheet_and_services_sale_order.action_confirm()
 
-        task_order_qty_timesheet = cls.env['project.task'].search(
+        task_order_qty_timesheet = cls.env['project.task'].search_fetch(
             [('sale_line_id', '=', cls.timesheet_and_services_sale_order.order_line[0].id)]
         )
-        task_delivered_qty_timesheet = cls.env['project.task'].search(
+        task_delivered_qty_timesheet = cls.env['project.task'].search_fetch(
             [('sale_line_id', '=', cls.timesheet_and_services_sale_order.order_line[1].id)]
         )
 

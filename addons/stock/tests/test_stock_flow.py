@@ -136,7 +136,7 @@ class TestStockFlow(TestStockCommon):
         })
 
         # Check incoming shipment total quantity of pack operation
-        total_qty = sum(self.StockPackObj.search([('move_id', 'in', picking_in.move_ids.ids)]).mapped('quantity'))
+        total_qty = sum(self.StockPackObj.search_fetch([('move_id', 'in', picking_in.move_ids.ids)]).mapped('quantity'))
         self.assertEqual(total_qty, 23, 'Wrong quantity in pack operation')
 
         # Transfer Incoming Shipment.
@@ -154,16 +154,16 @@ class TestStockFlow(TestStockCommon):
         for move in picking_in.move_ids:
             self.assertEqual(move.state, 'done', 'Wrong state of move line.')
         # Check product A done quantity must be 3 and 1
-        moves = self.MoveObj.search([('product_id', '=', self.productA.id), ('picking_id', '=', picking_in.id)])
+        moves = self.MoveObj.search_fetch([('product_id', '=', self.productA.id), ('picking_id', '=', picking_in.id)])
         self.assertEqual(moves.quantity, 4.0, 'Wrong move quantity for product A.')
         # Check product B done quantity must be 4 and 1
-        moves = self.MoveObj.search([('product_id', '=', self.productB.id), ('picking_id', '=', picking_in.id)])
+        moves = self.MoveObj.search_fetch([('product_id', '=', self.productB.id), ('picking_id', '=', picking_in.id)])
         self.assertEqual(moves.quantity, 5.0, 'Wrong move quantity for product B.')
         # Check product C done quantity must be 7
-        c_done_qty = self.MoveObj.search([('product_id', '=', self.productC.id), ('picking_id', '=', picking_in.id)], limit=1).product_uom_qty
+        c_done_qty = self.MoveObj.search_fetch([('product_id', '=', self.productC.id), ('picking_id', '=', picking_in.id)], limit=1).product_uom_qty
         self.assertEqual(c_done_qty, 7.0, 'Wrong move quantity of product C (%s found instead of 7)' % (c_done_qty))
         # Check product D done quantity must be 7
-        d_done_qty = self.MoveObj.search([('product_id', '=', self.productD.id), ('picking_id', '=', picking_in.id)], limit=1).product_uom_qty
+        d_done_qty = self.MoveObj.search_fetch([('product_id', '=', self.productD.id), ('picking_id', '=', picking_in.id)], limit=1).product_uom_qty
         self.assertEqual(d_done_qty, 7.0, 'Wrong move quantity of product D (%s found instead of 7)' % (d_done_qty))
 
         # ----------------------------------------------------------------------
@@ -239,16 +239,16 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(move_cust_c.state, 'assigned', 'Wrong state of move line.')
         self.assertEqual(move_cust_d.state, 'partially_available', 'Wrong state of move line.')
         # Check availability for product A
-        aval_a_qty = self.MoveObj.search([('product_id', '=', self.productA.id), ('picking_id', '=', picking_out.id)], limit=1).quantity
+        aval_a_qty = self.MoveObj.search_fetch([('product_id', '=', self.productA.id), ('picking_id', '=', picking_out.id)], limit=1).quantity
         self.assertEqual(aval_a_qty, 4.0, 'Wrong move quantity availability of product A (%s found instead of 4)' % (aval_a_qty))
         # Check availability for product B
-        aval_b_qty = self.MoveObj.search([('product_id', '=', self.productB.id), ('picking_id', '=', picking_out.id)], limit=1).quantity
+        aval_b_qty = self.MoveObj.search_fetch([('product_id', '=', self.productB.id), ('picking_id', '=', picking_out.id)], limit=1).quantity
         self.assertEqual(aval_b_qty, 5.0, 'Wrong move quantity availability of product B (%s found instead of 5)' % (aval_b_qty))
         # Check availability for product C
-        aval_c_qty = self.MoveObj.search([('product_id', '=', self.productC.id), ('picking_id', '=', picking_out.id)], limit=1).quantity
+        aval_c_qty = self.MoveObj.search_fetch([('product_id', '=', self.productC.id), ('picking_id', '=', picking_out.id)], limit=1).quantity
         self.assertEqual(aval_c_qty, 3.0, 'Wrong move quantity availability of product C (%s found instead of 3)' % (aval_c_qty))
         # Check availability for product D
-        aval_d_qty = self.MoveObj.search([('product_id', '=', self.productD.id), ('picking_id', '=', picking_out.id)], limit=1).quantity
+        aval_d_qty = self.MoveObj.search_fetch([('product_id', '=', self.productD.id), ('picking_id', '=', picking_out.id)], limit=1).quantity
         self.assertEqual(aval_d_qty, 7.0, 'Wrong move quantity availability of product D (%s found instead of 7)' % (aval_d_qty))
 
         # ----------------------------------------------------------------------
@@ -298,10 +298,10 @@ class TestStockFlow(TestStockCommon):
         # Check total move lines of back order.
         self.assertEqual(len(back_order_out.move_ids), 2, 'Wrong number of move lines')
         # Check back order should be created with 8 quantity of product A.
-        product_a_qty = self.MoveObj.search([('product_id', '=', self.productA.id), ('picking_id', '=', back_order_out.id)], limit=1).product_uom_qty
+        product_a_qty = self.MoveObj.search_fetch([('product_id', '=', self.productA.id), ('picking_id', '=', back_order_out.id)], limit=1).product_uom_qty
         self.assertEqual(product_a_qty, 8.0, 'Wrong move quantity of product A (%s found instead of 8)' % (product_a_qty))
         # Check back order should be created with 4 quantity of product D.
-        product_d_qty = self.MoveObj.search([('product_id', '=', self.productD.id), ('picking_id', '=', back_order_out.id)], limit=1).product_uom_qty
+        product_d_qty = self.MoveObj.search_fetch([('product_id', '=', self.productD.id), ('picking_id', '=', back_order_out.id)], limit=1).product_uom_qty
         self.assertEqual(product_d_qty, 4.0, 'Wrong move quantity of product D (%s found instead of 4)' % (product_d_qty))
 
         # -----------------------------------------------------------------------
@@ -331,7 +331,7 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(sum(total_qty), 2.0, 'Expecting 2.0 Unit, got %.4f Unit on location stock!' % (sum(total_qty)))
         self.assertEqual(self.productC.qty_available, 2.0, 'Wrong quantity available (%s found instead of 2.0)' % (self.productC.qty_available))
         # Check quants and available quantity for product D
-        quant = self.StockQuantObj.search([
+        quant = self.StockQuantObj.search_fetch([
             ('product_id', '=', self.productD.id), ('location_id', '=', self.stock_location.id), ('quantity', '!=', 0)
         ], limit=1)
         self.assertEqual(quant.quantity, 1.0, 'Expecting 1.0 Unit , got %.4f Unit on location stock!' % (quant.quantity))
@@ -419,10 +419,10 @@ class TestStockFlow(TestStockCommon):
         for move in back_order_in.move_ids:
             self.assertEqual(move.state, 'done', 'Wrong state of move lines.')
         # Check product A done quantity must be 10
-        movesA = self.MoveObj.search([('product_id', '=', self.productA.id), ('picking_id', '=', back_order_in.id)])
+        movesA = self.MoveObj.search_fetch([('product_id', '=', self.productA.id), ('picking_id', '=', back_order_in.id)])
         self.assertEqual(movesA.quantity, 10, "Wrong move quantity of product A (%s found instead of 10)" % (movesA.quantity))
         # Check product C done quantity must be 3.0, 1.0, 2.0
-        movesC = self.MoveObj.search([('product_id', '=', self.productC.id), ('picking_id', '=', back_order_in.id)])
+        movesC = self.MoveObj.search_fetch([('product_id', '=', self.productC.id), ('picking_id', '=', back_order_in.id)])
         self.assertEqual(movesC.quantity, 6.0, 'Wrong quantity of moves product C.')
         # Check product D done quantity must be 5.0 and 3.0
         movesD = self.MoveObj.search([('product_id', '=', self.productD.id), ('picking_id', '=', back_order_in.id)])
@@ -626,21 +626,21 @@ class TestStockFlow(TestStockCommon):
         # ----------------------------------------------------------------------
 
         # Check pack operation quantity and unit of measure for product DozA.
-        PackdozA = self.StockPackObj.search([('product_id', '=', self.DozA.id), ('picking_id', '=', picking_in_B.id)], limit=1)
+        PackdozA = self.StockPackObj.search_fetch([('product_id', '=', self.DozA.id), ('picking_id', '=', picking_in_B.id)], limit=1)
         self.assertEqual(PackdozA.quantity, 120, 'Wrong quantity in pack operation (%s found instead of 120)' % (PackdozA.quantity))
         self.assertEqual(PackdozA.quantity_product_uom, 10, 'Wrong real quantity in pack operation (%s found instead of 10)' % (PackdozA.quantity_product_uom))
         self.assertEqual(PackdozA.uom_id.id, self.uom_unit.id, 'Wrong uom in pack operation for product DozA.')
         # Check pack operation quantity and unit of measure for product SDozA.
-        PackSdozA = self.StockPackObj.search([('product_id', '=', self.SDozA.id), ('picking_id', '=', picking_in_B.id)], limit=1)
+        PackSdozA = self.StockPackObj.search_fetch([('product_id', '=', self.SDozA.id), ('picking_id', '=', picking_in_B.id)], limit=1)
         self.assertEqual(PackSdozA.quantity, 1512, 'Wrong quantity in pack operation (%s found instead of 1512)' % (PackSdozA.quantity))
         self.assertEqual(PackSdozA.uom_id.id, self.uom_unit.id, 'Wrong uom in pack operation for product SDozA.')
         # Check pack operation quantity and unit of measure for product gB.
-        packgB = self.StockPackObj.search([('product_id', '=', self.gB.id), ('picking_id', '=', picking_in_B.id)], limit=1)
+        packgB = self.StockPackObj.search_fetch([('product_id', '=', self.gB.id), ('picking_id', '=', picking_in_B.id)], limit=1)
         self.assertEqual(packgB.quantity, 0.525, 'Wrong quantity in pack operation (%s found instead of 0.525)' % (packgB.quantity))
         self.assertEqual(packgB.quantity_product_uom, 525, 'Wrong real quantity in pack operation (%s found instead of 525)' % (packgB.quantity_product_uom))
         self.assertEqual(packgB.uom_id.id, packgB.move_id.uom_id.id, 'Wrong uom in pack operation for product kgB.')
         # Check pack operation quantity and unit of measure for product kgB.
-        packkgB = self.StockPackObj.search([('product_id', '=', self.kgB.id), ('picking_id', '=', picking_in_B.id)], limit=1)
+        packkgB = self.StockPackObj.search_fetch([('product_id', '=', self.kgB.id), ('picking_id', '=', picking_in_B.id)], limit=1)
         self.assertEqual(packkgB.quantity, 20.0, 'Wrong quantity in pack operation (%s found instead of 20)' % (packkgB.quantity))
         self.assertEqual(packkgB.uom_id.id, self.uom_gm.id, 'Wrong uom in pack operation for product kgB')
 
@@ -682,19 +682,19 @@ class TestStockFlow(TestStockCommon):
         # Check total done move lines for incoming shipment.
         self.assertEqual(len(picking_in_B.move_ids), 4, 'Wrong number of move lines')
         # Check product DozA done quantity.
-        moves_DozA = self.MoveObj.search([('product_id', '=', self.DozA.id), ('picking_id', '=', picking_in_B.id)], limit=1)
+        moves_DozA = self.MoveObj.search_fetch([('product_id', '=', self.DozA.id), ('picking_id', '=', picking_in_B.id)], limit=1)
         self.assertEqual(moves_DozA.quantity, 96, 'Wrong move quantity (%s found instead of 96)' % (moves_DozA.product_uom_qty))
         self.assertEqual(moves_DozA.uom_id.id, self.uom_unit.id, 'Wrong uom in move for product DozA.')
         # Check product SDozA done quantity.
-        moves_SDozA = self.MoveObj.search([('product_id', '=', self.SDozA.id), ('picking_id', '=', picking_in_B.id)], limit=1)
+        moves_SDozA = self.MoveObj.search_fetch([('product_id', '=', self.SDozA.id), ('picking_id', '=', picking_in_B.id)], limit=1)
         self.assertEqual(moves_SDozA.quantity, 1512, 'Wrong move quantity (%s found instead of 1512)' % (moves_SDozA.product_uom_qty))
         self.assertEqual(moves_SDozA.uom_id.id, self.uom_unit.id, 'Wrong uom in move for product SDozA.')
         # Check product kgB done quantity.
-        moves_kgB = self.MoveObj.search([('product_id', '=', self.kgB.id), ('picking_id', '=', picking_in_B.id)], limit=1)
+        moves_kgB = self.MoveObj.search_fetch([('product_id', '=', self.kgB.id), ('picking_id', '=', picking_in_B.id)], limit=1)
         self.assertEqual(moves_kgB.quantity, 20, 'Wrong quantity in move (%s found instead of 20)' % (moves_kgB.product_uom_qty))
         self.assertEqual(moves_kgB.uom_id.id, self.uom_gm.id, 'Wrong uom in move for product kgB.')
         # Check two moves created for product gB with quantity (0.525 kg and 0.3 g)
-        moves_gB_kg = self.MoveObj.search([('product_id', '=', self.gB.id), ('picking_id', '=', picking_in_B.id), ('uom_id', '=', self.uom_kg.id)], limit=1)
+        moves_gB_kg = self.MoveObj.search_fetch([('product_id', '=', self.gB.id), ('picking_id', '=', picking_in_B.id), ('uom_id', '=', self.uom_kg.id)], limit=1)
         self.assertEqual(moves_gB_kg.quantity, 0.526, 'Wrong move quantity (%s found instead of 0.526)' % (moves_gB_kg.product_uom_qty))
         self.assertEqual(moves_gB_kg.uom_id.id, self.uom_kg.id, 'Wrong uom in move for product gB.')
 
@@ -715,7 +715,7 @@ class TestStockFlow(TestStockCommon):
         # Check total move lines of back order.
         self.assertEqual(len(bo_in_B.move_ids), 1, 'Wrong number of move lines')
         # Check back order created with correct quantity and uom or not.
-        moves_DozA = self.MoveObj.search([('product_id', '=', self.DozA.id), ('picking_id', '=', bo_in_B.id)], limit=1)
+        moves_DozA = self.MoveObj.search_fetch([('product_id', '=', self.DozA.id), ('picking_id', '=', bo_in_B.id)], limit=1)
         self.assertEqual(moves_DozA.product_uom_qty, 24.0, 'Wrong move quantity (%s found instead of 0.525)' % (moves_DozA.product_uom_qty))
         self.assertEqual(moves_DozA.uom_id.id, self.uom_unit.id, 'Wrong uom in move for product DozA.')
 
@@ -844,16 +844,16 @@ class TestStockFlow(TestStockCommon):
         for move in picking_out.move_ids:
             self.assertEqual(move.state, 'assigned', 'Wrong state of move line.')
         # Check product A available quantity
-        DozA_qty = self.MoveObj.search([('product_id', '=', self.DozA.id), ('picking_id', '=', picking_out.id)], limit=1).product_qty
+        DozA_qty = self.MoveObj.search_fetch([('product_id', '=', self.DozA.id), ('picking_id', '=', picking_out.id)], limit=1).product_qty
         self.assertEqual(DozA_qty, 4.5, 'Wrong move quantity availability (%s found instead of 4.5)' % (DozA_qty))
         # Check product B available quantity
-        SDozA_qty = self.MoveObj.search([('product_id', '=', self.SDozA.id), ('picking_id', '=', picking_out.id)], limit=1).product_qty
+        SDozA_qty = self.MoveObj.search_fetch([('product_id', '=', self.SDozA.id), ('picking_id', '=', picking_out.id)], limit=1).product_qty
         self.assertEqual(SDozA_qty, 2, 'Wrong move quantity availability (%s found instead of 2)' % (SDozA_qty))
         # Check product D available quantity
-        gB_qty = self.MoveObj.search([('product_id', '=', self.gB.id), ('picking_id', '=', picking_out.id)], limit=1).product_qty
+        gB_qty = self.MoveObj.search_fetch([('product_id', '=', self.gB.id), ('picking_id', '=', picking_out.id)], limit=1).product_qty
         self.assertEqual(gB_qty, 503, 'Wrong move quantity availability (%s found instead of 503)' % (gB_qty))
         # Check product D available quantity
-        kgB_qty = self.MoveObj.search([('product_id', '=', self.kgB.id), ('picking_id', '=', picking_out.id)], limit=1).product_qty
+        kgB_qty = self.MoveObj.search_fetch([('product_id', '=', self.kgB.id), ('picking_id', '=', picking_out.id)], limit=1).product_qty
         self.assertEqual(kgB_qty, 0.020, 'Wrong move quantity availability (%s found instead of 0.020)' % (kgB_qty))
 
         picking_out.button_validate()
@@ -933,7 +933,7 @@ class TestStockFlow(TestStockCommon):
         for move in picking_in.move_ids:
             self.assertEqual(move.state, 'assigned', 'Wrong state of move line.')
         # Check pack operation quantity.
-        packKG = self.StockPackObj.search([('product_id', '=', productKG.id), ('picking_id', '=', picking_in.id)], limit=1)
+        packKG = self.StockPackObj.search_fetch([('product_id', '=', productKG.id), ('picking_id', '=', picking_in.id)], limit=1)
         self.assertEqual(packKG.quantity_product_uom, 1000, 'Wrong product real quantity in pack operation (%s found instead of 1000)' % (packKG.quantity_product_uom))
         self.assertEqual(packKG.quantity, 1, 'Wrong product quantity in pack operation (%s found instead of 1)' % (packKG.quantity))
         self.assertEqual(packKG.uom_id.id, self.uom_ton.id, 'Wrong product uom in pack operation.')
@@ -952,7 +952,7 @@ class TestStockFlow(TestStockCommon):
         # Check total done move lines for incoming shipment.
         self.assertEqual(len(picking_in.move_ids), 1, 'Wrong number of move lines')
         # Check product DozA done quantity.
-        move = self.MoveObj.search([('product_id', '=', productKG.id), ('picking_id', '=', picking_in.id)], limit=1)
+        move = self.MoveObj.search_fetch([('product_id', '=', productKG.id), ('picking_id', '=', picking_in.id)], limit=1)
         self.assertEqual(move.product_uom_qty, 1, 'Wrong product quantity in done move.')
         self.assertEqual(move.uom_id.id, self.uom_ton.id, 'Wrong unit of measure in done move.')
         self.assertEqual(productKG.qty_available, 1000, 'Wrong quantity available of product (%s found instead of 1000)' % (productKG.qty_available))
@@ -991,7 +991,7 @@ class TestStockFlow(TestStockCommon):
         self.assertEqual(len(bo_out_1), 1, 'Back order should be created.')
         # Check total move lines of back order.
         self.assertEqual(len(bo_out_1.move_ids), 1, 'Wrong number of move lines')
-        moves_KG = self.MoveObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_1.id)], limit=1)
+        moves_KG = self.MoveObj.search_fetch([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_1.id)], limit=1)
         # Check back order created with correct quantity and uom or not.
         self.assertEqual(moves_KG.product_uom_qty, 20, 'Wrong move quantity (%s found instead of 20)' % (moves_KG.product_uom_qty))
         self.assertEqual(moves_KG.uom_id.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
@@ -1016,7 +1016,7 @@ class TestStockFlow(TestStockCommon):
         # Check total move lines of back order.
         self.assertEqual(len(bo_out_2.move_ids), 1, 'Wrong number of move lines')
         # Check back order created with correct move quantity and uom or not.
-        moves_KG = self.MoveObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_2.id)], limit=1)
+        moves_KG = self.MoveObj.search_fetch([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_2.id)], limit=1)
         self.assertEqual(moves_KG.product_uom_qty, 15, 'Wrong move quantity (%s found instead of 15)' % (moves_KG.product_uom_qty))
         self.assertEqual(moves_KG.uom_id.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_2.action_assign()
@@ -1039,7 +1039,7 @@ class TestStockFlow(TestStockCommon):
         # Check total move lines of back order.
         self.assertEqual(len(bo_out_3.move_ids), 1, 'Wrong number of move lines')
         # Check back order created with correct quantity and uom or not.
-        moves_KG = self.MoveObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_3.id)], limit=1)
+        moves_KG = self.MoveObj.search_fetch([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_3.id)], limit=1)
         self.assertEqual(moves_KG.product_uom_qty, 10, 'Wrong move quantity (%s found instead of 10)' % (moves_KG.product_uom_qty))
         self.assertEqual(moves_KG.uom_id.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_3.action_assign()
@@ -1062,7 +1062,7 @@ class TestStockFlow(TestStockCommon):
         # Check total move lines of back order.
         self.assertEqual(len(bo_out_4.move_ids), 1, 'Wrong number of move lines')
         # Check back order created with correct quantity and uom or not.
-        moves_KG = self.MoveObj.search([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_4.id)], limit=1)
+        moves_KG = self.MoveObj.search_fetch([('product_id', '=', productKG.id), ('picking_id', '=', bo_out_4.id)], limit=1)
         self.assertEqual(moves_KG.product_uom_qty, 5, 'Wrong move quantity (%s found instead of 5)' % (moves_KG.product_uom_qty))
         self.assertEqual(moves_KG.uom_id.id, self.uom_gm.id, 'Wrong uom in move for product KG.')
         bo_out_4.action_assign()
@@ -1406,7 +1406,7 @@ class TestStockFlow(TestStockCommon):
         picking_out.move_ids.picked = True
         picking_out._action_done()
         # Should be only 1 negative quant in supplier location
-        neg_quants = self.env['stock.quant'].search([('product_id', '=', self.productE.id), ('quantity', '<', 0.0)])
+        neg_quants = self.env['stock.quant'].search_fetch([('product_id', '=', self.productE.id), ('quantity', '<', 0.0)])
         self.assertEqual(len(neg_quants), 1, 'There should be 1 negative quants for supplier!')
         self.assertEqual(neg_quants.location_id.id, self.supplier_location.id, 'There shoud be 1 negative quants for supplier!')
 
@@ -1479,7 +1479,7 @@ class TestStockFlow(TestStockCommon):
         picking_out.move_ids.picked = True
         picking_out._action_done()
         # Should be only 1 negative quant in supplier location
-        neg_quants = self.env['stock.quant'].search([('product_id', '=', self.productE.id), ('quantity', '<', 0.0)])
+        neg_quants = self.env['stock.quant'].search_fetch([('product_id', '=', self.productE.id), ('quantity', '<', 0.0)])
         self.assertEqual(len(neg_quants), 1, 'There should be 1 negative quants for supplier!')
         self.assertEqual(neg_quants.location_id.id, self.supplier_location.id, 'There shoud be 1 negative quants for supplier!')
         # We should also make sure that when matching stock moves with pack operations, it takes the correct
@@ -1872,8 +1872,8 @@ class TestStockFlow(TestStockCommon):
             'warehouse_id': warehouse_company_1.id,
         })
         replenish_wizard.launch_replenishment()
-        incoming_picking = self.env['stock.picking'].search([('product_id', '=', product.id), ('picking_type_id', '=', warehouse_company_1.in_type_id.id)])
-        outgoing_picking = self.env['stock.picking'].search([('product_id', '=', product.id), ('picking_type_id', '=', warehouse_company_2.out_type_id.id)])
+        incoming_picking = self.env['stock.picking'].search_fetch([('product_id', '=', product.id), ('picking_type_id', '=', warehouse_company_1.in_type_id.id)])
+        outgoing_picking = self.env['stock.picking'].search_fetch([('product_id', '=', product.id), ('picking_type_id', '=', warehouse_company_2.out_type_id.id)])
 
         self.assertEqual(incoming_picking.company_id, self.env.company)
         self.assertEqual(incoming_picking.move_ids.company_id, self.env.company)
@@ -1963,16 +1963,16 @@ class TestStockFlow(TestStockCommon):
         picking.move_ids.write({'procure_method': 'make_to_order'})
         picking.action_confirm()
 
-        incoming_picking = self.env['stock.picking'].search([('product_id', '=', product_from_company_2.id), ('picking_type_id', '=', warehouse_company_1.in_type_id.id)])
-        outgoing_picking = self.env['stock.picking'].search([('product_id', '=', product_from_company_2.id), ('picking_type_id', '=', warehouse_company_2.out_type_id.id)])
+        incoming_picking = self.env['stock.picking'].search_fetch([('product_id', '=', product_from_company_2.id), ('picking_type_id', '=', warehouse_company_1.in_type_id.id)])
+        outgoing_picking = self.env['stock.picking'].search_fetch([('product_id', '=', product_from_company_2.id), ('picking_type_id', '=', warehouse_company_2.out_type_id.id)])
 
         self.assertEqual(incoming_picking.company_id, self.env.company)
         self.assertEqual(incoming_picking.move_ids.mapped('company_id'), self.env.company)
         self.assertEqual(outgoing_picking.company_id, self.company_2)
         self.assertEqual(outgoing_picking.move_ids.company_id, self.company_2)
 
-        incoming_picking = self.env['stock.picking'].search([('product_id', '=', product_from_company_3.id), ('picking_type_id', '=', warehouse_company_1.in_type_id.id)])
-        outgoing_picking = self.env['stock.picking'].search([('product_id', '=', product_from_company_3.id), ('picking_type_id', '=', warehouse_company_3.out_type_id.id)])
+        incoming_picking = self.env['stock.picking'].search_fetch([('product_id', '=', product_from_company_3.id), ('picking_type_id', '=', warehouse_company_1.in_type_id.id)])
+        outgoing_picking = self.env['stock.picking'].search_fetch([('product_id', '=', product_from_company_3.id), ('picking_type_id', '=', warehouse_company_3.out_type_id.id)])
 
         self.assertEqual(incoming_picking.company_id, self.env.company)
         self.assertEqual(incoming_picking.move_ids.mapped('company_id'), self.env.company)
@@ -1985,7 +1985,7 @@ class TestStockFlow(TestStockCommon):
         """
         partner = self.env['res.partner'].create({'name': 'Hubert Bonisseur de la Bath'})
         product = self.env['product.product'].create({'name': 'Un petit coup de polish', 'is_storable': True})
-        wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        wh = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
 
         picking = self.env['stock.picking'].create({
             'state': 'draft',
@@ -2234,7 +2234,7 @@ class TestStockFlow(TestStockCommon):
         move_out.picked = True
         Form.from_action(self.env, picking_out.button_validate()).save().process()
 
-        bo = self.env['stock.picking'].search([('backorder_id', '=', picking_out.id)])
+        bo = self.env['stock.picking'].search_fetch([('backorder_id', '=', picking_out.id)])
         self.assertEqual(bo.state, 'assigned')
 
     def test_picking_set_clear_qty(self):
@@ -2285,7 +2285,7 @@ class TestStockFlow(TestStockCommon):
         partner_1 = self.env['res.partner'].create({'name': 'Hubert Bonisseur de la Bath'})
         partner_2 = self.env['res.partner'].create({'name': 'Donald Clairvoyant du Bled'})
         product = self.env['product.product'].create({'name': 'Un petit coup de polish', 'is_storable': True})
-        wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        wh = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
 
         f = Form(self.env['stock.picking'])
         f.partner_id = partner_1
@@ -2398,7 +2398,7 @@ class TestStockFlow(TestStockCommon):
             'type': 'delivery',
         } for i in [1, 2]])
 
-        warehouse01 = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse01 = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse01.partner_id = wh01_address
         warehouse02 = self.env['stock.warehouse'].create({
             'name': 'Second Warehouse',
@@ -2425,10 +2425,10 @@ class TestStockFlow(TestStockCommon):
 
         self.env['stock.rule'].run_scheduler()
 
-        out_moves = self.env['stock.move'].search([
+        out_moves = self.env['stock.move'].search_fetch([
             ('product_id', 'in', products.ids), ('picking_id', '!=', False), ('location_id', '=', wh01_stock_location.id)
         ])
-        in_moves = self.env['stock.move'].search([('product_id', 'in', products.ids), ('picking_id', '!=', False), ('location_dest_id', '=', wh02_stock_location.id)])
+        in_moves = self.env['stock.move'].search_fetch([('product_id', 'in', products.ids), ('picking_id', '!=', False), ('location_dest_id', '=', wh02_stock_location.id)])
 
         out_picking = out_moves[0].picking_id
         self.assertEqual(len(out_moves), 3)
@@ -2476,7 +2476,7 @@ class TestStockFlow(TestStockCommon):
         in_input_move.picked = True
         in_input_move._action_done()
 
-        in_stock_move = self.env['stock.move'].search([
+        in_stock_move = self.env['stock.move'].search_fetch([
             ('product_id', '=', self.productA.id),
             ('location_id', '=', self.warehouse_1.wh_input_stock_loc_id.id)
         ], limit=1)
@@ -2497,7 +2497,7 @@ class TestStockFlow(TestStockCommon):
         grp_multi_loc = self.env.ref('stock.group_stock_multi_locations')
         self.env.user.write({'group_ids': [Command.link(grp_multi_loc.id)]})
 
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         stock_location = warehouse.lot_stock_id
         sub_loc = stock_location.child_ids[0]
 
@@ -2639,7 +2639,7 @@ class TestStockFlow(TestStockCommon):
         action_dict = picking.button_validate()
         backorder_wizard = Form(self.env['stock.backorder.confirmation'].with_context(action_dict['context'])).save()
         backorder_wizard.process()
-        bo = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
+        bo = self.env['stock.picking'].search_fetch([('backorder_id', '=', picking.id)])
         self.assertEqual(bo.state, 'assigned')
 
     def test_multiple_moves_with_different_destinations_putaway_strategy(self):

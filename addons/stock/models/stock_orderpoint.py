@@ -112,7 +112,7 @@ class StockWarehouseOrderpoint(models.Model):
         #  - not belonging to any warehouses
         for orderpoint in self:
             loc_domain = Domain('usage', 'in', ('internal', 'view'))
-            other_warehouses = self.env['stock.warehouse'].search([('id', '!=', orderpoint.warehouse_id.id)])
+            other_warehouses = self.env['stock.warehouse'].search_fetch([('id', '!=', orderpoint.warehouse_id.id)])
             for view_location_id in other_warehouses.mapped('view_location_id'):
                 loc_domain &= ~Domain('id', 'child_of', view_location_id.id)
                 loc_domain &= Domain('company_id', 'in', [False, orderpoint.company_id.id])
@@ -251,7 +251,7 @@ class StockWarehouseOrderpoint(models.Model):
 
     def _search_effective_route_id(self, operator, value):
         routes = self.env['stock.route'].search([('id', operator, value)])
-        orderpoints = self.env['stock.warehouse.orderpoint'].search([]).filtered(
+        orderpoints = self.env['stock.warehouse.orderpoint'].search_fetch([]).filtered(
             lambda orderpoint: orderpoint.effective_route_id in routes
         )
         return [('id', 'in', orderpoints.ids)]
@@ -283,7 +283,7 @@ class StockWarehouseOrderpoint(models.Model):
         for orderpoint in self:
             warehouse = orderpoint.warehouse_id
             if not warehouse:
-                warehouse = orderpoint.env['stock.warehouse'].search([
+                warehouse = orderpoint.env['stock.warehouse'].search_fetch([
                     ('company_id', '=', orderpoint.company_id.id)
                 ], limit=1)
             orderpoint.location_id = warehouse.lot_stock_id.id

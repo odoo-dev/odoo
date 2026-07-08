@@ -30,7 +30,7 @@ class TestDiscussChannelInvite(HttpCase, MailCommon):
                 "subject": f"{bob.name} has invited you to a channel",
             },
         )
-        mail = self.env["mail.mail"].search(
+        mail = self.env["mail.mail"].search_fetch(
             [("model", "=", "discuss.channel"), ("res_id", "=", group_chat.id)]
         )
         body_html = html.fromstring(mail.body_html)

@@ -104,7 +104,7 @@ class SpreadsheetMixin(models.AbstractModel):
             ids_per_model[arg["model"]].append(arg["id"])
         display_names = defaultdict(dict)
         for model, ids in ids_per_model.items():
-            records = self.env[model].with_context(active_test=False).search([("id", "in", ids)])
+            records = self.env[model].with_context(active_test=False).search_fetch([("id", "in", ids)])
             for record in records:
                 display_names[model][record.id] = record.display_name
 

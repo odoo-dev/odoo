@@ -552,7 +552,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         po.picking_ids.move_ids.picked = True
         po.picking_ids.button_validate()
         self.assertEqual(po.picking_ids.state, 'done')
-        quant = self.env['stock.quant'].search([('product_id', '=', product.id), ('location_id.usage', '=', 'internal')])
+        quant = self.env['stock.quant'].search_fetch([('product_id', '=', product.id), ('location_id.usage', '=', 'internal')])
         wizard = self.env['stock.inventory.adjustment.name'].create({'quant_ids': quant})
         wizard.action_apply()
         self.assertEqual(quant.quantity, 5)
@@ -652,7 +652,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         self.assertEqual(receipt01.state, 'done')
         self.assertEqual(po.order_line[0].qty_received, 5)
         self.assertEqual(po.order_line[0].price_unit, 500)
-        layers = self.env['stock.valuation.layer'].search([('product_id', '=', self.product_id_1.id)])
+        layers = self.env['stock.valuation.layer'].search_fetch([('product_id', '=', self.product_id_1.id)])
         self.assertEqual(len(layers), 1)
         self.assertEqual(layers.quantity, 5)
         self.assertEqual(layers.value, 2500)
@@ -919,7 +919,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         # Validate the receipt without creating backorders
         Form.from_action(self.env, receipt.button_validate()).save().process_cancel_backorder()
         # A note is created: it mentions 2 incomplete lines and ignores the complete one
-        activity = self.env['mail.activity'].search([
+        activity = self.env['mail.activity'].search_fetch([
             ('res_model_id', '=', 'purchase.order'), ('res_id', '=', po.id),
         ])
         self.assertEqual(activity.summary, 'Missing products in receipt')
@@ -1038,7 +1038,7 @@ class TestPurchaseOrder(ValuationReconciliationTestCommon):
         self.product_a.categ_id.property_cost_method = 'standard'
         self.product_a.categ_id.property_price_difference_account_id = self.company_data['default_account_revenue'].id
 
-        stock_location = self.env['stock.warehouse'].search([
+        stock_location = self.env['stock.warehouse'].search_fetch([
             ('company_id', '=', self.env.company.id),
         ], limit=1).lot_stock_id
         customer_location = self.env.ref('stock.stock_location_customers')

@@ -24,7 +24,7 @@ class TestStockEwaybill(L10nInTestInvoicingCommon):
         })
 
     def _create_stock_picking(self):
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)])
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)])
         delivery_picking = self.env['stock.picking'].create({
             'partner_id': self.partner_a.id,
             'picking_type_id': warehouse.out_type_id.id,

@@ -84,7 +84,7 @@ class TestDevice(TestHttpBase):
         self.Session.invalidate_model()
 
         domain = [('user_id', '=', user.id)] if user else []
-        session_ids = self.Session.search(domain)
+        session_ids = self.Session.search_fetch(domain)
         device_ids = session_ids.device_ids  # To have the order `last_activity desc`
         device_log_ids = self.DeviceLog.search(domain)
         return session_ids, device_ids, device_log_ids
@@ -276,8 +276,8 @@ class TestDevice(TestHttpBase):
         self.assertEqual(len(self.user_internal.session_ids), 1)
         self.assertEqual(len(self.user_internal.session_ids.device_ids), 1)
 
-        sessions_seen_from_admin = self.Session.with_user(self.user_admin).search([])
-        sessions_seen_from_internal = self.Session.with_user(self.user_internal).search([])
+        sessions_seen_from_admin = self.Session.with_user(self.user_admin).search_fetch([])
+        sessions_seen_from_internal = self.Session.with_user(self.user_internal).search_fetch([])
         self.assertEqual(len(sessions_seen_from_admin), 2)
         self.assertEqual(len(sessions_seen_from_admin.device_ids), 2)
         self.assertEqual(len(sessions_seen_from_internal), 1)

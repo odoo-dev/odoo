@@ -964,7 +964,7 @@ class StockPicking(models.Model):
 
         packages_by_pick = defaultdict(int)
         # Cannot _read_group() as picking_ids isn't stored, nor grouped() because multiple pickings per package
-        packages = self.env['stock.package'].search([('picking_ids', 'in', other_pickings.ids)])
+        packages = self.env['stock.package'].search_fetch([('picking_ids', 'in', other_pickings.ids)])
         for pack in packages:
             for picking in pack.picking_ids:
                 packages_by_pick[picking] += 1

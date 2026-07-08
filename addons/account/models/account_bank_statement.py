@@ -161,7 +161,7 @@ class AccountBankStatement(models.Model):
                 lines_in_common = previous_st_lines.filtered(lambda l: l.id in stmt.line_ids._origin.ids)
                 balance_start -= sum(lines_in_common.mapped('amount'))
 
-            lines_in_between = self.env['account.bank.statement.line'].search(lines_in_between_domain)
+            lines_in_between = self.env['account.bank.statement.line'].search_fetch(lines_in_between_domain)
             balance_start += sum(lines_in_between.mapped('amount'))
 
             stmt.balance_start = balance_start
@@ -228,7 +228,7 @@ class AccountBankStatement(models.Model):
     def _get_statement_validity(self):
         """ Compares the balance_start to the previous statements balance_end_real """
         self.ensure_one()
-        previous = self.env['account.bank.statement'].search(
+        previous = self.env['account.bank.statement'].search_fetch(
             [
                 ('first_line_index', '<', self.first_line_index),
                 ('first_line_index', '!=', False),

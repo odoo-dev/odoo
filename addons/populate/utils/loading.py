@@ -21,7 +21,7 @@ def load_populate(env):
     """
     _loading_logger.info("Populate module was installed or upgraded - scanning modules for populate data...")
 
-    modules_installed = env['ir.module.module'].search([('state', '=', 'installed')])
+    modules_installed = env['ir.module.module'].search_fetch([('state', '=', 'installed')])
 
     modules_deps = {}
     populate_folder_by_module_name = {}

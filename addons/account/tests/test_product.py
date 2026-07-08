@@ -47,7 +47,7 @@ class TestProduct(AccountTestInvoicingCommon):
             'name': 'Product With a Company',
             'company_id': self.company_data['company'].id,
         })
-        companies = self.env['res.company'].sudo().search([])
+        companies = self.env['res.company'].sudo().search_fetch([])
         # Product should have all the default taxes of the other companies.
         self.assertRecordValues(product_without_company.sudo(), [{
             'taxes_id': companies.account_sale_tax_id.ids,

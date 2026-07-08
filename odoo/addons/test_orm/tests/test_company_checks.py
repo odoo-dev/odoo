@@ -196,7 +196,7 @@ class TestCompanyCheck(common.TransactionCase):
         })
         user.sudo().company_ids += not_first_company
         user.sudo().company_id = not_first_company
-        self.assertNotEqual(user.env['res.company'].search([])[0], not_first_company)  # just mare sure it is not the first one
+        self.assertNotEqual(user.env['res.company'].search_fetch([])[0], not_first_company)  # just mare sure it is not the first one
         self.assertEqual(user.env.company, not_first_company)
         self.assertEqual(user.env.companies[0], not_first_company)
 

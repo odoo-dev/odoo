@@ -117,7 +117,7 @@ class TestEventProductConfiguratorUi(AccountTestInvoicingCommon, HttpCase):
     def test_event_using_product_configurator(self):
         self.start_tour("/odoo", 'event_sale_with_product_configurator_tour', login='salesman')
 
-        sale_order = self.env['sale.order'].search([('create_uid', "=", self.salesman.id)])
+        sale_order = self.env['sale.order'].search_fetch([('create_uid', "=", self.salesman.id)])
 
         # Check that all the so lines are in the so and that the total amount is correct
         self.assertEqual(len(sale_order.order_line), 4)

@@ -57,11 +57,11 @@ class TestStockPickingTour(HttpCase):
         self.assertEqual(self.receipt.move_ids.quantity, 100)
         self.assertEqual(len(self.receipt.move_ids.move_line_ids), 11)
 
-        lots_batch_1 = self.env['stock.lot'].search([
+        lots_batch_1 = self.env['stock.lot'].search_fetch([
             ('name', 'ilike', 'lot_n_1_%'),
             ('product_id', '=', product_lot_1.id)
         ], order='name asc')
-        lots_batch_2 = self.env['stock.lot'].search([
+        lots_batch_2 = self.env['stock.lot'].search_fetch([
             ('name', 'ilike', 'lot_n_2_%'),
             ('product_id', '=', product_lot_1.id)
         ], order='name asc')

@@ -36,13 +36,13 @@ class TestLivechatUI(HttpCaseWithUserDemo, TestLivechatCommon):
 
     def test_no_rating_flow_ui(self):
         self.start_tour("/", 'website_livechat_no_rating_tour')
-        channel = self.env['discuss.channel'].search([('livechat_visitor_id', '=', self.visitor_tour.id)])
+        channel = self.env['discuss.channel'].search_fetch([('livechat_visitor_id', '=', self.visitor_tour.id)])
         self.assertEqual(len(channel), 1, "There can only be one channel created for 'Visitor Tour'.")
         self.assertTrue(channel.livechat_end_dt, 'Livechat must be inactive after closing the chat window.')
 
     def test_no_rating_no_close_flow_ui(self):
         self.start_tour("/", 'website_livechat_no_rating_no_close_tour')
-        channel = self.env['discuss.channel'].search([('livechat_visitor_id', '=', self.visitor_tour.id)])
+        channel = self.env['discuss.channel'].search_fetch([('livechat_visitor_id', '=', self.visitor_tour.id)])
         self.assertEqual(len(channel), 1, "There can only be one channel created for 'Visitor Tour'.")
         self.assertFalse(
             channel.livechat_end_dt,
@@ -60,7 +60,7 @@ class TestLivechatUI(HttpCaseWithUserDemo, TestLivechatCommon):
         self.start_tour("/", 'website_livechat_no_rating_no_close_tour')
 
         # Visitor's session must be active (gets the priority)
-        channel = self.env["discuss.channel"].search(
+        channel = self.env["discuss.channel"].search_fetch(
             [("livechat_visitor_id", "=", self.visitor_tour.id), ("livechat_end_dt", "=", False)]
         )
         self.assertEqual(len(channel), 1, "There can only be one channel created for 'Visitor Tour'.")
@@ -92,6 +92,6 @@ class TestLivechatUI(HttpCaseWithUserDemo, TestLivechatCommon):
         self._check_end_of_rating_tours()
 
     def _check_end_of_rating_tours(self):
-        channel = self.env['discuss.channel'].search([('livechat_visitor_id', '=', self.visitor_tour.id)])
+        channel = self.env['discuss.channel'].search_fetch([('livechat_visitor_id', '=', self.visitor_tour.id)])
         self.assertEqual(len(channel), 1, "There can only be one channel created for 'Visitor Tour'.")
         self.assertTrue(channel.livechat_end_dt, "Livechat must be inactive after rating.")

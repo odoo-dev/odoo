@@ -512,8 +512,8 @@ class TestCreateEvents(TestCommon):
         self.env['calendar.event']._sync_microsoft2odoo(MicrosoftEvent([undefined_privacy_event, default_privacy_event]))
 
         # Ensure that synced events have the correct privacy field in Odoo.
-        undefined_privacy_odoo_event = self.env['calendar.event'].search([('microsoft_id', '=', 100)])
-        default_privacy_odoo_event = self.env['calendar.event'].search([('microsoft_id', '=', 200)])
+        undefined_privacy_odoo_event = self.env['calendar.event'].search_fetch([('microsoft_id', '=', 100)])
+        default_privacy_odoo_event = self.env['calendar.event'].search_fetch([('microsoft_id', '=', 200)])
         self.assertFalse(undefined_privacy_odoo_event.privacy, "Event with undefined privacy must have False value in privacy field.")
         self.assertFalse(default_privacy_odoo_event.privacy, "Event with custom privacy must have False value in privacy field.")
 

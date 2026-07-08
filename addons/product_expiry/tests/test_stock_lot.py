@@ -318,7 +318,7 @@ class TestStockLot(TestStockCommon):
         move.picked = True
         receipt._action_done()
         # Get back the lot created when the picking was done...
-        apple_lot = self.env['stock.lot'].search(
+        apple_lot = self.env['stock.lot'].search_fetch(
             [('product_id', '=', self.apple_product.id)],
             limit=1,
         )
@@ -365,7 +365,7 @@ class TestStockLot(TestStockCommon):
 
         receipt._action_done()
         # Get back the lot created when the picking was done...
-        apple_lot = self.env['stock.lot'].search(
+        apple_lot = self.env['stock.lot'].search_fetch(
             [('product_id', '=', self.apple_product.id)],
             limit=1,
         )

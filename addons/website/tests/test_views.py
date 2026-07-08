@@ -92,7 +92,7 @@ class TestCustomizeView(common.HttpCase):
 
         # theme_customize_data will clone the default view to save the configuration
         self.url_open_authenticate('/website/theme_customize_data', {'enable': [], 'disable': ['website.test_view']})
-        new_custo = View.with_context(active_test=False).search([('key', '=', 'website.test_view'), ('website_id', '=', website.id)])
+        new_custo = View.with_context(active_test=False).search_fetch([('key', '=', 'website.test_view'), ('website_id', '=', website.id)])
         self.assertEqual(bool(new_custo), True)
         self.assertNotEqual(custo.id, new_custo.id)
         self.assertEqual([new_custo.active, default.active], [False, True])
@@ -156,7 +156,7 @@ class TestCustomizeView(common.HttpCase):
 
         # theme_customize_data will clone the default view to save the configuration
         self.url_open_authenticate('/website/theme_customize_data', {'enable': [], 'disable': ['website.test_view']})
-        new_custo = View.with_context(active_test=False).search([('key', '=', 'website.test_view'), ('website_id', '=', website.id)])
+        new_custo = View.with_context(active_test=False).search_fetch([('key', '=', 'website.test_view'), ('website_id', '=', website.id)])
         self.assertEqual(bool(new_custo), True)
         self.assertNotEqual(custo.id, new_custo.id)
         self.assertEqual([new_custo.active, default.active], [False, True])
@@ -569,7 +569,7 @@ class TestCowViewSaving(TestViewSavingCommon, HttpCase):
         self.inherit_view.with_context(**self.website_ctx).write({'name': 'Extension Specific'})
         v1 = self.base_view
         v2 = self.inherit_view
-        v3 = View.search([*self.website_domain, ('name', '=', 'Extension Specific')])
+        v3 = View.search_fetch([*self.website_domain, ('name', '=', 'Extension Specific')])
         v4 = self.inherit_view.copy({'name': 'Second Extension'})
         v5 = self.inherit_view.copy({'name': 'Third Extension (Specific)'})
         v5.write({'website_id': self.ref('base.default_website')})
@@ -602,9 +602,9 @@ class TestCowViewSaving(TestViewSavingCommon, HttpCase):
         # 9  | Third Extension (Specific)  |     1      |     6    |  website.extension_view_5gr87e6c
 
         v6 = View.search([*self.website_domain, ('name', '=', 'Base Specific')])
-        v7 = View.search([*self.website_domain, ('name', '=', 'Extension Specific')])
-        v8 = View.search([*self.website_domain, ('name', '=', 'Second Extension')])
-        v9 = View.search([*self.website_domain, ('name', '=', 'Third Extension (Specific)')])
+        v7 = View.search_fetch([*self.website_domain, ('name', '=', 'Extension Specific')])
+        v8 = View.search_fetch([*self.website_domain, ('name', '=', 'Second Extension')])
+        v9 = View.search_fetch([*self.website_domain, ('name', '=', 'Third Extension (Specific)')])
 
         self.assertEqual(total_views + 4 - 2, View.search_count([]), "It should have duplicated the view tree with a website_id, taking only most specific (only specific `b` key), and removing website_specific from generic tree")
         self.assertEqual(len((v3 + v5).exists()), 0, "v3 and v5 should have been deleted as they were already specific and copied to the new specific base")
@@ -667,7 +667,7 @@ class TestCowViewSaving(TestViewSavingCommon, HttpCase):
         self.assertEqual(len(generic_base_view), 1)
         self.assertEqual(len(website_specific_base_view), 1)
 
-        inherit_views = View.search([('key', '=', 'website.extension_view')])
+        inherit_views = View.search_fetch([('key', '=', 'website.extension_view')])
         self.assertEqual(len(inherit_views), 2)
         self.assertEqual(len(inherit_views.filtered(lambda v: v.website_id.id == self.ref('base.default_website'))), 1)
 
@@ -1018,7 +1018,7 @@ class TestCowViewSaving(TestViewSavingCommon, HttpCase):
         specific_view = View.search([('name', '=', 'Specific Inherited View Changed First')])
         views = View.browse([self.base_view.id, specific_view.id])
         views.with_context(**self.website_ctx).write({'active': False})
-        new_specific_view = View.search([('name', '=', 'Specific Inherited View Changed First')])
+        new_specific_view = View.search_fetch([('name', '=', 'Specific Inherited View Changed First')])
         self.assertTrue(specific_view.id != new_specific_view.id, "Should have a new id")
         self.assertFalse(new_specific_view.active, "Should have been deactivated")
 
@@ -1031,7 +1031,7 @@ class TestCowViewSaving(TestViewSavingCommon, HttpCase):
         specific_view = View.search([('name', '=', 'Specific Inherited View Changed First')])
         views = View.browse([specific_view.id, self.base_view.id])
         views.with_context(**self.website_ctx).write({'active': False})
-        new_specific_view = View.search([('name', '=', 'Specific Inherited View Changed First')])
+        new_specific_view = View.search_fetch([('name', '=', 'Specific Inherited View Changed First')])
         self.assertTrue(specific_view.id != new_specific_view.id, "Should have a new id")
         self.assertFalse(new_specific_view.active, "Should have been deactivated")
 
@@ -1385,7 +1385,7 @@ class TestCowViewSaving(TestViewSavingCommon, HttpCase):
             'arch': '<data></data>',
         })
         # Get created views by searching to consider potential unwanted COW
-        created_views = View.search([('key', '=', 'website.no_website_id')])
+        created_views = View.search_fetch([('key', '=', 'website.no_website_id')])
         self.assertEqual(len(created_views), 1, "Should only have created one view")
         self.assertEqual(created_views.website_id.id, self.website_ctx['website_id'], "The created view should be specific to default website")
 
@@ -1846,7 +1846,7 @@ class TestThemeViews(common.TransactionCase):
         test_theme_module.with_context(load_all_views=True)._theme_load(website_1)
 
         # 3. Ensure everything went correctly
-        main_views = View.search([('key', '=', '_test.main_view')])
+        main_views = View.search_fetch([('key', '=', '_test.main_view')])
         self.assertEqual(len(main_views), 2, "View should have been COWd when writing on its arch in a website context")
         specific_main_view = main_views.filtered(lambda v: v.website_id == website_1)
         specific_main_view_children = specific_main_view.inherit_children_ids

@@ -13,7 +13,7 @@ class TestTodoOnboardingUsers(TransactionCase):
             login="internal_user",
             groups="base.group_user",
         )
-        onboarding_tasks = ProjectTaskSudo.search([('user_ids', 'in', internal_user.ids)])
+        onboarding_tasks = ProjectTaskSudo.search_fetch([('user_ids', 'in', internal_user.ids)])
 
         self.assertEqual(len(onboarding_tasks), 1, "Exactly 1 onboarding task should be created for internal users upon creation.")
         self.assertFalse(onboarding_tasks.project_id, "Onboarding task should not be linked to any project.")
@@ -40,6 +40,6 @@ class TestTodoOnboardingUsers(TransactionCase):
             groups="base.group_user",
             context={'default_project_id': project.id},
         )
-        onboarding_tasks = ProjectTaskSudo.search([('user_ids', 'in', other_internal_user.ids)])
+        onboarding_tasks = ProjectTaskSudo.search_fetch([('user_ids', 'in', other_internal_user.ids)])
         self.assertEqual(len(onboarding_tasks), 1, "Exactly 1 onboarding task should be created for internal users upon creation.")
         self.assertFalse(onboarding_tasks.project_id, "Onboarding task should not be linked to any project.")

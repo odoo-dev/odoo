@@ -53,7 +53,7 @@ class TestPoSSaleReport(TestPoSCommon, TestPointOfSaleHttpCommon):
         session.action_pos_session_closing_control()
 
         # PoS Orders have negative IDs to avoid conflict, so reports[0] will correspond to the newest order
-        reports = self.env['sale.report'].sudo().search([('product_id', '=', self.product0.id)], order='id', limit=2)
+        reports = self.env['sale.report'].sudo().search_fetch([('product_id', '=', self.product0.id)], order='id', limit=2)
         self.assertEqual(reports[0].weight, 3)
         self.assertEqual(reports[0].volume, 4)
         self.assertEqual(reports[1].weight, 18)
@@ -78,7 +78,7 @@ class TestPoSSaleReport(TestPoSCommon, TestPointOfSaleHttpCommon):
         current_session.close_session_from_ui()
         self.assertEqual(current_session.state, 'closed')
 
-        report = self.env['sale.report'].sudo().search([('product_id', '=', test_product.id), ('name', 'ilike', '% REFUND')], order='id', limit=1)
+        report = self.env['sale.report'].sudo().search_fetch([('product_id', '=', test_product.id), ('name', 'ilike', '% REFUND')], order='id', limit=1)
         self.assertEqual(report.product_uom_qty, -2)
         self.assertEqual(report.price_subtotal, report.product_uom_qty * test_product.list_price)
         self.assertEqual(report.price_total, report.price_subtotal)
@@ -118,10 +118,10 @@ class TestPoSSaleReport(TestPoSCommon, TestPointOfSaleHttpCommon):
 
         session.action_pos_session_closing_control()
 
-        report = self.env['sale.report'].sudo().search([('product_id', '=', product_1.id)], order='id', limit=1)
+        report = self.env['sale.report'].sudo().search_fetch([('product_id', '=', product_1.id)], order='id', limit=1)
         self.assertEqual(report.weight, 3)
         self.assertEqual(report.weight, 3)
-        report = self.env['sale.report'].sudo().search([('product_id', '=', product_2.id)], order='id', limit=1)
+        report = self.env['sale.report'].sudo().search_fetch([('product_id', '=', product_2.id)], order='id', limit=1)
         self.assertEqual(report.weight, 6)
         self.assertEqual(report.weight, 6)
 

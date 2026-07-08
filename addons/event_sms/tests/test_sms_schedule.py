@@ -65,7 +65,7 @@ class TestSMSSchedule(EventCase, SMSCase):
             self._create_registrations(test_event, 3)
 
         # check subscription scheduler
-        sub_scheduler = self.env['event.mail'].search([('event_id', '=', test_event.id), ('interval_type', '=', 'after_sub')])
+        sub_scheduler = self.env['event.mail'].search_fetch([('event_id', '=', test_event.id), ('interval_type', '=', 'after_sub')])
         self.assertEqual(len(sub_scheduler), 1)
         self.assertEqual(sub_scheduler.scheduled_date, test_event.create_date.replace(microsecond=0), 'event: incorrect scheduled date for checking controller')
 

@@ -127,7 +127,7 @@ class test_override_property(common.TransactionCase):
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestInherit(common.TransactionCase):
     def test_ir_model_inherit(self):
-        imi = self.env['ir.model.inherit'].search(
+        imi = self.env['ir.model.inherit'].search_fetch(
             [('model_id.model', '=', 'test_inherit_child')]
         )
         self.assertEqual(len(imi), 1)

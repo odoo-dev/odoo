@@ -272,7 +272,7 @@ class ProjectTask(models.Model):
             return
         # Fetch task IDs with timesheets that the user has read access.
         inaccessible_task_ids = set(task_with_timesheets_ids) - set(
-            self.env['account.analytic.line'].search([
+            self.env['account.analytic.line'].search_fetch([
                 ('task_id', 'in', task_with_timesheets_ids)
             ]).mapped('task_id.id')
         )

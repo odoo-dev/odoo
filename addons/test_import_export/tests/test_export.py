@@ -139,7 +139,7 @@ class TestExport(XlsxCreatorCase):
         )
         res = json.loads(res.content)['result']
 
-        model_fields = self.env['ir.model.fields'].search([('model', '=', test_model)])
+        model_fields = self.env['ir.model.fields'].search_fetch([('model', '=', test_model)])
         expected_fields = set(f.name for f in model_fields.filtered(lambda field: field.readonly == False)) | {'id'}
 
         self.assertEqual(expected_fields, set(field['id'] for field in res))

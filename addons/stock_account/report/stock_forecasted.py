@@ -22,7 +22,7 @@ class StockForecasted_Product_Product(models.AbstractModel):
             domain_quants += [('product_id.product_tmpl_id', 'in', product_template_ids)]
         else:
             domain_quants += [('product_id', 'in', product_ids)]
-        quants = self.env['stock.quant'].search(domain_quants)
+        quants = self.env['stock.quant'].search_fetch(domain_quants)
 
         currency = self.env.company.currency_id
         value = sum(quants.mapped('value'))

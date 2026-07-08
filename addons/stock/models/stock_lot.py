@@ -37,7 +37,7 @@ class StockLot(models.Model):
 
     def _read_group_location_id(self, locations, domain):
         partner_locations = locations.search([('usage', 'in', ('customer', 'supplier'))])
-        return partner_locations + locations.warehouse_id.search([]).lot_stock_id
+        return partner_locations + locations.warehouse_id.search_fetch([]).lot_stock_id
 
     name = fields.Char('Lot/Serial Number', required=True, compute='_compute_name', store=True, readonly=False, help="Unique Lot/Serial Number", index='trigram', precompute=True)
     ref = fields.Char('Internal Reference', help="Internal reference number in case it differs from the manufacturer's lot/serial number")

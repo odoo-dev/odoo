@@ -193,7 +193,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             },
         }
         self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
-        event = self.env['calendar.event'].search([('google_id', '=', values.get('id'))])
+        event = self.env['calendar.event'].search_fetch([('google_id', '=', values.get('id'))])
         self.assertEqual(event.user_id, self.env.user)
         self.assertGoogleAPINotCalled()
 
@@ -221,7 +221,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             },
         }
         self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
-        event = self.env['calendar.event'].search([('google_id', '=', values.get('id'))])
+        event = self.env['calendar.event'].search_fetch([('google_id', '=', values.get('id'))])
         self.assertEqual(event.user_id, user)
         self.assertGoogleAPINotCalled()
 
@@ -580,7 +580,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             }
         }])
         self.sync(events)
-        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', recurrence_id)])
+        recurrence = self.env['calendar.recurrence'].search_fetch([('google_id', '=', recurrence_id)])
         events = recurrence.calendar_event_ids.sorted('start')
         self.assertEqual(len(events), 2, "it should have created a recurrence with 2 events")
         self.assertEqual(events[0].start_date, date(2020, 1, 13))
@@ -612,7 +612,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'guestsCanModify': True,
         }])
         self.sync(events)
-        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', recurrence_id)])
+        recurrence = self.env['calendar.recurrence'].search_fetch([('google_id', '=', recurrence_id)])
         events = recurrence.calendar_event_ids.sorted('start')
         self.assertEqual(len(events), 3, "it should have created a recurrence with 3 events")
         self.assertEqual(events[0].name, 'edited')
@@ -648,7 +648,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'updated': self.now,
         }]
         self.env['calendar.event']._sync_google2odoo(GoogleEvent(values))
-        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', recurrence_id)])
+        recurrence = self.env['calendar.recurrence'].search_fetch([('google_id', '=', recurrence_id)])
         events = recurrence.calendar_event_ids.sorted('start')
         self.assertEqual(len(events), 3, "it should have created a recurrence with 3 events")
         self.assertEqual(events[0].name, 'edited')
@@ -924,7 +924,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'end': {'dateTime': '2020-01-06T19:00:00+01:00', 'timeZone': 'Pacific/Auckland', 'date': None},
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
-        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', values.get('id'))])
+        recurrence = self.env['calendar.recurrence'].search_fetch([('google_id', '=', values.get('id'))])
         self.assertEqual(recurrence.event_tz, 'Pacific/Auckland', "The Google event Timezone should be saved on the recurrency")
         self.assertGoogleAPINotCalled()
 
@@ -1593,7 +1593,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'guestsCanModify': True,
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
-        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', google_id)])
+        recurrence = self.env['calendar.recurrence'].search_fetch([('google_id', '=', google_id)])
         attendee = recurrence.calendar_event_ids.attendee_ids.mapped('state')
         self.assertEqual(attendee, ['declined', 'declined', 'declined'], "All events should be declined")
         self.assertGoogleAPINotCalled()
@@ -1864,7 +1864,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         }
 
         self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
-        event = self.env['calendar.event'].search([('google_id', '=', values.get('id'))])
+        event = self.env['calendar.event'].search_fetch([('google_id', '=', values.get('id'))])
         private_attendee = event.attendee_ids.filtered(lambda e: e.email == self.private_partner.email)
         self.assertEqual(self.private_partner.id, private_attendee.partner_id.id)
         self.assertGoogleAPINotCalled()
@@ -1889,7 +1889,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             'end': {'date': '2020-01-07'},
         }
         self.env['calendar.recurrence']._sync_google2odoo(GoogleEvent([values]))
-        recurrence = self.env['calendar.recurrence'].search([('google_id', '=', values.get('id'))])
+        recurrence = self.env['calendar.recurrence'].search_fetch([('google_id', '=', values.get('id'))])
         events = recurrence.calendar_event_ids
         private_attendees = events.mapped('attendee_ids').filtered(lambda e: e.email == self.private_partner.email)
         self.assertTrue(all([a.partner_id == self.private_partner for a in private_attendees]))
@@ -1963,7 +1963,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
             },
         }
         self.env['calendar.event']._sync_google2odoo(GoogleEvent([values]))
-        event = self.env['calendar.event'].search([('google_id', '=', values.get('id'))])
+        event = self.env['calendar.event'].search_fetch([('google_id', '=', values.get('id'))])
         self.assertEqual(1, len(event.attendee_ids))
         self.assertEqual(event.partner_ids[0], event.attendee_ids[0].partner_id)
         self.assertEqual('accepted', event.attendee_ids[0].state)
@@ -2009,7 +2009,7 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         }
 
         self.env['calendar.event'].with_user(user)._sync_google2odoo(GoogleEvent([values]))
-        event = self.env['calendar.event'].search([('google_id', '=', values.get('id'))])
+        event = self.env['calendar.event'].search_fetch([('google_id', '=', values.get('id'))])
         self.assertEqual(2, len(event.partner_ids), "Two attendees and two partners should be associated to the event")
         self.assertGoogleAPINotCalled()
 
@@ -2395,8 +2395,8 @@ class TestSyncGoogle2Odoo(TestSyncGoogle):
         self.env['calendar.event']._sync_google2odoo(GoogleEvent([undefined_privacy_event, default_privacy_event]))
 
         # Ensure that synced events have the correct privacy field in Odoo.
-        undefined_privacy_odoo_event = self.env['calendar.event'].search([('google_id', '=', 1)])
-        default_privacy_odoo_event = self.env['calendar.event'].search([('google_id', '=', 2)])
+        undefined_privacy_odoo_event = self.env['calendar.event'].search_fetch([('google_id', '=', 1)])
+        default_privacy_odoo_event = self.env['calendar.event'].search_fetch([('google_id', '=', 2)])
         self.assertFalse(undefined_privacy_odoo_event.privacy, "Event with undefined privacy must have False value in privacy field.")
         self.assertFalse(default_privacy_odoo_event.privacy, "Event with default privacy must have False value in privacy field.")
 

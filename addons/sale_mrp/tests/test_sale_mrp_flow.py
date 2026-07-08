@@ -333,7 +333,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Check 'To consume line' with product c and uom kg.
         # -------------------------------------------------
 
-        moves = self.StockMove.search([
+        moves = self.StockMove.search_fetch([
             ('raw_material_production_id', '=', mnf_product_a.id),
             ('product_id', '=', product_c.id),
             ('uom_id', '=', self.uom_kg.id)])
@@ -349,7 +349,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Check 'To consume line' with product c and uom gm.
         # ---------------------------------------------------
 
-        move = self.StockMove.search([
+        move = self.StockMove.search_fetch([
             ('raw_material_production_id', '=', mnf_product_a.id),
             ('product_id', '=', product_c.id),
             ('uom_id', '=', self.uom_gm.id)])
@@ -383,7 +383,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # Check 'To consume line' state, quantity, uom of production order (product D).
         # -----------------------------------------------------------------------------
 
-        move = self.StockMove.search([('raw_material_production_id', '=', mnf_product_d.id), ('product_id', '=', product_c.id)])
+        move = self.StockMove.search_fetch([('raw_material_production_id', '=', mnf_product_d.id), ('product_id', '=', product_c.id)])
         self.assertEqual(move.product_uom_qty, 20, "Wrong product quantity in 'To consume line' of manufacturing order.")
         self.assertEqual(move.uom_id.id, self.uom_kg.id, "Wrong unit of measure in 'To consume line' of manufacturing order.")
         self.assertEqual(move.state, 'confirmed', "Wrong state in 'To consume line' of manufacturing order.")
@@ -427,7 +427,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         # -----------------------------------------------------------------
 
         self.assertEqual(mnf_product_a.state, 'confirmed', 'Manufacturing order should be confirmed.')
-        move = self.StockMove.search([('raw_material_production_id', '=', mnf_product_a.id), ('product_id', '=', product_d.id)])
+        move = self.StockMove.search_fetch([('raw_material_production_id', '=', mnf_product_a.id), ('product_id', '=', product_d.id)])
         self.assertEqual(move.state, 'assigned', "Wrong state in 'To consume line' of manufacturing order.")
 
         # Create inventory for product C.
@@ -446,7 +446,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
 
         mnf_product_a.action_assign()
         self.assertEqual(mnf_product_a.reservation_state, 'assigned', 'Manufacturing order inventory state should be available.')
-        moves = self.StockMove.search([('raw_material_production_id', '=', mnf_product_a.id), ('product_id', '=', product_c.id)])
+        moves = self.StockMove.search_fetch([('raw_material_production_id', '=', mnf_product_a.id), ('product_id', '=', product_c.id)])
 
         # Check product c move line state.
         for move in moves:
@@ -1530,7 +1530,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         mo.action_cancel()
         copied_delivery = delivery.copy()
         copied_delivery.action_confirm()
-        mos = self.env['mrp.production'].search([('product_id', '=', finished_product.id)])
+        mos = self.env['mrp.production'].search_fetch([('product_id', '=', finished_product.id)])
         self.assertEqual(len(mos), 1)
         self.assertEqual(mos.state, 'cancel')
 
@@ -1584,7 +1584,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         delivery.action_cancel()
         copied_delivery = delivery.copy()
         copied_delivery.action_confirm()
-        mos = self.env['mrp.production'].search([('product_id', '=', finished_product.id)])
+        mos = self.env['mrp.production'].search_fetch([('product_id', '=', finished_product.id)])
         self.assertEqual(len(mos), 1)
         self.assertEqual(mos.state, 'cancel')
 

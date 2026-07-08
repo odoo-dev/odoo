@@ -888,7 +888,7 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
             self.env["account_edi_proxy_client.user"]._cron_peppol_get_new_documents()
 
         # Verify that 1 invoice was received in each company
-        moves = self.env["account.move"].search([("peppol_message_uuid", "=", self.MESSAGE_UUID)])
+        moves = self.env["account.move"].search_fetch([("peppol_message_uuid", "=", self.MESSAGE_UUID)])
         self.assertEqual(len(moves), 2)
         self.assertEqual(len(moves.company_id), 2)
         self.assertEqual(len(moves.line_ids), 4)
@@ -1000,7 +1000,7 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
 
         # Even with an existing move and an imported move, the only response expected to exist at this point is the AB response
         # sent automatically at reception of the imported move.
-        imported_move = self.env['account.move'].search([('peppol_message_uuid', '!=', False)])
+        imported_move = self.env['account.move'].search_fetch([('peppol_message_uuid', '!=', False)])
         self.assertEqual(len(imported_move.peppol_response_ids), 1)
         self.assertEqual(imported_move.peppol_response_ids.response_code, 'AB')
 

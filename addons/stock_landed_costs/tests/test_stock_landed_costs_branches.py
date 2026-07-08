@@ -29,7 +29,7 @@ class TestStockLandedCostsBranches(TestStockValuationLCCommon):
         """
         From a company's branch, create a LC and ensure it impacts the SVL
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.branch.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.branch.id)], limit=1)
         supplier_location = self.env.ref('stock.stock_location_suppliers')
 
         receipt = self.env['stock.picking'].create({

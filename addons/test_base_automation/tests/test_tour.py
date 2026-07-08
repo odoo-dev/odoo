@@ -23,7 +23,7 @@ class BaseAutomationTestUi(HttpCase):
     def test_01_base_automation_tour(self):
         self._neutralize_preexisting_automations()
         self.start_tour("/odoo/action-base_automation.base_automation_act?debug=tests", "test_base_automation", login="admin")
-        base_automation = self.env["base.automation"].search([])
+        base_automation = self.env["base.automation"].search_fetch([])
         self.assertEqual(base_automation.model_id.model, "res.partner")
         self.assertEqual(base_automation.trigger, "on_create_or_write")
         self.assertEqual(base_automation.action_server_ids.state, "object_write")  # only one action
@@ -66,7 +66,7 @@ class BaseAutomationTestUi(HttpCase):
         self.env["test_base_automation.project"].create({"name": "test", "tag_ids": [Command.link(tag.id)]})
 
         self.start_tour(f"/odoo/action-{test_action.id}?debug=0", "test_open_automation_from_grouped_kanban", login="admin")
-        base_auto = self.env["base.automation"].search([])
+        base_auto = self.env["base.automation"].search_fetch([])
         self.assertEqual(base_auto.name, "From Tour")
         self.assertEqual(base_auto.model_name, "test_base_automation.project")
         self.assertEqual(base_auto.trigger_field_ids.name, "tag_ids")
@@ -291,9 +291,9 @@ class BaseAutomationTestUi(HttpCase):
         """ test on_change rule creation from the UI """
         self.start_tour("/odoo/action-base_automation.base_automation_act", 'base_automation.on_change_rule_creation', login="admin")
 
-        rule = self.env['base.automation'].search([], order="create_date desc", limit=1)[0]
+        rule = self.env['base.automation'].search_fetch([], order="create_date desc", limit=1)[0]
         view_model = self.env['ir.model']._get("ir.ui.view")
-        active_field = self.env['ir.model.fields'].search([
+        active_field = self.env['ir.model.fields'].search_fetch([
             ('name', '=', 'active'),
             ('model', '=', 'ir.ui.view'),
         ])[0]

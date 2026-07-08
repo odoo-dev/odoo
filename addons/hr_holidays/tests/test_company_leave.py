@@ -76,7 +76,7 @@ class TestCompanyLeave(TransactionCase):
         })
         company_leave.action_generate_time_off()
 
-        all_leaves = self.env['hr.leave'].search([('employee_id', '=', self.employee.id)], order='id')
+        all_leaves = self.env['hr.leave'].search_fetch([('employee_id', '=', self.employee.id)], order='id')
         self.assertEqual(len(all_leaves), 3)
         # Before Time Off
         self.assertEqual(all_leaves[0].date_from, datetime(2020, 1, 7, 7, 0))
@@ -120,7 +120,7 @@ class TestCompanyLeave(TransactionCase):
 
         company_leave.action_generate_time_off()
 
-        all_leaves = self.env['hr.leave'].search([('employee_id', '=', self.employee.id)], order='id')
+        all_leaves = self.env['hr.leave'].search_fetch([('employee_id', '=', self.employee.id)], order='id')
         self.assertEqual(len(all_leaves), 3)
         # Before Time Off
         self.assertEqual(all_leaves[0].date_from, datetime(2020, 1, 7, 7, 0))
@@ -165,7 +165,7 @@ class TestCompanyLeave(TransactionCase):
         })
         company_leave.action_generate_time_off()
 
-        all_leaves = self.env['hr.leave'].search([('employee_id', '=', self.employee.id)], order='id')
+        all_leaves = self.env['hr.leave'].search_fetch([('employee_id', '=', self.employee.id)], order='id')
         self.assertEqual(len(all_leaves), 2)
         # Original Time Off
         self.assertEqual(leave.state, 'refuse')
@@ -202,7 +202,7 @@ class TestCompanyLeave(TransactionCase):
 
         company_leave.action_generate_time_off()
 
-        all_leaves = self.env['hr.leave'].search([('employee_id', '=', self.employee.id)], order='id')
+        all_leaves = self.env['hr.leave'].search_fetch([('employee_id', '=', self.employee.id)], order='id')
         self.assertEqual(len(all_leaves), 2)
         # Original Time Off
         self.assertEqual(leave.state, 'refuse')
@@ -245,7 +245,7 @@ class TestCompanyLeave(TransactionCase):
         })
         company_leave.action_generate_time_off()
 
-        all_leaves = self.env['hr.leave'].search([('employee_id', '=', self.employee.id)], order='id')
+        all_leaves = self.env['hr.leave'].search_fetch([('employee_id', '=', self.employee.id)], order='id')
         self.assertEqual(len(all_leaves), 2)
         # Before Time Off
         self.assertEqual(all_leaves[0].date_from, datetime(2020, 1, 6, 7, 0))

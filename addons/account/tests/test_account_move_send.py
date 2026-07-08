@@ -1116,7 +1116,7 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
             self.env.ref('account.ir_cron_account_move_send').method_direct_trigger()
             self.env.cr.precommit.run()  # trigger the creation of bus.bus records
 
-        bus_1 = self.env['bus.bus'].sudo().search(
+        bus_1 = self.env['bus.bus'].sudo().search_fetch(
             [('channel', '=', json_dump(channel_with_db(self.cr.dbname, self.env.user)))],
             order='id desc',
             limit=1,
@@ -1125,7 +1125,7 @@ class TestAccountMoveSend(TestAccountMoveSendCommon):
         self.assertEqual(payload_1['type'], 'success')
         self.assertEqual(sorted(payload_1['action_button']['res_ids']), invoices_success.ids)
 
-        bus_2 = self.env['bus.bus'].sudo().search(
+        bus_2 = self.env['bus.bus'].sudo().search_fetch(
             [('channel', '=', json_dump(channel_with_db(self.cr.dbname, user_2)))],
             order='id desc',
             limit=1,

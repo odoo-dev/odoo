@@ -27,7 +27,7 @@ class TestUniqueConstraints(PopulateTestCase):
 
         start_populate(session)
 
-        customer_ids = self.env['populate.model.data'].search([
+        customer_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.customer'),
         ]).mapped('res_id')
@@ -75,7 +75,7 @@ class TestUniqueConstraints(PopulateTestCase):
 
         start_populate(session)
 
-        product_ids = self.env['populate.model.data'].search([
+        product_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.product'),
         ]).mapped('res_id')

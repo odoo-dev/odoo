@@ -104,10 +104,10 @@ class TestOgTitleFromPath(TransactionCase):
         self.assertEqual(og_title_from_path(self.env, '/odoo/action-base.ir_cron_act'), 'Scheduled Actions')
 
     def test_known_action_by_model(self):
-        ir_cron_act = self.env['ir.actions.act_window'].sudo().search(
+        ir_cron_act = self.env['ir.actions.act_window'].sudo().search_fetch(
             [('res_model', '=', 'ir.cron')], limit=1)
         self.assertEqual(og_title_from_path(self.env, '/odoo/ir.cron'), ir_cron_act.name)
-        partner_action = self.env['ir.actions.act_window'].sudo().search(
+        partner_action = self.env['ir.actions.act_window'].sudo().search_fetch(
             [('res_model', '=', 'res.partner')], limit=1)
         self.assertEqual(og_title_from_path(self.env, '/odoo/res.partner'), partner_action.name)
 

@@ -1242,7 +1242,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
         # one may assign a value
         record_list.state = 'foo'
-        record_call.selection_str = self.env['res.lang'].search([], limit=1).code
+        record_call.selection_str = self.env['res.lang'].search_fetch([], limit=1).code
 
         # one may assign False or None
         record_list.state = None
@@ -2863,7 +2863,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
             'name': 'Test without attachment',
             'image_attachment': BinaryBytes(SVG_RAW),
         })
-        attachment = self.env['ir.attachment'].search([
+        attachment = self.env['ir.attachment'].search_fetch([
             ('res_model', '=', record._name),
             ('res_field', '=', 'image_attachment'),
             ('res_id', '=', record.id),
@@ -2876,7 +2876,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
             'name': 'Test without attachment',
             'image_attachment': BinaryBytes(SVG_RAW),
         })
-        attachment = self.env['ir.attachment'].search([
+        attachment = self.env['ir.attachment'].search_fetch([
             ('res_model', '=', record._name),
             ('res_field', '=', 'image_attachment'),
             ('res_id', '=', record.id),
@@ -2888,7 +2888,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         # User demo changes his own avatar
         demo_user.with_user(demo_user).image_1920 = BinaryBytes(SVG_RAW)
         # The SVG file should have been neutered
-        attachment = self.env['ir.attachment'].search([
+        attachment = self.env['ir.attachment'].search_fetch([
             ('res_model', '=', demo_user.partner_id._name),
             ('res_field', '=', 'image_1920'),
             ('res_id', '=', demo_user.partner_id.id),
@@ -5498,7 +5498,7 @@ class TestWriteOverrideTranslatedFields(TransactionCase):
     def test_write_override_translated_field(self):
         base_write = self.env.registry['base'].write
         violations = []
-        modules_to_check = set(self.env['ir.module.module'].search([
+        modules_to_check = set(self.env['ir.module.module'].search_fetch([
             ('name', 'in', list(self.CHECKED_FIELD_NAMES)),
             ('state', '=', 'installed'),
         ]).mapped('name'))

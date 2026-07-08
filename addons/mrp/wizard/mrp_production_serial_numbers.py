@@ -88,7 +88,7 @@ class MrpProductionSerials(models.TransientModel):
         lots = list(filter(lambda serial_number: len(serial_number.strip()) > 0, self.serial_numbers.split('\n'))) if self.serial_numbers else []
         if not lots:
             raise UserError(self.env._("No valid serial numbers provided."))
-        existing_lots = self.env['stock.lot'].search([
+        existing_lots = self.env['stock.lot'].search_fetch([
             '|', ('company_id', '=', False), ('company_id', '=', self.production_id.company_id.id),
             ('product_id', '=', self.production_id.product_id.id),
             ('name', 'in', lots),

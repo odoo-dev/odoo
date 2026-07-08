@@ -595,7 +595,7 @@ class TestEdiZatca(TestSaEdiCommon):
         """Test that validating OTP fails when the company street is missing."""
         self.company.street = False
 
-        journal = self.env['account.journal'].search([
+        journal = self.env['account.journal'].search_fetch([
             *self.env['account.journal']._check_company_domain(self.company),
             ('type', '=', 'sale'),
         ], limit=1)

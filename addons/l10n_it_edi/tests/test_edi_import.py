@@ -317,7 +317,7 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
                 self.proxy_user,
             )
 
-        imported_bill = self.env['account.move'].with_company(self.company).search([])
+        imported_bill = self.env['account.move'].with_company(self.company).search_fetch([])
         self.assertEqual(len(imported_bill), 1)
         self.assertRecordValues(imported_bill.journal_id, [{
             'id': preferred_journal.id,
@@ -706,8 +706,8 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
         """Ensure that importing vendor bill with a referenced service product, with a service tax of 22% S
         only applies one tax on the product
         """
-        sale_tax = self.env['account.tax'].search([('display_name', '=', '22%'), ('company_id', '=', self.company.id)])[0]
-        supplier_tax = self.env['account.tax'].search([('display_name', '=', '22% S'), ('company_id', '=', self.company.id)])[0]
+        sale_tax = self.env['account.tax'].search_fetch([('display_name', '=', '22%'), ('company_id', '=', self.company.id)])[0]
+        supplier_tax = self.env['account.tax'].search_fetch([('display_name', '=', '22% S'), ('company_id', '=', self.company.id)])[0]
         self.env['product.product'].create({
             'name': 'Servizio tecnico',
             'default_code': 'abcdefgh',
@@ -871,7 +871,7 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
 
         # ensure that the embedded files are imported correctly
         for filename, (extension, raw) in embedded_files.items():
-            chatter_attachments = self.env['ir.attachment'].search([
+            chatter_attachments = self.env['ir.attachment'].search_fetch([
                 ('name', '=', filename),
                 ('res_model', '=', 'account.move'),
                 ('res_id', '=', move.id),

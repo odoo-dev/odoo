@@ -446,5 +446,5 @@ class TestReInvoice(TestSaleCommon):
         down_payment = self.env['sale.advance.payment.inv'].with_context(so_context).create({})
         down_payment.create_invoices()
 
-        aml = self.env['account.move.line'].search([('move_id', 'in', so.invoice_ids.ids)])[0]
+        aml = self.env['account.move.line'].search_fetch([('move_id', 'in', so.invoice_ids.ids)])[0]
         self.assertRecordValues(aml, [{'analytic_distribution': {str(analytic_account_default.id): 100}}])

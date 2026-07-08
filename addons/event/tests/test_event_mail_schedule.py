@@ -119,20 +119,20 @@ class TestMailSchedule(EventMailCommon):
         self.assertEqual(test_event.user_id, self.user_eventmanager)
 
         # check subscription scheduler
-        after_sub_scheduler = self.env['event.mail'].search([('event_id', '=', test_event.id), ('interval_type', '=', 'after_sub'), ('interval_unit', '=', 'now')])
+        after_sub_scheduler = self.env['event.mail'].search_fetch([('event_id', '=', test_event.id), ('interval_type', '=', 'after_sub'), ('interval_unit', '=', 'now')])
         self.assertEqual(len(after_sub_scheduler), 1, 'event: wrong scheduler creation')
         self.assertFalse(after_sub_scheduler.error_datetime)
         self.assertEqual(after_sub_scheduler.scheduled_date, test_event.create_date.replace(microsecond=0))
         self.assertEqual(after_sub_scheduler.mail_state, 'running')
         self.assertEqual(after_sub_scheduler.mail_count_done, 0)
-        after_sub_scheduler_2 = self.env['event.mail'].search([('event_id', '=', test_event.id), ('interval_type', '=', 'after_sub'), ('interval_unit', '=', 'hours')])
+        after_sub_scheduler_2 = self.env['event.mail'].search_fetch([('event_id', '=', test_event.id), ('interval_type', '=', 'after_sub'), ('interval_unit', '=', 'hours')])
         self.assertEqual(len(after_sub_scheduler_2), 1, 'event: wrong scheduler creation')
         self.assertFalse(after_sub_scheduler_2.error_datetime)
         self.assertEqual(after_sub_scheduler_2.scheduled_date, test_event.create_date.replace(microsecond=0) + relativedelta(hours=1))
         self.assertEqual(after_sub_scheduler_2.mail_state, 'running')
         self.assertEqual(after_sub_scheduler_2.mail_count_done, 0)
         # check before event scheduler
-        event_prev_scheduler = self.env['event.mail'].search([('event_id', '=', test_event.id), ('interval_type', '=', 'before_event')])
+        event_prev_scheduler = self.env['event.mail'].search_fetch([('event_id', '=', test_event.id), ('interval_type', '=', 'before_event')])
         self.assertEqual(len(event_prev_scheduler), 1, 'event: wrong scheduler creation')
         self.assertFalse(event_prev_scheduler.error_datetime)
         self.assertEqual(event_prev_scheduler.scheduled_date, self.event_date_begin + relativedelta(days=-1))
@@ -140,7 +140,7 @@ class TestMailSchedule(EventMailCommon):
         self.assertEqual(event_prev_scheduler.mail_state, 'scheduled')
         self.assertEqual(event_prev_scheduler.mail_count_done, 0)
         # check after event scheduler
-        event_next_scheduler = self.env['event.mail'].search([('event_id', '=', test_event.id), ('interval_type', '=', 'after_event')])
+        event_next_scheduler = self.env['event.mail'].search_fetch([('event_id', '=', test_event.id), ('interval_type', '=', 'after_event')])
         self.assertEqual(len(event_next_scheduler), 1, 'event: wrong scheduler creation')
         self.assertFalse(event_next_scheduler.error_datetime)
         self.assertEqual(event_next_scheduler.scheduled_date, self.event_date_end + relativedelta(hours=1))
@@ -630,7 +630,7 @@ class TestMailSchedule(EventMailCommon):
         self.env['ir.config_parameter'].sudo().set_int('mail.render.cron.limit', render_limit)
 
         # find slot-based schedulers, remove other to avoid noise
-        event_prev_scheduler = self.env['event.mail'].search([('event_id', '=', test_event.id), ('interval_type', '=', 'before_event')])
+        event_prev_scheduler = self.env['event.mail'].search_fetch([('event_id', '=', test_event.id), ('interval_type', '=', 'before_event')])
         event_after_scheduler = self.env['event.mail'].search([('event_id', '=', test_event.id), ('interval_type', '=', 'after_event')])
         (test_event.event_mail_ids - (event_prev_scheduler + event_after_scheduler)).unlink()
 
@@ -1053,7 +1053,7 @@ class TestMailScheduleInternals(EventMailCommon):
         scheduler = self.env['event.mail'].search([('event_id', '=', test_event.id)])
         self.assertEqual(len(scheduler), 2, 'event: wrong scheduler creation')
 
-        event_prev_scheduler = self.env['event.mail'].search([('event_id', '=', test_event.id), ('interval_type', '=', 'before_event')])
+        event_prev_scheduler = self.env['event.mail'].search_fetch([('event_id', '=', test_event.id), ('interval_type', '=', 'before_event')])
 
         with self.mock_datetime_and_now(now), self.mock_mail_gateway():
             self.env['event.registration'].create({
@@ -1130,7 +1130,7 @@ class TestMailScheduleInternals(EventMailCommon):
         scheduler = self.env['event.mail'].search([('event_id', '=', test_event.id)])
         self.assertEqual(len(scheduler), 2, 'event: wrong scheduler creation')
 
-        event_after_scheduler = self.env['event.mail'].search([('event_id', '=', test_event.id), ('interval_type', '=', 'after_event')])
+        event_after_scheduler = self.env['event.mail'].search_fetch([('event_id', '=', test_event.id), ('interval_type', '=', 'after_event')])
 
         with self.mock_datetime_and_now(event_date_begin), self.mock_mail_gateway():
             self.env['event.registration'].create([

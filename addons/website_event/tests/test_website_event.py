@@ -136,7 +136,7 @@ class TestUi(HttpCaseWithUserDemo, HttpCaseWithUserPortal):
 
         self.start_tour("/event", 'test_tickets_questions', login="portal")
 
-        registrations = self.env['event.registration'].search([
+        registrations = self.env['event.registration'].search_fetch([
             ('email', 'in', ['attendee-a@gmail.com', 'attendee-b@gmail.com'])
         ])
         self.assertEqual(len(registrations), 2)

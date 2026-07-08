@@ -116,7 +116,7 @@ class OnboardingOnboardingStep(models.Model):
         Only considers existing `onboarding.progress` records for the current
         company or without company (depending on `is_per_company`).
         """
-        onboarding_progress_records = self.env['onboarding.progress'].search([
+        onboarding_progress_records = self.env['onboarding.progress'].search_fetch([
             ('onboarding_id', 'in', self.onboarding_ids.ids),
             ('company_id', 'in', [False, self.env.company.id])
         ])

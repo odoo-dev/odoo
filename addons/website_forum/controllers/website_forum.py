@@ -712,7 +712,7 @@ class WebsiteForum(WebsiteProfile):
             question_domain &= Domain.OR([
                 [('name', 'ilike', search_question)],
                 [('plain_content', 'ilike', search_question)]])
-        user_question_ids = Post.search(question_domain, order='create_date desc')
+        user_question_ids = Post.search_fetch(question_domain, order='create_date desc')
         count_user_questions = len(user_question_ids)
         min_karma_unlink = min(forums.mapped('karma_unlink_all'))
 
@@ -732,7 +732,7 @@ class WebsiteForum(WebsiteProfile):
             answer_domain &= Domain.OR([
                 [('name', 'ilike', search_answer)],
                 [('plain_content', 'ilike', search_answer)]])
-        user_answer_ids = Post.search(answer_domain, order='create_date desc')
+        user_answer_ids = Post.search_fetch(answer_domain, order='create_date desc')
         count_user_answers = len(user_answer_ids)
         user_answers = user_answer_ids[:post_display_limit]
 

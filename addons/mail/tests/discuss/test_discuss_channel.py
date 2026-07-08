@@ -78,8 +78,8 @@ class TestChannelInternals(MailCommon, HttpCase):
         test_partner_write_date = fields.Datetime.to_string(self.test_partner.write_date)
 
         def notifications():
-            message = self.env["mail.message"].sudo().search([], order="id desc", limit=1)
-            member = self.env["discuss.channel.member"].search([], order="id desc", limit=1)
+            message = self.env["mail.message"].sudo().search_fetch([], order="id desc", limit=1)
+            member = self.env["discuss.channel.member"].search_fetch([], order="id desc", limit=1)
             return [
                 BusResult(test_group),
                 BusResult((test_group, "internal_users")),
@@ -231,7 +231,7 @@ class TestChannelInternals(MailCommon, HttpCase):
             test_group._add_members(partners=self.test_partner)
 
         def notifications_again():
-            member = self.env["discuss.channel.member"].search([], order="id desc", limit=1)
+            member = self.env["discuss.channel.member"].search_fetch([], order="id desc", limit=1)
             return [
                 BusResult(
                     self.env.user,

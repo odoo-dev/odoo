@@ -29,7 +29,7 @@ class PosConfig(models.Model):
 
     def _get_special_products(self):
         res = super()._get_special_products()
-        return res | self.env['pos.config'].search([]).mapped(
+        return res | self.env['pos.config'].search_fetch([]).mapped(
             lambda config: config.down_payment_product_id | config.default_product_id
         )
 

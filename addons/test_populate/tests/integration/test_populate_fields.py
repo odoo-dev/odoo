@@ -39,8 +39,8 @@ class TestFieldGeneration(PopulateTestCase):
         final_count = self.env['test_populate.product'].search_count([])
         self.assertEqual(final_count - initial_count, 5)
 
-        created_products = self.env['test_populate.product'].search([
-            ('id', 'in', self.env['populate.model.data'].search([
+        created_products = self.env['test_populate.product'].search_fetch([
+            ('id', 'in', self.env['populate.model.data'].search_fetch([
                 ('session_id', '=', session.id),
                 ('res_model', '=', 'test_populate.product'),
             ]).mapped('res_id')),
@@ -86,8 +86,8 @@ class TestMany2OnePopulation(PopulateTestCase):
 
         start_populate(session)
 
-        created_products = self.env['test_populate.product'].search([
-            ('id', 'in', self.env['populate.model.data'].search([
+        created_products = self.env['test_populate.product'].search_fetch([
+            ('id', 'in', self.env['populate.model.data'].search_fetch([
                 ('session_id', '=', session.id),
                 ('res_model', '=', 'test_populate.product'),
             ]).mapped('res_id')),
@@ -126,8 +126,8 @@ class TestMany2OnePopulation(PopulateTestCase):
 
         start_populate(session)
 
-        created_orders = self.env['test_populate.order'].search([
-            ('id', 'in', self.env['populate.model.data'].search([
+        created_orders = self.env['test_populate.order'].search_fetch([
+            ('id', 'in', self.env['populate.model.data'].search_fetch([
                 ('session_id', '=', session.id),
                 ('res_model', '=', 'test_populate.order'),
             ]).mapped('res_id')),
@@ -173,7 +173,7 @@ class TestMany2OnePopulation(PopulateTestCase):
 
         start_populate(session)
 
-        supplier_model_data = self.env['populate.model.data'].search([
+        supplier_model_data = self.env['populate.model.data'].search_fetch([
             ('res_model', '=', 'test_populate.supplier'),
             ('session_id', '=', session.id),
             ('ref', '=', 'premium_suppliers'),
@@ -182,7 +182,7 @@ class TestMany2OnePopulation(PopulateTestCase):
 
         created_supplier_ids = supplier_model_data.mapped('res_id')
 
-        product_model_data = self.env['populate.model.data'].search([
+        product_model_data = self.env['populate.model.data'].search_fetch([
             ('res_model', '=', 'test_populate.product'),
             ('session_id', '=', session.id),
         ])
@@ -237,8 +237,8 @@ class TestOne2ManyPopulation(PopulateTestCase):
         final_count = self.env['test_populate.supplier'].search_count([])
         self.assertEqual(final_count - initial_count, 3)
 
-        created_suppliers = self.env['test_populate.supplier'].search([
-            ('id', 'in', self.env['populate.model.data'].search([
+        created_suppliers = self.env['test_populate.supplier'].search_fetch([
+            ('id', 'in', self.env['populate.model.data'].search_fetch([
                 ('session_id', '=', session.id),
                 ('res_model', '=', 'test_populate.supplier'),
             ]).mapped('res_id')),
@@ -288,8 +288,8 @@ class TestOne2ManyPopulation(PopulateTestCase):
 
         start_populate(session)
 
-        created_suppliers = self.env['test_populate.supplier'].search([
-            ('id', 'in', self.env['populate.model.data'].search([
+        created_suppliers = self.env['test_populate.supplier'].search_fetch([
+            ('id', 'in', self.env['populate.model.data'].search_fetch([
                 ('session_id', '=', session.id),
                 ('res_model', '=', 'test_populate.supplier'),
             ]).mapped('res_id')),
@@ -336,7 +336,7 @@ class TestOne2ManyPopulation(PopulateTestCase):
 
         start_populate(session)
 
-        product_model_data = self.env['populate.model.data'].search([
+        product_model_data = self.env['populate.model.data'].search_fetch([
             ('res_model', '=', 'test_populate.product'),
             ('session_id', '=', session.id),
             ('ref', '=', 'special_products'),
@@ -345,7 +345,7 @@ class TestOne2ManyPopulation(PopulateTestCase):
 
         created_product_ids = product_model_data.mapped('res_id')
 
-        supplier_model_data = self.env['populate.model.data'].search([
+        supplier_model_data = self.env['populate.model.data'].search_fetch([
             ('res_model', '=', 'test_populate.supplier'),
             ('session_id', '=', session.id),
         ])

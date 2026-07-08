@@ -56,7 +56,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         invoice.action_post()
 
         # Check what was posted in the stock valuation account
-        stock_valuation_aml = self.env['account.move.line'].search([('account_id', '=', self.stock_valuation_account.id)])
+        stock_valuation_aml = self.env['account.move.line'].search_fetch([('account_id', '=', self.stock_valuation_account.id)])
         self.assertEqual(
             len(stock_valuation_aml), 2,
             "Two lines for the stock valuation account: one from the receipt (debit 110) and one from the bill (credit 20)")
@@ -64,7 +64,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         self.assertAlmostEqual(sum(stock_valuation_aml.mapped('credit')), 20, msg="Credit of 20 because of the difference between the PO and its invoice")
 
         # Check what was posted in stock input account
-        input_aml = self.env['account.move.line'].search([('account_id','=', self.stock_input_account.id)])
+        input_aml = self.env['account.move.line'].search_fetch([('account_id','=', self.stock_input_account.id)])
         self.assertEqual(len(input_aml), 3, "Only two lines should have been generated in stock input account: one when receiving the product, two when making the invoice.")
         self.assertAlmostEqual(sum(input_aml.mapped('debit')), 110, msg="Total debit value on stock input account should be equal to the original PO price of the product.")
         self.assertAlmostEqual(sum(input_aml.mapped('credit')), 110, msg="Total credit value on stock input account should be equal to the original PO price of the product.")
@@ -106,13 +106,13 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         invoice.action_post()
 
         # Check what was posted in the stock valuation account
-        stock_valuation_aml = self.env['account.move.line'].search([('account_id', '=', self.stock_valuation_account.id)])
+        stock_valuation_aml = self.env['account.move.line'].search_fetch([('account_id', '=', self.stock_valuation_account.id)])
         self.assertEqual(len(stock_valuation_aml), 2, "Only one line should have been generated in the price difference account.")
         self.assertAlmostEqual(sum(stock_valuation_aml.mapped('debit')), 100)
         self.assertAlmostEqual(sum(stock_valuation_aml.mapped('credit')), 10, msg="Credit of 10 because of the 10% discount")
 
         # Check what was posted in stock input account
-        input_aml = self.env['account.move.line'].search([('account_id', '=', self.stock_input_account.id)])
+        input_aml = self.env['account.move.line'].search_fetch([('account_id', '=', self.stock_input_account.id)])
         self.assertEqual(len(input_aml), 3, "Three lines generated in stock input account: one when receiving the product, two when making the invoice.")
         self.assertAlmostEqual(sum(input_aml.mapped('debit')), 100, msg="Total debit value on stock input account should be equal to the original PO price of the product.")
         self.assertAlmostEqual(sum(input_aml.mapped('credit')), 100, msg="Total credit value on stock input account should be equal to the original PO price of the product.")
@@ -154,11 +154,11 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         invoice.action_post()
 
         # Check if something was posted in the price difference account
-        price_diff_aml = self.env['account.move.line'].search([('account_id', '=', self.stock_valuation_account.id)])
+        price_diff_aml = self.env['account.move.line'].search_fetch([('account_id', '=', self.stock_valuation_account.id)])
         self.assertEqual(price_diff_aml.debit, 90, "Should have only one line in the stock valuation account, created by the receipt.")
 
         # Check what was posted in stock input account
-        input_aml = self.env['account.move.line'].search([('account_id', '=', self.stock_input_account.id)])
+        input_aml = self.env['account.move.line'].search_fetch([('account_id', '=', self.stock_input_account.id)])
         self.assertEqual(len(input_aml), 2, "Only two lines should have been generated in stock input account: one when receiving the product, one when making the invoice.")
         self.assertAlmostEqual(sum(input_aml.mapped('debit')), 90, "Total debit value on stock input account should be equal to the original PO price of the product.")
         self.assertAlmostEqual(sum(input_aml.mapped('credit')), 90, "Total credit value on stock input account should be equal to the original PO price of the product.")
@@ -213,7 +213,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         "Lock Posted Entries with Hash" is enabled on the stock journal
         """
         expected_svl_values = [] # USD
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         stock_location = warehouse.lot_stock_id
         customer_location = self.env.ref('stock.stock_location_customers')
 
@@ -323,9 +323,9 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
             self.assertEqual(self.product1.stock_valuation_layer_ids.mapped('value'), expected_svl_values, err_msg)
 
             # account side
-            new_valuation_amls = self.env['account.move.line'].search([('account_id', '=', self.stock_valuation_account.id), ('id', 'not in', valuation_amls.ids)])
-            new_expense_amls = self.env['account.move.line'].search([('account_id', '=', expense_account.id), ('id', 'not in', expense_amls.ids)])
-            new_input_amls = self.env['account.move.line'].search([('account_id', '=', self.stock_input_account.id), ('id', 'not in', input_amls.ids)])
+            new_valuation_amls = self.env['account.move.line'].search_fetch([('account_id', '=', self.stock_valuation_account.id), ('id', 'not in', valuation_amls.ids)])
+            new_expense_amls = self.env['account.move.line'].search_fetch([('account_id', '=', expense_account.id), ('id', 'not in', expense_amls.ids)])
+            new_input_amls = self.env['account.move.line'].search_fetch([('account_id', '=', self.stock_input_account.id), ('id', 'not in', input_amls.ids)])
             valuation_amls |= new_valuation_amls
             expense_amls |= new_expense_amls
             input_amls |= new_input_amls
@@ -379,7 +379,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         self.product1.categ_id.property_cost_method = 'fifo'
         self.product1.categ_id.property_valuation = 'real_time'
 
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         stock_location = warehouse.lot_stock_id
         customer_location = self.env.ref('stock.stock_location_customers')
 
@@ -602,7 +602,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         expected_svl_values = []
         expected_svl_remaining_values = []
 
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         stock_location = warehouse.lot_stock_id
         customer_location = self.env.ref('stock.stock_location_customers')
 
@@ -1361,7 +1361,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
             receipt.move_line_ids.quantity = 1
             receipt.button_validate()
 
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', company.id)], limit=1)
         stock_location = warehouse.lot_stock_id
         customer_location = self.env.ref('stock.stock_location_customers')
         delivery = self.env['stock.picking'].create({
@@ -1595,7 +1595,7 @@ class TestStockValuationWithCOA(AccountTestInvoicingCommon):
         usd_currency = self.env.ref('base.USD')
         eur_currency = self.env.ref('base.EUR')
 
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         customer_location = self.env.ref('stock.stock_location_customers')
         stock_location = warehouse.lot_stock_id
 

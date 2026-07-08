@@ -386,9 +386,9 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         receipt.button_validate()
 
         # Check SVL and AML
-        svl = self.env['stock.valuation.layer'].search([('stock_move_id', '=', receipt.move_ids.id)])
+        svl = self.env['stock.valuation.layer'].search_fetch([('stock_move_id', '=', receipt.move_ids.id)])
         self.assertAlmostEqual(svl.value, 455)
-        aml = self.env['account.move.line'].search([('account_id', '=', stock_valuation_account.id)])
+        aml = self.env['account.move.line'].search_fetch([('account_id', '=', stock_valuation_account.id)])
         self.assertAlmostEqual(aml.debit, 455)
 
         # Create and validate LC
@@ -409,9 +409,9 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
 
         # Check LC, SVL and AML
         self.assertAlmostEqual(lc.valuation_adjustment_lines.final_cost, 554)
-        svl = self.env['stock.valuation.layer'].search([('stock_move_id', '=', receipt.move_ids.id)], order='id desc', limit=1)
+        svl = self.env['stock.valuation.layer'].search_fetch([('stock_move_id', '=', receipt.move_ids.id)], order='id desc', limit=1)
         self.assertAlmostEqual(svl.value, 99)
-        aml = self.env['account.move.line'].search([('account_id', '=', stock_valuation_account.id)], order='id desc', limit=1)
+        aml = self.env['account.move.line'].search_fetch([('account_id', '=', stock_valuation_account.id)], order='id desc', limit=1)
         self.assertAlmostEqual(aml.debit, 99)
 
         # Create an invoice with the same price
@@ -794,7 +794,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         bill.invoice_line_ids.quantity = 70
         bill.action_post()
 
-        svl_initial_receipt = self.env['stock.valuation.layer'].search([
+        svl_initial_receipt = self.env['stock.valuation.layer'].search_fetch([
             ('product_id', '=', self.product1.id),
             ('stock_move_id', '=', picking.move_ids.id)
         ])
@@ -832,7 +832,7 @@ class TestLandedCostsWithPurchaseAndInv(TestStockValuationLCCommon):
         backorder_picking.button_validate()  # This should not create another backorder
 
         # Check that the valuation layers of the backorder matches the bill
-        svl_backorder_receipt = self.env['stock.valuation.layer'].search([
+        svl_backorder_receipt = self.env['stock.valuation.layer'].search_fetch([
             ('product_id', '=', self.product1.id),
             ('stock_move_id', '=', backorder_picking.move_ids[0].id)
         ])

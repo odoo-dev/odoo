@@ -38,7 +38,7 @@ class TestReportPoSOrder(TestPoSCommon):
             'amount_return': 0.0,
         })
         # PoS Orders have negative IDs to avoid conflict, so reports[0] will correspond to the newest order
-        reports = self.env['report.pos.order'].sudo().search([('product_id', '=', product1.id)], order='id')
+        reports = self.env['report.pos.order'].sudo().search_fetch([('product_id', '=', product1.id)], order='id')
 
         self.assertEqual(len(reports.ids), 1)
         self.assertEqual(reports[0].margin, 150)
@@ -70,7 +70,7 @@ class TestReportPoSOrder(TestPoSCommon):
         })
 
         # PoS Orders have negative IDs to avoid conflict, so reports[0] will correspond to the newest order
-        reports = self.env['report.pos.order'].sudo().search([('product_id', '=', product1.id)], order='id')
+        reports = self.env['report.pos.order'].sudo().search_fetch([('product_id', '=', product1.id)], order='id')
 
         self.assertEqual(reports[0].margin, 150)
         self.assertEqual(reports[0].price_total, 165)
@@ -103,7 +103,7 @@ class TestReportPoSOrder(TestPoSCommon):
         })
 
         # PoS Orders have negative IDs to avoid conflict, so reports[0] will correspond to the newest order
-        reports = self.env['report.pos.order'].sudo().search([('product_id', '=', product1.id)], order='id')
+        reports = self.env['report.pos.order'].sudo().search_fetch([('product_id', '=', product1.id)], order='id')
 
         self.assertEqual(reports[0].margin, 135)
         self.assertEqual(reports[0].price_total, 135)
@@ -135,7 +135,7 @@ class TestReportPoSOrder(TestPoSCommon):
             'currency_rate': 2
         })
 
-        reports = self.env['report.pos.order'].sudo().search([('product_id', '=', product1.id)], order='id')
+        reports = self.env['report.pos.order'].sudo().search_fetch([('product_id', '=', product1.id)], order='id')
 
         self.assertEqual(reports[0].margin, 150)
         self.assertEqual(reports[0].price_subtotal_excl, 150)

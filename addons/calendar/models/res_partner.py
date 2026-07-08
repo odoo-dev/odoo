@@ -115,7 +115,7 @@ class ResPartner(models.Model):
 
         :rtype: dict[int, <calendar.event>]
         """
-        events = self.env['calendar.event'].search([
+        events = self.env['calendar.event'].search_fetch([
             ('stop', '>=', start_datetime.replace(tzinfo=None)),
             ('start', '<=', end_datetime.replace(tzinfo=None)),
             ('partner_ids', 'in', self.ids),

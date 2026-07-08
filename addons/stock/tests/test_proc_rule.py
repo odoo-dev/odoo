@@ -45,7 +45,7 @@ class TestProcRule(TransactionCase):
         """ Creates and configure a rule the way, when trying to get rules from
         location, it goes in a state where the found rule tries to trigger another
         rule but finds nothing else than itself and so get stuck in a recursion error."""
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         reception_route = warehouse.reception_route_id
         self.product.is_storable = True
 
@@ -139,7 +139,7 @@ class TestProcRule(TransactionCase):
         """Test that _get_rule selects the rule associated with the route of the lowest sequence."""
 
         # Create a warehouse and a product
-        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([], limit=1)
         product = self.env['product.product'].create({'name': 'Test Product', 'is_storable': True})
 
         # Create routes with different sequences to simulate prioritization.
@@ -217,7 +217,7 @@ class TestProcRule(TransactionCase):
         # Required for `location_id` to be visible in the view
         self.product.is_storable = True
         self.env.user.group_ids += self.env.ref('stock.group_stock_multi_locations')
-        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([], limit=1)
         orderpoint_form = Form(self.env['stock.warehouse.orderpoint'])
         orderpoint_form.product_id = self.product
         orderpoint_form.product_min_qty = 0.0
@@ -274,7 +274,7 @@ class TestProcRule(TransactionCase):
             'is_storable': True,
         })
 
-        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([], limit=1)
         orderpoint_form = Form(self.env['stock.warehouse.orderpoint'])
         orderpoint_form.product_id = self.productA
         orderpoint_form.product_min_qty = 0.0
@@ -604,7 +604,7 @@ class TestProcRule(TransactionCase):
         orderpoint.unlink()
 
     def test_replenishment_order_to_max(self):
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         self.product.is_storable = True
         self.env['stock.quant']._update_available_quantity(self.product, warehouse.lot_stock_id, 10)
         orderpoint = self.env['stock.warehouse.orderpoint'].create({
@@ -868,7 +868,7 @@ class TestProcRule(TransactionCase):
             'product_max_qty': 50,
         })
 
-        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([], limit=1)
         out_move = self.env['stock.move'].create({
             'product_id': self.product.id,
             'uom_id': self.uom_unit.id,
@@ -922,7 +922,7 @@ class TestProcRule(TransactionCase):
 
     def test_get_rules_from_location_preserves_route(self):
         """_get_rules_from_location should keep the selected route across chained rules."""
-        warehouse = self.env['stock.warehouse'].search([], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([], limit=1)
         product = self.env['product.product'].create({'name': 'Route Chain Product', 'is_storable': True})
         intermediate_location = self.env['stock.location'].create({
             'name': 'Route Chain Intermediate',

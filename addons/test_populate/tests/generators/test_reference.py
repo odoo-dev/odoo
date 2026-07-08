@@ -221,12 +221,12 @@ class TestReferenceRawSessionBinding(PopulateTestCase):
         self.session_b = self.env['populate.session'].create({'blueprint_id': self.blueprint.id})
         start_populate(self.session_b)
 
-        self.session_a_product_ids = set(self.env['populate.model.data'].search([
+        self.session_a_product_ids = set(self.env['populate.model.data'].search_fetch([
             ('ref', '=', 'special_products'),
             ('session_id', '=', self.session_a.id),
         ]).mapped('res_id'))
 
-        self.session_b_product_ids = set(self.env['populate.model.data'].search([
+        self.session_b_product_ids = set(self.env['populate.model.data'].search_fetch([
             ('ref', '=', 'special_products'),
             ('session_id', '=', self.session_b.id),
         ]).mapped('res_id'))

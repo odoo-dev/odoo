@@ -1855,12 +1855,12 @@ class HrLeave(models.Model):
         inspected_date = fields.Date.context_today(self) + timedelta(days=31)
         start_datetime = datetime.combine(fields.Date.context_today(self), datetime.min.time())
         end_datetime = datetime.combine(inspected_date, datetime.max.time())
-        concerned_leaves = self.search([
+        concerned_leaves = self.search_fetch([
             ('date_from', '>=', start_datetime),
             ('date_from', '<=', end_datetime),
             ('state', 'in', ['confirm', 'validate1', 'validate']),
         ], order='date_from desc')
-        accrual_allocations = self.env['hr.leave.allocation'].search([
+        accrual_allocations = self.env['hr.leave.allocation'].search_fetch([
             ('employee_id', 'in', concerned_leaves.employee_id.ids),
             ('work_entry_type_id', 'in', concerned_leaves.work_entry_type_id.ids),
             ('accrual_plan_id', '!=', False),

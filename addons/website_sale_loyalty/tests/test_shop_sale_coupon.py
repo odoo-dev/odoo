@@ -452,7 +452,7 @@ class TestWebsiteSaleCoupon(HttpCase, WebsiteSaleCommon):
         WebsiteSaleController = WebsiteSale()
 
         installed_modules = set(
-            self.env["ir.module.module"].search([("state", "=", "installed")]).mapped("name")
+            self.env["ir.module.module"].search_fetch([("state", "=", "installed")]).mapped("name")
         )
         for __ in http.routing_map._generate_routing_rules(installed_modules, nodb_only=False):
             pass

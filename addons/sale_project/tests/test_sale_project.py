@@ -2109,6 +2109,6 @@ class TestSaleProject(TestSaleProjectCommon):
             })],
         })
         vendor_bill.action_post()
-        line_vendor_bill = self.env['account.analytic.line'].search([('account_id', '=', self.project_global.account_id.id), ('category', '=', 'vendor_bill')])
+        line_vendor_bill = self.env['account.analytic.line'].search_fetch([('account_id', '=', self.project_global.account_id.id), ('category', '=', 'vendor_bill')])
         self.assertEqual(line_vendor_bill.category_report, 'costs')
         self.assertEqual(line_vendor_bill.billable_type, '12_vendor_bill')

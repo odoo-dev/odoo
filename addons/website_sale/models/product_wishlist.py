@@ -72,7 +72,7 @@ class ProductWishlist(models.Model):
     def _check_wishlist_from_session(self):
         """Assign all wishlist withtout partner from this the current session."""
         session_wishes = self.sudo().search([("id", "in", request.session.get("wishlist_ids", []))])
-        partner_wishes = self.sudo().search([("partner_id", "=", self.env.user.partner_id.id)])
+        partner_wishes = self.sudo().search_fetch([("partner_id", "=", self.env.user.partner_id.id)])
         partner_products = partner_wishes.mapped("product_id")
         # Remove session products already present for the user
         duplicated_wishes = session_wishes.filtered(

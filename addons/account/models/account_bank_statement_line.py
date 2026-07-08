@@ -530,7 +530,7 @@ class AccountBankStatementLine(models.Model):
 
     @api.model
     def _get_default_statement(self, journal_id=None, date=None):
-        statement = self.search(
+        statement = self.search_fetch(
             domain=[
                 ('journal_id', '=', journal_id or self._get_default_journal().id),
                 ('date', '<=', date or 'today'),

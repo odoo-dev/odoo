@@ -26,7 +26,7 @@ def uninstall_hook(env):
 def post_init_hook(env):
     env.cr.execute("UPDATE website SET default_lang_id=%s", (env['website']._default_language(),))
     lang_ids = env['website']._active_languages()
-    websites = env['website'].search([])
+    websites = env['website'].search_fetch([])
 
     for website in websites:
         website.language_ids = lang_ids

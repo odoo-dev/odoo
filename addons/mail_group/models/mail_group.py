@@ -385,7 +385,7 @@ class MailGroup(models.Model):
         if not template:
             raise UserError(_('Template "mail_group.mail_template_guidelines" was not found. No email has been sent. Please contact an administrator to fix this issue.'))
 
-        banned_emails = self.env['mail.group.moderation'].sudo().search([
+        banned_emails = self.env['mail.group.moderation'].sudo().search_fetch([
             ('status', '=', 'ban'),
             ('mail_group_id', '=', self.id),
         ]).mapped('email')

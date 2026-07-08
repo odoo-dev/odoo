@@ -505,7 +505,7 @@ class ProjectCustomerPortal(CustomerPortal):
         }
 
         # extends filterby criteria with project the customer has access to
-        projects = request.env['project.project'].search(project_domain or [], order="id")
+        projects = request.env['project.project'].search_fetch(project_domain or [], order="id")
         for project in projects:
             searchbar_filters.update({
                 str(project.id): {'label': project.name, 'domain': [('project_id', '=', project.id)]}

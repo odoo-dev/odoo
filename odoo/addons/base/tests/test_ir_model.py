@@ -388,13 +388,13 @@ class TestIrModelFieldsTranslation(HttpCase):
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestIrModelInherit(TransactionCase):
     def test_inherit(self):
-        imi = self.env["ir.model.inherit"].search([("model_id.model", "=", "ir.actions.server")])
+        imi = self.env["ir.model.inherit"].search_fetch([("model_id.model", "=", "ir.actions.server")])
         self.assertEqual(len(imi), 1)
         self.assertEqual(imi.parent_id.model, "ir.actions.actions")
         self.assertFalse(imi.parent_field_id)
 
     def test_inherits(self):
-        imi = self.env["ir.model.inherit"].search(
+        imi = self.env["ir.model.inherit"].search_fetch(
             [("model_id.model", "=", "res.users"), ("parent_field_id", "!=", False)]
         )
         self.assertEqual(len(imi), 1)

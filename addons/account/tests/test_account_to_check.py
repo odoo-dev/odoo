@@ -94,7 +94,7 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         with freeze_time(invoice.date + relativedelta(days=1)), self.enter_registry_test_mode():
             self.env.ref('account.ir_cron_auto_post_draft_entry').method_direct_trigger()
         self.assertEqual(invoice.review_state, 'no_review')
-        last_recurring = self.env['account.move'].search([('auto_post_origin_id', '=', invoice.id)], limit=1, order='date desc')
+        last_recurring = self.env['account.move'].search_fetch([('auto_post_origin_id', '=', invoice.id)], limit=1, order='date desc')
         self.assertEqual(last_recurring.review_state, 'no_review')
 
     def test_post_move_auto_check_with_auto_post_monthly_sales(self):
@@ -104,7 +104,7 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         with freeze_time(invoice.date + relativedelta(days=1)), self.enter_registry_test_mode():
             self.env.ref('account.ir_cron_auto_post_draft_entry').method_direct_trigger()
         self.assertEqual(invoice.review_state, 'todo')
-        last_recurring = self.env['account.move'].search([('auto_post_origin_id', '=', invoice.id)], limit=1, order='date desc')
+        last_recurring = self.env['account.move'].search_fetch([('auto_post_origin_id', '=', invoice.id)], limit=1, order='date desc')
         self.assertEqual(last_recurring.review_state, 'todo')
 
     def test_post_move_auto_check_with_auto_post_monthly_sales_prereviewed(self):
@@ -115,7 +115,7 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         with freeze_time(invoice.date + relativedelta(days=1)), self.enter_registry_test_mode():
             self.env.ref('account.ir_cron_auto_post_draft_entry').method_direct_trigger()
         self.assertEqual(invoice.review_state, 'reviewed')
-        last_recurring = self.env['account.move'].search([('auto_post_origin_id', '=', invoice.id)], limit=1, order='date desc')
+        last_recurring = self.env['account.move'].search_fetch([('auto_post_origin_id', '=', invoice.id)], limit=1, order='date desc')
         self.assertEqual(last_recurring.review_state, 'reviewed')
 
     def test_post_move_auto_check_with_auto_post_monthly_sales_postreviewed(self):
@@ -125,12 +125,12 @@ class TestCheckAccountMoves(AccountTestInvoicingCommon):
         with freeze_time(invoice.date + relativedelta(days=1)), self.enter_registry_test_mode():
             self.env.ref('account.ir_cron_auto_post_draft_entry').method_direct_trigger()
         invoice.review_state = 'reviewed'
-        last_recurring = self.env['account.move'].search([('auto_post_origin_id', '=', invoice.id)], limit=1, order='date desc')
+        last_recurring = self.env['account.move'].search_fetch([('auto_post_origin_id', '=', invoice.id)], limit=1, order='date desc')
         self.assertEqual(last_recurring.review_state, 'todo')
         last_recurring.review_state = 'reviewed'
         with freeze_time(invoice.date + relativedelta(days=1, months=1)), self.enter_registry_test_mode():
             self.env.ref('account.ir_cron_auto_post_draft_entry').method_direct_trigger()
-        last_recurring = self.env['account.move'].search([('auto_post_origin_id', '=', invoice.id)], limit=1, order='date desc')
+        last_recurring = self.env['account.move'].search_fetch([('auto_post_origin_id', '=', invoice.id)], limit=1, order='date desc')
         self.assertEqual(last_recurring.review_state, 'reviewed')
 
     def test_create_statement_line_auto_check(self):

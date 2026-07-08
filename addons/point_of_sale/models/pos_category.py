@@ -24,7 +24,7 @@ class PosCategory(models.Model):
         return random.randint(0, 10)
 
     def _default_sequence(self):
-        return (self.search([], order="sequence desc", limit=1).sequence or 0) + 1
+        return (self.search_fetch([], order="sequence desc", limit=1).sequence or 0) + 1
 
     name = fields.Char(string='Category Name', required=True, translate=True)
     complete_name = fields.Char('Complete Name', compute='_compute_complete_name', recursive=True, store=True)

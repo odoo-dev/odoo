@@ -562,7 +562,7 @@ class test_selection(ImporterCase):
     def test_imported_translated(self):
         self.env['res.lang']._activate_lang('fr_FR')
         # add translations for selection
-        selections = self.env['ir.model.fields.selection'].search([('name', 'in', list(self.translations_fr))])
+        selections = self.env['ir.model.fields.selection'].search_fetch([('name', 'in', list(self.translations_fr))])
         for selection in selections:
             selection.with_context(lang='fr_FR').name = self.translations_fr[selection.name]
 

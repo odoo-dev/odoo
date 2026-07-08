@@ -138,7 +138,7 @@ class TestRecruitmentInterviewer(MailCase):
         )
 
         # Checked that notification message is created
-        message = self.env['mail.message'].search([('res_id', '=', applicant.id)], limit=1)
+        message = self.env['mail.message'].search_fetch([('res_id', '=', applicant.id)], limit=1)
         self.assertEqual(message.subject, f"You have been assigned as an interviewer for {applicant.display_name}")
 
     def test_update_recruiter_for_ongoing_application(self):

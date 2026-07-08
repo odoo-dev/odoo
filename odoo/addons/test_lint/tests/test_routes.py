@@ -42,7 +42,7 @@ class RoutesLinter(TransactionCase):
 
             _check_and_complete_route_definition(controller_cls, submethod, merged_routing)
 
-        installed_modules = set(self.env['ir.module.module'].search([
+        installed_modules = set(self.env['ir.module.module'].search_fetch([
             ('state', '=', 'installed'),
         ]).mapped('name'))
         with patch('odoo.http.routing_map._check_and_complete_route_definition', extended_check):

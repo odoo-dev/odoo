@@ -693,7 +693,7 @@ class TestAPI(ThreadRecipients):
     @users("employee")
     def test_message_get_suggested_recipients_banned(self):
         """ Ban list: public partners, aliases, alias domains """
-        domains = self.env['mail.alias.domain'].sudo().search([])
+        domains = self.env['mail.alias.domain'].sudo().search_fetch([])
         domains_cc_list = []
         for domain in domains:
             domains_cc_list += [

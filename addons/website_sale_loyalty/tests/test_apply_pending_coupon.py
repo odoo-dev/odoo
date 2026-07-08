@@ -32,7 +32,7 @@ class TestSaleCouponApplyPending(TestSaleCouponNumbersCommon, WebsiteSaleCommon)
         cls.coupon = cls.coupon_program.coupon_ids[0]
 
         installed_modules = set(
-            cls.env["ir.module.module"].search([("state", "=", "installed")]).mapped("name")
+            cls.env["ir.module.module"].search_fetch([("state", "=", "installed")]).mapped("name")
         )
         for _ in http.routing_map._generate_routing_rules(installed_modules, nodb_only=False):
             pass

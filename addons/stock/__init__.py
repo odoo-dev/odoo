@@ -26,7 +26,7 @@ def post_init_hook(env):
 
 
 def uninstall_hook(env):
-    picking_type_ids = env["stock.picking.type"].with_context({"active_test": False}).search([])
+    picking_type_ids = env["stock.picking.type"].with_context({"active_test": False}).search_fetch([])
     picking_type_ids.sequence_id.unlink()
     _save_current_inventory(env)
 

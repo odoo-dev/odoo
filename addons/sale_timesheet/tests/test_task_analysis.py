@@ -16,7 +16,7 @@ class TestSaleTimesheetTaskAnalysis(TestCommonSaleTimesheet):
         })
         sales_order.action_confirm()
 
-        task_1 = self.env['project.task'].search([('sale_line_id', '=', so_line_1.id)])
+        task_1 = self.env['project.task'].search_fetch([('sale_line_id', '=', so_line_1.id)])
         task_2 = self.env['project.task'].create({
             'name': "Task 2",
             'project_id': task_1.project_id.id,
@@ -26,5 +26,5 @@ class TestSaleTimesheetTaskAnalysis(TestCommonSaleTimesheet):
         self.assertEqual(task_2.remaining_hours_so, 10)
 
         self.env.flush_all()
-        task_report = self.env['report.project.task.user'].search([('task_id', '=', task_2.id)])
+        task_report = self.env['report.project.task.user'].search_fetch([('task_id', '=', task_2.id)])
         self.assertEqual(task_report.remaining_hours_so, task_2.remaining_hours_so)

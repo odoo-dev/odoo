@@ -247,7 +247,7 @@ class TestLoyalty(TransactionCase):
             [partner_1.id, partner_2.id, dest_partner.id], dest_partner
         )
 
-        dest_partner_loyalty_cards = self.env["loyalty.card"].search([
+        dest_partner_loyalty_cards = self.env["loyalty.card"].search_fetch([
             ("partner_id", "=", dest_partner.id),
             ("program_id", "=", program.id),
         ])

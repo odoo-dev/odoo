@@ -6866,7 +6866,7 @@ class AccountMove(models.Model):
         if is_invoice_report:
             domain += [('is_invoice_report', '=', True)]
 
-        model_reports = self.env['ir.actions.report'].search(domain)
+        model_reports = self.env['ir.actions.report'].search_fetch(domain)
 
         available_reports = model_reports.filtered(
             lambda model_template: len(self.filtered_domain(ast.literal_eval(model_template.domain or '[]'))) == len(self)

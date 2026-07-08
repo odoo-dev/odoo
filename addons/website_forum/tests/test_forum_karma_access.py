@@ -309,7 +309,7 @@ class TestForumKarma(TestForumCommon):
         Post = self.env['forum.post']
         with self.assertRaises(UserError):
             self.post.with_user(self.user_portal).convert_answer_to_comment()
-        self.assertEqual(Post.search([('name', '=', 'TestQuestion')])[0].forum_id.name, 'TestForum', 'website_forum: question to comment conversion failed')
+        self.assertEqual(Post.search_fetch([('name', '=', 'TestQuestion')])[0].forum_id.name, 'TestForum', 'website_forum: question to comment conversion failed')
 
         with self.assertRaises(AccessError):
             self.answer.with_user(self.user_portal).convert_answer_to_comment()
@@ -487,7 +487,7 @@ class TestForumKarma(TestForumCommon):
             for post_user_group in groups:
                 self.assertEqual(post_user_group['__count'], 1)
 
-        ORIGIN_COUNT = len(self.env['forum.post.vote'].search([]).post_id)
+        ORIGIN_COUNT = len(self.env['forum.post.vote'].search_fetch([]).post_id)
         check_vote_records_count_and_integrity(ORIGIN_COUNT)
         self.post.create_uid.karma = KARMA['ask']
         self.user_portal.karma = KARMA['dwv']

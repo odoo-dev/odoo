@@ -44,7 +44,7 @@ class EventLeadRequest(models.Model):
         auto_commit = not modules.module.current_test
 
         registrations_batch_size = registrations_batch_size or self._REGISTRATIONS_BATCH_SIZE
-        generate_requests = self.env['event.lead.request'].search([], limit=job_limit)
+        generate_requests = self.env['event.lead.request'].search_fetch([], limit=job_limit)
         fulfilled_requests = self.env['event.lead.request']
         for generate_request in generate_requests:
             registrations_to_process = self.env['event.registration'].search([

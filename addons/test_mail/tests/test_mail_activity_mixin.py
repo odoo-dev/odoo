@@ -228,7 +228,7 @@ class TestActivityMixin(TestActivityCommon):
         self.assertFalse(any(archived_users.mapped('active')), "Users should be archived.")
 
         # activities of active users shouldn't be touched, each has exactly 1 activity present
-        activities = self.env['mail.activity'].search([('user_id', 'in', active_users.ids)])
+        activities = self.env['mail.activity'].search_fetch([('user_id', 'in', active_users.ids)])
         self.assertEqual(len(activities), 3, "We should have only 3 activities in total linked to our active users")
         self.assertEqual(activities.mapped('user_id'), active_users,
                          "We should have 3 different users linked to the activities of the active users")

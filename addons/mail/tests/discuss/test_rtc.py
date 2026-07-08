@@ -85,7 +85,7 @@ class TestChannelRTC(MailCommon, HttpCase):
         initial_rtc_session = self.member_of_employee_in_channel_internal.sudo().rtc_session_ids
 
         def notifications():
-            message = self.env["mail.message"].search(
+            message = self.env["mail.message"].search_fetch(
                 [
                     ("model", "=", "discuss.channel"),
                     ("res_id", "=", self.channel_internal.id),
@@ -211,7 +211,7 @@ class TestChannelRTC(MailCommon, HttpCase):
         self.member_of_employee_in_chat.sudo()._rtc_leave_call()
 
         def notifications():
-            message = self.env["mail.message"].search(
+            message = self.env["mail.message"].search_fetch(
                 [
                     ("model", "=", "discuss.channel"),
                     ("res_id", "=", self.chat.id),
@@ -351,7 +351,7 @@ class TestChannelRTC(MailCommon, HttpCase):
         self.member_of_employee_in_group_a.sudo()._rtc_leave_call()
 
         def notifications():
-            message = self.env["mail.message"].search(
+            message = self.env["mail.message"].search_fetch(
                 [
                     ("model", "=", "discuss.channel"),
                     ("res_id", "=", self.channel_group_a.id),

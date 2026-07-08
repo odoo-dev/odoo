@@ -72,10 +72,10 @@ class ExhibitorController(WebsiteEventController):
 
         # fetch data to display; use sudo to allow reading partner info, be sure domain is correct
         event = event.with_context(tz=event.date_tz or 'UTC')
-        sorted_sponsors = request.env['event.sponsor'].sudo().search(
+        sorted_sponsors = request.env['event.sponsor'].sudo().search_fetch(
             search_domain
         ).sorted(lambda sponsor: (sponsor.sponsor_type_id.sequence, sponsor.sequence))
-        sponsors_all = request.env['event.sponsor'].sudo().search(search_domain_base)
+        sponsors_all = request.env['event.sponsor'].sudo().search_fetch(search_domain_base)
         sponsor_types = sponsors_all.mapped('sponsor_type_id')
         sponsor_countries = sponsors_all.mapped('partner_id.country_id').sorted('name')
         # organize sponsors into categories to help display

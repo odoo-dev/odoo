@@ -24,7 +24,7 @@ class DashboardSharing(DashboardTestCommon):
             "excel_files": EXCEL_FILES,
         }
         url = self.env["spreadsheet.dashboard.share"].action_get_share_url(share_vals)
-        share = self.env["spreadsheet.dashboard.share"].search(
+        share = self.env["spreadsheet.dashboard.share"].search_fetch(
             [("dashboard_id", "=", dashboard.id)]
         )
         self.assertEqual(url, share.full_url)

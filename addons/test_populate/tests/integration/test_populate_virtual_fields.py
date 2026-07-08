@@ -31,7 +31,7 @@ class TestVirtualFieldsJSON(PopulateTestCase):
         final_count = self.env['test_populate.product'].search_count([])
         self.assertEqual(final_count - initial_count, 3)
 
-        product_ids = self.env['populate.model.data'].search([
+        product_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.product'),
         ]).mapped('res_id')
@@ -66,7 +66,7 @@ class TestVirtualFieldsXML(PopulateTestCase):
 
         start_populate(session)
 
-        product_ids = self.env['populate.model.data'].search([
+        product_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.product'),
         ]).mapped('res_id')
@@ -110,7 +110,7 @@ class TestVirtualFieldDependencies(PopulateTestCase):
 
         start_populate(session)
 
-        product_ids = self.env['populate.model.data'].search([
+        product_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.product'),
         ]).mapped('res_id')
@@ -156,7 +156,7 @@ class TestVirtualFieldDependencies(PopulateTestCase):
 
         start_populate(session)
 
-        product_ids = self.env['populate.model.data'].search([
+        product_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.product'),
         ]).mapped('res_id')
@@ -196,7 +196,7 @@ class TestVirtualFieldDependencies(PopulateTestCase):
 
         start_populate(session)
 
-        product_ids = self.env['populate.model.data'].search([
+        product_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.product'),
         ]).mapped('res_id')

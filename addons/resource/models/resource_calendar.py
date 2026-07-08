@@ -203,7 +203,7 @@ class ResourceCalendar(models.Model):
 
     def is_calendar_referenced(self):
         self.ensure_one()
-        relations = self.env['ir.model.fields'].sudo().search([
+        relations = self.env['ir.model.fields'].sudo().search_fetch([
             ('ttype', '=', 'many2one'),
             ('store', '=', True),
             ('model', 'not ilike', 'resource.calendar'),

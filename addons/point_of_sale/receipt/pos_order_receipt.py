@@ -214,7 +214,7 @@ class PosOrderReceipt(models.AbstractModel):
         }
 
     def order_receipt_generate_html(self, basic_receipt=False):
-        last_order = self.env['pos.order'].search([], order='id desc', limit=1)
+        last_order = self.env['pos.order'].search_fetch([], order='id desc', limit=1)
         report_name = 'point_of_sale.pos_order_receipt'
         return last_order.env['ir.qweb']._render(report_name, values=self.order_receipt_generate_data(basic_receipt))
 
@@ -412,7 +412,7 @@ class PosOrderReceipt(models.AbstractModel):
 
     # Preparation ticket generation
     def _order_change_receipts_generate_html(self):
-        last_order = self.env['pos.order'].search([], order='id desc', limit=1)
+        last_order = self.env['pos.order'].search_fetch([], order='id desc', limit=1)
         report_name = 'point_of_sale.pos_order_change_receipt'
         changes = self._generate_preparation_changes_by_printer()
         rendered = {}

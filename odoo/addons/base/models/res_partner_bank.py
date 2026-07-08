@@ -125,7 +125,7 @@ class ResPartnerBank(models.Model):
     @api.depends('country_id')
     def _compute_show_clearing_number(self):
         sepa_countries = self.env.ref('base.sepa_zone').country_ids
-        clearing_label_countries = self.env['clearing.label'].search([]).country_id
+        clearing_label_countries = self.env['clearing.label'].search_fetch([]).country_id
         excluded_countries = sepa_countries - clearing_label_countries
         for account in self:
             account.show_clearing_number = account.country_id not in excluded_countries

@@ -371,7 +371,7 @@ class MailMessage(models.Model):
 
     def _compute_needaction(self):
         """ Need action on a mail.message = notified on my channel """
-        my_messages = self.env['mail.notification'].sudo().search([
+        my_messages = self.env['mail.notification'].sudo().search_fetch([
             ('mail_message_id', 'in', self.ids),
             ('res_partner_id', '=', self.env.user.partner_id.id),
             ('is_read', '=', False)]).mapped('mail_message_id')
@@ -387,7 +387,7 @@ class MailMessage(models.Model):
         return [('notification_ids', 'in', notification_ids)]
 
     def _compute_has_error(self):
-        error_from_notification = self.env['mail.notification'].sudo().search([
+        error_from_notification = self.env['mail.notification'].sudo().search_fetch([
             ('mail_message_id', 'in', self.ids),
             ('notification_status', 'in', ('bounce', 'exception'))]).mapped('mail_message_id')
         for message in self:

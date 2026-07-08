@@ -64,7 +64,7 @@ class HrEmployee(models.Model):
         three_months_later = today + relativedelta(months=3)
         return_val = self.env["mail.activity"]
 
-        jobs_with_certification = self.env["hr.job"].search([("job_skill_ids.is_certification", "=", True)])
+        jobs_with_certification = self.env["hr.job"].search_fetch([("job_skill_ids.is_certification", "=", True)])
         if not jobs_with_certification:
             return return_val
 
@@ -95,7 +95,7 @@ class HrEmployee(models.Model):
         if not employees:
             return return_val
 
-        emp_skills = self.env["hr.employee.skill"].search(
+        emp_skills = self.env["hr.employee.skill"].search_fetch(
             Domain.AND(
                 [Domain("employee_id", "in", employees.ids), Domain("is_certification", "=", True)],
             ),

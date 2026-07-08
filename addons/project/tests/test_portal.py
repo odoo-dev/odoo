@@ -85,7 +85,7 @@ class TestPortalProject(TestProjectPortalCommon, HttpCase):
         self.assertFalse(all(self.project_pigs.tasks.mapped('access_token')), 'The access token should no longer be set in any tasks linked to the project since now the project is only available by internal users.')
 
     def test_search_validates_results(self):
-        project_manager = self.env['res.users'].search([
+        project_manager = self.env['res.users'].search_fetch([
             ('group_ids', 'in', [self.env.ref('project.group_project_manager').id])
         ],limit=1)
         self.authenticate(project_manager.login, project_manager.login)

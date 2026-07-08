@@ -112,12 +112,12 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
             ('channel_id', '=', channel_info['id']),
             ('partner_id', '=', operator.partner_id.id),
         ]
-        operator_member = self.env['discuss.channel.member'].search(operator_member_domain)
+        operator_member = self.env['discuss.channel.member'].search_fetch(operator_member_domain)
         visitor_member_domain = [
             ('channel_id', '=', channel_info['id']),
             ('partner_id', '=', test_user.partner_id.id),
         ]
-        visitor_member = self.env['discuss.channel.member'].search(visitor_member_domain)
+        visitor_member = self.env['discuss.channel.member'].search_fetch(visitor_member_domain)
         self.assertEqual(
             data["res.partner"],
             self._filter_partners_fields(
@@ -245,7 +245,7 @@ class TestGetDiscussChannel(TestImLivechatCommon, MailCommon):
             ('channel_id', '=', channel_info['id']),
             ('partner_id', '=', operator.partner_id.id),
         ]
-        operator_member = self.env['discuss.channel.member'].search(operator_member_domain)
+        operator_member = self.env['discuss.channel.member'].search_fetch(operator_member_domain)
         self.assertEqual(channel_info["name"], "Michel Operator")
         self.assertEqual(channel_info['country_id'], False)
         self.assertEqual(

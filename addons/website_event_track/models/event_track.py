@@ -619,7 +619,7 @@ class EventTrack(models.Model):
         else:
             domain = [('partner_id', '=', self.env.user.partner_id.id)]
 
-        track_visitors = self.env['event.track.visitor'].sudo().search(
+        track_visitors = self.env['event.track.visitor'].sudo().search_fetch(
             Domain.AND([domain, [('track_id', 'in', self.ids)]])
         )
         missing = self - track_visitors.track_id

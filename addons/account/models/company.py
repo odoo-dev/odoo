@@ -427,7 +427,7 @@ class ResCompany(models.Model):
                 # can have access to the company form without having access to its content (see base.res_company_rule_erp_manager)
                 record.account_enabled_tax_country_ids = False
                 continue
-            foreign_vat_fpos = self.env['account.fiscal.position'].search([
+            foreign_vat_fpos = self.env['account.fiscal.position'].search_fetch([
                 *self.env['account.fiscal.position']._check_company_domain(record),
                 ('foreign_vat', '!=', False)
             ])
@@ -526,7 +526,7 @@ class ResCompany(models.Model):
     def reflect_code_prefix_change(self, old_code, new_code):
         if not old_code or new_code == old_code:
             return
-        accounts = self.env['account.account'].with_company(self).search([
+        accounts = self.env['account.account'].with_company(self).search_fetch([
             *self.env['account.account']._check_company_domain(self),
             ('code', '=like', old_code + '%'),
             ('account_type', 'in', ('asset_cash', 'liability_credit_card')),

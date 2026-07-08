@@ -189,7 +189,7 @@ class TestSaleExpense(TestExpenseCommon, TestSaleCommon):
         expense.action_approve()
         self.post_expenses_with_wizard(expense)
 
-        line = self.env['account.analytic.line'].search([('account_id', '=', account.id)])
+        line = self.env['account.analytic.line'].search_fetch([('account_id', '=', account.id)])
         self.assertEqual('expense', line.category)
         self.assertEqual('costs', line.category_report)
         self.assertEqual('13_expense', line.billable_type)

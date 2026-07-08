@@ -248,7 +248,7 @@ class TestProductConfiguratorUi(TestProductConfiguratorCommon):
         self.start_tour(
             "/odoo", 'sale_product_configurator_custom_value_update_tour', login='salesman',
         )
-        order = self.env['sale.order'].search([], order='id desc', limit=1)
+        order = self.env['sale.order'].search_fetch([], order='id desc', limit=1)
         self.assertEqual(
             order.order_line.product_custom_attribute_value_ids.custom_value,
             "123456",

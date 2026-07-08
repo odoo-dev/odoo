@@ -48,7 +48,7 @@ class TestGamificationBadge(TestHrCommon):
             case 2: The one who has group Officer: Manage all employees access should be able to edit any badge
             case 3: The one who has not given the badge(base user) should not be able to update the badge
         """
-        badge_user = self.env["gamification.badge.user"].search([], limit=1)[0]
+        badge_user = self.env["gamification.badge.user"].search_fetch([], limit=1)[0]
         user_comment = "This person is a good guy"
 
         badge_user.with_user(self.demo2_user).write({'comment': user_comment})
@@ -67,7 +67,7 @@ class TestGamificationBadge(TestHrCommon):
             case 2: The one who has given the badge should be able to delete the badge
             case 3: The one who has group Officer: Manage all employees access should be able to edit any badge
         """
-        badge_user = self.env["gamification.badge.user"].search([], limit=1)[0]
+        badge_user = self.env["gamification.badge.user"].search_fetch([], limit=1)[0]
         with self.assertRaises(AccessError):
             badge_user.with_user(self.demo3_user).unlink()
 
@@ -80,6 +80,6 @@ class TestGamificationBadge(TestHrCommon):
             "user_id": self.demo_user.id,
         }]).action_grant_badge()
 
-        badge_user = self.env["gamification.badge.user"].search([], limit=1)[0]
+        badge_user = self.env["gamification.badge.user"].search_fetch([], limit=1)[0]
         badge_user.with_user(self.demo4_manager.id).unlink()
         self.assertEqual(0, self.env['gamification.badge.user'].search_count([('id', '=', badge_user.id)], limit=1))

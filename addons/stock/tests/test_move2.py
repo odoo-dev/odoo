@@ -160,7 +160,7 @@ class TestPickShip(TestStockCommon):
         picking_client.move_ids[0].picked = True
         picking_client._action_done()  # no new in order to create backorder
 
-        backorder = self.env['stock.picking'].search([('backorder_id', '=', picking_client.id)])
+        backorder = self.env['stock.picking'].search_fetch([('backorder_id', '=', picking_client.id)])
         self.assertEqual(backorder.state, 'confirmed', 'Backorder should be waiting for reservation')
 
     def test_mto_to_mts(self):
@@ -959,7 +959,7 @@ class TestSinglePicking(TestStockCommon):
         self.assertNotEqual(delivery_order.date_done, False)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.productA, self.pack_location), 0.0)
 
-        backorder = self.env['stock.picking'].search([('backorder_id', '=', delivery_order.id)])
+        backorder = self.env['stock.picking'].search_fetch([('backorder_id', '=', delivery_order.id)])
         self.assertEqual(backorder.state, 'confirmed')
 
     def test_backorder_3(self):
@@ -1002,7 +1002,7 @@ class TestSinglePicking(TestStockCommon):
         delivery_order.move_ids[0].picked = True
         delivery_order._action_done()
 
-        backorder = self.env['stock.picking'].search([('backorder_id', '=', delivery_order.id)])
+        backorder = self.env['stock.picking'].search_fetch([('backorder_id', '=', delivery_order.id)])
         self.assertEqual(backorder.state, 'confirmed')
 
     def test_backorder_4(self):
@@ -2871,7 +2871,7 @@ class TestStockUOM(TestStockCommon):
         })
         picking_in.move_ids.picked = True
         picking_in._action_done()
-        back_order_in = self.env['stock.picking'].search([('backorder_id', '=', picking_in.id)])
+        back_order_in = self.env['stock.picking'].search_fetch([('backorder_id', '=', picking_in.id)])
 
         self.assertEqual(len(back_order_in), 1.00, 'There should be one back order created')
         # picking_in: 42760.00 / 2240 -> 19.0892857
@@ -2989,7 +2989,7 @@ class TestRoutes(TestStockCommon):
         """ Checks that if a picking is sent to a sublocation of its original destination during the pick->ship route,
         it will still trigger the push rule from the sublocation as well to continue the route.
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse.delivery_steps = 'pick_ship'
         subloc = self.env['stock.location'].create({
             'name': 'Fancy Spot',
@@ -3585,7 +3585,7 @@ class TestAutoAssign(TestStockCommon):
         pick_2.move_ids.quantity = 1
         pick_2.button_validate()
         self.assertEqual(delivery_order_1, self.env['stock.picking'].search([('partner_id', '=', partner_1.id), ('picking_type_id', '=', warehouse.out_type_id.id)], limit=1))
-        delivery_order_2 = self.env['stock.picking'].search([('partner_id', '=', partner_2.id), ('picking_type_id', '=', warehouse.out_type_id.id)], limit=1)
+        delivery_order_2 = self.env['stock.picking'].search_fetch([('partner_id', '=', partner_2.id), ('picking_type_id', '=', warehouse.out_type_id.id)], limit=1)
         self.assertEqual(delivery_order_2.partner_id, partner_2)
         self.assertEqual(delivery_order_2.move_ids.mapped('product_id'), self.productA)
         self.assertEqual(delivery_order_2.move_ids.product_uom_qty, 1.0)

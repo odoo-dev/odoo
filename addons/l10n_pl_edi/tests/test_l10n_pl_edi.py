@@ -947,7 +947,7 @@ class TestL10nPlEdi(AccountTestInvoicingCommon, CronMixinCase):
             self.env['account.move'].sudo()._cron_l10n_pl_edi_download_bills()
 
         capt.assert_called_once_with(ksef_number)
-        bill = self.env['account.move'].search([
+        bill = self.env['account.move'].search_fetch([
             ('l10n_pl_edi_number', '=', ksef_number),
             ('company_id', '=', self.company_2.id),
         ])

@@ -244,7 +244,7 @@ class WebsiteVisitorTests(WebsiteVisitorTestsCommon):
         existing_tracks = self.env['website.track'].search([])
         self.start_tour(self.untracked_page.url, "visitor_tracking")
         self.assertEqual(self.env['website.visitor'].search_count([]), len(existing_visitors) + 1)
-        new_tracks = self.env['website.track'].search([('id', 'not in', existing_tracks.ids)])
+        new_tracks = self.env['website.track'].search_fetch([('id', 'not in', existing_tracks.ids)])
         self.assertIn(self.tracked_page.url, new_tracks.url, "1 tracked page expected")
 
     def test_visitor_creation_on_tracked_page(self):
@@ -346,7 +346,7 @@ class WebsiteVisitorTests(WebsiteVisitorTestsCommon):
 
         new_visitors = self.env['website.visitor'].search([('id', 'not in', existing_visitors.ids)])
         self.assertEqual(new_visitors, visitor_admin | visitor_portal)
-        visitor_admin = self.env['website.visitor'].search([('partner_id', '=', self.partner_admin.id)])
+        visitor_admin = self.env['website.visitor'].search_fetch([('partner_id', '=', self.partner_admin.id)])
         # tracks are linked
         self.assertTrue(visitor_anonymous_tracks < visitor_admin.website_track_ids)
         self.assertEqual(len(visitor_admin.website_track_ids), 5, "There should be 5 tracked page for the admin")

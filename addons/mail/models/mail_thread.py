@@ -997,7 +997,7 @@ class MailThread(models.AbstractModel):
           we also need to verify if the message come from "mailer-daemon"
         """
         # detection based on email_to
-        bounce_aliases = self.env['mail.alias.domain'].search([]).mapped('bounce_email')
+        bounce_aliases = self.env['mail.alias.domain'].search_fetch([]).mapped('bounce_email')
         email_to_list = [
             email_normalize(e) or e
             for e in email_split(message_dict['to'])
@@ -1286,7 +1286,7 @@ class MailThread(models.AbstractModel):
 
         # 2. Handle new incoming email by checking aliases and applying their settings
         # prefetch catchall aliases as they are used several times
-        catchall_aliases = self.env['mail.alias.domain'].search([]).mapped('catchall_email')
+        catchall_aliases = self.env['mail.alias.domain'].search_fetch([]).mapped('catchall_email')
         self = self.with_context(mail_catchall_aliases=catchall_aliases)
         if rcpt_tos_list:
             # no route found for a matching reference (or reply), so parent is invalid
@@ -3935,7 +3935,7 @@ class MailThread(models.AbstractModel):
         # have a fallback in case replies mess with Messsage-Id in the In-Reply-To (e.g. amazon
         # SES SMTP may replace Message-Id and In-Reply-To refers an internal ID not stored in Odoo)
         message_sudo = message.sudo()
-        ancestors = self.env['mail.message'].sudo().search(
+        ancestors = self.env['mail.message'].sudo().search_fetch(
             [
                 ('model', '=', message_sudo.model), ('res_id', '=', message_sudo.res_id),
                 ('id', '!=', message_sudo.id),
@@ -4541,7 +4541,7 @@ class MailThread(models.AbstractModel):
             return ooo_messages
 
         # limit number of real author / recipient exchanges to 1 every 4 days
-        sent_su = self.env['mail.message'].sudo().search([
+        sent_su = self.env['mail.message'].sudo().search_fetch([
             ('author_id', 'in', ooo_users.partner_id.ids),
             ('message_type', '=', 'out_of_office'),
             '|', ('partner_ids', 'in', recipient.ids), ('outgoing_email_to', '=', email_to),

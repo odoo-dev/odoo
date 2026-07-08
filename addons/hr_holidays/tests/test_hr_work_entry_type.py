@@ -47,7 +47,7 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
             'request_date_to': '2025-09-05',
         })
         self.assertEqual(
-            self.env['resource.calendar.leaves'].search([('holiday_id', '=', leave_0.id)]).count_as,
+            self.env['resource.calendar.leaves'].search_fetch([('holiday_id', '=', leave_0.id)]).count_as,
             'working_time',
         )
         with freeze_time('2025-09-03 13:00:00'):
@@ -75,7 +75,7 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
         })
 
         self.assertEqual(
-            self.env['resource.calendar.leaves'].search([('holiday_id', '=', leave_1.id)]).count_as,
+            self.env['resource.calendar.leaves'].search_fetch([('holiday_id', '=', leave_1.id)]).count_as,
             'absence'
         )
         with freeze_time('2025-09-03 13:00:00'):

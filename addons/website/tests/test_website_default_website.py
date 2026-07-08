@@ -51,7 +51,7 @@ class TestWebsiteDefaultWebsiteConsistency(TransactionCase):
         # Check that when a new website is created, default_website XML ID
         # is created again
         website = self.Website.create({"name": "Test Website", "sequence": 1})
-        default_website_data = self.IrModelData.search(self.DefaultWebsiteDomain)
+        default_website_data = self.IrModelData.search_fetch(self.DefaultWebsiteDomain)
         self.assertEqual(
             len(default_website_data),
             1,

@@ -243,7 +243,7 @@ class TestHrAttendanceOvertime(HttpCase):
         self.assertEqual(overtime.duration, 0, 'Overtime duration should be 0 when an attendance has not been checked out.')
         checkin_pm.write({'check_out': datetime(2021, 1, 4, 18, 0)})
         # self.assertTrue(overtime.exists(), 'Overtime should not be deleted')
-        overtime = self.env['hr.attendance.overtime.line'].search([('employee_id', '=', self.employee.id), ('date', '=', date(2021, 1, 4))])
+        overtime = self.env['hr.attendance.overtime.line'].search_fetch([('employee_id', '=', self.employee.id), ('date', '=', date(2021, 1, 4))])
         self.assertAlmostEqual(overtime.duration, 1)
         self.assertAlmostEqual(self.employee.total_overtime, 1)
 
@@ -448,7 +448,7 @@ class TestHrAttendanceOvertime(HttpCase):
         self.assertAlmostEqual(attendance.overtime_hours, 4, 2)
 
         # Total overtime for that day : 4 hours
-        overtime_1 = self.env['hr.attendance.overtime.line'].search([('employee_id', '=', self.employee.id),
+        overtime_1 = self.env['hr.attendance.overtime.line'].search_fetch([('employee_id', '=', self.employee.id),
                                                               ('date', '=', datetime(2023, 1, 2))])
         self.assertAlmostEqual(overtime_1.duration, 4, 2)
 
@@ -485,7 +485,7 @@ class TestHrAttendanceOvertime(HttpCase):
         # 21:00 -> 23:00 should contain 2 hours of overtime
         self.assertAlmostEqual(m_attendance_3.overtime_hours, 2, 2)
 
-        overtime_2 = self.env['hr.attendance.overtime.line'].search([('employee_id', '=', self.employee.id),
+        overtime_2 = self.env['hr.attendance.overtime.line'].search_fetch([('employee_id', '=', self.employee.id),
                                                                 ('date', '=', datetime(2023, 1, 3))])
         # Total overtime for that day : 5 hours
         self.assertEqual(sum(overtime_2.mapped('duration')), 5)
@@ -527,7 +527,7 @@ class TestHrAttendanceOvertime(HttpCase):
         self.assertAlmostEqual(early_attendance.overtime_hours, 5)
 
         # Total overtime for that day : 5 hours
-        overtime_record = self.env['hr.attendance.overtime.line'].search([('employee_id', '=', self.europe_employee.id),
+        overtime_record = self.env['hr.attendance.overtime.line'].search_fetch([('employee_id', '=', self.europe_employee.id),
                                                               ('date', '=', datetime(2024, 5, 28))])
         self.assertAlmostEqual(overtime_record.duration, 5)
 
@@ -542,7 +542,7 @@ class TestHrAttendanceOvertime(HttpCase):
         # and from 0h to 12h the 30th -> so he did 4h of overtime for this day
 
         self.assertAlmostEqual(early_attendance2.overtime_hours, 4)
-        overtime_record2 = self.env['hr.attendance.overtime.line'].search([('employee_id', '=', self.europe_employee.id),
+        overtime_record2 = self.env['hr.attendance.overtime.line'].search_fetch([('employee_id', '=', self.europe_employee.id),
                                                               ('date', '=', datetime(2024, 5, 30))])
         self.assertAlmostEqual(overtime_record2.duration, 4)
 
@@ -787,7 +787,7 @@ class TestHrAttendanceOvertime(HttpCase):
 
         self.assertEqual(attendance.check_out, datetime(2024, 1, 1, 14, 6))
         self.assertAlmostEqual(attendance.worked_hours, 6.1)
-        overtime = self.env['hr.attendance.overtime.line'].search([
+        overtime = self.env['hr.attendance.overtime.line'].search_fetch([
             ('employee_id', '=', self.employee.id),
             ('date', '=', date(2024, 1, 1)),
         ])
@@ -1657,14 +1657,14 @@ class TestHrAttendanceOvertime(HttpCase):
             'check_out': datetime(2021, 1, 4, 19, 0),
         }])
         overtime_line = self.env['hr.attendance.overtime.line']
-        all_lines = overtime_line.search([('employee_id', 'in', (own_reader_employee | officer_employee | self.other_employee).ids)])
+        all_lines = overtime_line.search_fetch([('employee_id', 'in', (own_reader_employee | officer_employee | self.other_employee).ids)])
         self.assertEqual(len(all_lines.employee_id), 3)
         self.assertEqual(own_reader_employee.total_overtime, 3)
         self.assertEqual(self.other_employee.total_overtime, 3)
         self.assertEqual(officer_employee.total_overtime, 3)
 
         # Basic user: should only have access to his own overtime_ids and total_overtime
-        own_reader_lines = overtime_line.with_user(own_reader_user).search([])
+        own_reader_lines = overtime_line.with_user(own_reader_user).search_fetch([])
         self.assertEqual(own_reader_lines.employee_id, own_reader_employee)
         with self.assertRaises(AccessError, msg="Simple user should not have access to others overtime lines"):
             _ = self.other_employee.with_user(own_reader_user).overtime_ids
@@ -1678,7 +1678,7 @@ class TestHrAttendanceOvertime(HttpCase):
         )  # access denied, _compute_total_overtime() silently fails and returns 0
 
         # Officer: can access his managed employees overtime_ids and total_overtime
-        officer_lines = overtime_line.with_user(officer_user).search([])
+        officer_lines = overtime_line.with_user(officer_user).search_fetch([])
         self.assertEqual(officer_lines.mapped('employee_id'), officer_employee | self.other_employee)
         with self.assertRaises(AccessError, msg="Officer user should not have access to non-managed employee overtime lines"):
             _ = own_reader_employee.with_user(officer_user).overtime_ids
@@ -1692,7 +1692,7 @@ class TestHrAttendanceOvertime(HttpCase):
         )
 
         # Admin: can access all employees overtime_ids and total_overtime
-        admin_lines = overtime_line.with_user(self.user).search([])
+        admin_lines = overtime_line.with_user(self.user).search_fetch([])
         self.assertIn(own_reader_employee, admin_lines.employee_id)
         self.assertIn(officer_employee, admin_lines.employee_id)
         self.assertIn(self.other_employee, admin_lines.employee_id)
@@ -1847,7 +1847,7 @@ class TestHrAttendanceOvertime(HttpCase):
             'check_out': datetime(2021, 1, 4, 23, 59, 59),
         })
 
-        overtimes = self.env['hr.attendance.overtime.line'].search([
+        overtimes = self.env['hr.attendance.overtime.line'].search_fetch([
             ('employee_id', '=', self.employee.id),
             ('date', '=', date(2021, 1, 4))
         ])

@@ -9,7 +9,7 @@ from odoo.tools import mute_logger
 class test_inherits(common.TransactionCase):
 
     def test_ir_model_inherit(self):
-        imi = self.env['ir.model.inherit'].search(
+        imi = self.env['ir.model.inherit'].search_fetch(
             [('model_id.model', '=', 'test.box')]
         )
         self.assertEqual(len(imi), 1)
@@ -88,11 +88,11 @@ class test_inherits(common.TransactionCase):
     def test_ir_model_data_inherits(self):
         """ Check the existence of the correct ir.model.data """
         IrModelData = self.env['ir.model.data']
-        field = IrModelData.search([('name', '=', 'field_test_unit__name')])
+        field = IrModelData.search_fetch([('name', '=', 'field_test_unit__name')])
         self.assertEqual(len(field), 1)
         self.assertEqual(field.module, 'test_orm')
 
-        field = IrModelData.search([('name', '=', 'field_test_box__name')])
+        field = IrModelData.search_fetch([('name', '=', 'field_test_box__name')])
         self.assertEqual(len(field), 1)
         self.assertEqual(field.module, 'test_orm')
 

@@ -204,7 +204,7 @@ class TestUi(TestPosStockHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'LotTour', login="pos_user")
-        two_last_orders = self.env['pos.order'].search([], order='id desc', limit=2)
+        two_last_orders = self.env['pos.order'].search_fetch([], order='id desc', limit=2)
         order_lot_id = [lot_id.lot_name for lot_id in two_last_orders[1].lines.pack_lot_ids]
         refund_lot_id = [lot_id.lot_name for lot_id in two_last_orders[0].lines.pack_lot_ids]
         self.assertEqual(order_lot_id, refund_lot_id, "In the refund we should find the same lot as in the original order")
@@ -280,7 +280,7 @@ class TestUi(TestPosStockHttpCommon):
         self.main_pos_config.write({'ship_later': True})
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'test_edit_paid_order_stock', login="pos_user")
-        edited_orders = self.env['pos.order'].search([], limit=2)
+        edited_orders = self.env['pos.order'].search_fetch([], limit=2)
         # check edited shiping date
         next_year = date.today().year + 1
         self.assertEqual(edited_orders[0].shipping_date, date(next_year, 5, 30))
@@ -308,7 +308,7 @@ class TestUi(TestPosStockHttpCommon):
             login="pos_user",
         )
         next_year = date.today().year + 1
-        pos_order = self.env['pos.order'].search([('partner_id', '=', self.partner_full.id)], limit=1)
+        pos_order = self.env['pos.order'].search_fetch([('partner_id', '=', self.partner_full.id)], limit=1)
         self.assertEqual(pos_order.shipping_date, date(next_year, 5, 30))
 
     def test_product_info_product_inventory(self):

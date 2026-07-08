@@ -166,7 +166,7 @@ class TestOldRules(TestStockCommon):
         qty_available = self.env['stock.quant']._get_available_quantity(self.productA, self.warehouse_3_steps.wh_output_stock_loc_id)
 
         # 3 pickings should be created.
-        picking_ids = self.env['stock.picking'].search([('reference_ids', 'in', reference.id)])
+        picking_ids = self.env['stock.picking'].search_fetch([('reference_ids', 'in', reference.id)])
         self.assertEqual(len(picking_ids), 3)
         for picking in picking_ids:
             self.assertEqual(picking.move_ids.procure_method, 'make_to_stock')
@@ -243,9 +243,9 @@ class TestOldRules(TestStockCommon):
             )
         ])
 
-        pickings_pg1 = self.env['stock.picking'].search([('reference_ids', 'in', reference_1.id)])
-        pickings_pg2 = self.env['stock.picking'].search([('reference_ids', 'in', reference_2.id)])
-        pickings_pg3 = self.env['stock.picking'].search([('reference_ids', 'in', reference_3.id)])
+        pickings_pg1 = self.env['stock.picking'].search_fetch([('reference_ids', 'in', reference_1.id)])
+        pickings_pg2 = self.env['stock.picking'].search_fetch([('reference_ids', 'in', reference_2.id)])
+        pickings_pg3 = self.env['stock.picking'].search_fetch([('reference_ids', 'in', reference_3.id)])
 
         # The 2 first procurements should have create only 1 picking since enough quantities
         # are left in the delivery location
@@ -313,7 +313,7 @@ class TestOldRules(TestStockCommon):
         action_data = picking.button_validate()
         backorder_wizard = Form(self.env['stock.backorder.confirmation'].with_context(action_data['context'])).save()
         backorder_wizard.process()
-        bo = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
+        bo = self.env['stock.picking'].search_fetch([('backorder_id', '=', picking.id)])
 
         self.assertNotIn(packB, picking.move_line_ids.package_id)
         self.assertEqual(packB, bo.move_line_ids.package_id)
@@ -447,7 +447,7 @@ class TestOldRules(TestStockCommon):
                 }
             ),
         ])
-        move_chain = self.env['stock.move'].search([('product_id', '=', product1.id)])
+        move_chain = self.env['stock.move'].search_fetch([('product_id', '=', product1.id)])
         self.assertEqual(len(move_chain), 3)
         pick_move = move_chain.filtered(lambda m: m.picking_type_id == self.warehouse_3_steps.pick_type_id)
         pick_move.picking_id.action_cancel()

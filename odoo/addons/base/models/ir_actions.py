@@ -317,7 +317,7 @@ class IrActionsAct_Window(models.Model):
     cache = fields.Boolean(string="Data Caching", default=True, help="If enabled, this action will cache the related data used in list, Kanban and form views with the aim to increase the loading speed")
 
     def _compute_embedded_actions(self):
-        embedded_actions = self.env["ir.embedded.actions"].search([('parent_action_id', 'in', self.ids)]).filtered(lambda x: x.is_visible)
+        embedded_actions = self.env["ir.embedded.actions"].search_fetch([('parent_action_id', 'in', self.ids)]).filtered(lambda x: x.is_visible)
         for action in self:
             action.embedded_action_ids = embedded_actions.filtered(lambda rec: rec.parent_action_id == action)
 

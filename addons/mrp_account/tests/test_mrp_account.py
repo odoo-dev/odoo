@@ -124,13 +124,13 @@ class TestMrpAccount(TestBomPriceCommon):
         production.button_mark_done()
 
         # finished product move
-        productA_debit_line = self.env['account.move.line'].search([('product_id', '=', self.dining_table.id), ('credit', '=', 0)])
-        productA_credit_line = self.env['account.move.line'].search([('product_id', '=', self.dining_table.id), ('debit', '=', 0)])
+        productA_debit_line = self.env['account.move.line'].search_fetch([('product_id', '=', self.dining_table.id), ('credit', '=', 0)])
+        productA_credit_line = self.env['account.move.line'].search_fetch([('product_id', '=', self.dining_table.id), ('debit', '=', 0)])
         self.assertEqual(productA_debit_line.account_id, self.account_stock_valuation)
         self.assertEqual(productA_credit_line.account_id, self.account_production)
         # one of component move
-        productB_debit_line = self.env['account.move.line'].search([('product_id', '=', self.glass.id), ('credit', '=', 0)])
-        productB_credit_line = self.env['account.move.line'].search([('product_id', '=', self.glass.id), ('debit', '=', 0)])
+        productB_debit_line = self.env['account.move.line'].search_fetch([('product_id', '=', self.glass.id), ('credit', '=', 0)])
+        productB_credit_line = self.env['account.move.line'].search_fetch([('product_id', '=', self.glass.id), ('debit', '=', 0)])
         self.assertEqual(productB_debit_line.account_id, self.account_production)
         self.assertEqual(productB_credit_line.account_id, self.account_stock_valuation)
 
@@ -138,12 +138,12 @@ class TestMrpAccount(TestBomPriceCommon):
         Form.from_action(self.env, production.button_unbuild()).save().action_validate()
 
         # finished product move
-        productA_debit_line = self.env['account.move.line'].search([
+        productA_debit_line = self.env['account.move.line'].search_fetch([
             ('product_id', '=', self.dining_table.id),
             ('credit', '=', 0),
             ('name', 'ilike', 'UB'),
         ])
-        productA_credit_line = self.env['account.move.line'].search([
+        productA_credit_line = self.env['account.move.line'].search_fetch([
             ('product_id', '=', self.dining_table.id),
             ('debit', '=', 0),
             ('name', 'ilike', 'UB'),
@@ -151,12 +151,12 @@ class TestMrpAccount(TestBomPriceCommon):
         self.assertEqual(productA_debit_line.account_id, self.account_production)
         self.assertEqual(productA_credit_line.account_id, self.account_stock_valuation)
         # component move
-        productB_debit_line = self.env['account.move.line'].search([
+        productB_debit_line = self.env['account.move.line'].search_fetch([
             ('product_id', '=', self.glass.id),
             ('credit', '=', 0),
             ('name', 'ilike', 'UB'),
         ])
-        productB_credit_line = self.env['account.move.line'].search([
+        productB_credit_line = self.env['account.move.line'].search_fetch([
             ('product_id', '=', self.glass.id),
             ('debit', '=', 0),
             ('name', 'ilike', 'UB'),
@@ -272,7 +272,7 @@ class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
         # post a WIP for an invalid MO, i.e. draft/cancelled/done results in a "Manual Entry"
         wizard = Form(self.env['mrp.account.wip.accounting'].with_context({'active_ids': [mo.id]}))
         wizard.save().confirm()
-        wip_manual_entry1 = self.env['account.move'].search([('ref', 'ilike', 'WIP - Manual Entry')])
+        wip_manual_entry1 = self.env['account.move'].search_fetch([('ref', 'ilike', 'WIP - Manual Entry')])
         self.assertEqual(len(wip_manual_entry1), 2, "Should be 2 journal entries: 1 for the WIP accounting + 1 for its reversal")
         self.assertEqual(wip_manual_entry1[0].wip_production_count, 0, "Non-WIP MOs shouldn't be linked to manual entry")
         self.assertEqual(len(wip_manual_entry1.line_ids), 6, "Should be 3 lines per journal entry: 1 for 'Component Value', 1 for '(WO) overhead', 1 for WIP")
@@ -289,7 +289,7 @@ class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
         mo.action_confirm()
         wizard = Form(self.env['mrp.account.wip.accounting'].with_context({'active_ids': [mo.id]}))
         wizard.save().confirm()
-        wip_empty_entries = self.env['account.move'].search([('ref', 'ilike', 'WIP - ' + mo.name)])
+        wip_empty_entries = self.env['account.move'].search_fetch([('ref', 'ilike', 'WIP - ' + mo.name)])
         self.assertEqual(len(wip_empty_entries), 2, "Should be 2 journal entries: 1 for the WIP accounting + 1 for its reversal")
         self.assertEqual(wip_empty_entries[0].wip_production_count, 1, "WIP MOs should be linked to entries even if no 'done' work")
         self.assertEqual(len(wip_empty_entries.line_ids), 6, "Should be 3 lines per journal entry: 1 for 'Component Value', 1 for '(WO) overhead', 1 for WIP")
@@ -318,7 +318,7 @@ class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
         workorder.button_finish()
         wizard = Form(self.env['mrp.account.wip.accounting'].with_context({'active_ids': [mo.id]}))
         wizard.save().confirm()
-        wip_entries1 = self.env['account.move'].search([('ref', 'ilike', 'WIP - ' + mo.name), ('id', 'not in', wip_empty_entries.ids)])
+        wip_entries1 = self.env['account.move'].search_fetch([('ref', 'ilike', 'WIP - ' + mo.name), ('id', 'not in', wip_empty_entries.ids)])
         self.assertEqual(len(wip_entries1), 2, "Should be 2 journal entries: 1 for the WIP accounting + 1 for its reversal")
         self.assertEqual(wip_entries1[0].wip_production_count, 1, "WIP MOs should be linked to entry")
         self.assertEqual(len(wip_entries1.line_ids), 6, "Should be 3 lines per journal entry: 1 for 'Component Value', 1 for '(WO) overhead', 1 for WIP")
@@ -340,7 +340,7 @@ class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
         # Draft MOs should be ignored when selecting multiple MOs
         wizard = Form(self.env['mrp.account.wip.accounting'].with_context({'active_ids': mos.ids}))
         wizard.save().confirm()
-        wip_entries2 = self.env['account.move'].search([('ref', 'ilike', 'WIP - ' + mo.name), ('id', 'not in', previous_wip_ids)])
+        wip_entries2 = self.env['account.move'].search_fetch([('ref', 'ilike', 'WIP - ' + mo.name), ('id', 'not in', previous_wip_ids)])
         self.assertEqual(len(wip_entries2), 2, "Should be 2 journal entries: 1 for the WIP accounting + 1 for its reversal, for 1 MO")
         self.assertTrue(mo_2.name not in wip_entries2[0].ref, "Draft MO should be completely disregarded by wizard")
         self.assertEqual(wip_entries2[0].wip_production_count, 1, "Only WIP MOs should be linked to entry")
@@ -360,7 +360,7 @@ class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
         mo_2.qty_producing = mo_2.product_qty
         wizard = Form(self.env['mrp.account.wip.accounting'].with_context({'active_ids': mos.ids}))
         wizard.save().confirm()
-        wip_entries3 = self.env['account.move'].search([('ref', 'ilike', 'WIP - ' + mo.name), ('id', 'not in', previous_wip_ids)])
+        wip_entries3 = self.env['account.move'].search_fetch([('ref', 'ilike', 'WIP - ' + mo.name), ('id', 'not in', previous_wip_ids)])
         self.assertEqual(len(wip_entries3), 2, "Should be 2 journal entries: 1 for the WIP accounting + 1 for its reversal, for both MOs")
         self.assertTrue(mo_2.name in wip_entries3[0].ref, "Both MOs should have been considered")
         self.assertEqual(wip_entries3[0].wip_production_count, 2, "Both WIP MOs should be linked to entry")
@@ -381,7 +381,7 @@ class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
         mo_2.button_mark_done()
         wizard = Form(self.env['mrp.account.wip.accounting'].with_context({'active_ids': mos.ids}))
         wizard.save().confirm()
-        wip_entries4 = self.env['account.move'].search([('ref', 'ilike', 'WIP - ' + mo.name), ('id', 'not in', previous_wip_ids)])
+        wip_entries4 = self.env['account.move'].search_fetch([('ref', 'ilike', 'WIP - ' + mo.name), ('id', 'not in', previous_wip_ids)])
         self.assertEqual(len(wip_entries4), 2, "Should be 2 journal entries: 1 for the WIP accounting + 1 for its reversal, for 1 MO")
         self.assertTrue(mo_2.name not in wip_entries4[0].ref, "Done MO should be completely disregarded by wizard")
         self.assertEqual(wip_entries4[0].wip_production_count, 1, "Only WIP MOs should be linked to entry")
@@ -401,7 +401,7 @@ class TestMrpAccountWorkorder(TestBomPriceOperationCommon):
         wizard = Form(self.env['mrp.account.wip.accounting'].with_context({'active_ids': [mo.id]}))
         wizard.date = now - timedelta(days=2)
         wizard.save().confirm()
-        wip_entries5 = self.env['account.move'].search([('ref', 'ilike', 'WIP - ' + mo.name), ('id', 'not in', previous_wip_ids)])
+        wip_entries5 = self.env['account.move'].search_fetch([('ref', 'ilike', 'WIP - ' + mo.name), ('id', 'not in', previous_wip_ids)])
         self.assertEqual(len(wip_entries5), 2, "Should be 2 journal entries: 1 for the WIP accounting + 1 for its reversal")
         self.assertEqual(wip_entries5[0].wip_production_count, 1, "WIP MOs should be linked to entry")
         self.assertEqual(len(wip_entries5.line_ids), 6, "Should be 3 lines per journal entry: 1 for 'Component Value', 1 for '(WO) overhead', 1 for WIP")

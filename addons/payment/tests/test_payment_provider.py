@@ -143,7 +143,7 @@ class TestPaymentProvider(PaymentCommon):
             ),
         ):
             self.provider._setup_provider("none")
-        copied_provider = self.env["payment.provider"].search([
+        copied_provider = self.env["payment.provider"].search_fetch([
             ("code", "=", "none"),
             ("company_id", "=", other_company.id),
         ])

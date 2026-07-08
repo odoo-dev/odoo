@@ -397,7 +397,7 @@ class Cart(PaymentPortal):
             self
             .env["sale.order"]
             .sudo()
-            .search(
+            .search_fetch(
                 [
                     ("partner_id", "=", self.env.user.partner_id.id),
                     ("state", "=", "sale"),

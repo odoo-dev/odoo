@@ -141,7 +141,7 @@ class TestHolidaysMultiContract(TestHolidayContract):
             'wage': 5000.0,
         })
 
-        leaves = self.env['hr.leave'].search([('employee_id', '=', self.jules_emp.id)])
+        leaves = self.env['hr.leave'].search_fetch([('employee_id', '=', self.jules_emp.id)])
         self.assertEqual(len(leaves), 3)
         self.assertEqual(leave.state, 'refuse')
 

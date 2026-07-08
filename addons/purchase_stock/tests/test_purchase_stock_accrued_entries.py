@@ -69,7 +69,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
 
         # 2 to invoice on 2020-01-04
         wizard.date = fields.Date.to_date('2020-01-04')
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_expense.id, 'debit': 0, 'credit': 60},
             {'account_id': wizard.account_id.id, 'debit': 60, 'credit': 0},
@@ -80,7 +80,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
 
         # 5 to invoice on 2020-01-07
         wizard.date = fields.Date.to_date('2020-01-07')
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_expense.id, 'debit': 0, 'credit': 150},
             {'account_id': wizard.account_id.id, 'debit': 150, 'credit': 0},
@@ -122,7 +122,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
         })
 
         # 2 to invoice on 2020-01-07
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_expense.id, 'debit': 0, 'credit': 60},
             {'account_id': wizard.account_id.id, 'debit': 60, 'credit': 0},
@@ -138,7 +138,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
 
         # 3 to invoice on 2020-01-07
         wizard.date = fields.Date.to_date('2020-01-07')
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_expense.id, 'debit': 0, 'credit': 90},
             {'account_id': wizard.account_id.id, 'debit': 90, 'credit': 0},
@@ -224,7 +224,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
             'date': '2025-05-31',
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_moves = self.env['account.move'].search(account_move_domain)
+        account_moves = self.env['account.move'].search_fetch(account_move_domain)
         # Expense: $ 2,000.00 (invoiced 2x $ 1,000.00 but nothing received yet.)
         # Price diff.: $ 400.00 ($ 2,000.00 - (2x $ 800.00) = $ 2,000.00 - $ 1,600.00)
         self.assertRecordValues(account_moves.line_ids.sorted('id'), [
@@ -249,7 +249,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
             'date': fields.Date.today() - relativedelta(days=7),
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_moves = self.env['account.move'].search(account_move_domain)
+        account_moves = self.env['account.move'].search_fetch(account_move_domain)
         # Expense: $ 6,500.00 (invoiced (2x $ 1,000.00) + (5x $ 900.00) = 2,000.00 $ + 4,500.00 $)
         # Price diff.: $ 900.00 ($ 6,500.00 - (7x $ 800.00) = $ 6,500.00 - $ 5,600.00)
         self.assertRecordValues(account_moves.line_ids.sorted('id'), [
@@ -274,7 +274,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
             'date': fields.Date.today() - relativedelta(days=1),
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_moves = self.env['account.move'].search(account_move_domain)
+        account_moves = self.env['account.move'].search_fetch(account_move_domain)
         # Expense: $ 5,500.00 (invoiced (2x $ 1,000.00) + (5x $ 900.00) - received (1x $ 1,000.00) = 2,000.00 $ + 4,500.00 $ - $ 1,000.00)
         # Price diff.: $ 700.00 ($ 5,500.00 - (6x $ 800.00) = $ 5,500.00 - $ 4,800.00)
         self.assertRecordValues(account_moves.line_ids.sorted('id'), [
@@ -299,7 +299,7 @@ class TestAccruedPurchaseStock(AccountTestInvoicingCommon):
             'date': fields.Date.today(),
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_moves = self.env['account.move'].search(account_move_domain)
+        account_moves = self.env['account.move'].search_fetch(account_move_domain)
         # Expense: $ 3,500.00 (invoiced (2x $ 1,000.00) + (5x $ 900.00) - received (3x $ 1,000.00) = 2,000.00 $ + 4,500.00 $ - $ 3,000.00)
         # Price diff.: $ 300.00 ($ 3,500.00 - (4x $ 800.00) = $ 3,500.00 - $ 3,200.00)
         self.assertRecordValues(account_moves.line_ids.sorted('id'), [

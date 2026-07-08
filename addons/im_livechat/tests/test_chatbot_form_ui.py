@@ -14,7 +14,7 @@ class TestLivechatChatbotFormUI(HttpCaseWithUserDemo):
             login='admin',
         )
 
-        chatbot_script = self.env['chatbot.script'].search([('title', '=', 'Test Chatbot Sequence')])
+        chatbot_script = self.env['chatbot.script'].search_fetch([('title', '=', 'Test Chatbot Sequence')])
 
         self.assertEqual(len(chatbot_script.script_step_ids), 3)
 
@@ -37,7 +37,7 @@ class TestLivechatChatbotFormUI(HttpCaseWithUserDemo):
             login='admin',
         )
 
-        chatbot_script = self.env['chatbot.script'].search([('title', '=', 'Test Chatbot Sequence')])
+        chatbot_script = self.env['chatbot.script'].search_fetch([('title', '=', 'Test Chatbot Sequence')])
 
         self.assertEqual(len(chatbot_script.script_step_ids), 6)
 

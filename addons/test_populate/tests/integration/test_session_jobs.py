@@ -83,7 +83,7 @@ class TestSessionFieldGeneration(PopulateTestCase):
         final_count = self.env['test_populate.product'].search_count([])
         self.assertEqual(final_count - initial_count, 5)
 
-        product_ids = self.env['populate.model.data'].search([
+        product_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.product'),
         ]).mapped('res_id')
@@ -118,7 +118,7 @@ class TestSessionFieldGeneration(PopulateTestCase):
         session = self.env['populate.session'].create({'blueprint_id': blueprint.id})
         start_populate(session)
 
-        customer_ids = self.env['populate.model.data'].search([
+        customer_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
         ]).mapped('res_id')
         customers = self.env['test_populate.customer'].browse(customer_ids)
@@ -161,7 +161,7 @@ class TestSessionFieldGeneration(PopulateTestCase):
         session = self.env['populate.session'].create({'blueprint_id': blueprint.id})
         start_populate(session)
 
-        product_ids = self.env['populate.model.data'].search([
+        product_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
         ]).mapped('res_id')
         products = self.env['test_populate.product'].browse(product_ids)
@@ -357,7 +357,7 @@ class TestWriteJobTargeting(PopulateTestCase):
 
         start_populate(session)
 
-        supplier_ids = self.env['populate.model.data'].search([
+        supplier_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.supplier'),
             ('ref', '=', 'mixed_suppliers'),
@@ -861,7 +861,7 @@ class TestDottedRefTargeting(PopulateTestCase):
 
         start_populate(session)
 
-        supplier_model_data = self.env['populate.model.data'].search([
+        supplier_model_data = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.supplier'),
         ])
@@ -941,7 +941,7 @@ class TestDottedRefTargeting(PopulateTestCase):
 
         start_populate(session)
 
-        warehouse_ids = self.env['populate.model.data'].search([
+        warehouse_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.warehouse'),
         ]).mapped('res_id')
@@ -958,7 +958,7 @@ class TestDottedRefTargeting(PopulateTestCase):
             )
 
         # Products whose supplier is NOT under any ref'd warehouse must be untouched.
-        all_product_ids = self.env['populate.model.data'].search([
+        all_product_ids = self.env['populate.model.data'].search_fetch([
             ('session_id', '=', session.id),
             ('res_model', '=', 'test_populate.product'),
         ]).mapped('res_id')

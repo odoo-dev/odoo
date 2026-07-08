@@ -45,7 +45,7 @@ class TestProjectEmbeddedActionSettings(TestProjectCommon):
         '''
         copied_project = self.project_goats.copy()
         # Check if the embedded action settings are copied
-        copied_settings = self.env['res.users.settings.embedded.action'].search([
+        copied_settings = self.env['res.users.settings.embedded.action'].search_fetch([
             ('user_setting_id', '=', self.user_settings.id),
             ('action_id', '=', self.window_action.id),
             ('res_id', '=', copied_project.id),
@@ -101,7 +101,7 @@ class TestProjectEmbeddedActionSettings(TestProjectCommon):
             ('user_id', '=', False)  # Ensure it's a shared action
         ], limit=1)
         # Check if the shared embedded action settings are correctly copied
-        copied_settings = self.env['res.users.settings.embedded.action'].search([
+        copied_settings = self.env['res.users.settings.embedded.action'].search_fetch([
             ('user_setting_id', '=', self.user_settings.id),
             ('action_id', '=', self.window_action.id),
             ('res_id', '=', copied_project.id),

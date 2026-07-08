@@ -31,7 +31,7 @@ class TestModelDataCreation(PopulateTestCase):
 
         self.assertEqual(final_model_data_count - initial_model_data_count, 3)
 
-        model_data_entries = self.env['populate.model.data'].search([
+        model_data_entries = self.env['populate.model.data'].search_fetch([
             ('res_model', '=', 'test_populate.product'),
             ('session_id', '=', session.id),
         ])
@@ -109,7 +109,7 @@ class TestModelDataRefs(PopulateTestCase):
 
         start_populate(session)
 
-        model_data_entries = self.env['populate.model.data'].search([
+        model_data_entries = self.env['populate.model.data'].search_fetch([
             ('res_model', '=', 'test_populate.product'),
             ('session_id', '=', session.id),
         ])

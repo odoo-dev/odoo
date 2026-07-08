@@ -327,7 +327,7 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
             'user_ids': [Command.set(self.env.user.ids)],
         })
         orig_company = self.env.company
-        report = self.env['account.invoice.report'].search(
+        report = self.env['account.invoice.report'].search_fetch(
             [('move_id', '=', invoice.id)],
         )
         self.assertEqual(report.inventory_value, -800)
@@ -340,7 +340,7 @@ class TestAccountInvoiceReport(AccountTestInvoicingCommon):
         })
         self.env.flush_all()
         self.env['account.invoice.report'].invalidate_model()
-        report = self.env['account.invoice.report'].search(
+        report = self.env['account.invoice.report'].search_fetch(
             [('move_id', '=', invoice.id)],
         )
         self.assertEqual(report.inventory_value, -1600)

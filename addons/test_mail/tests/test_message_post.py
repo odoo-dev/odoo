@@ -2091,7 +2091,7 @@ class TestMessagePostHelpers(TestMessagePostCommon):
             )
 
         # created partners from inline email addresses
-        new_partners = self.env['res.partner'].search([('email', 'in', [self.email_1, self.email_2])])
+        new_partners = self.env['res.partner'].search_fetch([('email', 'in', [self.email_1, self.email_2])])
         self.assertEqual(len(new_partners), 2,
                          'Post with template: should have created partners based on template emails')
 
@@ -2133,7 +2133,7 @@ class TestMessagePostHelpers(TestMessagePostCommon):
             )
 
         # created partners from inline email addresses
-        new_partners = self.env['res.partner'].search([('email', 'in', [self.email_1, self.email_2])])
+        new_partners = self.env['res.partner'].search_fetch([('email', 'in', [self.email_1, self.email_2])])
         self.assertEqual(len(new_partners), 2,
                          'Post with template: should have created partners based on template emails')
 

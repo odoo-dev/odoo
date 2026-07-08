@@ -179,7 +179,7 @@ class LunchAlert(models.Model):
             ))
             order_domain &= Domain('date', '>=', weeksago)
 
-        partners = self.env['lunch.order'].search(order_domain).user_id.partner_id
+        partners = self.env['lunch.order'].search_fetch(order_domain).user_id.partner_id
         if partners:
             self.env['mail.thread'].message_notify(
                 model=self._name,

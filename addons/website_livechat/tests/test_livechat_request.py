@@ -36,7 +36,7 @@ class TestLivechatRequestHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
 
         # Open Chat Request
         self.visitor.with_user(self.operator_b).sudo().action_send_chat_request()
-        chat_request = self.env["discuss.channel"].search(
+        chat_request = self.env["discuss.channel"].search_fetch(
             [("livechat_visitor_id", "=", self.visitor.id), ("livechat_end_dt", "=", False)]
         )
         self.assertEqual(
@@ -47,7 +47,7 @@ class TestLivechatRequestHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
         # Click on livechatbutton at client side
         res = self.url_open(url=self.open_chat_url, json=self.open_chat_params)
         self.assertEqual(res.status_code, 200)
-        channel = self.env["discuss.channel"].search(
+        channel = self.env["discuss.channel"].search_fetch(
             [("livechat_visitor_id", "=", self.visitor.id), ("livechat_end_dt", "=", False)]
         )
 
@@ -62,7 +62,7 @@ class TestLivechatRequestHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
 
         self._clean_livechat_sessions()
         self.visitor.with_user(self.operator_b).sudo().action_send_chat_request()
-        chat_request = self.env["discuss.channel"].search(
+        chat_request = self.env["discuss.channel"].search_fetch(
             [("livechat_visitor_id", "=", self.visitor.id), ("livechat_end_dt", "=", False)]
         )
         chat_request.is_pending_chat_request = False  # Customer already accessed the chat.
@@ -123,6 +123,6 @@ class TestLivechatRequestHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
         agent = new_test_user(self.env, login="outside_agent", groups="im_livechat.im_livechat_group_user")
         self.assertNotIn(agent, self.livechat_channel.user_ids)
         self.visitor.with_user(agent).action_send_chat_request()
-        chat_request = self.env["discuss.channel"].search([("livechat_visitor_id", "=", self.visitor.id)])
+        chat_request = self.env["discuss.channel"].search_fetch([("livechat_visitor_id", "=", self.visitor.id)])
         self.assertEqual(chat_request.livechat_agent_partner_ids, agent.partner_id)
         self.assertNotIn(agent, self.livechat_channel.user_ids)

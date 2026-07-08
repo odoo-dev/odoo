@@ -25,7 +25,7 @@ class TestQweb(TransactionCaseWithUserDemo):
             "cdn_url": "http://test.cdn"
         })
 
-        demo = self.env['res.users'].search([('login', '=', 'demo')])[0]
+        demo = self.env['res.users'].search_fetch([('login', '=', 'demo')])[0]
         demo.write({"signature": '''<span class="toto">
                 span<span class="fa"></span><img src="/web/image/1"/>
             </span>'''})

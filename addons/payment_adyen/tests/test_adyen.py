@@ -445,7 +445,7 @@ class AdyenTest(AdyenCommon, PaymentHttpCommon):
             ],
         )
         self._webhook_notification_flow(payload)
-        refund_tx = self.env["payment.transaction"].search([
+        refund_tx = self.env["payment.transaction"].search_fetch([
             ("source_transaction_id", "=", source_tx.id)
         ])
         self.assertEqual(
@@ -537,7 +537,7 @@ class AdyenTest(AdyenCommon, PaymentHttpCommon):
             ],
         )
         self._webhook_notification_flow(payload)
-        refund_tx = self.env["payment.transaction"].search([
+        refund_tx = self.env["payment.transaction"].search_fetch([
             ("source_transaction_id", "=", source_tx.id)
         ])
         self.assertEqual(

@@ -1288,7 +1288,7 @@ class TestAccountPaymentRegister(AccountTestInvoicingWithBanksCommon, PaymentCom
         ])
 
         # Cash basis.
-        caba_move = self.env['account.move'].search([('tax_cash_basis_origin_move_id', '=', invoice.id)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_origin_move_id', '=', invoice.id)])
         self.assertRecordValues(caba_move.line_ids.sorted('balance'), [
             {
                 'balance': -321.74,

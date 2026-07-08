@@ -117,7 +117,7 @@ class TestMarketingCardMail(MailCase, MarketingCardCommon):
         with self.mock_mail_gateway(), self.assertQueryCount(42):
             mailing._action_send_mail()
 
-        cards = self.env['card.card'].search([('campaign_id', '=', campaign.id)])
+        cards = self.env['card.card'].search_fetch([('campaign_id', '=', campaign.id)])
         self.assertEqual(len(cards), 6)
         sent_cards = cards.filtered(lambda card: not card.requires_sync)
         self.assertEqual(len(sent_cards), 5)
@@ -206,7 +206,7 @@ class TestMarketingCardRender(MarketingCardCommon):
 
         with self.mock_image_renderer():
             campaign.action_preview()
-        card = self.env['card.card'].search([
+        card = self.env['card.card'].search_fetch([
             ('campaign_id', '=', campaign.id),
             ('active', '=', False)
         ])
@@ -229,7 +229,7 @@ class TestMarketingCardRender(MarketingCardCommon):
         self.assertEqual(role_values['image2'].attrib['src'], f'data:image/png;base64,{base64.b64encode(VALID_JPEG).decode()}')
 
         campaign.action_preview()
-        cards = self.env['card.card'].search([
+        cards = self.env['card.card'].search_fetch([
             ('campaign_id', '=', campaign.id),
             ('active', '=', False)
         ])

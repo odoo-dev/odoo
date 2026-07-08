@@ -2137,7 +2137,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         })._create_payments()
         # check caba move
         partial_rec = invoice.mapped('line_ids.matched_debit_ids')
-        caba_move = self.env['account.move'].search([('tax_cash_basis_rec_id', '=', partial_rec.id)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_rec_id', '=', partial_rec.id)])
         expected_values = [
             {
                 'tax_line_id': False,
@@ -2181,7 +2181,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         credit_aml = invoice.line_ids.filtered('credit')
         credit_aml.remove_move_reconcile()
         # check caba move reverse is same as caba move with only debit/credit inverted
-        reversed_caba_move = self.env['account.move'].search([('reversed_entry_id', '=', caba_move.id)])
+        reversed_caba_move = self.env['account.move'].search_fetch([('reversed_entry_id', '=', caba_move.id)])
         for value in expected_values:
             value.update({
                 'debit': value['credit'],
@@ -2270,7 +2270,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         })._create_payments()
         # check caba move
         partial_rec = invoice.mapped('line_ids.matched_debit_ids')
-        caba_move = self.env['account.move'].search([('tax_cash_basis_rec_id', '=', partial_rec.id)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_rec_id', '=', partial_rec.id)])
         expected_values = [
             {
                 'tax_line_id': False,

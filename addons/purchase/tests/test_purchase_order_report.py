@@ -86,7 +86,7 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
         invoice.action_post()
         po.flush_model()
 
-        res_product1 = self.env['purchase.report'].search([
+        res_product1 = self.env['purchase.report'].search_fetch([
             ('order_id', '=', po.id),
             ('product_id', '=', self.product_a.id),
             ('company_id', '=', self.company_data['company'].id),
@@ -97,7 +97,7 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
         # report should show in company currency (amount/rate) = (100/2)
         self.assertEqual(res_product1.price_total, 50.0, 'Currency conversion is not working')
 
-        res_product2 = self.env['purchase.report'].search([
+        res_product2 = self.env['purchase.report'].search_fetch([
             ('order_id', '=', po.id),
             ('product_id', '=', self.product_b.id),
             ('company_id', '=', self.company_data['company'].id),
@@ -190,7 +190,7 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
         # flush the POs to make sure the report is up to date
         po.flush_model()
         po_2.flush_model()
-        report = self.env['purchase.report'].search([('product_id', "=", self.product_a.id)])
+        report = self.env['purchase.report'].search_fetch([('product_id', "=", self.product_a.id)])
         self.assertEqual(report.currency_id, self.env.company.currency_id)
 
     def test_avg_price_calculation(self):

@@ -139,7 +139,7 @@ class UtmCampaign(models.Model):
         the value set on the A/B testing campaign.
         In case there is no mailing sent for an A/B testing campaign we ignore this campaign
         """
-        ab_testing_campaign = self.search([
+        ab_testing_campaign = self.search_fetch([
             ('ab_testing_schedule_datetime', '<=', fields.Datetime.now()),
             ('ab_testing_winner_selection', '!=', 'manual'),
             ('ab_testing_completed', '=', False),

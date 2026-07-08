@@ -55,7 +55,7 @@ class TestSalePurchaseStockFlow(TransactionCase):
         so = so_form.save()
         so.action_confirm()
 
-        po = self.env['purchase.order'].search([('partner_id', '=', self.vendor.id)])
+        po = self.env['purchase.order'].search_fetch([('partner_id', '=', self.vendor.id)])
         # dest_address_id should only be present for dropshipping
         self.assertFalse(po.dest_address_id)
 
@@ -613,7 +613,7 @@ class TestSalePurchaseStockFlow(TransactionCase):
         })
         so.action_confirm()
 
-        po_from_so = self.env['purchase.order'].search([('partner_id', '=', self.vendor.id)])
+        po_from_so = self.env['purchase.order'].search_fetch([('partner_id', '=', self.vendor.id)])
         self.assertEqual(len(po_from_so), 1, 'One PO should be created from the sale order')
         self.assertTrue(po_from_so.reference_ids, 'PO from sale order must carry reference_ids')
 

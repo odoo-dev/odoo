@@ -72,7 +72,7 @@ class TestMailingControllers(TestMailingControllersCommon):
     def test_assert_initial_values(self):
         """ Ensure test base data to ease test understanding. Globally test_email
         is member of 2 mailing public lists. """
-        memberships = self.env['mailing.subscription'].search([
+        memberships = self.env['mailing.subscription'].search_fetch([
             ('contact_id.email_normalized', '=', self.test_email_normalized)]
         )
         self.assertEqual(memberships.list_id, self.mailing_list_1 + self.mailing_list_3)
@@ -357,7 +357,7 @@ class TestMailingControllers(TestMailingControllersCommon):
         )
 
         # posted messages on exclusion list record: activated, deactivated, activated again
-        bl_record = self.env['mail.blacklist'].search([('email', '=', contact_l1.email_normalized)])
+        bl_record = self.env['mail.blacklist'].search_fetch([('email', '=', contact_l1.email_normalized)])
         self.assertEqual(len(bl_record.message_ids), 2)
         self.assertFalse(bl_record.opt_out_reason_id)
         msg_bl, msg_create = bl_record.message_ids
@@ -454,7 +454,7 @@ class TestMailingControllers(TestMailingControllersCommon):
         )
 
         # posted messages on exclusion list record: activated, deactivated, activated again, feedback
-        bl_record = self.env['mail.blacklist'].search([('email', '=', contact_l1.email_normalized)])
+        bl_record = self.env['mail.blacklist'].search_fetch([('email', '=', contact_l1.email_normalized)])
         self.assertEqual(bl_record.opt_out_reason_id, opt_out_reasons[0])
         self.assertEqual(len(bl_record.message_ids), 5)
         msg_fb, msg_bl2, msg_unbl, msg_bl, msg_create = bl_record.message_ids
@@ -607,7 +607,7 @@ class TestMailingControllers(TestMailingControllersCommon):
         )
 
         # block list record created, feedback logged
-        bl_record = self.env['mail.blacklist'].search([('email', '=', contact_l1.email_normalized)])
+        bl_record = self.env['mail.blacklist'].search_fetch([('email', '=', contact_l1.email_normalized)])
         self.assertEqual(bl_record.opt_out_reason_id, opt_out_reasons[0])
         self.assertEqual(len(bl_record.message_ids), 3)
         msg_fb, msg_bl, _msg_create = bl_record.message_ids

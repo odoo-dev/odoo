@@ -58,7 +58,7 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
             })]
         }
         self.env['survey.user_input'].create(user_input_vals)._mark_done()
-        resume_line = ResumeLine.search([('survey_id', '=', self.certification.id)], limit=1, order='id DESC')
+        resume_line = ResumeLine.search_fetch([('survey_id', '=', self.certification.id)], limit=1, order='id DESC')
         self.assertEqual(resume_line.employee_id, self.employee_emp)
         self.assertEqual(resume_line.name, self.certification.title)
         self.assertEqual(resume_line.description, Markup('<p>Description</p>'))
@@ -75,7 +75,7 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
         ):
             self.certification.certification_validity_months = validity_months
             self.env['survey.user_input'].create(user_input_vals)._mark_done()
-            resume_line = ResumeLine.search([('survey_id', '=', self.certification.id)], order='id DESC')
+            resume_line = ResumeLine.search_fetch([('survey_id', '=', self.certification.id)], order='id DESC')
             self.assertEqual(len(resume_line), 1)
             self.assertEqual(resume_line.date_start, fields.Date.today())
             self.assertEqual(resume_line.date_end, expected_date_end)
@@ -97,8 +97,8 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
                 })]
             }
         ])._mark_done()
-        cert_1_resume_line = ResumeLine.search([('survey_id', '=', self.certification.id)], order='id DESC')
-        cert_2_resume_line = ResumeLine.search([('survey_id', '=', certification2.id)], order='id DESC')
+        cert_1_resume_line = ResumeLine.search_fetch([('survey_id', '=', self.certification.id)], order='id DESC')
+        cert_2_resume_line = ResumeLine.search_fetch([('survey_id', '=', certification2.id)], order='id DESC')
         self.assertEqual(cert_1_resume_line.description, Markup('<p>Description 1</p>'))
         self.assertFalse(cert_1_resume_line.date_end)
         self.assertEqual(cert_2_resume_line.description, Markup('<p>Description 2</p>'))
@@ -118,7 +118,7 @@ class TestCertificationFlow(common.TestSurveyCommon, HttpCase):
                 'suggested_answer_id': self.certification_q0.suggested_answer_ids.ids[0]
             })]
         })._mark_done()
-        resume_line = self.env['hr.resume.line'].search([('survey_id', '=', self.certification.id)], limit=1, order='id DESC')
+        resume_line = self.env['hr.resume.line'].search_fetch([('survey_id', '=', self.certification.id)], limit=1, order='id DESC')
         self.assertEqual(resume_line.employee_id, self.employee_emp)
         self.assertEqual(resume_line.name, self.certification.title)
         self.assertEqual(resume_line.description, Markup('<p>Description</p>'))

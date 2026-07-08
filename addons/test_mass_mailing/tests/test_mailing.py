@@ -78,7 +78,7 @@ class TestMassMailing(TestMassMailCommon):
         mailing.flush_recordset()
 
         # check traces status
-        traces = self.env['mailing.trace'].search([('model', '=', customers._name), ('res_id', 'in', customers.ids)])
+        traces = self.env['mailing.trace'].search_fetch([('model', '=', customers._name), ('res_id', 'in', customers.ids)])
         self.assertEqual(len(traces), 3)
         customer0_trace = traces.filtered(lambda t: t.res_id == customers[0].id)
         self.assertEqual(customer0_trace.trace_status, 'reply')
@@ -408,7 +408,7 @@ class TestMassMailing(TestMassMailCommon):
         self.gateway_mail_reply_wrecord(MAIL_TEMPLATE, self.mailing_list_1.contact_ids[0], use_in_reply_to=True)
         self.gateway_mail_reply_wrecord(MAIL_TEMPLATE, self.mailing_list_1.contact_ids[1], use_in_reply_to=False)
 
-        mailing_test_utms = self.env['mailing.test.utm'].search([('name', '=', 'Re: %s' % subject)])
+        mailing_test_utms = self.env['mailing.test.utm'].search_fetch([('name', '=', 'Re: %s' % subject)])
         self.assertEqual(len(mailing_test_utms), 2)
         for test_utm in mailing_test_utms:
             self.assertEqual(test_utm.campaign_id, campaign)

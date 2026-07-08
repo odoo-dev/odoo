@@ -126,7 +126,7 @@ class TestSelfOrderMobile(SelfOrderCommonTest, OnlinePaymentCommon):
         self_route = self.pos_config._get_self_order_route()
         self.start_tour(self_route, "test_kiosk_cart_restore_and_cancel")
 
-        kiosk_order = self.env['pos.order'].search(
+        kiosk_order = self.env['pos.order'].search_fetch(
             [('config_id', '=', self.pos_config.id)],
             order="id desc", limit=1
         )

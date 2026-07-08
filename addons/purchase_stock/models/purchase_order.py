@@ -366,7 +366,7 @@ class PurchaseOrder(models.Model):
         if not picking_type:
             picking_type = self.env['stock.picking.type'].search([('code', '=', 'incoming'), ('warehouse_id', '=', False)])
         if not picking_type:
-            picking_type = self.env['stock.picking.type'].with_context(active_test=False).search([('code', '=', 'incoming'), ('warehouse_id', '=', False)])
+            picking_type = self.env['stock.picking.type'].with_context(active_test=False).search_fetch([('code', '=', 'incoming'), ('warehouse_id', '=', False)])
         return picking_type[:1]
 
     def _prepare_reference_vals(self):

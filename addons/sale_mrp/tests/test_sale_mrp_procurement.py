@@ -200,7 +200,7 @@ class TestSaleMrpProcurement(TransactionCase):
         location. Have a manufactured product with the manufacture route and a
         RR min=max=0. Confirm a SO with that product -> It should generate a MO
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         manufacture_route = warehouse.manufacture_pull_id.route_id
 
         warehouse.manufacture_steps = 'pbm_sam'
@@ -248,7 +248,7 @@ class TestSaleMrpProcurement(TransactionCase):
         so.action_confirm()
         self.assertEqual(so.state, 'sale')
 
-        mo = self.env['mrp.production'].search([('product_id', '=', product.id)], order='id desc', limit=1)
+        mo = self.env['mrp.production'].search_fetch([('product_id', '=', product.id)], order='id desc', limit=1)
         self.assertIn(so.name, mo.origin)
 
     def test_so_reordering_rule(self):
@@ -290,7 +290,7 @@ class TestSaleMrpProcurement(TransactionCase):
         Confirm a SO with that product in 510 grams -> It should generate a MO with 510g.
         Create a second SO with 510g -> It should update the MO to 1020g.
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         manufacture_route = warehouse.manufacture_pull_id.route_id
         mto_route = warehouse.mto_pull_id.route_id
         mto_route.active = True
@@ -336,7 +336,7 @@ class TestSaleMrpProcurement(TransactionCase):
         so.action_confirm()
         self.assertEqual(so.state, 'sale')
 
-        mo = self.env['mrp.production'].search([('product_id', '=', product.id)], order='id desc', limit=1)
+        mo = self.env['mrp.production'].search_fetch([('product_id', '=', product.id)], order='id desc', limit=1)
         self.assertIn(so.name, mo.origin)
         self.assertEqual(mo.uom_id, uom_gram)
         self.assertEqual(mo.product_qty, 510)
@@ -351,7 +351,7 @@ class TestSaleMrpProcurement(TransactionCase):
         generated when we are not in 3 steps manufacturing.
         """
 
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse.sam_loc_id = warehouse.lot_stock_id
 
         so = self.env['sale.order'].create({

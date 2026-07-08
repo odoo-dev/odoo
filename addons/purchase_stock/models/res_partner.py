@@ -40,7 +40,7 @@ class ResPartner(models.Model):
     @api.depends('purchase_line_ids')
     def _compute_on_time_rate(self):
         date_order_days_delta = self.env['ir.config_parameter'].sudo().get_int('purchase_stock.on_time_delivery_days') or 365
-        order_lines = self.env['purchase.order.line'].search([
+        order_lines = self.env['purchase.order.line'].search_fetch([
             ('partner_id', 'in', self.ids),
             ('date_order', '>', fields.Date.today() - timedelta(date_order_days_delta)),
             ('qty_received', '!=', 0),

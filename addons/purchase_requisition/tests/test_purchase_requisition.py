@@ -50,7 +50,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         # Check for both product that the new supplier info(purchase.requisition.vendor_id) is added to the purchase tab
         # and check the quantity
         seller_partner1 = self.res_partner_1
-        supplierinfo09 = self.env['product.supplierinfo'].search([
+        supplierinfo09 = self.env['product.supplierinfo'].search_fetch([
             ('partner_id', '=', seller_partner1.id),
             ('product_id', '=', self.product_09.id),
             ('purchase_requisition_id', '=', requisition_blanket.id),
@@ -58,7 +58,7 @@ class TestPurchaseRequisition(TestPurchaseRequisitionCommon):
         self.assertEqual(supplierinfo09.partner_id, seller_partner1, 'The supplierinfo is not correct')
         self.assertEqual(supplierinfo09.price, price_product09, 'The supplierinfo is not correct')
 
-        supplierinfo13 = self.env['product.supplierinfo'].search([
+        supplierinfo13 = self.env['product.supplierinfo'].search_fetch([
             ('partner_id', '=', seller_partner1.id),
             ('product_id', '=', self.product_13.id),
             ('purchase_requisition_id', '=', requisition_blanket.id),

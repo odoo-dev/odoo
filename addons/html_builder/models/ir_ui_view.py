@@ -55,7 +55,7 @@ class IrUiView(models.Model):
         snippet_key = '%s_%s' % (snippet_key, uuid.uuid4().hex)
         full_snippet_key = '%s.%s' % (app_name, snippet_key)
 
-        used_names = self.env['ir.ui.view'].search(self._get_used_names_domain(name, technical_usage)).mapped("name")
+        used_names = self.env['ir.ui.view'].search_fetch(self._get_used_names_domain(name, technical_usage)).mapped("name")
         name = self._find_available_name(name, used_names)
 
         # html to xml to add '/' at the end of self closing tags like br, ...

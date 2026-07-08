@@ -193,7 +193,7 @@ class PosSelfOrderController(http.Controller):
         orders = pos_config.env['pos.order'].search(domain)
         access_tokens = set({o.get('access_token') for o in order_access_tokens})
         # Do not use session.order_ids, it may fail if there is shared sessions
-        existing_order_tokens = pos_config.env['pos.order'].search([('access_token', 'in', access_tokens)]).mapped('access_token')
+        existing_order_tokens = pos_config.env['pos.order'].search_fetch([('access_token', 'in', access_tokens)]).mapped('access_token')
         if deleted_order_tokens := list(access_tokens - set(existing_order_tokens)):
             # Remove orders that no longer exist on the server but are still shown in the self-order UI
             pos_config._notify('REMOVE_ORDERS', {'deleted_order_tokens': deleted_order_tokens})

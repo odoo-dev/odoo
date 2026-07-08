@@ -13,7 +13,7 @@ class Website(models.Model):
     )
 
     def _compute_in_store_dm_id(self):
-        in_store_delivery_methods = self.env["delivery.carrier"].search([
+        in_store_delivery_methods = self.env["delivery.carrier"].search_fetch([
             ("delivery_type", "=", "in_store"),
             ("is_published", "=", True),
         ])

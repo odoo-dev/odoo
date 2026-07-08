@@ -21,7 +21,7 @@ class IrModel(models.Model):
         if operator not in ('in', 'not in'):
             return NotImplemented
 
-        valid_models = self.search([]).filtered(
+        valid_models = self.search_fetch([]).filtered(
             lambda model: model.model in self.env
             and not model.is_transient()
             and getattr(self.env[model.model], '_mailing_enabled', False)

@@ -229,7 +229,7 @@ class TestMrpMulticompany(common.TransactionCase):
         A manufacture route should be created for the new company
         """
         company = self.env.company
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', company.id)], limit=1)
 
         manufacture_rule = warehouse.manufacture_pull_id
         manufacture_route = manufacture_rule.route_id
@@ -247,7 +247,7 @@ class TestMrpMulticompany(common.TransactionCase):
         manufacture_route.company_id = company
 
         new_company = self.env['res.company'].create({'name': 'Super Company'})
-        new_warehouse = self.env['stock.warehouse'].search([('company_id', '=', new_company.id)], limit=1)
+        new_warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', new_company.id)], limit=1)
         self.assertEqual(new_warehouse.manufacture_pull_id.route_id.company_id, new_company)
 
     def test_company_specific_routes_and_warehouse_creation(self):
@@ -298,7 +298,7 @@ class TestMrpMulticompany(common.TransactionCase):
             'company_id': self.company_a.id,
             'type': 'phantom',
         }])
-        warehouse_b = self.env['stock.warehouse'].search([('company_id', '=', self.company_b.id)], limit=1)
+        warehouse_b = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.company_b.id)], limit=1)
         delivery = self.env['stock.picking'].with_company(self.company_b.id).create({
             'picking_type_id': warehouse_b.out_type_id.id,
             'location_id': warehouse_b.lot_stock_id.id,

@@ -384,7 +384,7 @@ class TestRecruitment(MailCase, TransactionCase):
 
         employee_applicant = applicant_1.create_employee_from_applicant()
         self.assertTrue(employee_applicant['res_id'])
-        attachment_employee_applicant = self.Attachment.search([
+        attachment_employee_applicant = self.Attachment.search_fetch([
             ('res_model', '=', employee_applicant['res_model']),
             ('res_id', '=', employee_applicant['res_id']),
         ])
@@ -508,7 +508,7 @@ class TestRecruitment(MailCase, TransactionCase):
             'applicant_ids': [(6, 0, [app_1.id])],
         })
         applicant_get_refuse_reason._prepare_send_refusal_mails()
-        mail = self.env['mail.mail'].search([('subject', '=', 'Application refused: Mario')], limit=1)
+        mail = self.env['mail.mail'].search_fetch([('subject', '=', 'Application refused: Mario')], limit=1)
         self.assertEqual(mail.partner_ids, app_1.partner_id)
 
     def test_create_and_get_alias_for_source(self):

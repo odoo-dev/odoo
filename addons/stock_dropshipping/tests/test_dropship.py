@@ -59,7 +59,7 @@ class TestDropship(common.TransactionCase):
             'picking_policy': 'direct',
         })
         so.action_confirm()
-        po = self.env['purchase.order'].search([('reference_ids', '=', so.stock_reference_ids.id)])
+        po = self.env['purchase.order'].search_fetch([('reference_ids', '=', so.stock_reference_ids.id)])
         po_line = po.order_line
 
         # Check dropship count on SO and PO
@@ -134,7 +134,7 @@ class TestDropship(common.TransactionCase):
         purchase.picking_ids.button_validate()
 
         # Check one move line was created in Customers location with 200 pieces
-        move_line = self.env['stock.move.line'].search([
+        move_line = self.env['stock.move.line'].search_fetch([
             ('location_dest_id', '=', self.env.ref('stock.stock_location_customers').id),
             ('product_id', '=', self.dropship_product.id)])
         self.assertEqual(len(move_line.ids), 1, 'There should be exactly one move line')
@@ -420,7 +420,7 @@ class TestDropship(common.TransactionCase):
         difference between stock and SO qty, instead of the full SO qty.
         '''
         # Make delivery default to MTSO
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse.delivery_route_id.rule_ids.procure_method = 'mts_else_mto'
 
         product = self.env['product.product'].create({
@@ -594,7 +594,7 @@ class TestDropshipPostInstall(common.TransactionCase):
         '''
         Ensure the dropship route is not included in the replenish wizard.
         '''
-        buy_route = self.env['stock.rule'].search([
+        buy_route = self.env['stock.rule'].search_fetch([
             ('action', '=', 'buy'),
             ('company_id', '=', self.env.company.id),
             ('location_dest_id.usage', '=', 'internal'),

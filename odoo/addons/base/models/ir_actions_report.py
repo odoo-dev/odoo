@@ -86,7 +86,7 @@ class IrActionsReport(models.Model):
         elif operator == 'any' or isinstance(value, int):
             models = models.search(Domain('id', operator, value))
         elif operator == 'in':
-            models = models.search(Domain.OR(
+            models = models.search_fetch(Domain.OR(
                 Domain('id' if isinstance(v, int) else 'display_name', operator, v)
                 for v in value
                 if v

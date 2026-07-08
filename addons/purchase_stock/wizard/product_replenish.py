@@ -92,7 +92,7 @@ class ProductReplenish(models.TransientModel):
     def _get_route_domain(self, product_tmpl_id):
         domain = super()._get_route_domain(product_tmpl_id)
         company = product_tmpl_id.company_id or self.env.company
-        buy_route = self.env['stock.rule'].search([
+        buy_route = self.env['stock.rule'].search_fetch([
             ('action', '=', 'buy'),
             ('company_id', '=', company.id),
             ('picking_type_id.code', '=', 'incoming'),

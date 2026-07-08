@@ -27,7 +27,7 @@ class TestPurchaseMatrixUi(TestMatrixCommon):
         )
         self.assertFalse(dyn)
 
-        self.env['purchase.order.line'].search([('product_id', 'in', self.matrix_template.product_variant_ids.ids)]).order_id.button_confirm()
+        self.env['purchase.order.line'].search_fetch([('product_id', 'in', self.matrix_template.product_variant_ids.ids)]).order_id.button_confirm()
         self.matrix_template.flush_recordset()
         self.assertEqual(round(self.matrix_template.purchased_product_qty, 2), 51.8)
         for variant in self.matrix_template.product_variant_ids:

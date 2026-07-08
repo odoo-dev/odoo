@@ -1043,7 +1043,7 @@ foo3,Invalid Country\n"""),
         )
         self.assertItemsEqual(results['messages'], [])  # No error
 
-        last_record = self.env['import.complex'].search([], order='id DESC', limit=1)
+        last_record = self.env['import.complex'].search_fetch([], order='id DESC', limit=1)
         self.assertItemsEqual(last_record.html, "<p>foo</p><br><p>bar</p>")
 
     @mute_logger('odoo.addons.base_import.models.base_import')

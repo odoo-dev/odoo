@@ -4214,7 +4214,7 @@ class TestStockMove(TestStockCommon):
         self.assertEqual(len(self.gather_relevant(self.productA, self.stock_location)), 0.0)
 
         # The backoder should contain a move for the other 5 produts.
-        backorder = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
+        backorder = self.env['stock.picking'].search_fetch([('backorder_id', '=', picking.id)])
         self.assertEqual(len(backorder), 1.0)
         self.assertEqual(backorder.move_ids.product_uom_qty, 5.0)
 
@@ -4267,7 +4267,7 @@ class TestStockMove(TestStockCommon):
         self.assertEqual(action.get('res_model'), 'stock.backorder.confirmation')
         wizard = self.env[(action.get('res_model'))].browse(action.get('res_id')).with_context(action.get('context'))
         wizard.process()
-        backorder = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
+        backorder = self.env['stock.picking'].search_fetch([('backorder_id', '=', picking.id)])
         self.assertEqual(len(backorder), 1.0)
 
         # The backorder should contain 99 product1 and 100 product5.
@@ -4619,7 +4619,7 @@ class TestStockMove(TestStockCommon):
         scrap_form.company_id = self.env.company
         scrap = scrap_form.save()
         scrap.action_scrap()
-        move = self.env['stock.move'].search([('product_id', '=', self.productA.id), ('is_scrap', '=', True)])
+        move = self.env['stock.move'].search_fetch([('product_id', '=', self.productA.id), ('is_scrap', '=', True)])
         self.assertEqual(move.state, 'done')
         self.assertEqual(move.quantity, 1)
         self.assertEqual(move.location_dest_id, alternate_location)
@@ -4642,7 +4642,7 @@ class TestStockMove(TestStockCommon):
             'company_id': self.env.company.id,
         })
         scrap.action_scrap()
-        move = self.env['stock.move'].search([('product_id', '=', self.product_consu.id), ('is_scrap', '=', True)])
+        move = self.env['stock.move'].search_fetch([('product_id', '=', self.product_consu.id), ('is_scrap', '=', True)])
         self.assertEqual(move.state, 'done')
         self.assertEqual(move.quantity, 1)
         self.assertEqual(alternate_location.usage, 'internal')
@@ -4780,7 +4780,7 @@ class TestStockMove(TestStockCommon):
         insufficient_qty_wizard = self.env['stock.warn.insufficient.qty.scrap']\
             .with_context(warning_message['context']).create({})
         insufficient_qty_wizard.action_done()
-        move = self.env['stock.move'].search([('product_id', '=', self.productA.id), ('is_scrap', '=', True)])
+        move = self.env['stock.move'].search_fetch([('product_id', '=', self.productA.id), ('is_scrap', '=', True)])
         self.assertEqual(self.env['stock.quant']._gather(self.productA, self.stock_location).quantity, -11)
         self.assertEqual(move.quantity, 1)
         self.assertEqual(move.uom_id, self.uom_dozen)
@@ -5070,7 +5070,7 @@ class TestStockMove(TestStockCommon):
         move2.picked = True
         move2._action_done()
 
-        initial_in_date_lot2 = self.env['stock.quant'].search([
+        initial_in_date_lot2 = self.env['stock.quant'].search_fetch([
             ('location_id', '=', self.stock_location.id),
             ('product_id', '=', self.product_lot.id),
             ('lot_id', '=', lot2.id),
@@ -5100,7 +5100,7 @@ class TestStockMove(TestStockCommon):
         move3.move_line_ids.quantity = 1
         move3.picked = True
         move3._action_done()
-        quant_in_pack = self.env['stock.quant'].search([
+        quant_in_pack = self.env['stock.quant'].search_fetch([
             ('product_id', '=', self.product_lot.id),
             ('location_id', '=', self.pack_location.id),
         ])
@@ -5114,7 +5114,7 @@ class TestStockMove(TestStockCommon):
         move3.move_line_ids.lot_id = lot2
 
         # Check that lot1 correctly is back to stock with its right in_date
-        quant_lot1 = self.env['stock.quant'].search([
+        quant_lot1 = self.env['stock.quant'].search_fetch([
             ('location_id.usage', '=', 'internal'),
             ('product_id', '=', self.product_lot.id),
             ('lot_id', '=', lot1.id),
@@ -5124,7 +5124,7 @@ class TestStockMove(TestStockCommon):
         self.assertAlmostEqual(quant_lot1.in_date, initial_in_date_lot1, delta=timedelta(seconds=1))
 
         # Check that lo2 is in pack with is right in_date
-        quant_lot2 = self.env['stock.quant'].search([
+        quant_lot2 = self.env['stock.quant'].search_fetch([
             ('location_id.usage', '=', 'internal'),
             ('product_id', '=', self.product_lot.id),
             ('lot_id', '=', lot2.id),
@@ -5177,7 +5177,7 @@ class TestStockMove(TestStockCommon):
         move2.picked = True
         move2._action_done()
 
-        initial_in_date_lot2 = self.env['stock.quant'].search([
+        initial_in_date_lot2 = self.env['stock.quant'].search_fetch([
             ('location_id', '=', self.stock_location.id),
             ('product_id', '=', self.product_lot.id),
             ('lot_id', '=', lot2.id),
@@ -6259,7 +6259,7 @@ class TestStockMove(TestStockCommon):
         move_product.quantity = 1
         move_consu.quantity = 0
         Form.from_action(self.env, picking.button_validate()).save().with_user(self.user_stock_user).process()
-        backorder = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
+        backorder = self.env['stock.picking'].search_fetch([('backorder_id', '=', picking.id)])
 
         self.assertEqual(picking.scheduled_date, today + relativedelta(day=5))
         self.assertEqual(backorder.scheduled_date, today + relativedelta(day=10))

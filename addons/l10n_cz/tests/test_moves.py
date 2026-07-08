@@ -50,5 +50,5 @@ class TestAccountCZ(AccountTestInvoicingCommon):
             'date': '2024-12-31',
         })
 
-        inv_line = self.env['account.move'].search([('statement_line_id', '=', st_line.id)])
+        inv_line = self.env['account.move'].search_fetch([('statement_line_id', '=', st_line.id)])
         self.assertNotEqual(inv_line.taxable_supply_date, st_line.date)

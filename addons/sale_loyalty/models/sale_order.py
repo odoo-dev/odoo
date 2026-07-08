@@ -1191,7 +1191,7 @@ class SaleOrder(models.Model):
         automatic_programs = (
             self
             .env["loyalty.program"]
-            .search(domain)
+            .search_fetch(domain)
             .filtered(lambda p: not p.limit_usage or p.total_order_count < p.max_usage)
         )
 
@@ -1705,7 +1705,7 @@ class SaleOrder(models.Model):
 
         base_domain = self._get_trigger_domain()
         domain = Domain.AND([base_domain, [("mode", "=", "with_code"), ("code", "=", code)]])
-        rule = self.env["loyalty.rule"].search(domain)
+        rule = self.env["loyalty.rule"].search_fetch(domain)
         program = rule.program_id
         coupon = False
         check_date = self._get_confirmed_tx_create_date()

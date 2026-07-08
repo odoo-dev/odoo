@@ -126,7 +126,7 @@ class TestTranslationController(HttpCaseWithUserDemo):
         result = self._mock_translation_request({"message_id": self.message.id})
         self.assertFalse(result.get("error"))
         self.assertHTMLEqual(result["body"], "<p>Bij slecht weer, goed gezicht.</p>")
-        translation = self.env["mail.message.translation"].search([])
+        translation = self.env["mail.message.translation"].search_fetch([])
         self.assertEqual(len(translation), 1)
         self.assertHTMLEqual(translation.body, "<p>Bij slecht weer, goed gezicht.</p>")
 

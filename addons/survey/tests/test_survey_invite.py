@@ -126,7 +126,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCase):
         invite = invite_form.save()
         invite.action_invite()
 
-        answers = Answer.search([('survey_id', '=', self.survey.id)])
+        answers = Answer.search_fetch([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 1)
         self.assertEqual(
             set(answers.mapped('email')),
@@ -163,7 +163,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCase):
         invite = invite_form.save()
         invite.action_invite()
 
-        answers = Answer.search([('survey_id', '=', self.survey.id)])
+        answers = Answer.search_fetch([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 2)
         self.assertEqual(
             set(answers.mapped('email')),
@@ -189,7 +189,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCase):
         invite = invite_form.save()
         invite.action_invite()
 
-        answers = Answer.search([('survey_id', '=', self.survey.id)])
+        answers = Answer.search_fetch([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 3)
         self.assertEqual(
             set(answers.mapped('email')),
@@ -229,7 +229,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCase):
         invite = invite_form.save()
         invite.action_invite()
 
-        answers = Answer.search([('survey_id', '=', self.survey.id)])
+        answers = Answer.search_fetch([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 3)
         self.assertEqual(
             set(answers.mapped('email')),
@@ -249,7 +249,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCase):
         invite = invite_form.save()
         invite.action_invite()
 
-        answers = Answer.search([('survey_id', '=', self.survey.id)])
+        answers = Answer.search_fetch([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 3)
         self.assertEqual(
             set(answers.mapped('email')),
@@ -276,7 +276,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCase):
         invite = invite_form.save()
         invite.action_invite()
 
-        answers = Answer.search([('survey_id', '=', self.survey.id)])
+        answers = Answer.search_fetch([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 1)
         self.assertEqual(
             set(answers.mapped('email')),
@@ -305,7 +305,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCase):
         invite = invite_form.save()
         invite.action_invite()
 
-        answers = self.env['survey.user_input'].search([('survey_id', '=', self.survey.id)])
+        answers = self.env['survey.user_input'].search_fetch([('survey_id', '=', self.survey.id)])
         self.assertEqual(len(answers), 1)
         self.assertEqual(answers.partner_id.display_name, first_partner.display_name)
 
@@ -355,7 +355,7 @@ class TestSurveyInvite(common.TestSurveyCommon, MailCase):
         with self.mock_mail_gateway():
             invite.action_invite()
 
-        self.assertEqual(self.env['mail.mail'].sudo().search([
+        self.assertEqual(self.env['mail.mail'].sudo().search_fetch([
             ('email_to', '=', 'test_survey_invite_with_template_attachment@odoo.gov')
         ]).attachment_ids, mail_template.attachment_ids)
 

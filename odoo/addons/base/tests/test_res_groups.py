@@ -34,7 +34,7 @@ class TestGroups(TransactionCase):
         self.assertItemsEqual(groups.ids, [g.id for g in all_groups if 'Master Data' in g.full_name],
                               "did not match search for 'Master Data'")
 
-        groups = all_groups.search([('full_name', 'like', 'Monkey/Banana')])
+        groups = all_groups.search_fetch([('full_name', 'like', 'Monkey/Banana')])
         self.assertItemsEqual(groups.mapped('full_name'), ['Monkey / Banana'],
                               "did not match search for 'Monkey/Banana'")
 
@@ -50,16 +50,16 @@ class TestGroups(TransactionCase):
         self.assertItemsEqual(groups.ids, [g.id for g in all_groups if 'Monk' in g.full_name],
                               "did not match search for 'Monk'")
 
-        groups = all_groups.search([('full_name', 'in', ['Creation'])])
+        groups = all_groups.search_fetch([('full_name', 'in', ['Creation'])])
         self.assertItemsEqual(groups.mapped('full_name'), ['Contact / Creation'])
 
-        groups = all_groups.search([('full_name', 'in', ['Role / Administrator', 'Creation'])])
+        groups = all_groups.search_fetch([('full_name', 'in', ['Role / Administrator', 'Creation'])])
         self.assertItemsEqual(groups.mapped('full_name'), ['Contact / Creation', 'Role / Administrator'])
 
-        groups = all_groups.search([('full_name', 'like', 'Admin')])
+        groups = all_groups.search_fetch([('full_name', 'like', 'Admin')])
         self.assertItemsEqual(groups.mapped('full_name'), [g.full_name for g in all_groups if 'Admin' in g.full_name])
 
-        groups = all_groups.search([('full_name', 'not like', 'Role /')])
+        groups = all_groups.search_fetch([('full_name', 'not like', 'Role /')])
         self.assertItemsEqual(groups.mapped('full_name'), [g.full_name for g in all_groups if 'Role /' not in g.full_name])
 
         groups = all_groups.search([('full_name', '=', False)])

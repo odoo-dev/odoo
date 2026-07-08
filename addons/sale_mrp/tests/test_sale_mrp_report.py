@@ -142,7 +142,7 @@ class TestSaleMrpReports(TestReportsCommon):
         """Ensure forecast report shows Manufacturing Order as source
         for MTO manufactured products."""
         # Enable MTO route
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         mto_route = warehouse.mto_pull_id.route_id
         mto_route.active = True
         self.product.route_ids = [Command.link(mto_route.id)]

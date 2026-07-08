@@ -18,7 +18,7 @@ class User(models.Model):
 
         # Fetch the user's language or fallback to the environment default.
         lang_code = user.lang or self.env.user.lang
-        lang = self.env['res.lang'].search([('code', '=', lang_code)], limit=1)
+        lang = self.env['res.lang'].search_fetch([('code', '=', lang_code)], limit=1)
 
         # Determine the start of the week based on the language.
         lang_week_start = int(lang.week_start or '7') - 1

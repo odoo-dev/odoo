@@ -304,7 +304,7 @@ class DocController(http.Controller):
 
 
 def get_sorted_installed_modules(env):
-    names = env['ir.module.module'].sudo().search([
+    names = env['ir.module.module'].sudo().search_fetch([
         ('state', '=', 'installed'),
     ]).mapped('name')
     graph = ModuleGraph(env.cr)

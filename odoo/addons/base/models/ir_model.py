@@ -253,7 +253,7 @@ class IrModel(models.Model):
 
     @api.depends()
     def _in_modules(self):
-        installed_modules = self.env['ir.module.module'].search([('state', '=', 'installed')])
+        installed_modules = self.env['ir.module.module'].search_fetch([('state', '=', 'installed')])
         installed_names = set(installed_modules.mapped('name'))
         xml_ids = models.Model._get_external_ids(self)
         for model in self:
@@ -674,7 +674,7 @@ class IrModelFields(models.Model):
 
     @api.depends()
     def _in_modules(self):
-        installed_modules = self.env['ir.module.module'].search([('state', '=', 'installed')])
+        installed_modules = self.env['ir.module.module'].search_fetch([('state', '=', 'installed')])
         installed_names = set(installed_modules.mapped('name'))
         xml_ids = models.Model._get_external_ids(self)
         for field in self:

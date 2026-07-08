@@ -38,7 +38,7 @@ class TestPoSSaleMarginReport(TestPoSCommon):
         })
 
         # PoS Orders have negative IDs to avoid conflict, so reports[0] will correspond to the newest order
-        reports = self.env['sale.report'].sudo().search([('product_id', '=', product1.id)], order='id')
+        reports = self.env['sale.report'].sudo().search_fetch([('product_id', '=', product1.id)], order='id')
 
         self.assertEqual(reports[0].margin, 100)
 
@@ -64,7 +64,7 @@ class TestPoSSaleMarginReport(TestPoSCommon):
             'amount_return': 0.0,
         })
 
-        reports = self.env['sale.report'].sudo().search([('product_id', '=', product.id)], order='id')
+        reports = self.env['sale.report'].sudo().search_fetch([('product_id', '=', product.id)], order='id')
         self.assertEqual(reports[0].margin, -75)
         self.assertAlmostEqual(reports[0].margin_percent, 0.5)
         self.assertEqual(reports[0].purchase_price, -75)

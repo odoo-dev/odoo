@@ -17,7 +17,7 @@ class ProductTemplate(models.Model):
     def _onchange_buy_route(self):
         if self.purchase_ok:
             return
-        buy_routes = self.env['stock.rule'].search([
+        buy_routes = self.env['stock.rule'].search_fetch([
             ('action', '=', 'buy'),
             ('picking_type_id.code', '=', 'incoming'),
             ('active', '=', True),

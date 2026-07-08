@@ -302,7 +302,7 @@ class TestMassSMSTest(TestMassSMSCommon):
         with self.with_user('user_marketing'):
             with self.mockSMSGateway():
                 mailing_test.action_send_sms()
-        new_traces = self.env['mailing.trace'].search([('mass_mailing_id', '=', mailing.id)])
+        new_traces = self.env['mailing.trace'].search_fetch([('mass_mailing_id', '=', mailing.id)])
         self.assertEqual(len(new_traces), 2, 'Should have create 1 trace / valid number')
         self.assertEqual(new_traces.mapped('is_test_trace'), [True, True], 'Traces should be flagged as test')
         self.assertEqual(

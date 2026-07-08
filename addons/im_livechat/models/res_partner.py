@@ -32,7 +32,7 @@ class ResPartner(models.Model):
         )
         active_livechat_partners = (
             # sudo: im_livechat.channel - checking whether live chat agents are available for invitation in a live chat we are members of is acceptable.
-            self.env["im_livechat.channel"].sudo().search([]).available_operator_ids.partner_id
+            self.env["im_livechat.channel"].sudo().search_fetch([]).available_operator_ids.partner_id
         )
         languages_by_partner = {
             partner: list(
@@ -110,7 +110,7 @@ class ResPartner(models.Model):
 
     def action_view_livechat_sessions(self):
         action = self.env["ir.actions.act_window"]._for_xml_id("im_livechat.discuss_channel_action")
-        livechat_channel_ids = self.env['im_livechat.channel.member.history'].search([
+        livechat_channel_ids = self.env['im_livechat.channel.member.history'].search_fetch([
             ('partner_id', '=', self.id),
             ('livechat_member_type', '=', 'visitor'),
         ]).channel_id.ids

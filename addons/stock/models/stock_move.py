@@ -1115,7 +1115,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         """ This method will search or create the lot_id from the lot_name and set it in the vals_list
         """
         lot_names = [vals['lot_name'] for vals in vals_list if vals.get('lot_name')]
-        lot_ids = self.env['stock.lot'].search([
+        lot_ids = self.env['stock.lot'].search_fetch([
             ('product_id', '=', product_id),
             '|', ('company_id', '=', company_id), ('company_id', '=', False),
             ('name', 'in', lot_names),

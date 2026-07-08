@@ -182,8 +182,8 @@ class TestProjectBase(TestProjectCommon):
         project_ids = [self.project_pigs.id, self.project_goats.id]
         domain = [('id', 'in', project_ids)]
 
-        self.assertEqual(Project.search(domain, order='is_favorite desc')[0], self.project_goats)
-        self.assertEqual(Project.search(domain, order='is_favorite')[-1], self.project_goats)
+        self.assertEqual(Project.search_fetch(domain, order='is_favorite desc')[0], self.project_goats)
+        self.assertEqual(Project.search_fetch(domain, order='is_favorite')[-1], self.project_goats)
 
         self.assertTrue(self.project_pigs.id < self.project_goats.id)
         self.assertEqual(Project.search(domain, order='id').ids, project_ids)

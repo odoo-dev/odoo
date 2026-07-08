@@ -245,7 +245,7 @@ class TestLotSerial(TestStockCommon):
         })
         self.assertEqual(self.productB.tracking, 'serial')
         self.productB.company_id = self.env.company
-        branch_a_warehouse = self.env['stock.warehouse'].search([('company_id', '=', branch_a.id)])
+        branch_a_warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', branch_a.id)])
         branch_receipt_type = self.env['stock.picking.type'].search([('company_id', '=', branch_a.id), ('code', '=', 'incoming')], limit=1)
         # create a receipt and confirm it
         picking1 = self.env['stock.picking'].create({

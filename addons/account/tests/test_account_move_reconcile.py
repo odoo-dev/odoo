@@ -4124,7 +4124,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         })
         pmt_wizard._create_payments()
         partial_rec = caba_inv.mapped('line_ids.matched_credit_ids')
-        caba_move = self.env['account.move'].search([('tax_cash_basis_rec_id', 'in', partial_rec.ids)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_rec_id', 'in', partial_rec.ids)])
 
         self.assertRecordValues(caba_move.line_ids, [
             {'account_id': self.cash_basis_base_account.id,     'debit': 150.0, 'credit': 0.0,      'amount_currency': 100.0,   'tax_ids': [],                                      'tax_line_id': False},
@@ -4204,7 +4204,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         partial_rec = caba_inv.line_ids.matched_credit_ids
         self.assertTrue(receivable_line.full_reconcile_id, "Invoice should be fully paid")
 
-        caba_move = self.env['account.move'].search([('tax_cash_basis_rec_id', 'in', caba_inv.line_ids.matched_credit_ids.ids)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_rec_id', 'in', caba_inv.line_ids.matched_credit_ids.ids)])
         self.assertRecordValues(caba_move.line_ids, [
             {'account_id': self.cash_basis_base_account.id,     'debit': 150.0,     'credit': 0.0,      'amount_currency': 100.0,   'tax_ids': [],                                      'tax_line_id': False},
             {'account_id': self.cash_basis_base_account.id,     'debit': 0.0,       'credit': 150.0,    'amount_currency': -100.0,  'tax_ids': self.cash_basis_tax_a_third_amount.ids,  'tax_line_id': False},
@@ -4998,7 +4998,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         pmt_wizard._create_payments()
 
         partial_rec = invoice.mapped('line_ids.matched_debit_ids')
-        caba_move = self.env['account.move'].search([('tax_cash_basis_rec_id', 'in', partial_rec.ids)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_rec_id', 'in', partial_rec.ids)])
 
         self.assertRecordValues(caba_move.line_ids.sorted(lambda line: (-abs(line.balance), -line.debit, line.account_id)), [
             # Base amount:
@@ -5148,7 +5148,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             'payment_date': invoice.date,
         })._create_payments()
 
-        caba_move = self.env['account.move'].search([('tax_cash_basis_origin_move_id', '=', invoice.id)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_origin_move_id', '=', invoice.id)])
 
         self.assertEqual(caba_move.fiscal_position_id, foreign_vat_fpos, "The foreign VAT fiscal position should be kept in the cash basis move.")
 
@@ -5217,7 +5217,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         pmt_wizard = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=invoice.ids).create({})
         pmt_wizard._create_payments()
 
-        caba_move = self.env['account.move'].search([('tax_cash_basis_origin_move_id', '=', invoice.id)])
+        caba_move = self.env['account.move'].search_fetch([('tax_cash_basis_origin_move_id', '=', invoice.id)])
         self.assertEqual(len(caba_move.line_ids), 6, "All lines should be there")
         tax_group_base_tags = (tax_a | tax_b).invoice_repartition_line_ids.filtered(lambda l: l.repartition_type == 'base').tag_ids.ids
         tax_a_tax_tag = tax_a.invoice_repartition_line_ids.filtered(lambda l: l.repartition_type == 'tax').tag_ids.ids
@@ -5296,7 +5296,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
         # check caba move
         partial_rec = invoice.mapped('line_ids.matched_debit_ids')
-        caba_move = self.env['account.move'].search(
+        caba_move = self.env['account.move'].search_fetch(
             [('tax_cash_basis_rec_id', '=', partial_rec.id)])
         expected_values = [
             {
@@ -5363,7 +5363,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         self.assertFalse(cash_basis_moves)
 
         # No exchange journal entry created for CABA.
-        caba_transfer_amls = self.env['account.move.line'].search([
+        caba_transfer_amls = self.env['account.move.line'].search_fetch([
             ('account_id', '=', self.cash_basis_transfer_account.id),
             ('move_id.move_type', '=', 'entry'),
         ])
@@ -6007,7 +6007,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             })
             pmt_wizard._create_payments()
 
-        caba_moves = self.env['account.move'].search([('tax_cash_basis_origin_move_id', '=', invoice.id)])
+        caba_moves = self.env['account.move'].search_fetch([('tax_cash_basis_origin_move_id', '=', invoice.id)])
 
         self.assertRecordValues(caba_moves.line_ids.sorted('id'), [
             # Base amount:
@@ -6228,7 +6228,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             'currency_id': foreign_curr.id,
         })._create_payments()
 
-        partials = self.env['account.partial.reconcile'].search([
+        partials = self.env['account.partial.reconcile'].search_fetch([
             ('debit_move_id.move_id', 'in', [inv1.id, inv2.id]),
             ('credit_move_id.move_id', '=', payment.move_id.id),
         ])

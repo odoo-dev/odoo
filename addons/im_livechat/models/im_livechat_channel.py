@@ -321,7 +321,7 @@ class Im_LivechatChannel(models.Model):
 
     def action_view_chatbot_scripts(self):
         action = self.env['ir.actions.act_window']._for_xml_id('im_livechat.chatbot_script_action')
-        chatbot_script_ids = self.env['im_livechat.channel.rule'].search(
+        chatbot_script_ids = self.env['im_livechat.channel.rule'].search_fetch(
             [('channel_id', 'in', self.ids)]).mapped('chatbot_script_id')
         if len(chatbot_script_ids) == 1:
             action['res_id'] = chatbot_script_ids.id

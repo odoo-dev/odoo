@@ -11,7 +11,7 @@ class AccountJournal(models.Model):
     def _unlink_except_linked_to_payment_provider(self):
         if self.env.context.get('force_delete'):
             return
-        linked_providers = self.env['payment.provider'].sudo().search([]).filtered(
+        linked_providers = self.env['payment.provider'].sudo().search_fetch([]).filtered(
             lambda p: p.journal_id.id in self.ids
         )
         if linked_providers:

@@ -1021,7 +1021,7 @@ class SaleOrder(models.Model):
         """Send rating request emails to customers a few days after order."""
         today = fields.Date.today()
         # Find websites with rating emails enabled and email template configured.
-        websites = self.env["website"].search([
+        websites = self.env["website"].search_fetch([
             ("send_order_rating_emails", "=", True),
             ("rating_email_template_id", "!=", False),
         ])

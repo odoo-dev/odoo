@@ -33,7 +33,7 @@ class PosSession(models.Model):
         ]
 
         # Lines where product already has HSN
-        lines_with_product_hsn = PosOrderLine.search(
+        lines_with_product_hsn = PosOrderLine.search_fetch(
             base_domain + [('product_id.l10n_in_hsn_code', '!=', False)]
         )
         for line in lines_with_product_hsn:

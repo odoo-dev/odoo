@@ -335,7 +335,7 @@ class TestItAccountMoveSend(TestItEdi, TestAccountMoveSendCommon):
             _get_default_extra_edis
         ):
             self.env['account.move.send']._generate_and_send_invoices(invoice)
-        attachments = self.env['ir.attachment'].search([
+        attachments = self.env['ir.attachment'].search_fetch([
             ('res_model', '=', 'account.move'),
             ('res_field', '=', 'l10n_it_edi_attachment_file'),
             ('res_id', 'in', invoice.ids),
@@ -365,7 +365,7 @@ class TestItAccountMoveSend(TestItEdi, TestAccountMoveSendCommon):
         bill.action_post()
         bill.l10n_it_edi_attachment_file = BinaryBytes(base64.b64encode(bill._l10n_it_edi_render_xml()))
         bill.l10n_it_edi_attachment_name = "IT1234567890_10001.xml"
-        attachments = self.env['ir.attachment'].search([
+        attachments = self.env['ir.attachment'].search_fetch([
             ('res_model', '=', 'account.move'),
             ('res_field', '=', 'l10n_it_edi_attachment_file'),
             ('res_id', 'in', bill.ids),

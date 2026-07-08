@@ -175,7 +175,7 @@ class TestIrModel(TransactionCase):
             self.bananas_model.order = order
             self.assertEqual(self.env['x_bananas']._order, order)
 
-            bananas = self.env['x_bananas'].search([])
+            bananas = self.env['x_bananas'].search_fetch([])
             self.assertEqual(bananas.mapped('x_name'), names, 'failed to order by %s' % order)
 
     def test_model_fold_search(self):
@@ -262,7 +262,7 @@ class TestIrModel(TransactionCase):
             'model': 'x_paper_model',
             'field_id': fields_value,
         })
-        monetary_field = model.field_id.search([['name', 'ilike', 'x_monetary']])
+        monetary_field = model.field_id.search_fetch([['name', 'ilike', 'x_monetary']])
         self.assertEqual(len(monetary_field), 1,
                          "Should have the monetary field in the created ir.model")
         self.assertEqual(monetary_field.currency_field, "x_good_currency",

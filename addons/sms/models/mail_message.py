@@ -16,7 +16,7 @@ class MailMessage(models.Model):
         'Has SMS error', compute='_compute_has_sms_error', search='_search_has_sms_error')
 
     def _compute_has_sms_error(self):
-        sms_error_from_notification = self.env['mail.notification'].sudo().search([
+        sms_error_from_notification = self.env['mail.notification'].sudo().search_fetch([
             ('notification_type', '=', 'sms'),
             ('mail_message_id', 'in', self.ids),
             ('notification_status', '=', 'exception')]).mapped('mail_message_id')

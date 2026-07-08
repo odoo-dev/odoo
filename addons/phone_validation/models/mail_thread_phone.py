@@ -170,7 +170,7 @@ class MailThreadPhone(models.AbstractModel):
     def _compute_blacklisted(self):
         # TODO : Should remove the sudo as compute_sudo defined on methods.
         # But if user doesn't have access to mail.blacklist, doen't work without sudo().
-        blacklist = set(self.env['phone.blacklist'].sudo().search([
+        blacklist = set(self.env['phone.blacklist'].sudo().search_fetch([
             ('number', 'in', self.mapped('phone_sanitized'))]).mapped('number'))
         number_fields = self._phone_get_number_fields()
         for record in self:

@@ -16,7 +16,7 @@ class StockLot(models.Model):
     @api.depends('name')
     def _compute_repair_line_ids(self):
         repair_orders = defaultdict(lambda: self.env['repair.order'])
-        repair_moves = self.env['stock.move'].search([
+        repair_moves = self.env['stock.move'].search_fetch([
             ('repair_id', '!=', False),
             ('repair_line_type', '!=', False),
             ('move_line_ids.lot_id', 'in', self.ids),

@@ -19,7 +19,7 @@ class MailingMailingTest(models.TransientModel):
          This enables a user to do quick successive tests without having to type it every time.
          As this is a transient model, it will not always work, but is sufficient as just a default
          value. """
-        return self.env['mailing.mailing.test'].search([
+        return self.env['mailing.mailing.test'].search_fetch([
             ('create_uid', '=', self.env.uid),
         ], order='create_date desc', limit=1).email_to or self.env.user.email_formatted
 

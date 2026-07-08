@@ -42,7 +42,7 @@ class ResPartner(models.Model):
 
     def _get_all_addr(self):
         self.ensure_one()
-        employee_id = self.env['hr.employee'].search(
+        employee_id = self.env['hr.employee'].search_fetch(
             [('id', 'in', self.employee_ids.ids)],
             limit=1,
         )

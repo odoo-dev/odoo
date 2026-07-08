@@ -261,6 +261,6 @@ class StockMove(models.Model):
         """ Overridden to return the vendor bills related to this stock move.
         """
         rslt = super()._get_related_invoices()
-        purchase_ids = self.env['purchase.order'].search([('picking_ids', 'in', self.picking_id.ids)])
+        purchase_ids = self.env['purchase.order'].search_fetch([('picking_ids', 'in', self.picking_id.ids)])
         rslt += purchase_ids.invoice_ids.filtered(lambda x: x.state == 'posted')
         return rslt

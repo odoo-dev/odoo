@@ -1442,7 +1442,7 @@ class StockQuant(models.Model):
 
         # Searches all GS1 rules linked to an UoM other than Unit and retrieves their AI.
         uom_unit_id = self.env.ref('uom.product_uom_unit').id
-        gs1_quantity_rules = self.env['barcode.rule'].search([
+        gs1_quantity_rules = self.env['barcode.rule'].search_fetch([
             ('associated_uom_id', '!=', False),
             ('associated_uom_id', '!=', uom_unit_id),
             ('is_gs1_nomenclature', '=', True)]

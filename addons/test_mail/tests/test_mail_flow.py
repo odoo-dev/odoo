@@ -307,7 +307,7 @@ class TestMailFlow(MailCommon, TestRecipients):
         suggested_all = lead_as_emp._message_get_suggested_recipients(
             reply_discussion=True, no_create=False,
         )
-        partner_sylvie = self.env['res.partner'].search(
+        partner_sylvie = self.env['res.partner'].search_fetch(
             [('email_normalized', '=', 'sylvie.lelitre@zboing.com')]
         )
         partner_pay = self.env['res.partner'].search(

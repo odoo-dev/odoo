@@ -53,7 +53,7 @@ class TestProductPublicCategory(TransactionCase):
         published_categs = set(
             self
             .env["product.public.category"]
-            .search([("has_published_products", "not in", (False,))])
+            .search_fetch([("has_published_products", "not in", (False,))])
             .mapped("name")
         )
 
@@ -63,7 +63,7 @@ class TestProductPublicCategory(TransactionCase):
         unpublished_categs = set(
             self
             .env["product.public.category"]
-            .search([("has_published_products", "!=", True)])
+            .search_fetch([("has_published_products", "!=", True)])
             .mapped("name")
         )
 

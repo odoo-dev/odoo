@@ -30,7 +30,7 @@ class ResUsers(models.Model):
         :rtype: list
         """
         self.ensure_one()
-        partner_ids = self.env['calendar.filters'].search([
+        partner_ids = self.env['calendar.filters'].search_fetch([
             ('user_id', '=', self.id),
             ('partner_checked', '=', True)
         ]).partner_id.ids

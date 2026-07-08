@@ -449,7 +449,7 @@ class DiscussChannelMember(models.Model):
             session_domain = [("partner_id", "=", self.partner_id.id)]
         elif self.guest_id:
             session_domain = [("guest_id", "=", self.guest_id.id)]
-        user_sessions = self.search(session_domain).rtc_session_ids
+        user_sessions = self.search_fetch(session_domain).rtc_session_ids
         check_rtc_session_ids = (check_rtc_session_ids or []) + user_sessions.ids
         self.channel_id._rtc_cancel_invitations(member_ids=self.ids)
         user_sessions.unlink()

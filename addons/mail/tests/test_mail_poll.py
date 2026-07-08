@@ -64,7 +64,7 @@ class TestMailPoll(MailCommon, HttpCase):
                 "thread_model": self.test_record._name,
             },
         )
-        poll = self.env["mail.poll"].search([("id", "=", poll_id)])
+        poll = self.env["mail.poll"].search_fetch([("id", "=", poll_id)])
         self.make_jsonrpc_request(
             "/mail/poll/vote", {"poll_id": poll.id, "option_ids": poll.option_ids.ids}
         )

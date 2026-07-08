@@ -120,7 +120,7 @@ class TestPurchaseAlternativeStock(TestPurchaseAlternativeCommon):
         in_picking.move_ids.picked = True
         in_picking.button_validate()
         # Now the internal move (Input -> Stock) should be generated
-        int_move = self.env['stock.move'].search([('product_id', '=', product.id), ('location_dest_id', '=', wh.lot_stock_id.id)])
+        int_move = self.env['stock.move'].search_fetch([('product_id', '=', product.id), ('location_dest_id', '=', wh.lot_stock_id.id)])
         self.assertEqual(int_move.quantity, 10, "Quantity should be reserved in the original internal move.")
         self.assertEqual(int_move.move_orig_ids.id, in_picking.move_ids.id, "Both moves should be correctly chained together.")
 

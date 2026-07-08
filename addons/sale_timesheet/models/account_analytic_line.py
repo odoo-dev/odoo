@@ -182,7 +182,7 @@ class AccountAnalyticLine(models.Model):
 
     def _get_employee_mapping_entry(self):
         self.ensure_one()
-        employees = self.env['project.sale.line.employee.map'].search([
+        employees = self.env['project.sale.line.employee.map'].search_fetch([
             ('project_id', '=', self.project_id.id),
             ('employee_id', 'in', self.env.user.employee_ids.ids),
             ])

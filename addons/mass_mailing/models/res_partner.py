@@ -26,7 +26,7 @@ class ResPartner(models.Model):
         """
         self.mailing_contact_id = False
         active_list_id = self.env['mailing.contact']._get_context_active_list_id()
-        subscribing_contacts = self.env['mailing.subscription'].search(
+        subscribing_contacts = self.env['mailing.subscription'].search_fetch(
             Domain('contact_id', 'in', self.mailing_contact_ids.ids) & Domain('list_id', '=', active_list_id)
         ).contact_id
         for partner in self.filtered('mailing_contact_ids'):

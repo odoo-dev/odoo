@@ -411,7 +411,7 @@ class ResConfigSettings(models.TransientModel):
     def _compute_display_name(self):
         """ Override display_name method to return an appropriate configuration wizard
         name, and not the generated name."""
-        action = self.env['ir.actions.act_window'].search([('res_model', '=', self._name)], limit=1)
+        action = self.env['ir.actions.act_window'].search_fetch([('res_model', '=', self._name)], limit=1)
         self.display_name = action.name or self._name
 
     @api.model

@@ -71,7 +71,7 @@ class TestMembership(TestSalesCommon):
         self.user_sales_manager.write({'group_ids': [(3, self.env.ref('base.group_system').id)]})
 
         self.env.flush_all()
-        memberships = self.env['crm.team.member'].with_context(active_test=False).search([('user_id', '=', self.user_sales_leads.id)])
+        memberships = self.env['crm.team.member'].with_context(active_test=False).search_fetch([('user_id', '=', self.user_sales_leads.id)])
         self.assertEqual(len(memberships), 3)  # subscribed twice to new_team + subscribed to sales_team_1
         self.assertEqual(memberships.crm_team_id, sales_team_1 | new_team)
         self.assertFalse(memberships.filtered(lambda m: m.crm_team_id == sales_team_1).active)
@@ -137,7 +137,7 @@ class TestMembership(TestSalesCommon):
         self.assertEqual(sales_team_1.member_ids, self.user_admin)
         self.env.flush_all()
 
-        memberships = self.env['crm.team.member'].with_context(active_test=False).search([('user_id', '=', self.user_sales_leads.id)])
+        memberships = self.env['crm.team.member'].with_context(active_test=False).search_fetch([('user_id', '=', self.user_sales_leads.id)])
         self.assertEqual(memberships.crm_team_id, sales_team_1 | new_team)
         self.assertFalse(memberships.filtered(lambda m: m.crm_team_id == sales_team_1).active)
         self.assertTrue(memberships.filtered(lambda m: m.crm_team_id == new_team).active)

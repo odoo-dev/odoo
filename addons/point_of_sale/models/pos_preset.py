@@ -94,7 +94,7 @@ class PosPreset(models.Model):
 
     def _compute_slots_usage(self):
         usage = defaultdict(int)
-        orders = self.env['pos.order'].search([
+        orders = self.env['pos.order'].search_fetch([
             ('preset_id', '=', self.id),
             ('session_id.state', '!=', 'closed'),
             ('preset_time', '!=', False),

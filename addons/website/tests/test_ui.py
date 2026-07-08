@@ -356,7 +356,7 @@ class TestUi(HttpCaseWithWebsiteUser):
         self.start_tour(self.env['website'].get_client_action_url('/'), 'restricted_editor', login="website_user")
 
     def test_04_website_navbar_menu(self):
-        website = self.env['website'].search([], limit=1)
+        website = self.env['website'].search_fetch([], limit=1)
         self.env['website.menu'].create({
             'name': 'Test Tour Menu',
             'url': '/test-tour-menu',

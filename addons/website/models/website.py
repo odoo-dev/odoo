@@ -678,7 +678,7 @@ class Website(models.CachedModel):
         return configurator_snippets
 
     def configurator_set_menu_links(self, menu_company, module_data):
-        menus = self.env['website.menu'].search([('url', 'in', list(module_data.keys())), ('website_id', '=', self.id)])
+        menus = self.env['website.menu'].search_fetch([('url', 'in', list(module_data.keys())), ('website_id', '=', self.id)])
         for m in menus:
             m.sequence = module_data[m.url]['sequence']
 
@@ -718,7 +718,7 @@ class Website(models.CachedModel):
         Module = self.env['ir.module.module']
         domain = Module.get_themes_domain()
         domain = Domain.AND([[('name', '!=', 'theme_default')], domain])
-        client_themes = Module.search(domain).mapped('name')
+        client_themes = Module.search_fetch(domain).mapped('name')
         manifests = {
             theme_name: manifest
             for theme_name in client_themes
@@ -1078,7 +1078,7 @@ class Website(models.CachedModel):
                 generic_view.with_context(website_id=website.id).write({'arch_db': updated_view})
 
         # Configure the images
-        names = self.env['ir.model.data'].search([
+        names = self.env['ir.model.data'].search_fetch([
             ('name', '=ilike', f'configurator\\_{website.id}\\_%'),
             ('module', '=', 'website'),
             ('model', '=', 'ir.attachment')

@@ -50,7 +50,7 @@ class TestStockReportTour(HttpCase):
         """
         Test repenish from the forecast page.
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         interdimensional_protal = self.env['stock.location'].create({
             'name': 'Interdimensional portal',
             'usage': 'internal',

@@ -158,14 +158,14 @@ class TestImportFiles(TransactionCase):
 
         self.import_product_xls("product.product", filepath=test_file)
 
-        products = self.env['product.product'].search([('id', 'not in', prod_ids)])
+        products = self.env['product.product'].search_fetch([('id', 'not in', prod_ids)])
         self.assertEqual(products.mapped('name'), ['Apple juice', 'Ananas juice', 'Orange juice', 'Orange juice', 'Lemon juice', 'Lemon juice'])
         self.assertEqual(products.mapped('display_name'), ['[JUICE-1] Apple juice', '[JUICE-2] Ananas juice', '[JUICE-3] Orange juice (Orange)', '[JUICE-4] Orange juice (Red)', '[JUICE-5] Lemon juice (Orange)', '[JUICE-6] Lemon juice (Red)'])
 
-        attributes = self.env['product.attribute'].search([('id', 'not in', attr_ids)])
+        attributes = self.env['product.attribute'].search_fetch([('id', 'not in', attr_ids)])
         self.assertEqual(attributes.mapped('name'), ['ColorTest'])
 
-        values = self.env['product.attribute.value'].search([('id', 'not in', val_ids)])
+        values = self.env['product.attribute.value'].search_fetch([('id', 'not in', val_ids)])
         self.assertEqual(values.mapped('name'), ['Orange', 'Red'])
         self.assertEqual(values.mapped('display_name'), ['ColorTest: Orange', 'ColorTest: Red'])
 
@@ -178,7 +178,7 @@ class TestImportFiles(TransactionCase):
 
         self.assertFalse(results["messages"])
 
-        product = self.env['product.product'].search([('default_code', '=', 'CERT20')])
+        product = self.env['product.product'].search_fetch([('default_code', '=', 'CERT20')])
         self.assertEqual(product.list_price, 200)
         self.assertEqual(product.standard_price, 5)
 

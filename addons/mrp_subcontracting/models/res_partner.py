@@ -47,7 +47,7 @@ class ResPartner(models.Model):
     def _search_is_subcontractor(self, operator, value):
         if operator != 'in':
             return NotImplemented
-        subcontractor_ids = self.env['mrp.bom'].search(
+        subcontractor_ids = self.env['mrp.bom'].search_fetch(
             [('type', '=', 'subcontract')]).subcontractor_ids.ids
         return [('id', 'in', subcontractor_ids)]
 

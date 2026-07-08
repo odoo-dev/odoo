@@ -17,7 +17,7 @@ class WebsiteCrmChatbotCase(MockVisitor, test_chatbot_lead.CrmChatbotCase):
         website_visitor.partner_id = partner.id  # can't be set in create as compute overrides it
         with self.mock_visitor_from_request(force_visitor=website_visitor):
             self._play_session_with_lead()
-        created_lead = self.env['crm.lead'].sudo().search([], limit=1, order='id desc')
+        created_lead = self.env['crm.lead'].sudo().search_fetch([], limit=1, order='id desc')
 
         self.assertEqual(created_lead.name, "Jean Michel Visitor's New Lead")
         self.assertEqual(created_lead.visitor_ids, website_visitor)

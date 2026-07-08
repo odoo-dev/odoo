@@ -264,14 +264,14 @@ class TestSubscriptionManagement(MassMailCommon):
 
         # add new subscriptions (and ensure email_normalized is used)
         (ml_1 + ml_2)._update_subscription_from_email(_email_formatted_upd, opt_out=False)
-        subs = self.env['mailing.subscription'].search(
+        subs = self.env['mailing.subscription'].search_fetch(
             [('contact_id', '=', contact.id)]
         )
         self.assertEqual(subs.list_id, ml_1 + ml_2)
 
         # opt-out from opted-in mailing list + 1 non opted-in mailing list
         (ml_2 + ml_3)._update_subscription_from_email(_email_formatted_upd, opt_out=True)
-        subs = self.env['mailing.subscription'].search(
+        subs = self.env['mailing.subscription'].search_fetch(
             [('contact_id', '=', contact.id)]
         )
         self.assertEqual(subs.list_id, ml_1 + ml_2)

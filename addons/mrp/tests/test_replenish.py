@@ -386,7 +386,7 @@ class TestMrpReplenish(TestMrpCommon):
         wizard_form = Form(self.env['product.replenish'].with_context(
             default_product_tmpl_id=self.product_4.product_tmpl_id.id
         ))
-        manufacture_routes = self.env['stock.rule'].search([
+        manufacture_routes = self.env['stock.rule'].search_fetch([
             ('action', '=', 'manufacture'),
             ('company_id', '=', self.company.id),
             ('location_dest_id.usage', '=', 'internal'),

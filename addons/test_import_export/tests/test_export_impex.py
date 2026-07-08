@@ -630,7 +630,7 @@ class test_xid_perfs(common.TransactionCase):
         for i in range(10000):
             Model.create({'value': i})
         self.env.invalidate_all()
-        records = Model.search([])
+        records = Model.search_fetch([])
 
         self.profile.runcall(records._export_rows, [['id'], ['value']])
 
@@ -640,7 +640,7 @@ class test_xid_perfs(common.TransactionCase):
         for _ in range(10000):
             Model.create({'value': rid})
         self.env.invalidate_all()
-        records = Model.search([])
+        records = Model.search_fetch([])
 
         self.profile.runcall(records._export_rows, [['id'], ['value', 'id']])
 
@@ -650,6 +650,6 @@ class test_xid_perfs(common.TransactionCase):
         for i in range(10000):
             Model.create({'value': Integer.create({'value': i}).id})
         self.env.invalidate_all()
-        records = Model.search([])
+        records = Model.search_fetch([])
 
         self.profile.runcall(records._export_rows, [['id'], ['value', 'id']])

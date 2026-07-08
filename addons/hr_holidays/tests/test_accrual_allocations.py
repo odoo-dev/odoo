@@ -4969,7 +4969,7 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
 
         multi_employee_allocation.action_generate_allocations()
 
-        children_allocations = self.env['hr.leave.allocation'].search(
+        children_allocations = self.env['hr.leave.allocation'].search_fetch(
             [('employee_id', 'in', employees.ids)])
         self.assertEqual(len(children_allocations), 2)
         self.assertEqual(children_allocations[0].number_of_days, 21.0)

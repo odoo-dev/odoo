@@ -37,7 +37,7 @@ class SkillsTestUI(HttpCase):
 
         self.start_tour("/odoo", 'hr_skills_type_tour', login='admin')
         skill_type_id = self.env['hr.skill.type'].search([('name', '=', 'Cooking Skill')]).id
-        self.assertTrue(self.env['hr.skill.level'].search([
+        self.assertTrue(self.env['hr.skill.level'].search_fetch([
             ('default_level', '=', True),
             ('skill_type_id', '=', skill_type_id)
         ]).name, "Intermediate")

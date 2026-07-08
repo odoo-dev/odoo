@@ -25,7 +25,7 @@ class ResCompany(models.Model):
     @api.model
     def create_missing_unbuild_sequences(self):
         company_ids  = self.env['res.company'].search([])
-        company_has_unbuild_seq = self.env['ir.sequence'].search([('code', '=', 'mrp.unbuild')]).mapped('company_id')
+        company_has_unbuild_seq = self.env['ir.sequence'].search_fetch([('code', '=', 'mrp.unbuild')]).mapped('company_id')
         company_todo_sequence = company_ids - company_has_unbuild_seq
         company_todo_sequence._create_unbuild_sequence()
 

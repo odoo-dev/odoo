@@ -207,7 +207,7 @@ class PosPaymentMethod(models.Model):
             'phone_number': str(metadata.get('PhoneNumber', '')),
         }
 
-        active_sessions = self.env['pos.session'].search([
+        active_sessions = self.env['pos.session'].search_fetch([
             ('state', '=', 'opened'),
             ('config_id.payment_method_ids', 'in', self.ids),
         ])

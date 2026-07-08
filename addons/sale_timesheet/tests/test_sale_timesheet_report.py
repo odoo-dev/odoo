@@ -30,7 +30,7 @@ class TestSaleTimesheetReport(TestCommonSaleTimesheet):
             'tax_ids': [Command.set(self.tax_sale_a.ids)],
         })
         sale_order.action_confirm()
-        task = self.env['project.task'].search([('sale_line_id', '=', so_line.id)])
+        task = self.env['project.task'].search_fetch([('sale_line_id', '=', so_line.id)])
 
         # Register a timesheet entry of 24 hours
         self.env['account.analytic.line'].create({
@@ -44,7 +44,7 @@ class TestSaleTimesheetReport(TestCommonSaleTimesheet):
         })
         self.env.flush_all()
 
-        report = self.env['timesheets.analysis.report'].search([('so_line', '=', so_line.id)])
+        report = self.env['timesheets.analysis.report'].search_fetch([('so_line', '=', so_line.id)])
         self.assertEqual(report.unit_amount, 24)
         self.assertEqual(report.timesheet_revenues, 30)
         self.assertEqual(report.billable_time, 24)
@@ -69,7 +69,7 @@ class TestSaleTimesheetReport(TestCommonSaleTimesheet):
             'discount': 10.0,
         })
         sale_order.action_confirm()
-        task = self.env['project.task'].search([('sale_line_id', '=', so_line.id)])
+        task = self.env['project.task'].search_fetch([('sale_line_id', '=', so_line.id)])
 
         ts = self.env['account.analytic.line'].create({
             'name': 'Test Line',

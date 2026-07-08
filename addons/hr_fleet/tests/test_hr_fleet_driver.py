@@ -83,7 +83,7 @@ class TestHrFleetDriver(common.TransactionCase):
         })
         self.assertEqual(car.driver_employee_id, test_employee2)
 
-        assignation_log = self.env['fleet.vehicle.assignation.log'].search([
+        assignation_log = self.env['fleet.vehicle.assignation.log'].search_fetch([
             ('vehicle_id', '=', car.id)
         ])
         self.assertEqual(len(assignation_log), 1)

@@ -74,7 +74,7 @@ class WebClient(WebclientController):
             )
         # sudo - im_livechat.channel: allow access to live chat channel to
         # check if operators are available.
-        channel = request.env["im_livechat.channel"].sudo().search([("id", "=", params)])
+        channel = request.env["im_livechat.channel"].sudo().search_fetch([("id", "=", params)])
         if not channel:
             return
         country_id = (

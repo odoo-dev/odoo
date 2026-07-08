@@ -407,7 +407,7 @@ class IrModuleModule(models.Model):
 
     @assert_log_admin_access
     def button_install(self):
-        company_countries = self.env['res.company'].search([]).country_id
+        company_countries = self.env['res.company'].search_fetch([]).country_id
         # domain to select auto-installable (but not yet installed) modules
         auto_domain = [('state', '=', 'uninstalled'), ('auto_install', '=', True)]
 
@@ -659,7 +659,7 @@ class IrModuleModule(models.Model):
             return config
 
         # reload the client; open the first available root menu
-        menu = self.env['ir.ui.menu'].search([('parent_id', '=', False)])[:1]
+        menu = self.env['ir.ui.menu'].search_fetch([('parent_id', '=', False)])[:1]
         return {
             'type': 'ir.actions.client',
             'tag': 'reload',

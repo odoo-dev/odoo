@@ -498,7 +498,7 @@ class TestLeadAssign(TestLeadAssignCommon):
             self.env['crm.team'].browse(sales_teams.ids)._action_assign_leads()
 
         # teams assign
-        leads = self.env['crm.lead'].search([('id', 'in', leads.ids)])
+        leads = self.env['crm.lead'].search_fetch([('id', 'in', leads.ids)])
         self.assertEqual(leads.team_id, sales_teams)
         self.assertEqual(leads.user_id, sales_teams.member_ids)
         self.assertEqual(len(leads), 600)

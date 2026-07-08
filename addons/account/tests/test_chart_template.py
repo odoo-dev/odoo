@@ -536,7 +536,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
 
-        updated_tax = self.env['account.tax'].search([('company_id', '=', self.company.id), ('name', 'like', '%Tax 1')])
+        updated_tax = self.env['account.tax'].search_fetch([('company_id', '=', self.company.id), ('name', 'like', '%Tax 1')])
         # Check that tax was not recreated
         self.assertEqual(len(updated_tax), 1)
         # Check that tags have been updated
@@ -557,7 +557,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
 
-        updated_tax = self.env['account.tax'].search([('company_id', '=', self.company.id), ('name', 'like', '%Tax 1')])
+        updated_tax = self.env['account.tax'].search_fetch([('company_id', '=', self.company.id), ('name', 'like', '%Tax 1')])
         # Check that tax was not recreated
         self.assertEqual(len(updated_tax), 1)
         # Check that tags have been updated
@@ -581,7 +581,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         self.assertRecordValues(tax_existing, [{'name': '[old] Tax 1', 'amount': 15}])
 
         # Check that new tax has been recreated
-        new_tax = self.env['account.tax'].search([('company_id', '=', self.company.id), ('name', '=', 'Tax 1 modified')])
+        new_tax = self.env['account.tax'].search_fetch([('company_id', '=', self.company.id), ('name', '=', 'Tax 1 modified')])
         self.assertEqual(new_tax.amount, tax_existing.amount + 1)
 
     def test_update_taxes_removed_from_templates(self):
@@ -589,7 +589,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
             Tests updating after the removal of taxes and updating the fiscal position of a tax
 
         """
-        fiscal_position = self.env['account.fiscal.position'].search([])
+        fiscal_position = self.env['account.fiscal.position'].search_fetch([])
         self.env['account.tax'].search([('company_id', '=', self.company.id)]).unlink()
 
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=test_get_data, autospec=True):
@@ -706,7 +706,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
 
-        parent_tax = self.env['account.tax'].search([
+        parent_tax = self.env['account.tax'].search_fetch([
             ('company_id', '=', self.company.id),
             ('name', '=', 'Tax with children'),
         ])
@@ -744,11 +744,11 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
 
-        parent_tax = self.env['account.tax'].with_context(active_test=False).search([
+        parent_tax = self.env['account.tax'].with_context(active_test=False).search_fetch([
             ('company_id', '=', self.company.id),
             ('name', '=', 'Inactive Tax with children'),
         ])
-        children_taxes = self.env['account.tax'].with_context(active_test=False).search([
+        children_taxes = self.env['account.tax'].with_context(active_test=False).search_fetch([
             ('company_id', '=', self.company.id),
             ('name', 'in', ['Inactive Tax 3', 'Inactive Tax 4']),
         ])
@@ -1146,7 +1146,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         with patch.object(AccountChartTemplate, '_get_chart_template_data', side_effect=local_get_data, autospec=True):
             self.env['account.chart.template'].try_loading('test', company=self.company, install_demo=False)
 
-        accounts = self.env['account.account'].search([
+        accounts = self.env['account.account'].search_fetch([
             ('company_ids', '=', self.company.id),
             ('code', 'in', ('777777', '777778'))
         ], order='code asc')

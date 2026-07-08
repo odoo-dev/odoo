@@ -438,7 +438,7 @@ class AccountEdiProxyClientUser(models.Model):
 
     def _pdp_import_flow_10_response(self, uuid, content):
         flow_id = content['flow_id'].split('_')[-1]
-        flow = self.env['l10n.fr.pdp.reports.flow'].search([('pdp_flow_id', '=', flow_id)], limit=1)
+        flow = self.env['l10n.fr.pdp.reports.flow'].search_fetch([('pdp_flow_id', '=', flow_id)], limit=1)
         if not flow:
             _logger.warning('Flow 10 message with uuid %s and flow_id %s could not be linked '
                             'to any flow 10', uuid, flow_id)

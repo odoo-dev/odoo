@@ -1749,7 +1749,7 @@ class TestAngloSaxonValuation(TestStockValuationCommon, TestSaleStockCommon):
 
         self._make_in_move(self.product_fifo_auto, 12, 1)
 
-        moves = self.env['stock.move'].search([('product_id', '=', self.product_fifo_auto.id)])
+        moves = self.env['stock.move'].search_fetch([('product_id', '=', self.product_fifo_auto.id)])
         self.assertEqual(moves.value, 12)
 
         sale_order = self._so_deliver(self.product_fifo_auto, 6, 5)

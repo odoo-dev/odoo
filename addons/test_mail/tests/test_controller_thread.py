@@ -213,7 +213,7 @@ class TestMessageController(MailControllerThreadCommon):
         message = next(filter(lambda m: m["id"] == data["message_id"], data["store_data"]["mail.message"]))
         self.assertEqual(message['partner_ids'], partner_to.ids)
         self.assertEqual(message['partner_cc_ids'], partner_cc.ids)
-        mail = self.env['mail.mail'].search([('mail_message_id', '=', message['id'])], limit=1)
+        mail = self.env['mail.mail'].search_fetch([('mail_message_id', '=', message['id'])], limit=1)
         self.assertEqual(len(mail), 1)
         header = literal_eval(mail.headers)
         self.assertEqual(header.get('X-Msg-Cc-Add'), ','.join(partner_cc.mapped('email_formatted')))

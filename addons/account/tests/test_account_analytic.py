@@ -24,7 +24,7 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon, AnalyticCommon):
         })
 
     def get_analytic_lines(self, invoice):
-        return self.env['account.analytic.line'].search([
+        return self.env['account.analytic.line'].search_fetch([
             ('move_line_id', 'in', invoice.line_ids.ids),
         ]).sorted('amount')
 
@@ -548,7 +548,7 @@ class TestAccountAnalyticAccount(AccountTestInvoicingCommon, AnalyticCommon):
     def test_analytic_lines_partner_compute(self):
         ''' Ensures analytic lines partner is changed when changing partner on move line'''
         def get_analytic_lines():
-            return self.env['account.analytic.line'].search([
+            return self.env['account.analytic.line'].search_fetch([
                 ('move_line_id', 'in', entry.line_ids.ids)
             ]).sorted('amount')
 

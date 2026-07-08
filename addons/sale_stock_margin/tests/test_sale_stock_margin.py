@@ -266,7 +266,7 @@ class TestSaleStockMargin(TestStockValuationCommon):
         product.categ_id.property_cost_method = 'fifo'
         product.standard_price = 100
 
-        incoming_picking_type = self.env['stock.picking.type'].search([('company_id', '=', new_company.id), ('code', '=', 'incoming')], limit=1)
+        incoming_picking_type = self.env['stock.picking.type'].search_fetch([('company_id', '=', new_company.id), ('code', '=', 'incoming')], limit=1)
         production_location = self.env['stock.location'].search([('company_id', '=', new_company.id), ('usage', '=', 'production')])
 
         picking = self.env['stock.picking'].create({

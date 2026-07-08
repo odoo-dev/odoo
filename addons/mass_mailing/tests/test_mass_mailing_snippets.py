@@ -39,7 +39,7 @@ class TestMassMailingSnippets(MassMailCommon):
                     with self.assertRaises(AccessError):
                         IrUiView.rename_snippet("some original name", view_id, key)
         saved_name = IrUiView.save_snippet("My custom Snippet", "<section>Should Work</section>", "mass_mailing.email_designer_snippets", "custom_snippet_working", "https://www.example.com", "mass_mailing")
-        saved_view = IrUiView.search([("name", "=", saved_name)])
+        saved_view = IrUiView.search_fetch([("name", "=", saved_name)])
         value = IrUiView.render_public_asset("mass_mailing.email_designer_snippets")
         data_snippet = saved_view.key.split(".")[1]
         self.assertIn(f'data-snippet="{data_snippet}"', str(value))

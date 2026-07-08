@@ -151,7 +151,7 @@ class EventLeadRule(models.Model):
         registrations = registrations.sorted('id')
 
         # first: ensure no duplicate by searching existing registrations / rule (include lost leads)
-        existing_leads = self.env['crm.lead'].with_context(active_test=False).search([
+        existing_leads = self.env['crm.lead'].with_context(active_test=False).search_fetch([
             ('registration_ids', 'in', registrations.ids),
             ('event_lead_rule_id', 'in', self.ids)
         ])

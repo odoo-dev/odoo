@@ -702,7 +702,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         n_paid = self.env['pos.order'].search_count([('state', '=', 'paid')])
         self.assertEqual(n_invoiced, 1, 'There should be 1 invoiced order.')
         self.assertEqual(n_paid, 2, 'There should be 2 paid order.')
-        last_order = self.env['pos.order'].search([], limit=1, order="id desc")
+        last_order = self.env['pos.order'].search_fetch([], limit=1, order="id desc")
         self.assertEqual(last_order.lines[0].price_subtotal, 30.0)
         self.assertEqual(last_order.lines[0].price_subtotal_incl, 30.0)
         # Check if session name contains config name as prefix
@@ -710,7 +710,7 @@ class TestUi(TestPointOfSaleHttpCommon):
 
     def test_04_product_configurator(self):
         # Making one attribute inactive to verify that it doesn't show
-        configurable_product = self.env['product.product'].search([('name', '=', 'Configurable Chair'), ('available_in_pos', '=', True)], limit=1)
+        configurable_product = self.env['product.product'].search_fetch([('name', '=', 'Configurable Chair'), ('available_in_pos', '=', True)], limit=1)
         fabrics_line = configurable_product.attribute_line_ids[2]
         fabrics_line.product_template_value_ids[1].ptav_active = False
         self.main_pos_config.with_user(self.pos_user).open_ui()
@@ -901,7 +901,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'CashClosingDetails', login="pos_user")
         self.assertEqual(self.main_pos_config.last_session_closing_cash, 50.0)
-        cash_diff_line = self.env['account.bank.statement.line'].search([
+        cash_diff_line = self.env['account.bank.statement.line'].search_fetch([
             ('payment_ref', 'ilike', 'Cash difference observed during the counting (Loss)')
         ])
         self.assertAlmostEqual(cash_diff_line.amount, -1.00)
@@ -1200,10 +1200,10 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('ProductComboPriceTaxIncludedTour')
-        order = self.env['pos.order'].search([])
+        order = self.env['pos.order'].search_fetch([])
         self.assertEqual(len(order.lines), 4, "There should be 4 order lines - 1 combo parent and 3 combo lines")
         # check that the combo lines are correctly linked to each other
-        parent_line_id = self.env['pos.order.line'].search([('product_id.name', '=', 'Office Combo'), ('order_id', '=', order.id)])
+        parent_line_id = self.env['pos.order.line'].search_fetch([('product_id.name', '=', 'Office Combo'), ('order_id', '=', order.id)])
         combo_line_ids = self.env['pos.order.line'].search([('product_id.name', '!=', 'Office Combo'), ('order_id', '=', order.id)])
         self.assertEqual(parent_line_id.combo_line_ids, combo_line_ids, "The combo parent should have 3 combo lines")
         self.assertEqual(order.lines[1].price_unit, 18.67)
@@ -1471,7 +1471,7 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'FiscalPositionNoTaxRefund', login="pos_user")
-        order = self.env['pos.order'].search([])
+        order = self.env['pos.order'].search_fetch([])
         self.assertTrue(order[0].name == order[1].name + " REFUND")
 
     def test_customer_display_popup(self):
@@ -1823,7 +1823,7 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'ProductComboPriceCheckTour', login="pos_user")
-        order = self.env['pos.order'].search([], limit=1)
+        order = self.env['pos.order'].search_fetch([], limit=1)
         self.assertEqual(order.lines.filtered(lambda l: l.product_id.type == 'combo').margin, 0)
         self.assertEqual(order.lines.filtered(lambda l: l.product_id.type == 'combo').margin_percent, 0)
 
@@ -2264,7 +2264,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         ])
 
         # References should not have gaps
-        references = self.env['pos.order'].search([], order="pos_reference").mapped("pos_reference")
+        references = self.env['pos.order'].search_fetch([], order="pos_reference").mapped("pos_reference")
         for i in range(len(references) - 1):
             self.assertEqual(int(references[i + 1].split('-')[-1]), int(references[i].split('-')[-1]) + 1, "There is a gap in the pos references")
 
@@ -2296,7 +2296,7 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_edit_paid_order(self):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(f"/pos/ui/{self.main_pos_config.id}", 'test_edit_paid_order', login="pos_user")
-        edited_orders = self.env['pos.order'].search([], limit=1)
+        edited_orders = self.env['pos.order'].search_fetch([], limit=1)
         # check invoice created
         self.assertTrue(edited_orders[0].account_move)
         self.assertEqual(edited_orders[0].partner_id.name, 'Partner Test 1')
@@ -2398,7 +2398,7 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         #  Ensure that the original product created in the frontend ('Test Frontend Product') has been edited to ('Test Frontend Product Edited').
         frontend_created_product = self.env['product.product'].search_count([('name', '=', 'Test Frontend Product')])
-        frontend_created_product_edited = self.env['product.product'].search([('name', '=', 'Test Frontend Product Edited')])
+        frontend_created_product_edited = self.env['product.product'].search_fetch([('name', '=', 'Test Frontend Product Edited')])
 
         self.assertEqual(frontend_created_product, 0)
         self.assertEqual(frontend_created_product_edited.name, 'Test Frontend Product Edited')
@@ -2554,7 +2554,7 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_zero_decimal_places_currency', login="pos_user")
-        order = self.env['pos.order'].search([], limit=1)
+        order = self.env['pos.order'].search_fetch([], limit=1)
         self.assertEqual(order.payment_ids[0].payment_method_id.name, "Bank")
 
     def test_barcode_search_attributes_preset(self):
@@ -3381,7 +3381,7 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_weight_product(self):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_weight_product')
-        order = self.env['pos.order'].search([], limit=1)
+        order = self.env['pos.order'].search_fetch([], limit=1)
         self.assertEqual(len(order.lines), 2, "There should be two order lines")
         self.assertEqual(order.lines[0].price_subtotal_incl, 40, "The price unit should be 40")
         self.assertEqual(order.lines[0].qty, 4, "The quantity should be 4")
@@ -3886,7 +3886,7 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_not_available_pricelist_not_set_on_order', login="pos_user")
 
-        created_order = self.env['pos.order'].search([('partner_id', '=', partner.id)], limit=1)
+        created_order = self.env['pos.order'].search_fetch([('partner_id', '=', partner.id)], limit=1)
         self.assertNotEqual(created_order.pricelist_id, not_available_pricelist)
 
     def test_pos_open_ui_button(self):

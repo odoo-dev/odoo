@@ -207,7 +207,7 @@ class MicrosoftCalendarSync(models.AbstractModel):
         # is specific to the Microsoft user calendar.
         ms_recurrence_ids = list({x.seriesMasterId for x in recurrents})
         ms_recurrence_uids = {r.id: r.iCalUId for r in microsoft_events if r.id in ms_recurrence_ids}
-        recurrences = self.env['calendar.recurrence'].search([('ms_universal_event_id', 'in', microsoft_events.uids)])
+        recurrences = self.env['calendar.recurrence'].search_fetch([('ms_universal_event_id', 'in', microsoft_events.uids)])
         for recurrent_master_id in ms_recurrence_ids:
             recurrence_id = recurrences.filtered(
                 lambda ev: ev.ms_universal_event_id == ms_recurrence_uids[recurrent_master_id]

@@ -39,7 +39,7 @@ class TestSelfOrderMobile(SelfOrderCommonTest):
         # Test selection of different presets
         self.start_tour(self_route, "self_mobile_each_table_takeaway_in")
         self.start_tour(self_route, "self_mobile_each_table_takeaway_out")
-        orders = self.env['pos.order'].search([], order="id desc", limit=2)
+        orders = self.env['pos.order'].search_fetch([], order="id desc", limit=2)
         self.assertEqual(orders[0].preset_id, self.out_preset)
         self.assertEqual(orders[1].preset_id, self.in_preset)
 
@@ -180,7 +180,7 @@ class TestSelfOrderMobile(SelfOrderCommonTest):
         # Zero priced order
         self.start_tour(self_route, "self_order_mobile_0_price_order")
 
-        order = self.env['pos.order'].search([], limit=1)
+        order = self.env['pos.order'].search_fetch([], limit=1)
         self.assertEqual(order.general_customer_note, "test")
 
     def test_order_sequence_in_self(self):
@@ -197,7 +197,7 @@ class TestSelfOrderMobile(SelfOrderCommonTest):
         self.start_tour(self_route, "test_order_sequence_in_self")
 
         current_year = str(datetime.now().year)[-2:]
-        references = self.env['pos.order'].search([], limit=4, order="id desc").mapped('pos_reference')
+        references = self.env['pos.order'].search_fetch([], limit=4, order="id desc").mapped('pos_reference')
         self.assertEqual(references, [f"{current_year}0-{self.pos_config.id}-00000{4 - i}" for i in range(4)])
         self.assertEqual(self.pos_config.order_backend_seq_id.number_next, 5)
 

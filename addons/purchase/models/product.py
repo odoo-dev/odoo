@@ -121,7 +121,7 @@ class ProductProduct(models.Model):
     def _search_is_in_purchase_order(self, operator, value):
         if operator != 'in':
             return NotImplemented
-        product_ids = self.env['purchase.order.line'].search([
+        product_ids = self.env['purchase.order.line'].search_fetch([
             ('order_id', 'in', [self.env.context.get('order_id', '')]),
         ]).product_id.ids
         return [('id', 'in', product_ids)]

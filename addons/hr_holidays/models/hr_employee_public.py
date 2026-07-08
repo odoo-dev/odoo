@@ -36,7 +36,7 @@ class HrEmployeePublic(models.Model):
         # this only returns employees that are absent right now.
         today_start = date.today()
         today_end = today_start + timedelta(1)
-        holidays = self.env['hr.leave'].sudo().search([
+        holidays = self.env['hr.leave'].sudo().search_fetch([
             ('employee_id', '!=', False),
             ('state', '=', 'validate'),
             ('date_from', '<', today_end),

@@ -103,7 +103,7 @@ class TestPurchaseOldRules(PurchaseTestCommon):
         # Purchase order should be created for picking.
         self.assertTrue(purchase_order, 'No purchase order created.')
 
-        picking_ids = self.env['stock.picking'].search([('reference_ids', '=', self.reference.id)])
+        picking_ids = self.env['stock.picking'].search_fetch([('reference_ids', '=', self.reference.id)])
 
         storage = picking_ids.filtered(lambda r: r.picking_type_id ==
             self.warehouse_2_steps.store_type_id and r.reference_ids.id == self.reference.id)
@@ -137,7 +137,7 @@ class TestPurchaseOldRules(PurchaseTestCommon):
         # Po should be create related picking.
         self.assertTrue(purchase_order, 'purchase order is created.')
 
-        picking_ids = self.env['stock.picking'].search([('reference_ids', '=', self.reference.id)])
+        picking_ids = self.env['stock.picking'].search_fetch([('reference_ids', '=', self.reference.id)])
 
         internal = picking_ids.filtered(lambda r: r.picking_type_id == self.warehouse_2_steps.int_type_id)
         pick = picking_ids.filtered(lambda r: r.picking_type_id == self.warehouse_2_steps.pick_type_id)
@@ -172,7 +172,7 @@ class TestPurchaseOldRules(PurchaseTestCommon):
         # Po should be create related picking.
         self.assertTrue(purchase_order, 'No purchase order created.')
 
-        picking_ids = self.env['stock.picking'].search([('reference_ids', '=', self.reference.id)])
+        picking_ids = self.env['stock.picking'].search_fetch([('reference_ids', '=', self.reference.id)])
 
         internal = picking_ids.filtered(lambda r: r.picking_type_id == self.warehouse_3_steps.int_type_id)
         pick = picking_ids.filtered(lambda r: r.picking_type_id == self.warehouse_3_steps.pick_type_id)
@@ -206,7 +206,7 @@ class TestPurchaseOldRules(PurchaseTestCommon):
         # Po should be create related picking.
         self.assertTrue(purchase_order, 'No purchase order created.')
 
-        picking_ids = self.env['stock.picking'].search([('reference_ids', '=', self.reference.id)])
+        picking_ids = self.env['stock.picking'].search_fetch([('reference_ids', '=', self.reference.id)])
 
         internal = picking_ids.filtered(lambda r: r.picking_type_id == self.warehouse_3_steps.int_type_id)
         pick = picking_ids.filtered(lambda r: r.picking_type_id == self.warehouse_3_steps.pick_type_id)
@@ -252,7 +252,7 @@ class TestPurchaseOldRules(PurchaseTestCommon):
         )])
 
         # Confirm purchase order
-        purchase = self.env['purchase.order.line'].search([('product_id', '=', self.product.id)], limit=1).order_id
+        purchase = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.product.id)], limit=1).order_id
         purchase.button_confirm()
         # Check order date of purchase order
         order_date = date_planned - timedelta(days=self.product.seller_ids.delay + rule_delay)
@@ -266,13 +266,13 @@ class TestPurchaseOldRules(PurchaseTestCommon):
         self.assertTrue(purchase.picking_ids, "Picking should be created.")
 
         # Check scheduled date of Internal Type shipment
-        incoming_shipment1 = self.env['stock.picking'].search([('move_ids.product_id', '=', self.product.id), ('picking_type_id', '=', warehouse.qc_type_id.id), ('location_id', '=', warehouse.wh_input_stock_loc_id.id), ('location_dest_id', '=', warehouse.wh_qc_stock_loc_id.id)])
+        incoming_shipment1 = self.env['stock.picking'].search_fetch([('move_ids.product_id', '=', self.product.id), ('picking_type_id', '=', warehouse.qc_type_id.id), ('location_id', '=', warehouse.wh_input_stock_loc_id.id), ('location_dest_id', '=', warehouse.wh_qc_stock_loc_id.id)])
         incoming_shipment1_date = order_date + timedelta(days=self.product.seller_ids.delay)
         self.assertEqual(incoming_shipment1.scheduled_date, incoming_shipment1_date, 'Schedule date of Internal Type shipment for input stock location should be equal to: schedule date of purchase order + push rule delay.')
         self.assertEqual(incoming_shipment1.date_deadline, incoming_shipment1_date)
         old_deadline1 = incoming_shipment1.date_deadline
 
-        incoming_shipment2 = self.env['stock.picking'].search([('picking_type_id', '=', warehouse.store_type_id.id), ('location_id', '=', warehouse.wh_qc_stock_loc_id.id), ('location_dest_id', '=', warehouse.lot_stock_id.id)])
+        incoming_shipment2 = self.env['stock.picking'].search_fetch([('picking_type_id', '=', warehouse.store_type_id.id), ('location_id', '=', warehouse.wh_qc_stock_loc_id.id), ('location_dest_id', '=', warehouse.lot_stock_id.id)])
         incoming_shipment2_date = schedule_date - timedelta(days=incoming_shipment2.move_ids[0].rule_id.delay)
         self.assertEqual(incoming_shipment2.scheduled_date, incoming_shipment2_date, 'Schedule date of Internal Type shipment for quality control stock location should be equal to: schedule date of Internal type shipment for input stock location + push rule delay..')
         self.assertEqual(incoming_shipment2.date_deadline, incoming_shipment2_date)

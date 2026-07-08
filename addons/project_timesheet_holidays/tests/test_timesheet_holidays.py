@@ -306,7 +306,7 @@ class TestTimesheetHolidays(TestCommonTimesheet):
         })
         time_off.with_user(SUPERUSER_ID)._action_validate()
 
-        timesheet = self.env['account.analytic.line'].search([
+        timesheet = self.env['account.analytic.line'].search_fetch([
             ('date', '>=', self.leave_start_datetime),
             ('date', '<=', self.leave_end_datetime),
             ('employee_id', '=', self.empl_employee.id),
@@ -382,7 +382,7 @@ class TestTimesheetHolidays(TestCommonTimesheet):
         })
         time_off.with_user(SUPERUSER_ID)._action_validate()
 
-        timesheet = self.env['account.analytic.line'].search([
+        timesheet = self.env['account.analytic.line'].search_fetch([
             ('date', '>=', datetime(2025, 7, 12)),
             ('date', '<=', datetime(2025, 7, 12)),
             ('employee_id', '=', self.empl_employee.id),

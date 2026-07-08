@@ -43,7 +43,7 @@ class TestCIIUS(TestUBLCommon):
         )
 
         # Default XML acting as the default EDI
-        edi_attachment = self.env['ir.attachment'].search([
+        edi_attachment = self.env['ir.attachment'].search_fetch([
             ('res_model', '=', 'account.move'),
             ('res_id', '=', invoice.id)
         ])

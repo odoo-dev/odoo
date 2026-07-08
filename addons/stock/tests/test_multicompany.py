@@ -139,7 +139,7 @@ class TestMultiCompany(TransactionCase):
         self.assertEqual(inventory_quant.company_id, self.company_a)
         inventory_quant.with_user(self.user_b).inventory_quantity = 10
         inventory_quant.with_user(self.user_b).action_apply_inventory()
-        last_move_id = self.env['stock.move'].search([('is_inventory', '=', True)])[-1]
+        last_move_id = self.env['stock.move'].search_fetch([('is_inventory', '=', True)])[-1]
         self.assertEqual(inventory_quant.company_id, self.company_a)
         self.assertEqual(last_move_id.company_id, self.company_a)
         self.assertEqual(last_move_id.quantity, 10)
@@ -212,7 +212,7 @@ class TestMultiCompany(TransactionCase):
         picking.with_user(self.user_b).move_ids.picked = True
         picking.with_user(self.user_b).button_validate()
         self.assertEqual(picking.state, 'done')
-        created_serial = self.env['stock.lot'].search([
+        created_serial = self.env['stock.lot'].search_fetch([
             ('name', '=', 'receipt_serial')
         ])
         self.assertEqual(created_serial.company_id, self.company_a)

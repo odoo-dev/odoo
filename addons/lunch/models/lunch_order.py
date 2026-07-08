@@ -220,7 +220,7 @@ class LunchOrder(models.Model):
         if values.get('state'):
             domain = Domain.AND([domain, [('state', '=', values['state'])]])
         toppings = values.get('toppings', [])
-        return self.search(domain).filtered(lambda line: (line.topping_ids_1 | line.topping_ids_2 | line.topping_ids_3).ids == toppings)
+        return self.search_fetch(domain).filtered(lambda line: (line.topping_ids_1 | line.topping_ids_2 | line.topping_ids_3).ids == toppings)
 
     @api.depends('topping_ids_1', 'topping_ids_2', 'topping_ids_3', 'product_id', 'quantity')
     def _compute_total_price(self):

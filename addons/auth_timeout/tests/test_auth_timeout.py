@@ -523,7 +523,7 @@ class TestAuthTimeoutHttp(HttpCase):
         self.assertGreater(expires, datetime.now() + timedelta(seconds=group.lock_timeout * 60 - 60))
 
         # 6. Assert the expiration date of the device in database
-        device = self.env["auth_totp.device"].search([("user_id", "=", self.user.id)], order="id DESC", limit=1)
+        device = self.env["auth_totp.device"].search_fetch([("user_id", "=", self.user.id)], order="id DESC", limit=1)
         self.assertLessEqual(device.expiration_date, datetime.now() + timedelta(seconds=group.lock_timeout * 60))
         self.assertGreater(device.expiration_date, datetime.now() + timedelta(seconds=group.lock_timeout * 60 - 60))
 

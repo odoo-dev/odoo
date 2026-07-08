@@ -96,7 +96,7 @@ class ProductTemplate(models.Model):
         return action
 
     def action_archive(self):
-        filtered_products = self.env['mrp.bom.line'].search([('product_id', 'in', self.product_variant_ids.ids), ('bom_id.active', '=', True)]).product_id.mapped('display_name')
+        filtered_products = self.env['mrp.bom.line'].search_fetch([('product_id', 'in', self.product_variant_ids.ids), ('bom_id.active', '=', True)]).product_id.mapped('display_name')
         res = super().action_archive()
         if filtered_products:
             return {
@@ -202,7 +202,7 @@ class ProductProduct(models.Model):
     def _search_product_is_in_bom(self, operator, value):
         if operator != 'in':
             return NotImplemented
-        product_ids = self.env['mrp.bom.line'].search([
+        product_ids = self.env['mrp.bom.line'].search_fetch([
             ('bom_id', '=', self.env.context.get('order_id', '')),
         ]).product_id.ids
         return [('id', operator, product_ids)]
@@ -210,7 +210,7 @@ class ProductProduct(models.Model):
     def _search_product_is_in_mo(self, operator, value):
         if operator != 'in':
             return NotImplemented
-        product_ids = self.env['mrp.production'].search([
+        product_ids = self.env['mrp.production'].search_fetch([
             ('id', 'in', [self.env.context.get('order_id', '')]),
         ]).move_raw_ids.product_id.ids
         return [('id', operator, product_ids)]
@@ -428,7 +428,7 @@ class ProductProduct(models.Model):
         return list(set(product_ids))
 
     def action_archive(self):
-        filtered_products = self.env['mrp.bom.line'].search([('product_id', 'in', self.ids), ('bom_id.active', '=', True)]).product_id.mapped('display_name')
+        filtered_products = self.env['mrp.bom.line'].search_fetch([('product_id', 'in', self.ids), ('bom_id.active', '=', True)]).product_id.mapped('display_name')
         res = super().action_archive()
         if filtered_products:
             return {

@@ -43,7 +43,7 @@ class TestSMSPost(TestMassMailCommon):
         new_body = self.env['mail.render.mixin']._shorten_links_text('Welcome to %s !' % link, self.tracker_values)
         self.assertNotIn(link, new_body)
         self.assertLinkShortenedText(new_body, (link, True), {'utm_campaign': self.utm_c.name, 'utm_medium': self.utm_m.name})
-        link = self.env['link.tracker'].search([('url', '=', link)])
+        link = self.env['link.tracker'].search_fetch([('url', '=', link)])
         self.assertIn(link.short_url, new_body)
 
         link = f'{self._web_base_url}/my/super_page?test[0]=42&toto=áâà#title3'
@@ -56,7 +56,7 @@ class TestSMSPost(TestMassMailCommon):
             'test[0]': '42',
             'toto': 'áâà',
         })
-        link = self.env['link.tracker'].search([('url', '=', link)])
+        link = self.env['link.tracker'].search_fetch([('url', '=', link)])
         self.assertIn(link.short_url, new_body)
         # Bugfix: ensure void content convert does not crash
         new_body = self.env['mail.render.mixin']._shorten_links_text(False, self.tracker_values)

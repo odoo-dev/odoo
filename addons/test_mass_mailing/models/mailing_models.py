@@ -83,7 +83,7 @@ class MailingTestOptout(models.Model):
 
     def _mailing_get_opt_out_list(self, mailing):
         res_ids = mailing._get_recipients()
-        opt_out_contacts = set(self.search([
+        opt_out_contacts = set(self.search_fetch([
             ('id', 'in', res_ids),
             ('opt_out', '=', True)
         ]).mapped('email_normalized'))

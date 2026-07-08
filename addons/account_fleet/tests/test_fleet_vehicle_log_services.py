@@ -171,7 +171,7 @@ class TestFleetVehicleLogServices(AccountTestInvoicingCommon):
         })
         move.action_post()
         line = move.line_ids[0]
-        fleet_service = self.env['fleet.vehicle.log.services'].search([('vendor_id', '=', partner.id),
+        fleet_service = self.env['fleet.vehicle.log.services'].search_fetch([('vendor_id', '=', partner.id),
                                                                        ('description', '=', False)])
 
         self.assertNotEqual(line.debit, line.price_subtotal)

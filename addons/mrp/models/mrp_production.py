@@ -395,7 +395,7 @@ class MrpProduction(models.Model):
         if operator != 'in':
             return NotImplemented
 
-        current_productions = self.search([('state', 'in', ('confirmed', 'progress', 'to_close'))])
+        current_productions = self.search_fetch([('state', 'in', ('confirmed', 'progress', 'to_close'))])
         matching_productions = current_productions.filtered(lambda production: production.components_availability_state in value)
 
         return [('id', 'in', matching_productions.ids)]

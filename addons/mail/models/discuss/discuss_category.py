@@ -12,7 +12,7 @@ class DiscussCategory(models.Model):
     _inherit = ["bus.sync.mixin", "bus.listener.mixin"]
 
     def _default_sequence(self):
-        return (self.search([], order="sequence desc", limit=1).sequence or 0) + 1
+        return (self.search_fetch([], order="sequence desc", limit=1).sequence or 0) + 1
 
     # description
     name = fields.Char("Name", required=True)

@@ -142,7 +142,7 @@ class TestSubcontractingLandedCosts(TestMrpSubcontractingCommon):
             of a landed cost applied to the receipt of  subcontracted product take into
             account the pro rata of the products still in stock.
         """
-        warehouse = self.env['stock.warehouse'].search([
+        warehouse = self.env['stock.warehouse'].search_fetch([
             ('company_id', '=', self.env.company.id),
         ], limit=1)
         product_category_all = self.env.ref('product.product_category_goods')

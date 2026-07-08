@@ -51,7 +51,7 @@ class HrEmployee(models.Model):
     def _compute_current_work_entry_type_id(self):
         self.current_work_entry_type_id = False
 
-        holidays = self.env['hr.leave'].sudo().search([
+        holidays = self.env['hr.leave'].sudo().search_fetch([
             ('employee_id', 'in', self.ids),
             ('date_from', '<=', fields.Datetime.now()),
             ('date_to', '>=', fields.Datetime.now()),
@@ -87,7 +87,7 @@ class HrEmployee(models.Model):
 
     def _compute_allocation_remaining_display(self):
         current_date = date.today()
-        allocations = self.env['hr.leave.allocation'].search([('employee_id', 'in', self.ids)])
+        allocations = self.env['hr.leave.allocation'].search_fetch([('employee_id', 'in', self.ids)])
         leaves_taken = self._get_consumed_leaves(allocations.work_entry_type_id)[0]
         for employee in self:
             employee_remaining_leaves = 0
@@ -252,7 +252,7 @@ class HrEmployee(models.Model):
         # this only returns employees that are absent right now.
         today_start = date.today()
         today_end = today_start + timedelta(1)
-        holidays = self.env['hr.leave'].sudo().search([
+        holidays = self.env['hr.leave'].sudo().search_fetch([
             ('employee_id', '!=', False),
             ('state', '=', 'validate'),
             ('date_from', '<', today_end),
@@ -261,7 +261,7 @@ class HrEmployee(models.Model):
         return [('id', 'in', holidays.employee_id.ids)]
 
     def _search_part_of_department(self, operator, value):
-        versions = self.env['hr.version'].sudo().search([
+        versions = self.env['hr.version'].sudo().search_fetch([
             ('member_of_department', operator, value),
         ]).filtered(lambda v: v.is_current)
         return [('id', 'in', versions.employee_id.ids)]
@@ -528,12 +528,12 @@ class HrEmployee(models.Model):
             target_date = fields.Date.today()
         if ignore_future:
             leaves_domain.append(('date_from', '<=', target_date))
-        leaves = self.env['hr.leave'].search(leaves_domain)
+        leaves = self.env['hr.leave'].search_fetch(leaves_domain)
         leaves_per_employee_type = defaultdict(lambda: defaultdict(lambda: self.env['hr.leave']))
         for leave in leaves:
             leaves_per_employee_type[leave.employee_id][leave.work_entry_type_id] |= leave
 
-        allocations = self.env['hr.leave.allocation'].with_context(active_test=False).search([
+        allocations = self.env['hr.leave.allocation'].with_context(active_test=False).search_fetch([
             ('employee_id', 'in', employees.ids),
             ('work_entry_type_id', 'in', work_entry_types.ids),
             ('state', '=', 'validate'),

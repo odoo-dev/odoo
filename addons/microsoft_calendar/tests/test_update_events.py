@@ -742,7 +742,7 @@ class TestUpdateEvents(TestCommon):
         self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
 
         # assert
-        updated_event = self.env["calendar.event"].search([('microsoft_id', '=', ms_event_id)])
+        updated_event = self.env["calendar.event"].search_fetch([('microsoft_id', '=', ms_event_id)])
         self.assertEqual(updated_event.name, new_name)
         self.assertEqual(updated_event.follow_recurrence, False)
 
@@ -770,7 +770,7 @@ class TestUpdateEvents(TestCommon):
         self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
 
         # assert
-        updated_event = self.env["calendar.event"].search([('microsoft_id', '=', ms_event_id)])
+        updated_event = self.env["calendar.event"].search_fetch([('microsoft_id', '=', ms_event_id)])
         self.assertEqual(updated_event.start, new_date)
         self.assertEqual(updated_event.follow_recurrence, False)
 
@@ -800,7 +800,7 @@ class TestUpdateEvents(TestCommon):
         self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
 
         # assert
-        updated_event = self.env["calendar.event"].search([('microsoft_id', '=', ms_event_id)])
+        updated_event = self.env["calendar.event"].search_fetch([('microsoft_id', '=', ms_event_id)])
         self.assertEqual(updated_event.start, new_date)
         self.assertEqual(updated_event.follow_recurrence, False)
 
@@ -831,7 +831,7 @@ class TestUpdateEvents(TestCommon):
         self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
 
         # assert
-        updated_events = self.env["calendar.event"].search([
+        updated_events = self.env["calendar.event"].search_fetch([
             ('microsoft_id', 'in', tuple(ms_event_ids.keys()))
         ])
         for e in updated_events:
@@ -1102,7 +1102,7 @@ class TestUpdateEvents(TestCommon):
         self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
 
         # assert
-        updated_events = self.env["calendar.event"].search([
+        updated_events = self.env["calendar.event"].search_fetch([
             ('microsoft_id', 'in', tuple(ms_events_to_update.keys()))
         ])
         for e in updated_events:
@@ -1186,7 +1186,7 @@ class TestUpdateEvents(TestCommon):
 
         # ----------- ASSERT -----------
 
-        updated_events = self.env["calendar.event"].search([
+        updated_events = self.env["calendar.event"].search_fetch([
             ('microsoft_id', 'in', tuple(ms_events_to_update.keys()))
         ])
         for e in updated_events:
@@ -1215,7 +1215,7 @@ class TestUpdateEvents(TestCommon):
         self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
 
         # ----------- ASSERT -----------
-        updated_events = self.env["calendar.event"].search([
+        updated_events = self.env["calendar.event"].search_fetch([
             ('microsoft_id', 'in', tuple(ms_events_to_update.keys()))
         ])
         for e in updated_events:
@@ -1245,7 +1245,7 @@ class TestUpdateEvents(TestCommon):
 
         # ----------- ASSERT -----------
 
-        updated_events = self.env["calendar.event"].search([
+        updated_events = self.env["calendar.event"].search_fetch([
             ('microsoft_id', 'in', tuple(ms_events_to_update.keys()))
         ])
         for e in updated_events:
@@ -1290,7 +1290,7 @@ class TestUpdateEvents(TestCommon):
 
         # ----------- ASSERT -----------
 
-        updated_events = self.env["calendar.event"].search([
+        updated_events = self.env["calendar.event"].search_fetch([
             ('microsoft_id', 'in', tuple(ms_events_to_update.keys()))
         ])
         for e in updated_events:

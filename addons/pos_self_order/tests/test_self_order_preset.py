@@ -58,7 +58,7 @@ class TestSelfOrderPreset(SelfOrderCommonTest):
         self.pos_config.current_session_id.set_opening_control(0, "")
         self_route = self.pos_config._get_self_order_route()
         self.start_tour(self_route, "self_order_preset_takeaway_tour")
-        self.assertEqual("Dr Dre", self.env["pos.order"].search([], limit=1, order="id desc").floating_order_name)
+        self.assertEqual("Dr Dre", self.env["pos.order"].search_fetch([], limit=1, order="id desc").floating_order_name)
 
     def test_preset_delivery_tour(self):
         self.pos_config.with_user(self.pos_user).open_ui()
@@ -98,7 +98,7 @@ class TestSelfOrderPreset(SelfOrderCommonTest):
         ):
             self.start_tour(self_route, "self_order_preset_delivery_tour")
 
-        last_order = self.env["pos.order"].search([], limit=1, order="id desc")
+        last_order = self.env["pos.order"].search_fetch([], limit=1, order="id desc")
         self.assertEqual(last_order.partner_id.name, 'Dr Dre')
         self.assertEqual(last_order.partner_id.email, 'dre@dr.com')
         self.assertEqual(last_order.partner_id.street, 'Rue du Bronx 90, 9999 New York')
@@ -124,7 +124,7 @@ class TestSelfOrderPreset(SelfOrderCommonTest):
         self.pos_config.current_session_id.set_opening_control(0, "")
         self_route = self.pos_config._get_self_order_route()
         self.start_tour(self_route, "self_order_preset_slot_tour")
-        last_order = self.env["pos.order"].search([], limit=1, order="id desc")
+        last_order = self.env["pos.order"].search_fetch([], limit=1, order="id desc")
         self.assertEqual(last_order.floating_order_name, 'Dr Dre')
         self.assertNotEqual(last_order.preset_time, False)
 

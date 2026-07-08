@@ -536,7 +536,7 @@ class StockGenerateCommon(TransactionCase):
                 }),
             ]
         })
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         receipt = self.env['stock.picking'].create({
             'picking_type_id': warehouse.in_type_id.id,
             'location_id': self.ref('stock.stock_location_suppliers'),

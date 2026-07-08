@@ -1386,7 +1386,7 @@ class TestExpression(SavepointCaseWithUserDemo, TransactionExpressionCase):
         self.assertEqual(countries.filtered_domain(domain)._ids, countries._ids)
 
     def test_filtered_domain_order2(self):
-        countries = self.env['res.country'].search([])
+        countries = self.env['res.country'].search_fetch([])
         # match the first two countries, in order
         expected = countries[:2]
         id1, id2 = expected._ids

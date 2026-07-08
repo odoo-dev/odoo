@@ -2223,10 +2223,10 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         # Check quantities of the original MO
         self.assertEqual(mo.product_uom_qty, 10.0)
         self.assertEqual(mo.qty_produced, 10.0)
-        move_prod_1 = self.env['stock.move'].search([
+        move_prod_1 = self.env['stock.move'].search_fetch([
             ('product_id', '=', mo.bom_id.bom_line_ids[0].product_id.id),
             ('raw_material_production_id', '=', mo.id)])
-        move_prod_2 = self.env['stock.move'].search([
+        move_prod_2 = self.env['stock.move'].search_fetch([
             ('product_id', '=', mo.bom_id.bom_line_ids[1].product_id.id),
             ('raw_material_production_id', '=', mo.id)])
         self.assertEqual(sum(move_prod_1.mapped('quantity')), 90.0)
@@ -2236,10 +2236,10 @@ class TestMrpOrder(TestMrpCommon, MailCase):
 
         # Check quantities of the backorder MO
         self.assertEqual(mo_backorder.product_uom_qty, 20.0)
-        move_prod_1_bo = self.env['stock.move'].search([
+        move_prod_1_bo = self.env['stock.move'].search_fetch([
             ('product_id', '=', mo.bom_id.bom_line_ids[0].product_id.id),
             ('raw_material_production_id', '=', mo_backorder.id)])
-        move_prod_2_bo = self.env['stock.move'].search([
+        move_prod_2_bo = self.env['stock.move'].search_fetch([
             ('product_id', '=', mo.bom_id.bom_line_ids[1].product_id.id),
             ('raw_material_production_id', '=', mo_backorder.id)])
         self.assertEqual(sum(move_prod_1_bo.mapped('product_uom_qty')), 60.0)
@@ -2389,7 +2389,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo_1.button_mark_done()
 
         move_lines_1 = self.env['stock.move.line'].search([("reference", "=", mo_1.name)])
-        move_finished_ids_1 = self.env['stock.move'].search([("production_id", "=", mo_1.id)])
+        move_finished_ids_1 = self.env['stock.move'].search_fetch([("production_id", "=", mo_1.id)])
         self.assertEqual(len(move_lines_1), 2, "There should only be 2 move lines: the component line and produced product line")
         self.assertEqual(len(move_finished_ids_1), 1, "There should only be 1 produced product for this MO")
         self.assertEqual(move_finished_ids_1.product_id, variant_2, "Incorrect variant produced")
@@ -2407,7 +2407,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo_2.button_mark_done()
 
         move_lines_2 = self.env['stock.move.line'].search([("reference", "=", mo_2.name)])
-        move_finished_ids_2 = self.env['stock.move'].search([("production_id", "=", mo_2.id)])
+        move_finished_ids_2 = self.env['stock.move'].search_fetch([("production_id", "=", mo_2.id)])
         self.assertEqual(len(move_lines_2), 2, "There should only be 2 move lines: the component line and produced product line")
         self.assertEqual(len(move_finished_ids_2), 1, "There should only be 1 produced product for this MO")
         self.assertEqual(move_finished_ids_2.product_id, variant_2, "Incorrect variant produced")
@@ -2428,7 +2428,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo_3.button_mark_done()
 
         move_lines_3 = self.env['stock.move.line'].search([("reference", "=", mo_3.name)])
-        move_finished_ids_3 = self.env['stock.move'].search([("production_id", "=", mo_3.id)])
+        move_finished_ids_3 = self.env['stock.move'].search_fetch([("production_id", "=", mo_3.id)])
         self.assertEqual(len(move_lines_3), 2, "There should only be 2 move lines: the component line and produced product line")
         self.assertEqual(len(move_finished_ids_3), 1, "There should only be 1 produced product for this MO")
         self.assertEqual(move_finished_ids_3.product_id, variant_1, "Incorrect variant produced")
@@ -3060,7 +3060,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         quantity of a confirmed MO shouldn't trigger the reservation of the
         components
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], order='id', limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], order='id', limit=1)
         warehouse.manu_type_id.reservation_method = 'manual'
 
         for product in self.product_1 + self.product_2:
@@ -3091,7 +3091,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         MO.
         (The test checks the flow in 1-step, 2-steps and 3-steps manufacturing)
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         mto_route = warehouse.mto_pull_id.route_id
         manufacture_route = warehouse.manufacture_pull_id.route_id
         mto_route.active = True
@@ -3640,7 +3640,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         self.assertEqual(mo.name, "BWH/PT1/00002")
 
     def test_onchange_bom_ids_and_picking_type(self):
-        warehouse01 = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse01 = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         warehouse02, warehouse03 = self.env['stock.warehouse'].create([
             {'name': 'Second Warehouse', 'code': 'WH02'},
             {'name': 'Third Warehouse', 'code': 'WH03'},
@@ -3883,7 +3883,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         Ensure that the MO can still be processed and that the consumed quantities
         are correct.
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         mto_route = warehouse.mto_pull_id.route_id
         manufacture_route = warehouse.manufacture_pull_id.route_id
         mto_route.active = True
@@ -4961,7 +4961,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         (B + C) have the routes MTO + Manufacture
         so producing one unit of A -> should generate a MO for B and C
         """
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         mto_route = warehouse.mto_pull_id.route_id
         manufacture_route = warehouse.manufacture_pull_id.route_id
         mto_route.active = True
@@ -5629,7 +5629,7 @@ class TestTourMrpOrder(HttpCase):
         self.assertEqual(len(mo.move_raw_ids), 1)
 
         mo.action_confirm()
-        component_transfer = self.env['stock.move'].search([
+        component_transfer = self.env['stock.move'].search_fetch([
             ('product_id', '=', component.id),
             ('location_dest_id', '=', warehouse.pbm_loc_id.id)
         ])

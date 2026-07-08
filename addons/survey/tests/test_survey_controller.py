@@ -214,7 +214,7 @@ class TestSurveyController(common.TestSurveyCommon, HttpCase):
         # Host: Check answered questions and scores
         self.authenticate('survey_manager', 'survey_manager')
         self.assertEqual(self._session_next_question(survey).status_code, 200)
-        user_inputs = self.env['survey.user_input'].search([
+        user_inputs = self.env['survey.user_input'].search_fetch([
             ('survey_id', '=', survey.id),
             ('create_date', '>=', survey.session_start_time)
         ], order='id')

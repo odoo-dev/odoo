@@ -39,14 +39,14 @@ class ProductTemplate(models.Model):
 
         # Always include delivery product templates, even if the limit cut them off
         loaded_ids = {p['id'] for p in products}
-        delivery_tmpl_ids = self.env['pos.preset'].sudo().search([
+        delivery_tmpl_ids = self.env['pos.preset'].sudo().search_fetch([
             ('delivery_product_id', '!=', False),
         ]).delivery_product_id.product_tmpl_id.ids
         missing_delivery = [tid for tid in delivery_tmpl_ids if tid not in loaded_ids]
         if missing_delivery:
             products.extend(self.browse(missing_delivery).read(fields, load=False))
 
-        service_fee_tmpl_ids = self.env['pos.preset'].sudo().search([
+        service_fee_tmpl_ids = self.env['pos.preset'].sudo().search_fetch([
             ('service_fee_product_id', '!=', False),
         ]).service_fee_product_id.product_tmpl_id.ids
         missing_service_fee = [tid for tid in service_fee_tmpl_ids if tid not in loaded_ids]
@@ -73,7 +73,7 @@ class ProductTemplate(models.Model):
         domain = super()._load_pos_self_data_domain(data, config)
         domain = Domain.AND([domain, [('self_order_available', '=', True)]])
         # Also include templates for delivery products referenced by active presets
-        delivery_tmpl_ids = self.env['pos.preset'].sudo().search([
+        delivery_tmpl_ids = self.env['pos.preset'].sudo().search_fetch([
             ('delivery_product_id', '!=', False),
         ]).delivery_product_id.product_tmpl_id.ids
         if delivery_tmpl_ids:

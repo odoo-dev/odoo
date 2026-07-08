@@ -92,7 +92,7 @@ class TestAnswerEvents(TestCommon):
         )
         self.attendee_user.with_user(self.attendee_user).sudo()._sync_microsoft_calendar()
 
-        attendee = self.env["calendar.attendee"].search([
+        attendee = self.env["calendar.attendee"].search_fetch([
             ('event_id', '=', self.simple_event.id),
             ('partner_id', '=', self.attendee_user.partner_id.id)
         ])
@@ -117,7 +117,7 @@ class TestAnswerEvents(TestCommon):
         )
         self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
 
-        attendee = self.env["calendar.attendee"].search([
+        attendee = self.env["calendar.attendee"].search_fetch([
             ('event_id', '=', self.simple_event.id),
             ('partner_id', '=', self.attendee_user.partner_id.id)
         ])
@@ -154,7 +154,7 @@ class TestAnswerEvents(TestCommon):
         )
         self.organizer_user.with_user(self.organizer_user).sudo()._sync_microsoft_calendar()
 
-        attendee = self.env["calendar.attendee"].search([
+        attendee = self.env["calendar.attendee"].search_fetch([
             ('event_id', '=', self.simple_event.id),
             ('partner_id', '=', self.attendee_user.partner_id.id)
         ])

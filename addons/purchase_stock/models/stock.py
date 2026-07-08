@@ -228,7 +228,7 @@ class StockWarehouseOrderpoint(models.Model):
     def _search_effective_vendor_id(self, operator, value):
         target_partners = self.env['res.partner'].search([('id', operator, value)])
 
-        orderpoints = self.env['stock.warehouse.orderpoint'].search([
+        orderpoints = self.env['stock.warehouse.orderpoint'].search_fetch([
             ('vendor_ids.partner_id', 'in', target_partners.ids)
         ]).filtered(
             lambda op: op.effective_vendor_id in target_partners
@@ -238,7 +238,7 @@ class StockWarehouseOrderpoint(models.Model):
 
     def _search_available_vendor(self, operator, value):
         vendors = self.env['res.partner'].search([('id', operator, value)])
-        orderpoints = self.env['stock.warehouse.orderpoint'].search([]).filtered(
+        orderpoints = self.env['stock.warehouse.orderpoint'].search_fetch([]).filtered(
             lambda orderpoint: orderpoint.product_id._prepare_sellers().mapped('partner_id') & vendors
         )
         return [('id', 'in', orderpoints.ids)]
@@ -258,7 +258,7 @@ class StockWarehouseOrderpoint(models.Model):
 
         # Remvove the context since the action basically display RFQ and not PO.
         result['context'] = {}
-        order_line_ids = self.env['purchase.order.line'].search([('orderpoint_id', '=', self.id)])
+        order_line_ids = self.env['purchase.order.line'].search_fetch([('orderpoint_id', '=', self.id)])
         purchase_ids = order_line_ids.mapped('order_id')
 
         result['domain'] = "[('id','in',%s)]" % (purchase_ids.ids)
@@ -296,7 +296,7 @@ class StockWarehouseOrderpoint(models.Model):
         domain = Domain('orderpoint_id', 'in', self.ids)
         if self.env.context.get('written_after'):
             domain &= Domain('write_date', '>=', self.env.context.get('written_after'))
-        order = self.env['purchase.order.line'].search(domain, limit=1).order_id
+        order = self.env['purchase.order.line'].search_fetch(domain, limit=1).order_id
         if order:
             return {
                 'type': 'ir.actions.client',

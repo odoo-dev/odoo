@@ -21,7 +21,7 @@ class WebsiteMenu(models.Model):
     _order = "sequence, id"
 
     def _default_sequence(self):
-        menu = self.search([], limit=1, order="sequence DESC")
+        menu = self.search_fetch([], limit=1, order="sequence DESC")
         return menu.sequence or 0
 
     name = fields.Char('Menu', required=True, translate=True)

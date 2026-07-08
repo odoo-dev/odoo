@@ -69,7 +69,7 @@ class TestPerformanceTimeit(TransactionCase):
     def setUp(self):
         super().setUp()
         # Warm up the cache of all data
-        self.Model.with_context(active_test=False).search([]).mapped('name')
+        self.Model.with_context(active_test=False).search_fetch([]).mapped('name')
 
     def launch_perf(
         self, code: str, records: BaseModel, *,

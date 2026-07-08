@@ -66,7 +66,7 @@ class TestMessageHelpersRobustness(MailCommon, HttpCase):
         self.env.invalidate_all()
 
     def test_assert_initial_values(self):
-        notifs_by_employee = self.env['mail.notification'].search([('author_id', '=', self.partner_employee.id)])
+        notifs_by_employee = self.env['mail.notification'].search_fetch([('author_id', '=', self.partner_employee.id)])
         self.assertEqual(
             set(notifs_by_employee.mapped('mail_message_id.res_id')),
             set(self.test_records_simple.ids)
@@ -81,7 +81,7 @@ class TestMessageHelpersRobustness(MailCommon, HttpCase):
             result = self.make_jsonrpc_request("/mail/store", {"fetch_params": ["failures"]})
         self.assertEqual(sorted(r['thread']['id'] for r in result['mail.message']), sorted(self.test_records_simple[:2].ids))
         self.assertEqual(
-            sorted(self.env['mail.notification'].search([('author_id', '=', self.partner_employee.id)]).mapped('mail_message_id.res_id')),
+            sorted(self.env['mail.notification'].search_fetch([('author_id', '=', self.partner_employee.id)]).mapped('mail_message_id.res_id')),
             sorted((self.test_records_simple - self.deleted_record).ids),
             'Should have cleaned notifications linked to unexisting records'
         )

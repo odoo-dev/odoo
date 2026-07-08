@@ -647,7 +647,7 @@ class TestReplenishWizard(PurchaseTestCommon):
         replenish_wizard = Form(self.env['product.replenish'].with_context(
             default_product_tmpl_id=self.product.product_tmpl_id.id
         ))
-        buy_routes = self.env['stock.rule'].search([
+        buy_routes = self.env['stock.rule'].search_fetch([
             ('action', '=', 'buy'),
             ('company_id', '=', self.company.id),
             ('location_dest_id.usage', '=', 'internal'),

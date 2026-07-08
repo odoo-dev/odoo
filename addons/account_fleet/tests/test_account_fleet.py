@@ -43,5 +43,5 @@ class TestAccountFleet(AccountTestInvoicingCommon):
             }).id,
         })
         result_action = wizard.do_action()
-        transfer_moves = self.env['account.move'].search(result_action['domain'])
+        transfer_moves = self.env['account.move'].search_fetch(result_action['domain'])
         self.assertEqual(transfer_moves.line_ids.filtered(lambda l: l.account_id == expense_account).vehicle_id, car_1, "Vehicle info is missing")

@@ -39,7 +39,7 @@ class TestSampleBlueprints(PopulateTestCase):
 
     def test_all_sample_blueprints(self):
         blueprints = self.env['populate.blueprint'].search([
-            ('id', 'in', self.env['ir.model.data'].search([
+            ('id', 'in', self.env['ir.model.data'].search_fetch([
                 ('module', '=', 'test_populate'),
                 ('model', '=', 'populate.blueprint'),
             ]).mapped('res_id')),

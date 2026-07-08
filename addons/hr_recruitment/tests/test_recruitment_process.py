@@ -141,7 +141,7 @@ class TestRecruitmentProcess(TestHrCommon):
         self.env['mail.thread'].message_process('hr.applicant', request_message, custom_values={"job_id": job_developer.id})
 
         # Make sure the applicant are created in the right company
-        applicant = self.env['hr.applicant'].search([('email_from', 'ilike', 'Richard_Anderson@yahoo.com')], limit=1)
+        applicant = self.env['hr.applicant'].search_fetch([('email_from', 'ilike', 'Richard_Anderson@yahoo.com')], limit=1)
         self.assertEqual(applicant.company_id, other_company, 'Applicant should be created in the right company')
 
     def test_email_application_department_with_no_company(self):

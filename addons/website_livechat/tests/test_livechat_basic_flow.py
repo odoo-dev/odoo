@@ -47,7 +47,7 @@ class TestLivechatBasicFlowHttpCase(HttpCaseWithUserDemo, TestLivechatCommon):
         # Open a new live chat
         res = self.url_open(url=self.open_chat_url, json=self.open_chat_params)
         self.assertEqual(res.status_code, 200)
-        channel_2 = self.env['discuss.channel'].search([('livechat_visitor_id', '=', self.visitor.id), ('livechat_end_dt', '=', False)], limit=1)
+        channel_2 = self.env['discuss.channel'].search_fetch([('livechat_visitor_id', '=', self.visitor.id), ('livechat_end_dt', '=', False)], limit=1)
 
         # Check Channel naming
         self.assertEqual(channel_2.name, "%s %s" % (f'Visitor #{channel_2.livechat_visitor_id.id}', self.operator.name))

@@ -102,7 +102,7 @@ class TestEventSale(TestEventSaleCommon):
         registration_to_cancel = self.event_0.registration_ids[0]
         registration_to_cancel.action_cancel()
 
-        registrations = self.env['event.registration'].search([('sale_order_id', '=', customer_so.id)])
+        registrations = self.env['event.registration'].search_fetch([('sale_order_id', '=', customer_so.id)])
 
         expected_states = ['draft', 'draft', 'cancel']
         actual_states = registrations.sorted('id').mapped('state')
@@ -254,7 +254,7 @@ class TestEventSale(TestEventSaleCommon):
         })
         customer_so.action_confirm()
 
-        registrations = self.env['event.registration'].search([
+        registrations = self.env['event.registration'].search_fetch([
             ('sale_order_id', '=', customer_so.id)
         ])
         self.assertEqual(registrations.state, 'draft')
@@ -264,7 +264,7 @@ class TestEventSale(TestEventSaleCommon):
         }).create({})
         editor.action_make_registration()
 
-        registrations = self.env['event.registration'].search([
+        registrations = self.env['event.registration'].search_fetch([
             ('sale_order_id', '=', customer_so.id)
         ])
         self.assertEqual(len(registrations), 1)

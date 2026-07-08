@@ -12,7 +12,7 @@ class PosConfig(models.Model):
     # When no PoS is specified at a loyalty program form, this program is applied to every PoS (instead of none)
     def _get_program_ids(self):
         today = fields.Date.context_today(self)
-        return self.env['loyalty.program'].search([
+        return self.env['loyalty.program'].search_fetch([
             ('pos_ok', '=', True),
             '|', ('pos_config_ids', '=', self.id), ('pos_config_ids', '=', False),
             '|', ('date_from', '=', False), ('date_from', '<=', today),

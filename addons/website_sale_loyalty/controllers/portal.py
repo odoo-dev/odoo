@@ -12,7 +12,7 @@ class CustomerPortalLoyalty(loyalty_portal.CustomerPortalLoyalty):
         """Add published trigger products for the loyalty program."""
         res = super().portal_get_card_history_values(card_id)
         program_sudo = (
-            self.env["loyalty.program"].sudo().search([("coupon_ids", "=", int(card_id))])
+            self.env["loyalty.program"].sudo().search_fetch([("coupon_ids", "=", int(card_id))])
         )
         if not program_sudo:
             return res

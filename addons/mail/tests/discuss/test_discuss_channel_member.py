@@ -91,14 +91,14 @@ class TestDiscussChannelMember(MailCommon):
         channel_as_user_1 = self.env['discuss.channel'].with_user(self.user_1)._create_channel(group_id=None, name='Public channel')
         channel_as_user_1.with_user(self.user_1)._add_members(users=self.user_1)
         channel_as_user_1.with_user(self.user_1)._add_members(users=self.user_2)
-        channel_1_rel_user_2 = self.env['discuss.channel.member'].search([
+        channel_1_rel_user_2 = self.env['discuss.channel.member'].search_fetch([
             ('channel_id', '=', channel_as_user_1.id),
             ('partner_id', '=', self.user_2.partner_id.id)
         ])
         self.assertEqual(channel_1_rel_user_2.message_unread_counter, 0, "should not have unread message initially as notification type is ignored")
 
         channel_as_user_1.message_post(body='Test', message_type='comment', subtype_xmlid='mail.mt_comment')
-        channel_1_rel_user_2 = self.env['discuss.channel.member'].search([
+        channel_1_rel_user_2 = self.env['discuss.channel.member'].search_fetch([
             ('channel_id', '=', channel_as_user_1.id),
             ('partner_id', '=', self.user_2.partner_id.id)
         ])
@@ -113,7 +113,7 @@ class TestDiscussChannelMember(MailCommon):
         channel_1_as_user_1.message_post(body='Test', message_type='comment', subtype_xmlid='mail.mt_comment')
         channel_1_as_user_1.message_post(body='Test 2', message_type='comment', subtype_xmlid='mail.mt_comment')
         channel_2_as_user_2.message_post(body='Test', message_type='comment', subtype_xmlid='mail.mt_comment')
-        members = self.env['discuss.channel.member'].search([('channel_id', 'in', (channel_1_as_user_1 + channel_2_as_user_2).ids)], order="id")
+        members = self.env['discuss.channel.member'].search_fetch([('channel_id', 'in', (channel_1_as_user_1 + channel_2_as_user_2).ids)], order="id")
         self.assertEqual(members.mapped('message_unread_counter'), [
             0,  # channel 1 user 1: posted last message
             0,  # channel 2 user 2: posted last message

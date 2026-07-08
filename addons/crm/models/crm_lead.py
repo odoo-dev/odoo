@@ -1407,7 +1407,7 @@ class CrmLead(models.Model):
             ('alias_id.alias_model_id.model', '=', 'crm.lead'),
         ]
         # sort by use_leads, then by our membership of the team
-        alias_records = self.env['crm.team'].search(alias_domain).sorted(
+        alias_records = self.env['crm.team'].search_fetch(alias_domain).sorted(
             lambda r: (r.use_leads, self.env.user in r.member_ids), reverse=True
         )
         alias_record = alias_records[0] if alias_records else None
@@ -1657,7 +1657,7 @@ class CrmLead(models.Model):
         """
         self.ensure_one()
 
-        all_attachments = self.env['ir.attachment'].search([
+        all_attachments = self.env['ir.attachment'].search_fetch([
             ('res_model', '=', self._name),
             ('res_id', 'in', opportunities.ids)
         ])
@@ -2240,7 +2240,7 @@ class CrmLead(models.Model):
                 leads_fields.add(field)
         leads_fields = sorted(leads_fields)
         # get all variable related records from frequency table, no matter the team_id
-        frequencies = self.env['crm.lead.scoring.frequency'].search([('variable', 'in', list(leads_fields))], order="team_id asc, id")
+        frequencies = self.env['crm.lead.scoring.frequency'].search_fetch([('variable', 'in', list(leads_fields))], order="team_id asc, id")
 
         # get all team_ids from frequencies
         frequency_teams = frequencies.mapped('team_id')

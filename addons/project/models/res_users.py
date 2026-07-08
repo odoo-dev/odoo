@@ -37,7 +37,7 @@ class ResUsers(models.Model):
             return internal_users
 
     def _search_followed_project_ids(self, operator, value):
-        followers = self.env['mail.followers'].search([
+        followers = self.env['mail.followers'].search_fetch([
             ('res_model', '=', 'project.project'),
             ('res_id', operator, value)
         ])

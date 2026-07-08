@@ -158,7 +158,7 @@ class TestResConfigExecute(TransactionCase):
         loaded or saved and avoid remaining methods `get_default_foo` or `set_foo` that
         won't be executed is foo != `fields`
         """
-        all_config_settings = self.env['ir.model'].search([('name', 'like', 'config.settings')])
+        all_config_settings = self.env['ir.model'].search_fetch([('name', 'like', 'config.settings')])
         for config_settings in all_config_settings:
             _logger.info("Testing %s" % (config_settings.name))
             self.env[config_settings.name].create({}).execute()

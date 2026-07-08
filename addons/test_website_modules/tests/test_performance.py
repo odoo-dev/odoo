@@ -203,7 +203,7 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
 
         def _serve_page():
             request = odoo.http.request
-            self.assertTrue(request.env['website'].search([]).user_id._is_public(), 'The public user of the website is not public!')
+            self.assertTrue(request.env['website'].search_fetch([]).user_id._is_public(), 'The public user of the website is not public!')
             self.assertTrue(request.env.user._is_public(), 'The visitor should not be logged')
             return origin_serve_page()
 
@@ -267,7 +267,7 @@ class TestWebsiteAllPerformance(TestWebsitePerformanceCommon, TestWebsitePriceLi
             "jsonrpc": "2.0",
             "method": "call",
             "params": {
-                "line_id": self.env['sale.order'].search([], limit=1).order_line.id,
+                "line_id": self.env['sale.order'].search_fetch([], limit=1).order_line.id,
                 "product_id": self.productC.id,
                 "quantity": 0
             }

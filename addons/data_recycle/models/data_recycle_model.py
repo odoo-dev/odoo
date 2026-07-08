@@ -121,7 +121,7 @@ class Data_RecycleModel(models.Model):
         is_test = modules.module.current_test
 
         existing_recycle_records = self.env['data_recycle.record'].with_context(
-            active_test=False).search([('recycle_model_id', 'in', self.ids)])
+            active_test=False).search_fetch([('recycle_model_id', 'in', self.ids)])
         mapped_existing_records = defaultdict(list)
         for recycle_record in existing_recycle_records:
             mapped_existing_records[recycle_record.recycle_model_id].append(recycle_record.res_id)

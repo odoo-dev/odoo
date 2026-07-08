@@ -12,7 +12,7 @@ class SlideSlidePartner(models.Model):
 
     @api.depends('partner_id', 'user_input_ids.scoring_success')
     def _compute_survey_scoring_success(self):
-        succeeded_user_inputs = self.env['survey.user_input'].sudo().search([
+        succeeded_user_inputs = self.env['survey.user_input'].sudo().search_fetch([
             ('slide_partner_id', 'in', self.ids),
             ('scoring_success', '=', True)
         ])

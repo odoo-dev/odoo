@@ -90,7 +90,7 @@ class TestConfig(CrmPlsCommon):
         correct value from config params and after updating values from the wizard
         config params are correctly updated. """
         # Set the PLS config
-        frequency_fields = self.env['crm.lead.scoring.frequency.field'].search([])
+        frequency_fields = self.env['crm.lead.scoring.frequency.field'].search_fetch([])
         pls_fields_str = ','.join(frequency_fields.mapped('field_id.name'))
         pls_start_date_str = "2021-01-01"
         IrConfigSudo = self.env['ir.config_parameter'].sudo()
@@ -243,15 +243,15 @@ class TestCrmPls(CrmPlsCommon):
         self.assertAlmostEqual(lead_13_no_team_proba, 35.19, places=2)
 
         # Test frequencies
-        lead_4_stage_0_freq = LeadScoringFrequency.search([('team_id', '=', leads[4].team_id.id), ('variable', '=', 'stage_id'), ('value', '=', stage_ids[0])])
-        lead_4_stage_won_freq = LeadScoringFrequency.search([('team_id', '=', leads[4].team_id.id), ('variable', '=', 'stage_id'), ('value', '=', won_stage_id)])
-        lead_4_country_freq = LeadScoringFrequency.search([('team_id', '=', leads[4].team_id.id), ('variable', '=', 'country_id'), ('value', '=', leads[4].country_id.id)])
-        lead_4_email_state_freq = LeadScoringFrequency.search([('team_id', '=', leads[4].team_id.id), ('variable', '=', 'email_state'), ('value', '=', str(leads[4].email_state))])
+        lead_4_stage_0_freq = LeadScoringFrequency.search_fetch([('team_id', '=', leads[4].team_id.id), ('variable', '=', 'stage_id'), ('value', '=', stage_ids[0])])
+        lead_4_stage_won_freq = LeadScoringFrequency.search_fetch([('team_id', '=', leads[4].team_id.id), ('variable', '=', 'stage_id'), ('value', '=', won_stage_id)])
+        lead_4_country_freq = LeadScoringFrequency.search_fetch([('team_id', '=', leads[4].team_id.id), ('variable', '=', 'country_id'), ('value', '=', leads[4].country_id.id)])
+        lead_4_email_state_freq = LeadScoringFrequency.search_fetch([('team_id', '=', leads[4].team_id.id), ('variable', '=', 'email_state'), ('value', '=', str(leads[4].email_state))])
 
-        lead_9_stage_0_freq = LeadScoringFrequency.search([('team_id', '=', leads[9].team_id.id), ('variable', '=', 'stage_id'), ('value', '=', stage_ids[0])])
-        lead_9_stage_won_freq = LeadScoringFrequency.search([('team_id', '=', leads[9].team_id.id), ('variable', '=', 'stage_id'), ('value', '=', won_stage_id)])
-        lead_9_country_freq = LeadScoringFrequency.search([('team_id', '=', leads[9].team_id.id), ('variable', '=', 'country_id'), ('value', '=', leads[9].country_id.id)])
-        lead_9_email_state_freq = LeadScoringFrequency.search([('team_id', '=', leads[9].team_id.id), ('variable', '=', 'email_state'), ('value', '=', str(leads[9].email_state))])
+        lead_9_stage_0_freq = LeadScoringFrequency.search_fetch([('team_id', '=', leads[9].team_id.id), ('variable', '=', 'stage_id'), ('value', '=', stage_ids[0])])
+        lead_9_stage_won_freq = LeadScoringFrequency.search_fetch([('team_id', '=', leads[9].team_id.id), ('variable', '=', 'stage_id'), ('value', '=', won_stage_id)])
+        lead_9_country_freq = LeadScoringFrequency.search_fetch([('team_id', '=', leads[9].team_id.id), ('variable', '=', 'country_id'), ('value', '=', leads[9].country_id.id)])
+        lead_9_email_state_freq = LeadScoringFrequency.search_fetch([('team_id', '=', leads[9].team_id.id), ('variable', '=', 'email_state'), ('value', '=', str(leads[9].email_state))])
 
         self.assertEqual(lead_4_stage_0_freq.won_count, 1.1)
         self.assertEqual(lead_4_stage_won_freq.won_count, 1.1)
@@ -276,7 +276,7 @@ class TestCrmPls(CrmPlsCommon):
         leads[9].action_set_won()
 
         # re-get frequencies that did not exists before
-        lead_9_country_freq = LeadScoringFrequency.search([('team_id', '=', leads[9].team_id.id), ('variable', '=', 'country_id'), ('value', '=', leads[9].country_id.id)])
+        lead_9_country_freq = LeadScoringFrequency.search_fetch([('team_id', '=', leads[9].team_id.id), ('variable', '=', 'country_id'), ('value', '=', leads[9].country_id.id)])
 
         # B.1. Test frequencies - team 1 should not impact team 2
         self.assertEqual(lead_4_stage_0_freq.won_count, 1.1)  # unchanged
@@ -449,8 +449,8 @@ class TestCrmPls(CrmPlsCommon):
         # tag 1 : won = 19+14  /  lost = 30+35
         # tag 2 : won = 9+14  /  lost = 40+35
 
-        tag_1_freq = LeadScoringFrequency.search([('variable', '=', 'tag_id'), ('value', '=', tag_ids[0])])
-        tag_2_freq = LeadScoringFrequency.search([('variable', '=', 'tag_id'), ('value', '=', tag_ids[1])])
+        tag_1_freq = LeadScoringFrequency.search_fetch([('variable', '=', 'tag_id'), ('value', '=', tag_ids[0])])
+        tag_2_freq = LeadScoringFrequency.search_fetch([('variable', '=', 'tag_id'), ('value', '=', tag_ids[1])])
         self.assertEqual(tools.float_compare(tag_1_freq.won_count, 33.1, 1), 0)
         self.assertEqual(tools.float_compare(tag_1_freq.lost_count, 65.1, 1), 0)
         self.assertEqual(tools.float_compare(tag_2_freq.won_count, 23.1, 1), 0)
@@ -850,7 +850,7 @@ class TestCrmPlsSides(CrmPlsCommon):
         self.assertEqual(
             existing_plsteam.exists(), self.env["crm.lead.scoring.frequency"],
             'Frequencies of unlinked teams should be unlinked (cascade)')
-        existing_noteam = self.env["crm.lead.scoring.frequency"].sudo().search([
+        existing_noteam = self.env["crm.lead.scoring.frequency"].sudo().search_fetch([
             ('team_id', '=', False),
             ('variable', 'in', ['stage_id', 'country_id']),
         ])

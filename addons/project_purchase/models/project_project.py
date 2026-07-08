@@ -41,7 +41,7 @@ class ProjectProject(models.Model):
     # ----------------------------
 
     def action_open_project_purchase_orders(self):
-        purchase_orders = self.env['purchase.order.line'].search([
+        purchase_orders = self.env['purchase.order.line'].search_fetch([
             '|',
                 ('analytic_distribution', 'in', self.account_id.ids),
                 ('order_id.project_id', '=', self.id),

@@ -28,7 +28,7 @@ class TestWebsiteFormEditor(HttpCaseWithUserPortal):
     def test_website_form_contact_us_edition_with_email(self):
         self.start_tour(self.env['website'].get_client_action_url('/contactus', True), 'website_form_contactus_edition_with_email', login="admin")
         self.start_tour('/contactus', 'website_form_contactus_submit', login="portal")
-        mail = self.env['mail.mail'].search([], order='id desc', limit=1)
+        mail = self.env['mail.mail'].search_fetch([], order='id desc', limit=1)
         self.assertEqual(
             mail.email_to,
             'test@test.test',
@@ -38,7 +38,7 @@ class TestWebsiteFormEditor(HttpCaseWithUserPortal):
         self.env.company.email = 'website_form_contactus_edition_no_email@mail.com'
         self.start_tour(self.env['website'].get_client_action_url('/contactus', True), 'website_form_contactus_edition_no_email', login="admin")
         self.start_tour('/contactus', 'website_form_contactus_submit', login="portal")
-        mail = self.env['mail.mail'].search([], order='id desc', limit=1)
+        mail = self.env['mail.mail'].search_fetch([], order='id desc', limit=1)
         self.assertEqual(
             mail.email_to,
             self.env.company.email,
@@ -60,7 +60,7 @@ class TestWebsiteFormEditor(HttpCaseWithUserPortal):
 
     def test_website_form_special_characters(self):
         self.start_tour(self.env['website'].get_client_action_url('/', True), 'website_form_special_characters', login='admin')
-        mail = self.env['mail.mail'].search([], order='id desc', limit=1)
+        mail = self.env['mail.mail'].search_fetch([], order='id desc', limit=1)
         self.assertIn('Test1&#34;&#39;', mail.body_html, 'The single quotes and double quotes characters should be visible on the received mail')
 
     def test_website_form_nested_forms(self):

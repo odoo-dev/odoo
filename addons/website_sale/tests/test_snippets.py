@@ -44,7 +44,7 @@ class TestSnippets(HttpCase):
 
     def test_02_snippet_products_remove(self):
         Visitor = self.env["website.visitor"]
-        user = self.env["res.users"].search([("login", "=", "admin")])
+        user = self.env["res.users"].search_fetch([("login", "=", "admin")])
         product = self.env["product.product"].create({
             "name": "Storage Box",
             "website_published": True,
@@ -59,7 +59,7 @@ class TestSnippets(HttpCase):
             headers={"referer": product.website_url},
             json={"params": {"res_model": "product.product", "res_id": product.id}},
         )
-        website_visitor = Visitor.search([("partner_id", "=", user.partner_id.id)])
+        website_visitor = Visitor.search_fetch([("partner_id", "=", user.partner_id.id)])
 
         self.assertEqual(
             website_visitor.name,

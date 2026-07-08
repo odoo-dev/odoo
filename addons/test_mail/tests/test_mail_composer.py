@@ -1441,7 +1441,7 @@ class TestComposerInternals(TestMailComposer):
         with self.mock_datetime_and_now(self.reference_now):
             composer.action_schedule_message()
         # should have created a scheduled message with correct parameters
-        scheduled_message = self.env['mail.scheduled.message'].search([
+        scheduled_message = self.env['mail.scheduled.message'].search_fetch([
             ['model', '=', self.test_record._name],
             ['res_id', '=', self.test_record.id],
         ])

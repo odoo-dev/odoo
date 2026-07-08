@@ -341,7 +341,7 @@ class TestProjectSubtasks(TestProjectCommon):
         })
         project_copied = project.copy()
         self.assertEqual(project_copied.name, 'Project (copy)', 'The name of the project should contains the extra (copy).')
-        parent_task = self.env['project.task'].search([('project_id', '=', project_copied.id), ('parent_id', '=', False)])
+        parent_task = self.env['project.task'].search_fetch([('project_id', '=', project_copied.id), ('parent_id', '=', False)])
         self.assertEqual(parent_task.name, 'Task A', 'The task is copied from project.copy(). Its name should be the same.')
         self.assertEqual(parent_task.child_ids[0].name, 'Subtask A 1', 'The task is copied from project.copy(). Its name should be the same.')
         self.assertEqual(parent_task.child_ids[1].name, 'Subtask A 2', 'The task is copied from project.copy(). Its name should be the same.')

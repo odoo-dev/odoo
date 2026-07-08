@@ -1437,7 +1437,7 @@ class HrEmployee(models.Model):
 
     @api.model
     def notify_expiring_contract_work_permit(self):
-        companies = self.env['res.company'].search([])
+        companies = self.env['res.company'].search_fetch([])
         employees_contract_expiring = self.env['hr.employee']
         employees_work_permit_expiring = self.env['hr.employee']
         today = fields.Date.context_today(self)

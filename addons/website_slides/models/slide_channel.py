@@ -407,13 +407,13 @@ class SlideChannel(models.Model):
     @api.depends('slide_partner_ids')
     @api.depends_context('uid')
     def _compute_partner_has_new_content(self):
-        new_published_slides = self.env['slide.slide'].sudo().search([
+        new_published_slides = self.env['slide.slide'].sudo().search_fetch([
             ('is_published', '=', True),
             ('published_date', '>', fields.Datetime.now() - relativedelta(days=7)),
             ('channel_id', 'in', self.ids),
             ('is_category', '=', False)
         ])
-        slide_partner_completed = self.env['slide.slide.partner'].sudo().search([
+        slide_partner_completed = self.env['slide.slide.partner'].sudo().search_fetch([
             ('channel_id', 'in', self.ids),
             ('partner_id', '=', self.env.user.partner_id.id),
             ('slide_id', 'in', new_published_slides.ids),
@@ -460,7 +460,7 @@ class SlideChannel(models.Model):
     @api.depends('prerequisite_channel_ids', 'channel_partner_ids.member_status')
     @api.depends_context('uid')
     def _compute_prerequisite_user_has_completed(self):
-        completed_prerequisite_channels = self.env['slide.channel.partner'].sudo().search([
+        completed_prerequisite_channels = self.env['slide.channel.partner'].sudo().search_fetch([
             ('partner_id', '=', self.env.user.partner_id.id),
             ('channel_id', 'in', self.prerequisite_channel_ids.ids),
             ('member_status', '=', 'completed'),
@@ -812,7 +812,7 @@ class SlideChannel(models.Model):
         """
         total_karma = defaultdict(list)
 
-        slide_completed = self.env['slide.slide.partner'].sudo().search([
+        slide_completed = self.env['slide.slide.partner'].sudo().search_fetch([
             ('partner_id', 'in', partner_ids),
             ('channel_id', 'in', self.ids),
             ('completed', '=', True),
@@ -834,7 +834,7 @@ class SlideChannel(models.Model):
                 'channel_id': slide.channel_id,
             })
 
-        channel_completed = self.env['slide.channel.partner'].sudo().search([
+        channel_completed = self.env['slide.channel.partner'].sudo().search_fetch([
             ('partner_id', 'in', partner_ids),
             ('channel_id', 'in', self.ids),
             ('member_status', '=', 'completed')

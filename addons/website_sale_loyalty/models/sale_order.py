@@ -314,7 +314,7 @@ class SaleOrder(models.Model):
         programs = (
             self
             .env["loyalty.program"]
-            .search(
+            .search_fetch(
                 Domain.AND([
                     self._get_program_domain(),
                     [

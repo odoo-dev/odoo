@@ -19,7 +19,7 @@ class TestWarehouse(TestStockCommon):
         })
         product_1_quant.action_apply_inventory()
         # Make sure the inventory was successful
-        move_in_id = self.env['stock.move'].search([('is_inventory', '=', True), ('product_id', '=', self.product_1.id)])
+        move_in_id = self.env['stock.move'].search_fetch([('is_inventory', '=', True), ('product_id', '=', self.product_1.id)])
         self.assertEqual(len(move_in_id), 1)
         self.assertEqual(move_in_id.product_qty, 50.0)
         self.assertEqual(product_1_quant.quantity, 50.0)
@@ -31,7 +31,7 @@ class TestWarehouse(TestStockCommon):
         product_1_quant.action_apply_inventory()
 
         # Check related move and quants
-        move_ids = self.env['stock.move'].search([('is_inventory', '=', True), ('product_id', '=', self.product_1.id)])
+        move_ids = self.env['stock.move'].search_fetch([('is_inventory', '=', True), ('product_id', '=', self.product_1.id)])
         self.assertEqual(len(move_ids), 2)
         move_out_id = move_ids[-1]
         self.assertEqual(move_out_id.product_qty, 15.0)
@@ -162,7 +162,7 @@ class TestWarehouse(TestStockCommon):
         return_pick.action_assign()
         return_pick.button_validate()
 
-        quant = self.env['stock.quant'].search([('product_id', '=', productA.id), ('location_id', '=', self.stock_location.id)])
+        quant = self.env['stock.quant'].search_fetch([('product_id', '=', productA.id), ('location_id', '=', self.stock_location.id)])
         self.assertEqual(sum(quant.mapped('quantity')), 0)
 
     def test_inventory_adjustment_and_negative_quants_2(self):
@@ -199,14 +199,14 @@ class TestWarehouse(TestStockCommon):
         quant.action_apply_inventory()
 
         # The inventory adjustment should have created one
-        move = self.env['stock.move'].search([('product_id', '=', productA.id), ('is_inventory', '=', True)])
+        move = self.env['stock.move'].search_fetch([('product_id', '=', productA.id), ('is_inventory', '=', True)])
         self.assertEqual(len(move), 1)
         self.assertEqual(move.product_qty, 1, "Moves created with wrong quantity.")
         self.assertEqual(move.location_id.id, location_loss.id)
 
         # There should be no quant in the stock location
         self.env['stock.quant']._quant_tasks()
-        quants = self.env['stock.quant'].search([('product_id', '=', productA.id), ('location_id', '=', self.stock_location.id)])
+        quants = self.env['stock.quant'].search_fetch([('product_id', '=', productA.id), ('location_id', '=', self.stock_location.id)])
         self.assertEqual(sum(quants.mapped('quantity')), 0)
 
         # There should be one quant in the inventory loss location
@@ -596,7 +596,7 @@ class TestWarehouse(TestStockCommon):
             'code': 'Chic2',
             'partner_id': partner.id
         })
-        wh = self.env["stock.warehouse"].search([])
+        wh = self.env["stock.warehouse"].search_fetch([])
 
         assert len(set(wh.mapped("company_id.id"))) > 1
 
@@ -892,7 +892,7 @@ class TestWarehouse(TestStockCommon):
         renamed_route_count = route_sudo.search_count([("name", "=", "New Name (MTO)")])
         self.assertEqual(renamed_route_count, 1)
 
-        new_mto_route = route_sudo.search([("name", "=", "Replenish on Order (MTO)")])
+        new_mto_route = route_sudo.search_fetch([("name", "=", "Replenish on Order (MTO)")])
         self.assertEqual(len(new_mto_route), 1)
         self.assertEqual(new_mto_route.company_id.id, company_2.id)
 
@@ -960,7 +960,7 @@ class TestWarehousePostInstall(TestStockCommon):
         product_replenish = Form(self.env['product.replenish'].with_context(default_product_id=self.product.id))
         product_replenish.warehouse_id = warehouse_2
         product_replenish.save().launch_replenishment()
-        replenishment_pickings = self.env['stock.picking'].search([('origin', '=', 'Manual Replenishment'), ('product_id', 'in', self.product.ids)]).sorted('id')
+        replenishment_pickings = self.env['stock.picking'].search_fetch([('origin', '=', 'Manual Replenishment'), ('product_id', 'in', self.product.ids)]).sorted('id')
         self.assertRecordValues(replenishment_pickings, [
             {
                 'picking_type_id': self.warehouse_1.out_type_id.id,

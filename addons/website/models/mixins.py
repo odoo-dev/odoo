@@ -468,7 +468,7 @@ class WebsitePublishedMixin(models.AbstractModel):
         field_records = (
             self.env['ir.model.fields']
             .sudo()
-            .search([
+            .search_fetch([
                 ('name', '=', 'publish_on'),
                 ('model_id.abstract', '=', False),
                 ('store', '=', True),

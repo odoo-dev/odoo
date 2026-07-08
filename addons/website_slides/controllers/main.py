@@ -1606,7 +1606,7 @@ class WebsiteSlides(WebsiteProfile):
         }.get(invite_error, '')
 
     def _prepare_user_slides_profile(self, user):
-        courses = request.env['slide.channel.partner'].sudo().search([('partner_id', '=', user.partner_id.id), ('member_status', '!=', 'invited')])
+        courses = request.env['slide.channel.partner'].sudo().search_fetch([('partner_id', '=', user.partner_id.id), ('member_status', '!=', 'invited')])
         courses_completed = courses.filtered(lambda c: c.member_status == 'completed')
         courses_ongoing = courses - courses_completed
         values = {

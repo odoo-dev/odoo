@@ -193,7 +193,7 @@ class CrmTeamMember(models.Model):
 
         :param user_team_ids: list of pairs (user_id, crm_team_id)
         """
-        existing = self.search([
+        existing = self.search_fetch([
             ('active', '=', True),  # explicit search on active only, whatever context
             ('user_id', 'in', [values['user_id'] for values in user_team_ids])
         ])

@@ -27,7 +27,7 @@ class TestHrLeaveUninstall(TransactionCase):
             note='Test Note',
             user_id=self.env.user.id)
         model = self.env['ir.model'].search([('model', '=', 'hr.leave')])
-        activity_type = self.env['mail.activity'].search([
+        activity_type = self.env['mail.activity'].search_fetch([
             ('res_model', '=', 'hr.leave')
         ]).activity_type_id
 

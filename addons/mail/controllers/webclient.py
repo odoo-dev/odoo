@@ -105,7 +105,7 @@ class WebclientController(ThreadController):
         ]
         # sudo as to not check ACL, which is far too costly
         # sudo: mail.notification - return only failures of current user as author
-        notifications = request.env["mail.notification"].sudo().search(domain, limit=100)
+        notifications = request.env["mail.notification"].sudo().search_fetch(domain, limit=100)
         found = defaultdict(list)
         for message in notifications.mail_message_id:
             found[message.model].append(message.res_id)

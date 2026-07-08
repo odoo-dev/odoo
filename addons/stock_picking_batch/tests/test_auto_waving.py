@@ -204,7 +204,7 @@ class TestAutoWaving(TransactionCase):
 
         self.all_pickings.action_assign()
 
-        all_batches = self.env['stock.picking.batch'].search([('picking_ids.partner_id', 'in', self.demo_partners.ids)])
+        all_batches = self.env['stock.picking.batch'].search_fetch([('picking_ids.partner_id', 'in', self.demo_partners.ids)])
         waves = all_batches.filtered(lambda b: b.is_wave)
 
         wave_1 = waves.filtered(lambda w: w.description == f'{self.us_client.name}, {self.child_location_2.complete_name}')
@@ -265,7 +265,7 @@ class TestAutoWaving(TransactionCase):
 
         self.all_pickings.action_assign()
 
-        all_batches = self.env['stock.picking.batch'].search([('picking_ids.partner_id', 'in', self.demo_partners.ids)])
+        all_batches = self.env['stock.picking.batch'].search_fetch([('picking_ids.partner_id', 'in', self.demo_partners.ids)])
         waves = all_batches.filtered(lambda b: b.is_wave)
 
         wave_1 = waves.filtered(lambda w: w.description == self.child_location_1.complete_name)

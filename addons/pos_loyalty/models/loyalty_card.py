@@ -47,7 +47,7 @@ class LoyaltyCard(models.Model):
 
     @api.model
     def get_gift_card_status(self, gift_code, config_id):
-        card = self.search([('code', '=', gift_code)], limit=1)
+        card = self.search_fetch([('code', '=', gift_code)], limit=1)
         is_valid = card.exists() and (not card.expiration_date or card.expiration_date > fields.Date.context_today(self)) and card.points > 0
         is_valid = is_valid and (card.program_id.program_type == 'gift_card') and not card.partner_id
         is_valid = is_valid and len([id for id in card.history_ids.mapped('order_id') if id != 0]) == 0
@@ -61,7 +61,7 @@ class LoyaltyCard(models.Model):
 
     @api.model
     def get_loyalty_card_partner_by_code(self, code):
-        return self.env['loyalty.card'].search([
+        return self.env['loyalty.card'].search_fetch([
             ('code', '=', code),
             ('program_type', '=', 'loyalty'),
         ], limit=1).partner_id or False

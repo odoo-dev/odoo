@@ -39,7 +39,7 @@ class TestMailGroupMessage(TestMailListCommon):
                 self.test_group.alias_id.display_name,
                 subject='Never Surrender', msg_id='<glory.to.the.hypnotoad@localhost>', target_model='mail.group')
 
-        message = self.env['mail.group.message'].search([('mail_message_id.message_id', '=', '<glory.to.the.hypnotoad@localhost>')])
+        message = self.env['mail.group.message'].search_fetch([('mail_message_id.message_id', '=', '<glory.to.the.hypnotoad@localhost>')])
         self.assertEqual(message.subject, 'Never Surrender', 'Should have created a <mail.group.message>')
 
         mails = self.env['mail.mail'].search([('mail_message_id', '=', message.mail_message_id.id)])
@@ -97,7 +97,7 @@ class TestMailGroupMessage(TestMailListCommon):
                 self.test_group.alias_id.display_name,
                 subject='Test subject', target_model='mail.group')
 
-        mails = self.env['mail.mail'].search([('subject', '=', 'Test subject')])
+        mails = self.env['mail.mail'].search_fetch([('subject', '=', 'Test subject')])
         self.assertEqual(len(mails), len(self.test_group.member_ids) - 1)
         self.assertNotIn(self.test_group_member_1.email, mails.mapped('email_to'), 'Should not have send the email to the original author')
 

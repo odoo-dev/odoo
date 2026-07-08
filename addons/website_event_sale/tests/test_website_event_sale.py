@@ -108,7 +108,7 @@ class TestWebsiteEventSale(HttpCaseWithUserPortal, TestWebsiteEventSaleCommon):
             'csrf_token': self.csrf_token(),
         })
 
-        last_so = self.env['sale.order'].search([], order='id desc', limit=1)
+        last_so = self.env['sale.order'].search_fetch([], order='id desc', limit=1)
         self.assertTrue(last_so.state == 'draft', "Apply pricelist with 100% discount should not auto-confirm the SO")
 
         self.url_open(f'/event/{self.event.id}/registration/confirm', data={
@@ -119,6 +119,6 @@ class TestWebsiteEventSale(HttpCaseWithUserPortal, TestWebsiteEventSaleCommon):
             'csrf_token': self.csrf_token(),
         })
 
-        last_so = self.env['sale.order'].search([], order='id desc', limit=1)
+        last_so = self.env['sale.order'].search_fetch([], order='id desc', limit=1)
         self.assertEqual(len(self.event.registration_ids), event_registration_count + 2)
         self.assertTrue(last_so.state == 'draft', "The status of unpaid events should be draft")

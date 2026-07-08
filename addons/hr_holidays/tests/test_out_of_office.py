@@ -133,7 +133,7 @@ class TestOutOfOfficePerformance(TestHrHolidaysCommon, TransactionCaseWithUserDe
         present_employees = self.env['hr.employee'].search([('is_absent', '!=', True)])
         absent_employees = self.env['hr.employee'].search([('is_absent', '=', True)])
         today_date = datetime.now(timezone.utc).date()
-        holidays = self.env['hr.leave'].sudo().search([
+        holidays = self.env['hr.leave'].sudo().search_fetch([
             ('employee_id', '!=', False),
             ('state', '=', 'validate'),
             ('date_from', '<=', today_date),

@@ -22,7 +22,7 @@ class ProductComparison(Controller):
 
     @route("/shop/compare/get_product_data", type="jsonrpc", auth="public", website=True)
     def get_product_data(self, product_ids):
-        products = self.env["product.product"].search([("id", "in", product_ids)])
+        products = self.env["product.product"].search_fetch([("id", "in", product_ids)])
         product_data = []
 
         for product in products:

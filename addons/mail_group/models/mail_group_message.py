@@ -189,7 +189,7 @@ class MailGroupMessage(models.Model):
             if not email_normalize(message.email_from):
                 raise UserError(_('The email "%s" is not valid.', message.email_from))
 
-        existing_moderation = self.env['mail.group.moderation'].search(
+        existing_moderation = self.env['mail.group.moderation'].search_fetch(
             Domain.OR([
                 [
                     ('email', '=', email_normalize(message.email_from)),

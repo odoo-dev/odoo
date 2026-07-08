@@ -53,7 +53,7 @@ class TestAngloSaxonValuationPurchaseMRP(TestStockValuationCommon):
         self.assertEqual(len(svls), 2, "The invoice should have created two SVL (one by kit's component) for the price diff")
         self.assertEqual(sum(svls.mapped('value')), 100, "Should be the standard price of both components")
 
-        input_amls = self.env['account.move.line'].search([('account_id', '=', self.stock_input_account.id)])
+        input_amls = self.env['account.move.line'].search_fetch([('account_id', '=', self.stock_input_account.id)])
         self.assertEqual(sum(input_amls.mapped('balance')), 0)
 
     @skip('Temporary to fast merge new valuation')
@@ -204,7 +204,7 @@ class TestAngloSaxonValuationPurchaseMRP(TestStockValuationCommon):
         po.picking_ids.button_validate()
 
         svl = po.order_line.move_ids.stock_valuation_layer_ids.ensure_one()
-        input_aml = self.env['account.move.line'].search([('account_id', '=', self.stock_valuation_account.id)])
+        input_aml = self.env['account.move.line'].search_fetch([('account_id', '=', self.stock_valuation_account.id)])
 
         self.assertEqual(svl.value, 50)  # USD
         self.assertEqual(input_aml.amount_currency, 100)  # EUR
@@ -372,7 +372,7 @@ class TestAngloSaxonValuationPurchaseMRP(TestStockValuationCommon):
         wizard = wizard.save()
         wizard.action_validate()
         self.assertTrue(float_is_zero(
-            sum(self.env['account.move.line'].search([
+            sum(self.env['account.move.line'].search_fetch([
                 ('account_id', '=', cost_of_production_account.id),
                 ('product_id', 'in', (final_product.id, comp_1.id, comp_2.id)),
             ]).mapped('balance')),

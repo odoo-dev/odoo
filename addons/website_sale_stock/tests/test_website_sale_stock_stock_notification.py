@@ -37,7 +37,7 @@ class TestStockNotificationProduct(WebsiteSaleStockCommon, HttpCase):
         with self.setup_cron_env() as env:
             env["product.product"]._send_availability_email()
 
-        emails = self.env["mail.mail"].search([("email_to", "=", partner.email_formatted)])
+        emails = self.env["mail.mail"].search_fetch([("email_to", "=", partner.email_formatted)])
         self.assertEqual(emails[0].subject, "Macbook Pro is back in stock")
         self.assertFalse(self.macbook._has_stock_notification(partner))
 

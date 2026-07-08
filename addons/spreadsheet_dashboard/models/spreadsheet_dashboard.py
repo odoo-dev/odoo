@@ -73,7 +73,7 @@ class SpreadsheetDashboard(models.Model):
         return False
 
     def _get_dashboard_translation_namespace(self):
-        data = self.env['ir.model.data'].sudo().search([
+        data = self.env['ir.model.data'].sudo().search_fetch([
             ('model', '=', self._name),
             ('res_id', 'in', self.ids),
         ], limit=1)

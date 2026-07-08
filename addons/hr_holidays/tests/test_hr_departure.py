@@ -72,7 +72,7 @@ class TestHolidaysFlow(TestHrHolidaysCommon):
         cancel_message = "<p>The time off request has been cancelled for the following reason:</p><p>The employee will leave the company on %(departure_date)s.</p>" % {
             'departure_date': self.departure_date,
         }
-        self.assertTrue(cancel_message in self.env['hr.leave'].search([
+        self.assertTrue(cancel_message in self.env['hr.leave'].search_fetch([
             ('request_date_from', '=', self.departure_date + timedelta(days=1)),
             ('request_date_to', '=', self.departure_date + timedelta(days=8)),
             ("employee_id", "=", self.employee.id)

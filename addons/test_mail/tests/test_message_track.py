@@ -695,7 +695,7 @@ class TestTrackingTemplate(TestTrackingCommon):
             })
             self.flush_tracking()
 
-        new_partner = self.env['res.partner'].search([('email_normalized', '=', email_new_partner_normalized)])
+        new_partner = self.env['res.partner'].search_fetch([('email_normalized', '=', email_new_partner_normalized)])
         self.assertEqual(new_partner.company_id, self.company_2)
         self.assertEqual(new_partner.email, email_new_partner_normalized)
         self.assertEqual(new_partner.name, email_new_partner_normalized,
@@ -1433,7 +1433,7 @@ class TestTrackingInternals(TestTrackingCommon):
         })
         self.flush_tracking()
         self.assertEqual(len(record.message_ids), 2, 'should have 1 new tracking message')
-        tracking_values = self.env['mail.tracking.value'].sudo().search(
+        tracking_values = self.env['mail.tracking.value'].sudo().search_fetch(
             [('mail_message_id', '=', record.message_ids[0].id)]
         )
         self.assertEqual(
@@ -1461,7 +1461,7 @@ class TestTrackingInternals(TestTrackingCommon):
             }
             for field_id in field_ids
         ])
-        tracking_values = self.env['mail.tracking.value'].sudo().search(
+        tracking_values = self.env['mail.tracking.value'].sudo().search_fetch(
             [('mail_message_id', '=', record.message_ids[0].id)]
         )
         self.assertEqual(

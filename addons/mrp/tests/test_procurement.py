@@ -252,7 +252,7 @@ class TestProcurement(TestMrpCommon):
         mo = mo_form.save()
 
         # Confirming mo create finished move
-        move_orig = self.env['stock.move'].search([
+        move_orig = self.env['stock.move'].search_fetch([
             ('move_dest_ids', 'in', move_dest.ids)
         ], limit=1)
 
@@ -321,7 +321,7 @@ class TestProcurement(TestMrpCommon):
         })
 
         move_dest._action_confirm()
-        mo = self.env['mrp.production'].search([
+        mo = self.env['mrp.production'].search_fetch([
             ('product_id', '=', product_bottle.id),
             ('state', '=', 'confirmed')
         ])
@@ -466,7 +466,7 @@ class TestProcurement(TestMrpCommon):
         ])
 
         # Check that the MO is created and remains in 'draft' state.
-        production = self.env['mrp.production'].search([('product_id', '=', product.id)])
+        production = self.env['mrp.production'].search_fetch([('product_id', '=', product.id)])
         self.assertEqual(len(production), 1, "The manufacturing order was not automatically created.")
         self.assertFalse(production.move_raw_ids)
         self.assertFalse(production.workorder_ids)
@@ -628,7 +628,7 @@ class TestProcurement(TestMrpCommon):
             line.product_uom_qty = 1
         mo_form.save()  # should trigger orderpoint to create and confirm 3rd MO
 
-        mo3 = self.env['mrp.production'].search([
+        mo3 = self.env['mrp.production'].search_fetch([
             ('product_id', '=', product_4.id),
             ('state', '=', 'confirmed')
         ])
@@ -726,7 +726,7 @@ class TestProcurement(TestMrpCommon):
             'warehouse_id': self.warehouse_1,
             'partner_id': vendor.id,
         })
-        customer_move = self.env['stock.move'].search([('reference_ids', '=', reference.id), ('picking_type_id', '=', self.picking_type_out.id)])
+        customer_move = self.env['stock.move'].search_fetch([('reference_ids', '=', reference.id), ('picking_type_id', '=', self.picking_type_out.id)])
         manufacturing_order = self.env['mrp.production'].search([('product_id', '=', product.id)])
         self.assertTrue(manufacturing_order, 'No manufacturing order created.')
 
@@ -820,8 +820,8 @@ class TestProcurement(TestMrpCommon):
         })
 
         (op1 | op2)._procure_orderpoint_confirm()
-        mo1 = self.env['mrp.production'].search([('product_id', '=', product_1.id)])
-        mo3 = self.env['mrp.production'].search([('product_id', '=', product_3.id)])
+        mo1 = self.env['mrp.production'].search_fetch([('product_id', '=', product_1.id)])
+        mo3 = self.env['mrp.production'].search_fetch([('product_id', '=', product_3.id)])
 
         self.assertEqual(len(mo1), 1)
         self.assertEqual(len(mo3), 1)
@@ -1128,7 +1128,7 @@ class TestProcurement(TestMrpCommon):
                 })],
             })
             picking.action_confirm()
-            mo = self.env['mrp.production'].search([('product_id', '=', product_1.id)])
+            mo = self.env['mrp.production'].search_fetch([('product_id', '=', product_1.id)])
             self.assertEqual(len(mo), i, 'One mo per picking')
             self.assertEqual(delta_hours(mo[i - 1].date_finished - mo[i - 1].date_start), 24)
 
@@ -1158,7 +1158,7 @@ class TestProcurement(TestMrpCommon):
                 },
             ),
         ])
-        manufacturing_orders = self.env['mrp.production'].search([('product_id', '=', self.product_4.id)])
+        manufacturing_orders = self.env['mrp.production'].search_fetch([('product_id', '=', self.product_4.id)])
         self.assertEqual(len(manufacturing_orders), 2, 'Expected 2 manufacturing orders to be created.')
         self.assertEqual(manufacturing_orders.mapped('product_qty'), [200.0, 200.0], 'Each manufacturing order should have a quantity of 200.0, as defined by the BoM batch size.')
 
@@ -1478,10 +1478,10 @@ class TestProcurement(TestMrpCommon):
         ])
 
         # Verify that each MO has the correct state based on its operation type configuration
-        mo_draft = self.env['mrp.production'].search([('product_id', '=', self.product_4.id)], limit=1)
+        mo_draft = self.env['mrp.production'].search_fetch([('product_id', '=', self.product_4.id)], limit=1)
         self.assertFalse(mo_draft.picking_type_id.auto_confirm_production)
         self.assertEqual(mo_draft.state, 'draft', "MO should be in draft state because auto_confirm_production is disabled on the operation type.")
 
-        mo_confirm = self.env['mrp.production'].search([('product_id', '=', self.product_6.id)], limit=1)
+        mo_confirm = self.env['mrp.production'].search_fetch([('product_id', '=', self.product_6.id)], limit=1)
         self.assertTrue(mo_confirm.picking_type_id.auto_confirm_production)
         self.assertEqual(mo_confirm.state, 'confirmed', "MO should be in confirmed state because auto_confirm_production is enabled on the operation type.")

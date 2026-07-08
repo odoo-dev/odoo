@@ -38,7 +38,7 @@ class TestPosCashDifferenceTax(CommonPosTest):
 
     def test_no_tax_on_counterpart(self):
         self.session._post_statement_difference(10)
-        st_line = self.env['account.bank.statement.line'].search(
+        st_line = self.env['account.bank.statement.line'].search_fetch(
             [('pos_session_id', '=', self.session.id)], order='id desc', limit=1)
         self.assertRecordValues(st_line.move_id.line_ids, [
             {'balance': 10.0, 'account_id': self.cash_journal.default_account_id.id},

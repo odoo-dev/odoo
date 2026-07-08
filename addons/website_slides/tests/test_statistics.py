@@ -64,7 +64,7 @@ class TestChannelStatistics(common.SlidesCase):
         channel_publisher._action_add_members(self.user_emp.partner_id)
         channel_emp = self.channel.with_user(self.user_emp)
 
-        members = self.env['slide.channel.partner'].search([('channel_id', '=', self.channel.id)])
+        members = self.env['slide.channel.partner'].search_fetch([('channel_id', '=', self.channel.id)])
         member_emp = members.filtered(lambda m: m.partner_id == self.user_emp.partner_id)
         member_publisher = members.filtered(lambda m: m.partner_id == self.user_officer.partner_id)
 

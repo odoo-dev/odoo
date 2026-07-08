@@ -16,7 +16,7 @@ def _split_partial_sale_order_lines(env):
         Domain('state', '=', 'sale'),
         Domain('delivery_status', '=', 'partial')
     ])
-    partial_orders = env['sale.order'].search([to_adjust])
+    partial_orders = env['sale.order'].search_fetch([to_adjust])
     lines_to_create = []
 
     for line in partial_orders.order_line:
@@ -37,7 +37,7 @@ def _create_pickings_for_open_sale_orders(env):
         Domain('state', '=', 'sale'),
         Domain('delivery_status', '!=', 'full')
     ])
-    open_sale_orders = env['sale.order'].search([to_adjust])
+    open_sale_orders = env['sale.order'].search_fetch([to_adjust])
     partial_orders = open_sale_orders.filtered(lambda o: o.delivery_status == 'partial')
     empty_lines = open_sale_orders.order_line.filtered(
         lambda l: l._is_product_line() and l.product_uom_id.is_zero(l.qty_delivered)

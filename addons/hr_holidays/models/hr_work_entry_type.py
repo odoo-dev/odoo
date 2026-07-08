@@ -147,7 +147,7 @@ class HrWorkEntryType(models.Model):
 
         employee_id = self.env.context.get('default_employee_id', self.env.context.get('employee_id')) or self.env.user.employee_id.id
 
-        work_entry_types = self.env['hr.leave.allocation'].search([
+        work_entry_types = self.env['hr.leave.allocation'].search_fetch([
             ('employee_id', '=', employee_id),
             ('state', '=', 'validate'),
             ('date_from', '<=', date_to),
@@ -173,7 +173,7 @@ class HrWorkEntryType(models.Model):
     @api.constrains('include_public_holidays_in_duration')
     def _check_overlapping_public_holidays(self):
         # checking for the current user's company too
-        public_holidays = self.env['resource.calendar.leaves'].search([
+        public_holidays = self.env['resource.calendar.leaves'].search_fetch([
             ('resource_id', '=', False),
             ('company_id', '=', self.env.company.id),
         ])
@@ -182,7 +182,7 @@ class HrWorkEntryType(models.Model):
         min_datetime = fields.Datetime.to_string(datetime.now().replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0))
         max_datetime = fields.Datetime.to_string(datetime.now().replace(month=12, day=31, hour=23, minute=59, second=59))
 
-        leaves = self.env['hr.leave'].search([
+        leaves = self.env['hr.leave'].search_fetch([
             ('work_entry_type_id', 'in', self.ids),
             ('date_from', '>=', min_datetime),
             ('date_from', '<=', max_datetime),

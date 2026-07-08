@@ -178,7 +178,7 @@ class TestReportSession(TestPoSCommon):
         for payment in order_payment:
             payment.with_context(**payment_context).check()
 
-        order_report_lines = self.env['report.pos.order'].sudo().search([('order_id', '=', order.id)])
+        order_report_lines = self.env['report.pos.order'].sudo().search_fetch([('order_id', '=', order.id)])
 
         self.assertEqual(len(order_report_lines), 2)
         self.assertEqual(order_report_lines[0].payment_method_id.id, order_report_lines[1].payment_method_id.id)

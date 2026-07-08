@@ -456,7 +456,7 @@ class TestSurveyInternals(common.TestSurveyCommon, MailCase):
         # Save an answer with no selected choice but with a comment.
         survey_user._save_lines(question, answer=[], comment='This is only a comment')
 
-        answer_line = self.env['survey.user_input.line'].search([
+        answer_line = self.env['survey.user_input.line'].search_fetch([
             ('user_input_id', '=', survey_user.id),
             ('question_id', '=', question.id)
         ])

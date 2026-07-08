@@ -28,7 +28,7 @@ class TestSearch(TestOrmPartnerCommon, TransactionCase):
         self.assertTrue(partners_offset)
         self.assertIsRecordset(partners_offset, 'test_orm.partner')
 
-        partners_slice = self.env['test_orm.partner'].search([('id', 'in', self.partners.ids)])[5:]
+        partners_slice = self.env['test_orm.partner'].search_fetch([('id', 'in', self.partners.ids)])[5:]
         self.assertTrue(partners_slice)
         self.assertIsRecordset(partners_slice, 'test_orm.partner')
 
@@ -41,7 +41,7 @@ class TestSearch(TestOrmPartnerCommon, TransactionCase):
         self.assertTrue(partners_limit)
         self.assertIsRecordset(partners_limit, 'test_orm.partner')
 
-        partners_slice = self.env['test_orm.partner'].search([('id', 'in', self.partners.ids)])[:5]
+        partners_slice = self.env['test_orm.partner'].search_fetch([('id', 'in', self.partners.ids)])[:5]
         self.assertTrue(partners_slice)
         self.assertIsRecordset(partners_slice, 'test_orm.partner')
 
@@ -54,7 +54,7 @@ class TestSearch(TestOrmPartnerCommon, TransactionCase):
         self.assertTrue(partners_offset_limit)
         self.assertIsRecordset(partners_offset_limit, 'test_orm.partner')
 
-        partners_slice = self.env['test_orm.partner'].search([('id', 'in', self.partners.ids)])[3:10]
+        partners_slice = self.env['test_orm.partner'].search_fetch([('id', 'in', self.partners.ids)])[3:10]
         self.assertTrue(partners_slice)
         self.assertIsRecordset(partners_slice, 'test_orm.partner')
 
@@ -2058,11 +2058,11 @@ class TestFlushSearch(TransactionCase):
             'tag_ids': [Command.create({'name': 'tag1'})],
         })
 
-        self.assertEqual(self.env['test_orm.custom.view'].search([]).sum_quantity, 10)
+        self.assertEqual(self.env['test_orm.custom.view'].search_fetch([]).sum_quantity, 10)
         # _depends doesn't invalidate the cache of the model, should it ?
         self.env['test_orm.custom.view'].invalidate_model()
         child.quantity = 25
-        self.assertEqual(self.env['test_orm.custom.view'].search([]).sum_quantity, 25)
+        self.assertEqual(self.env['test_orm.custom.view'].search_fetch([]).sum_quantity, 25)
 
     def test_depends_with_table_query_model(self):
         parent = self.env['test_orm.any.parent'].create({'name': 'parent'})
@@ -2072,11 +2072,11 @@ class TestFlushSearch(TransactionCase):
             'tag_ids': [Command.create({'name': 'tag1'})],
         })
 
-        self.assertEqual(self.env['test_orm.custom.table_query'].search([]).sum_quantity, 10)
+        self.assertEqual(self.env['test_orm.custom.table_query'].search_fetch([]).sum_quantity, 10)
         # _depends doesn't invalidate the cache of the model, should it ?
         self.env['test_orm.custom.table_query'].invalidate_model()
         child.quantity = 25
-        self.assertEqual(self.env['test_orm.custom.table_query'].search([]).sum_quantity, 25)
+        self.assertEqual(self.env['test_orm.custom.table_query'].search_fetch([]).sum_quantity, 25)
 
     def test_depends_with_table_query_model_sql(self):
         parent = self.env['test_orm.any.parent'].create({'name': 'parent'})
@@ -2086,11 +2086,11 @@ class TestFlushSearch(TransactionCase):
             'tag_ids': [Command.create({'name': 'tag1'})],
         })
 
-        self.assertEqual(self.env['test_orm.custom.table_query_sql'].search([]).sum_quantity, 10)
+        self.assertEqual(self.env['test_orm.custom.table_query_sql'].search_fetch([]).sum_quantity, 10)
         # _depends doesn't invalidate the cache of the model, should it ?
         self.env['test_orm.custom.table_query_sql'].invalidate_model()
         child.quantity = 25
-        self.assertEqual(self.env['test_orm.custom.table_query_sql'].search([]).sum_quantity, 25)
+        self.assertEqual(self.env['test_orm.custom.table_query_sql'].search_fetch([]).sum_quantity, 25)
 
 
 class TestDatePartNumber(TransactionExpressionCase):

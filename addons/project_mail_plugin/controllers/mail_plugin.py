@@ -84,7 +84,7 @@ class MailPluginController(mail_plugin.MailPluginController):
 
     def _search_and_format_tasks(self, domain, limit=30):
         task_count = request.env['project.task'].search_count(domain)
-        partner_tasks = request.env['project.task'].search(
+        partner_tasks = request.env['project.task'].search_fetch(
             domain,
             limit=limit,
             # state start with number to be able to sort based on their value

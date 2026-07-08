@@ -129,7 +129,7 @@ class TestPosStockFlow(CommonPosStockTest):
         })
 
         self.assertEqual(order.state, 'paid')
-        tracked_line = self.env['stock.move.line'].search(
+        tracked_line = self.env['stock.move.line'].search_fetch(
             [('product_id', '=', self.ten_dollars_with_10_incl.product_variant_id.id)])
         untracked_line = order.picking_ids.move_line_ids - tracked_line
         self.assertEqual(tracked_line.lot_id, lot)
@@ -515,7 +515,7 @@ class TestPosStockFlow(CommonPosStockTest):
             ],
         })
         self.pos_config_usd.current_session_id.action_pos_session_closing_control()
-        purchase_order = self.env['purchase.order'].search([], limit=1)
+        purchase_order = self.env['purchase.order'].search_fetch([], limit=1)
         self.assertEqual(purchase_order.order_line.product_qty, 1)
         self.assertEqual(purchase_order.order_line.product_id.id,
                         self.ten_dollars_with_15_incl.product_variant_id.id)
@@ -628,7 +628,7 @@ class TestPosStockFlow(CommonPosStockTest):
             'is_refund': True,
         }]
         self.env['pos.order'].sync_from_ui(refund_values)
-        refunded_order_line = self.env['pos.order.line'].search([('product_id', '=', product.id), ('qty', '=', -2)])
+        refunded_order_line = self.env['pos.order.line'].search_fetch([('product_id', '=', product.id), ('qty', '=', -2)])
         self.assertEqual(refunded_order_line.total_cost, -20)
 
     def test_ship_later_total_cost_fallback_to_standard_price(self):
@@ -1028,7 +1028,7 @@ class TestPosStockFlow(CommonPosStockTest):
         order_no_invoice.partner_id = self.partner
         order_no_invoice.action_pos_order_invoice()
 
-        reversal_move = self.env['account.move'].search([('reversed_pos_order_id', '=', order_no_invoice.id)], limit=1)
+        reversal_move = self.env['account.move'].search_fetch([('reversed_pos_order_id', '=', order_no_invoice.id)], limit=1)
         self.assertEqual(len(reversal_move.line_ids), 5)
         for line in order_no_invoice.account_move.line_ids:
             reverse_line = reversal_move.line_ids.filtered(lambda l: l.account_id == line.account_id)
@@ -1037,7 +1037,7 @@ class TestPosStockFlow(CommonPosStockTest):
 
         refund_order_no_invoice.partner_id = self.partner
         refund_order_no_invoice.action_pos_order_invoice()
-        reversal_move = self.env['account.move'].search([('reversed_pos_order_id', '=', refund_order_no_invoice.id)], limit=1)
+        reversal_move = self.env['account.move'].search_fetch([('reversed_pos_order_id', '=', refund_order_no_invoice.id)], limit=1)
         self.assertEqual(len(reversal_move.line_ids), 5)
         for line in refund_order_no_invoice.account_move.line_ids:
             reverse_line = reversal_move.line_ids.filtered(lambda l: l.account_id == line.account_id)
@@ -1080,7 +1080,7 @@ class TestPosStockFlow(CommonPosStockTest):
                 })
             ],
         })
-        ptavs = self.env["product.template.attribute.value"].search(
+        ptavs = self.env["product.template.attribute.value"].search_fetch(
             [("product_attribute_value_id", "in", chair_fabrics_attribute.value_ids.ids)]
         ).sorted("id")
         self.pos_config_usd.open_ui()

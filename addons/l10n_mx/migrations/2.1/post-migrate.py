@@ -7,7 +7,7 @@ def migrate(cr, version):
     # Migrate wrong data tag on account cuenta102_02
     debit_tag = env.ref('l10n_mx.tag_debit_balance_account')
     credit_tag = env.ref('l10n_mx.tag_credit_balance_account')
-    account_102_ids = env['ir.model.data'].search([
+    account_102_ids = env['ir.model.data'].search_fetch([
         ('name', 'ilike', '%_cuenta102_02'),
         ('model', '=', 'account.account'),
     ]).mapped('res_id')

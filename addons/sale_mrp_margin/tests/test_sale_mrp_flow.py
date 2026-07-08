@@ -209,7 +209,7 @@ class TestSaleMrpFlow(test_sale_mrp_flow.TestSaleMrpFlowCommon):
         self.component_b.standard_price = 20
         kit_x.button_bom_cost()
 
-        stock_location = self.env['stock.warehouse'].search(
+        stock_location = self.env['stock.warehouse'].search_fetch(
             [('company_id', '=', self.env.company.id)], limit=1,
         ).lot_stock_id
         self.env['stock.quant']._update_available_quantity(self.component_a, stock_location, 100)

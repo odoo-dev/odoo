@@ -23,7 +23,7 @@ class TestRefundFlows(StripeCommon, PaymentHttpCommon):
         ):
             source_tx._refund()
         self._run_processing()
-        refund_tx = self.env["payment.transaction"].search([
+        refund_tx = self.env["payment.transaction"].search_fetch([
             ("source_transaction_id", "=", source_tx.id)
         ])
         self.assertEqual(refund_tx.provider_reference, self.refund_object["id"])

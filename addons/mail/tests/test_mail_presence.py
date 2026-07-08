@@ -33,11 +33,11 @@ class TestMailPresence(HttpCase):
         self.env["mail.presence"].search([("user_id", "=", bob.id)]).unlink()
         self.env.cr.precommit.run()  # trigger the creation of bus.bus records
         presence_channel = json_dump(channel_with_db(self.env.cr.dbname, (bob, "presence")))
-        presence_bus_notif = self.env["bus.bus"].sudo().search(
+        presence_bus_notif = self.env["bus.bus"].sudo().search_fetch(
             [("channel", "=", presence_channel)], order="id desc", limit=1,
         )
         user_channel = json_dump(channel_with_db(self.env.cr.dbname, bob))
-        user_bus_notif = self.env["bus.bus"].sudo().search(
+        user_bus_notif = self.env["bus.bus"].sudo().search_fetch(
             [("channel", "=", user_channel)], order="id desc", limit=1,
         )
         self.assertEqual(

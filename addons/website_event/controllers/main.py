@@ -204,7 +204,7 @@ class WebsiteEventController(http.Controller):
         if '.' not in page:
             page = 'website_event.%s' % page
 
-        view = request.env["website.event.menu"].sudo().search([
+        view = request.env["website.event.menu"].sudo().search_fetch([
             ("event_id", "=", event.id),
             '|',
               ("view_id.key", "ilike", page),

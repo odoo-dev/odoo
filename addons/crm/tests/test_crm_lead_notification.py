@@ -370,11 +370,11 @@ Content-Transfer-Encoding: quoted-printable
             )
 
         # each team should receive all three of their new opportunities and none of the others'
-        team1_leads = self.env['crm.lead'].search([
+        team1_leads = self.env['crm.lead'].search_fetch([
             ('team_id', '=', self.sales_team_1.id),
             ('email_from', 'ilike', 'source.email@customerOfTeam'),
         ])
-        team2_leads = self.env['crm.lead'].search([
+        team2_leads = self.env['crm.lead'].search_fetch([
             ('team_id', '=', team_2.id),
             ('email_from', 'ilike', 'source.email@customerOfTeam'),
         ])

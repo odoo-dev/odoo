@@ -160,7 +160,7 @@ class AccountMove(models.Model):
             supplier_info.findtext('{*}groupMemberTaxNumber/{*}taxpayerId') or
             supplier_info.findtext('{*}supplierTaxNumber/{*}taxpayerId')
         )
-        partner = self.env['res.partner'].search([
+        partner = self.env['res.partner'].search_fetch([
             *self.env['res.partner']._check_company_domain(company),
             ('vat', '=ilike', f'{taxpayer_id}%'),
         ]).filtered(lambda p: (p.l10n_hu_eu_vat or '')[2:] == taxpayer_id)[:1]

@@ -692,7 +692,7 @@ class AccountJournal(models.Model):
             'general': 'account_dashboard',
         }
         onboarding_data = defaultdict(dict)
-        onboarding_progresses = self.env['onboarding.progress'].sudo().search([
+        onboarding_progresses = self.env['onboarding.progress'].sudo().search_fetch([
             ('onboarding_id.route_name', 'in', [*journal_onboarding_map.values()]),
             ('company_id', 'in', self.company_id.ids),
         ])

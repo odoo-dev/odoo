@@ -1765,7 +1765,7 @@ class TestMailgateway(MailGatewayCommon):
             MAIL_TEMPLATE, self.email_from, record_msg.reply_to, cc='',
             subject='Re: Replies to Record', extra=f'In-Reply-To: {record_msg.message_id}',
             msg_id=msgID, target_model='mail.test.simple')
-        incoming_msg = self.env['mail.message'].search([('message_id', '=', msgID)])
+        incoming_msg = self.env['mail.message'].search_fetch([('message_id', '=', msgID)])
         self.assertFalse(res_test)
         self.assertEqual(incoming_msg.model, 'mail.test.simple')
         self.assertEqual(incoming_msg.parent_id, record_msg)
@@ -1777,7 +1777,7 @@ class TestMailgateway(MailGatewayCommon):
             MAIL_TEMPLATE, self.email_from, mail_msg.reply_to, cc='',
             subject='Re: Replies to Record', extra=f'In-Reply-To: {mail_msg.message_id}',
             msg_id=msgID, target_model='mail.test.gateway')
-        incoming_msg = self.env['mail.message'].search([('message_id', '=', msgID)])
+        incoming_msg = self.env['mail.message'].search_fetch([('message_id', '=', msgID)])
         self.assertEqual(len(res_test), 1)
         self.assertEqual(res_test.name, 'Re: Replies to Record')
         self.assertEqual(incoming_msg.model, 'mail.test.gateway')
@@ -2119,7 +2119,7 @@ class TestMailGatewayLoops(MailGatewayCommon):
                 target_model=self.alias_ticket.alias_model_id.model,
             )
 
-        records = self.env['mail.test.ticket'].search([('name', 'ilike', 'Test alias loop %')])
+        records = self.env['mail.test.ticket'].search_fetch([('name', 'ilike', 'Test alias loop %')])
         self.assertEqual(len(records), 6, 'Should have created 6 <mail.test.gateway>')
         self.assertEqual(set(records.mapped('email_from')), {self.email_from},
             msg='Should have automatically filled the email field')

@@ -74,7 +74,7 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
 
         # 5 qty of each product billeable
         self.purchase_order.order_line.qty_received = 5
-        self.assertRecordValues(self.env['account.move'].search(self.wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(self.wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_expense.id, 'debit': 0, 'credit': 5000},
             {'account_id': self.alt_exp_account.id, 'debit': 0, 'credit': 1000},
@@ -98,7 +98,7 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         self.purchase_order.order_line.qty_received = 5
         # set currency != company currency
         self.purchase_order.currency_id = self.other_currency
-        moves = self.env['account.move'].search(self.wizard.create_entries()['domain'])
+        moves = self.env['account.move'].search_fetch(self.wizard.create_entries()['domain'])
         for move in moves:
             self.assertEqual(move.currency_id, self.purchase_order.currency_id)
         self.assertRecordValues(moves.line_ids, [
@@ -115,7 +115,7 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
     def test_analytic_account_accrued_order(self):
         self.purchase_order.order_line.qty_received = 10
 
-        self.assertRecordValues(self.env['account.move'].search(self.wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(self.wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_expense.id, 'debit': 0.0, 'credit': 10000.0, 'analytic_distribution': {str(self.analytic_account_a.id): 80.0, str(self.analytic_account_b.id): 20.0}},
             {'account_id': self.alt_exp_account.id, 'debit': 0.0, 'credit': 2000.0, 'analytic_distribution': {str(self.analytic_account_b.id): 100.0}},
@@ -135,7 +135,7 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         })
         self.purchase_order.order_line.tax_ids = tax_10_included
         self.purchase_order.order_line.qty_received = 5
-        self.assertRecordValues(self.env['account.move'].search(self.wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(self.wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_expense.id, 'debit': 0.0, 'credit': 4545.45},
             {'account_id': self.alt_exp_account.id, 'debit': 0.0, 'credit': 909.09},
@@ -157,7 +157,7 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
             self.wizard.create_entries()
 
         self.purchase_order.order_line.qty_received = 5
-        res = self.env['account.move'].search(self.wizard.create_entries()['domain']).line_ids
+        res = self.env['account.move'].search_fetch(self.wizard.create_entries()['domain']).line_ids
         self.assertRecordValues(res, [
             # reverse move lines
             {'account_id': self.account_expense.id, 'debit': 5000.0, 'credit': 0.0},
@@ -170,7 +170,7 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         ])
 
         self.purchase_order.order_line.qty_received = 0
-        res = self.env['account.move'].search(self.wizard.create_entries()['domain']).line_ids
+        res = self.env['account.move'].search_fetch(self.wizard.create_entries()['domain']).line_ids
         self.assertRecordValues(res, [
             # reverse move lines
             {'account_id': self.account_expense.id, 'debit': 10000.0, 'credit': 0.0},
@@ -193,7 +193,7 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         move.action_post()
         self.purchase_order.order_line.qty_received = 5
         wizard = self.wizard.with_context(accrual_entry_date='2020-01-30')
-        res = self.env['account.move'].search(wizard.create_entries()['domain']).line_ids
+        res = self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids
         self.assertRecordValues(res, [
             # move lines
             {'account_id': self.account_expense.id, 'debit': 0.0, 'credit': 5000.0},
@@ -251,7 +251,7 @@ class TestAccruedPurchaseOrders(AccountTestInvoicingCommon):
         ).create({
             'account_id': self.account_revenue.id,
         })
-        res = self.env['account.move'].search(accrued_wizard.create_entries()['domain']).line_ids
+        res = self.env['account.move'].search_fetch(accrued_wizard.create_entries()['domain']).line_ids
         self.assertRecordValues(res, [
             {'debit': 0.0, 'credit': 90.0},
             {'debit': 90.0, 'credit': 0.0},

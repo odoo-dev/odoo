@@ -77,7 +77,7 @@ class TestOSSBelgium(AccountTestInvoicingCommon):
         original_name = fpos.tax_ids[0].name
         fpos.unlink()
         self.sub_child_company._map_eu_taxes()
-        fpos = self.env['account.fiscal.position'].search([('country_id', '=', another_eu_country.id)], limit=1)
+        fpos = self.env['account.fiscal.position'].search_fetch([('country_id', '=', another_eu_country.id)], limit=1)
         new_name = fpos.tax_ids[0].name
         self.assertEqual(new_name, f"{original_name} (Copy)", "The tax name should be the same as the original one with (Copy) appended to it.")
 
@@ -119,7 +119,7 @@ class TestOSSSpain(AccountTestInvoicingCommon):
         self.ensure_installed('l10n_es')
 
         another_eu_country_code = (self.env.ref('base.europe').country_ids - self.company_data['company'].country_id)[0].code
-        tax_oss = self.env['account.tax'].search([('name', 'ilike', f'%"{another_eu_country_code}"%')], limit=1)
+        tax_oss = self.env['account.tax'].search_fetch([('name', 'ilike', f'%"{another_eu_country_code}"%')], limit=1)
 
         self.assertEqual(tax_oss.l10n_es_type, 'no_sujeto_loc')
 

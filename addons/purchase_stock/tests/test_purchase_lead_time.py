@@ -19,7 +19,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         # Make procurement request from product_1's form view, create procurement and check it's state
         date_planned = fields.Datetime.now() + timedelta(days=10)
         self._make_procurement(self.product, 15.00, date_planned=date_planned)
-        purchase = self.env['purchase.order.line'].search([('product_id', '=', self.product.id)], limit=1).order_id
+        purchase = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.product.id)], limit=1).order_id
 
         # Confirm purchase order
         purchase.button_confirm()
@@ -49,12 +49,12 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         # Make procurement request from product_1's form view, create procurement and check it's state
         date_planned1 = fields.Datetime.now() + timedelta(days=5)
         self._make_procurement(self.product, 10.00, date_planned=date_planned1)
-        purchase1 = self.env['purchase.order.line'].search([('product_id', '=', self.product.id)], limit=1).order_id
+        purchase1 = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.product.id)], limit=1).order_id
 
         # Make procurement request from product_2's form view, create procurement and check it's state
         date_planned2 = fields.Datetime.now() + timedelta(days=10)
         self._make_procurement(self.product_2, 5.00, date_planned=date_planned2)
-        purchase2 = self.env['purchase.order.line'].search([('product_id', '=', self.product_2.id)], limit=1).order_id
+        purchase2 = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.product_2.id)], limit=1).order_id
 
         # Check purchase order is same or not
         self.assertEqual(purchase1, purchase2, 'Purchase orders should be same for the two different product with same vendor.')
@@ -104,11 +104,11 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
             {'name': 'SO002'},
         ])
         self._make_procurement(self.product, 10.00, date_planned=date_planned, procurement_values={'reference_ids': ref1})
-        purchase1 = self.env['purchase.order.line'].search([('product_id', '=', self.product.id)], limit=1).order_id
+        purchase1 = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.product.id)], limit=1).order_id
 
         # Make procurement request from product_2's form view, create procurement and check it's state
         self._make_procurement(self.product_2, 5.00, date_planned=date_planned, procurement_values={'reference_ids': ref2})
-        purchase2 = self.env['purchase.order.line'].search([('product_id', '=', self.product_2.id)], limit=1).order_id
+        purchase2 = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.product_2.id)], limit=1).order_id
 
         # Check purchase order is same or not
         self.assertEqual(purchase1, purchase2, 'Purchase orders should be same for the two different product with same vendor.')
@@ -156,12 +156,12 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
             {'name': 'SO002'},
         ])
         self._make_procurement(self.product, 10.00, date_planned=date_planned, procurement_values={'reference_ids': ref1})
-        purchase1 = self.env['purchase.order.line'].search([('product_id', '=', self.product.id)], limit=1).order_id
+        purchase1 = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.product.id)], limit=1).order_id
 
         # Make procurement request from product_2's form view, create procurement and check it's state
         date_planned = fields.Datetime.now() + timedelta(days=3)
         self._make_procurement(self.product_2, 5.00, date_planned=date_planned, procurement_values={'reference_ids': ref2})
-        purchase2 = self.env['purchase.order.line'].search([('product_id', '=', self.product_2.id)], limit=1).order_id
+        purchase2 = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.product_2.id)], limit=1).order_id
 
         self.assertEqual(purchase1, purchase2, 'Purchase orders should be same for the two different product with same vendor.')
 
@@ -201,7 +201,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         })
 
         move_1._action_confirm()
-        po_line = self.env['purchase.order.line'].search([
+        po_line = self.env['purchase.order.line'].search_fetch([
             ('product_id', '=', product_1.id),
         ])
         self.assertEqual(len(po_line), 1, 'the purchase order line is not created')
@@ -217,7 +217,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         })
 
         move_2._action_confirm()
-        po_line = self.env['purchase.order.line'].search([
+        po_line = self.env['purchase.order.line'].search_fetch([
             ('product_id', '=', product_1.id),
         ])
         self.assertEqual(len(po_line), 1, 'the purchase order lines should be merged')
@@ -259,7 +259,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
             self.t_shirt, 5, self.uom, self.warehouse.lot_stock_id,
             self.t_shirt.name, '/', self.env.company, order_1_values)
         ])
-        purchase_order = self.env['purchase.order.line'].search([('product_id', '=', self.t_shirt.id)], limit=1).order_id
+        purchase_order = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.t_shirt.id)], limit=1).order_id
         self.assertEqual(len(purchase_order.order_line), 1, 'wrong number of order line is created')
         self.assertEqual(purchase_order.order_line.name, t_shirt.display_name + "\n" + "Color (Red)", 'wrong description in po lines')
 
@@ -311,7 +311,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
 
         # First replenishment trigger
         orderpoint.action_replenish()
-        po_line = self.env['purchase.order.line'].search([('product_id', '=', self.product.id)])
+        po_line = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.product.id)])
         self.assertEqual(len(po_line), 1, 'A purchase order line should be created')
         self.assertEqual(po_line.product_qty, 5)
 
@@ -331,7 +331,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
             ('trigger', '=', 'manual'),
         ])
         orderpoint.action_replenish()
-        po_line = self.env['purchase.order.line'].search([('product_id', '=', self.product.id)])
+        po_line = self.env['purchase.order.line'].search_fetch([('product_id', '=', self.product.id)])
         self.assertEqual(len(po_line), 1, 'The PO line should be reused, not duplicated')
         self.assertEqual(po_line.product_qty, 8, 'The PO line quantity should be updated')
 
@@ -439,7 +439,7 @@ class TestPurchaseLeadTime(PurchaseTestCommon):
         })
 
         self.env['stock.rule'].run_scheduler()
-        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.partner.id)])
+        purchase_order = self.env['purchase.order'].search_fetch([('partner_id', '=', self.partner.id)])
 
         today = datetime.combine(fields.Datetime.now(), time(12))
         self.assertEqual(purchase_order.date_order, today)

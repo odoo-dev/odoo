@@ -232,7 +232,7 @@ class ProjectTaskType(models.Model):
     # This method should be called once a day by the scheduler
     @api.model
     def _send_rating_all(self):
-        stages = self.search([
+        stages = self.search_fetch([
             ('rating_active', '=', True),
             ('rating_status', '=', 'periodic'),
             ('rating_request_deadline', '<=', fields.Datetime.now())

@@ -262,7 +262,7 @@ class TestAccountAccount(TestAccountMergeCommon):
         })
         self.assertEqual(new_account.account_type, existing_account.account_type)
         # account_type should not be altered
-        alternate_account = self.env['account.account'].search([
+        alternate_account = self.env['account.account'].search_fetch([
             ('account_type', '!=', existing_account.account_type),
             ('company_ids', '=', self.company_data['company'].id),
         ], limit=1)

@@ -18,7 +18,7 @@ class TestUi(HttpCase, SalesTeamCommon):
 
         self.start_tour("/odoo", "create_crm_team_tour", login="salesmanager")
 
-        created_team = self.env["crm.team"].search([("name", "=", "My CRM Team")])
+        created_team = self.env["crm.team"].search_fetch([("name", "=", "My CRM Team")])
         self.assertTrue(bool(created_team))
         self.assertEqual(
             created_team.member_ids,

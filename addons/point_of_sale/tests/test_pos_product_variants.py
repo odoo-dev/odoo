@@ -310,7 +310,7 @@ class TestPoSProductVariants(ProductVariantsCommon, TestPointOfSaleHttpCommon):
             'attribute_id': self.color_attribute.id,
             'value_ids': [Command.set([self.color_attribute_blue.id])],
         })
-        product_S_blue = self.env["product.product"].search([("product_tmpl_id", "=", product_template.id)])[0]
+        product_S_blue = self.env["product.product"].search_fetch([("product_tmpl_id", "=", product_template.id)])[0]
         self.assertEqual(len(product_S_blue.product_template_variant_value_ids), 1)  # Size S (only size varies)
         self.assertEqual(len(product_S_blue.product_template_attribute_value_ids), 2)  # Attributes: S, blue
         product_S_blue.barcode = "TEST123"

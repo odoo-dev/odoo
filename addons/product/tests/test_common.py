@@ -21,7 +21,7 @@ class TestProduct(ProductCommon):
             self.pricelist,
         )
         self.assertEqual(
-            self.env['res.partner'].search([]).property_product_pricelist,
+            self.env['res.partner'].search_fetch([]).property_product_pricelist,
             self.pricelist,
         )
         self.assertEqual(self.pricelist.currency_id.name, self.currency.name)

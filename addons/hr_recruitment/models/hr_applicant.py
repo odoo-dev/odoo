@@ -1022,7 +1022,7 @@ class HrApplicant(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('hr.open_view_employee_list')
         employee = self.env['hr.employee'].with_context(clean_context(self.env.context)).create(self._get_employee_create_vals())
         action['res_id'] = employee.id
-        employee_attachments = self.env['ir.attachment'].search([('res_model', '=','hr.employee'), ('res_id', '=', employee.id)])
+        employee_attachments = self.env['ir.attachment'].search_fetch([('res_model', '=','hr.employee'), ('res_id', '=', employee.id)])
         unique_attachments = self.attachment_ids.filtered(
             lambda attachment: attachment.checksum not in employee_attachments.mapped('checksum')
         )

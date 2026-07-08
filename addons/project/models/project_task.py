@@ -456,7 +456,7 @@ class ProjectTask(models.Model):
     @api.depends('user_ids')
     def _compute_personal_stage_id(self):
         # An user may only access his own 'personal stage' and there can only be one pair (user, task_id)
-        personal_stages = self.env['project.task.stage.personal'].search([('user_id', '=', self.env.uid), ('task_id', 'in', self.ids)])
+        personal_stages = self.env['project.task.stage.personal'].search_fetch([('user_id', '=', self.env.uid), ('task_id', 'in', self.ids)])
         self.personal_stage_id = False
         for personal_stage in personal_stages:
             personal_stage.task_id.personal_stage_id = personal_stage

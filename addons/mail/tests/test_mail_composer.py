@@ -231,7 +231,7 @@ class TestMailComposerForm(TestMailComposer):
             [('email_normalized', '=', self.partner_private_2.email_normalized)]
         )
         self.assertEqual(existing_partner, partner_private_2, 'Should find existing private contact')
-        new_partner = self.env['res.partner'].search(
+        new_partner = self.env['res.partner'].search_fetch(
             [('email_normalized', '=', email_to_new)]
         )
         self.assertEqual(new_partner.type, 'contact', 'Should create a new contact')

@@ -184,7 +184,7 @@ class TestPacking(TestPackingCommon):
         picking.action_assign()
         picking.move_ids.filtered(lambda ml: ml.product_id == self.productA).picked = True
         picking.action_put_in_pack()
-        pack1 = self.env['stock.package'].search([], order='id')[-1]
+        pack1 = self.env['stock.package'].search_fetch([], order='id')[-1]
         picking.write({
             'move_line_ids': [(0, 0, {
                 'product_id': self.productB.id,
@@ -213,7 +213,7 @@ class TestPacking(TestPackingCommon):
         wizard.location_dest_id = shelf2_location.id
         wizard.action_done()
         picking._action_done()
-        pack2 = self.env['stock.package'].search([], order='id')[-1]
+        pack2 = self.env['stock.package'].search_fetch([], order='id')[-1]
         self.assertEqual(pack2.location_id.id, shelf2_location.id, 'The package must be stored  in shelf2')
         self.assertEqual(pack1.location_id.id, shelf1_location.id, 'The package must be stored  in shelf1')
         qp1 = pack2.quant_ids[0]
@@ -874,7 +874,7 @@ class TestPacking(TestPackingCommon):
         action_data = picking.button_validate()
         backorder_wizard = Form(self.env['stock.backorder.confirmation'].with_context(action_data['context'])).save()
         backorder_wizard.process()
-        bo = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
+        bo = self.env['stock.picking'].search_fetch([('backorder_id', '=', picking.id)])
 
         self.assertNotIn(packB, picking.move_line_ids.package_id)
         self.assertEqual(packB, bo.move_line_ids.package_id)
@@ -1293,7 +1293,7 @@ class TestPacking(TestPackingCommon):
         })
         picking.action_put_in_pack()
 
-        quant = self.env['stock.quant'].search([('product_id', '=', self.productA.id), ('location_id', '=', self.stock_location.id)])
+        quant = self.env['stock.quant'].search_fetch([('product_id', '=', self.productA.id), ('location_id', '=', self.stock_location.id)])
         self.assertEqual(quant.available_quantity, 0)
 
         picking.button_validate()
@@ -1354,8 +1354,8 @@ class TestPacking(TestPackingCommon):
         picking.button_validate()
 
         # Check that the quants have their expected location/package/quantities
-        quantA = self.env['stock.quant'].search([('product_id', '=', self.productA.id), ('location_id', '=', loc_2.id)])
-        quantB = self.env['stock.quant'].search([('product_id', '=', self.productB.id), ('location_id', '=', loc_2.id)])
+        quantA = self.env['stock.quant'].search_fetch([('product_id', '=', self.productA.id), ('location_id', '=', loc_2.id)])
+        quantB = self.env['stock.quant'].search_fetch([('product_id', '=', self.productB.id), ('location_id', '=', loc_2.id)])
         self.assertEqual(pack.location_id.id, loc_2.id, "Package should have been moved to Location B.")
         self.assertEqual(quantA.quantity, 5, "All 5 units of product A should be in location B")
         self.assertEqual(quantA.package_id.id, False, "There should be no package for product A as it was removed in the move.")
@@ -1539,7 +1539,7 @@ class TestPacking(TestPackingCommon):
             })],
         })
         (pack_1 | pack_2).location_id = self.shelf_1
-        moves = self.env['stock.move'].search([
+        moves = self.env['stock.move'].search_fetch([
             ('location_id', '=', self.stock_location.id),
             ('location_dest_id', '=', self.shelf_1.id),
             ('reference', '=', 'Package manually relocated'),
@@ -1597,7 +1597,7 @@ class TestPacking(TestPackingCommon):
         self.assertRecordValues(picking.move_ids, [
             {'product_id': self.productA.id, 'product_uom_qty': 8, 'quantity': 0},
         ])
-        backorder = self.env['stock.picking'].search([('backorder_id', '=', picking.id)])
+        backorder = self.env['stock.picking'].search_fetch([('backorder_id', '=', picking.id)])
         self.assertRecordValues(backorder.move_ids.sorted('product_id'), [
             {'product_id': self.productA.id, 'product_uom_qty': 2, 'quantity': 0},
             {'product_id': self.productB.id, 'product_uom_qty': 10, 'quantity': 0},
@@ -1799,7 +1799,7 @@ class TestPackagePropagation(TestPackingCommon):
         picking.move_ids.move_line_ids.quantity = 1
         picking.button_validate()
         self.assertEqual(picking.state, 'done')
-        pack_lines = self.env['stock.picking'].search([
+        pack_lines = self.env['stock.picking'].search_fetch([
             ('product_id', '=', self.productA.id),
             ('location_id', '=', self.pack_location.id),
         ]).move_line_ids

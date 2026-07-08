@@ -98,7 +98,7 @@ class TestDisableSnippetsAssets(TransactionCase):
         return self.IrAsset.search([('path', '=', 'website/static/src/snippets/' + snippet_id + '/' + asset_version + '.' + asset_type)], limit=1)
 
     def _get_active_snippets_assets(self):
-        return self.IrAsset.search([('path', 'like', 'snippets'), ('active', '=', True)]).mapped('path')
+        return self.IrAsset.search_fetch([('path', 'like', 'snippets'), ('active', '=', True)]).mapped('path')
 
 
 HOMEPAGE_UP_TO_DATE = """

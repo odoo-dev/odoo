@@ -94,7 +94,7 @@ class MailMessageSubtype(models.Model):
     def _default_subtypes(self, model_name):
         domain = [('default', '=', True),
                   '|', ('res_model', '=', model_name), ('res_model', '=', False)]
-        subtypes = self.search(domain)
+        subtypes = self.search_fetch(domain)
         internal = subtypes.filtered('internal')
         return subtypes.ids, internal.ids, (subtypes - internal).ids
 

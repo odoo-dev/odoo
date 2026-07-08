@@ -530,7 +530,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             order.action_pos_order_invoice()
 
         # Check the reverse moves, one for the closing entry, one for the statement lines.
-        reverse_closing_entries = self.env['account.move'].search([
+        reverse_closing_entries = self.env['account.move'].search_fetch([
             ('id', '!=', closing_entry.id),
             ('company_id', '=', self.env.company.id),
             ('statement_line_id', '=', False),
@@ -630,7 +630,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             order.action_pos_order_invoice()
 
         # Check the reverse moves, one for the closing entry, one for the statement lines.
-        reverse_closing_entries = self.env['account.move'].search([
+        reverse_closing_entries = self.env['account.move'].search_fetch([
             ('id', '!=', closing_entry.id),
             ('company_id', '=', self.env.company.id),
             ('statement_line_id', '=', False),
@@ -741,8 +741,8 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
 
         current_session.action_pos_session_closing_control()
-        invoices = self.env['account.move'].search([('move_type', '=', 'out_invoice')], order='id desc', limit=1)
-        credit_notes = self.env['account.move'].search([('move_type', '=', 'out_refund')], order='id desc', limit=1)
+        invoices = self.env['account.move'].search_fetch([('move_type', '=', 'out_invoice')], order='id desc', limit=1)
+        credit_notes = self.env['account.move'].search_fetch([('move_type', '=', 'out_refund')], order='id desc', limit=1)
         self.assertEqual(credit_notes.ref, "Reversal of: "+invoices.name)
         self.assertEqual(credit_notes.reversed_entry_id.id, invoices.id)
 
@@ -909,7 +909,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'to_invoice': True
         }
         pos_order_id = self.env['pos.order'].sync_from_ui([product_order])['pos.order'][0]['id']
-        pos_order = self.env['pos.order'].search([('id', '=', pos_order_id)])
+        pos_order = self.env['pos.order'].search_fetch([('id', '=', pos_order_id)])
         payments = pos_order.payment_ids
         self.assertRecordValues(payments.sorted(), [
             {'amount': -50.0, 'payment_method_id': cash_payment_method.id, 'is_change': True},
@@ -1571,7 +1571,7 @@ class TestPointOfSaleFlow(CommonPosTest):
             'to_invoice': False}
 
         self.env['pos.order'].sync_from_ui([product_order])
-        order = self.env['pos.order'].search([])
+        order = self.env['pos.order'].search_fetch([])
         self.assertEqual(order.name, f"/AA - {order.pos_reference.split('-')[-1]} - 1.B")
 
     def test_payment_method_sequence(self):
@@ -1873,7 +1873,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         }
 
         self.env['pos.order'].sync_from_ui([product_order])
-        order = self.env['pos.order'].search([])
+        order = self.env['pos.order'].search_fetch([])
 
         # Verify order name contains interpolated year and month with static parts
         current_year = fields.Datetime.now().year

@@ -40,7 +40,7 @@ class ProductTemplate(models.Model):
 
         # Prepare the delivery stock data.
         DeliveryCarrier = self.env["delivery.carrier"].sudo()
-        available_delivery_methods_sudo = DeliveryCarrier.search([
+        available_delivery_methods_sudo = DeliveryCarrier.search_fetch([
             "|",
             ("website_id", "=", website.id),
             ("website_id", "=", False),

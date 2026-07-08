@@ -652,7 +652,7 @@ class TestPersonalServer(MailCommon):
             self.env['mail.mail'].process_email_queue()
 
         self.assertEqual(self.mail_server_1.owner_limit_count, TEST_LIMIT)
-        mails = self.env["mail.mail"].search(
+        mails = self.env["mail.mail"].search_fetch(
             [('mail_message_id', '=', mail.mail_message_id.id)],
             order='create_date DESC, id DESC',
         )
@@ -689,7 +689,7 @@ class TestPersonalServer(MailCommon):
         with self.mock_smtplib_connection(), self.mock_datetime_and_now("2025-01-01 20:32:27"):
             self.env['mail.mail'].process_email_queue()
         self.assertEqual(self.mail_server_1.owner_limit_count, TEST_LIMIT)
-        mails = self.env["mail.mail"].search([('mail_message_id', '=', mail.mail_message_id.id)])
+        mails = self.env["mail.mail"].search_fetch([('mail_message_id', '=', mail.mail_message_id.id)])
         self.assertEqual(sorted(mails.mapped('state')), ['outgoing', 'sent', 'sent'])
         outgoing = mails.filtered(lambda m: m.state == 'outgoing')
         self.assertEqual(len(outgoing), 1)
@@ -714,7 +714,7 @@ class TestPersonalServer(MailCommon):
             self.env['mail.mail'].process_email_queue()
         self.assertEqual(self.mail_server_1.owner_limit_count, TEST_LIMIT)
         self.assertEqual(other_mail.state, 'outgoing')
-        mails = self.env["mail.mail"].search(
+        mails = self.env["mail.mail"].search_fetch(
             [('mail_message_id', 'in', (mail.mail_message_id.id, other_mail.mail_message_id.id))],
             order='create_date DESC, id DESC',
         )
@@ -738,7 +738,7 @@ class TestPersonalServer(MailCommon):
         with self.mock_smtplib_connection(), self.mock_datetime_and_now("2025-01-01 20:39:29"):
             self.env['mail.mail'].process_email_queue()
         self.assertEqual(self.mail_server_1.owner_limit_count, TEST_LIMIT)
-        mails = self.env["mail.mail"].search([('mail_message_id', 'in', (mail.mail_message_id.id, other_mail.mail_message_id.id))])
+        mails = self.env["mail.mail"].search_fetch([('mail_message_id', 'in', (mail.mail_message_id.id, other_mail.mail_message_id.id))])
         self.assertEqual(
             sorted(mails.mapped('state')),
             ['outgoing', 'sent', 'sent', 'sent', 'sent', 'sent'],
@@ -757,5 +757,5 @@ class TestPersonalServer(MailCommon):
         with self.mock_smtplib_connection(), self.mock_datetime_and_now("2025-01-01 20:42:29"):
             self.env['mail.mail'].process_email_queue()
         self.assertEqual(self.mail_server_1.owner_limit_count, 3)
-        mails = self.env["mail.mail"].search([('mail_message_id', 'in', (mail.mail_message_id.id, other_mail.mail_message_id.id))])
+        mails = self.env["mail.mail"].search_fetch([('mail_message_id', 'in', (mail.mail_message_id.id, other_mail.mail_message_id.id))])
         self.assertEqual(set(mails.mapped('state')), {'sent'})

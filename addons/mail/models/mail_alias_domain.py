@@ -227,7 +227,7 @@ class MailAliasDomain(models.Model):
 
         # search on aliases using the proposed list, as we could have a lot of aliases
         # better than returning 'all alias emails'
-        potential_aliases = self.env['mail.alias'].search([
+        potential_aliases = self.env['mail.alias'].search_fetch([
             '|',
             ('alias_full_name', 'in', filtered_emails),
             '&', ('alias_name', 'in', email_localparts_tocheck), ('alias_incoming_local', '=', True),

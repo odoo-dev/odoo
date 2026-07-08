@@ -40,7 +40,7 @@ class TestStockWarehouseOrderpoint(HttpCase):
             ('rule_ids.action', '=', 'buy'),
             ('company_id', 'in', [False, self.env.company.id]),
         ]
-        routes = self.env['stock.route'].search(route_domain)
+        routes = self.env['stock.route'].search_fetch(route_domain)
         routes.warehouse_ids = False
         orderpoint = self.env['stock.warehouse.orderpoint'].create({'product_id': self.product.id})
         self.assertEqual(routes[0].name, orderpoint.route_id_placeholder)

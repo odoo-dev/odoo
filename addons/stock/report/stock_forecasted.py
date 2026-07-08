@@ -151,7 +151,7 @@ class StockForecasted_Product_Product(models.AbstractModel):
         }
 
     def _get_warehouse(self):
-        return self.env['stock.warehouse'].browse(self.env.context.get('warehouse_id', False)) or self.env['stock.warehouse'].search([['active', '=', True]])[0]
+        return self.env['stock.warehouse'].browse(self.env.context.get('warehouse_id', False)) or self.env['stock.warehouse'].search_fetch([['active', '=', True]])[0]
 
     def _get_report_data(self, product_template_ids=False, product_ids=False):
         assert product_template_ids or product_ids

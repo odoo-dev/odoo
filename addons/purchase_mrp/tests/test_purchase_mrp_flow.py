@@ -515,7 +515,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         picking.action_confirm()
 
         # Find PO
-        purchase = self.env['purchase.order.line'].search([
+        purchase = self.env['purchase.order.line'].search_fetch([
             ('product_id', '=', component.id),
         ]).order_id
         self.assertTrue(purchase)
@@ -607,7 +607,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
             'uom_id': product.uom_id.id,
         })
         # create a need of the product with a picking
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         picking = self.env['stock.picking'].create({
             'location_id': warehouse.lot_stock_id.id,
             'location_dest_id': self.env.ref('stock.stock_location_customers').id,
@@ -630,7 +630,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # switch the product route to manufacture
         product.write({'route_ids': [(3, buy_route.id), (4, manu_route.id)]})
         self.env['stock.warehouse.orderpoint']._get_orderpoint_action()
-        orderpoint_product = self.env['stock.warehouse.orderpoint'].search(
+        orderpoint_product = self.env['stock.warehouse.orderpoint'].search_fetch(
             [('product_id', '=', product.id)])
         self.assertEqual(orderpoint_product.route_id, manu_route, "The route manufacture should be set on the orderpoint")
 
@@ -707,7 +707,7 @@ class TestPurchaseMrpFlow(AccountTestInvoicingCommon):
         # lead_horizon_date should be today + product manufacturing lead time
         self.assertEqual(orderpoint.lead_horizon_date, (fields.Date.today() + timedelta(days=1)))
         orderpoint.action_replenish()
-        mo = self.env['mrp.production'].search([('product_id', '=', product.id)])
+        mo = self.env['mrp.production'].search_fetch([('product_id', '=', product.id)])
         self.assertEqual(mo.product_uom_qty, 5)
         self.assertEqual(mo.date_start.date(), fields.Date.today())
 

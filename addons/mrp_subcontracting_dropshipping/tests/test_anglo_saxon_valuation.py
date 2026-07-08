@@ -119,7 +119,7 @@ class TestSubcontractingDropshippingValuation(ValuationReconciliationTestCommon)
         ])
 
         # return to stock location
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         stock_location = warehouse.lot_stock_id
         return_picking = delivery._create_return()
         return_picking.move_ids[0].product_uom_qty = 1

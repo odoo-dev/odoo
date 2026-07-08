@@ -96,7 +96,7 @@ class TestSaleService(TestCommonSaleTimesheet):
             'product_uom_id': uom_days.id,
         })
         self.sale_order.action_confirm()
-        task = self.env['project.task'].search([('sale_line_id', '=', sale_order_line.id)])
+        task = self.env['project.task'].search_fetch([('sale_line_id', '=', sale_order_line.id)])
 
         # let's log some timesheets
         self.env['account.analytic.line'].create({
@@ -168,7 +168,7 @@ class TestSaleService(TestCommonSaleTimesheet):
             'order_id': self.sale_order.id,
         })
         self.sale_order.action_confirm()
-        task_serv2 = self.env['project.task'].search([('sale_line_id', '=', so_line_deliver_new_task_project.id)])
+        task_serv2 = self.env['project.task'].search_fetch([('sale_line_id', '=', so_line_deliver_new_task_project.id)])
 
         # add a timesheet
         timesheet1 = self.env['account.analytic.line'].create({

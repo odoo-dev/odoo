@@ -84,7 +84,7 @@ class TestPOSLoyaltyHistory(TestPointOfSaleHttpCommon):
         pos_order.confirm_coupon_programs(coupon_data)
 
         def check_coupon(points, history_count):
-            created_card = self.env['loyalty.card'].search([('program_id', '=', ewallet_program.id), ('partner_id', '=', test_partner.id)])
+            created_card = self.env['loyalty.card'].search_fetch([('program_id', '=', ewallet_program.id), ('partner_id', '=', test_partner.id)])
             self.assertEqual(created_card.points, points, "The coupon should have 50 points after the first confirmation.")
             self.assertEqual(len(created_card.history_ids), history_count, "The history should have one entry after the first confirmation.")
 
@@ -217,5 +217,5 @@ class TestPOSLoyaltyHistory(TestPointOfSaleHttpCommon):
             }
         }
         pos_order.confirm_coupon_programs(coupon_data)
-        loyalty_card = self.env['loyalty.card'].search([('code', '=', 'test-code')])
+        loyalty_card = self.env['loyalty.card'].search_fetch([('code', '=', 'test-code')])
         self.assertEqual(loyalty_card.partner_id, test_partner)

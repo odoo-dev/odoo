@@ -156,7 +156,7 @@ class TestRelationOneSessionBinding(PopulateTestCase):
             ref='my_suppliers',
         )
 
-        all_supplier_ids = self.env['populate.model.data'].search([
+        all_supplier_ids = self.env['populate.model.data'].search_fetch([
             ('ref', '=', 'my_suppliers'),
             ('res_model', '=', 'test_populate.supplier'),
         ]).mapped('res_id')
@@ -165,12 +165,12 @@ class TestRelationOneSessionBinding(PopulateTestCase):
         self.assertEqual(set(generator.comodel_ids), set(all_supplier_ids))
 
     def test_ref_with_session_scopes_to_that_session(self):
-        session_a_supplier_ids = self.env['populate.model.data'].search([
+        session_a_supplier_ids = self.env['populate.model.data'].search_fetch([
             ('ref', '=', 'my_suppliers'),
             ('session_id', '=', self.session_a.id),
         ]).mapped('res_id')
 
-        session_b_supplier_ids = self.env['populate.model.data'].search([
+        session_b_supplier_ids = self.env['populate.model.data'].search_fetch([
             ('ref', '=', 'my_suppliers'),
             ('session_id', '=', self.session_b.id),
         ]).mapped('res_id')
@@ -524,12 +524,12 @@ class TestRelationManySessionBinding(PopulateTestCase):
         session_b = self.env['populate.session'].create({'blueprint_id': blueprint.id})
         start_populate(session_b)
 
-        session_a_product_ids = set(self.env['populate.model.data'].search([
+        session_a_product_ids = set(self.env['populate.model.data'].search_fetch([
             ('ref', '=', 'tagged_products'),
             ('session_id', '=', session_a.id),
         ]).mapped('res_id'))
 
-        session_b_product_ids = set(self.env['populate.model.data'].search([
+        session_b_product_ids = set(self.env['populate.model.data'].search_fetch([
             ('ref', '=', 'tagged_products'),
             ('session_id', '=', session_b.id),
         ]).mapped('res_id'))

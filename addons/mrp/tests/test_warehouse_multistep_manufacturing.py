@@ -195,13 +195,13 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         self.assertEqual(production_order.origin, 'SOURCEDOCUMENT', 'The MO origin should be the SO name')
         self.assertNotEqual(production_order.name, 'SOURCEDOCUMENT', 'The MO name should not be the origin of the move')
 
-        picking_stock_preprod = self.env['stock.move'].search([
+        picking_stock_preprod = self.env['stock.move'].search_fetch([
             ('product_id', '=', self.raw_product.id),
             ('location_id', '=', self.stock_location.id),
             ('location_dest_id', '=', self.warehouse_1.pbm_loc_id.id),
             ('picking_type_id', '=', self.warehouse_1.pbm_type_id.id)
         ]).picking_id
-        picking_stock_postprod = self.env['stock.move'].search([
+        picking_stock_postprod = self.env['stock.move'].search_fetch([
             ('product_id', '=', self.finished_product.id),
             ('location_id', '=', self.warehouse_1.sam_loc_id.id),
             ('location_dest_id', '=', self.stock_location.id),
@@ -230,7 +230,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
 
         self.assertFalse(sum(self.env['stock.quant']._gather(self.raw_product, self.warehouse_1.pbm_loc_id).mapped('quantity')))
 
-        picking_stock_postprod = self.env['stock.move'].search([
+        picking_stock_postprod = self.env['stock.move'].search_fetch([
             ('product_id', '=', self.finished_product.id),
             ('location_id', '=', self.warehouse_1.sam_loc_id.id),
             ('location_dest_id', '=', self.stock_location.id),
@@ -400,7 +400,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         self.assertEqual(postprod_picking.location_id, self.warehouse_1.sam_loc_id)
         self.assertEqual(postprod_picking.location_dest_id, self.stock_location)
 
-        byproduct_postprod_move = self.env['stock.move'].search([
+        byproduct_postprod_move = self.env['stock.move'].search_fetch([
             ('product_id', '=', secondary_product.id),
             ('location_id', '=', self.warehouse_1.sam_loc_id.id),
             ('location_dest_id', '=', self.stock_location.id),
@@ -559,7 +559,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
                 - Create an orderpoint for this product specifying the 2nd BoM that must be used,
                 - Check that the MO has been created with the 2nd BoM
         """
-        manufacturing_route = self.env['stock.rule'].search([
+        manufacturing_route = self.env['stock.rule'].search_fetch([
             ('action', '=', 'manufacture')]).route_id
         with Form(self.warehouse_1) as warehouse:
             warehouse.manufacture_steps = 'pbm_sam'
@@ -588,7 +588,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
             'bom_id': bom_2.id,
         })
         self.env['stock.rule'].run_scheduler()
-        mo = self.env['mrp.production'].search([('product_id', '=', self.finished_product.id)])
+        mo = self.env['mrp.production'].search_fetch([('product_id', '=', self.finished_product.id)])
         self.assertEqual(len(mo), 1)
         self.assertEqual(mo.product_qty, 1.0)
         self.assertEqual(mo.bom_id, bom_2)

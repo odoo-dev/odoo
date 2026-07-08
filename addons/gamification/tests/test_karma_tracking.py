@@ -140,7 +140,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
         self.assertEqual(self.test_user.karma, 40)
         self.assertEqual(self.test_user_2.karma, 200)
 
-        consolidated_1 = Tracking.search([
+        consolidated_1 = Tracking.search_fetch([
             ('user_id', '=', self.test_user.id),
             ('tracking_date', '>=', first_day_of_test_date_month),
             ('tracking_date', '<', first_day_of_test_date_next_month),
@@ -151,7 +151,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
         self.assertEqual(consolidated_1.new_value, 20)
         self.assertEqual(consolidated_1.reason, 'Consolidation from 2020-12-01 to 2020-12-31')
 
-        consolidated_2 = Tracking.search([
+        consolidated_2 = Tracking.search_fetch([
             ('user_id', '=', self.test_user_2.id),
             ('tracking_date', '>=', first_day_of_test_date_month),
             ('tracking_date', '<', first_day_of_test_date_next_month),
@@ -182,7 +182,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
         self._create_trackings(self.test_user_2, 10, 20, self.test_date, days_delta=2)
 
         Tracking._process_consolidate(self.test_date)
-        consolidated = Tracking.search([
+        consolidated = Tracking.search_fetch([
             ('user_id', '=', self.test_user_2.id),
             ('tracking_date', '>=', self.first_day_of_test_date_month),
             ('tracking_date', '<', self.first_day_of_test_date_next_month),
@@ -192,7 +192,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
         self.assertEqual(consolidated.old_value, base_test_user_2_karma)
         self.assertEqual(consolidated.new_value, base_test_user_2_karma + 150)  # 15 2-days span, from 1 to 29 included = 15 steps -> 150 karma
 
-        remaining = Tracking.search([
+        remaining = Tracking.search_fetch([
             ('user_id', '=', self.test_user_2.id),
             ('consolidated', '=', False)
         ])
@@ -201,7 +201,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
         self.assertEqual(remaining[-1].tracking_date, self.test_date + relativedelta(months=1, day=1))
 
         Tracking._process_consolidate(self.test_date + relativedelta(months=1))
-        consolidated = Tracking.search([
+        consolidated = Tracking.search_fetch([
             ('user_id', '=', self.test_user_2.id),
             ('consolidated', '=', True),
         ])
@@ -219,7 +219,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
         self.assertFalse(remaining)
 
         # current user not-in-details tests
-        current_user_trackings = Tracking.search([
+        current_user_trackings = Tracking.search_fetch([
             ('user_id', '=', self.test_user.id),
         ])
         self.assertEqual(len(current_user_trackings), 2)
@@ -240,7 +240,7 @@ class TestKarmaTrackingCommon(common.TransactionCase):
 
         user._add_karma(38, source=self.test_user_2)
         self.assertEqual(user.karma, 70)
-        trackings = self.env['gamification.karma.tracking'].sudo().search(
+        trackings = self.env['gamification.karma.tracking'].sudo().search_fetch(
             [('user_id', '=', user.id)], order="create_date ASC, id ASC")
         self.assertEqual(len(trackings), 2)  # create + add_karma
         self.assertEqual(trackings[0].origin_ref, self.test_user)

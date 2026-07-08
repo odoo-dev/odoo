@@ -78,7 +78,7 @@ class MrpRoutingWorkcenter(models.Model):
         for operation in manual_ops:
             operation.time_cycle = operation.time_cycle_manual
         for operation in self - manual_ops:
-            data = self.env['mrp.workorder'].search([
+            data = self.env['mrp.workorder'].search_fetch([
                 ('operation_id', 'in', operation.ids),
                 ('qty_produced', '>', 0),
                 ('state', '=', 'done')],

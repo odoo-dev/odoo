@@ -200,7 +200,7 @@ class TestEventNotifications(TransactionCase):
             "start": datetime(2019, 10, 25, 8, 0),
             "stop": datetime(2019, 10, 25, 10, 0),
         })
-        messages = self.env["mail.message"].search([
+        messages = self.env["mail.message"].search_fetch([
             ("model", "=", event._name),
             ("res_id", "=", event.id),
             ("message_type", "=", "user_notification")

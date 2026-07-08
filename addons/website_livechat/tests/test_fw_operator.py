@@ -56,7 +56,7 @@ class TestFwOperator(ChatbotCase, HttpCase, TestLivechatCommon):
 
     def test_chatbot_removed_after_forward_to_operator(self):
         self.start_tour("/", "website_livechat.chatbot_forward")
-        channel = self.env["discuss.channel"].search(
+        channel = self.env["discuss.channel"].search_fetch(
             [("livechat_channel_id", "=", self.livechat_channel.id)]
         )
         self.assertEqual(self.operator.partner_id, channel.livechat_agent_partner_ids)

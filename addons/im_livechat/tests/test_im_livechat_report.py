@@ -31,7 +31,7 @@ class TestImLivechatReport(TestImLivechatCommon):
             )["channel_id"]
 
         channel = self.env['discuss.channel'].browse(channel_id)
-        self.operator = self.env["im_livechat.channel.member.history"].search([
+        self.operator = self.env["im_livechat.channel.member.history"].search_fetch([
             ("channel_id", "=", channel.id),
             ("livechat_member_type", "=", "agent"),
         ]).partner_id
@@ -54,7 +54,7 @@ class TestImLivechatReport(TestImLivechatCommon):
         self.env['mail.message'].flush_model()
 
     def test_im_livechat_report_channel(self):
-        report = self.env['im_livechat.report.channel'].search([('livechat_channel_id', '=', self.livechat_channel.id)])
+        report = self.env['im_livechat.report.channel'].search_fetch([('livechat_channel_id', '=', self.livechat_channel.id)])
         self.assertEqual(len(report), 1, 'Should have one channel report for this live channel')
         # We have those messages, ordered by creation;
         # 05:05:54: wrong model

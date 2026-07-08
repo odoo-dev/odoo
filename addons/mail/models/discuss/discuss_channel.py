@@ -1027,7 +1027,7 @@ class DiscussChannel(models.Model):
             ]),
         ])
         # sudo: discuss.channel.member - read to get the members of the channel and res.users.settings of the partners
-        members = self.env["discuss.channel.member"].sudo().search(domain)
+        members = self.env["discuss.channel.member"].sudo().search_fetch(domain)
         for member in members:
             recipients_data.append({
                 "active": True,

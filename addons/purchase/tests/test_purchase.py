@@ -750,12 +750,12 @@ class TestPurchase(AccountTestInvoicingCommon):
 
     def test_merge_purchase_order(self):
         PurchaseOrder = self.env['purchase.order']
-        user_1 = self.env['res.users'].search([])[0]
-        user_2 = self.env['res.users'].search([])[1]
-        payment_term_id_1 = self.env['account.payment.term'].search([])[0]
-        payment_term_id_2 = self.env['account.payment.term'].search([])[1]
-        incoterm_id_1 = self.env['account.incoterms'].search([])[0]
-        incoterm_id_2 = self.env['account.incoterms'].search([])[1]
+        user_1 = self.env['res.users'].search_fetch([])[0]
+        user_2 = self.env['res.users'].search_fetch([])[1]
+        payment_term_id_1 = self.env['account.payment.term'].search_fetch([])[0]
+        payment_term_id_2 = self.env['account.payment.term'].search_fetch([])[1]
+        incoterm_id_1 = self.env['account.incoterms'].search_fetch([])[0]
+        incoterm_id_2 = self.env['account.incoterms'].search_fetch([])[1]
 
         po_1 = Form(PurchaseOrder)
         po_1.partner_id = self.partner_a
@@ -935,7 +935,7 @@ class TestPurchase(AccountTestInvoicingCommon):
         result = vendor_bill.action_purchase_matching()
         matching_records = self.env['purchase.bill.line.match'].search(result['domain'])
         result_bill_matching = purchase_order.action_bill_matching()
-        matching_records_from_po = self.env['purchase.bill.line.match'].search(result_bill_matching['domain'])
+        matching_records_from_po = self.env['purchase.bill.line.match'].search_fetch(result_bill_matching['domain'])
 
         # Ensure that calling `action_add_to_po()` on multiple records
         # does not raise a singleton ValueError when the vendor is an individual

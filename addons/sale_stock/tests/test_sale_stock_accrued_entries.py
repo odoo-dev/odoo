@@ -102,7 +102,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
 
         # 2 to invoice on 2020-01-04
         wizard.date = fields.Date.to_date('2020-01-04')
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_revenue.id, 'debit': 60, 'credit': 0},
             {'account_id': wizard.account_id.id, 'debit': 0, 'credit': 60},
@@ -113,7 +113,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
 
         # 5 to invoice on 2020-01-07
         wizard.date = fields.Date.to_date('2020-01-07')
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_revenue.id, 'debit': 150, 'credit': 0},
             {'account_id': wizard.account_id.id, 'debit': 0, 'credit': 150},
@@ -154,7 +154,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'date': '2020-01-02',
         })
         # 2 to invoice on 2020-01-07
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_revenue.id, 'debit': 60, 'credit': 0},
             {'account_id': wizard.account_id.id, 'debit': 0, 'credit': 60},
@@ -170,7 +170,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
 
         # 3 to invoice on 2020-01-07
         wizard.date = fields.Date.to_date('2020-01-07')
-        self.assertRecordValues(self.env['account.move'].search(wizard.create_entries()['domain']).line_ids, [
+        self.assertRecordValues(self.env['account.move'].search_fetch(wizard.create_entries()['domain']).line_ids, [
             # reverse move lines
             {'account_id': self.account_revenue.id, 'debit': 90, 'credit': 0},
             {'account_id': wizard.account_id.id, 'debit': 0, 'credit': 90},
@@ -228,7 +228,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'date': fields.Date.today(),
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_move = self.env['account.move'].search(account_move_domain)
+        account_move = self.env['account.move'].search_fetch(account_move_domain)
         self.assertRecordValues(account_move.line_ids.sorted('id'), [
             # Accrued revenues entries.
             {'account_id': self.account_revenue.id, 'debit': 0, 'credit': 135},
@@ -266,7 +266,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'date': fields.Date.today(),
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_move = self.env['account.move'].search(account_move_domain)
+        account_move = self.env['account.move'].search_fetch(account_move_domain)
         self.assertRecordValues(account_move.line_ids.sorted('id'), [
             # Accrued revenues entries.
             {'account_id': self.account_revenue.id, 'debit': 140, 'credit': 0},
@@ -347,7 +347,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'date': fields.Date.today(),
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_move = self.env['account.move'].search(account_move_domain)
+        account_move = self.env['account.move'].search_fetch(account_move_domain)
         self.assertRecordValues(account_move.line_ids.sorted('id'), [
             # Accrued revenues entries.
             # Following lines refer to invoice lines' price.
@@ -430,7 +430,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'date': fields.Date.today(),
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_move = self.env['account.move'].search(account_move_domain)
+        account_move = self.env['account.move'].search_fetch(account_move_domain)
         self.assertRecordValues(account_move.line_ids.sorted('id'), [
             # Accrued revenues entries.
             {'account_id': self.account_revenue.id, 'debit': 505, 'credit': 0},
@@ -502,7 +502,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'date': fields.Date.today(),
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_move = self.env['account.move'].search(account_move_domain)
+        account_move = self.env['account.move'].search_fetch(account_move_domain)
         self.assertRecordValues(account_move.line_ids.sorted('id'), [
             # Accrued revenues entries.
             {'account_id': self.account_revenue.id, 'debit': 0, 'credit': 70},
@@ -569,7 +569,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'date': fields.Date.today(),
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_move = self.env['account.move'].search(account_move_domain)
+        account_move = self.env['account.move'].search_fetch(account_move_domain)
         self.assertRecordValues(account_move.line_ids.sorted('id'), [
             # Accrued revenues entries.
             {'account_id': self.account_revenue.id, 'debit': 0, 'credit': 360},
@@ -596,7 +596,7 @@ class TestAccruedStockSaleOrders(TestSaleCommon):
             'date': fields.Date.today(),
         })
         account_move_domain = wizard.create_entries()['domain']
-        account_move = self.env['account.move'].search(account_move_domain)
+        account_move = self.env['account.move'].search_fetch(account_move_domain)
         self.assertRecordValues(account_move.line_ids.sorted('id'), [
             # Accrued revenues entries.
             {'account_id': self.account_revenue.id, 'debit': 0, 'credit': 450},

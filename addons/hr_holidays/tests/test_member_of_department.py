@@ -46,6 +46,6 @@ class TestMemberOfDepartment(TransactionCase):
 
     @freeze_time('2026-03-01')
     def test_other_dep_visibility(self):
-        dep_emps = self.env["hr.employee"].with_user(self.duck_guy).search([("member_of_department", "=", True)])
+        dep_emps = self.env["hr.employee"].with_user(self.duck_guy).search_fetch([("member_of_department", "=", True)])
         self.assertTrue(self.duck_guy_emp in dep_emps.employee_id)
         self.assertFalse(self.other_dep_emp in dep_emps.employee_id)

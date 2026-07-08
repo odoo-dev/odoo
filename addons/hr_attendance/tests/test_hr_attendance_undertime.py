@@ -184,7 +184,7 @@ class TestHrAttendanceUndertime(HttpCase):
         overtime = checkin_pm.linked_overtime_ids
         self.assertFalse(overtime.exists(), 'Overtime duration should not exist when an attendance has not been checked out.')
         checkin_pm.write({'check_out': datetime(2021, 1, 4, 18, 0)})
-        overtime = self.env['hr.attendance.overtime.line'].search([('employee_id', '=', self.employee.id), ('date', '=', date(2021, 1, 4))])
+        overtime = self.env['hr.attendance.overtime.line'].search_fetch([('employee_id', '=', self.employee.id), ('date', '=', date(2021, 1, 4))])
         self.assertAlmostEqual(overtime.duration, 1)
         self.assertAlmostEqual(self.employee.total_overtime, 1)
 
@@ -324,7 +324,7 @@ class TestHrAttendanceUndertime(HttpCase):
         self.assertAlmostEqual(m_attendance_2.overtime_hours, 0, 2)
         self.assertAlmostEqual(m_attendance_3.overtime_hours, 1, 2)
 
-        overtime_2 = self.env['hr.attendance.overtime.line'].search([('employee_id', '=', self.employee.id),
+        overtime_2 = self.env['hr.attendance.overtime.line'].search_fetch([('employee_id', '=', self.employee.id),
                                                                 ('date', '=', datetime(2023, 1, 3))])
         # Total overtime for that day : 5 hours
         self.assertEqual(len(overtime_2), 1, "Only one overtime record should be created for that day.")

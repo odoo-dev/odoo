@@ -83,7 +83,7 @@ class TestAccruedSaleOrders(TestSaleCommon):
         # Call accrual wizard at today date because calling in the past will
         # re-compute delivred and invoiced quantities for this date and thus
         # generate nothing since there was no delivered quantity at this time.
-        account_move = self.env["account.move"].search(self.wizard.create_entries()["domain"])
+        account_move = self.env["account.move"].search_fetch(self.wizard.create_entries()["domain"])
         self.assertRecordValues(
             account_move.line_ids,
             [
@@ -112,7 +112,7 @@ class TestAccruedSaleOrders(TestSaleCommon):
         # set currency != company currency
         self.sale_order.currency_id = self.other_currency
         self.assertRecordValues(
-            self.env["account.move"].search(self.wizard.create_entries()["domain"]).line_ids,
+            self.env["account.move"].search_fetch(self.wizard.create_entries()["domain"]).line_ids,
             [
                 # reverse move lines
                 {
@@ -159,7 +159,7 @@ class TestAccruedSaleOrders(TestSaleCommon):
         self.sale_order.order_line.qty_delivered = 10
 
         self.assertRecordValues(
-            self.env["account.move"].search(self.wizard.create_entries()["domain"]).line_ids,
+            self.env["account.move"].search_fetch(self.wizard.create_entries()["domain"]).line_ids,
             [
                 # reverse move lines
                 {
@@ -233,7 +233,7 @@ class TestAccruedSaleOrders(TestSaleCommon):
         self.wizard.create_entries()
         self.assertFalse(self.wizard.display_amount)
         self.assertRecordValues(
-            self.env["account.move"].search(self.wizard.create_entries()["domain"]).line_ids,
+            self.env["account.move"].search_fetch(self.wizard.create_entries()["domain"]).line_ids,
             [
                 # reverse move lines
                 {"account_id": self.account_revenue.id, "debit": 5000, "credit": 0},

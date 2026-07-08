@@ -29,7 +29,7 @@ class BlogBlog(models.Model):
     _CUSTOMER_HEADERS_LIMIT_COUNT = 0  # never use X-Msg-To headers
 
     def _default_sequence(self):
-        return (self.search([], order="sequence desc", limit=1).sequence or 0) + 1
+        return (self.search_fetch([], order="sequence desc", limit=1).sequence or 0) + 1
 
     sequence = fields.Integer("Sequence", default=_default_sequence)
     name = fields.Char('Blog Name', required=True, translate=True)

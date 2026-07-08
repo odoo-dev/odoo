@@ -302,7 +302,7 @@ class AccountJournal(models.Model):
     )
 
     def _compute_has_invalid_statements(self):
-        journals_with_invalid_statements = self.env['account.bank.statement'].search([
+        journals_with_invalid_statements = self.env['account.bank.statement'].search_fetch([
             ('journal_id', 'in', self.ids),
             '|',
             ('is_valid', '=', False),
@@ -897,7 +897,7 @@ class AccountJournal(models.Model):
             'general': 'MISC',
         }
         journal_code_base = prefix_map.get(journal_type)
-        existing_codes = set(self.env['account.journal'].with_context(active_test=False).search([
+        existing_codes = set(self.env['account.journal'].with_context(active_test=False).search_fetch([
             *self.env['account.journal']._check_company_domain(company),
             ('code', '=like', journal_code_base + '%'),
         ]).mapped('code') + (cache or []))

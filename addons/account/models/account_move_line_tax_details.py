@@ -33,7 +33,7 @@ class AccountMoveLine(models.Model):
         :param fallback:            Fallback on an approximated mapping if the mapping failed.
         :return:                    query as an SQL object
         """
-        group_taxes = self.env['account.tax'].search([('amount_type', '=', 'group')])
+        group_taxes = self.env['account.tax'].search_fetch([('amount_type', '=', 'group')])
 
         group_taxes_query_list = []
         for group_tax in group_taxes:

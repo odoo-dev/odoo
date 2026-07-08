@@ -111,7 +111,7 @@ class TestStockMoveInvoice(TestSaleCommon):
         } for x in range(2)])
 
         # Add stock for the serial numbers
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         for lot in serial_numbers:
             self.env['stock.quant']._update_available_quantity(
                 self.product_cable_management_box,
@@ -272,7 +272,7 @@ class TestStockMoveInvoice(TestSaleCommon):
         Check that changing the scheduled date of a move can affect the scheduled date
         of the picking but not its sibling moves.
         """
-        wh = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        wh = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         receipt = self.env['stock.picking'].create({
             'picking_type_id': wh.in_type_id.id,
             'location_id': self.ref('stock.stock_location_customers'),

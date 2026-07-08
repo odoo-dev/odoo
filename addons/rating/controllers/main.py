@@ -88,7 +88,7 @@ class Rating(http.Controller):
         })
 
     def _get_rating_and_record(self, token):
-        rating_sudo = request.env['rating.rating'].sudo().search([('access_token', '=', token)])
+        rating_sudo = request.env['rating.rating'].sudo().search_fetch([('access_token', '=', token)])
         if not rating_sudo:
             raise werkzeug.exceptions.NotFound()
 

@@ -334,7 +334,7 @@ class AccountChartTemplate(models.AbstractModel):
 
     @template(model='account.bank.statement', demo=True)
     def _get_demo_data_statement(self, template_code):
-        bnk_journal = self.env['account.journal'].search(
+        bnk_journal = self.env['account.journal'].search_fetch(
             domain=[
                 *self.env['account.journal']._check_company_domain(self.env.company),
                 ('type', '=', 'bank'),
@@ -602,7 +602,7 @@ class AccountChartTemplate(models.AbstractModel):
         :return: the most appropriate ``account.account`` record found
         """
         return (
-            self.env['account.account'].browse(self.env['ir.model.data'].sudo().search([
+            self.env['account.account'].browse(self.env['ir.model.data'].sudo().search_fetch([
                 ('name', '=', '%d_%s' % (company.id, xml_id)),
                 ('model', '=', 'account.account'),
             ], limit=1).res_id)

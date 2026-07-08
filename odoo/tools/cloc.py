@@ -174,7 +174,7 @@ class Cloc(object):
         # if base_import_module is present
         if env['ir.module.module']._fields.get('imported'):
             domain.append(('imported', '=', False))
-        module_list = env['ir.module.module'].search(domain).mapped('name')
+        module_list = env['ir.module.module'].search_fetch(domain).mapped('name')
 
         for module_name in module_list:
             manifest = odoo.modules.Manifest.for_addon(module_name)

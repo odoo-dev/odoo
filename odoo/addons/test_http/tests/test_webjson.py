@@ -79,7 +79,7 @@ class TestHttpWebJson_1(TestHttpBase):
         self.assertIn("You are not allowed to access", capture.output[0])
 
     def test_webjson_access_error_crm(self):
-        action_crm = self.env['ir.actions.server'].sudo().search([('path', '=', 'crm')])
+        action_crm = self.env['ir.actions.server'].sudo().search_fetch([('path', '=', 'crm')])
         if not action_crm:
             self.skipTest("crm is not installed")
 
@@ -326,7 +326,7 @@ class TestHttpWebJson_1(TestHttpBase):
         self.assertIn(f"start_date={start_date_iso}", res.url)
         # check that we can filter using the date
         last_date = max(
-            env['test_http.stargate'].search([('last_use_date', '!=', False)])
+            env['test_http.stargate'].search_fetch([('last_use_date', '!=', False)])
             .mapped('last_use_date')
         )
         res = self.url_open_json(f'/test_http.stargate?view_type=calendar&domain=[]&start_date={last_date.isoformat()}&end_date=2099-01-01')

@@ -169,7 +169,7 @@ class TestAutomation(TransactionCaseWithUserDemo):
         self.assertTrue(model_field.domain)
         domain = model_field.domain
 
-        allowed_models = self.env['ir.model'].search(domain)
+        allowed_models = self.env['ir.model'].search_fetch(domain)
         self.assertTrue(base_model._name not in allowed_models.mapped('model'), "The base model should not be in the allowed models")
 
     def test_scheduled_action_updates_for_timebased_automations(self):

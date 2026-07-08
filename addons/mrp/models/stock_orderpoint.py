@@ -104,7 +104,7 @@ class StockWarehouseOrderpoint(models.Model):
 
     def _search_effective_bom_id(self, operator, value):
         boms = self.env['mrp.bom'].search([('id', operator, value)])
-        orderpoints = self.env['stock.warehouse.orderpoint'].search([
+        orderpoints = self.env['stock.warehouse.orderpoint'].search_fetch([
             '|',
             ('product_id.variant_bom_ids', 'in', boms.ids),
             ('product_id.bom_ids', 'in', boms.ids),

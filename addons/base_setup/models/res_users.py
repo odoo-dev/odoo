@@ -17,7 +17,7 @@ class ResUsers(models.Model):
             raise UserError(self.env._("You have to install the Discuss application to use this feature."))
 
         # Reactivate already existing users if needed
-        deactivated_users = self.with_context(active_test=False).search([
+        deactivated_users = self.with_context(active_test=False).search_fetch([
             ('active', '=', False),
             '|', ('login', 'in', emails + emails_normalized), ('email_normalized', 'in', emails_normalized)])
         for user in deactivated_users:

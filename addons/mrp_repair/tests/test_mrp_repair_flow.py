@@ -23,7 +23,7 @@ class TestMrpRepairFlow(TestMrpCommon):
         """
         mto_route = self.env.ref('stock.route_warehouse0_mto')
         mto_route.active = True
-        manufacturing_route = self.env['stock.rule'].search([('action', '=', 'manufacture')]).route_id
+        manufacturing_route = self.env['stock.rule'].search_fetch([('action', '=', 'manufacture')]).route_id
         rule = mto_route.rule_ids.filtered(lambda r: r.picking_type_id.code == 'repair_operation')
         rule.procure_method = 'make_to_order'
 

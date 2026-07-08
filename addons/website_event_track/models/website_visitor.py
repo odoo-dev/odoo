@@ -39,7 +39,7 @@ class WebsiteVisitor(models.Model):
         if operator in ('not in', 'not any'):
             raise UserError(self.env._("Unsupported 'Not In' operation on track wishlist visitors"))
 
-        track_visitors = self.env['event.track.visitor'].sudo().search([
+        track_visitors = self.env['event.track.visitor'].sudo().search_fetch([
             ('track_id', operator, operand),
             ('is_wishlisted', '=', True)
         ])

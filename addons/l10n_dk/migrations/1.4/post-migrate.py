@@ -88,7 +88,7 @@ def migrate(cr, version):
         ]
 
     deprecated_account_names = [f'{company.id}_{account}' for account in deprecated_accounts for company in dk_companies]
-    deprecated_account_ids = set(env['ir.model.data'].search([
+    deprecated_account_ids = set(env['ir.model.data'].search_fetch([
         ('model', '=', 'account.account'),
         ('module', '=', 'account'),
         ('name', 'in', deprecated_account_names),

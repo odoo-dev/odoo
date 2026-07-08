@@ -35,7 +35,7 @@ class TestOnchangeProductId(TransactionCase):
         # Required for `uom_id` to be visible in the view
         self.env.user.group_ids += self.env.ref('uom.group_uom')
 
-        uom_id = self.product_uom_model.search([('name', '=', 'Units')])[0]
+        uom_id = self.product_uom_model.search_fetch([('name', '=', 'Units')])[0]
 
         partner_id = self.res_partner_model.create(dict(name="George"))
         fp_id = self.fiscal_position_model.create(dict(name="fiscal position", sequence=1))

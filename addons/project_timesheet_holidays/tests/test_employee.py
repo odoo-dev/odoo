@@ -59,7 +59,7 @@ class TestEmployee(TransactionCase):
         ])
         self.assertFalse(resource_timesheet, 'No timesheet should be created for resource-specific leaves')
 
-        timesheet = self.env['account.analytic.line'].search([
+        timesheet = self.env['account.analytic.line'].search_fetch([
             ('employee_id', '=', employee.id),
             ('global_leave_id', '=', self.global_leave.id),
         ])
@@ -73,7 +73,7 @@ class TestEmployee(TransactionCase):
             'company_id': self.company.id,
             'resource_calendar_id': self.company.resource_calendar_id.id,
         })
-        timesheet = self.env['account.analytic.line'].search([
+        timesheet = self.env['account.analytic.line'].search_fetch([
             ('employee_id', '=', employee2.id),
             ('global_leave_id', '=', self.global_leave.id),
         ])
@@ -100,7 +100,7 @@ class TestEmployee(TransactionCase):
             'company_id': self.company.id,
         })
         employee.write({'resource_calendar_id': self.company.resource_calendar_id.id})
-        timesheet = self.env['account.analytic.line'].search([
+        timesheet = self.env['account.analytic.line'].search_fetch([
             ('employee_id', '=', employee.id),
             ('global_leave_id', '=', self.global_leave.id),
         ])
@@ -116,7 +116,7 @@ class TestEmployee(TransactionCase):
         self.assertFalse(timesheet, 'The timesheet should have been deleted when the employee was archived')
 
         employee.write({'active': True})
-        timesheet = self.env['account.analytic.line'].search([
+        timesheet = self.env['account.analytic.line'].search_fetch([
             ('employee_id', '=', employee.id),
             ('global_leave_id', '=', self.global_leave.id),
         ])
@@ -134,7 +134,7 @@ class TestEmployee(TransactionCase):
 
         # simulate the company of the employee updated is not in the allowed_company_ids of the current user
         employee.with_company(self.env.company).write({'resource_calendar_id': self.company.resource_calendar_id.id})
-        timesheet = self.env['account.analytic.line'].search([
+        timesheet = self.env['account.analytic.line'].search_fetch([
             ('employee_id', '=', employee.id),
             ('global_leave_id', '=', self.global_leave.id),
         ])

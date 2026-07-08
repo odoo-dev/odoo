@@ -199,7 +199,7 @@ class TestPoSSaleStock(TestPosStockHttpCommon, TestPoSSale):
         self.main_pos_config.open_ui()
         self.start_pos_tour('PosSettleOrderRealTime', login="accountman")
         self.main_pos_config.current_session_id.close_session_from_ui()
-        pos_order = self.env['pos.order'].search([], order='id desc', limit=1)
+        pos_order = self.env['pos.order'].search_fetch([], order='id desc', limit=1)
         self.assertEqual(pos_order.picking_ids.move_line_ids[0].quantity, 2)
         self.assertEqual(pos_order.picking_ids.move_line_ids[0].location_id.id, self.shelf_1.id)
         self.assertEqual(pos_order.picking_ids.move_line_ids[1].quantity, 2)
@@ -263,7 +263,7 @@ class TestPoSSaleStock(TestPosStockHttpCommon, TestPoSSale):
         } for name in ('Groupable Product', 'Non Groupable Product')])
         non_groupable_product.uom_id = non_groupable_uom.id
 
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         stock_location = warehouse.lot_stock_id
         non_groupable_lot, groupable_lot = self.env['stock.lot'].create([{
             'name': f'LOT {product.name}',
@@ -509,7 +509,7 @@ class TestPoSSaleStock(TestPosStockHttpCommon, TestPoSSale):
         self.assertEqual(invoice.state, 'posted')
 
     def test_settle_order_with_lot(self):
-        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        warehouse = self.env['stock.warehouse'].search_fetch([('company_id', '=', self.env.company.id)], limit=1)
         stock_location = warehouse.lot_stock_id
         product = self.env['product.product'].create({
             'name': 'Product A',

@@ -28,7 +28,7 @@ class TestPoSRestaurantLoyalty(TestFrontend):
         })
         self.pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour("PosRestaurantRewardStay")
-        order = self.env['pos.order'].search([])
+        order = self.env['pos.order'].search_fetch([])
         self.assertEqual(order.currency_id.round(order.amount_total), 1.98)
 
     def test_loyalty_reward_with_courses(self):

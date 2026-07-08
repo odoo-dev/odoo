@@ -232,7 +232,7 @@ class TestImLivechatMessage(ChatbotCase, MailCommon):
         )
 
         def notifications():
-            message = self.env["mail.message"].sudo().search([], order="id desc", limit=1)
+            message = self.env["mail.message"].sudo().search_fetch([], order="id desc", limit=1)
             return [
                 BusResult(self.env.user, "mail.record/insert"),
                 BusResult(

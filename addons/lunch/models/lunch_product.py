@@ -59,7 +59,7 @@ class LunchProduct(models.Model):
 
     @api.depends_context('uid')
     def _compute_last_order_date(self):
-        all_orders = self.env['lunch.order'].search([
+        all_orders = self.env['lunch.order'].search_fetch([
             ('user_id', '=', self.env.user.id),
             ('product_id', 'in', self.ids),
         ])

@@ -1630,7 +1630,7 @@ class TestMessageToStorePerformance(BaseMailPerformance):
         )
 
         def notifications():
-            message = self.env["mail.message"].search([], order="id desc", limit=1)
+            message = self.env["mail.message"].search_fetch([], order="id desc", limit=1)
             notif_1 = message.notification_ids.filtered(
                 lambda n: n.res_partner_id == self.user_emp_inbox.partner_id
             )

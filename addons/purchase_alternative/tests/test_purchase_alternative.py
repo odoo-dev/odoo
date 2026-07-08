@@ -524,7 +524,7 @@ class TestPurchaseAlternative(TestPurchaseAlternativeCommon):
         alt_po_wiz.copy_products = True
         alt_po_wiz = alt_po_wiz.save()
         alt_po_wiz.action_create_alternative()
-        po_orders = self.env['purchase.order'].search([('partner_id', '=', res_partner_2.id)])
+        po_orders = self.env['purchase.order'].search_fetch([('partner_id', '=', res_partner_2.id)])
         merger_alternative_orders = po_orders[0] | po_orders[1]
         merger_alternative_orders.action_merge()
         self.assertEqual(len(po_orders[0].alternative_po_ids), 4)

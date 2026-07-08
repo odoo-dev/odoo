@@ -130,7 +130,7 @@ class TestInventory(TransactionCase):
             'inventory_quantity': 1
         })
 
-        inventory_quants = self.env['stock.quant'].search(quant_domain)
+        inventory_quants = self.env['stock.quant'].search_fetch(quant_domain)
         self.assertEqual(len(inventory_quants), 1)
         self.assertEqual(inventory_quants.quantity, 0)
 
@@ -276,7 +276,7 @@ class TestInventory(TransactionCase):
         self.assertEqual(len(self.env['stock.quant']._gather(self.product1, self.stock_location)), 2.0)
         self.assertEqual(self.env['stock.quant']._get_available_quantity(self.product1, self.stock_location), 2.0)
         self.env['stock.quant']._quant_tasks()
-        inventory_quant = self.env['stock.quant'].search([
+        inventory_quant = self.env['stock.quant'].search_fetch([
             ('location_id', '=', self.stock_location.id),
             ('product_id', '=', self.product1.id)
         ])
@@ -550,12 +550,12 @@ class TestInventory(TransactionCase):
         self.env['stock.quant']._update_available_quantity(self.product1, existing_loc2, 5)
         self.env['stock.quant']._update_available_quantity(self.product1, no_cyclic_loc, 5)
         # cyclic inventory locations should auto-assign their next inventory date to their quants
-        quant_new_loc = self.env['stock.quant'].search([('location_id', '=', new_loc.id)])
-        quant_existing_loc = self.env['stock.quant'].search([('location_id', '=', existing_loc2.id)])
+        quant_new_loc = self.env['stock.quant'].search_fetch([('location_id', '=', new_loc.id)])
+        quant_existing_loc = self.env['stock.quant'].search_fetch([('location_id', '=', existing_loc2.id)])
         self.assertEqual(quant_new_loc.inventory_date, new_loc.next_inventory_date)
         self.assertEqual(quant_existing_loc.inventory_date, existing_loc2.next_inventory_date)
         # quant without a cyclic inventory location should default to the company's annual inventory date
-        quant_non_cyclic_loc = self.env['stock.quant'].search([('location_id', '=', no_cyclic_loc.id)])
+        quant_non_cyclic_loc = self.env['stock.quant'].search_fetch([('location_id', '=', no_cyclic_loc.id)])
         self.assertEqual(quant_non_cyclic_loc.inventory_date.month, int(no_cyclic_loc.company_id.annual_inventory_month))
         # in case of leap year, ensure we select a feasiable day for next year since inventory_date should default to last
         # day of the month if annual_inventory_day is greater than number of days in that month

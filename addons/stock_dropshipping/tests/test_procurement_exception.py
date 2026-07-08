@@ -51,7 +51,7 @@ class TestProcurementException(common.TransactionCase):
 
         # I confirm the sales order, but no purchase quotation should be created
         sale_order_route_dropship01.action_confirm()
-        purchase = self.env['purchase.order.line'].search([
+        purchase = self.env['purchase.order.line'].search_fetch([
             ('sale_line_id', '=', sale_order_route_dropship01.order_line.ids[0])]).order_id
         self.assertFalse(purchase, 'No Purchase Quotation should be created')
 
@@ -67,7 +67,7 @@ class TestProcurementException(common.TransactionCase):
         sale_order_route_dropship02.action_confirm()
 
         # I check a purchase quotation was created.
-        purchase = self.env['purchase.order.line'].search([
+        purchase = self.env['purchase.order.line'].search_fetch([
             ('sale_line_id', '=', sale_order_route_dropship02.order_line.ids[0])]).order_id
 
         self.assertTrue(purchase, 'No Purchase Quotation is created')

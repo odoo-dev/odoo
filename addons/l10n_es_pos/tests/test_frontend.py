@@ -159,6 +159,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.default_fiscal_position_id = self.fiscal_pos_a.id
         self.main_pos_config.open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_simplified_invoice_not_override_set_pricelist', login="pos_user")
-        order = self.env['pos.order'].search([('partner_id', '=', self.main_pos_config.simplified_partner_id.id)])
+        order = self.env['pos.order'].search_fetch([('partner_id', '=', self.main_pos_config.simplified_partner_id.id)])
         self.assertNotEqual(order.pricelist_id, self.main_pos_config.simplified_partner_id.property_product_pricelist)
         self.assertNotEqual(order.fiscal_position_id, self.fiscal_pos_a)

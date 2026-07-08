@@ -44,7 +44,7 @@ class PosPaymentMethod(models.Model):
         self.ensure_one()
         providers_sudo = self.sudo().online_payment_provider_ids
         if not providers_sudo: # Empty = all published providers
-            providers_sudo = self.sudo().env['payment.provider'].search([('is_published', '=', True)])
+            providers_sudo = self.sudo().env['payment.provider'].search_fetch([('is_published', '=', True)])
 
         if not pos_config_id:
             return providers_sudo

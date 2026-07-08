@@ -29,7 +29,7 @@ class TestConsumeComponentCommon(common.TransactionCase):
         cls.manufacture_route = cls.env.ref('mrp.route_warehouse0_manufacture')
         cls.stock_id = cls.env.ref('stock.stock_location_stock').id
 
-        cls.picking_type = cls.env['stock.picking.type'].search([('code', '=', 'mrp_operation')])[0]
+        cls.picking_type = cls.env['stock.picking.type'].search_fetch([('code', '=', 'mrp_operation')])[0]
         cls.picking_type.use_create_components_lots = True
 
         # Create Products & Components

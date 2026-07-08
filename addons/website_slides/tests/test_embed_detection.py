@@ -22,7 +22,7 @@ class TestEmbedDetection(HttpCase, common.SlidesCase):
         """ When hitting the external URL without a referer header, the global embed record is
         incremented. """
         self.url_open(f'/slides/embed_external/{self.slide.id}')
-        embed_views = self.env['slide.embed'].search([('slide_id', '=', self.slide.id)])
+        embed_views = self.env['slide.embed'].search_fetch([('slide_id', '=', self.slide.id)])
         self.assertEqual(len(embed_views), 1)
         self.assertEqual(embed_views.website_name, 'Unknown Website')
 
@@ -39,7 +39,7 @@ class TestEmbedDetection(HttpCase, common.SlidesCase):
             headers={'Referer': 'https://someexternalwebsite.com'}
         )
 
-        embed_views = self.env['slide.embed'].search([('slide_id', '=', self.slide.id)])
+        embed_views = self.env['slide.embed'].search_fetch([('slide_id', '=', self.slide.id)])
         self.assertEqual(len(embed_views), 1)
         self.assertEqual(embed_views.count_views, 1)
         self.assertEqual(embed_views.website_name, 'https://someexternalwebsite.com')

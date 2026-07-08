@@ -22,16 +22,16 @@ class TestSalePurchaseProject(TestSalePurchase):
 
         (self.sale_order_1 + self.sale_order_2).action_confirm()
 
-        purchase_order = self.env['purchase.order'].search([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
+        purchase_order = self.env['purchase.order'].search_fetch([('partner_id', '=', self.service_purchase_1.seller_ids.partner_id.id), ('state', '=', 'draft')])
         self.assertEqual(len(purchase_order), 2, "Two PO should have been created, from the 2 Sales orders")
         self.assertEqual(len(purchase_order.order_line), 2, "The purchase order should have 2 lines")
         self.assertEqual(set(purchase_order.mapped('state')), {'draft'}, "The created PO should be in draft state.")
 
-        purchase_lines_so1 = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
+        purchase_lines_so1 = self.env['purchase.order.line'].search_fetch([('sale_line_id', 'in', self.sale_order_1.order_line.ids)])
         self.assertEqual(len(purchase_lines_so1), 1, "Only one SO line from SO 1 should have create a PO line")
         purchase_line1 = purchase_lines_so1[0]
 
-        purchase_lines_so2 = self.env['purchase.order.line'].search([('sale_line_id', 'in', self.sale_order_2.order_line.ids)])
+        purchase_lines_so2 = self.env['purchase.order.line'].search_fetch([('sale_line_id', 'in', self.sale_order_2.order_line.ids)])
         self.assertEqual(len(purchase_lines_so2), 1, "Only one SO line from SO 2 should have create a PO line")
         purchase_line2 = purchase_lines_so2[0]
 

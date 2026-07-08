@@ -81,7 +81,7 @@ class TestHrHomeworkingHrEmployeeLocation(common.TransactionCase):
             'weekly': False
         })
         wizard.set_employee_location()
-        created_worklocations = self.HrEmployeeLocation.search([
+        created_worklocations = self.HrEmployeeLocation.search_fetch([
             ('employee_id', '=', self.employee_emp.id),
             ('date', '=', datetime(2023, 10, 4)),
         ])
@@ -103,7 +103,7 @@ class TestHrHomeworkingHrEmployeeLocation(common.TransactionCase):
         self.assertEqual(len(created_worklocations), 1, 'should have created 1 worklocation record')
         wizard.work_location_id = self.work_office_2
         wizard.set_employee_location()
-        created_worklocations = self.HrEmployeeLocation.search([
+        created_worklocations = self.HrEmployeeLocation.search_fetch([
             ('employee_id', '=', self.employee_emp.id),
             ('date', '=', datetime(2023, 10, 4)),
         ])

@@ -48,7 +48,7 @@ class ResPartner(models.Model):
         return [('id', 'in', subquery.subselect('partner_id'))]
 
     def _search_slide_channel_ids(self, operator, value):
-        cp_enrolled = self.env['slide.channel.partner'].search([
+        cp_enrolled = self.env['slide.channel.partner'].search_fetch([
             ('channel_id', operator, value),
             ('member_status', '!=', 'invited')
         ])

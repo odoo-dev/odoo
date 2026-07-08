@@ -43,15 +43,15 @@ class TestCalendar(SavepointCaseWithUserDemo):
         domain = [('id', 'in', (foo1 + foo2 + bar1 + bar2).ids)]
 
         # sort them by name only
-        events = self.CalendarEvent.search(domain, order='name')
+        events = self.CalendarEvent.search_fetch(domain, order='name')
         self.assertEqual(events.mapped('name'), ['bar', 'bar', 'foo', 'foo'])
-        events = self.CalendarEvent.search(domain, order='name desc')
+        events = self.CalendarEvent.search_fetch(domain, order='name desc')
         self.assertEqual(events.mapped('name'), ['foo', 'foo', 'bar', 'bar'])
 
         # sort them by start date only
-        events = self.CalendarEvent.search(domain, order='start')
+        events = self.CalendarEvent.search_fetch(domain, order='start')
         self.assertEqual(events.mapped('start'), (foo1 + bar1 + foo2 + bar2).mapped('start'))
-        events = self.CalendarEvent.search(domain, order='start desc')
+        events = self.CalendarEvent.search_fetch(domain, order='start desc')
         self.assertEqual(events.mapped('start'), (foo2 + bar2 + bar1 + foo1).mapped('start'))
 
         # sort them by name then start date
@@ -147,7 +147,7 @@ class TestCalendar(SavepointCaseWithUserDemo):
         def _test_emails_has_attachment(self, partners, attachments_names=["fileText_attachment.txt"]):
             # check that every email has specified extra attachments
             for partner in partners:
-                mail = self.env['mail.message'].sudo().search([
+                mail = self.env['mail.message'].sudo().search_fetch([
                     ('notified_partner_ids', 'in', partner.id),
                 ])
                 extra_attachments = mail.attachment_ids.filtered(lambda attachment: attachment.name in attachments_names)

@@ -95,7 +95,7 @@ class TestPERF(TransactionCaseWithUserDemo):
     @warmup
     @prepare
     def test_light_sales_orders_batch_creation_perf_without_taxes(self):
-        self.env['res.country'].search([]).mapped('code')
+        self.env['res.country'].search_fetch([]).mapped('code')
         self.products[0].taxes_id = [Command.set([])]
         # + 2 SQL insert
         # + 2 queries to get analytic default tags

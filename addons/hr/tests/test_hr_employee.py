@@ -280,7 +280,7 @@ class TestHrEmployee(TestHrCommon):
             'password': 'test_user_password',
             'partner_id': partner.id,
         })
-        self.assertFalse(self.env['res.users'].search([('login', '=', 'test_user')]).employee_id)
+        self.assertFalse(self.env['res.users'].search_fetch([('login', '=', 'test_user')]).employee_id)
 
     def test_employee_update_work_contact_id(self):
         """

@@ -839,7 +839,7 @@ class TestRepair(TestRepairCommon):
         })
         validate_action = repair_order.action_validate()
         self.assertEqual(repair_order.state, "confirmed", 'Repair order should be in "Confirmed" state.')
-        move = self.env['stock.move'].search([
+        move = self.env['stock.move'].search_fetch([
             ('product_id', '=', self.product_storable_no.id),
             ('location_dest_id', '=', self.stock_location_14.id,)
         ])

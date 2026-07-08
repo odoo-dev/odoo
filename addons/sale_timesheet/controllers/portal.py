@@ -35,7 +35,7 @@ class PortalProjectAccount(PortalAccount, ProjectCustomerPortal):
         '/my/tasks/<task_id>/orders/invoices/page/<int:page>'],
         type='http', auth="user", website=True)
     def portal_my_tasks_invoices(self, task_id=None, page=1, date_begin=None, date_end=None, sortby=None, filterby=None, **kw):
-        task = request.env['project.task'].search([('id', '=', task_id)])
+        task = request.env['project.task'].search_fetch([('id', '=', task_id)])
         if not task:
             return NotFound()
 

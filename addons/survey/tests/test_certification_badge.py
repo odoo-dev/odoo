@@ -94,7 +94,7 @@ class TestCertificationBadge(common.TestSurveyCommon):
         challenge = self.env['gamification.challenge'].search([('reward_id', '=', self.certification_badge.id)])
         self.assertEqual(len(challenge), 1,
             "A challenge should be created if the certification badge is activated on a certification survey")
-        challenge_line = self.env['gamification.challenge.line'].search([('challenge_id', '=', challenge.id)])
+        challenge_line = self.env['gamification.challenge.line'].search_fetch([('challenge_id', '=', challenge.id)])
         self.assertEqual(len(challenge_line), 1,
             "A challenge_line should be created if the certification badge is activated on a certification survey")
         goal = challenge_line.definition_id
@@ -126,7 +126,7 @@ class TestCertificationBadge(common.TestSurveyCommon):
         challenge = self.env['gamification.challenge'].search([('reward_id', '=', self.certification_badge.id)])
         self.assertEqual(len(challenge), 1,
             "A challenge should be created if the certification badge is activated on a certification survey")
-        challenge_line = self.env['gamification.challenge.line'].search([('challenge_id', '=', challenge.id)])
+        challenge_line = self.env['gamification.challenge.line'].search_fetch([('challenge_id', '=', challenge.id)])
         self.assertEqual(len(challenge_line), 1,
             "A challenge_line should be created if the certification badge is activated on a certification survey")
         goal = challenge_line.definition_id
@@ -172,7 +172,7 @@ class TestCertificationBadge(common.TestSurveyCommon):
 
         challenges = self.env['gamification.challenge'].search([('reward_id', 'in', certification_surveys.mapped('certification_badge_id').ids)])
         self.assertEqual(len(challenges), 3, "3 challenges should be created")
-        challenge_lines = self.env['gamification.challenge.line'].search([('challenge_id', 'in', challenges.ids)])
+        challenge_lines = self.env['gamification.challenge.line'].search_fetch([('challenge_id', 'in', challenges.ids)])
         self.assertEqual(len(challenge_lines), 3, "3 challenge_lines should be created")
         goals = challenge_lines.mapped('definition_id')
         self.assertEqual(len(goals), 3, "3 goals should be created")
@@ -197,7 +197,7 @@ class TestCertificationBadge(common.TestSurveyCommon):
 
         challenges = self.env['gamification.challenge'].search([('reward_id', 'in', certification_surveys.mapped('certification_badge_id').ids)])
         self.assertEqual(len(challenges), 3, "3 challenges should be created")
-        challenge_lines = self.env['gamification.challenge.line'].search([('challenge_id', 'in', challenges.ids)])
+        challenge_lines = self.env['gamification.challenge.line'].search_fetch([('challenge_id', 'in', challenges.ids)])
         self.assertEqual(len(challenge_lines), 3, "3 challenge_lines should be created")
         goals = challenge_lines.mapped('definition_id')
         self.assertEqual(len(goals), 3, "3 goals should be created")
