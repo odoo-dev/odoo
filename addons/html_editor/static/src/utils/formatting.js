@@ -32,7 +32,7 @@ export const DEFAULT_FONT_SIZE_CLASSES = [
     "h4",
     "h5",
     "h6",
-    "o_default_font_size",
+    "o-default-fs",
 ];
 
 export const FORMATTABLE_TAGS = ["SPAN", "FONT", "B", "STRONG", "I", "EM", "U", "S", "CODE"];
@@ -119,24 +119,34 @@ export const formatsSpecs = {
         removeStyle: (node) => removeStyle(node, "font-size"),
     },
     setFontSizeClassName: {
-        isFormatted: (node, props) =>
-            props?.className
+        isFormatted: (node, props) => {
+            const blockParent = closestBlock(node)?.parentElement;
+            const hasDefaultClass = !!findNode(
+                closestPath(node),
+                (el) => DEFAULT_FONT_SIZE_CLASSES.some((cls) => el.classList?.contains(cls)),
+                (el) => el === blockParent || FONT_SIZE_CLASSES.some((cls) => el.classList?.contains(cls))
+            );
+            if (hasDefaultClass) {
+                return false;
+            }
+            return props?.className
                 ? FONT_SIZE_CLASSES.includes(props.className) &&
                   !!(
                       findNode(
                           closestPath(node),
                           (el) => el.classList?.contains(props.className),
-                          (el) => el === closestBlock(node).parentElement
+                          (el) => el === blockParent
                       ) || closestElement(node, "li")?.classList?.contains(props.className)
                   )
                 : !!findNode(
                       closestPath(node),
                       (el) => FONT_SIZE_CLASSES.find((cls) => el.classList?.contains(cls)),
-                      (el) => el === closestBlock(node).parentElement
+                      (el) => el === blockParent
                   ) ||
-                  FONT_SIZE_CLASSES.find((cls) =>
+                  !!FONT_SIZE_CLASSES.find((cls) =>
                       closestElement(node, "li")?.classList.contains(cls)
-                  ),
+                  );
+        },
         hasStyle: (node, props) =>
             [...FONT_SIZE_CLASSES, ...TEXT_STYLE_CLASSES, ...DEFAULT_FONT_SIZE_CLASSES].find(
                 (cls) => node.classList.contains(cls)
@@ -159,7 +169,7 @@ export const formatsSpecs = {
             if (["H1", "H2", "H3", "H4", "H5", "H6"].includes(block.nodeName)) {
                 node.classList.add(block.nodeName.toLowerCase());
             } else {
-                node.classList.add("o_default_font_size");
+                node.classList.add("o-default-fs");
             }
         },
     },
@@ -269,6 +279,7 @@ export function getFontSizeDisplayValue(sel, document) {
         [style*='font-size'],
         ${FONT_SIZE_CLASSES.map((className) => `.${className}`)},
         ${styleClassesRelatedToFontSize.map((className) => `.${className}`)},
+        ${DEFAULT_FONT_SIZE_CLASSES.map((className) => `.${className}`)},
         ${tagNameRelatedToFontSize}
     `);
     let remValue;
@@ -284,22 +295,20 @@ export function getFontSizeDisplayValue(sel, document) {
             // options.
             return parseFloat(getComputedStyle(closestStartContainerEl).fontSize);
         }
-        // It's a class font size or a hN tag. We don't return the computed
-        // font size because it can be different from the one displayed in
-        // the toolbar because it's responsive.
-        const fontSizeClass = FONT_SIZE_CLASSES.find((className) =>
-            closestFontSizedEl.classList.contains(className)
-        );
-        let fsName;
-        if (fontSizeClass) {
-            fsName = fontSizeClass.substring(0, fontSizeClass.length - 3); // Without -fs
-        } else {
-            fsName =
-                styleClassesRelatedToFontSize.find((className) =>
-                    closestFontSizedEl.classList.contains(className)
-                ) || closestFontSizedEl.tagName.toLowerCase();
-        }
-        remValue = parseFloat(getCSSVariableValue(`${fsName}-font-size`, htmlStyle));
+        // It's a font size class (custom or default/neutral) or a heading tag.
+        // Retrieve the theme CSS variable to get the desktop size instead of
+        // the computed font size, which can be different due to responsiveness.
+        const activeClass =
+            FONT_SIZE_CLASSES.find((cls) => closestFontSizedEl.classList.contains(cls)) ||
+            DEFAULT_FONT_SIZE_CLASSES.find((cls) => closestFontSizedEl.classList.contains(cls)) ||
+            styleClassesRelatedToFontSize.find((cls) => closestFontSizedEl.classList.contains(cls));
+
+        const baseName = activeClass
+            ? (activeClass.endsWith("-fs") ? activeClass.slice(0, -3) : activeClass)
+            : closestFontSizedEl.tagName.toLowerCase();
+
+        const cssVarName = `${baseName}-font-size`;
+        remValue = parseFloat(getCSSVariableValue(cssVarName, htmlStyle));
     }
     const pxValue = remValue && convertNumericToUnit(remValue, "rem", "px", htmlStyle);
     return pxValue || parseFloat(getComputedStyle(closestStartContainerEl).fontSize);

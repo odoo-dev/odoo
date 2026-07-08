@@ -1163,8 +1163,8 @@ describe("Display classes", () => {
         h4: "h4",
         h5: "h5",
         h6: "h6",
-        p: "o_default_font_size",
-        div: "o_default_font_size",
+        p: "o-default-fs",
+        div: "o-default-fs",
     };
     for (const [tag, defaultClass] of Object.entries(tagDefaultClasses)) {
         test(`should remove style of display classes from completely selected ${tag} element`, async () => {
@@ -1231,5 +1231,25 @@ describe("typography classes", () => {
                 <div class="h3">vwx]</div>
             `),
         });
+    });
+
+    test("should do nothing when removing format on selection in block default class", async () => {
+        await testEditor({
+            contentBefore: '<h2 class="display-3-fs">a<span class="h2">[b]</span>c</h2>',
+            stepFunction: (editor) => execCommand(editor, "removeFormat"),
+            contentAfter: '<h2 class="display-3-fs">a<span class="h2">[b]</span>c</h2>',
+        });
+    });
+
+    test("should disable remove format button after applying block default class", async () => {
+        const { el } = await setupEditor('<h2 class="display-3-fs">Hello [Odoo]</h2>');
+        await expandToolbar();
+        expect(".btn[name='remove_format']").not.toHaveAttribute("disabled");
+
+        await click(".btn[name='remove_format']");
+        await animationFrame();
+
+        expect(".btn[name='remove_format']").toHaveAttribute("disabled");
+        expect(getContent(el)).toBe('<h2 class="display-3-fs">Hello <span class="h2">[Odoo]</span></h2>');
     });
 });

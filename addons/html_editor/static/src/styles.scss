@@ -1,3 +1,7 @@
 *[contenteditable="true"] {
     outline: none;
 }
+
+:root {
+    --o-default-font-size: var(--font-size-base);
+}
