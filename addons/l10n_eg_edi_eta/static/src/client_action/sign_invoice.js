@@ -20,7 +20,12 @@ async function actionGetDrive(env, action, type) {
 
     let result;
     try {
-        result = await http.post(route, action.params);
+        result = await browser.fetch(route, {
+            method: "POST",
+            targetAddressSpace: useLoopback ? "loopback" : useLna ? "local" : undefined,
+            body: jsonToFormData(actionDescr.params),
+        });
+        result = await result.json();
     } catch {
         dialog.add(AlertDialog, {
             body: _t("Error trying to connect to the middleware. Is the middleware running?"),

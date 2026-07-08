@@ -27,8 +27,12 @@ export class ActionableErrors extends Component {
         }
         if (errorData.action_call) {
             const [model, method, args] = errorData.action_call;
-            await this.orm.call(model, method, [args]);
-            this.env.model.action.doAction("soft_reload");
+            const response = await this.orm.call(model, method, [args]);
+            if (typeof response == 'object' && response.type) {
+                this.env.model.action.doAction(response);
+            } else {
+                this.env.model.action.doAction("soft_reload");
+            }
         } else {
             this.env.model.action.doAction(errorData.action);
         }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="l10n_eg_edi_eta.EtaSubmissionStatusPopover">
+        <div class="bg-view rounded-0 mw-100">
+            <div class="p-2 border-bottom bg-light d-flex justify-content-between align-items-center">
+                <span class="fw-bold">ETA Response</span>
+                <button type="button" class="btn-close" t-on-click="this.props.close" tabindex="-1"/>
+            </div>
+            <div class="p-2 mt-2">
+                <span t-esc="this.props.message"/>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="l10n_eg_edi_eta.EtasubmissionStatus" t-inherit="web.SelectionField" t-inherit-mode="primary">
+        <xpath expr="//t[@t-else]" position="after">
+            <span type="button" class="ms-1 text-info" t-on-click="this.onClickInfo">
+                <i class="oi" data-icon="info"/>
+            </span>
+        </xpath>
+    </t>
+
+</templates>
