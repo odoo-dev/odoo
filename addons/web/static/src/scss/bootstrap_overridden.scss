@@ -160,6 +160,8 @@ $table-striped-order: even !default;
 $table-active-bg-factor: .05 !default;
 $table-active-color: $headings-color !default;
 $table-th-font-weight: $headings-font-weight !default;
+$table-hover-bg: rgba($o-enterprise-action-color, $table-hover-bg-factor) !default;
+$table-active-bg: rgba($o-enterprise-action-color, $table-active-bg-factor) !default;
 
 // Buttons + Forms
 //
