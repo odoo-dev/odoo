@@ -1,10 +1,13 @@
+import { plugin } from "@odoo/owl";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
-import { ProjectModelMixin } from "./project_model_mixin";
+import { ProjectModelPlugin } from "../plugins/project_model_plugin";
 
-export class ProjectRelationalModel extends ProjectModelMixin(RelationalModel) {
+export class ProjectRelationalModel extends RelationalModel {
+    projectModelPlugin = plugin(ProjectModelPlugin);
+
     async load(params = {}) {
         const domain = params.domain || this.config.domain;
-        params.domain = this._processSearchDomain(domain);
+        params.domain = this.projectModelPlugin.processSearchDomain(domain, this.env.searchModel.context);
         return super.load(params);
     }
 }

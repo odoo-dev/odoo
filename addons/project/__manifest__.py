@@ -71,6 +71,7 @@
             'project/static/src/utils/**/*',
             'project/static/src/actions/client_actions.js',
             'project/static/src/components/**/*',
+            'project/static/src/plugins/**/*',
             'project/static/src/views/**/*',
             'project/static/src/js/tours/project.js',
             'project/static/src/scss/project_dashboard.scss',
@@ -227,7 +228,7 @@
             'project/static/src/views/project_task_control_panel/*',
             'project/static/src/views/project_task_model_mixin.js',
             'project/static/src/views/project_task_relational_model.js',
-            'project/static/src/views/project_model_mixin.js',
+            'project/static/src/plugins/project_model_plugin.js',
             'project/static/src/views/project_relational_model.js',
 
             ('include', 'portal.assets_chatter_helpers'),
