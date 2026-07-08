@@ -110,16 +110,3 @@ export const createTax = (store, name, amount, priceIncluded) =>
         tax_group_id: store.models["account.tax.group"].get(1),
         fiscal_position_ids: [],
     });
-
-export const createFiscalPosition = (store, name, taxIds = [], taxMap = {}) =>
-    store.models["account.fiscal.position"].create({
-        name,
-        display_name: name,
-        tax_ids: taxIds,
-        tax_map: taxMap,
-    });
-
-export const setFiscalPosition = (order, fiscalPosition) => {
-    order.fiscal_position_id = fiscalPosition;
-    order.triggerRecomputeAllPrices();
-};

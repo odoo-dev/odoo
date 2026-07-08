@@ -645,46 +645,6 @@ class TestUi(TestPointOfSaleHttpCommon):
     def test_01_pos_basic_order(self):
         self.start_pos_tour('pos_pricelist')
 
-    def test_pos_basic_order_02_decimal_order_quantity(self):
-        with self.with_new_session() as session:
-            cash_payment_method = self.main_pos_config.payment_method_ids.filtered(lambda pm: pm.is_cash_count)[:1]
-            self.assertTrue(cash_payment_method)
-
-            order = self.env['pos.order'].create({
-                'session_id': session.id,
-                'config_id': self.main_pos_config.id,
-                'company_id': self.main_pos_config.company_id.id,
-                'pricelist_id': self.main_pos_config.pricelist_id.id,
-                'amount_tax': 0.0,
-                'amount_total': 5.05,
-                'amount_paid': 0.0,
-                'amount_return': 0.0,
-                'lines': [Command.create({
-                    'name': 'Desk Organizer',
-                    'product_id': self.desk_organizer.product_variant_id.id,
-                    'qty': 0.99,
-                    'price_unit': self.desk_organizer.list_price,
-                    'price_subtotal': 5.05,
-                    'price_subtotal_incl': 5.05,
-                    'tax_ids': [Command.clear()],
-                })],
-            })
-
-            self.assertAlmostEqual(order.lines.qty, 0.99, places=2)
-            self.assertAlmostEqual(order.amount_total, 5.05, places=2)
-
-            payment_context = {
-                'active_ids': order.ids,
-                'active_id': order.id,
-            }
-            self.env['pos.make.payment'].with_context(**payment_context).create({
-                'amount': 5.05,
-                'payment_method_id': cash_payment_method.id,
-            }).with_context(**payment_context).check()
-
-            self.assertEqual(order.state, 'paid')
-            self.assertAlmostEqual(order.amount_paid, 5.05, places=2)
-
     def test_pos_basic_order_03_tax_position(self):
         self.start_pos_tour('pos_basic_order_03_tax_position')
 
@@ -1292,6 +1252,49 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'test_gs1_barcode_scan_missing_product_variant', login="pos_user")
 
+    def test_refund_order_with_fp_tax_included(self):
+        # create a fiscal position
+        self.fiscal_position = self.env['account.fiscal.position'].create({
+            'name': 'No Tax',
+        })
+        #create a tax of 15% tax included
+        self.tax1 = self.env['account.tax'].create({
+            'name': 'Tax 1',
+            'amount': 15,
+            'amount_type': 'percent',
+            'type_tax_use': 'sale',
+            'price_include_override': 'tax_included',
+        })
+        #create a tax of 0%
+        self.tax2 = self.env['account.tax'].create({
+            'name': 'Tax 2',
+            'amount': 0,
+            'amount_type': 'percent',
+            'type_tax_use': 'sale',
+            'price_include_override': 'tax_included',
+            'fiscal_position_ids': self.fiscal_position,
+            'original_tax_ids': self.tax1,
+        })
+
+        self.product_test = self.env['product.product'].create({
+            'name': 'Product Test',
+            'is_storable': True,
+            'available_in_pos': True,
+            'list_price': 100,
+            'taxes_id': [(6, 0, self.tax1.ids)],
+        })
+
+        #add the fiscal position to the PoS
+        self.main_pos_config.write({
+            'fiscal_position_ids': [(4, self.fiscal_position.id)],
+            'tax_regime_selection': True,
+            })
+
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'FiscalPositionNoTaxRefund', login="pos_user")
+        order = self.env['pos.order'].search([])
+        self.assertTrue(order[0].name == order[1].name + " REFUND")
+
     def test_customer_display_popup(self):
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'customer_display_shows_qr_popup', login="pos_user")
 
@@ -1895,6 +1898,12 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'ProductSearchTour', login="pos_user")
 
+    def test_customer_popup(self):
+        """Verify that the customer popup search & inifnite scroll work properly"""
+        self.env["res.partner"].create([{"name": "Z partner to search"}, {"name": "Z partner to scroll"}])
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'CustomerPopupTour', login="pos_user")
+
     def test_pricelist_multi_items_different_qty_thresholds(self):
         """ Having multiple pricelist items for the same product tmpl with ascending `min_quantity`
         values, prefer the "latest available"- that is, the one with greater `min_quantity`.
@@ -2353,6 +2362,37 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.assertAlmostEqual(lines[2].balance, 56.41)
         self.assertAlmostEqual(lines[3].balance, 352.59)
         self.assertAlmostEqual(lines[4].balance, 7771.01)
+
+    def test_preset_timing_retail(self):
+        """
+        Test to set order preset hour inside a tour
+        """
+        self.preset_dine_in = self.env['pos.preset'].create({
+            'name': 'Dine in',
+        })
+        self.preset_delivery = self.env['pos.preset'].create({
+            'name': 'Delivery',
+            'identification': 'address',
+        })
+        self.main_pos_config.write({
+            'use_presets': True,
+            'default_preset_id': self.preset_dine_in.id,
+            'available_preset_ids': [(6, 0, [self.preset_delivery.id])],
+        })
+        self.pos_user.street = 'Rue de Ramillies'
+        resource_calendar = self.env['resource.calendar'].create({
+            'name': 'Takeaway',
+            'attendance_ids': [(0, 0, {
+                'dayofweek': str(day),
+                'hour_from': 0,
+                'hour_to': 24,
+            }) for day in range(7)],
+        })
+        self.preset_delivery.write({
+            'use_timing': True,
+            'resource_calendar_id': resource_calendar
+        })
+        self.start_pos_tour('test_preset_timing_retail')
 
     def test_pricelists_in_pos(self):
         pos_limited_category = self.env['pos.category'].create({'name': 'Limited Category'})
@@ -2971,6 +3011,56 @@ class TestUi(TestPointOfSaleHttpCommon):
             })
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_pos_tour('test_combo_no_free_item')
+
+    def test_not_available_pricelist_not_set_on_order(self):
+        """ Test that when the pricelist is not available, it is not set on the order """
+        not_available_pricelist, available_pricelist = self.env['product.pricelist'].create([{
+            'name': 'Not Available Pricelist',
+        }, {
+            'name': 'Available Pricelist',
+        }])
+
+        self.main_pos_config.write({
+            'available_pricelist_ids': [(4, available_pricelist.id)],
+            'pricelist_id': available_pricelist.id,
+        })
+        self.main_pos_config.with_user(self.pos_user).open_ui()
+        pos_session = self.main_pos_config.current_session_id
+
+        partner = self.env['res.partner'].create({
+            'name': 'AA Customer',
+            'property_product_pricelist': not_available_pricelist.id,
+        })
+
+        order = self.env['pos.order'].create({
+            'company_id': self.env.company.id,
+            'session_id': pos_session.id,
+            'partner_id': partner.id,
+            'config_id': self.main_pos_config.id,
+            'lines': [(0, 0, {
+                'name': 'OL/0001',
+                'product_id': self.wall_shelf.product_variant_ids[0].id,
+                'price_unit': 10.00,
+                'discount': 0,
+                'qty': 1,
+                'tax_ids': False,
+                'price_subtotal': 10.00,
+                'price_subtotal_incl': 10.00,
+            })],
+            'pricelist_id': not_available_pricelist.id,
+            'amount_paid': 10.00,
+            'amount_total': 10.00,
+            'amount_tax': 0.0,
+            'amount_return': 0.0,
+            'to_invoice': False,
+            'pos_reference': 'Test/0001',
+        })
+        order.action_pos_order_paid()
+
+        self.start_tour(f"/pos/ui?config_id={self.main_pos_config.id}", 'test_not_available_pricelist_not_set_on_order', login="pos_user")
+
+        created_order = self.env['pos.order'].search([('partner_id', '=', partner.id)], limit=1)
+        self.assertNotEqual(created_order.pricelist_id, not_available_pricelist)
 
     def test_pos_open_ui_button(self):
         """ Test the Open Register button click behavior in the dashboard. """

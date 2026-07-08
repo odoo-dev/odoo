@@ -176,6 +176,36 @@ registry.category("web_tour.tours").add("TicketScreenTour", {
         ].flat(),
 });
 
+registry.category("web_tour.tours").add("FiscalPositionNoTaxRefund", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Product Test"),
+            ProductScreen.totalAmountIs("100.00"),
+            ProductScreen.clickFiscalPosition("No Tax"),
+            ProductScreen.totalAmountIs("100.00"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank", true, { remaining: "0.00" }),
+            PaymentScreen.clickValidate(),
+            FeedbackScreen.isShown(),
+            FeedbackScreen.clickNextOrder(),
+            ...ProductScreen.clickRefund(),
+            TicketScreen.selectOrder("001"),
+            ProductScreen.clickNumpad("1"),
+            TicketScreen.confirmRefund(),
+            PaymentScreen.isShown(),
+            PaymentScreen.clickBack(),
+            ProductScreen.isShown(),
+            { ...ProductScreen.back(), isActive: ["mobile"] },
+            ProductScreen.totalAmountIs("100.00"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            FeedbackScreen.isShown(),
+        ].flat(),
+});
+
 registry.category("web_tour.tours").add("RefundFewQuantities", {
     steps: () =>
         [
@@ -426,5 +456,23 @@ registry.category("web_tour.tours").add("test_order_invoice_search", {
                     "Verify that the order is paid; this ensures that the RPC process is complete.",
                 trigger: ".orders .order-row:eq(0):has(.badge.rounded:contains(Paid))",
             },
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("test_not_available_pricelist_not_set_on_order", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            Chrome.clickOrders(),
+            TicketScreen.selectFilter("Paid"),
+            Chrome.createFloatingOrder(),
+            ProductScreen.addOrderline("Desk Pad", "2", "3"),
+            ProductScreen.clickPartnerButton(),
+            ProductScreen.clickCustomer("AA Customer"),
+            ProductScreen.clickPayButton(),
+            PaymentScreen.clickPaymentMethod("Bank"),
+            PaymentScreen.clickValidate(),
+            FeedbackScreen.isShown(),
         ].flat(),
 });
