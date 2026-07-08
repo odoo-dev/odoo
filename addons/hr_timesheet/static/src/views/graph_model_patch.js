@@ -6,6 +6,7 @@ const FIELDS = [
     'overtime', 'number_hours', 'difference', 'timesheet_unit_amount'
 ];
 
+// TODO: to discuss with GED (maybe we could find another way to do that without doing patch?) Maybe abstract class would be better?
 export function patchGraphModel(Model) {
     patch(Model.prototype, {
         /**
