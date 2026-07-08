@@ -88,15 +88,15 @@
     // Default KanbanView values
 
     --Kanban-background: #{$o-kanban-background};
-    --Kanban-gap: unset;
+    --Kanban-gap: 0;
     --Kanban-padding: 0;
 
     --KanbanGroup-background: var(--Kanban-background);
     --KanbanGroup-padding-h: #{$o-kanban-group-padding};
     --KanbanGroup-padding-bottom: #{$o-kanban-group-padding};
 
-    --KanbanRecord-margin-v: #{$o-kanban-record-margin};
-    --KanbanRecord-margin-h: #{$o-kanban-record-margin};
+    --KanbanRecord-margin-v: 0;
+    --KanbanRecord-margin-h: 0;
     --KanbanRecord-gap-v: #{$o-kanban-inner-hmargin};
     --KanbanRecord-width: #{$o-kanban-default-record-width}; 
     --KanbanRecord--small-width: #{$o-kanban-small-record-width};
@@ -322,7 +322,7 @@
             }
 
             .o_column_title {
-                @include o-position-absolute(map-get($spacers, 3));
+                @include o-position-absolute(map-get($spacers, 3), auto, auto, 11px);
                 transform-origin: left bottom 0;
                 transform: rotate(90deg);
                 overflow: visible;
@@ -343,7 +343,8 @@
         min-height: 100%;
 
         @include media-breakpoint-up(md) {
-            --Kanban-padding:  var(--KanbanRecord-margin-v) var(--KanbanRecord-margin-h);
+            --Kanban-padding: 0 #{map-get($spacers, 3)} #{map-get($spacers, 3)};
+            --Kanban-gap: #{$o-kanban-record-margin * 2};
         }
 
         .o_kanban_record {
