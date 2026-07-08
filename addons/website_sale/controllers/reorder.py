@@ -61,17 +61,7 @@ class CustomerPortal(sale_portal.CustomerPortal):
                     })
 
             cart_values = Cart_controller.add_to_cart(
-                product_id=line.product_id.id,
-                product_template_id=line.product_id.product_tmpl_id.id,
-                quantity=line.product_uom_qty,
-                product_custom_attribute_values=[
-                    {
-                        "custom_product_template_attribute_value_id": pcav.custom_product_template_attribute_value_id.id,  # noqa: E501
-                        "custom_value": pcav.custom_value,
-                    }
-                    for pcav in line.product_custom_attribute_value_ids
-                ],
-                no_variant_attribute_value_ids=line.product_no_variant_attribute_value_ids.ids,
+                **self._get_reorder_add_to_cart_values(line),
                 linked_products=linked_products,
             )
 
@@ -79,3 +69,27 @@ class CustomerPortal(sale_portal.CustomerPortal):
 
         values["cart_quantity"] = order_sudo.cart_quantity
         return values
+
+    def _get_reorder_add_to_cart_values(self, line):
+        """Build the ``Cart.add_to_cart`` kwargs for a single line being re-ordered.
+
+        Override this method to inject additional parameters (e.g. rental dates)
+        without having to duplicate the full ``my_orders_reorder`` loop.
+
+        :param sale.order.line line: The order line to re-order.
+        :return: Keyword arguments forwarded to ``Cart.add_to_cart``.
+        :rtype: dict
+        """
+        return {
+            "product_id": line.product_id.id,
+            "product_template_id": line.product_id.product_tmpl_id.id,
+            "quantity": line.product_uom_qty,
+            "product_custom_attribute_values": [
+                {
+                    "custom_product_template_attribute_value_id": pcav.custom_product_template_attribute_value_id.id,  # noqa: E501
+                    "custom_value": pcav.custom_value,
+                }
+                for pcav in line.product_custom_attribute_value_ids
+            ],
+            "no_variant_attribute_value_ids": line.product_no_variant_attribute_value_ids.ids,
+        }
