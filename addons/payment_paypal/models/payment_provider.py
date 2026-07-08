@@ -64,6 +64,11 @@ class PaymentProvider(models.Model):
             )
         return supported_currencies
 
+    def _compute_feature_support_fields(self):
+        """Override of `payment` to enable additional features."""
+        super()._compute_feature_support_fields()
+        self.filtered(lambda p: p.code == "paypal").update({"support_tokenization": True})
+
         # === CONSTRAINT METHODS === #
 
     @api.constrains("is_published")
@@ -108,6 +113,7 @@ class PaymentProvider(models.Model):
         webhook_events = (
             const.CHECKOUT_WEBHOOK_EVENTS
             + const.CAPTURE_WEBHOOK_EVENTS
+            + const.VAULT_WEBHOOK_EVENTS
             + [const.SELLER_EMAIL_CONFIRMED_WEBHOOK]
         )
         data = {
@@ -260,7 +266,7 @@ class PaymentProvider(models.Model):
         Note: `self.ensure_one()`
 
         :param res.currency currency: The transaction currency.
-        :param int partner_id: The partner of the transaction, as a `res.partner` id.
+        :param int partner_id: The partner making the payment, as a `res.partner` id.
         :return: The JSON serial of the required values to render the inline form.
         :rtype: str
         """
@@ -316,6 +322,11 @@ class PaymentProvider(models.Model):
         self.paypal_email_account = response_content.get("primary_email")
         self.paypal_payments_receivable = response_content.get("payments_receivable")
         self.paypal_email_confirmed = response_content.get("primary_email_confirmed")
+        self.allow_tokenization = any(
+            capability.get("name") == const.VAULTING_CAPABILITY
+            and capability.get("status") == "ACTIVE"
+            for capability in response_content.get("capabilities", [])
+        )
         return response_content
 
     # === REQUEST HELPERS === #

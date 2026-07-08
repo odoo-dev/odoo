@@ -55,15 +55,19 @@ class PaypalController(http.Controller):
             ._search_by_reference("paypal", {"reference_id": data.get("reference")})
         )
         if tx_sudo:
-            order_id = tx_sudo.provider_reference
-            if tx_sudo.payment_method_code in {"paypal", "card"}:
-                self._paypal_capture_order(tx_sudo, order_id)
-            else:
-                order_details = tx_sudo._send_api_request(
-                    "GET", f"/v2/checkout/orders/{order_id}"
-                )
-                normalized_data = self._normalize_paypal_data(order_details)
-                tx_sudo._record(normalized_data)
+            order_id = data.get("token") or tx_sudo.provider_reference
+            try:
+                if tx_sudo.payment_method_code in {"paypal", "card"}:
+                    self._paypal_capture_order(tx_sudo, order_id)
+                else:
+                    order_details = tx_sudo._send_api_request(
+                        "GET", f"/v2/checkout/orders/{order_id}"
+                    )
+                    normalized_data = self._normalize_paypal_data(order_details)
+                    tx_sudo._record(normalized_data)
+            except ValidationError as e:
+                _logger.warning("Unable to complete the order with PayPal: %s", e)
+                tx_sudo.with_context(payment_safe_write=True)._set_error(str(e))
         return request.redirect("/payment/status")
 
     @http.route(_cancel_url, type="http", auth="public", methods=["GET"], save_session=False)
@@ -82,9 +86,11 @@ class PaypalController(http.Controller):
             ._search_by_reference("paypal", {"reference_id": data.get("reference")})
         )
         if tx_sudo:
-            order_id = tx_sudo.provider_reference
-            if tx_sudo.payment_method_code in {"paypal", "card"}:
-                self._paypal_capture_order(tx_sudo, order_id)
+            order_id = data.get("token") or tx_sudo.provider_reference
+            try:
+                order_details = tx_sudo._send_api_request("GET", f"/v2/checkout/orders/{order_id}")
+            except ValidationError:
+                _logger.warning("Unable to fetch the order details from PayPal.")
             else:
                 order_details = tx_sudo._send_api_request(
                     "GET", f"/v2/checkout/orders/{order_id}"
@@ -112,6 +118,8 @@ class PaypalController(http.Controller):
                 self._handle_capture_notification(data)
             elif event_type == const.SELLER_EMAIL_CONFIRMED_WEBHOOK:
                 self._handle_merchant_notification(data)
+            elif event_type in const.VAULT_WEBHOOK_EVENTS:
+                self._handle_vault_notification(data)
         return request.make_json_response("")
 
     def _handle_checkout_notification(self, data):
@@ -219,6 +227,58 @@ class PaypalController(http.Controller):
         else:
             _logger.warning("Invalid PayPal response format, can't normalize.")
         return result
+
+    def _handle_vault_notification(self, notification_data):
+        """Create a token from a `VAULT.PAYMENT-TOKEN.CREATED` webhook notification.
+
+        See https://developer.paypal.com/api/rest/webhooks/event-names/#vault.
+
+        :param dict notification_data: The full notification payload.
+        :return: None
+        """
+        resource = notification_data.get("resource", {})
+        vault_id = resource.get("id")
+        customer_id = resource.get("customer", {}).get("id")
+        if not (vault_id and customer_id):
+            return
+
+        tx_sudo = (
+            self
+            .env["payment.transaction"]
+            .sudo()
+            .search(
+                [
+                    ("provider_code", "=", "paypal"),
+                    ("paypal_customer_id", "=", customer_id),
+                    ("tokenize", "=", True),
+                    ("token_id", "=", False),
+                ],
+                order="id desc",
+                limit=1,
+            )
+        )
+        if not tx_sudo:
+            return
+
+        # Guard against duplicate deliveries
+        if (
+            self
+            .env["payment.token"]
+            .sudo()
+            .search_count([
+                ("provider_id", "=", tx_sudo.provider_id.id),
+                ("provider_ref", "=", vault_id),
+            ])
+        ):
+            return
+
+        try:
+            self._verify_notification_origin(notification_data, tx_sudo)
+        except ValidationError:
+            _logger.warning("Unable to verify the origin of the PayPal vault notification.")
+            return
+
+        tx_sudo.with_context(payment_safe_write=True)._paypal_tokenize_from_notification(resource)
 
     def _verify_notification_origin(self, payment_data, tx_sudo=None, provider_sudo=None):
         """Check that the notification was sent by PayPal.

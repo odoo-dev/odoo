@@ -124,7 +124,7 @@ patch(PaymentForm.prototype, {
         const isCard = paymentMethodCode === 'card';
         const paypalLoadingList = document.querySelectorAll('#o_paypal_loading');
         if (!isCard) {
-            this._hideInputs();
+            this.env.bus.trigger('hidePaymentButton');
             for (const paypalLoading of paypalLoadingList) {
                 paypalLoading.classList.remove('d-none');
             }
@@ -313,6 +313,7 @@ patch(PaymentForm.prototype, {
             }
         }
     },
+
 
     /**
      * Handle the approval event of the component and complete the payment.
