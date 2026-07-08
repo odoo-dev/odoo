@@ -30,11 +30,11 @@
     </t>
 
     <t t-name="web.GraphRenderer">
-        <div t-att-class="'o_graph_renderer o_renderer h-100 d-flex flex-column border-top ' + this.props.class" t-custom-ref="root">
-            <div class="d-flex d-print-none gap-1 flex-shrink-0 mt-2 mx-3 mb-3 overflow-x-auto">
+        <div t-att-class="'o_graph_renderer o_renderer h-100 d-flex flex-column ' + this.props.class" t-custom-ref="root">
+            <div class="d-flex d-print-none gap-1 flex-shrink-0 mb-3 overflow-x-auto">
                 <t t-call="{{ this.props.buttonTemplate }}"/>
             </div>
-            <div t-if="this.model.hasData()" class="o_graph_canvas_container flex-grow-1 position-relative px-3 pb-3" t-custom-ref="container">
+            <div t-if="this.model.hasData()" class="o_graph_canvas_container flex-grow-1 position-relative rounded-4 rounded-bottom-0 p-3 bg-view" t-custom-ref="container">
                 <canvas t-custom-click="(ev, isMiddleClick) => this.onGraphClicked(ev, isMiddleClick)" t-custom-ref="canvas" />
             </div>
         </div>
