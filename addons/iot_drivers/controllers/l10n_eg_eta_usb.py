@@ -137,15 +137,14 @@ class EtaUsbController(http.Controller):
             cert_id = session.getAttributeValue(cert, [PyKCS11.CKA_ID])[0]
             priv_key = session.findObjects([(PyKCS11.CKA_CLASS, PyKCS11.CKO_PRIVATE_KEY), (PyKCS11.CKA_ID, cert_id)])[0]
 
-            invoice_dict = dict()
             invoices = json.loads(invoices)
-            for invoice, eta_inv in invoices.items():
-                to_sign = base64.b64decode(eta_inv)
+            for eta_inv in invoices.values():
+                to_sign = base64.b64decode(eta_inv['sign_attrs'])
                 signed_data = session.sign(priv_key, to_sign, PyKCS11.Mechanism(PyKCS11.CKM_SHA256_RSA_PKCS))
-                invoice_dict[invoice] = base64.b64encode(bytes(signed_data)).decode()
+                eta_inv['signature'] = base64.b64encode(bytes(signed_data)).decode()
 
             payload = {
-                'invoices': json.dumps(invoice_dict),
+                'invoices': json.dumps(invoices),
             }
             return json.dumps(payload)
         except Exception as ex:

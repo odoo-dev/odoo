@@ -3,8 +3,10 @@ import base64
 import datetime
 import hashlib
 import json
+import requests
 
 from asn1crypto import cms, core, x509, algos, tsp
+from json import JSONDecodeError
 
 from odoo import models, fields
 from odoo.tools import BinaryBytes
@@ -25,15 +27,13 @@ class L10n_Eg_EdiThumbDrive(models.Model):
         'You can only have one thumb drive per user per company!',
     )
 
-    def action_sign_invoices(self, invoice_ids):
+    def action_sign_and_send_eta_invoice(self, invoice_json_list):
         self.ensure_one()
         sign_host = self._get_host()
-
         to_sign_dict = dict()
-        for invoice_id in invoice_ids:
-            eta_invoice = json.loads(invoice_id.l10n_eg_eta_json_doc_file.content)['request']
-            signed_attrs = self._generate_signed_attrs__(eta_invoice, invoice_id.l10n_eg_signing_time)
-            to_sign_dict[invoice_id.id] = base64.b64encode(signed_attrs.dump()).decode()
+        for invoice_id, invoice_data in invoice_json_list.items():
+            signed_attrs = self._generate_signed_attrs(invoice_data['invoice'], invoice_data['signing_time'])
+            to_sign_dict[invoice_id] = {**invoice_data, 'sign_attrs': base64.b64encode(signed_attrs.dump()).decode()}
 
         return {
             'type': 'ir.actions.client',
@@ -74,16 +74,18 @@ class L10n_Eg_EdiThumbDrive(models.Model):
     def set_signature_data(self, invoices):
         """ This is called from the browser with the signed data from the local server """
         invoices = json.loads(invoices)
-        for key, value in invoices.items():
+        invoice_ids = self.env['account.move']
+        for key, invoice_vals in invoices.items():
             invoice_id = self.env['account.move'].browse(int(key))
-            eta_invoice_json = json.loads(invoice_id.l10n_eg_eta_json_doc_file.content)
+            invoice_ids |= invoice_id
 
-            signature = self._generate_cades_bes_signature(eta_invoice_json['request'], invoice_id.l10n_eg_signing_time,
-                                                           base64.b64decode(value))
+            signature = self._generate_cades_bes_signature(invoice_vals['invoice'], invoice_id.l10n_eg_signing_time,
+                                                           base64.b64decode(invoice_vals['signature']))
 
-            eta_invoice_json['request']['signatures'] = [{'signatureType': 'I', 'value': signature}]
-            invoice_id.l10n_eg_eta_json_doc_file = BinaryBytes(json.dumps(eta_invoice_json).encode())
-            invoice_id.l10n_eg_is_signed = True
+            invoice_vals['invoice']['signatures'] = [{'signatureType': 'I', 'value': signature}]
+
+        # Send Invoice to ETA for signing
+        self.env['account.move']._l10n_eg_edi_send_invoice(invoices)
         return True
 
     def _get_host(self):
@@ -107,7 +109,7 @@ class L10n_Eg_EdiThumbDrive(models.Model):
                     canonical_str.append(self._serialize_for_signing(elem))
         return ''.join(canonical_str)
 
-    def _generate_signed_attrs__(self, eta_invoice, signing_time):
+    def _generate_signed_attrs(self, eta_invoice, signing_time):
         cert = x509.Certificate.load(self.certificate.content)
         data = hashlib.sha256(self._serialize_for_signing(eta_invoice).encode()).digest()
         return cms.CMSAttributes([
@@ -149,7 +151,7 @@ class L10n_Eg_EdiThumbDrive(models.Model):
             'signature_algorithm': algos.SignedDigestAlgorithm({
                 'algorithm': 'sha256_rsa'
             }),
-            'signed_attrs': self._generate_signed_attrs__(eta_invoice, signing_time)
+            'signed_attrs': self._generate_signed_attrs(eta_invoice, signing_time)
         }
         if signature:
             signer_info['signature'] = signature
