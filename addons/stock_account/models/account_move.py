@@ -8,6 +8,7 @@ class AccountMove(models.Model):
     stock_move_ids = fields.One2many('stock.move', 'account_move_id', string='Stock Move')
     inventory_closing = fields.Boolean(string='Inventory Closing', default=False)
     closing_datetime = fields.Datetime(string='Closing Date')
+    product_value_id = fields.Many2one('product.value', 'account_move_id')
 
     # -------------------------------------------------------------------------
     # OVERRIDE METHODS

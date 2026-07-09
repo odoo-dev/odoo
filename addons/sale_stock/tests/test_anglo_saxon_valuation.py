@@ -147,7 +147,7 @@ class TestAngloSaxonValuation(TestStockValuationCommon, TestSaleStockCommon):
         sale_order.picking_ids.move_ids.write({'quantity': 1, 'picked': True})
         Form.from_action(self.env, sale_order.picking_ids.button_validate()).save().process()
 
-        # change the standard price to 14
+        # change the standard price to 14, amls posted on standard_price change
         self.product_standard_auto.standard_price = 14.0
 
         # deliver the backorder
@@ -176,8 +176,8 @@ class TestAngloSaxonValuation(TestStockValuationCommon, TestSaleStockCommon):
 
         closing_move = self._close()
         self.assertRecordValues(closing_move.line_ids, [
-            {'account_id': self.account_stock_variation.id, 'debit': 0.0, 'credit': 8.0},
-            {'account_id': self.account_stock_valuation.id, 'debit': 8.0, 'credit': 0.0},
+            {'account_id': self.account_stock_variation.id, 'debit': 0.0, 'credit': 4.0},
+            {'account_id': self.account_stock_valuation.id, 'debit': 4.0, 'credit': 0.0},
         ])
 
     # -------------------------------------------------------------------------
@@ -222,7 +222,7 @@ class TestAngloSaxonValuation(TestStockValuationCommon, TestSaleStockCommon):
         sale_order.picking_ids.move_ids.write({'quantity': 1, 'picked': True})
         Form.from_action(self.env, sale_order.picking_ids.button_validate()).save().process()
 
-        # change the standard price to 14
+        # change the standard price to 14, amls posted on standard_price change
         self.product_standard_auto.standard_price = 14.0
 
         # deliver the backorder
@@ -251,8 +251,8 @@ class TestAngloSaxonValuation(TestStockValuationCommon, TestSaleStockCommon):
 
         closing_move = self._close()
         self.assertRecordValues(closing_move.line_ids, [
-            {'account_id': self.account_stock_variation.id, 'debit': 0.0, 'credit': 8.0},
-            {'account_id': self.account_stock_valuation.id, 'debit': 8.0, 'credit': 0.0},
+            {'account_id': self.account_stock_variation.id, 'debit': 0.0, 'credit': 4.0},
+            {'account_id': self.account_stock_valuation.id, 'debit': 4.0, 'credit': 0.0},
         ])
 
     # -------------------------------------------------------------------------

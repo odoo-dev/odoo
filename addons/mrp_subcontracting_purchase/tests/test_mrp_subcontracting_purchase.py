@@ -753,6 +753,7 @@ class MrpSubcontractingPurchaseTest(TestAccountSubcontractingFlows):
         })
 
         self.env['stock.quant']._update_available_quantity(component, self.warehouse.lot_stock_id, total_component_quantity)
+        self.env.invalidate_all()
         # Check quantity was updated
         self.assertEqual(component.virtual_available, total_component_quantity)
         self.assertEqual(component.qty_available, total_component_quantity)

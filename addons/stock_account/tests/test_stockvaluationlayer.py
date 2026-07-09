@@ -1,12 +1,6 @@
 """ Implementation of "INVENTORY VALUATION TESTS" spreadsheet. """
 
-from datetime import timedelta
-from freezegun import freeze_time
-
-from odoo import fields
-from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.stock_account.tests.common import TestStockValuationCommon
-from odoo.exceptions import ValidationError
 from odoo.tests import Form, tagged
 from odoo import Command
 
@@ -340,7 +334,7 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         self.assertEqual(self.product.total_value, 0)
         self.assertEqual(self.product.qty_available, 0)
 
-    @freeze_time("2026-03-10 10:00:00")
+    # https://github.com/odoo/odoo/pull/269686
     def test_return_receipt_1(self):
         """
         Receive a product twice, return one unit and deliver the other one.
@@ -359,7 +353,9 @@ class TestStockValuationAVCO(TestStockValuationCommon):
 
         self._make_return(move2, 1)
         move2.quantity = 0
-        self.assertEqual(self.product.with_context(to_date=fields.Datetime.now() + timedelta(days=1)).total_value, 15.0)
+        # https://github.com/odoo/odoo/pull/269686
+        self.assertEqual(self.product.qty_available, 2)
+        self.assertEqual(self.product.total_value, 30.0)
 
     def test_return_delivery_1(self):
         self._make_in_move(self.product, 1, unit_cost=10)

@@ -16,13 +16,14 @@ def _post_init_hook(env):
 def _create_product_value(env):
     product_vals_list = []
     products = env['product.product'].with_context(prefetch_fields=False).search([('type', '=', 'consu')])
+    now = fields.Datetime.now()
     for company in env['res.company'].search([]):
         products = products.with_company(company)
         product_vals_list += [
             {
                 'product_id': product.id,
                 'value': product.standard_price,
-                'date': fields.Date.today(),
+                'date': now,
                 'company_id': company.id,
                 'description': 'Initial cost',
             }

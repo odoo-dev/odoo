@@ -295,19 +295,22 @@ class ProductProduct(models.Model):
         product_ids_lot_valuated = set()
         date = valuation_date or fields.Datetime.now()
         for product in self:
-            if product.cost_method == 'fifo' or product.standard_price == old_price.get(product):
+            old_value = old_price.get(product)
+            value = product.standard_price
+            if product.cost_method == 'fifo' or value == old_value:
                 continue
-
             if product.lot_valuated:
                 product_ids_lot_valuated.add(product.id)
-
+            quantity = product.qty_available
             product_values.append({
                 'product_id': product.id,
-                'value': product.standard_price,
+                'quantity': quantity,
+                'old_value': old_value,
+                'value': value,
                 'company_id': product.company_id.id or self.env.company.id,
                 'date': date,
-                'description': _('Price update from %(old_price)s to %(new_price)s by %(user)s',
-                    old_price=old_price.get(product), new_price=product.standard_price, user=self.env.user.name)
+                'description': _('Price update from %(old_price)s to %(new_price)s for %(quantity)s by %(user)s',
+                    old_price=old_value, new_price=value, quantity=quantity, user=self.env.user.name)
             })
         self.env['product.value'].sudo().create(product_values)
         if product_ids_lot_valuated:
@@ -471,8 +474,9 @@ class ProductProduct(models.Model):
                     if move.is_in or move.is_dropship:
                         in_qty = move._get_valued_qty()
                         in_value = move.value
-                        if at_date or move.is_dropship:
-                            in_value = move._get_value(at_date=at_date, forced_std_price=average_cost)
+                        # https://github.com/odoo/odoo/pull/269686
+                        if move.is_dropship:
+                            in_value = move._get_value(forced_std_price=average_cost)
                         if lot:
                             lot_qty = move._get_valued_qty(lot)
                             in_value = (in_value * lot_qty / in_qty) if in_qty else 0
@@ -508,13 +512,14 @@ class ProductProduct(models.Model):
     def _run_fifo_batch(self, at_date=None, lot=None, location=None):
         std_price_by_product_id = {}
         value_by_product_id = {}
+        now = fields.Datetime.now()
         for product in self:
-            quantity = product.qty_available
-            if lot:
-                quantity = lot.product_qty
+            if at_date and at_date < now:
+                quantity = lot.with_context(to_date=at_date).product_qty if lot else product.with_context(to_date=at_date).qty_available
+            else:
+                quantity = lot.product_qty if lot else product.qty_available
             value = product._run_fifo(quantity, lot, at_date, location)
-            std_price = value / quantity if quantity else 0
-            std_price_by_product_id[product.id] = std_price
+            std_price_by_product_id[product.id] = value / quantity if quantity else 0
             value_by_product_id[product.id] = value
 
         return std_price_by_product_id, value_by_product_id
@@ -528,7 +533,6 @@ class ProductProduct(models.Model):
                 last_in = self._get_last_in(at_date)
                 return quantity * (last_in._get_price_unit() if last_in else std_price)
             return quantity * std_price
-        external_location = location and location.is_valued_external
 
         fifo_cost = 0
         fifo_stack, qty_on_first_move = self._run_fifo_get_stack(lot=lot, at_date=at_date, location=location)
@@ -538,8 +542,7 @@ class ProductProduct(models.Model):
             move = fifo_stack.pop(0)
             last_move = move
             move_value = move.value
-            if at_date:
-                move_value = move._get_value(at_date=at_date)
+            # https://github.com/odoo/odoo/pull/269686
             if qty_on_first_move:
                 valued_qty = move._get_valued_qty()
                 in_qty = qty_on_first_move
@@ -569,7 +572,7 @@ class ProductProduct(models.Model):
         if location:
             self = self.with_context(location=location.ids)  # noqa: PLW0642
         if lot:
-            fifo_stack_size = lot.product_qty
+            fifo_stack_size = lot.with_context(to_date=at_date).product_qty
         else:
             fifo_stack_size = self._with_valuation_context().with_context(to_date=at_date).qty_available
         if self.env.context.get('fifo_qty_already_processed'):
@@ -627,6 +630,27 @@ class ProductProduct(models.Model):
             products = self_ctx.env['product.product'].browse(product_ids)
             if cost_method == 'standard':
                 continue
+            # https://github.com/odoo/odoo/pull/269686
+            if extra_value is not None and extra_quantity is not None:
+                products_with_incremental_recompute = (
+                    self.env['product.product'].concat(extra_value.keys()) & products
+                ).with_context(
+                    allowed_company_ids=self.env.company.ids
+                )._with_valuation_context()
+                products_with_incremental_recompute.fetch(['qty_available'])
+                for product in products_with_incremental_recompute:
+                    added_value = extra_value.get(product)
+                    added_qty = extra_quantity.get(product)
+                    previous_qty = product.qty_available - added_qty
+                    if (
+                            product.uom_id.compare(previous_qty, 0) > 0
+                            and product.uom_id.compare(product.qty_available, 0) > 0
+                    ):
+                        new_avg_cost = (previous_qty * product.standard_price + added_value) / product.qty_available
+                    else:
+                        new_avg_cost = added_value / added_qty
+                    product.with_context(disable_auto_revaluation=True).sudo().standard_price = new_avg_cost
+                products = products - products_with_incremental_recompute
             if cost_method == 'fifo':
                 for product in products:
                     qty_available = product._with_valuation_context().qty_available
@@ -635,8 +659,9 @@ class ProductProduct(models.Model):
                     elif last_in := product._get_last_in():
                         if last_in_price_unit := last_in._get_price_unit():
                             product.sudo().standard_price = last_in_price_unit
-                continue
-            if cost_method == 'average':
+            # https://github.com/odoo/odoo/pull/269686
+            #     continue
+            elif cost_method == 'average':
                 new_standard_price_by_product = self._run_average_batch(force_recompute=True)[0]
                 for product in products:
                     if product.id in new_standard_price_by_product:
