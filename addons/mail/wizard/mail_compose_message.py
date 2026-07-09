@@ -750,7 +750,19 @@ class MailComposeMessage(models.TransientModel):
 
     def action_schedule_message(self):
         self._action_schedule_message()
-        return {'type': 'ir.actions.act_window_close'}
+        res_ids = self._evaluate_res_ids()
+        res_id = res_model = False
+        if self.model and len(res_ids) == 1 and self.composition_mode == 'comment':
+            res_id = res_ids[0]
+            res_model = self.model
+        return {
+            "type": "ir.actions.client",
+            "tag": "action_send_mail_callback",
+            "params": {
+                "res_id": res_id,
+                "res_model": res_model,
+            },
+        }
 
     def _prepare_schedule_message_post_values(self, post_values):
         """ Override this method to add additional values to the 'mail.scheduled.message' record creation.
@@ -797,14 +809,18 @@ class MailComposeMessage(models.TransientModel):
         """ Used for action button that do not accept arguments. """
         self._action_send_mail(auto_commit=False)
         res_ids = self._evaluate_res_ids()
-        record_name = False
+        record_name = res_id = res_model = False
         if self.model and len(res_ids) == 1 and self.composition_mode == 'comment':
             record_name = self.env[self.model].browse(res_ids[0]).display_name
+            res_id = res_ids[0]
+            res_model = self.model
         return {
             "type": "ir.actions.client",
             "tag": "action_send_mail_callback",
             "params": {
                 "record_name": record_name,
+                "res_id": res_id,
+                "res_model": res_model,
             },
         }
 
