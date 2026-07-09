@@ -196,7 +196,7 @@
                                                     <field name="name" invisible="not name" class="flex-grow-1 fw-bold"/>
                                                     <field name="type" invisible="name" class="flex-grow-1 fw-bold"/>
                                                     <span t-if="record.type.raw_value != 'contact'" class="text-muted">
-                                                        <i class="fa fa-fw me-1" t-att-class="{'invoice': 'fa-file','delivery': 'fa-truck', 'other': 'fa-cube'}[record.type.raw_value]" role="img" t-att-title="{'invoice': 'Invoice','delivery': 'Delivery', 'other': 'Other'}[record.type.raw_value]"/>
+                                                        <i class="oi oi-fw me-1" t-att-data-icon="{'invoice': 'description','delivery': 'local_shipping', 'other': 'deployed_code'}[record.type.raw_value]" role="img" t-att-title="{'invoice': 'Invoice','delivery': 'Delivery', 'other': 'Other'}[record.type.raw_value]"/>
                                                         <field name="type"/> address
                                                     </span>
                                                 </div>

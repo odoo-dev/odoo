@@ -29,6 +29,7 @@ export const booleanIconField = {
     supportedTypes: ["boolean"],
     extractProps: ({ options, string }) => ({
         icon: options.icon,
+        icon_class: options.icon_class,
         label: string,
     }),
 };
