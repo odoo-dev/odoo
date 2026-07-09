@@ -8,7 +8,12 @@ from odoo.addons.sale_loyalty.tests.common import TestSaleCouponCommon
 
 @tagged("-at_install", "post_install")
 class TestPayWithGiftCard(TestSaleCouponCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+    )
+
+    _test_user_name = 'Test Sales & Product Manager'
 
     def test_paying_with_single_gift_card_over(self):
         self.env["loyalty.generate.wizard"].with_context(

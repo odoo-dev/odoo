@@ -8,7 +8,9 @@ from odoo.addons.base.tests.common import BaseCommon
 @tagged('-at_install', 'post_install')
 class TestUsersHttp(BaseCommon, HttpCase):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     @classmethod
     def setUpClass(cls):
@@ -51,7 +53,8 @@ class TestUsersHttp(BaseCommon, HttpCase):
         """Test that bank account holder name updates when partner name changes via /my/account route."""
         portal_user = self.portal_user.partner_id
 
-        bank_account = self.env['res.partner.bank'].create({
+        # Master-data setup: create a bank account (run as sudo)
+        bank_account = self.env['res.partner.bank'].sudo().create({
             'account_number': '123456789',
             'partner_id': portal_user.id,
             'holder_name': 'Partner A Holder',
@@ -138,12 +141,14 @@ class TestUsersHttp(BaseCommon, HttpCase):
     def test_deactivate_portal_user(self):
         # Create a portal user with data which should be removed on deactivation
         portal_user = self.portal_user
-        self.env['res.users.apikeys'].with_user(portal_user)._generate(
+        # Master-data setup: generate an API key for the portal user (run as
+        # sudo, as documented on res.users.apikeys._generate).
+        self.env['res.users.apikeys'].with_user(portal_user).sudo()._generate(
             'rpc',
             'Portal API Key',
             datetime.now() + timedelta(days=1)
         )
-        self.assertTrue(portal_user.api_key_ids)
+        self.assertTrue(portal_user.sudo().api_key_ids)
 
         # Request the deactivation of the portal account as portal through the route meant for this purpose
         self.authenticate(self.portal_user.login, self.portal_user.login)
@@ -161,7 +166,7 @@ class TestUsersHttp(BaseCommon, HttpCase):
         # Assert the password is an empty string. In `check_credentials`, an empty string as password is invalid
         # so you are not able to login with an empty password.
         self.assertTrue(self.env['res.users']._crypt_context().verify('', hashed))
-        self.assertFalse(portal_user.api_key_ids)
+        self.assertFalse(portal_user.sudo().api_key_ids)
         # Assert the deletion of the account is added to the deletion processing queue.
         self.assertTrue(self.env['res.users.deletion'].search([('user_id', '=', portal_user.id)]))
         # Run the cron processing the deletion queue
@@ -172,7 +177,8 @@ class TestUsersHttp(BaseCommon, HttpCase):
     def test_submit_address_from_anonymous_partner(self):
         portal_user = self.portal_user
         self.authenticate(portal_user.login, portal_user.login)
-        anonymous_partner = self.env['res.partner'].create({
+        # Master-data setup: create the address partner to submit (run as sudo)
+        anonymous_partner = self.env['res.partner'].sudo().create({
             'type': 'invoice',
             'parent_id': portal_user.commercial_partner_id.id,
         })

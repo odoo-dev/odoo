@@ -12,7 +12,12 @@ class TestProgramWithCodeOperations(TestSaleCouponCommon):
     # Test the basic operation (apply_coupon) on a coupon program on which we should apply the
     # reward when the code is correct or remove the reward automatically when the reward is not
     # valid anymore.
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+    )
+
+    _test_user_name = 'Test Sales & Product Manager'
 
     @classmethod
     def setUpClass(cls):

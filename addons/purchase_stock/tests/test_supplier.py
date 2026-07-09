@@ -4,7 +4,11 @@ from odoo.tests import tagged
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestSupplier(TestStockCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+    )
+
+    _test_user_name = 'Test Product Manager'
 
     def test_display_name(self):
         supplier = self.env['product.supplierinfo'].create({

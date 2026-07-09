@@ -12,7 +12,13 @@ from odoo.tests.common import HttpCase
 @tagged('post_install', '-at_install')
 class TestPurchaseOrderSuggest(PurchaseTestCommon, HttpCase):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'purchase.group_purchase_user',
+        'stock.group_stock_manager',  # setup master-data: stock.warehouse create in setUpClass + stock.quant/picking prep
+        'product.group_product_manager',  # setup master-data: product.product create in setUpClass and test bodies
+    )
+
+    _test_user_name = 'Test User'
 
     @classmethod
     def setUpClass(cls):

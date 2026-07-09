@@ -8,7 +8,9 @@ from odoo.addons.test_orm.tests.test_domain_expression import TransactionExpress
 
 @tagged('at_install', '-post_install')
 class TestSearch(TestOrmPartnerCommon, TransactionCase):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     @classmethod
     def setUpClass(cls):
@@ -86,7 +88,9 @@ class TestSearch(TestOrmPartnerCommon, TransactionCase):
         field does not interfere with the standard behaviour
         """
         model = self.env['test_orm.related_bar']
-        self.env['ir.model.fields'].create({
+        # Creating a custom field is schema setup (requires access to ir.model),
+        # not the subject under test (the search behaviour with x_active) -> sudo.
+        self.env['ir.model.fields'].sudo().create({
             'name': 'x_active',
             'model_id': self.env.ref('test_orm.model_test_orm_related_bar').id,
             'ttype': 'boolean',

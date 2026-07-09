@@ -11,7 +11,9 @@ from odoo.addons.pos_self_order.tests.self_order_common_test import SelfOrderCom
 @odoo.tests.tagged("post_install", "-at_install")
 class TestSelfOrderMobile(SelfOrderCommonTest, OnlinePaymentCommon):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def _fake_online_payment(self, pos_order_id, access_token, expected_payment_provider_id, exit_route=None, confirmation_page=True):
         res = super()._fake_online_payment(pos_order_id, access_token, expected_payment_provider_id, exit_route=exit_route, confirmation_page=confirmation_page)

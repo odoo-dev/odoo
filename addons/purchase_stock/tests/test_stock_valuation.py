@@ -6,7 +6,16 @@ from .common import PurchaseTestCommon
 
 
 class TestPurchaseStockValuation(PurchaseTestCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'purchase.group_purchase_user',
+        'stock.group_stock_user',
+        'account.group_account_invoice',
+        # SUJET testé : test_move_standard écrit standard_price pour déclencher la revalorisation
+        # (product.product write -> product.group_product_manager).
+        'product.group_product_manager',
+    )
+
+    _test_user_name = 'Test User'
 
     def test_move_value(self):
         """This test ensure the move value is correct. The move value
@@ -59,7 +68,8 @@ class TestPurchaseStockValuation(PurchaseTestCommon):
         self.assertEqual(self.product_avco.total_value, 140)
 
     def test_move_value_at_date(self):
-        self.env['product.value'].search([]).unlink()
+        # SETUP master-data: purge des product.value (stock.group_stock_manager) -> sudo
+        self.env['product.value'].sudo().search([]).unlink()
         with freeze_time('2025-01-01'):
             po = self._create_purchase(self.product_avco, 10, 8)
 
@@ -75,7 +85,8 @@ class TestPurchaseStockValuation(PurchaseTestCommon):
         self.assertEqual(self.product_avco.with_context(to_date="2025-01-03").total_value, 120)
 
     def test_move_value_with_small_decimals(self):
-        self.env.ref('product.decimal_price').digits = 5
+        # SETUP master-data: decimal.precision admin-only -> sudo
+        self.env.ref('product.decimal_price').sudo().digits = 5
         po = self._create_purchase(self.product_avco, 1500, 3.30125)
         move = self._receive(purchase_order=po)
         self.assertEqual(move.value, 4951.88)
@@ -84,7 +95,8 @@ class TestPurchaseStockValuation(PurchaseTestCommon):
         self.assertEqual(move.value, 4951.88)
 
     def test_move_value_multi_currency(self):
-        self.env['product.value'].search([]).unlink()
+        # SETUP master-data: purge des product.value (stock.group_stock_manager) -> sudo
+        self.env['product.value'].sudo().search([]).unlink()
         self._use_multi_currencies([
             ('2025-01-01', 1.25),
             ('2025-01-02', 1.5),
@@ -124,8 +136,9 @@ class TestPurchaseStockValuation(PurchaseTestCommon):
         self.assertEqual(self.product_avco.total_value, 100)
 
     def test_move_value_uom(self):
-        uom_pack_of_10 = self.env['uom.uom'].create({'name': 'Pack of 10', 'relative_uom_id': self.uom.id, 'relative_factor': 10})
-        uom_pack_of_1_on_10 = self.env['uom.uom'].create({'name': 'Pack of 1/10', 'relative_uom_id': self.uom.id, 'relative_factor': 1 / 10})
+        # SETUP master-data: uom.uom create (base.group_system) -> sudo
+        uom_pack_of_10 = self.env['uom.uom'].sudo().create({'name': 'Pack of 10', 'relative_uom_id': self.uom.id, 'relative_factor': 10})
+        uom_pack_of_1_on_10 = self.env['uom.uom'].sudo().create({'name': 'Pack of 1/10', 'relative_uom_id': self.uom.id, 'relative_factor': 1 / 10})
         self.product_avco.uom_ids = [Command.link(uom_pack_of_10.id), Command.link(uom_pack_of_1_on_10.id)]
         po = self._create_purchase(self.product_avco, 5, 100, uom=uom_pack_of_10)
         move = self._receive(purchase_order=po)

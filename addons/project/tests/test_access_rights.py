@@ -22,7 +22,9 @@ class TestAccessRights(TestProjectCommon):
 
 class TestCRUDVisibilityFollowers(TestAccessRights):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def setUp(self):
         super().setUp()
@@ -118,7 +120,9 @@ class TestCRUDVisibilityFollowers(TestAccessRights):
 
 class TestCRUDVisibilityPortal(TestAccessRights):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def setUp(self):
         super().setUp()
@@ -147,7 +151,9 @@ class TestCRUDVisibilityPortal(TestAccessRights):
 
 class TestCRUDVisibilityEmployees(TestAccessRights):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def setUp(self):
         super().setUp()
@@ -171,7 +177,9 @@ class TestCRUDVisibilityEmployees(TestAccessRights):
 
 class TestAllowedUsers(TestAccessRights):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def setUp(self):
         super().setUp()
@@ -343,7 +351,9 @@ class TestPortalProject(TestProjectPortalCommon):
 @tagged('at_install', '-post_install')  # LEGACY at_install, fails post install
 class TestAccessRightsPrivateTask(TestAccessRights):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     @classmethod
     def setUpClass(cls):
@@ -433,7 +443,9 @@ class TestAccessRightsPrivateTask(TestAccessRights):
 
 class TestAccessRightsInvitedUsers(TestAccessRights):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     @classmethod
     def setUpClass(cls):

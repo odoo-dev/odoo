@@ -8,7 +8,11 @@ from odoo.addons.stock.tests.common import TestStockCommon
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestAnalyticLine(TestStockCommon):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+    )
+
+    _test_user_name = 'Test Product Manager'
 
     @classmethod
     def setUpClass(cls):

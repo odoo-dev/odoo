@@ -10,7 +10,9 @@ from odoo.addons.base.tests.common import BaseCommon
 @tagged('-at_install', 'post_install')
 class TestPortalAddresses(BaseCommon, HttpCase):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     @classmethod
     def setUpClass(cls):
@@ -123,8 +125,8 @@ class TestPortalAddresses(BaseCommon, HttpCase):
         csrf_token = self.csrf_token()
 
         internal_partner = self.internal_user.partner_id
-        # Fill the incomplete address
-        internal_partner.write(self.default_address_values)
+        # Fill the incomplete address (master-data setup, run as sudo)
+        internal_partner.sudo().write(self.default_address_values)
 
         # Try to update the account name
         res = self._submit_address_values({
@@ -140,8 +142,8 @@ class TestPortalAddresses(BaseCommon, HttpCase):
         csrf_token = self.csrf_token()
 
         internal_partner = self.internal_user.partner_id
-        # Fill the incomplete address
-        internal_partner.write(self.default_address_values)
+        # Fill the incomplete address (master-data setup, run as sudo)
+        internal_partner.sudo().write(self.default_address_values)
 
         # Try to update the account email
         res = self._submit_address_values({
@@ -351,7 +353,8 @@ class TestPortalAddresses(BaseCommon, HttpCase):
                 self.archive_url, params={'partner_id': self.account_b.partner_id.id},
             )
 
-        child_partner = self.env['res.partner'].create({
+        # Master-data setup: create a child address to archive (run as sudo)
+        child_partner = self.env['res.partner'].sudo().create({
             'parent_id': self.account_a.partner_id.id,
             'type': 'delivery',
             'street': 'Nowhere',

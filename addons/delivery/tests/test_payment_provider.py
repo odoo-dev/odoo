@@ -7,7 +7,12 @@ from odoo.addons.delivery.tests.cash_on_delivery_common import CashOnDeliveryCom
 
 @tagged("post_install", "-at_install")
 class TestCODPaymentProvider(CashOnDeliveryCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+    )
+
+    _test_user_name = 'Test Sales & Product Manager'
 
     def test_cod_provider_available_when_dm_cod_enabled(self):
         order = self.sale_order

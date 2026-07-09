@@ -264,7 +264,9 @@ class TestORM(TransactionCase):
 
 @tagged('at_install', '-post_install')
 class TestRecordset(TestOrmPartnerCommon, TransactionCase):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     @classmethod
     def setUpClass(cls):
@@ -359,7 +361,7 @@ class TestRecordset(TestOrmPartnerCommon, TransactionCase):
             self.assertEqual(partner.env, self.env)
 
         # Create a new environment
-        demo = self.env['res.users'].create({
+        demo = self.env['res.users'].sudo().create({
             'name': 'test_environment_demo',
             'login': 'test_environment_demo',
             'password': 'test_environment_demo',

@@ -8,7 +8,12 @@ from odoo.addons.delivery.tests.cash_on_delivery_common import CashOnDeliveryCom
 
 @tagged("post_install", "-at_install")
 class TestCODPaymentTransaction(CashOnDeliveryCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+    )
+
+    _test_user_name = 'Test Sales & Product Manager'
 
     def test_choosing_cod_payment_confirms_order(self):
         order = self.sale_order
@@ -18,7 +23,9 @@ class TestCODPaymentTransaction(CashOnDeliveryCommon):
             flow="direct",
             state="done",
             provider_id=self.cod_provider.id,
-            payment_method_id=self.cod_provider.payment_method_ids.id,
+            # provider config (payment methods) is restricted to admins; reading it
+            # is test setup, not the subject (COD confirming the order) -> sudo.
+            payment_method_id=self.cod_provider.sudo().payment_method_ids.id,
             sale_order_ids=[order.id],
         )
         with mute_logger("odoo.addons.sale.models.payment_transaction"):

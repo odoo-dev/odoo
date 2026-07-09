@@ -12,7 +12,9 @@ _logger = logging.getLogger(__name__)
 
 @tagged('at_install', '-post_install')
 class TestPerformance(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     @classmethod
     def setUpClass(cls):

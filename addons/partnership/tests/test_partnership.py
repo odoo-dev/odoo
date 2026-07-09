@@ -10,7 +10,12 @@ from .common import PartnershipCommon
 @tagged('post_install', '-at_install')
 class TestPartnership(PartnershipCommon):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+    )
+
+    _test_user_name = 'Test Sale & Product Manager'
 
     def test_sell_basic_partnership(self):
         self.sale_order_partnership.action_confirm()
@@ -31,11 +36,11 @@ class TestPartnership(PartnershipCommon):
             'type': 'service',
             'list_price': 100.00,
             'service_tracking': 'partnership',
-            'grade_id': self.env['res.partner.grade'].create({'name': 'A+'}).id,
+            'grade_id': self.env['res.partner.grade'].sudo().create({'name': 'A+'}).id,
         })
         with self.assertRaises(ValidationError):
             # A sale order cannot contain partnership products assigning different grade levels
-            self.sale_order_partnership.order_line = [Command.create({'product_id': partnership.id})]
+            self.sale_order_partnership.sudo().order_line = [Command.create({'product_id': partnership.id})]
 
     def test_partnership_product_domain(self):
         ProductTemplate = self.env['product.template']

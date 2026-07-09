@@ -20,7 +20,12 @@ from odoo.addons.sale_pdf_quote_builder.controllers.quotation_document import (
 
 @tagged("-at_install", "post_install")
 class TestPDFQuoteBuilder(SaleManagementCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+    )
+
+    _test_user_name = 'Test Sales & Product Manager'
 
     @classmethod
     def setUpClass(cls):
@@ -59,7 +64,11 @@ class TestPDFQuoteBuilder(SaleManagementCommon):
         cls.internal_user = cls._create_new_internal_user(
             login="internal.user@test.odoo.com", groups="sales_team.group_sale_salesman"
         )
-        cls.alt_company = cls.env["res.company"].create({"name": "Backup Company"})
+        cls.alt_company = cls.env["res.company"].sudo().create({"name": "Backup Company"})
+        if cls._test_user:
+            # The upload controller sets `allowed_company_ids` including alt_company;
+            # the restricted test user must belong to it or env.companies raises.
+            cls._test_user.sudo().company_ids = [Command.link(cls.alt_company.id)]
 
     def _create_so_form(self, **values):
         SaleOrder = self.env["sale.order"].with_context(default_partner_id=self.partner.id)
@@ -75,7 +84,7 @@ class TestPDFQuoteBuilder(SaleManagementCommon):
         self.assertEqual(self.sale_order.customizable_pdf_form_fields, False)
 
     def test_dynamic_fields_mapping_for_quotation_document(self):
-        FormField = self.env["sale.pdf.form.field"]
+        FormField = self.env["sale.pdf.form.field"].sudo()
         new_form_field = partial(dict, document_type="quotation_document")
         new_form_fields = FormField.create([
             new_form_field(name="boolean_test", path="locked"),
@@ -113,7 +122,8 @@ class TestPDFQuoteBuilder(SaleManagementCommon):
     def test_dynamic_fields_mapping_for_product_document(self):
         self.sale_order.commitment_date = "2121-12-21 12:21:12"
         sol_1, sol_2 = self.sale_order.order_line
-        sol_1.update({
+        # `tax_ids` command creates account.tax master data (accounting-admin only).
+        sol_1.sudo().update({
             "sequence": 0,
             "discount": 4.99,
             "tax_ids": [
@@ -122,7 +132,7 @@ class TestPDFQuoteBuilder(SaleManagementCommon):
             ],
         })
         new_form_field = partial(dict, document_type="product_document")
-        new_form_fields = self.env["sale.pdf.form.field"].create([
+        new_form_fields = self.env["sale.pdf.form.field"].sudo().create([
             new_form_field(name="boolean_test", path="order_id.locked"),
             new_form_field(name="char_test", path="order_id.name"),
             new_form_field(name="date_test", path="order_id.validity_date"),

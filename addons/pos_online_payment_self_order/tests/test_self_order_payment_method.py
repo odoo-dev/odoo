@@ -8,7 +8,9 @@ from odoo.addons.pos_online_payment.tests.online_payment_common import OnlinePay
 
 @odoo.tests.tagged("post_install", "-at_install")
 class TestSelfOrderOnlinePaymentMethod(SelfOrderCommonTest, OnlinePaymentCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def setUp(self):
         super().setUp()

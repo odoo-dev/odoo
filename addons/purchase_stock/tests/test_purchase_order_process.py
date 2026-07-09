@@ -8,7 +8,13 @@ from .common import PurchaseTestCommon
 @tagged('post_install', '-at_install')
 class TestPurchaseOrderProcess(PurchaseTestCommon):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'purchase.group_purchase_user',
+        'stock.group_stock_manager',  # setup master-data: route_mto.active write (test_merge_po_references)
+        'product.group_product_manager',  # setup master-data: self.product.copy() (test_02_vendor_delay_report_partially_cancelled_purchase_order)
+    )
+
+    _test_user_name = 'Test User'
 
     @users('purchase_user')
     def test_00_cancel_purchase_order_flow(self):

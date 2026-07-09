@@ -18,7 +18,12 @@ class TestProgramRules(TestSaleCouponCommon, PaymentCommon):
     # Test all the validity rules to allow a customer to have a reward.
     # The check based on the products is already done in the basic operations test
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+    )
+
+    _test_user_name = 'Test Sales & Product Manager'
 
     def test_program_rules_minimum_purchased_amount(self):
         # Test case: Based on the minimum purchased

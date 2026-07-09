@@ -2,7 +2,13 @@ from .common import PurchaseTestCommon
 
 
 class TestPurchaseOrderStock(PurchaseTestCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'purchase.group_purchase_user',
+        'stock.group_stock_user',
+        'account.group_account_invoice',
+    )
+
+    _test_user_name = 'Test User'
 
     def test_inventory_user_access_right(self):
         """ Test to check if Inventory/User is able to validate a

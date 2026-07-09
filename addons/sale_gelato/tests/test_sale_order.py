@@ -9,7 +9,12 @@ from odoo.addons.sale_gelato.tests.common import GelatoCommon
 
 @tagged("post_install", "-at_install")
 class TestSaleOrder(GelatoCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+    )
+
+    _test_user_name = 'Test Sales & Product Manager'
 
     def test_allow_adding_generic_service_product_to_gelato_order(self):
         """Test that adding a non-gelato, service product to a Gelato order is allowed."""

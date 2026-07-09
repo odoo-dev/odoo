@@ -9,7 +9,18 @@ from .common import PurchaseTestCommon
 
 
 class TestPurchaseOrderInvoice(PurchaseTestCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'purchase.group_purchase_user',
+        'stock.group_stock_user',
+        'account.group_account_invoice',
+        # FIXME stock_account account_accountant/models/res_company.py:290 (compute_fiscalyear_dates lit
+        # account.fiscal.year sans sudo) révélé par TestPurchaseOrderInvoice._close ; et
+        # stock_account/tests/common.py:79 (_use_price_diff crée account.account) hors de ce module.
+        # group_account_manager couvre le read fiscal.year (implique readonly) et le create account.account.
+        'account.group_account_manager',
+    )
+
+    _test_user_name = 'Test User'
 
     def test_invoice_standard(self):
         po = self._create_purchase(self.product_standard, price_unit=12)
@@ -84,7 +95,8 @@ class TestPurchaseOrderInvoice(PurchaseTestCommon):
 
     def test_invoice_standard_auto_rounding_price_unit(self):
         self._use_price_diff()
-        self.env.ref("product.decimal_price").digits = 6
+        # SETUP master-data: decimal.precision admin-only -> sudo au point d'usage
+        self.env.ref("product.decimal_price").sudo().digits = 6
         self.product_standard_auto.standard_price = 0.0005
 
         purchase_order = self._create_purchase(self.product_standard_auto, quantity=100000, receive=True)
@@ -106,7 +118,8 @@ class TestPurchaseOrderInvoice(PurchaseTestCommon):
     def test_invoice_standard_auto_with_discount(self):
         self._use_price_diff()
         self.product_standard_auto.standard_price = 100
-        self.env.ref("product.decimal_discount").digits = 5
+        # SETUP master-data: decimal.precision admin-only -> sudo au point d'usage
+        self.env.ref("product.decimal_discount").sudo().digits = 5
 
         purchase_order = self._create_purchase(self.product_standard_auto, price_unit=100, quantity=10000, receive=True)
         bill = self._create_bill(purchase_order=purchase_order, post=False)
@@ -157,7 +170,8 @@ class TestPurchaseOrderInvoice(PurchaseTestCommon):
             self._close()
 
     def test_invoice_avco_tax_without_account(self):
-        tax_with_no_account = self.env['account.tax'].create({
+        # SETUP master-data: tax création de préparation -> sudo
+        tax_with_no_account = self.env['account.tax'].sudo().create({
             'name': "Tax with no account",
             'amount_type': 'fixed',
             'amount': 5,

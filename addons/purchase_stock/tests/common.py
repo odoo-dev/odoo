@@ -7,12 +7,10 @@ from odoo import tools
 
 
 class PurchaseTestCommon(TestStockValuationCommon):
-    _test_user_groups = (
-        'stock.group_stock_user',
-        'purchase.group_purchase_user',
-    )
 
-    _test_user_name = 'Test Purchase & Stock User'
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def _create_bill(self, product=None, quantity=None, price_unit=None, post=True, **kwargs):
         if 'purchase_order' not in kwargs:

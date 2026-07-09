@@ -4,7 +4,9 @@ from odoo.addons.base.tests.common import BaseCommon
 
 @tagged('post_install', '-at_install')
 class TestMultilevelConstraints(BaseCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     @classmethod
     def setUpClass(cls):

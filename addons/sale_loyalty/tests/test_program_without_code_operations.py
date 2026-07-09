@@ -11,7 +11,12 @@ class TestProgramWithoutCodeOperations(TestSaleCouponCommon):
     # Test some basic operation (create, write, unlink) on an immediate coupon program on which we
     # should apply or remove the reward automatically, as there's no program code.
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+    )
+
+    _test_user_name = 'Test Sales & Product Manager'
 
     def test_immediate_program_basic_operation(self):
 

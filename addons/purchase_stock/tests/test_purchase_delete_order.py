@@ -11,7 +11,11 @@ from .common import PurchaseTestCommon
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestDeleteOrder(PurchaseTestCommon):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'stock.group_stock_manager',  # FIXME: use stock.group_stock_user
+    )
+
+    _test_user_name = 'Test User'
 
     @users('purchase_user')
     def test_00_delete_order(self):

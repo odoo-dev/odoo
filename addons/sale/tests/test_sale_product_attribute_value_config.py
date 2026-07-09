@@ -9,7 +9,11 @@ from odoo.addons.product.tests.test_product_attribute_value_config import (
 
 @tagged("post_install", "-at_install")
 class TestSaleProductAttributeValueConfig(TestProductAttributeValueCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'product.group_product_manager',
+    )
+
+    _test_user_name = 'Test Product Manager'
 
     def test_01_is_combination_possible_archived(self):
         """The goal is to test the possibility of archived combinations.
@@ -41,14 +45,14 @@ class TestSaleProductAttributeValueConfig(TestProductAttributeValueCommon):
             # Create a dummy SO to prevent the variant from being deleted by
             # _create_variant_ids() because the variant is a related field that
             # is required on the SO line
-            so = self.env["sale.order"].create({"partner_id": self.ref("base.partner_root")})
-            self.env["sale.order.line"].create({
+            so = self.env["sale.order"].sudo().create({"partner_id": self.ref("base.partner_root")})
+            self.env["sale.order.line"].sudo().create({
                 "order_id": so.id,
                 "name": "test",
                 "product_id": variant.id,
             })
             # additional variant to test correct ignoring when mismatch values
-            self.env["sale.order.line"].create({
+            self.env["sale.order.line"].sudo().create({
                 "order_id": so.id,
                 "name": "test",
                 "product_id": variant2.id,
@@ -112,7 +116,7 @@ class TestSaleProductAttributeValueConfig(TestProductAttributeValueCommon):
             self.computer_ssd_attribute_lines.write({"active": False})
 
             variant4 = self.computer._get_variant_for_combination(computer_ram_8 + computer_hdd_1)
-            self.env["sale.order.line"].create({
+            self.env["sale.order.line"].sudo().create({
                 "order_id": so.id,
                 "name": "test",
                 "product_id": variant4.id,
@@ -129,7 +133,7 @@ class TestSaleProductAttributeValueConfig(TestProductAttributeValueCommon):
             computer_hdd_2 = self._get_product_template_attribute_value(self.hdd_2)
 
             variant5 = self.computer._get_variant_for_combination(computer_ram_8 + computer_hdd_1)
-            self.env["sale.order.line"].create({
+            self.env["sale.order.line"].sudo().create({
                 "order_id": so.id,
                 "name": "test",
                 "product_id": variant5.id,

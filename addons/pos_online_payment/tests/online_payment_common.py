@@ -9,7 +9,10 @@ from odoo.addons.pos_online_payment.controllers.payment_portal import PaymentPor
 
 
 class OnlinePaymentCommon(PaymentHttpCommon):
-    _test_user_groups = None
+
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def _fake_http_get_request(self, route):
         url = self._build_url(route)

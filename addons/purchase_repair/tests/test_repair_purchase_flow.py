@@ -8,7 +8,9 @@ from odoo.addons.purchase_stock.tests.common import PurchaseTestCommon
 @tagged('post_install', '-at_install')
 class TestRepairPurchaseFlow(PurchaseTestCommon):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def test_repair_with_purchase_mto_link(self):
         """

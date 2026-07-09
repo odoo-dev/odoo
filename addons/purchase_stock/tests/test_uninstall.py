@@ -8,10 +8,16 @@ from .common import PurchaseTestCommon
 
 @tagged('post_install', '-at_install')
 class TestUninstallPurchaseStock(PurchaseTestCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = (
+        'purchase.group_purchase_user',
+        'stock.group_stock_user',
+    )
+
+    _test_user_name = 'Test User'
 
     def test_qty_received_method(self):
-        partner = self.env['res.partner'].create({'name': 'Test Partner'})
+        # setup master-data: test partner -> sudo
+        partner = self.env['res.partner'].sudo().create({'name': 'Test Partner'})
         purchase_order = self.env['purchase.order'].create({
             'partner_id': partner.id,
             'state': 'purchase',
@@ -30,7 +36,8 @@ class TestUninstallPurchaseStock(PurchaseTestCommon):
 
         self.assertEqual(purchase_order.order_line.qty_received, 1)
 
-        stock_moves_option = self.env['ir.model.fields.selection'].search([
+        # SETUP master-data: introspection ir.model.fields.selection (admin-only) -> sudo
+        stock_moves_option = self.env['ir.model.fields.selection'].sudo().search([
             ('field_id.model', '=', 'purchase.order.line'),
             ('field_id.name', '=', 'qty_received_method'),
             ('value', '=', 'stock_moves'),

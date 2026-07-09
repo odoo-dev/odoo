@@ -9,7 +9,9 @@ from odoo.addons.pos_online_payment_self_order.tests.test_self_order_mobile impo
 @odoo.tests.tagged("post_install", "-at_install")
 class TestSelfOrderFakePayment(TestSelfOrderMobile):
 
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def test_online_payment_mobile(self):
         self.pos_config.write({
@@ -88,7 +90,9 @@ class TestSelfOrderFakePayment(TestSelfOrderMobile):
 
 @odoo.tests.tagged("post_install", "-at_install")
 class TestSelfOrderFakePaymentMail(MailCase, TestSelfOrderMobile):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def test_online_payment_mobile_sends_mail_after_payment(self):
         self.pos_config.write({

@@ -10,7 +10,9 @@ from .common import PurchaseTestCommon
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
 class TestReplenishWizard(PurchaseTestCommon):
-    _test_user_groups = None  # FIXME list needed groups
+    _test_user_groups = ('base.group_user',)
+
+    _test_user_name = 'Test User'
 
     def _get_purchase_order_from_replenishment(self, replenish_wizard):
         notification = replenish_wizard.launch_replenishment()
