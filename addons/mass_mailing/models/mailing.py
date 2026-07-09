@@ -83,12 +83,7 @@ class MailingMailing(models.Model):
     email_from = fields.Char(
         string='Send From',
         compute='_compute_email_from', readonly=False, store=True, precompute=True)
-    favorite = fields.Boolean('Favorite', copy=False, tracking=True)
-    favorite_date = fields.Datetime(
-        'Favorite Date',
-        compute='_compute_favorite_date', store=True,
-        copy=False,
-        help='When this mailing was added in the favorites')
+    is_template = fields.Boolean('Is Template', tracking=True)
     sent_date = fields.Datetime(string='Sent Date', copy=False)
     schedule_type = fields.Selection(
         [('now', 'Send now'), ('scheduled', 'Send on')],
@@ -297,12 +292,6 @@ class MailingMailing(models.Model):
                 mailing.email_from = notification_email
             else:
                 mailing.email_from = mailing.email_from or user_email
-
-    @api.depends('favorite')
-    def _compute_favorite_date(self):
-        favorited = self.filtered('favorite')
-        (self - favorited).favorite_date = False
-        favorited.filtered(lambda mailing: not mailing.favorite_date).favorite_date = fields.Datetime.now()
 
     def _compute_total(self):
         for mass_mailing in self:
@@ -804,21 +793,21 @@ class MailingMailing(models.Model):
         return action
 
     @api.model
-    def action_fetch_favorites(self, extra_domain=None):
-        """Return all mailings set as favorite and skip mailings with empty body.
+    def action_fetch_templates(self, extra_domain=None):
+        """Return all mailings set as template and skip mailings with empty body.
 
         Return archived mailing templates as well, so the user can archive the templates
         while keeping using it, without cluttering the Kanban view if they're a lot of
         templates.
         """
-        domain = Domain('favorite', '=', True)
+        domain = Domain('is_template', '=', True)
         if extra_domain:
             domain &= Domain(extra_domain)
 
         values_list = self.with_context(active_test=False).search_read(
             domain=domain,
-            fields=['id', 'subject', 'body_arch', 'user_id', 'mailing_model_id'],
-            order='favorite_date DESC',
+            fields=['id', 'subject', 'body_arch', 'user_id', 'mailing_model_id', 'active'],
+            order='create_date DESC'
         )
 
         values_list = [
@@ -826,13 +815,46 @@ class MailingMailing(models.Model):
             if not tools.is_html_empty(values['body_arch'])
         ]
 
-        # You see first the mailings without responsible, then your mailings and then the others
+        # You see first the templates without responsible, then your templates and then the others
         values_list.sort(
             key=lambda values:
             values['user_id'][0] != self.env.user.id if values['user_id'] else -1
         )
 
         return values_list
+
+    def action_save_as_template(self):
+        def show_notification(notification_type, message):
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'type': notification_type,
+                    'message': message,
+                },
+            }
+        self.ensure_one()
+        if not self.body_arch:
+            return show_notification('danger', _("No design has been created yet!"))
+        self.env['mailing.mailing'].create({
+            'user_id': self.user_id.id,
+            'subject': self.subject,
+            'is_template': True,
+            'mailing_model_id': self.mailing_model_id.id,
+            'body_arch': self.body_arch,
+            })
+        return show_notification('success', _("Design added to your template library!"))
+
+    def action_use_template(self):
+        self.ensure_one()
+        if mass_mailing_copy := self.copy(default={"is_template": False}):
+            return {
+                'type': 'ir.actions.act_window',
+                'view_mode': 'form',
+                'res_model': 'mailing.mailing',
+                'res_id': mass_mailing_copy.id,
+                'context': {**self.env.context, 'default_is_template': 0},
+            }
 
     # ------------------------------------------------------
     # A/B Test

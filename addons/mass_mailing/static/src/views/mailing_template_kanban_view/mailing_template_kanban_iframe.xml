@@ -1,0 +1,15 @@
+<templates>
+    <t t-name="mass_mailing.MailingTemplateKanbanIframe">
+        <div class="d-flex w-100 h-100">
+            <div class="salut flex-grow-1 o_mass_mailing_template_kanban_iframe_container position-relative">
+                <div t-if="!this.state.ready"
+                    class="position-absolute top-50 start-50 translate-middle d-flex flex-column align-items-center justify-content-center">
+                    <i class="fa fa-spinner fa-spin fa-2x text-primary"/>
+                    <small class="text-muted mt-2">Loading templates...</small>
+                </div>
+                <iframe class="w-100 h-100" t-custom-ref="iframe" t-att-hidden="!this.state.ready ? '' : false"
+                    t-att-sandbox="this.isBrowserSafari ? 'allow-same-origin allow-scripts' : 'allow-same-origin'"/>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,11 +1,12 @@
 <templates>
-    <t t-name="mass_mailing.FavoritePreview">
+    <t t-name="mass_mailing.TemplatePreview">
+    <!-- TODO: update the css classes names ('favorite' -> 'template') -->
         <div class="o_mail_favorite_preview_wrapper mb-2">
             <div t-custom-ref="shadowRoot" class="o_mail_favorite_preview" inert="inert"/>
         </div>
     </t>
 
-    <t t-name="mass_mailing.FavoritePreviewBody">
+    <t t-name="mass_mailing.TemplatePreviewBody">
         <div class="o_favorite_template_preview">
             <div class="o_mass_mailing_value o_readonly"
                 t-att-class="{'o_rtl': isRTL}">

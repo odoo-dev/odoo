@@ -17,6 +17,7 @@ import { localization } from "@web/core/l10n/localization";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { loadIframe, loadIframeBundles } from "@mail/convert_inline/iframe_utils";
 import { getStyleSheets } from "../../util/assets_utils";
+import { _t } from "@web/core/l10n/translation";
 
 export class ThemeSelectorIframe extends Component {
     static template = "mass_mailing.ThemeSelectorIframe";
@@ -33,7 +34,7 @@ export class ThemeSelectorIframe extends Component {
             show: false,
         });
         this.themeSelectorProps = {
-            favoriteThemes: proxy({
+            templateThemes: proxy({
                 promise: undefined,
             }),
         };
@@ -49,7 +50,7 @@ export class ThemeSelectorIframe extends Component {
         });
         onWillUpdateProps((newProps) => {
             if (newProps.config.mailingModelId !== this.props.config.mailingModelId) {
-                this.themeSelectorProps.favoriteThemes.promise = this.fetchFavoriteThemes(newProps);
+                this.themeSelectorProps.templateThemes.promise = this.fetchTemplateThemes(newProps);
             }
         });
     }
@@ -58,7 +59,7 @@ export class ThemeSelectorIframe extends Component {
         return isBrowserSafari();
     }
 
-    getFavoriteDomain(props) {
+    getTemplatesDomain(props) {
         return props.config.filterTemplates
             ? [["mailing_model_id", "=", props.config.mailingModelId]]
             : [];
@@ -71,29 +72,40 @@ export class ThemeSelectorIframe extends Component {
             themesPromise: this.themeService.load(),
             iframeRef: this.iframeRef,
         });
-        this.themeSelectorProps.favoriteThemes.promise = this.fetchFavoriteThemes(this.props);
+        this.themeSelectorProps.templateThemes.promise = this.fetchTemplateThemes(this.props);
         return this.themeSelectorProps;
     }
 
-    async fetchFavoriteThemes(props) {
-        const favoriteTemplates = await this.orm.call("mailing.mailing", "action_fetch_favorites", [
-            this.getFavoriteDomain(props),
+    async fetchTemplateThemes(props) {
+        const templates = await this.orm.call("mailing.mailing", "action_fetch_templates", [
+            this.getTemplatesDomain(props),
         ]);
-        return favoriteTemplates.map((favorite) => ({
-            bodyArch: markup(favorite.body_arch),
-            id: favorite.id,
-            modelId: favorite.mailing_model_id[0],
-            modelName: favorite.mailing_model_id[1],
-            name: `template_${favorite.id}`,
+        return templates.map((template) => ({
+            bodyArch: markup(template.body_arch),
+            id: template.id,
+            modelId: template.mailing_model_id[0],
+            modelName: template.mailing_model_id[1],
+            name: `template_${template.id}`,
             nowrap: true,
-            subject: favorite.subject,
-            userId: favorite.user_id[0],
-            userName: favorite.user_id[1],
+            subject: template.subject,
+            userId: template.user_id[0],
+            userName: template.user_id[1],
+            active: template.active,
         }));
     }
 
     renderHeadContent() {
         return renderToFragment("mass_mailing.IframeHead", this);
+    }
+
+    getBanner() {
+        const bannerDiv = document.createElement("div");
+        bannerDiv.textContent = _t(
+            "Use the Save as Template under the ⚙️ button to save your mailings to your Template Library."
+        );
+        bannerDiv.classList.add("o_banner", "p-3", "pt-1", "pb-1", "d-inline-block", "text-black");
+        bannerDiv.style.fontWeight = 400;
+        return bannerDiv;
     }
 
     async setupIframe() {
@@ -102,6 +114,7 @@ export class ThemeSelectorIframe extends Component {
             await loadIframe(this.iframeRef.el, async (iframe) => {
                 iframe.contentDocument.head.appendChild(this.renderHeadContent());
                 iframe.contentDocument.body.style.setProperty("direction", localization.direction);
+                iframe.contentDocument.body.appendChild(this.getBanner());
                 this.themeSelectorRoot = this.app.createRoot(ThemeSelector, {
                     env: this.env,
                     props: this.getThemeSelectorProps(),

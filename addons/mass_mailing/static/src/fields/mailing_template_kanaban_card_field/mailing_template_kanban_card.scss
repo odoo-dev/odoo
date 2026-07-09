@@ -1,0 +1,15 @@
+.o_mailing_template_card_preview_wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background-color: #e8ebee;
+    overflow: hidden;
+    height: 360px;
+    
+
+    .o_mailing_shadow_root {
+        width: 700px;
+        transform: scale(0.5);
+        transform-origin: top center;
+    }
+}

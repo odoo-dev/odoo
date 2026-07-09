@@ -1,14 +1,15 @@
 import { useRef } from "@web/owl2/utils";
-import { Component, onMounted, onPatched, onWillStart } from "@odoo/owl";
+import { Component, onMounted, onPatched, onWillStart, props, t } from "@odoo/owl";
 import { localization } from "@web/core/l10n/localization";
 import { renderToFragment } from "@web/core/utils/render";
 
-export class FavoritePreview extends Component {
-    static template = "mass_mailing.FavoritePreview";
-    static props = {
-        template: Object,
-        styleSheetsPromise: Promise,
-    };
+// TODO: rename the js file to TemplatePreview.js
+export class TemplatePreview extends Component {
+    static template = "mass_mailing.TemplatePreview";
+    props = props({
+        template: t.object(),
+        styleSheetsPromise: t.promise(),
+    });
 
     setup() {
         this.isRTL = localization.direction === "rtl";
@@ -38,7 +39,7 @@ export class FavoritePreview extends Component {
     }
 
     renderBodyContent() {
-        return renderToFragment("mass_mailing.FavoritePreviewBody", {
+        return renderToFragment("mass_mailing.TemplatePreviewBody", {
             ...this.props.template,
             isRTL: this.isRTL,
         });
