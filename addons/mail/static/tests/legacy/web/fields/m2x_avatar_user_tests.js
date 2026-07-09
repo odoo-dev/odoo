@@ -10,7 +10,7 @@ import { EventBus } from "@odoo/owl";
 import { popoverService } from "@web/core/popover/popover_service";
 import { registry } from "@web/core/registry";
 import { tooltipService } from "@web/core/tooltip/tooltip_service";
-import { triggerHotkey } from "@web/../tests/helpers/utils";
+import { triggerHotkey, getFixture } from "@web/../tests/helpers/utils";
 import { assertSteps, click, contains, step } from "@web/../tests/utils";
 import { getOrigin } from "@web/core/utils/urls";
 
@@ -463,4 +463,34 @@ test("many2many_avatar_user widget in form view", async () => {
     await contains(".o_card_user_infos > span", { text: "Mario" });
     await contains(".o_card_user_infos > a", { text: "Mario@partner.com" });
     await contains(".o_card_user_infos > a", { text: "+45687468" });
+});
+
+test("many2many_avatar_user widget in form view", async (assert) => {
+    const target = getFixture();
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "Partner 1" });
+    const userId = pyEnv["res.users"].create({
+        name: "Mario",
+        partner_id: partnerId,
+        email: "Mario@partner.com",
+        phone: "+45687468",
+    });
+    const avatarUserId = pyEnv["m2x.avatar.user"].create({ user_ids: [userId] });
+    const views = {
+        "m2x.avatar.user,false,form": `
+            <form>
+                <field name="user_ids" widget="many2many_avatar_user" on_change="1" can_create="True" can_write="True"/>
+            </form>`,
+    };
+    await start({ serverData: { views } });
+    await openFormView("m2x.avatar.user", avatarUserId);
+    await click(".o_field_many2many_avatar_user input");
+    await triggerHotkey("control+a");
+    await triggerHotkey("delete");
+    await triggerHotkey("a");
+    await triggerHotkey("backspace");
+    await contains(".o_avatar_card");
+    await click(".dropdown-item .o_avatar_many2x_autocomplete:text(Mario)");
+    await click(".o_field_many2many_avatar_user input");
+    assert.strictEqual(target.querySelector(".o_field_many2many_avatar_user input").value, "Mario");
 });
