@@ -1,27 +1,22 @@
-import { onMounted, props, proxy, t, useEffect } from "@odoo/owl";
+import { computed, props, proxy, t, useEffect } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { StateSelectionField, stateSelectionField } from "@web/views/fields/state_selection/state_selection_field";
 
 export class TodoDoneCheckmark extends StateSelectionField {
     static template = "project_todo.TodoDoneCheckmark";
-    props = props({
-        ...standardFieldProps,
-        showLabel: t.boolean().optional(true),
-        withCommand: t.boolean().optional(),
+    todoProps = props({
         viewType: t.string().optional(),
     });
+
+    notDoneState = computed(() => this.props.record.data[this.props.name] == "1_done")
+
     setup() {
         super.setup();
         this.uiService = useService("ui");
         this.stateDone = proxy({
             isDone: false, //This state determines the appearance of the done checkmark and should only be actualized when the mouse leaves it (and atfer the form is loaded)
             notReloadState: false, //used to avoid a change of the checkmark when re-rendering the form
-        });
-        onMounted(() => {
-            const fieldValue = this.props.record.data[this.props.name]
-            this.notDoneState = fieldValue == '1_done' ? '01_in_progress' : fieldValue;
         });
         useEffect(() => {
             if (!this.stateDone.notReloadState) {
@@ -51,8 +46,8 @@ export class TodoDoneCheckmark extends StateSelectionField {
      * @param {InputEvent} ev
      */
     async onDoneToggled(ev) {
-        const value = this.props.record.data[this.props.name] != '1_done' ? '1_done' : this.notDoneState;
-        if (['card', 'list'].includes(this.props.viewType)) {
+        const value = this.props.record.data[this.props.name] != '1_done' ? '1_done' : this.notDoneState();
+        if (['card', 'list'].includes(this.todoProps.viewType)) {
             await super.updateRecord(value);
         }
         else {
