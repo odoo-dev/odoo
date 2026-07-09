@@ -2633,7 +2633,7 @@ class SaleOrder(models.Model):
 
     def _get_product_price_type(self) -> str:
         """Specify the price type that should be computed as product 'price' in the catalog."""
-        self.ensure_one()
+        # self.ensure_one()
         # Disable the default price computation as the pricelist should be considered instead
         return ""
 
