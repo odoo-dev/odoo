@@ -458,6 +458,8 @@ class MailMessage(models.Model):
         # searching for all messages or a subset of models
         res_model_names = condition_values(self, 'model', domain) or ()
         if operation != 'read' or not (0 < len(res_model_names) <= MAX_COMODELS_FOR_DOMAIN):
+            if not self:
+                domain = domain & Domain('id', 'in', self.ids)
             query = super(MailMessage, self.sudo())._search(domain, order='id')
             records = self.browse()._filter_accessible_from_query(query, operation)
             # [('id', 'any!', query_with_ids)] is optimized in sec_domain
