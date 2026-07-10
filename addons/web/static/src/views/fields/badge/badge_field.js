@@ -32,7 +32,7 @@ export class BadgeField extends Component {
                 if (decorationName === "muted") {
                     return "text-bg-300";
                 }
-                return `text-bg-${decorationName}`;
+                return `text-${decorationName} bg-${decorationName}-subtle`;
             }
         }
         return "text-bg-300";

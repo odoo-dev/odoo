@@ -299,13 +299,13 @@
                                     <div name="live_mode_badges">
                                         <span
                                             t-if="is_live"
-                                            class="badge rounded-pill text-bg-success ms-1"
+                                            class="badge rounded-pill bg-success-subtle text-success ms-1"
                                         >
                                             Live
                                         </span>
                                         <span
                                             t-else=""
-                                            class="badge rounded-pill text-bg-warning ms-1"
+                                            class="badge rounded-pill bg-warning-subtle text-warning ms-1"
                                         >
                                             Test
                                         </span>
@@ -313,19 +313,19 @@
                                     <div>
                                         <span
                                             t-if="is_published"
-                                            class="badge rounded-pill text-bg-success ms-1"
+                                            class="badge rounded-pill bg-success-subtle text-success ms-1"
                                         >
                                             Published
                                         </span>
                                         <span
                                             t-else=""
-                                            class="badge rounded-pill text-bg-info ms-1"
+                                            class="badge rounded-pill bg-info-subtle text-info ms-1"
                                         >
                                             Unpublished
                                         </span>
                                     </div>
                                 </t>
-                                <span t-if="to_upgrade" class="badge text-bg-primary">Enterprise</span>
+                                <span t-if="to_upgrade" class="badge bg-primary-subtle text-primary">Enterprise</span>
                             </div>
                             <footer>
                                 <button t-if="!installed and !selection_mode and !to_buy" type="object" class="btn btn-sm btn-primary ms-auto" name="button_immediate_install">Install</button>

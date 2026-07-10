@@ -45,16 +45,16 @@ test("LabelSelectionField in form view", async () => {
         resId: 1,
     });
 
-    expect(".o_field_widget .badge.text-bg-warning").toHaveCount(1, {
+    expect(".o_field_widget .badge.bg-warning-subtle.text-warning").toHaveCount(1, {
         message: "should have a warning status label since selection is the second, blocked state",
     });
     expect(".o_field_widget .badge.text-bg-secondary").toHaveCount(0, {
         message: "should not have a default status since selection is the second, blocked state",
     });
-    expect(".o_field_widget .badge.text-bg-success").toHaveCount(0, {
+    expect(".o_field_widget .badge.bg-success-subtle.text-success").toHaveCount(0, {
         message: "should not have a success status since selection is the second, blocked state",
     });
-    expect(".o_field_widget .badge.text-bg-warning").toHaveText("Blocked", {
+    expect(".o_field_widget .badge.bg-warning-subtle.text-warning").toHaveText("Blocked", {
         message: "the label should say 'Blocked' since this is the label value for that state",
     });
 });
@@ -76,10 +76,10 @@ test("LabelSelectionField in editable list view", async () => {
     expect(".o_field_widget .badge:not(:empty)").toHaveCount(3, {
         message: "should have three visible status labels",
     });
-    expect(".o_field_widget .badge.text-bg-warning").toHaveCount(1, {
+    expect(".o_field_widget .badge.bg-warning-subtle.text-warning").toHaveCount(1, {
         message: "should have one warning status label",
     });
-    expect(".o_field_widget .badge.text-bg-warning").toHaveText("Blocked", {
+    expect(".o_field_widget .badge.bg-warning-subtle.text-warning").toHaveText("Blocked", {
         message: "the warning label should read 'Blocked'",
     });
     expect(".o_field_widget .badge.text-bg-secondary").toHaveCount(1, {
@@ -88,10 +88,10 @@ test("LabelSelectionField in editable list view", async () => {
     expect(".o_field_widget .badge.text-bg-secondary").toHaveText("Normal", {
         message: "the default label should read 'Normal'",
     });
-    expect(".o_field_widget .badge.text-bg-success").toHaveCount(1, {
+    expect(".o_field_widget .badge.bg-success-subtle.text-success").toHaveCount(1, {
         message: "should have one success status label",
     });
-    expect(".o_field_widget .badge.text-bg-success").toHaveText("Done", {
+    expect(".o_field_widget .badge.bg-success-subtle.text-success").toHaveText("Done", {
         message: "the success label should read 'Done'",
     });
 
@@ -102,10 +102,10 @@ test("LabelSelectionField in editable list view", async () => {
     expect(".o_field_widget .badge:not(:empty)").toHaveCount(3, {
         message: "should have three visible status labels",
     });
-    expect(".o_field_widget .badge.text-bg-warning").toHaveCount(1, {
+    expect(".o_field_widget .badge.bg-warning-subtle.text-warning").toHaveCount(1, {
         message: "should have one warning status label",
     });
-    expect(".o_field_widget .badge.text-bg-warning").toHaveText("Blocked", {
+    expect(".o_field_widget .badge.bg-warning-subtle.text-warning").toHaveText("Blocked", {
         message: "the warning label should read 'Blocked'",
     });
     expect(".o_field_widget .badge.text-bg-secondary").toHaveCount(1, {
@@ -114,10 +114,10 @@ test("LabelSelectionField in editable list view", async () => {
     expect(".o_field_widget .badge.text-bg-secondary").toHaveText("Normal", {
         message: "the default label should read 'Normal'",
     });
-    expect(".o_field_widget .badge.text-bg-success").toHaveCount(1, {
+    expect(".o_field_widget .badge.bg-success-subtle.text-success").toHaveCount(1, {
         message: "should have one success status label",
     });
-    expect(".o_field_widget .badge.text-bg-success").toHaveText("Done", {
+    expect(".o_field_widget .badge.bg-success-subtle.text-success").toHaveText("Done", {
         message: "the success label should read 'Done'",
     });
 
@@ -127,10 +127,10 @@ test("LabelSelectionField in editable list view", async () => {
     expect(".o_field_widget .badge:not(:empty)").toHaveCount(3, {
         message: "should have three visible status labels",
     });
-    expect(".o_field_widget .badge.text-bg-warning").toHaveCount(1, {
+    expect(".o_field_widget .badge.bg-warning-subtle.text-warning").toHaveCount(1, {
         message: "should have one warning status label",
     });
-    expect(".o_field_widget .badge.text-bg-warning").toHaveText("Blocked", {
+    expect(".o_field_widget .badge.bg-warning-subtle.text-warning").toHaveText("Blocked", {
         message: "the warning label should read 'Blocked'",
     });
     expect(".o_field_widget .badge.text-bg-secondary").toHaveCount(1, {
@@ -139,10 +139,10 @@ test("LabelSelectionField in editable list view", async () => {
     expect(".o_field_widget .badge.text-bg-secondary").toHaveText("Normal", {
         message: "the default label should read 'Normal'",
     });
-    expect(".o_field_widget .badge.text-bg-success").toHaveCount(1, {
+    expect(".o_field_widget .badge.bg-success-subtle.text-success").toHaveCount(1, {
         message: "should have one success status label",
     });
-    expect(".o_field_widget .badge.text-bg-success").toHaveText("Done", {
+    expect(".o_field_widget .badge.bg-success-subtle.text-success").toHaveText("Done", {
         message: "the success label should read 'Done'",
     });
 });

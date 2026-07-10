@@ -8,7 +8,7 @@
                     <div class="d-flex bg-100 py-2 border-bottom">
                         <span class="text-danger fw-bold mx-3">Overdue</span>
                         <span class="flex-grow-1"/>
-                        <span class="badge rounded-pill text-bg-danger mx-3 align-self-center" t-out="this.overdueActivities.length"/>
+                        <span class="badge rounded-pill bg-danger-subtle text-danger mx-3 align-self-center" t-out="this.overdueActivities.length"/>
                     </div>
                     <ActivityListPopoverItem t-foreach="this.overdueActivities" t-as="activity" t-key="activity.id" activity="activity" onActivityChanged="this.props.onActivityChanged" onClickEditActivityButton="this.props.close" onClickDoneAndScheduleNext="this.props.close"/>
                 </t>
@@ -16,7 +16,7 @@
                     <div class="d-flex bg-100 py-2 border-bottom">
                         <span class="o-mail-ActivityListPopover-todayTitle text-warning fw-bold mx-3">Today</span>
                         <span class="flex-grow-1"/>
-                        <span class="badge rounded-pill text-bg-warning mx-3 align-self-center" t-out="this.todayActivities.length"/>
+                        <span class="badge rounded-pill bg-warning-subtle text-warning mx-3 align-self-center" t-out="this.todayActivities.length"/>
                     </div>
                     <ActivityListPopoverItem t-foreach="this.todayActivities" t-as="activity" t-key="activity.id" activity="activity" onActivityChanged="this.props.onActivityChanged" onClickEditActivityButton="this.props.close" onClickDoneAndScheduleNext="this.props.close"/>
                 </t>
@@ -24,7 +24,7 @@
                     <div class="d-flex bg-100 py-2 border-bottom">
                         <span class="text-success fw-bold mx-3">Planned</span>
                         <span class="flex-grow-1"/>
-                        <span class="badge rounded-pill text-bg-success mx-3 align-self-center" t-out="this.plannedActivities.length"/>
+                        <span class="badge rounded-pill bg-success-subtle text-success mx-3 align-self-center" t-out="this.plannedActivities.length"/>
                     </div>
                     <ActivityListPopoverItem t-foreach="this.plannedActivities" t-as="activity" t-key="activity.id" activity="activity" onActivityChanged="this.props.onActivityChanged" onClickEditActivityButton="this.props.close" onClickDoneAndScheduleNext="this.props.close"/>
                 </t>

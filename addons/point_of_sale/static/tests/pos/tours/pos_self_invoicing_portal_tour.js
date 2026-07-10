@@ -107,7 +107,7 @@ registry.category("web_tour.tours").add("invoicePoSOrderWithSelfInvocing", {
             expectUnloadPage: true,
         },
         {
-            trigger: ".rounded.text-bg-success.fw-normal.badge",
+            trigger: ".rounded.bg-success-subtle.text-success.fw-normal.badge",
         },
     ],
 });

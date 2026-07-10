@@ -121,7 +121,7 @@
             <div class="d-flex align-items-center px-3">
                 <i class="oi oi-fw" t-att-data-icon="this.state.showActivities ? 'arrow_drop_down' : 'arrow_right'"/>
                 Planned Activities
-                <span t-if="!this.state.showActivities" class="badge rounded-pill ms-2 text-bg-success"><t t-out="this.activities.length"/></span>
+                <span t-if="!this.state.showActivities" class="badge rounded-pill ms-2 bg-success-subtle text-success"><t t-out="this.activities.length"/></span>
             </div>
             <hr class="flex-grow-1 fe-3"/>
         </div>
@@ -140,7 +140,7 @@
             <div class="d-flex align-items-center px-3">
                 <i class="oi oi-fw" t-att-data-icon="this.state.showScheduledMessages ? 'arrow_drop_down' : 'arrow_right'"/>
                 Scheduled Messages
-                <span t-if="!this.state.showScheduledMessages" class="badge rounded-pill ms-2 text-bg-success" t-out="this.scheduledMessages.length"/>
+                <span t-if="!this.state.showScheduledMessages" class="badge rounded-pill ms-2 bg-success-subtle text-success" t-out="this.scheduledMessages.length"/>
             </div>
             <hr class="flex-grow-1 fe-3"/>
         </div>

@@ -13,7 +13,7 @@
             <img t-attf-src="/web/image/res.users/{{this.user.userId}}/avatar_128" class="o_avatar rounded" style="--Avatar-size: 2.5rem;"/>
             <div class="d-flex justify-content-between w-100">
                 <span class="h5 mb-0" t-out="this.user.name"/>
-                <span class="badge rounded-pill text-bg-info">Active</span>
+                <span class="badge rounded-pill bg-info-subtle text-info">Active</span>
             </div>
         </div>
         <form t-att-id="this.state.authMethod" t-on-submit.prevent="this.onSubmit" class="o_check_identity_form mb-3 text-center">

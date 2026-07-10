@@ -246,11 +246,11 @@
                             <div class="dropdown-menu">
                                 <a t-attf-class="#{dropdown_item_classes} filter-finished-or-not #{'active' if not search_finished else ''}">
                                     <span>All surveys</span>
-                                    <span t-if="not search_finished" t-out="survey_data['count_all']" class="badge rounded-pill text-bg-primary ms-3"/>
+                                    <span t-if="not search_finished" t-out="survey_data['count_all']" class="badge rounded-pill bg-primary-subtle text-primary ms-3"/>
                                 </a>
                                 <a t-attf-class="#{dropdown_item_classes} filter-finished #{'active' if search_finished else ''}">
                                     <span>Completed surveys</span>
-                                    <span t-if="not search_finished" t-out="survey_data['count_finished']" class="badge rounded-pill text-bg-primary ms-3"/>
+                                    <span t-if="not search_finished" t-out="survey_data['count_finished']" class="badge rounded-pill bg-primary-subtle text-primary ms-3"/>
                                 </a>
                             </div>
                         </li>
@@ -264,15 +264,15 @@
                             <div class="dropdown-menu">
                                 <a t-attf-class="#{dropdown_item_classes} filter-passed-and-failed #{'active' if not search_passed_or_failed else ''}">
                                     <span>Passed and Failed</span>
-                                    <span t-if="not search_passed_or_failed" t-out="survey_data['count_all']" class="badge rounded-pill text-bg-primary ms-3"/>
+                                    <span t-if="not search_passed_or_failed" t-out="survey_data['count_all']" class="badge rounded-pill bg-primary-subtle text-primary ms-3"/>
                                 </a>
                                 <a t-attf-class="#{dropdown_item_classes} filter-passed #{'active' if search_passed else ''}">
                                     <span>Passed only</span>
-                                    <span t-if="not search_passed_or_failed" t-out="survey_data['count_passed']" class="badge rounded-pill text-bg-primary ms-3"/>
+                                    <span t-if="not search_passed_or_failed" t-out="survey_data['count_passed']" class="badge rounded-pill bg-primary-subtle text-primary ms-3"/>
                                 </a>
                                 <a t-attf-class="#{dropdown_item_classes} filter-failed #{'active' if search_failed else ''}">
                                     <span>Failed only</span>
-                                    <span t-if="not search_passed_or_failed" t-out="survey_data['count_failed']" class="badge rounded-pill text-bg-primary ms-3"/>
+                                    <span t-if="not search_passed_or_failed" t-out="survey_data['count_failed']" class="badge rounded-pill bg-primary-subtle text-primary ms-3"/>
                                 </a>
                             </div>
                         </li>
@@ -429,7 +429,7 @@
                             </td>
                             <td class="o_survey_answer">
                                 <span t-out="round(choice_data['count'] * 100.0/ (len(question_data['answer_line_done_ids']) or 1), 2)"></span> %
-                                <span t-out="choice_data['count_text']" class="badge text-bg-primary"/>
+                                <span t-out="choice_data['count_text']" class="badge bg-primary-subtle text-primary"/>
                                 <i t-if="choice_data['suggested_answer'].id and choice_data['count']"
                                     class="oi oi-filled filter-add-answer d-print-none cursor-pointer text-primary"
                                     data-icon="filter_alt"
@@ -477,7 +477,7 @@
                             <td class="o_survey_answer" t-foreach="choice_data['columns']" t-as="column_data">
                                 <div class="d-flex align-items-center gap-1 justify-content-end">
                                     <span t-out="round(column_data['count'] * 100.0/ (len(question_data['answer_input_done_ids']) or 1), 2)"></span> %
-                                    <span class="badge text-bg-primary" t-out="column_data['count']"></span>
+                                    <span class="badge bg-primary-subtle text-primary" t-out="column_data['count']"></span>
                                     <i t-if="column_data['count']" class="oi oi-filled text-primary filter-add-answer d-print-none"
                                         data-icon="filter_alt"
                                         data-model-short-key="A"

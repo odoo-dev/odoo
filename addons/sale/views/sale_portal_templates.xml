@@ -41,9 +41,9 @@
                         <td class="text-end"><span t-field="quotation.date_order"/></td>
                         <td class="text-end"><span t-field="quotation.validity_date"/></td>
                         <td class="text-center">
-                            <span t-if="quotation.state == 'cancel'" class="badge rounded-pill text-bg-danger">
+                            <span t-if="quotation.state == 'cancel'" class="badge rounded-pill bg-danger-subtle text-danger">
                                 <i class="oi oi-fw" data-icon="close"/> Cancelled</span>
-                            <span t-if="quotation.is_expired" class="badge rounded-pill text-bg-danger">
+                            <span t-if="quotation.is_expired" class="badge rounded-pill bg-danger-subtle text-danger">
                                 <i class="oi oi-fw" data-icon="schedule"/> Expired</span>
                         </td>
                         <td class="text-end">
@@ -641,16 +641,16 @@
                                     <a t-att-href="report_url">
                                         <span t-out="i.name"/>
                                     </a>
-                                    <div t-if="i.payment_state in ('paid', 'in_payment')" class="small badge rounded-pill text-bg-success orders_label_text_align">
+                                    <div t-if="i.payment_state in ('paid', 'in_payment')" class="small badge rounded-pill bg-success-subtle text-success orders_label_text_align">
                                         <i class="oi oi-fw" data-icon="check"/> Paid
                                     </div>
-                                    <div t-elif="i.payment_state == 'reversed'" class="small badge text-bg-success orders_label_text_align">
+                                    <div t-elif="i.payment_state == 'reversed'" class="small badge bg-success-subtle text-success orders_label_text_align">
                                         <i class="oi oi-fw" data-icon="check"/> Reversed
                                     </div>
-                                    <div t-elif="authorized_tx_ids" class="small badge rounded-pill text-bg-success orders_label_text_align">
+                                    <div t-elif="authorized_tx_ids" class="small badge rounded-pill bg-success-subtle text-success orders_label_text_align">
                                         <i class="oi oi-fw" data-icon="check"/> Authorized
                                     </div>
-                                    <div t-else="" class="small badge rounded-pill text-bg-info orders_label_text_align">
+                                    <div t-else="" class="small badge rounded-pill bg-info-subtle text-info orders_label_text_align">
                                         <i class="oi oi-fw" data-icon="schedule"/> Waiting Payment
                                     </div>
                                 </div>
