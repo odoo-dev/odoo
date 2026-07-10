@@ -119,7 +119,7 @@
                                     <field name="name" class="fw-bolder fs-5" />
                                 </div>
                                 <div class="text-primary ms-auto">
-                                    <div t-if="record.is_new.raw_value" class="o_lunch_new_product me-1 py-1 fs-6 badge rounded-pill text-bg-success">
+                                    <div t-if="record.is_new.raw_value" class="o_lunch_new_product me-1 py-1 fs-6 badge rounded-pill bg-success-subtle text-success">
                                         New
                                     </div>
                                     <field name="price" widget="monetary" class="fw-bold "/>
@@ -233,7 +233,7 @@
                             <field name="image_128" widget="image"/>
                         </aside>
                         <main>
-                            <button class="badge rounded-pill text-bg-primary ms-auto" type="action"
+                            <button class="badge rounded-pill bg-primary-subtle text-primary ms-auto" type="action"
                                 name="%(lunch.lunch_product_action_statbutton)d"
                                 context="{'search_default_category_id': id,'default_category_id': id}"
                                 invisible="product_count == 0">

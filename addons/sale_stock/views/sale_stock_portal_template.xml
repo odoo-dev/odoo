@@ -37,16 +37,16 @@
                                     <span t-out="picking.name"/>
                                 </a>
                                 <div t-if="picking.state == 'done'">
-                                    <span class="small badge rounded-pill text-bg-success orders_label_text_align">
+                                    <span class="small badge rounded-pill bg-success-subtle text-success orders_label_text_align">
                                         <i class="oi oi-fw" data-icon="local_shipping"/> Shipped
                                     </span>
                                 </div>
                                 <span t-elif="picking.state == 'cancel'"
-                                    class="small badge rounded-pill text-bg-danger orders_label_text_align">
+                                    class="small badge rounded-pill bg-danger-subtle text-danger orders_label_text_align">
                                     <i class="oi oi-fw" data-icon="close"/>Cancelled
                                 </span>
                                 <span t-elif="picking.state in ['draft', 'waiting', 'confirmed', 'assigned']"
-                                    class="small badge rounded-pill text-bg-info orders_label_text_align">
+                                    class="small badge rounded-pill bg-info-subtle text-info orders_label_text_align">
                                     <i class="oi oi-fw" data-icon="schedule"/>Preparation
                                 </span>
                             </div>
@@ -77,15 +77,15 @@
                                 <span t-out="picking.name"/>
                             </a>
                             <span t-if="picking.state == 'done'"
-                                class="small badge rounded-pill text-bg-success orders_label_text_align">
+                                class="small badge rounded-pill bg-success-subtle text-success orders_label_text_align">
                                 <i class="oi oi-fw" data-icon="local_shipping"/> Received
                             </span>
                             <span t-elif="picking.state == 'cancel'"
-                                class="small badge rounded-pill text-bg-danger orders_label_text_align">
+                                class="small badge rounded-pill bg-danger-subtle text-danger orders_label_text_align">
                                 <i class="oi oi-fw" data-icon="close"/> Cancelled
                             </span>
                             <span t-elif="picking.state in ['draft', 'waiting', 'confirmed', 'assigned']"
-                                class="small badge rounded-pill text-bg-info orders_label_text_align">
+                                class="small badge rounded-pill bg-info-subtle text-info orders_label_text_align">
                                 <i class="oi oi-fw" data-icon="schedule"/> Awaiting arrival
                             </span>
                         </div>
@@ -117,31 +117,31 @@
             <td class="text-end" name="order_delivery_status">
                 <span
                     t-if="order.delivery_status == 'pending'"
-                    class="badge rounded-pill text-bg-warning"
+                    class="badge rounded-pill bg-warning-subtle text-warning"
                 >
                     Not Delivered
                 </span>
                 <span
                     t-elif="order.delivery_status == 'started'"
-                    class="badge rounded-pill text-bg-primary"
+                    class="badge rounded-pill bg-primary-subtle text-primary"
                 >
                     Started
                 </span>
                 <span
                     t-elif="order.delivery_status == 'partial'"
-                    class="badge rounded-pill text-bg-info"
+                    class="badge rounded-pill bg-info-subtle text-info"
                 >
                     Partially Delivered
                 </span>
                 <span
                     t-elif="order.delivery_status == 'full'"
-                    class="badge rounded-pill text-bg-success"
+                    class="badge rounded-pill bg-success-subtle text-success"
                 >
                     Delivered
                 </span>
                 <span
                     t-else=""
-                    class="badge rounded-pill text-bg-danger"
+                    class="badge rounded-pill bg-danger-subtle text-danger"
                 >
                     Not Available
                 </span>

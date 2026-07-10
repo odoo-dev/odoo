@@ -92,8 +92,8 @@ test("BadgeField component with decoration-xxx attributes", async () => {
     });
 
     expect(`.o_field_badge[name="display_name"]`).toHaveCount(4);
-    expect(`.o_field_badge[name="display_name"] .text-bg-danger`).toHaveCount(1);
-    expect(`.o_field_badge[name="display_name"] .text-bg-warning`).toHaveCount(1);
+    expect(`.o_field_badge[name="display_name"] .bg-danger-subtle.text-danger`).toHaveCount(1);
+    expect(`.o_field_badge[name="display_name"] .bg-warning-subtle.text-warning`).toHaveCount(1);
 });
 
 test("BadgeField component with color_field option", async () => {

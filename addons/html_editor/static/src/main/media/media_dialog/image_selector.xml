@@ -18,7 +18,7 @@
                 t-att-class="{ 'cursor-pointer': !this.props.unselectable }"
                 t-on-click="this.props.onImageClick"
                 t-att-aria-label="this.props.unselectable ? unselectable_attachment_title : this.props.title"/>
-        <span t-if="this.props.isOptimized" class="badge position-absolute bottom-0 end-0 m-1 text-bg-success">Optimized</span>
+        <span t-if="this.props.isOptimized" class="badge position-absolute bottom-0 end-0 m-1 bg-success-subtle text-success">Optimized</span>
     </div>
 </t>
 

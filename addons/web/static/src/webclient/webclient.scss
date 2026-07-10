@@ -247,14 +247,6 @@ select {
   }
 }
 
-//== Badges
-.badge {
-    &.text-bg-default, &.bg-light, &.text-bg-light, &.bg-default, &.text-primary{
-        outline: 1px solid $o-brand-primary;
-        outline-offset: -1px;
-    }
-}
-
 //== Buttons
 
 // Disable unnecessary box-shadows on mouse hover

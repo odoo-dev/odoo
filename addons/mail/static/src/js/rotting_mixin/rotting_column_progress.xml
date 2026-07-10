@@ -4,7 +4,7 @@
         <AnimatedNumber position="before">
             <t t-set="rottingAggregate" t-value="this.getRottingGroupCount(this.props.group)"/>
             <div t-if="rottingAggregate.value > 0" t-on-click="this.onRottingIconClick"
-                t-attf-class="badge rounded-pill text-bg-danger ms-3 {{ this.rottingFilterAvailable ? 'cursor-pointer' : 'cursor-default' }}"
+                t-attf-class="badge rounded-pill bg-danger-subtle text-danger ms-3 {{ this.rottingFilterAvailable ? 'cursor-pointer' : 'cursor-default' }}"
                 t-att-title="rottingAggregate.title">
                     <b t-out="rottingAggregate.value"/>
             </div>

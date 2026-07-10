@@ -1142,7 +1142,7 @@ stepUtils.autoExpandMoreButtons(true),
 {
     isActive: ["community"],
     content: "wait for payment registration to succeed",
-    trigger: "span.text-bg-success:contains('Paid')",
+    trigger: "span.bg-success-subtle.text-success:contains('Paid')",
 },
     ...stepUtils.toggleHomeMenu(),
     stepUtils.goToAppSteps('accountant.menu_accounting', 'Go to Accounting')[2], // 2 -> Ent only

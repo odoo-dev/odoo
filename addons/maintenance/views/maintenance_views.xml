@@ -459,7 +459,7 @@
                         <div id="unassigned" invisible="1">Unassigned</div>
                         <field name="equipment_properties" widget="properties"/>
                         <footer>
-                            <div class="badge rounded-pill text-bg-danger" t-if="record.maintenance_open_count.raw_value">
+                            <div class="badge rounded-pill bg-danger-subtle text-danger" t-if="record.maintenance_open_count.raw_value">
                                 <field name="maintenance_open_count" /> Request
                             </div>
                             <div class="d-flex ms-auto align-items-center">

@@ -10588,12 +10588,12 @@ test("edition in list containing widget with decoration", async () => {
     });
 
     expect(".o_data_row").toHaveCount(2);
-    expect(".o_data_row:eq(1) .o_field_badge .badge").toHaveClass("text-bg-warning");
+    expect(".o_data_row:eq(1) .o_field_badge .badge").toHaveClass("bg-warning-subtle text-warning");
 
     await contains(".o_data_row .o_data_cell").click();
     await contains(".o_selected_row .o_field_integer input").edit("44", { confirm: false });
 
-    expect(".o_data_row:eq(1) .o_field_badge .badge").toHaveClass("text-bg-warning");
+    expect(".o_data_row:eq(1) .o_field_badge .badge").toHaveClass("bg-warning-subtle text-warning");
 });
 
 test("reordering embedded one2many with handle widget starting with same sequence", async () => {

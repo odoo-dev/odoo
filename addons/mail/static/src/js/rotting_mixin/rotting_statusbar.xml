@@ -9,7 +9,7 @@
                 
         <xpath expr="//span[@t-att-title='item.fullTimeInStage']" position="after">
             <t t-if="this.props.record.data.is_rotting and item.isSelected">
-                <span class="badge rounded-pill small text-bg-danger ms-2"
+                <span class="badge rounded-pill small bg-danger-subtle text-danger ms-2"
                     t-att-title="this.title" style="pointer-events: all;">
                     <t t-out="this.props.record.data.rotting_days"/>d
                 </span>

@@ -28,7 +28,7 @@
                                     <button type="submit" role="button" class="btn btn-danger btn-block">Decline</button>
                                 </form>
                             </div>
-                            <span class="float-end badge text-bg-info align-self-center" t-if="attendee.state != 'needsAction'">
+                            <span class="float-end badge bg-info-subtle text-info align-self-center" t-if="attendee.state != 'needsAction'">
                                 <t t-if="attendee.state == 'accepted'">Yes I'm going.</t>
                                 <t t-if="attendee.state == 'declined'">No I'm not going.</t>
                                 <t t-if="attendee.state == 'tentative'">Tentative</t>

@@ -11,7 +11,7 @@
                     class="d-flex flex-row align-items-center" colspan="2"
                     groups="base.group_system">
                     <span invisible="server_type != 'outlook' or not microsoft_outlook_refresh_token"
-                        class="badge text-bg-success">
+                        class="badge bg-success-subtle text-success">
                         Outlook Token Valid
                     </span>
                     <button type="object"
