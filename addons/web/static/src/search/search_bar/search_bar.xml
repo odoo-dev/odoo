@@ -3,53 +3,55 @@
 
     <t t-name="web.SearchBar.Facets">
         <t t-foreach="this.env.searchModel.facets" t-as="facet" t-key="facet_index">
-            <div class="o_searchview_facet position-relative d-inline-flex align-items-center rounded-2 text-nowrap opacity-trigger-hover mw-100"
+            <div class="o_searchview_facet position-relative d-inline-flex rounded-2 border border-transparent text-nowrap opacity-trigger-hover mw-100"
                 t-att-class="{
-                    o_facet_with_domain: facet.domain,
+                    'o_facet_with_domain': facet.domain,
                     'o_facet_groupby': facet.type == 'groupBy',
-                    'bg-primary-subtle text-primary-emphasis': facet.type == 'field' || facet.type == 'filter',
                     'o_facet_favorite': facet.type == 'favorite'
                 }"
                 role="listitem"
                 aria-label="search"
                 tabindex="0"
                 >
-                <div class="o_searchview_facet_label position-relative rounded-start-2 px-1 rounded-end-0 p-0 overflow-hidden"
-                    t-on-click="(ev) => this.onFacetLabelClick(ev.target, facet)"
-                    t-att-role="facet.domain ? 'button' : 'img'"
-                    >
-                    <i t-if="facet.icon" class="small fa-fw" t-att-class="facet.icon" role="image"/>
-                    <small t-else="" class="px-1 fw-bold" t-out="facet.title + ':'"/>
-
-                    <!-- Editable facets' overlay -->
-                    <span t-if="facet.domain"
-                        class="o_facet_overlay position-absolute top-0 end-100 transition-base px-1"
-                        t-att-class="{
-                            'o_facet_no_icon pe-2': !facet.icon,
-                            'bg-primary-subtle text-primary-emphasis': facet.type == 'field' || facet.type == 'filter',
-                            'o_facet_favorite': facet.type == 'favorite'
-                        }">
-                        <i class="fa fa-fw fa-pencil"/>
-                    </span>
-                </div>
-
-                <div class="o_facet_values position-relative d-flex flex-wrap align-items-center rounded-end-2 text-wrap overflow-hidden">
-                    <span
-                        t-att-class="{'cursor-pointer': facet.type != 'groupBy'}"
+                <div class="o_searchview_facet_content d-flex align-items-center gap-1">
+                    <div class="o_searchview_facet_label position-relative d-flex rounded-2 p-1 small overflow-hidden"
                         t-on-click="(ev) => this.onFacetLabelClick(ev.target, facet)"
-                    >
-                        <t t-foreach="facet.values" t-as="facetValue" t-key="facetValue_index">
-                            <em t-if="!facetValue_first" class="o_facet_values_sep small fw-bold mx-1 opacity-50" t-out="facet.separator"/>
-                            <small class="o_facet_value text-truncate" t-out="facetValue" t-att-title="facet.tooltip or facetValue"/>
-                        </t>
-                    </span>
-                    <button class="o_facet_remove oi oi-close btn btn-link py-0 px-2 text-danger d-print-none"
-                        aria-label="Remove"
-                        title="Remove"
-                        t-on-click="() => this.onFacetRemove(facet)"
-                        tabindex="-1"
-                    />
+                        t-att-role="facet.domain ? 'button' : 'img'"
+                        t-att-class="{
+                            'bg-primary-subtle text-primary': facet.type == 'field' || facet.type == 'filter',
+                        }"
+                        >
+                        <i t-if="facet.icon" class="fa-fw" t-att-class="facet.icon" role="image"/>
+                        <small t-else="" class="lh-1 fw-bold" t-out="facet.title + ':'"/>
+
+                        <!-- Editable facets' overlay -->
+                        <span t-if="facet.domain"
+                            class="o_facet_overlay position-absolute top-0 end-100 transition-base d-flex p-1"
+                            t-att-class="{
+                                'o_facet_no_icon pe-2': !facet.icon,
+                                'bg-primary-subtle text-primary': facet.type == 'field' || facet.type == 'filter',
+                            }">
+                            <i class="fa fa-pencil fa-fw"/>
+                        </span>
+                    </div>
+                    <div class="o_facet_values position-relative d-flex flex-wrap align-items-center text-wrap overflow-hidden">
+                        <span
+                            t-att-class="{'cursor-pointer': facet.type != 'groupBy'}"
+                            t-on-click="(ev) => this.onFacetLabelClick(ev.target, facet)"
+                        >
+                            <t t-foreach="facet.values" t-as="facetValue" t-key="facetValue_index">
+                                <em t-if="!facetValue_first" class="o_facet_values_sep small fw-bold mx-1 opacity-50" t-out="facet.separator"/>
+                                <small class="o_facet_value text-truncate" t-out="facetValue" t-att-title="facet.tooltip or facetValue"/>
+                            </t>
+                        </span>
+                    </div>
                 </div>
+                <button class="o_facet_remove oi oi-close btn btn-link d-flex align-items-center px-1 py-0 text-danger d-print-none"
+                    aria-label="Remove"
+                    title="Remove"
+                    t-on-click="() => this.onFacetRemove(facet)"
+                    tabindex="-1"
+                />
             </div>
         </t>
     </t>
@@ -107,7 +109,7 @@
                             role="img"
                         />
                     </button>
-                    <div class="o_searchview_input_container d-flex flex-grow-1 flex-wrap gap-1 mw-100" t-ref="this.facetContainerRef">
+                    <div class="o_searchview_input_container d-flex flex-grow-1 flex-wrap gap-1 align-items-center mw-100" t-ref="this.facetContainerRef">
                         <t t-call="web.SearchBar.Facets"/>
                         <input type="text"
                             class="o_searchview_input o_input d-print-none flex-grow-1 w-auto border-0"
