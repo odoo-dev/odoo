@@ -453,6 +453,8 @@ class MailMessage(models.Model):
             domain = Domain.TRUE
         # Non-employee see only messages with a subtype and not internal
         domain = self._get_search_domain_share() & domain
+        if not self:
+            return domain
         self = self.sudo(False)  # noqa: PLW0642
 
         # searching for all messages or a subset of models
