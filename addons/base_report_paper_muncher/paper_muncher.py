@@ -1,11 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import contextlib
 import datetime as dt
+import json
 import logging
 import os
 import os.path
 import re
 import selectors
+import shlex
+import socket
 import subprocess as sp
 import sys
 import threading
@@ -24,7 +28,7 @@ from odoo.http.server import SERVER_AGENT, SERVER_SOFTWARE
 from odoo.http.server_log import http_log, run_in_isolated_context, reset_thread_info
 from odoo.tools.misc import find_in_path
 
-__all__ = ['PaperMuncherInfo', 'PaperMuncherServer', 'paper_muncher']
+__all__ = ['PaperMuncherInfo', 'PaperMuncherServer', 'RenderError', 'paper_muncher']
 
 _logger = logging.getLogger(__name__)
 _logger_pipe = _logger.getChild('pipe')
@@ -37,6 +41,16 @@ CHUNK_SIZE = 8192  # 8kiB, buffer size of paper-muncher
 MAX_INCOMPLETE_EVENT_SIZE = 8192  # 8kiB
 GET_DOCUMENT_RE = re.compile(br"^/paper-muncher/(\.|[0-9]+)\.(?:html|xhtml|xml)$")
 
+# When set, connect to this Unix socket instead of spawning paper-muncher as a direct subprocess.
+# The server process is responsible for actually running (and sandboxing) paper-muncher.
+# Odoo only ever sees a byte stream, never the sandboxing mechanism, and never picks the binary
+# path.
+SOCKET_PATH = os.environ.get('ODOO_PAPER_MUNCHER_SOCKET')
+
+
+class RenderError(RuntimeError):
+    pass
+
 
 class PaperMuncherServer:
     __slots__ = (
@@ -47,9 +61,12 @@ class PaperMuncherServer:
         '_os_env',
         '_pdf',
         '_process',
+        '_reader',
         '_request',
         '_request_body',
         '_selector',
+        '_sock',
+        '_writer',
         '_wsgi_environ',
     )
 
@@ -58,23 +75,43 @@ class PaperMuncherServer:
         self._os_env = os_env
         self._wsgi_environ = wsgi_environ or {}
         self._process = None
+        self._sock = None
+        self._reader = None
+        self._writer = None
 
     def __enter__(self):
-        if self._process:
+        if self._process or self._sock:
             e = "process started already"
             raise RuntimeError(e)
 
-        self._process = sp.Popen(
-            self._args,
-            stdin=sp.PIPE,
-            stdout=sp.PIPE,
-            stderr=(
-                sys.stderr
-                if logging.NOTSET < _logger_process.level <= logging.DEBUG else
-                sp.DEVNULL
-            ),
-            env=self._os_env,
-        )
+        if SOCKET_PATH:
+            sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+            try:
+                sock.connect(SOCKET_PATH)
+                # self._args[0] is Odoo's own bin path; the server process owns its own and
+                # decides on its own how much of the rest of argv it trusts.
+                _logger_process.info(
+                    "connected to paper-muncher socket at %s, forwarding: %s",
+                    SOCKET_PATH, shlex.join(self._args[1:]),
+                )
+                sock.sendall(json.dumps(self._args[1:]).encode() + b'\n')
+            except OSError as e:
+                sock.close()
+                raise RenderError(f"could not reach server process: {e}") from e
+            self._sock = sock
+            self._reader = sock.fileno()  # read from Unix socket
+            self._writer = sock.fileno()  # write to Unix socket (same fd for both directions)
+        else:
+            _logger_process.info("executing: %s", shlex.join(self._args))
+            self._process = sp.Popen(
+                self._args,
+                stdin=sp.PIPE,
+                stdout=sp.PIPE,
+                stderr=sp.PIPE,
+                env=self._os_env,
+            )
+            self._reader = self._process.stdout.fileno()  # read from paper-muncher stdout
+            self._writer = self._process.stdin.fileno()  # write to paper-muncher stdin
 
         self._conn = h11.Connection(
             h11.SERVER,
@@ -83,17 +120,25 @@ class PaperMuncherServer:
         return self
 
     def __exit__(self, *_):
-        if self._process and not self._process.poll():
-            try:
-                self._process.terminate()
-                self._process.wait(1)
-            except sp.TimeoutExpired:
-                self._process.kill()
-        self._process = None
+        if self._sock is not None:
+            with contextlib.suppress(OSError):
+                self._sock.close()
+            self._sock = None
+        elif self._process:
+            if not self._process.poll():
+                try:
+                    self._process.terminate()
+                    self._process.wait(1)
+                except sp.TimeoutExpired:
+                    self._process.kill()
+            self._process = None
+
+        self._reader = None
+        self._writer = None
 
     def serve(self, documents: Sequence[str], *, timeout: int = SERVE_TIMEOUT):
         """Serve Paper Muncher requests until the rendered PDF is returned."""
-        if not self._process:
+        if not self._process and self._sock is None:
             e = "this function cannot be called outside of the context manager"
             raise RuntimeError(e)
 
@@ -107,15 +152,15 @@ class PaperMuncherServer:
         self._documents = documents
         self._selector = selectors.DefaultSelector()
         with self._selector:
-            self._selector.register(self._process.stdout, selectors.EVENT_READ, data='stdout')
+            self._selector.register(self._reader, selectors.EVENT_READ, data='read_side')
 
             while (
-                self._process.poll() is None  # paper-muncher is alive
-                and self._selector.get_map()  # stdout still registered
+                (self._sock is not None or self._process.poll() is None)
+                and self._selector.get_map()  # read side still registered
             ):
                 events = self._selector.select(timeout=_remaining_time(self._deadline))
                 if events:
-                    chunk = os.read(self._process.stdout.fileno(), CHUNK_SIZE)
+                    chunk = os.read(self._reader, CHUNK_SIZE)
                     if logging.NOTSET < _logger_pipe.level <= logging.DEBUG:
                         _logger_pipe.debug("read %d bytes:\n%s", len(chunk), chunk)
                     else:
@@ -123,8 +168,12 @@ class PaperMuncherServer:
                     self._conn.receive_data(chunk)
                     self._process_data()
 
-        if exit_code := self._process.poll():
+        if self._process and (exit_code := self._process.poll()):
             raise sp.CalledProcessError(exit_code, self._args)
+
+        if not hasattr(self, '_pdf'):
+            e = "no PDF was produced"
+            raise RenderError(e)
 
         return self._pdf
 
@@ -151,11 +200,11 @@ class PaperMuncherServer:
                         exc.add_note("upon processing %s" % self._request)
                         raise
                     if self._conn.our_state is h11.MUST_CLOSE:
-                        self._selector.unregister(self._process.stdout)
+                        self._selector.unregister(self._reader)
                         break
                     self._conn.start_next_cycle()
                 case h11.ConnectionClosed():
-                    self._selector.unregister(self._process.stdout)
+                    self._selector.unregister(self._reader)
                     break
                 case _:
                     e = f"unexpected {event=} in states={self._conn.states}"
@@ -213,7 +262,10 @@ class PaperMuncherServer:
         )
         self._send(response)
         self._send(h11.EndOfMessage())
-        self._process.stdin.close()
+        if self._sock is not None:
+            self._sock.shutdown(socket.SHUT_WR)  # half-close: the UNIX server relays this as stdin.close()
+        else:
+            self._process.stdin.close()
         return response, 0
 
     def _handle_fallback(self, request: h11.Request, body: bytes):
@@ -319,14 +371,15 @@ class PaperMuncherServer:
             deadline = time.monotonic() + WRITE_TIMEOUT
 
         with selectors.DefaultSelector() as selector:  # TODO: maybe reuse _selector
-            selector.register(self._process.stdin.fileno(), selectors.EVENT_WRITE)
+            selector.register(self._writer, selectors.EVENT_WRITE)
             while bytes_written < len(data):
                 events = selector.select(timeout=_remaining_time(deadline))
                 if not events:
-                    e = "Timeout exceeded while writing to subprocess"
+                    e = "Timeout exceeded while writing"
                     raise TimeoutError(e)
-                bytes_written += os.write(self._process.stdin.fileno(), memview[bytes_written:])
-            self._process.stdin.flush()
+                bytes_written += os.write(self._writer, memview[bytes_written:])
+            if self._process is not None:
+                self._process.stdin.flush()
 
         if logging.NOTSET < _logger_pipe.level <= logging.DEBUG:
             _logger_pipe.debug("wrote %d bytes:\n%s", bytes_written, data)
