@@ -1,3 +1,6 @@
+import ctypes
+import logging
+import time
 from pprint import pformat
 
 from odoo import Command, models
@@ -6,6 +9,57 @@ from odoo.tests.common import TransactionCase, tagged
 from odoo.tools import SQL, lazy, mute_logger, unique
 
 from .common import TestOrmPartnerCommon
+
+_logger = logging.getLogger(__name__)
+
+
+@tagged('-at_install', 'post_install')
+class TestPerfBench(TransactionCase):
+    def _time_loop(self, label, func, n=500_000):
+        func()
+        t0 = time.perf_counter()
+        for _ in range(n):
+            func()
+        elapsed = time.perf_counter() - t0
+        stats_logger = logging.getLogger('odoo.tests.stats')
+        stats_logger.info("Tested performance for label %s in %.3fs", label, elapsed)
+
+    def test_bench_access_model_attributes(self):
+        with self.profile():
+            user = self.env.user
+            self._time_loop('user.env', lambda: user.id)
+            self._time_loop('user.id', lambda: user.id)
+            self._time_loop('user.__class__', lambda: user.__class__)
+            self._time_loop('user.browse(user.id)', lambda: user.browse(user.id))
+
+    def test_check_version_tags(self):
+        """
+        Avoid performance regression in 3.13. see _reset_attribute_cache_budget__ for more info
+        """
+        assign = ctypes.pythonapi.PyUnstable_Type_AssignVersionTag  # this should work ok if python version >= 3.12, if backported add a version check
+        assign.argtypes = [ctypes.py_object]
+        assign.restype = ctypes.c_int
+        errors = 0
+
+        def _check_tag(obj):
+            assert isinstance(obj, type)
+            return assign(obj)
+
+        if not _check_tag(type(self.env.registry)):
+            _logger.error("Registry class has exhausted its version tag budget")
+            errors += 1
+        for model in self.env.registry.values():
+            for c in model.__mro__:
+                if not _check_tag(c):
+                    _logger.error("Model %s (%s.%s) ...", model._name, c.__module__, c.__qualname__)
+                    errors += 1
+            for field in model._fields.values():
+                for c in field.__class__.__mro__:
+                    if not _check_tag(c):
+                        _logger.error("Field %s.%s has exhausted its version tag budget", c.__module__, c.__qualname__)
+                        errors += 1
+        if errors:
+            raise AssertionError(f"{errors} classes have exhausted their version tag budget")
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
