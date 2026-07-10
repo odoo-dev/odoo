@@ -33,7 +33,7 @@ registry.category("form_compilers").add("portal_chatter_compiler", {
         compileChatter(node, {
             resId: "__comp__.props.record.resId or undefined",
             resModel: "__comp__.props.record.resModel",
-            projectSharingId: "__comp__.props.record.context.active_id_chatter",
+            projectSharingId: "__comp__.props.record.context.active_id_chatter or __comp__.props.record.data.project_id.id",
             isFollower: "__comp__.props.record.data.message_is_follower",
             displayFollowButton: "__comp__.props.record.data.display_follow_button",
         }),

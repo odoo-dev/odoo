@@ -2,9 +2,13 @@
 <templates xml:space="preserve">
 
     <t t-inherit="portal.Chatter" t-inherit-mode="extension">
-        <xpath expr="//div[hasclass('o-mail-Chatter-top')]" position="before">
-            <div class="d-flex justify-content-end">
-                <button t-if="this.projectSharingProps.displayFollowButton and this.thread().id" class="btn btn-link w-auto" t-on-click="this.toggleIsFollower">
+        <xpath expr="//Composer" position="before">
+            <div t-if="this.state.thread" class="d-flex align-items-center py-1">
+                <span class="flex-shrink-0 text-end fw-bold" style="width:55px">To: </span>
+                <RecipientsInput thread="this.state.thread"
+                    recipientType="'to'"
+                    placeholder.translate="Followers only"/>
+                <button t-if="this.projectSharingProps?.displayFollowButton and this.thread().id" class="btn btn-link w-auto ms-auto flex-shrink-0" t-on-click="this.toggleIsFollower">
                     <t t-if="this.state.isFollower">
                         Unfollow
                     </t>

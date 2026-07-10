@@ -55,6 +55,21 @@ class TestProjectSharingPortalAccess(TestProjectSharingCommon):
             if k not in readable_fields and k not in field_exception
         ])
 
+    def test_recipient_suggestions(self):
+        data = (
+            self.task_portal.with_user(self.user_portal)
+            .get_recipient_suggestions(search="")
+            ._build_result()
+        )
+        suggestion_ids = {partner.get("id") for partner in data.get("res.partner", [])}
+        self.assertIn(self.partner_portal.id, suggestion_ids)
+        self.assertIn(self.user_portal.partner_id.id, suggestion_ids)
+        self.assertNotIn(
+            self.user_projectmanager.partner_id.id,
+            suggestion_ids,
+            "Partners outside collaborators and the portal user's company should be excluded",
+        )
+
     def test_mention_suggestions(self):
         data = (
             self.task_portal.with_user(self.user_portal)

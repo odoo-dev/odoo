@@ -5,10 +5,11 @@ import { _t } from "@web/core/l10n/translation";
 
 import { patch } from "@web/core/utils/patch";
 import { onWillStart } from "@odoo/owl";
+import { session } from "@web/session";
 
 patch(Composer.prototype, {
     setup() {
-        super.setup();
+        super.setup(...arguments);
         this.projectSharingPlugin = maybePlugin(ProjectSharingPlugin);
         onWillStart(() => {
             if (this.thread && !this.thread.id) {
@@ -18,16 +19,18 @@ patch(Composer.prototype, {
     },
 
     get placeholder() {
-        if (this.projectSharingPlugin?.projectSharingId()) {
-            return _t("Write a message…");
+        if (this.thread && this.thread.model === "project.task" && this.props.type === "message") {
+            return _t("Send a message to all followers and selected contacts…");
         }
         return super.placeholder;
     },
 
     get extraData() {
         const extraData = super.extraData;
-        if (this.projectSharingPlugin?.projectSharingId()) {
-            extraData.project_sharing_id = this.projectSharingPlugin.projectSharingId();
+        const projectSharingId =
+            this.projectSharingPlugin?.projectSharingId() ?? session.project_id;
+        if (projectSharingId) {
+            extraData.project_sharing_id = projectSharingId;
         }
         return extraData;
     },

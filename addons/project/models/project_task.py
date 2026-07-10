@@ -2224,6 +2224,22 @@ class ProjectTask(models.Model):
                 token = token
         return super()._get_thread_with_access(thread_id, project_sharing_id=project_sharing_id, token=token, **kwargs)
 
+    def _get_project_sharing_recipient_partner_domain(self, search):
+        """Partners that can be selected as recipients in project sharing chatter."""
+        self.ensure_one()
+        project = self.project_id.sudo()
+        commercial_partner = self.env.user.partner_id.commercial_partner_id
+        collaborators = project.collaborator_ids.partner_id
+        same_company_partners = self.env["res.partner"].sudo().search([
+            ("commercial_partner_id", "in", commercial_partner.ids),
+            ("active", "=", True),
+        ])
+        allowed_partner_ids = (collaborators | same_company_partners).ids
+        return (
+            Domain(self.env["res.partner"]._get_mention_suggestions_domain(search))
+            & Domain("id", "in", allowed_partner_ids)
+        )
+
     def get_mention_suggestions(self, search, limit=8):
         """Return the 'limit'-first followers of the given task or followers of its project matching
         a 'search' string.
@@ -2251,6 +2267,44 @@ class ProjectTask(models.Model):
                 res.from_method("_store_mention_fields"),
             ),
         )
+
+    def get_recipient_suggestions(self, search="", limit=8):
+        """Return partners that can be added in the To field of project sharing chatter."""
+        self.ensure_one()
+        project = self.project_id
+        if not (
+            project
+            and project._check_project_sharing_access()
+            and project._get_thread_with_access(project.id)
+        ):
+            return {}
+        domain = self._get_project_sharing_recipient_partner_domain(search)
+        return Store().add(
+            self.env["res.partner"].sudo()._search_mention_suggestions(domain, limit),
+            lambda res: (
+                res.extend(["email", "name", "display_name"]),
+                res.from_method("_store_im_status_fields", internal=True),
+            ),
+        )
+
+    def get_allowed_recipient_partner_ids(self):
+        """Return partner ids selectable in the project sharing To field (Search More)."""
+        self.ensure_one()
+        project = self.project_id
+        if not (
+            project
+            and project._check_project_sharing_access()
+            and project._get_thread_with_access(project.id)
+        ):
+            return []
+        project = project.sudo()
+        commercial_partner = self.env.user.partner_id.commercial_partner_id
+        collaborators = project.collaborator_ids.partner_id
+        same_company_partners = self.env["res.partner"].sudo().search([
+            ("commercial_partner_id", "in", commercial_partner.ids),
+            ("active", "=", True),
+        ])
+        return (collaborators | same_company_partners).ids
 
     def _get_share_url(self, redirect=False, signup_partner=False, pid=None, share_token=True):
         self.ensure_one()
