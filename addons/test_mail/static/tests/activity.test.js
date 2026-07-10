@@ -329,7 +329,7 @@ test("activity view: Activity rendering with done activities", async () => {
     await click(`${selRowMeetingCellUpload} > div`, {
         target: domActivity,
     });
-    await contains(".o-mail-ActivityListPopover .badge.text-bg-success", { text: "3" }); // 3 planned
+    await contains(".o-mail-ActivityListPopover .badge.bg-success-subtle.text-success", { text: "3" }); // 3 planned
     for (const actIdx of [0, 1, 2]) {
         await contains(".o-mail-ActivityListPopoverItem", {
             text: `${uploadPlannedActs[actIdx].user_id[1]}-`,

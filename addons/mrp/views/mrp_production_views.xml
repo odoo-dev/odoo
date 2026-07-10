@@ -620,7 +620,7 @@
                             <div class="d-flex mb-1">
                                 <field name="name" class="fw-bolder fs-6 ms-1"/>
                                 <field name="product_default_code" class="fs-6 ms-1"/>
-                                <span t-attf-class="ms-auto badge rounded-pill #{['text-bg-light', 'text-bg-info', 'text-bg-warning', 'text-bg-success', 'text-bg-success', 'text-bg-danger'][['draft', 'confirmed', 'progress', 'to_close', 'done', 'cancel'].indexOf(record.state.raw_value)]}"><field name="state"/></span>
+                                <span t-attf-class="ms-auto badge rounded-pill #{['text-bg-light', 'bg-info-subtle text-info', 'bg-warning-subtle text-warning', 'bg-success-subtle text-success', 'bg-success-subtle text-success', 'bg-danger-subtle text-danger'][['draft', 'confirmed', 'progress', 'to_close', 'done', 'cancel'].indexOf(record.state.raw_value)]}"><field name="state"/></span>
                             </div>
                             <div class="d-flex mb-1">
                                 <field name="product_name" class="ms-1"/>

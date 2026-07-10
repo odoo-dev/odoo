@@ -11,7 +11,7 @@
                     colspan="2"
                     groups="base.group_system">
                     <span invisible="smtp_authentication != 'gmail' or not google_gmail_refresh_token"
-                        class="badge text-bg-success">
+                        class="badge bg-success-subtle text-success">
                         Gmail Token Valid
                     </span>
                     <button type="object"

@@ -39,7 +39,7 @@
             >
                     Pay with Demo
                     <span t-if="not provider_sudo.is_published"
-                          class="badge rounded-pill text-bg-danger ms-1"
+                          class="badge rounded-pill bg-danger-subtle text-danger ms-1"
                     >
                           Unpublished
                     </span>
@@ -56,7 +56,7 @@
                             <h5 class="modal-title" id="o_payment_demo_modal_label">
                                 Demo Express Checkout
                             </h5>
-                            <span class="badge rounded-pill text-bg-warning ms-1">
+                            <span class="badge rounded-pill bg-warning-subtle text-warning ms-1">
                                 Test Mode
                             </span>
                             <button type="button"

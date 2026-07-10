@@ -4,7 +4,7 @@
         <label class="o_form_label" t-att-for="this.props.id" t-att-class="this.className">
             <HighlightText originalText="this.props.string"/>
             <t t-if="this.upgradeEnterprise">
-                <span class="badge text-bg-primary oe_inline o_enterprise_label">Enterprise</span>
+                <span class="badge bg-primary-subtle text-primary oe_inline o_enterprise_label">Enterprise</span>
             </t>
         </label>
     </t>

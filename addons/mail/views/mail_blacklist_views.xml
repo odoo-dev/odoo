@@ -25,7 +25,7 @@
                         invisible="active or not email"/>
                 </header>
                 <sheet>
-                    <div class="badge rounded-pill text-bg-danger float-end fs-6 border-0" invisible="active">Archived</div>
+                    <div class="badge rounded-pill bg-danger-subtle text-danger float-end fs-6 border-0" invisible="active">Archived</div>
                     <group>
                         <field name="email"/>
                     </group>
