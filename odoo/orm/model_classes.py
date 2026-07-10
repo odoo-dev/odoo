@@ -342,6 +342,15 @@ def setup_model_classes(env: Environment):
     for model_cls in models_classes:
         _setup_fields(model_cls, env)
 
+    # copy
+    models_classes = [
+        type(model_cls.__name__, model_cls.__bases__, dict(
+            vars(model_cls),
+            #_args__=frozendict(),
+        ))
+        for model_cls in models_classes
+    ]
+
     for model_cls in models_classes:
         model_cls._fields_update_order__ = {
             field: (field.write_sequence, i)

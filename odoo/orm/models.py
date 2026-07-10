@@ -247,6 +247,9 @@ class MetaModel(type):
 
     def __new__(meta, name, bases, attrs):
         # this prevents assignment of non-fields on recordsets
+        if '__slots__' in attrs and attrs.get('pool'):
+            # ccopy
+            return super().__new__(meta, name, bases, attrs)
         attrs.setdefault('__slots__', ())
         # this collects the fields defined on the class (via Field.__set_name__())
         attrs.setdefault('_field_definitions', [])
@@ -312,6 +315,21 @@ class MetaModel(type):
                     'res.users', string='Last Updated by', readonly=True))
                 add_default('write_date', Datetime(
                     string='Last Updated on', readonly=True))
+
+    GG = 0
+    OLD = 0
+    def __setattr__(self, name, value):
+        if self._name == 'res.users':
+            sid = id(self)
+            if MetaModel.OLD != sid:
+                MetaModel.OLD = sid
+                MetaModel.GG = 1
+            else:
+                MetaModel.GG += 1
+            print(sid, MetaModel.GG, name)
+            import inspect
+            print(inspect.currentframe().f_back)
+        return super().__setattr__(name, value)
 
     @property
     def _inherit(cls):

@@ -400,9 +400,10 @@ class Field[T]:
         assert '_models' not in globals() or isinstance(owner, _models.MetaModel)
         is_model_definition = getattr(owner, 'pool', None) is None  # models.is_model_definition(owner)
 
-        if self._args__ is None:
+        if self._args__ is None and False:
             # assert self in FIELD_CACHE.values()
             assert not is_model_definition  # model registry class
+            breakpoint()
             assert self._shareable
             assert self.name in ('id', 'display_name') or self._module is not None
             assert owner._name == self.model_name
@@ -425,6 +426,7 @@ class Field[T]:
         else:  # model registry class
             self._setup_attrs__(owner, name)
             # free memory from stuff that is no longer useful
+            return
             self.__dict__.pop('_args__', None)
             if not self.related:
                 # keep _base_fields__ on related fields for incremental model setup
