@@ -31,6 +31,7 @@ from odoo.tools import (
 from odoo.tools.func import locked, reset_cached_properties
 from odoo.tools.lru import LRU
 from odoo.tools.misc import Collector
+from odoo.tools.version_tag_reset import reset_registry_classes
 
 from .utils import SUPERUSER_ID
 from . import model_classes
@@ -542,59 +543,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self._reset_attribute_cache_budget__()
 
     def _reset_attribute_cache_budget__(self):  # noqa: PLW3201
-        """Rebuild registry classes to restore CPython's type attribute cache.
-
-        Since Python 3.13, a class that has consumed 1000 version tags
-        (MAX_VERSIONS_PER_CLASS) has its attribute cache disabled permanently,
-        and the exhaustion poisons every subclass: assign_version_tag() refuses
-        to tag a type if any ancestor is exhausted. Model setup consumes one tag
-        per field added (setattr interleaved with lookups), so large models
-        (res.users: 500+ fields) exceed the budget, making every attribute
-        access an uncached MRO walk (up to ~30x slower). See CPython gh-127773.
-
-        A fresh type with the SAME BASES (not a subclass of the exhausted
-        class!) and a copied namespace has a zero tag budget and a clean
-        ancestry. Attributes are copied via setattr rather than passed to
-        type.__new__, to avoid re-running Field.__set_name__ (PEP 487) on
-        already-set-up fields; consecutive setattrs without interleaved
-        lookups consume only ~1 tag.
-
-        Registry classes of inherited models (e.g. mail.thread) are BASES of
-        inheriting models' registry classes (e.g. sale.order), and version-tag
-        exhaustion poisons descendants through ancestry. Classes are therefore
-        rebuilt recursively, bases-first, remapping every registry-class base
-        to its rebuilt equivalent.
-        """
-        registry_classes = set(self.values())
-        processed = {}
-
-        def rebuild(old_cls):
-            try:
-                return processed[old_cls]
-            except KeyError:
-                pass
-            new_bases = tuple(
-                rebuild(base) if base in registry_classes else base
-                for base in old_cls.__bases__
-            )
-            metacls = type(old_cls)
-            # bypass MetaModel.__new__ to avoid module check assert
-            new_cls = type.__new__(metacls, old_cls.__name__, new_bases, {
-                '__module__': old_cls.__module__,
-                '__qualname__': old_cls.__qualname__,
-            })
-            for key, value in list(vars(old_cls).items()):
-                if key not in ('__dict__', '__weakref__', '__module__', '__qualname__'):
-                    type.__setattr__(new_cls, key, value)  # noqa: PLC2801
-            # keep invariant consistent with the remapped bases
-            # (checked by _prepare_setup: cls.__bases__ == cls._base_classes__)
-            if getattr(old_cls, '_base_classes__', None) == old_cls.__bases__:
-                new_cls._base_classes__ = new_bases
-            processed[old_cls] = new_cls
-            return new_cls
-
-        for name, old_cls in list(self.items()):
-            self[name] = rebuild(old_cls)
+        reset_registry_classes(self, logger=_logger)
 
     @functools.cached_property
     def field_inverses(self) -> Collector[Field, Field]:

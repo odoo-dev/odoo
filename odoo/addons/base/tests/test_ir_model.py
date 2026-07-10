@@ -649,7 +649,6 @@ class TestCustomFields(TestCommonCustomFields):
                 'store': True,
             })
 
-        # check the computed values
         for partner in partners:
             self.assertEqual(partner.x_oh_boy, partner.country_id.code)
 
