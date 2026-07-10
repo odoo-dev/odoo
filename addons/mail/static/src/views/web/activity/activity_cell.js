@@ -29,6 +29,7 @@ export class ActivityCell extends Component {
                 })
                 .optional(),
             countByState: t.record(t.number()),
+            customClasses: t.string(),
             reloadFunc: t.function([]),
             reportingDate: t.string(),
             resId: t.number(),
