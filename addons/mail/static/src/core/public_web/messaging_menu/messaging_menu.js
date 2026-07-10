@@ -1,8 +1,9 @@
+import { VirtualList } from "@mail/core/common/virtual_list";
 import { DiscussSearch } from "@mail/core/public_web/discuss_search";
 import { MessageInDialog } from "@mail/core/public_web/messaging_menu/message_in_dialog";
 import { MessagingMenuEmpty } from "@mail/core/public_web/messaging_menu/messaging_menu_empty";
 import { MessagingMenuItem } from "@mail/core/public_web/messaging_menu/messaging_menu_item";
-import { useOnBottomScrolled, useSearch } from "@mail/utils/common/hooks";
+import { useSearch } from "@mail/utils/common/hooks";
 
 import { Component, computed, props, signal, types, useEffect } from "@odoo/owl";
 
@@ -12,7 +13,12 @@ import { normalize } from "@web/core/l10n/utils";
 import { useService } from "@web/core/utils/hooks";
 
 export class MessagingMenu extends Component {
-    static components = { DiscussSearch, MessagingMenuItem, MessagingMenuEmpty };
+    static components = {
+        DiscussSearch,
+        MessagingMenuItem,
+        MessagingMenuEmpty,
+        VirtualList,
+    };
     static template = "mail.MessagingMenu";
 
     isIosPwa = isIOS() && isDisplayStandalone();
@@ -30,6 +36,10 @@ export class MessagingMenu extends Component {
         return this.filteredMessages();
     });
     searchTerm = signal("");
+    // Flattened rows fed to the single VirtualList. Each row carries the props its
+    // MessagingMenuItem needs. Override `rowsGroups` (see the discuss patch) to
+    // contribute more rows (e.g. channels) into the same list.
+    rows = computed(() => this.rowsGroups.flat());
 
     setup() {
         super.setup();
@@ -51,6 +61,7 @@ export class MessagingMenu extends Component {
                 }),
             deps: () => [this.filteredMessages()],
         });
+        this.onBottomScrolled = this.onBottomScrolled.bind(this);
         this.store = useService("mail.store");
         this.state = props.static(
             "state",
@@ -65,9 +76,6 @@ export class MessagingMenu extends Component {
         this.ui = useService("ui");
         // Bound once so `onClickMessage` is a stable (props.static) handler.
         this.onClickMessage = this.onClickMessage.bind(this);
-        useOnBottomScrolled("tabContent", () =>
-            this.activeTab().loadMore({ filter: this.state().selectedFilter })
-        );
         // On search term change: update the search state.
         useEffect(() => {
             this.messageSearch.searchTerm = this.searchTerm();
@@ -79,11 +87,26 @@ export class MessagingMenu extends Component {
     }
 
     get isEmpty() {
-        return !this.messages().length;
+        return !this.rows().length;
+    }
+
+    /** Row groups concatenated into the VirtualList, in display order. */
+    get rowsGroups() {
+        return [
+            this.messages().map((message) => ({
+                key: message.localId,
+                message,
+                onClick: this.onClickMessage,
+            })),
+        ];
     }
 
     get noSearchResultText() {
         return this.searchTerm() ? _t('No results for "%s".', this.searchTerm()) : "";
+    }
+
+    onBottomScrolled() {
+        this.activeTab().loadMore({ filter: this.state().selectedFilter });
     }
 
     /** @param {import("@mail/core/public_web/messaging_menu/messaging_menu_tab_model").MessagingMenuTabAction} action */

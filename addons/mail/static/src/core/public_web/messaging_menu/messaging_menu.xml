@@ -26,12 +26,15 @@
         </div>
         <div t-custom-ref="tabContent" class="o-mail-MessagingMenu-tabContent d-flex flex-column overflow-auto o-scrollbar-thin flex-grow-1">
             <t name="messagingMenuExtraItems"/>
-            <MessagingMenuItem
-                t-foreach="this.messages()" t-as="message" t-key="message.localId"
-                message="message"
-                activeTab="this.activeTab"
-                onClick="this.onClickMessage"
-            />
+            <VirtualList t-if="this.rows().length" items="this.rows" estimateItemHeight="() => 55" bufferViewports="2" getItemKey="(row) => row.key" onBottomScrolled="this.onBottomScrolled">
+                <t t-set-slot="default" t-slot-scope="scope">
+                    <MessagingMenuItem
+                        message="scope.item.message"
+                        activeTab="this.activeTab"
+                        onClick="scope.item.onClick"
+                    />
+                </t>
+            </VirtualList>
             <t t-if="this.isEmpty">
                 <MessagingMenuEmpty t-if="this.noSearchResultText" title="this.noSearchResultText"/>
                 <t t-elif="this.activeTab().getLoadStatus(this.state().selectedFilter) === 'loaded' and this.activeTab().emptyState">

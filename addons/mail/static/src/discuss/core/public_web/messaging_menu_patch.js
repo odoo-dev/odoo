@@ -42,8 +42,15 @@ patch(MessagingMenu.prototype, {
         // Bound once so `onClickChannel` is a stable (props.static) handler.
         this.onClickChannel = this.onClickChannel.bind(this);
     },
-    get isEmpty() {
-        return super.isEmpty && !this.channels().length;
+    get rowsGroups() {
+        return [
+            ...super.rowsGroups,
+            this.channels().map((channel) => ({
+                key: channel.localId,
+                channel,
+                onClick: this.onClickChannel,
+            })),
+        ];
     },
     /** @param {import("models").DiscussChannel} channel */
     onClickChannel(channel) {

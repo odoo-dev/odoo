@@ -1,0 +1,10 @@
+.o-VirtualList {
+    contain: strict;
+    overflow-y: auto;
+    position: relative;
+}
+
+.o-VirtualList-item {
+    box-sizing: border-box;
+    will-change: transform;
+}
