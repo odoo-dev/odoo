@@ -12,3 +12,8 @@ class L10n_PeResCityDistrict(models.Model):
     @api.model
     def _load_pos_data_fields(self, config):
         return ["name", "city_id", "country_id", "state_id"]
+
+    @api.model
+    def _load_pos_data_domain(self, data, config):
+        l10n_pe_district_ids = {partner['l10n_pe_district'] for partner in data['res.partner'] if partner.get('l10n_pe_district')}
+        return [('id', 'in', list(l10n_pe_district_ids))]
