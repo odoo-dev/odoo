@@ -70,12 +70,17 @@ export class EventRegistrationSummaryDialog extends Component {
         }
     }
 
+    get reportName() {
+        return "event.action_report_event_registration_badge";
+    }
+
     async onRegistrationPrintPdf() {
-        await this.actionService.doAction({
-            type: "ir.actions.report",
-            report_type: "qweb-pdf",
-            report_name: `event.event_registration_report_template_badge/${this.registration.id}`,
-        });
+        await this.actionService.doAction(this.reportName, {
+          additionalContext: {
+              active_id: this.registration.id,
+              active_ids: [this.registration.id],
+          },
+      });
         if (this.props.doNextScan) {
             this.onScanNext();
         }
