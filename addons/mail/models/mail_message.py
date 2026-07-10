@@ -448,6 +448,8 @@ class MailMessage(models.Model):
         assert self.env.su
         if domain_operator != 'in':
             return NotImplemented
+        if not self:
+            return []
         domain = self.env.context.get('search_domain')
         if not isinstance(domain, Domain):
             domain = Domain.TRUE
