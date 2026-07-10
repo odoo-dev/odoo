@@ -318,7 +318,7 @@ class MetaModel(type):
 
     GG = 0
     OLD = 0
-    def __setattr__(self, name, value):
+    def xxxxxx__setattr__(self, name, value):
         if self._name == 'res.users':
             sid = id(self)
             if MetaModel.OLD != sid:

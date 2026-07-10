@@ -342,20 +342,29 @@ def setup_model_classes(env: Environment):
     for model_cls in models_classes:
         _setup_fields(model_cls, env)
 
-    # copy
-    models_classes = [
-        type(model_cls.__name__, model_cls.__bases__, dict(
-            vars(model_cls),
-            #_args__=frozendict(),
-        ))
-        for model_cls in models_classes
-    ]
-
     for model_cls in models_classes:
         model_cls._fields_update_order__ = {
             field: (field.write_sequence, i)
             for i, field in enumerate(model_cls._fields.values())
         }
+
+    # make a copy
+
+    rebuilt = {}
+    def rebuild(model_cls):
+        if c := rebuilt.get(model_cls):
+            return c
+        if getattr(model_cls, 'pool', None) is None:
+            rebuilt[model_cls] = model_cls
+            return model_cls
+        bases = tuple(map(rebuild, model_cls.__bases__))
+        c = type(model_cls.__name__, bases, dict(vars(model_cls), _base_classes__=bases))
+        rebuilt[model_cls] = c
+        return c
+    for name, model_cls in registry.items():
+        registry[name] = rebuild(model_cls)
+
+    for model_cls in registry.values():
         model_cls(env, (), ())._post_model_setup__()
 
 
