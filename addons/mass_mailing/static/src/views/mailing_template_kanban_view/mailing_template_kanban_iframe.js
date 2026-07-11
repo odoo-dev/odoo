@@ -17,6 +17,7 @@ import { useRef } from "@web/owl2/utils";
 import { kanbanRendererProps } from "@web/views/kanban/kanban_renderer";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { MailingTemplateKanbanWrapper } from "./mailing_template_kanban_wrapper";
+import { cookie } from "@web/core/browser/cookie";
 
 /**
  * This is an Iframe in which the kanban renderer will be loaded
@@ -59,8 +60,11 @@ export class MailingTemplateKanbanIframe extends Component {
     }
 
     loadIframeAssets() {
-        // FIXME: check for dark mode and load the proper assets it.
-        return loadIframeBundles(this.iframeRef.el, ["web.assets_backend"]);
+        return loadIframeBundles(
+            this.iframeRef.el,
+            [cookie.get("color_scheme") === "dark" ? "web.assets_web_dark" : "web.assets_web"],
+            { css: true }
+        );
     }
 
     /**
