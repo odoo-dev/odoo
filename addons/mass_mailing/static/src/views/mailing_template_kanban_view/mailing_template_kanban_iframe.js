@@ -6,6 +6,7 @@ import {
     onWillUpdateProps,
     props,
     proxy,
+    signal,
     status,
     useApp,
     useScope,
@@ -34,7 +35,8 @@ export class MailingTemplateKanbanIframe extends Component {
         });
         this.iframeRef = useRef("iframe");
         this.scope = useScope();
-        this.rendererWrapperRootProps = Object.assign(proxy({}), this.props);
+        this.kanbanRendererProps = signal.Object(this.props);
+        this.rendererWrapperRootProps = { kanbanRendererProps: this.kanbanRendererProps };
         onMounted(() => {
             this.setupIframe();
         });
@@ -44,10 +46,7 @@ export class MailingTemplateKanbanIframe extends Component {
             }
         });
         onWillUpdateProps(async (nextProps) => {
-            Object.assign(this.rendererWrapperRootProps, nextProps);
-            // TODO: look for a better way of updating the props of the RendererWrapper.
-            this.templateKanbanRoot.node.component.props = this.rendererWrapperRootProps;
-            await this.rendererWrapper.reloadRenderer();
+            this.kanbanRendererProps.set(nextProps);
         });
     }
 
@@ -86,7 +85,7 @@ export class MailingTemplateKanbanIframe extends Component {
         } catch (error) {
             loadingError = error;
         }
-        if (!status(this.scope.component) === "destroyed") {
+        if (status(this.scope.component) === "destroyed") {
             return;
         } else if (loadingError) {
             throw loadingError;

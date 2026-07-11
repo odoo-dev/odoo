@@ -1,5 +1,4 @@
-import { Component, props, proxy } from "@odoo/owl";
-import { kanbanRendererProps } from "@web/views/kanban/kanban_renderer";
+import { Component, props, t } from "@odoo/owl";
 import { MailingTemplateKanbanRenderer } from "./mailing_template_kanban_renderer";
 
 /**
@@ -11,17 +10,5 @@ import { MailingTemplateKanbanRenderer } from "./mailing_template_kanban_rendere
 export class MailingTemplateKanbanWrapper extends Component {
     static template = "mass_mailing.MailingTemplateKanbanWrapper";
     static components = { MailingTemplateKanbanRenderer };
-    props = props(kanbanRendererProps);
-
-    setup() {
-        this.state = proxy({ rendererKey: 0 });
-    }
-
-    /**
-     * Increment the t-key of the renderer component
-     * in order for OWL to reload a fresh component.
-     */
-    async reloadRenderer() {
-        this.state.rendererKey++;
-    }
+    props = props({ kanbanRendererProps: t.signal(t.object()) });
 }
