@@ -1651,10 +1651,18 @@ class SaleOrder(models.Model):
         if not program.filtered_domain(self._get_program_domain()):
             return {"error": self.env._("The program is not available for this order.")}
         if program in self._get_applied_programs():
-            return {
-                "error": self.env._("This program is already applied to this order."),
-                "already_applied": True,
-            }
+            # Allow re-entering the code when the program was applied via a reward line but the
+            # coupon still has enough points to cover at least one more unclaimed reward.
+            has_further_rewards = coupon and any(
+                self._get_real_points_for_coupon(coupon) >= reward.required_points
+                for reward in program.reward_ids
+                if reward not in self.order_line.reward_id
+            )
+            if not has_further_rewards:
+                return {
+                    "error": self.env._("This program is already applied to this order."),
+                    "already_applied": True,
+                }
         if program.reward_ids:
             global_rewards = program.reward_ids.filtered("is_global_discount")
             applied_global_reward = self._get_applied_global_discount()
