@@ -78,7 +78,7 @@ patch(MessagingMenuItem.prototype, {
         const swipeRight = this.channel.isUnread
             ? {
                   action: () => this.channel.thread.markAsRead(),
-                  icon: "fa-check-circle",
+                  icon: "check_circle",
                   bgColor: "bg-success",
               }
             : undefined;
@@ -110,7 +110,7 @@ patch(MessagingMenuItem.prototype, {
         if (this.hasTouch() && this.channel?.canHide) {
             return {
                 action: () => this.channel.unpinChannel(),
-                icon: "fa-times-circle",
+                icon: "cancel",
                 bgColor: "bg-danger",
             };
         }

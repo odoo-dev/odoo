@@ -107,12 +107,10 @@
             border: none;
 
             &:before {
-                --o-mi-fill: 1;
-
                 z-index: 2;
                 display: inline-block;
                 font-family: "material_symbols_outlined";
-                content: 'circle';
+                content: 'circle_f';
             }
 
             &:hover {

@@ -7,7 +7,7 @@ export class BooleanIconField extends Component {
     static template = "web.BooleanIconField";
     props = props({
         ...standardFieldProps,
-        icon: t.string().optional("fa-check-square-o"),
+        icon: t.string().optional("check_box"),
         label: t.string().optional(),
     });
 

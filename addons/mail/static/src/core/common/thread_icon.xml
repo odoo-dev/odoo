@@ -9,7 +9,7 @@
         <t t-set="attr" t-value="{ 'class': class }"/>
         <t name="extra"/>
         <t t-if="this.channel?.channel_type === 'channel'">
-            <div t-if="!this.channel.group_public_id" class="fa fa-globe o-fs-small" t-att="attr" title="Public Channel"/>
+            <div t-if="!this.channel.group_public_id" class="oi o-fs-small" data-icon="public" t-att="attr" title="Public Channel"/>
         </t>
         <t t-elif="this.channel?.channel_type === 'group'">
             <t name="group"/>
