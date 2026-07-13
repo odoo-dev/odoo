@@ -1,4 +1,17 @@
-from odoo import api, fields, models
+from types import MappingProxyType
+
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+
+PEPPOL_PROXY_STATE_17_TO_18 = MappingProxyType({
+    'not_registered': 'not_registered',
+    'not_verified': 'in_verification',
+    'sent_verification': 'in_verification',
+    'pending': 'smp_registration',
+    'active': 'receiver',
+    'sender': 'sender',
+    'rejected': 'rejected',
+})
 
 
 class ResConfigSettings(models.TransientModel):
@@ -35,6 +48,18 @@ class ResConfigSettings(models.TransientModel):
         Franchised VAT Regime (Bimonthly) : transactions reported bimonthly, payments reported bimonthly
         """,
     )
+    l10n_fr_pdp_peppol_proxy_display_state = fields.Selection(
+        selection=[
+            ('not_registered', 'Not registered'),
+            ('in_verification', 'In verification'),
+            ('sender', 'Can send but not receive'),
+            ('smp_registration', 'Can send, pending registration to receive'),
+            ('receiver', 'Can send and receive'),
+            ('rejected', 'Rejected'),
+        ],
+        string='Approved Platform Status',
+        compute='_compute_l10n_fr_pdp_peppol_proxy_display_state',
+    )
 
     def action_open_pdp_form(self):
         registration_wizard = self.env['pdp.registration'].create({'company_id': self.company_id.id})
@@ -53,4 +78,19 @@ class ResConfigSettings(models.TransientModel):
 
     def _inverse_l10n_fr_pdp_pilot_phase(self):
         for record in self:
-            record.company_id._l10n_fr_pdp_update_pilot_phase(record.l10n_fr_pdp_pilot_phase)
+            if record.l10n_fr_pdp_pilot_phase != record.company_id.l10n_fr_pdp_pilot_phase:
+                record.company_id._l10n_fr_pdp_update_pilot_phase(record.l10n_fr_pdp_pilot_phase)
+
+    @api.depends('account_peppol_proxy_state')
+    def _compute_l10n_fr_pdp_peppol_proxy_display_state(self):
+        for record in self:
+            record.l10n_fr_pdp_peppol_proxy_display_state = PEPPOL_PROXY_STATE_17_TO_18.get(record.account_peppol_proxy_state) or False
+
+    def _check_mandatory_peppol_user_data(self):
+        self.ensure_one()
+        if self.company_id._get_peppol_proxy_type() != 'pdp':
+            super()._check_mandatory_peppol_user_data()
+            return
+
+        if not self.account_peppol_contact_email:
+            raise ValidationError(_("A contact email is required."))

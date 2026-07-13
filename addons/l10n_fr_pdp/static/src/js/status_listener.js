@@ -1,3 +1,5 @@
+/** @odoo-module **/
+
 import { formView } from "@web/views/form/form_view";
 import { FormController } from "@web/views/form/form_controller";
 import { registry } from "@web/core/registry";

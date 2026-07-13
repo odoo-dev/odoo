@@ -2,11 +2,9 @@ import logging
 import re
 import requests
 
-from markupsafe import Markup
 from urllib import parse
 
-from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo import _, api, fields, models
 
 from odoo.addons.l10n_fr_pdp.tools.demo_utils import handle_demo
 
@@ -18,7 +16,7 @@ siren_siret_re = re.compile(r'^(\d{9}|\d{14})$')
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
-    invoice_edi_format = fields.Selection(selection_add=[('ubl_21_fr', "France E-Invoicing (UBL 2.1)")])
+    ubl_cii_format = fields.Selection(selection_add=[('ubl_21_fr', "France E-Invoicing (UBL 2.1)")])
     pdp_verification_display_state = fields.Selection(
         selection=[
             ('not_verified', 'Not verified yet'),
@@ -33,42 +31,29 @@ class ResPartner(models.Model):
         compute="_compute_pdp_verification_display_state",
     )
 
-    @api.model
-    def fields_get(self, allfields=None, attributes=None):
-        # Extend to rename the `peppol` option in the `invoice_sending_method` selection
-        fields = super().fields_get(allfields, attributes)
-        company = self.env.company
-        if not self._context.get("studio") and (company.country_code == 'FR' or company.pdp_identifier) and 'invoice_sending_method' in fields:
-            field = fields['invoice_sending_method']
-            if 'selection' in field:
-                field['selection'] = [('peppol', self.env._('by Approved Platform')) if option[0] == 'peppol' else option for option in field['selection']]
-        return fields
-
     # -------------------------------------------------------------------------
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @api.depends('peppol_verification_state', 'peppol_endpoint', 'peppol_eas')
+    @api.depends('account_peppol_verification_label', 'peppol_endpoint', 'peppol_eas')
     @api.depends_context('company')
     def _compute_pdp_verification_display_state(self):
         for partner in self:
-            partner.pdp_verification_display_state = partner._get_pdp_display_verification_state(partner.peppol_verification_state)
+            partner.pdp_verification_display_state = partner._get_pdp_display_verification_state(partner.account_peppol_verification_label)
 
-    # -------------------------------------------------------------------------
-    # CONSTRAINT
-    # -------------------------------------------------------------------------
-
-    @api.constrains('invoice_edi_format', 'invoice_sending_method')
-    def _check_pdp_send_ubl_21_fr(self):
-        if self.filtered(
-            lambda partner: (
-                partner.invoice_sending_method == "peppol"
+    @api.depends('country_code')
+    def _compute_ubl_cii_format(self):
+        super()._compute_ubl_cii_format()
+        # Note: The `ubl_cii_format` is not a `company_dependent` field.
+        #       But we only want to use 'ubl_21_fr' when sending from "PDP" to "PDP".
+        for partner in self:
+            if (
+                (partner.company_id.partner_id.peppol_eas == '0225'
+                 or (not partner.company_id and self.env.company.partner_id.peppol_eas == '0225'))
+                and partner.country_code == 'FR'
                 and partner._get_pdp_receiver_identification_info()[0] == 'pdp'
-                and partner.invoice_edi_format != "ubl_21_fr"
-            )
-        ):
-            ubl_21_fr_string = self.env._("France E-Invoicing (UBL 2.1)")
-            raise ValidationError(self.env._("For French regulated invoices, only %(format_name)s is supported.", format_name=ubl_21_fr_string))
+            ):
+                partner.ubl_cii_format = 'ubl_21_fr'
 
     # -------------------------------------------------------------------------
     # OVERRIDE AND HELPERS
@@ -112,13 +97,13 @@ class ResPartner(models.Model):
         if eas != '0225':
             return super()._build_error_peppol_endpoint(eas, endpoint)
         if not self.env["res.company"]._check_pdp_identifier(endpoint):
-            return self.env._("The Peppol endpoint is not valid. The expected format is: SIREN, SIREN_SIRET, SIREN_SIRET_CodeRoutage or SIREN_SuffixeAdressage")
+            return _("The Peppol endpoint is not valid. The expected format is: SIREN, SIREN_SIRET, SIREN_SIRET_CodeRoutage or SIREN_SuffixeAdressage")
 
-    def _get_edi_builder(self, invoice_edi_format):
+    def _get_edi_builder(self):
         # EXTENDS 'account_edi_ubl_cii'
-        if invoice_edi_format == 'ubl_21_fr':
+        if self.ubl_cii_format == 'ubl_21_fr':
             return self.env['account.edi.xml.ubl_21_fr']
-        return super()._get_edi_builder(invoice_edi_format)
+        return super()._get_edi_builder()
 
     def _get_ubl_cii_formats_info(self):
         # EXTENDS 'account_edi_ubl_cii'
@@ -126,15 +111,15 @@ class ResPartner(models.Model):
         formats_info['ubl_21_fr'] = {'countries': ['FR'], 'on_peppol': False}
         return formats_info
 
-    def _get_suggested_invoice_edi_format(self):
+    def _get_suggested_ubl_cii_format(self):
         # EXTENDS 'account'
         if self.country_code == 'FR' and not self._l10n_fr_pdp_is_b2c():
             return 'ubl_21_fr'
-        return super()._get_suggested_invoice_edi_format()
+        return super()._get_suggested_ubl_cii_format()
 
     def _get_pdp_display_verification_state(self, state=None):
         self.ensure_one()
-        state = state if state is not None else self.peppol_verification_state
+        state = state if state is not None else self.account_peppol_verification_label
         if not state or state == 'not_verified':
             return state
         elif self.env.company._get_peppol_proxy_type() == 'pdp' and self._get_pdp_receiver_identification_info()[0] == 'pdp':
@@ -149,58 +134,36 @@ class ResPartner(models.Model):
             return 'ubl_21_fr'
         return super()._get_suggested_peppol_edi_format()
 
-    def _log_verification_state_update(self, company, old_value, new_value):
-        # log the update of the pdp verification state
-        # we do this instead of regular tracking because of the customized message
-        # and because we want to log the change for every company in the db
-        if self._get_pdp_receiver_identification_info()[0] != 'pdp':
-            return super()._log_verification_state_update(company, old_value, new_value)
-        if old_value == new_value:
-            return None
+    def _compute_account_peppol_verification_label(self):
+        pdp_partners = self.filtered(
+            lambda p: (p._get_pdp_receiver_identification_info()[0] == 'pdp')
+        ) if self.env.company._get_peppol_proxy_type() == 'pdp' else self.env[self._name]
+        for partner in pdp_partners:
+            if not partner.account_peppol_validity_last_check:
+                partner.account_peppol_verification_label = 'not_verified'
+            elif partner.ubl_cii_format != 'ubl_21_fr':
+                partner.account_peppol_verification_label = 'not_valid_format'
+            elif partner.account_peppol_is_endpoint_valid:
+                partner.account_peppol_verification_label = 'valid'
+            else:
+                partner.account_peppol_verification_label = 'not_valid'
+        super(ResPartner, self - pdp_partners)._compute_account_peppol_verification_label()
 
-        state_field = self._fields['pdp_verification_display_state']
-        selection_values = dict(state_field.selection)
-        old_display_state = self._get_pdp_display_verification_state(state=old_value)
-        new_display_state = self._get_pdp_display_verification_state(state=new_value)
-        old_label = selection_values[old_display_state] if old_value else False  # get translated labels
-        new_label = selection_values[new_display_state] if new_value else False
+    def button_account_peppol_check_partner_endpoint(self):
+        self.ensure_one()
+        partner_type, edi_identification = self._get_pdp_receiver_identification_info()
+        if self.env.company._get_peppol_proxy_type() != 'pdp' or partner_type != 'pdp':
+            return super().button_account_peppol_check_partner_endpoint()
 
-        body = Markup("""
-            <ul>
-                <li>
-                    <span class='o-mail-Message-trackingOld me-1 px-1 text-muted fw-bold'>{old}</span>
-                    <i class='o-mail-Message-trackingSeparator fa fa-long-arrow-right mx-1 text-600'/>
-                    <span class='o-mail-Message-trackingNew me-1 fw-bold text-info'>{new}</span>
-                    <span class='o-mail-Message-trackingField ms-1 fst-italic text-muted'>({field})</span>
-                    <span class='o-mail-Message-trackingCompany ms-1 fst-italic text-muted'>({company})</span>
-                </li>
-            </ul>
-        """).format(
-            old=old_label,
-            new=new_label,
-            field=state_field.string,
-            company=company.display_name,
-        )
-        self._message_log(body=body)
-
-    @api.model
-    @handle_demo
-    def _get_peppol_verification_state(self, peppol_endpoint, peppol_eas, invoice_edi_format):
-        proxy_type, edi_identification = self._get_peppol_proxy_identification_info(peppol_eas, peppol_endpoint)
-        if proxy_type != 'pdp' or self.env.company._get_peppol_proxy_type() != 'pdp':
-            return super()._get_peppol_verification_state(peppol_endpoint, peppol_eas, invoice_edi_format)
-        return self._get_pdp_annuaire_verification_state(edi_identification, invoice_edi_format)
-
-    @api.model
-    def _get_pdp_annuaire_verification_state(self, edi_identification, invoice_edi_format):
         if not edi_identification:
-            return 'not_verified'
-        if invoice_edi_format != 'ubl_21_fr':
-            return 'not_valid_format'
-        participant_info = self._pdp_annuaire_lookup_participant(edi_identification)
-        if (participant_info or {}).get('in_annuaire'):
-            return 'valid'
-        return 'not_valid'
+            self.account_peppol_is_endpoint_valid = False
+        else:
+            participant_info = self._pdp_annuaire_lookup_participant(edi_identification)
+            self.write({
+                'account_peppol_validity_last_check': fields.Date.context_today(self),
+                'account_peppol_is_endpoint_valid': (participant_info or {}).get('in_annuaire') or False,
+            })
+        return False
 
     @api.model
     @handle_demo
@@ -243,7 +206,3 @@ class ResPartner(models.Model):
         if peppol_eas == '0225':
             proxy_type = 'pdp'
         return proxy_type, identifier
-
-    @handle_demo
-    def button_account_peppol_check_partner_endpoint(self, company=None):
-        return super().button_account_peppol_check_partner_endpoint(company=company)

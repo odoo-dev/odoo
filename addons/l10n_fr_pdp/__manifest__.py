@@ -7,13 +7,12 @@
         - Send and receive documents via the Odoo approved platform
 """,
     'depends': [
-        'l10n_fr_account',
+        'l10n_fr',
         'account_edi_ubl_cii_tax_extension',
         'account_peppol_response',
-        'auth_totp_mail_enforce',
         'iap',
     ],
-    'auto_install': ['l10n_fr_account', 'auth_totp_mail_enforce'],
+    'auto_install': ['l10n_fr'],
     'data': [
         'data/ir_cron.xml',
         'security/ir.model.access.csv',
@@ -25,6 +24,7 @@
         'views/pdp_send_wizard_views.xml',
         'views/res_config_settings_views.xml',
         'views/res_partner_views.xml',
+        'wizard/account_move_send_views.xml',
         'wizard/pdp_registration_views.xml',
         'wizard/pdp_response_wizard_views.xml',
     ],
@@ -36,5 +36,4 @@
     'license': 'LGPL-3',
     'pre_init_hook': '_pre_init_pdp',
     'post_init_hook': '_post_init_pdp',
-    'uninstall_hook': 'uninstall_hook',
 }
