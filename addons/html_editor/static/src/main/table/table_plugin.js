@@ -187,6 +187,11 @@ export class TablePlugin extends Plugin {
                 return true;
             }
         },
+        is_no_inline_root_predicates: (node) => {
+            if (node.classList?.contains("o_table_wrapper")) {
+                return true;
+            }
+        },
 
         /** Selectors */
         move_node_whitelist_selectors: "table",

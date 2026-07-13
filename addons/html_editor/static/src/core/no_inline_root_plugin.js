@@ -10,7 +10,12 @@ export class NoInlineRootPlugin extends Plugin {
 
     /** @type {import("plugins").EditorResources} */
     resources = {
-        fix_selection_on_editable_root_overrides: this.fixSelectionOnEditableRoot.bind(this),
+        fix_selection_on_no_inline_root_overrides: this.fixSelectionOnNoInlineRoot.bind(this),
+        is_no_inline_root_predicates: (node) => {
+            if (node === this.editable) {
+                return true;
+            }
+        },
     };
 
     setup() {
@@ -26,28 +31,38 @@ export class NoInlineRootPlugin extends Plugin {
     }
 
     /**
-     * Places the cursor in a safe place (not the editable root).
-     * Inserts an empty paragraph if selection results from mouse click and
-     * there's no other way to insert text before/after a block.
+     * Places the cursor in a safe place (not the editable root, nor any
+     * other registered no-inline root). Inserts an empty paragraph if
+     * selection results from mouse click and there's no other way to
+     * insert text before/after a block.
      *
      * @param {import("./selection_plugin").EditorSelection} selection
      * @returns {boolean} Whether the selection was fixed
      */
-    fixSelectionOnEditableRoot(selection) {
-        if (!selection.isCollapsed || selection.anchorNode !== this.editable) {
-            return false;
-        }
+    fixSelectionOnNoInlineRoot(selection) {
+        const { anchorNode, anchorOffset } = selection;
 
-        const children = childNodes(this.editable);
-        const nodeAfterCursor = children[selection.anchorOffset];
-        const nodeBeforeCursor = children[selection.anchorOffset - 1];
+        const root = anchorNode;
+        const children = childNodes(root);
+        const nodeAfterCursor = children[anchorOffset];
+        const nodeBeforeCursor = children[anchorOffset - 1];
         const key = this.currentKeyDown;
         delete this.currentKeyDown;
 
         if (key?.startsWith("Arrow")) {
-            return this.fixSelectionOnEditableRootArrowKeys(nodeAfterCursor, nodeBeforeCursor, key);
+            return this.fixSelectionOnNoInlineRootArrowKeys(
+                root,
+                nodeAfterCursor,
+                nodeBeforeCursor,
+                key
+            );
         }
-        return this.fixSelectionOnEditableRootGeneric(nodeAfterCursor, nodeBeforeCursor);
+        return this.fixSelectionOnNoInlineRootGeneric(
+            root,
+            nodeAfterCursor,
+            nodeBeforeCursor,
+            anchorOffset
+        );
     }
     /**
      * @param {Node} nodeAfterCursor
@@ -55,12 +70,17 @@ export class NoInlineRootPlugin extends Plugin {
      * @param {string} key
      * @returns {boolean} Whether the selection was fixed
      */
-    fixSelectionOnEditableRootArrowKeys(nodeAfterCursor, nodeBeforeCursor, key) {
+    fixSelectionOnNoInlineRootArrowKeys(root, nodeAfterCursor, nodeBeforeCursor, key) {
         if (!["ArrowRight", "ArrowLeft", "ArrowUp", "ArrowDown"].includes(key)) {
             return false;
         }
         const directionForward = ["ArrowRight", "ArrowDown"].includes(key);
         let node = directionForward ? nodeAfterCursor : nodeBeforeCursor;
+        if (!node && root !== this.editable) {
+            // The root has no child in that direction (e.g. a table wrapper).
+            // Continue the navigation using its sibling in the parent container.
+            node = directionForward ? root.nextElementSibling : root.previousElementSibling;
+        }
         while (node && isNotAllowedContent(node)) {
             node = directionForward ? node.nextElementSibling : node.previousElementSibling;
         }
@@ -77,7 +97,7 @@ export class NoInlineRootPlugin extends Plugin {
      * @param {Node} nodeBeforeCursor
      * @returns {boolean} Whether the selection was fixed
      */
-    fixSelectionOnEditableRootGeneric(nodeAfterCursor, nodeBeforeCursor) {
+    fixSelectionOnNoInlineRootGeneric(root, nodeAfterCursor, nodeBeforeCursor, offset) {
         if (isParagraphRelatedElement(nodeAfterCursor)) {
             // Cursor is right before a 'P'.
             this.dependencies.selection.setCursorStart(nodeAfterCursor);
@@ -86,6 +106,14 @@ export class NoInlineRootPlugin extends Plugin {
         if (isParagraphRelatedElement(nodeBeforeCursor)) {
             // Cursor is right after a 'P'.
             this.dependencies.selection.setCursorEnd(nodeBeforeCursor);
+            return true;
+        }
+        // Neither direct child works (e.g. table wrapper only holds a table),
+        // fall back to the root's own sibling on the cursor's side instead.
+        const atStart = offset === 0;
+        const sibling = atStart ? root.previousElementSibling : root.nextElementSibling;
+        if (isParagraphRelatedElement(sibling)) {
+            this.dependencies.selection[atStart ? "setCursorEnd" : "setCursorStart"](sibling);
             return true;
         }
         return false;
