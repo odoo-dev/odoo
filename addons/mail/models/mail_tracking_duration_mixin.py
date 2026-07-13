@@ -23,6 +23,31 @@ class MailTrackingDurationMixin(models.AbstractModel):
         compute='_compute_rotting')
     is_rotting = fields.Boolean('Rotting', compute='_compute_rotting', search='_search_is_rotting')
 
+    @api.model
+    def read_progress_bar(self, domain, group_by, progress_bar):
+        res = super().read_progress_bar(domain, group_by, progress_bar)
+        if not self._is_rotting_feature_enabled():
+            return res
+
+        rotting_domain = Domain(domain) & Domain([('is_rotting', '=', True)])
+        rotting_groups = self.env[self._name].formatted_read_group(
+            rotting_domain,
+            [group_by],
+            ['__count'],
+        )
+
+        def adapt(value):
+            return value[0] if isinstance(value, tuple) else value
+
+        for group in rotting_groups:
+            key = str(adapt(group[group_by]))
+            if key in res:
+                res[key]['rotting_count'] = group['__count']
+            else:
+                res[key] = {'rotting_count': group['__count']}
+
+        return res
+
     @api.depends(lambda self: [self._track_duration_field])
     def _compute_duration_tracking(self):
         """

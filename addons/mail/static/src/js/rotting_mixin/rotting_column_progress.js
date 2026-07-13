@@ -17,7 +17,7 @@ export class RottingColumnProgress extends ColumnProgress {
         }
         return {
             title: isRottingField.string,
-            value: group.list.records.filter((record) => record.data.is_rotting).length,
+            value: this.props.progressBarState._pbCounts?.[group.serverValue]?.rotting_count || 0,
         };
     }
 
