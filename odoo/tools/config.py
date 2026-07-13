@@ -10,6 +10,7 @@ import optparse
 import os
 import sys
 import tempfile
+import tomllib
 import warnings
 from os.path import abspath, expanduser, expandvars, normcase, realpath
 
@@ -727,22 +728,16 @@ class configmanager:
             for name, value in DEFAULT_COLOR_SPEC.items()
         }
 
-        p = ConfigParser.RawConfigParser()
-        try:
-            p.read([self['config']])
-            file_options = p.items('colors')
-        except (OSError, ConfigParser.NoSectionError):
-            pass
-        else:
-            for name, value in file_options:
-                if name not in DEFAULT_COLOR_SPEC:
-                    self._log(logging.WARNING, "unknown color option: %r, skipped", name)
-                    continue
-                try:
-                    self.colors[name] = color2bool[value]
-                except KeyError:
-                    e = f"color option {name}: invalid value: {value!r}"
-                    raise optparse.OptionValueError(e) from None
+        file_options = self._load_file_options_dict(self['config'], 'colors') or {}
+        for name, value in file_options.items():
+            if name not in DEFAULT_COLOR_SPEC:
+                self._log(logging.WARNING, "unknown color option: %r, skipped", name)
+                continue
+            try:
+                self.colors[name] = color2bool[value]
+            except KeyError:
+                e = f"color option {name}: invalid value: {value!r}"
+                raise optparse.OptionValueError(e) from None
 
     def _postprocess_options(self):
         self._runtime_options.clear()
@@ -935,6 +930,8 @@ class configmanager:
 
     @classmethod
     def _check_bool(cls, option, opt, value):
+        if isinstance(value, bool):
+            return value
         if value.lower() in ('1', 'yes', 'true', 'on'):
             return True
         if value.lower() in ('0', 'no', 'false', 'off'):
@@ -945,7 +942,9 @@ class configmanager:
 
     @classmethod
     def _check_comma(cls, option_name, option, value):
-        return [v for s in value.split(',') if (v := s.strip())]
+        if not isinstance(value, list):
+            value = value.split(',')
+        return [v for s in value if s and (v := s.strip())]
 
     @classmethod
     def _check_path(cls, option, opt, value):
@@ -958,13 +957,13 @@ class configmanager:
             return not cls._check_bool(option, opt, value)
         except optparse.OptionValueError:
             cls._log(logging.WARNING, "option %s: since 19.0, invalid boolean value: %r, assume %s", opt, value, value != 'None')
-            return value == 'None'
+            return value == 'None' or value is None
 
     def parse(self, option_name, value):
         if not isinstance(value, str):
             e = f"can only cast strings: {value!r}"
             raise TypeError(e)
-        if value == 'None':
+        if value == 'None' or value is None:
             return None
         option = self.options_index[option_name]
         if option.action in ('store_true', 'store_false'):
@@ -993,40 +992,50 @@ class configmanager:
             format_func = self.parser.option_class.TYPE_FORMATTER[option.type]
         return format_func(value)
 
-    def _load_file_options(self, rcfile):
-        self._file_options.clear()
-        p = ConfigParser.RawConfigParser()
+    def _load_file_options_dict(self, rcfile, key='options'):
         try:
-            p.read([rcfile])
-            for (name, value) in p.items('options'):
-                if name == 'without_demo':
-                    name = 'with_demo'
-                    value = str(self._check_without_demo(None, 'without_demo', value))
-                option = self.options_index.get(name)
-                if not option:
-                    if name not in self.aliases:
-                        self._log(logging.WARNING,
-                            "unknown option %r in the config file at "
-                            "%s, option stored as-is, without parsing",
-                            name, self['config'],
-                        )
-                    self._file_options[name] = value
-                    continue
-                if not option.file_loadable:
-                    continue
-                if (
-                    value in ('False', 'false')
-                    and option.action not in ('store_true', 'store_false', 'callback')
-                    and option.nargs_ != '?'
-                ):
-                    # "False" used to be the my_default of many non-bool options
-                    self._log(logging.WARNING, "option %s reads %r in the config file at %s but isn't a boolean option, skip", name, value, self['config'])
-                    continue
-                self._file_options[name] = self.parse(name, value)
+            if rcfile.endswith('.toml'):
+                with open(rcfile, 'rb') as f:
+                    data = tomllib.load(f)
+                    return data.get(key)
+            else:
+                p = ConfigParser.RawConfigParser()
+                p.read([rcfile])
+                return dict(p.items('options'))
         except OSError:
-            pass
+            self._log(logging.DEBUG, "Failed to read options file %s", rcfile)
         except ConfigParser.NoSectionError:
             pass
+        return None
+
+    def _load_file_options(self, rcfile):
+        self._file_options.clear()
+        options = self._load_file_options_dict(rcfile) or {}
+        for (name, value) in options.items():
+            if name == 'without_demo':
+                name = 'with_demo'
+                value = str(self._check_without_demo(None, 'without_demo', value))
+            option = self.options_index.get(name)
+            if not option:
+                if name not in self.aliases:
+                    self._log(logging.WARNING,
+                        "unknown option %r in the config file at "
+                        "%s, option stored as-is, without parsing",
+                        name, self['config'],
+                    )
+                self._file_options[name] = value
+                continue
+            if not option.file_loadable:
+                continue
+            if (
+                (value in ('False', 'false') or value is False)
+                and option.action not in ('store_true', 'store_false', 'callback')
+                and option.nargs_ != '?'
+            ):
+                # "False" used to be the my_default of many non-bool options
+                self._log(logging.WARNING, "option %s reads %r in the config file at %s but isn't a boolean option, skip", name, value, self['config'])
+                continue
+            self._file_options[name] = self.parse(name, value)
 
     def save(self, keys=None):
         p = ConfigParser.RawConfigParser()
