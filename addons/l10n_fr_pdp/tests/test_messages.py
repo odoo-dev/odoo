@@ -1,86 +1,27 @@
-import json
-from base64 import b64encode
 from contextlib import contextmanager
-from requests import PreparedRequest, Response, Session
 from unittest.mock import patch
-from urllib.parse import parse_qs
 
 from odoo import Command
 from odoo.exceptions import UserError
 from odoo.tests.common import tagged
-from odoo.tools.misc import file_open
 
-from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
-
-from .common import FAKE_UUID, FILE_PATH, TestL10nFrPdpCommon
+from .common import FAKE_UUID
+from .messages_common import TestPdpMessagesCommon
 
 
 @tagged('post_install_l10n', 'post_install', '-at_install')
-class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
+class TestPdpMessage(TestPdpMessagesCommon):
 
     @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
+    def setUpClass(cls, chart_template_ref='fr'):
+        super().setUpClass(chart_template_ref=chart_template_ref)
 
-        cls.env.company.account_peppol_proxy_state = 'receiver'
         cls.invalid_partner = cls.env['res.partner'].create([{
             'name': 'Wintermute',
             'city': 'Copenhagen',
             'country_id': cls.env.ref('base.dk').id,
-            'invoice_sending_method': 'peppol',
             'vat': 'DK12345674',
         }])
-
-    @classmethod
-    def _get_mock_data(cls, error=False, nr_invoices=1):
-        proxy_documents = {
-            FAKE_UUID[0]: {
-                'accounting_supplier_party': False,
-                'filename': 'test_outgoing.xml',
-                'enc_key': '',
-                'document': '',
-                'state': 'done' if not error else 'error',
-                'direction': 'outgoing',
-                'document_type': 'Invoice',
-                'origin_message_uuid': FAKE_UUID[0],
-            },
-            FAKE_UUID[1]: {
-                'accounting_supplier_party': '0184:16356706',
-                'filename': 'test_incoming',
-                'enc_key': file_open(f'{FILE_PATH}/enc_key', mode='rb').read(),
-                'document': b64encode(file_open(f'{FILE_PATH}/document', mode='rb').read()),
-                'state': 'done' if not error else 'error',
-                'direction': 'incoming',
-                'document_type': 'Invoice',
-                'origin_message_uuid': FAKE_UUID[1],
-            },
-        }
-
-        responses = {
-            '/api/pdp/1/send_document': {'result': {'messages': [{'message_uuid': FAKE_UUID[0]}] * nr_invoices}},
-            '/api/pdp/1/send_response': {'result': {'messages': [{'message_uuid': FAKE_UUID[2]}] * nr_invoices}},
-            # '/api/pdp/1/get_document' is handled separately in _request_handler
-            '/api/pdp/1/ack': {'result': {}},
-            '/api/pdp/1/get_all_documents': {'result': {
-                'messages': [
-                    {
-                        'accounting_supplier_party': None,
-                        'filename': 'test_incoming.xml',
-                        'uuid': FAKE_UUID[1],
-                        'origin_message_uuid': FAKE_UUID[1],
-                        'state': 'done',
-                        'direction': 'incoming',
-                        'document_type': 'Invoice',
-                        'sender': '0184:16356706',
-                        'receiver': '0088:5798009811512',
-                        'timestamp': '2022-12-30',
-                        'error': False if not error else 'Test error',
-                    }
-                ],
-            }},
-            '/api/pdp/1/get_all_ppf_documents': {'result': {}},
-        }
-        return proxy_documents, responses
 
     @contextmanager
     def _set_context(self, other_context):
@@ -91,50 +32,14 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
         finally:
             self.env.context = previous_context
 
-    @classmethod
-    def _request_handler(cls, s: Session, r: PreparedRequest, /, **kw):
-
-        if r.path_url.startswith('/api/pdp/1/annuaire_lookup?pdp_identifier='):
-            identifier = parse_qs(r.path_url.rsplit('?')[1])['pdp_identifier'][0]
-            return cls._get_annuaire_lookup_response(identifier, "968515759_96851575905823")
-        elif r.path_url.startswith('/api/pdp/1/lookup?peppol_identifier='):
-            identifier = parse_qs(r.path_url.rsplit('?')[1])['peppol_identifier'][0]
-            return cls._get_peppol_lookup_response(identifier, "0208:0239843188")
-        elif r.path_url.startswith('/api/peppol/1/lookup?peppol_identifier='):
-            identifier = parse_qs(r.path_url.rsplit('?')[1])['peppol_identifier'][0]
-            return cls._get_peppol_lookup_response(identifier, "0225:968515759_96851575905899")
-
-        response = Response()
-        response.status_code = 200
-        url = r.path_url
-        body = json.loads(r.body)
-        if url == '/api/pdp/1/send_document':
-            if not body['params']['documents']:
-                raise UserError('No documents were provided')
-            proxy_documents, responses = cls._get_mock_data(cls.env.context.get('error'), nr_invoices=len(body['params']['documents']))
-        elif url == '/api/pdp/1/send_response':
-            if 'send_response_params' in cls.env.context:
-                cls.env.context['send_response_params'] = body['params']
-            proxy_documents, responses = cls._get_mock_data(cls.env.context.get('error'), nr_invoices=len(body['params']['reference_uuids']))
-        else:
-            proxy_documents, responses = cls._get_mock_data(cls.env.context.get('error'))
-
-        if url == '/api/pdp/1/get_document':
-            uuid = body['params']['message_uuids'][0]
-            response.json = lambda: {'result': {uuid: proxy_documents[uuid]}}
-            return response
-
-        if url not in responses:
-            return super()._request_handler(s, r, **kw)
-        response.json = lambda: responses[url]
-        return response
-
     def test_pdp_attachment_placeholders(self):
         move = self._create_french_invoice()
         move.action_post()
+        partner = move.partner_id
+        self.assertEqual(partner.ubl_cii_format, 'ubl_21_fr')
+        filename = partner._get_edi_builder()._export_invoice_filename(move)
 
-        wizard = self.create_send_and_print(move, sending_methods=['email', 'peppol'])
-        self.assertEqual(wizard.invoice_edi_format, 'ubl_21_fr')
+        wizard = self.create_send_and_print(move, checkbox_ubl_cii_xml=True, checkbox_send_peppol=False)
 
         # the ubl xml placeholder should be generated
         self._assert_mail_attachments_widget(wizard, [
@@ -150,7 +55,11 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
             },
         ])
 
-        wizard.sending_methods = ['peppol']
+        # we don't want to email the xml file in addition to sending via peppol
+        wizard.checkbox_send_peppol = True
+        self.assertFalse(bool(
+            [file for file in wizard.mail_attachments_widget if file['name'] == filename]
+        ))
         wizard.action_send_and_print()
         self.assertEqual(self._get_mail_message(move).preview, 'The invoice has been sent to the Peppol Access Point. The following attachments were sent with the XML:')
 
@@ -158,51 +67,66 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
         self.env.company.account_peppol_proxy_state = False
         move = self._create_french_invoice()
         move.action_post()
-        wizard = self.env['account.move.send.wizard'].create({
-            'move_id': move.id,
-        })
-        self.assertEqual(move.partner_id.peppol_verification_state, 'valid')
-        self.assertTrue('peppol' not in wizard.sending_method_checkboxes)  # peppol checkbox not shown
-        self.assertTrue('peppol' not in wizard.sending_methods)  # peppol is not checked by default
 
-    def test_send_pdp_not_valid_format(self):
+        wizard = self.create_send_and_print(move)
+        self.assertEqual(move.partner_id.account_peppol_verification_label, 'valid')
+        self.assertTrue(not wizard.enable_peppol)  # peppol checkbox not shown
+        self.assertTrue(not wizard.checkbox_send_peppol)  # peppol is not checked by default
+
+    def test_pdp_send_valid_pdp_partner_wrong_format(self):
         move = self._create_french_invoice()
         move.action_post()
-        move.partner_id.invoice_edi_format = 'xrechnung'
-        wizard = self.env['account.move.send.wizard'].create({
-            'move_id': move.id,
-        })
-        self.assertEqual(move.partner_id.peppol_verification_state, 'not_valid_format')
-        self.assertTrue('peppol' not in wizard.sending_methods)  # peppol is not checked by default
-        self.assertTrue(wizard.sending_method_checkboxes['peppol']['readonly'])  # can't select peppol
-        self.assertFalse(wizard.alerts)  # there is no alerts
+        partner = move.partner_id
+        self.assertEqual(partner.ubl_cii_format, 'ubl_21_fr')
+        self.assertEqual(partner.account_peppol_verification_label, 'valid')
+        self.assertTrue(partner.is_peppol_edi_format)
+
+        partner.ubl_cii_format = 'ubl_bis3'
+        self.assertEqual(partner.account_peppol_verification_label, 'not_valid_format')
+
+        wizard = self.create_send_and_print(move)
+        self.assertTrue(wizard.enable_peppol)  # peppol checkbox shown
+        self.assertTrue(not wizard.checkbox_send_peppol)  # peppol is not checked by default
+        self.assertEqual(wizard.peppol_warning, "For French regulated invoices, only the format 'France E-Invoicing (UBL 2.1)' is supported.Please check the following partners: SUPER FRENCH PARTNER")
+
+    def test_send_pdp_not_valid_peppol_format(self):
+        move = self._create_french_invoice()
+        move.action_post()
+        partner = move.partner_id
+        partner.ubl_cii_format = 'zugferd'
+        wizard = self.create_send_and_print(move)
+        self.assertEqual(partner.account_peppol_verification_label, 'not_valid_format')
+        self.assertTrue(not partner.is_peppol_edi_format)
+        self.assertTrue(not wizard.enable_peppol)  # peppol checkbox not shown
+        self.assertTrue(not wizard.checkbox_send_peppol)  # peppol is not checked by default
+        self.assertEqual(wizard.peppol_warning, "For French regulated invoices, only the format 'France E-Invoicing (UBL 2.1)' is supported.Please check the following partners: SUPER FRENCH PARTNER")
 
     def test_send_pdp_not_valid_partner(self):
         partner = self.invalid_partner
         partner.write({
             'peppol_eas': '0225',
             'peppol_endpoint': '111111111',
-            'invoice_edi_format': 'ubl_21_fr',
+            'ubl_cii_format': 'ubl_21_fr',
         })
         move = self._create_french_invoice()
         move.partner_id = partner
         move.action_post()
-        wizard = self.env['account.move.send.wizard'].create({
-            'move_id': move.id,
-        })
-        self.assertEqual(partner.peppol_verification_state, 'not_valid')
-        self.assertTrue('peppol' not in wizard.sending_methods)  # peppol is not checked by default
-        self.assertTrue(wizard.sending_method_checkboxes['peppol']['readonly'])  # can't select peppol
-        self.assertFalse(wizard.alerts)  # there is no alerts
+        wizard = self.create_send_and_print(move)
+        self.assertEqual(partner.account_peppol_verification_label, 'not_valid')
+        self.assertTrue(not wizard.checkbox_send_peppol)  # peppol is not checked by default
+        self.assertTrue(wizard.enable_peppol)  # peppol checkbox is visible
+        self.assertTrue(wizard.peppol_warning)  # there is a warning
 
     def test_resend_error_pdp_message(self):
         # should be able to resend error invoices
         move = self._create_french_invoice()
         move.action_post()
+        partner = move.partner_id
+        self.assertEqual(partner.ubl_cii_format, 'ubl_21_fr')
 
         wizard = self.create_send_and_print(move)
-        self.assertEqual(wizard.invoice_edi_format, 'ubl_21_fr')
-        self.assertTrue('peppol' in wizard.sending_methods)
+        self.assertTrue(wizard.enable_peppol)  # peppol checkbox show
+        self.assertTrue(wizard.checkbox_send_peppol)  # peppol is checked by default
         with self._set_context({'error': True}):
             wizard.action_send_and_print()
 
@@ -212,8 +136,9 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
         # we can't send the ubl document again unless we regenerate the pdf
         move.invoice_pdf_report_id.unlink()
         wizard = self.create_send_and_print(move)
-        self.assertEqual(wizard.invoice_edi_format, 'ubl_21_fr')
-        self.assertTrue('peppol' in wizard.sending_methods)
+        self.assertEqual(partner.ubl_cii_format, 'ubl_21_fr')
+        self.assertTrue(wizard.enable_peppol)  # peppol checkbox show
+        self.assertTrue(wizard.checkbox_send_peppol)  # peppol is checked by default
 
         wizard.action_send_and_print()
 
@@ -228,8 +153,9 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
         move.action_post()
 
         wizard = self.create_send_and_print(move)
-        self.assertEqual(wizard.invoice_edi_format, 'ubl_21_fr')
-        self.assertTrue('peppol' in wizard.sending_methods)
+        self.assertEqual(move.partner_id.ubl_cii_format, 'ubl_21_fr')
+        self.assertTrue(wizard.enable_peppol)  # peppol checkbox show
+        self.assertTrue(wizard.checkbox_send_peppol)  # peppol is checked by default
 
         wizard.action_send_and_print()
 
@@ -251,7 +177,7 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
         move.action_post()
 
         wizard = self.create_send_and_print(move)
-        self.assertTrue('peppol' not in wizard.sending_method_checkboxes)
+        self.assertFalse(wizard.checkbox_send_peppol)
 
     def test_receive_error_pdp(self):
         # an error pdp message should be created
@@ -270,24 +196,24 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
 
     def test_silent_error_while_creating_xml(self):
         """When in multi/async mode, the generation of XML can fail silently (without raising).
-        This needs to be reflected as an error and put the move in 'error' peppol state.
+        This needs to be reflected by putting the move in the 'skipped' peppol state.
         """
         def mocked_export_invoice_constraints(self, invoice, vals):
             return {'test_error_key': 'test_error_description'}
 
-        self.partner_a.invoice_edi_format = 'ubl_21_fr'
+        self.partner_a.ubl_cii_format = 'ubl_21_fr'
         move_1 = self._create_french_invoice()
         move_2 = self._create_french_invoice()
         (move_1 + move_2).action_post()
 
-        wizard = self.create_send_and_print(move_1 + move_2)
+        wizard = self.create_send_and_print(move_1 + move_2, checkbox_download=False)
         with patch(
-            'odoo.addons.l10n_fr_pdp.models.account_edi_xml_ubl_21_fr.AccountEdiXmlUbl21Fr._export_invoice_constraints_new',
+            'odoo.addons.l10n_fr_pdp.models.account_edi_xml_ubl_21_fr.AccountEdiXmlUbl21Fr._export_invoice_constraints',
             mocked_export_invoice_constraints
         ):
             wizard.action_send_and_print()
             self.env.ref('account.ir_cron_account_move_send').method_direct_trigger()
-        self.assertEqual(move_1.peppol_move_state, 'error')
+        self.assertEqual(move_1.peppol_move_state, 'skipped')
 
     def _pay(self, move, amount=None):
         payment = self.env['account.payment.register'].with_context(active_model='account.move', active_ids=move.ids).create({
@@ -296,7 +222,6 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
         })._create_payments()
         self.assertTrue(payment.is_reconciled)
         self.assertFalse(payment.is_matched)
-        payment.action_post()
         liquidity_lines, _counterpart_lines, _writeoff_lines = payment._seek_for_lines()
 
         statement_line = self.env['account.bank.statement.line'].create({
@@ -326,7 +251,7 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
                 'journal_id': move.journal_id.id,
             }
         ).reverse_moves()
-        credit_note = move.reversal_move_ids
+        credit_note = move.reversal_move_id
         credit_note.action_post()
 
         send_wizard2 = self.create_send_and_print(credit_note)
@@ -377,7 +302,6 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
         })._create_payments()
         self.assertTrue(payment.is_reconciled)
         self.assertFalse(payment.is_matched)
-        payment.action_post()
         self.assertEqual(move.payment_state, 'in_payment')
         self.assertEqual(move.pdp_lifecycle_residual, 0)
 
@@ -519,7 +443,7 @@ class TestPdpMessage(TestL10nFrPdpCommon, TestAccountMoveSendCommon):
                 'journal_id': move.journal_id.id,
             }
         ).reverse_moves()
-        credit_note = move.reversal_move_ids
+        credit_note = move.reversal_move_id
         credit_note.action_post()
 
         self.assertEqual(move.payment_state, 'paid')

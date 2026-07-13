@@ -110,7 +110,7 @@ class AccountMoveSend(models.TransientModel):
         }
         for wizard in self:
             edi_user = wizard.company_id.sudo().account_edi_proxy_client_ids.filtered(
-                lambda usr: usr.proxy_type == 'peppol'
+                lambda usr: usr.proxy_type in self.env['account_edi_proxy_client.user']._get_peppol_proxy_types()
             )
             mode = mode_strings.get(edi_user.edi_mode)
             wizard.account_peppol_edi_mode_info = f' ({mode})' if mode else ''
@@ -160,6 +160,48 @@ class AccountMoveSend(models.TransientModel):
 
         return super()._hook_if_errors(moves_data, from_cron=from_cron, allow_fallback_pdf=allow_fallback_pdf)
 
+    def _get_peppol_document_params(self, partner, invoice, invoice_data):
+        edi_user = invoice.company_id.account_peppol_edi_user
+        if not edi_user:
+            return None, None
+
+        if invoice_data.get('ubl_cii_xml_attachment_values'):
+            xml_file = invoice_data['ubl_cii_xml_attachment_values']['raw']
+            filename = invoice_data['ubl_cii_xml_attachment_values']['name']
+        elif invoice.ubl_cii_xml_id and invoice.peppol_move_state != 'canceled':
+            xml_file = invoice.ubl_cii_xml_id.raw
+            filename = invoice.ubl_cii_xml_id.name
+        else:
+            invoice.peppol_move_state = 'skipped'
+            return None, None
+
+        if not partner.peppol_eas or not partner.peppol_endpoint:
+            invoice.peppol_move_state = 'error'
+            invoice_data['error'] = _('The partner is missing Peppol EAS and/or Endpoint identifier.')
+            return None, None
+
+        if not partner.account_peppol_is_endpoint_valid:
+            invoice.peppol_move_state = 'error'
+            invoice_data['error'] = _('Please verify partner configuration in partner settings.')
+            return None, None
+
+        if invoice._is_exportable_as_self_invoice() and not partner._can_receive_self_billing(invoice.partner_id.commercial_partner_id.ubl_cii_format):
+            invoice.peppol_move_state = 'error'
+            invoice_data['error'] = _('The partner has indicated it does not accept this document type, so you cannot send this invoice via Peppol.')
+            return None, None
+
+        if len(xml_file) > 64000000:
+            invoice_data['error'] = _("Invoice %s is too big to send via peppol (64MB limit)", invoice.name)
+
+        receiver_identification = f"{partner.peppol_eas}:{partner.peppol_endpoint}"
+        document = {
+            'filename': filename,
+            'receiver': receiver_identification,
+            'ubl': b64encode(xml_file).decode(),
+        }
+
+        return edi_user, document
+
     @api.model
     def _call_web_service_after_invoice_pdf_render(self, invoices_data):
         # Overrides 'account'
@@ -169,52 +211,23 @@ class AccountMoveSend(models.TransientModel):
         invoices_data_peppol = {}
         for invoice, invoice_data in invoices_data.items():
             if invoice_data.get('send_peppol') and invoice.peppol_move_state not in ('processing', 'done'):
-                if invoice_data.get('ubl_cii_xml_attachment_values'):
-                    xml_file = invoice_data['ubl_cii_xml_attachment_values']['raw']
-                    filename = invoice_data['ubl_cii_xml_attachment_values']['name']
-                elif invoice.ubl_cii_xml_id and invoice.peppol_move_state != 'canceled':
-                    xml_file = invoice.ubl_cii_xml_id.raw
-                    filename = invoice.ubl_cii_xml_id.name
-                else:
-                    invoice.peppol_move_state = 'skipped'
-                    continue
-
                 partner = invoice.partner_id.commercial_partner_id
-                if not partner.peppol_eas or not partner.peppol_endpoint:
-                    invoice.peppol_move_state = 'error'
-                    invoice_data['error'] = _('The partner is missing Peppol EAS and/or Endpoint identifier.')
+                edi_user, document = self._get_peppol_document_params(partner, invoice, invoice_data)
+                if not edi_user or not document:
                     continue
 
-                if not partner.account_peppol_is_endpoint_valid:
-                    invoice.peppol_move_state = 'error'
-                    invoice_data['error'] = _('Please verify partner configuration in partner settings.')
-                    continue
-
-                if invoice._is_exportable_as_self_invoice() and not partner._can_receive_self_billing(invoice.partner_id.commercial_partner_id.ubl_cii_format):
-                    invoice.peppol_move_state = 'error'
-                    invoice_data['error'] = _('The partner has indicated it does not accept this document type, so you cannot send this invoice via Peppol.')
-                    continue
-
-                if len(xml_file) > 64000000:
-                    invoice_data['error'] = _("Invoice %s is too big to send via peppol (64MB limit)", invoice.name)
-
-                receiver_identification = f"{partner.peppol_eas}:{partner.peppol_endpoint}"
-                params['documents'].append({
-                    'filename': filename,
-                    'receiver': receiver_identification,
-                    'ubl': b64encode(xml_file).decode(),
-                })
+                params['documents'].append(document)
                 invoices_data_peppol[invoice] = invoice_data
 
         if not params['documents']:
             return
 
         edi_user = next(iter(invoices_data)).company_id.account_edi_proxy_client_ids.filtered(
-            lambda u: u.proxy_type == 'peppol')
+            lambda u: u.proxy_type in self.env['account_edi_proxy_client.user']._get_peppol_proxy_types())
 
         try:
             response = edi_user._make_request(
-                f"{edi_user._get_server_url()}/api/peppol/1/send_document",
+                edi_user._get_server_url() + edi_user._get_peppol_proxy_endpoint('1/send_document'),
                 params=params,
             )
         except AccountEdiProxyError as e:

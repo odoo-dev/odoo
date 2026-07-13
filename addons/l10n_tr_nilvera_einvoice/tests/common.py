@@ -124,6 +124,11 @@ class TrNilveraCommon(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
 
+        # Avoid the demo company from interfering with the tests
+        demo_company_partner = cls.env.ref('l10n_tr.partner_demo_company_tr', raise_if_not_found=False)
+        if demo_company_partner:
+            demo_company_partner.vat = '/'
+
         cls.company_data['company'].partner_id.write({
             'vat': '3297552117',
             'street': '3281. Cadde',
