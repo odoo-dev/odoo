@@ -1,0 +1,78 @@
+$count: 14;
+$arc: 180deg;
+$radius-outer: 280px;
+$radius-inner: 200px;
+
+@keyframes o-hr-float {
+    0%,
+    100% {
+        translate: 0 0;
+    }
+    50% {
+        translate: 0 -6px;
+    }
+}
+
+.o_hr_onboarding_blocks {
+    position: relative;
+    width: $radius-outer * 2;
+    height: $radius-outer + 40px;
+
+    .o_hr_onboarding_icon {
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        width: 36px;
+        height: 36px;
+        margin: -18px;
+
+        transform: rotate(calc(#{-$arc / 2} + #{$arc} / #{$count - 1} * var(--i)))
+            translateY(-#{$radius-outer})
+            rotate(calc(#{$arc / 2} - #{$arc} / #{$count - 1} * var(--i)));
+
+        @for $i from 1 through $count {
+            &:nth-child(#{$i}) {
+                --i: #{$i - 1};
+            }
+        }
+
+        &--inner {
+            transform: rotate(calc(#{-$arc / 2} + #{$arc} / #{$count - 1} * var(--i)))
+                translateY(-#{$radius-inner})
+                rotate(calc(#{$arc / 2} - #{$arc} / #{$count - 1} * var(--i)));
+        }
+
+        &:not(.o_hr_onboarding_icon_hr) {
+            opacity: 0.7;
+            animation: o-hr-float 3s ease-in-out infinite;
+            animation-delay: calc(var(--i) * -0.4s);
+
+            &:hover {
+                opacity: 1;
+                animation-play-state: paused;
+
+                span {
+                    opacity: 1;
+                }
+
+                img {
+                    transform: scale(1.2);
+                }
+            }
+        }
+
+        span {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        img {
+            transition: transform 0.5s;
+            transform-origin: center;
+        }
+
+        &.o_hr_onboarding_icon_hr {
+            top: 75%;
+        }
+    }
+}

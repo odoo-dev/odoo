@@ -1,62 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <t t-name="hr.OnboardingHelperBlocks">
-        <div class="container mt-2">
-            <div class="row justify-content-center text-center">
-                <div class="col-auto align-items-center mb-4 ms-3 me-4 ps-0">
-                    <p class="fs-2 mb-3">
-                        Hiring
-                    </p>
-                    <div class="d-flex flex-column gap-2 flex-nowrap">
-                        <OnboardingIconCard label.translate="Hiring" iconPath="'/hr_recruitment/static/description/icon.png'"/>
-                        <OnboardingIconCard label.translate="Sign" iconPath="'/sign/static/description/icon.png'"/>
-                        <OnboardingIconCard label.translate="Referral" iconPath="'/hr_referral/static/description/icon.png'"/>
-                    </div>
-                </div>
-                <div class="col-auto justify-content-center mb-4 mx-2">
-                    <p class="fs-2 mb-3">
-                        Experience
-                    </p>
-                    <div class="d-flex flex-row flex-nowrap">
-                        <div class="d-flex flex-column gap-2 flex-nowrap me-4">
-                            <OnboardingIconCard label.translate="AI" iconPath="'/ai/static/description/icon.png'"/>
-                            <OnboardingIconCard label.translate="Planning" iconPath="'/planning/static/description/icon.png'"/>
-                            <OnboardingIconCard label.translate="Fleet" iconPath="'/fleet/static/description/icon.png'"/>
-                        </div>
-                        <div class="d-flex flex-column gap-2 flex-nowrap">
-                            <OnboardingIconCard label.translate="Payroll" iconPath="'/hr_payroll/static/description/icon.png'"/>
-                            <OnboardingIconCard label.translate="Leaves" iconPath="'/hr_holidays/static/description/icon.png'"/>
-                            <OnboardingIconCard label.translate="Lunch" iconPath="'/lunch/static/description/icon.png'"/>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-auto justify-content-center mb-4 ms-2 me-0 pe-0">
-                    <p class="fs-2 mb-3">
-                        Development
-                    </p>
-                    <div class="d-flex flex-row flex-nowrap">
-                        <div class="d-flex flex-column gap-2 flex-nowrap me-3">
-                            <OnboardingIconCard label.translate="Performance" iconPath="'/hr_appraisal/static/description/icon.png'"/>
-                            <OnboardingIconCard label.translate="eLearning" iconPath="'/website_slides/static/description/icon.png'"/>
-                            <OnboardingIconCard label.translate="Documents" iconPath="'/documents/static/description/icon.png'"/>
-                        </div>
-                        <div class="d-flex flex-column gap-2 flex-nowrap">
-                            <OnboardingIconCard label.translate="Talent" iconPath="'/hr_skills/static/description/icon.png'"/>
-                            <OnboardingIconCard label.translate="Trainings" iconPath="'/event/static/description/icon.png'"/>
-                            <OnboardingIconCard label.translate="Dashboard" iconPath="'/board/static/description/icon.png'"/>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <t t-name="hr.OnboardingIconCard">
+        <div t-attf-class="o_hr_onboarding_icon {{archClass || ''}} o_hr_onboarding_icon_{{module}} d-flex flex-column align-items-center justify-content-center">
+            <img t-attf-src="/{{module}}/static/description/icon.png" t-att-width="size" t-att-height="size"/>
+            <span t-if="label" class="text-center text-nowrap small" t-out="label"/>
         </div>
     </t>
 
-    <t t-name="hr.OnboardingIconCard">
-        <div class="vstack">
-            <div class="col align-self-center mb-1">
-                <img t-att-src="this.props.iconPath" width="60" />
-            </div>
-            <small t-out="this.props.label"/>
+    <t t-name="hr.OnboardingHelperBlocks">
+        <div class="o_hr_onboarding_blocks container-fluid d-flex flex-column align-items-center justify-content-center">
+                <t t-call="hr.OnboardingIconCard" module="'hr_recruitment'" label="'Recruitment'" size="40"/>
+            <t t-call="hr.OnboardingIconCard" module="'sign'" label="'Sign'" size="40" archClass="'o_hr_onboarding_icon--inner'"/>
+            <t t-call="hr.OnboardingIconCard" module="'hr_referral'" label="'Employee Referral'" size="40"/>
+            <t t-call="hr.OnboardingIconCard" module="'ai'" label="'AI'" size="40" archClass="'o_hr_onboarding_icon--inner'"/>
+            <t t-call="hr.OnboardingIconCard" module="'planning'" label="'Planning'" size="40"/>
+            <t t-call="hr.OnboardingIconCard" module="'fleet'" label="'Fleet'" size="40" archClass="'o_hr_onboarding_icon--inner'"/>
+            <t t-call="hr.OnboardingIconCard" module="'hr_payroll'" label="'Payroll'" size="40"/>
+            <t t-call="hr.OnboardingIconCard" module="'hr_holidays'" label="'Time Off'" size="40" archClass="'o_hr_onboarding_icon--inner'"/>
+            <t t-call="hr.OnboardingIconCard" module="'lunch'" label="'Lunch'" size="40"/>
+            <t t-call="hr.OnboardingIconCard" module="'hr_appraisal'" label="'Appraisals'" size="40" archClass="'o_hr_onboarding_icon--inner'"/>
+            <t t-call="hr.OnboardingIconCard" module="'website_slides'" label="'eLearning'" size="40"/>
+            <t t-call="hr.OnboardingIconCard" module="'documents'" label="'Documents'" size="40" archClass="'o_hr_onboarding_icon--inner'"/>
+            <t t-call="hr.OnboardingIconCard" module="'hr_skills'" label="'Skills'" size="40"/>
+            <t t-call="hr.OnboardingIconCard" module="'board'" label="'Dashboards'" size="40"/>
+            <t t-call="hr.OnboardingIconCard" module="'hr'" size="80"/>
         </div>
     </t>
 </odoo>
