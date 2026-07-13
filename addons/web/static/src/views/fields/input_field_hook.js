@@ -1,4 +1,4 @@
-import { onWillRender, useComponent, useLayoutEffect, useRef } from "@web/owl2/utils";
+import { useComponent, useLayoutEffect, useRef } from "@web/owl2/utils";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_service";
 import { useBus } from "@web/core/utils/hooks";
 import { resolveRefEl } from "@web/core/utils/ref_utils";
@@ -125,31 +125,27 @@ export function useInputField(params) {
         () => [getEl()]
     );
 
-    // We need to call getValue to always observe
-    // the corresponding value in the record. Otherwise, in some cases,
-    // if the value in the record change the useLayoutEffect isn't triggered.
-    onWillRender(() => params.getValue());
-
     /**
      * Sometimes, a patch can happen with possible a new value for the field
      * If the user was typing a new value (isDirty) or the field is still invalid,
      * we need to do nothing.
      * If it is not such a case, we update the field with the new value.
      */
-    useLayoutEffect(() => {
-        const value = params.getValue();
-        const el = getEl();
-        if (!el) {
-            return;
-        }
-        if (el.value === value) {
-            isDirty = false;
-        }
-        if (!isDirty && !component.props.record.isFieldInvalid(fieldName)) {
-            el.value = value;
-            lastSetValue = el.value;
-        }
-    });
+    useLayoutEffect(
+        (el, value, isFieldInvalid) => {
+            if (!el) {
+                return;
+            }
+            if (el.value === value) {
+                isDirty = false;
+            }
+            if (!isDirty && !isFieldInvalid) {
+                el.value = value;
+                lastSetValue = el.value;
+            }
+        },
+        () => [getEl(), params.getValue(), component.props.record.isFieldInvalid(fieldName)]
+    );
 
     const { model } = component.props.record;
     useBus(model.bus, "WILL_SAVE_URGENTLY", () => commitChanges(true));
