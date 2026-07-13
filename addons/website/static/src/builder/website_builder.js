@@ -219,7 +219,7 @@ export class WebsiteBuilder extends Component {
             }
             return {
                 resModel: editableEl.dataset["oeModel"],
-                resId: editableEl.dataset["oeId"],
+                resId: Number(editableEl.dataset["oeId"]),
                 field: editableEl.dataset["oeField"],
                 type: editableEl.dataset["oeType"],
             };
