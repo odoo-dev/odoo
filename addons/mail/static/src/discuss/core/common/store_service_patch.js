@@ -22,10 +22,14 @@ const storeServicePatch = {
         this.channel_types_with_seen_infos = [];
         // Debounce it to avoid intensive client => worker communication.
         // Should be moved in the bus service at some point.
-        this.updateBusSubscription = debounce(
+        this._updateBusSubscription = debounce(
             () => this.env.services.bus_service.forceUpdateChannels(),
             0
         );
+        this.updateBusSubscription = () => {
+            console.warn("===!!!");
+            this._updateBusSubscription();
+        };
         this.favoriteChannels = fields.Many("discuss.channel", {
             inverse: "storeAsFavoriteChannels",
         });

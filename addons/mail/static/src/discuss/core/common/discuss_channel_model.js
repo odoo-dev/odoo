@@ -534,12 +534,17 @@ export class DiscussChannel extends Record {
         inverse: "channel",
         onDelete: (r) => r?.delete(),
     });
-    memberBusSubscription = fields.Attr(false, {
+    // Start with `not_member` not to trigger a subscription if the user is not a member
+    // initially, only when switching from `member_xxx` to `not_member` following a leave.
+    memberBusSubscription = fields.Attr("not_member", {
         /** @this {import("models").Thread} */
         compute() {
-            return (
-                this.self_member_id?.memberSince >= this.store.env.services.bus_service.startedAt
-            );
+            if (!this.self_member_id) {
+                return "not_member";
+            }
+            return this.self_member_id.memberSince >= this.store.env.services.bus_service.startedAt
+                ? "member_after_start"
+                : "member_before_start";
         },
         onUpdate() {
             this.store.updateBusSubscription();

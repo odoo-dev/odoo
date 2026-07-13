@@ -171,6 +171,7 @@ export function cleanupDate() {
  *  mockDate("2019-02-11 09:30:00.001", +2);
  */
 export function mockDate(date, tz) {
+    console.warn("mockdate", date);
     ensureTest("mockDate");
     setDateParams(date ? parseDateParams(date) : DEFAULT_DATE);
     if (!isNil(tz)) {
