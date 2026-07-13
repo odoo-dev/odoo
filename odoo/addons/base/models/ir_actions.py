@@ -1077,10 +1077,6 @@ class IrActionsServer(models.Model):
         _logger.info("Webhook call to %s", url)
         _logger.debug("POST JSON data for webhook call: %s", json_values)
 
-        @self.env.cr.postrollback.add
-        def _add_post_rollback():
-            _logger.warning("Webhook call to %s - cancelled due to a rollback", url)
-
         @self.env.cr.postcommit.add
         def _add_post_commit():
             _logger.debug("Webhook call to %s - start", url)

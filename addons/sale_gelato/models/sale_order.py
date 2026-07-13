@@ -126,13 +126,11 @@ class SaleOrder(models.Model):
             def confirm_gelato():
                 with self.env.registry.cursor() as cr:
                     order = self.with_env(self.env(cr=cr))
-                    order._confirm_order_on_gelato(data["id"])
-
-            @self.env.cr.postrollback.add
-            def delete_gelato():
-                with self.env.registry.cursor() as cr:
-                    order = self.with_env(self.env(cr=cr))
                     order._delete_order_on_gelato(data["id"])
+
+            # XXX hmmm a real use case
+            # alternative, separate tx to save the gelato_id, then process it? (confirm or cancel)
+            # self.env.cr.postrollback.add(partial(self._delete_order_on_gelato, data["id"]))
         except UserError as exc:
             raise UserError(
                 self.env._(

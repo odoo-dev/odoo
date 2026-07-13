@@ -1443,7 +1443,7 @@ class TransactionCase(BaseCase):
         def _reset(cb, funcs, data):
             cb._funcs = funcs
             cb.data = data
-        for callback in [cr.precommit, cr.postcommit, cr.prerollback, cr.postrollback]:
+        for callback in [cr.precommit, cr.postcommit]:
             self.addCleanup(_reset, callback, deque(callback._funcs), deepcopy(callback.data))
 
         self.addCleanup(self.savepoint.rollback)

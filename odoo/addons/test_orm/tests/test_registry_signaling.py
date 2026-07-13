@@ -529,8 +529,6 @@ class TestCursorHooks(common.TransactionCase):
         self.log.clear()
         cr.precommit.add(partial(self.log.append, 'preC'))
         cr.postcommit.add(partial(self.log.append, 'postC'))
-        cr.prerollback.add(partial(self.log.append, 'preR'))
-        cr.postrollback.add(partial(self.log.append, 'postR'))
         self.assertEqual(self.log, [])
 
     def test_hooks_on_cursor(self):
@@ -546,12 +544,12 @@ class TestCursorHooks(common.TransactionCase):
         cr.flush()
         self.assertEqual(self.log, ['preC'])
         cr.rollback()
-        self.assertEqual(self.log, ['preC', 'preR', 'postR'])
+        self.assertEqual(self.log, ['preC'])
 
         # check hook on close()
         self.prepare_hooks(cr)
         cr.close()
-        self.assertEqual(self.log, ['preR', 'postR'])
+        self.assertEqual(self.log, [])
 
     def test_hooks_on_testcursor(self):
         self.enterContext(self.enter_registry_test_mode())
@@ -568,12 +566,12 @@ class TestCursorHooks(common.TransactionCase):
         cr.flush()
         self.assertEqual(self.log, ['preC'])
         cr.rollback()
-        self.assertEqual(self.log, ['preC', 'preR', 'postR'])
+        self.assertEqual(self.log, ['preC'])
 
         # check hook on close()
         self.prepare_hooks(cr)
         cr.close()
-        self.assertEqual(self.log, ['preR', 'postR'])
+        self.assertEqual(self.log, [])
 
 
 @tagged('at_install', '-post_install')  # LEGACY at_install
@@ -592,8 +590,8 @@ class TestCursorHooksTransactionCaseCleanup(common.TransactionCase):
         super().setUpClass()
 
         cr = cls.env.cr
-        cls.callback_names = ['precommit', 'postcommit', 'prerollback', 'postrollback']
-        cls.callbacks = [cr.precommit, cr.postcommit, cr.prerollback, cr.postrollback]
+        cls.callback_names = ['precommit', 'postcommit']
+        cls.callbacks = [cr.precommit, cr.postcommit]
 
         for callback, name in zip(cls.callbacks, cls.callback_names):
             callback.data[f'test_cursor_hooks_{name}'] = ['keep']

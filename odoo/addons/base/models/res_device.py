@@ -66,7 +66,8 @@ class ResDeviceLog(models.Model):
         user_id = request.session.uid
         session_identifier = request.session.sid[:STORED_SESSION_BYTES]
 
-        def insert_device_log(cr):
+        # insert the log now
+        with self.env.registry.cursor() as cr:
             info = {
                 'session_identifier': session_identifier,
                 'user_id': user_id,
@@ -83,23 +84,6 @@ class ResDeviceLog(models.Model):
                 VALUES (%(session_identifier)s, %(user_id)s, %(ip_address)s, %(user_agent)s, %(country)s, %(city)s, %(first_activity)s, %(last_activity)s, %(revoked)s)
             """, **info))
             _logger.info('User %(user_id)d inserts device log: %(session_identifier)s - %(ip_address)s - %(user_agent)s', info)
-
-        def insert_device_log_in_new_cursor():
-            with self.env.registry.cursor() as cr:
-                insert_device_log(cr)
-
-        if self.env.cr.readonly:
-            if module.current_test and self.env.cr.readonly:
-                # During testing, we cannot open a new rw cursor from a ro
-                # cursor. Rollbacking the current (readonly) cursor, removes the
-                # savepoint and allows to start a read-write transaction.
-                self.env.cr.rollback()
-                insert_device_log_in_new_cursor()
-            else:
-                self.env.cr.postcommit.add(insert_device_log_in_new_cursor)
-        else:
-            insert_device_log(self.env.cr)
-        self.env.cr.postrollback.add(insert_device_log_in_new_cursor)
 
         session_store().save(request.session)
 
