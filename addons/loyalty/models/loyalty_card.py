@@ -4,7 +4,8 @@ from uuid import uuid4
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.tools import format_amount
+from odoo.fields import Domain
+from odoo.tools import float_compare, format_amount
 
 
 class LoyaltyCard(models.Model):
@@ -36,7 +37,7 @@ class LoyaltyCard(models.Model):
     currency_id = fields.Many2one(related="program_id.currency_id")
     # Reserved for this partner if non-empty
     partner_id = fields.Many2one(comodel_name="res.partner", index=True)
-    points = fields.Float(tracking=True)
+    points = fields.Float(compute="_compute_points", search="_search_points")
     point_name = fields.Char(related="program_id.portal_point_name", readonly=True)
     points_display = fields.Char(compute="_compute_points_display")
 
@@ -90,6 +91,12 @@ class LoyaltyCard(models.Model):
                     card.env._("A customer can only have one active loyalty card per program.")
                 )
 
+    @api.depends("history_ids.expiration_date", "history_ids.issued", "history_ids.used")
+    def _compute_points(self):
+        points_per_card = self.env["loyalty.history"]._get_points_by_card(self)
+        for card in self:
+            card.points = points_per_card.get(card, 0.0)
+
     @api.depends("points", "point_name")
     def _compute_points_display(self):
         for card in self:
@@ -106,6 +113,26 @@ class LoyaltyCard(models.Model):
     # Meant to be overriden
     def _compute_use_count(self):
         self.use_count = 0
+
+    def _search_points(self, operator, value):
+        if operator not in (">", "="):
+            return NotImplemented
+        value = float(value)
+        loyalty_history = self.env["loyalty.history"]
+        history_data = loyalty_history._read_group(
+            domain=loyalty_history._get_valid_domain(),
+            groupby=["card_id"],
+            aggregates=["issued:sum", "used:sum"],
+        )
+        if operator == ">":
+            matching_ids = [card.id for card, issued, used in history_data if issued - used > value]
+        else:
+            matching_ids = [
+                card.id
+                for card, issued, used in history_data
+                if float_compare(issued - used, value, precision_digits=2) == 0
+            ]
+        return Domain("id", "in", matching_ids)
 
     def _get_default_template(self):
         self.ensure_one()
@@ -224,17 +251,6 @@ class LoyaltyCard(models.Model):
         res._send_creation_communication()
         return res
 
-    def write(self, vals):
-        if not self.env.context.get("loyalty_no_mail", False) and "points" in vals:
-            points_before = {coupon: coupon.points for coupon in self}
-        res = super().write(vals)
-        if not self.env.context.get("loyalty_no_mail", False) and "points" in vals:
-            points_changes = {
-                coupon: {"old": points_before[coupon], "new": coupon.points} for coupon in self
-            }
-            self._send_points_reach_communication(points_changes)
-        return res
-
     def action_loyalty_update_balance(self):
         return {
             "name": self.env._("Update Balance"),
@@ -244,3 +260,13 @@ class LoyaltyCard(models.Model):
             "target": "new",
             "context": {"default_card_id": self.id},
         }
+
+    def _adjust_points(self, diff, description, order_model=False, order_id=False):
+        """Create the loyalty.history line(s) needed to change this card's balance by difference."""
+        self.ensure_one()
+        if not diff:
+            return self.env["loyalty.history"]
+        values = {"description": description, "order_model": order_model, "order_id": order_id}
+        if diff > 0:
+            return self.env["loyalty.history"]._create_issuing_history(self, diff, values)
+        return self.env["loyalty.history"]._create_consuming_history(self, -diff, values)

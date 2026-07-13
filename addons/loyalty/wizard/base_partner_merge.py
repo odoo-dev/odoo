@@ -31,14 +31,11 @@ class BasePartnerMergeAutomaticWizard(models.TransientModel):
             )
         )
         for program, cards in cards_per_program.items():
-            total_points = sum(card.points for card in cards)
             dst_card = LoyaltyCard.search(
                 [("partner_id", "=", dst_partner.id), ("program_id", "=", program.id)], limit=1
             )
-            if dst_card:
-                final_card = dst_card
-                total_points += dst_card.points
-            else:
-                final_card = cards[0]
-            final_card.sudo().write({"partner_id": dst_partner.id, "points": total_points})
-            (cards - final_card).sudo().write({"points": 0, "active": False})
+            final_card = dst_card or cards[0]
+            cards_to_archive = cards - final_card
+            cards_to_archive.history_ids.write({"card_id": final_card.id})
+            final_card.write({"partner_id": dst_partner.id})
+            cards_to_archive.write({"active": False})

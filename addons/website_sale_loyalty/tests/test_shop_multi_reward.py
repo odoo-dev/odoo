@@ -75,10 +75,13 @@ class TestClaimReward(WebsiteSaleCommon):
                         "required_points": 1,
                     }),
                 ],
-                "coupon_ids": [Command.create({"points": 1})],
+                "coupon_ids": [Command.create({})],
             },
         ])
         cls.coupon = cls.coupon_program.coupon_ids
+        cls.env["loyalty.history"]._create_issuing_history(
+            cls.coupon, 1, {"description": "Initial balance"}
+        )
 
         installed_modules = set(
             cls.env["ir.module.module"].search([("state", "=", "installed")]).mapped("name")

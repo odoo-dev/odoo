@@ -144,6 +144,10 @@
                                 groups="base.group_no_one"
                             />
                             <field
+                                name="expire_after"
+                                invisible="program_type != 'loyalty'"
+                            />
+                            <field
                                 name="portal_visible"
                                 groups="base.group_no_one"
                                 string="Show Points Unit"

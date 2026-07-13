@@ -134,12 +134,14 @@ class WebsiteSaleLoyaltyTestUi(TestSaleCommon, HttpCase):
             ],
         })
 
-        self.env["loyalty.card"].create({
+        vip_card = self.env["loyalty.card"].create({
             "partner_id": self.env.ref("base.partner_admin").id,
             "program_id": vip_program.id,
             "point_name": "Points",
-            "points": 371.03,
         })
+        self.env["loyalty.history"]._create_issuing_history(
+            vip_card, 371.03, {"description": "Initial balance"}
+        )
 
         self.env.ref("website_sale.reduction_code").write({"active": True})
         self.start_tour(large_cabinet.website_url, "website_sale_loyalty.promotions", login="admin")
@@ -207,11 +209,13 @@ class WebsiteSaleLoyaltyTestUi(TestSaleCommon, HttpCase):
             ],
         })
         # Create a gift card to be used
-        self.env["loyalty.card"].create({
+        gift_card = self.env["loyalty.card"].create({
             "program_id": gift_card_program.id,
-            "points": 50,
             "code": "GIFT_CARD",
         })
+        self.env["loyalty.history"]._create_issuing_history(
+            gift_card, 50, {"description": "Initial balance"}
+        )
 
         self.env.ref("website_sale.reduction_code").write({"active": True})
         self.start_tour("/shop", "website_sale_loyalty.gift_card", login="admin")
@@ -256,14 +260,14 @@ class WebsiteSaleLoyaltyTestUi(TestSaleCommon, HttpCase):
             }
             for ecommerce_ok in (True, False)
         ])
-        self.env["loyalty.card"].create([
-            {
-                "partner_id": self.env.ref("base.partner_admin").id,
-                "program_id": program_id,
-                "points": 1000,
-            }
+        cards = self.env["loyalty.card"].create([
+            {"partner_id": self.env.ref("base.partner_admin").id, "program_id": program_id}
             for program_id in ewallet_programs.ids
         ])
+        for card in cards:
+            self.env["loyalty.history"]._create_issuing_history(
+                card, 1000, {"description": "Initial balance"}
+            )
         self.start_tour("/shop", "website_sale_loyalty.ewallet", login="admin")
 
 
@@ -596,7 +600,6 @@ class TestWebsiteSaleCoupon(HttpCase, WebsiteSaleCommon):
         loyalty_card = self.env["loyalty.card"].create({
             "program_id": loyalty_program.id,
             "partner_id": test_partner.id,
-            "points": 0,
         })
         public_user = self.env.ref("base.public_user")
         order.action_quotation_send()

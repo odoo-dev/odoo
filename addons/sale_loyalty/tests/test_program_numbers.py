@@ -2239,9 +2239,12 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
             ],
         })
         order = self.empty_order
-        self.env["loyalty.card"].create([
-            {"program_id": loyalty_program.id, "partner_id": order.partner_id.id, "points": 3.39}
+        card = self.env["loyalty.card"].create([
+            {"program_id": loyalty_program.id, "partner_id": order.partner_id.id}
         ])
+        self.env["loyalty.history"]._create_issuing_history(
+            card, 3.39, {"description": "Initial balance"}
+        )
 
         # Create taxes
         tax_15pc_excl = self.env["account.tax"].create({
@@ -2281,9 +2284,12 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
             ],
         })
         order = self.empty_order
-        self.env["loyalty.card"].create([
-            {"program_id": loyalty_program.id, "partner_id": order.partner_id.id, "points": 3030}
+        card = self.env["loyalty.card"].create([
+            {"program_id": loyalty_program.id, "partner_id": order.partner_id.id}
         ])
+        self.env["loyalty.history"]._create_issuing_history(
+            card, 3030, {"description": "Initial balance"}
+        )
         product_a = self._create_product(name="product_a", lst_price=3000.0, taxes_id=False)
         order.order_line = [Command.create({"product_id": product_a.id})]
 
@@ -2331,8 +2337,10 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         coupon = self.env["loyalty.card"].create({
             "program_id": loyalty_program.id,
             "partner_id": order.partner_id.id,
-            "points": 1,
         })
+        self.env["loyalty.history"]._create_issuing_history(
+            coupon, 1, {"description": "Initial balance"}
+        )
 
         points = order._get_real_points_for_coupon(coupon)
         self.assertEqual(
@@ -2381,8 +2389,10 @@ class TestSaleCouponProgramNumbers(TestSaleCouponNumbersCommon):
         loyalty_card = self.env["loyalty.card"].create({
             "program_id": loyalty_program.id,
             "partner_id": partner.id,
-            "points": 10,
         })
+        self.env["loyalty.history"]._create_issuing_history(
+            loyalty_card, 10, {"description": "Initial balance"}
+        )
 
         order = (
             self

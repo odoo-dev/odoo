@@ -13,30 +13,36 @@ class PosOrderReceipt(models.AbstractModel):
         data = super().order_receipt_generate_data(basic_receipt)
         loyalties, new_coupons = [], []
         histories = self.env['loyalty.history'].search([('order_id', '=', self.id), ('order_model', '=', 'pos.order')])
-        for history in histories:
-            program_type = history.card_id.program_id.program_type
+        # Aggregate per card: one order can produce separate issuing/consuming rows
+        # for the same card, so raw rows can't be used directly.
+        cards_in_order = histories.card_id.browse(dict.fromkeys(histories.card_id.ids))
+        for card in cards_in_order:
+            program_type = card.program_id.program_type
+            card_histories = histories.filtered(lambda h: h.card_id == card)
             if program_type == 'loyalty':
-                for field, label in [('issued', _('Won:')), ('used', _('Spent:'))]:
-                    amount = history[field]
+                for amount, label in [
+                    (sum(card_histories.mapped('issued')), _('Won:')),
+                    (sum(card_histories.mapped('used')), _('Spent:')),
+                ]:
                     if amount > 0:
                         loyalties.append({
-                            'name': history.card_id.program_id.portal_point_name,
+                            'name': card.program_id.portal_point_name,
                             'type': label,
                             'points': float_round(amount, 2),
                         })
 
                 loyalties.append({
-                    'name': history.card_id.program_id.portal_point_name,
+                    'name': card.program_id.portal_point_name,
                     'type': _('Balance:'),
-                    'points': float_round(history.card_id.points, 2),
+                    'points': float_round(card.points, 2),
                 })
 
             elif program_type == 'next_order_coupons':
                 new_coupons.append({
-                    'name': history.card_id.program_id.name,
-                    'code': history.card_id.code,
-                    'expiration_date': history.card_id.expiration_date,
-                    'barcode_base64': image_data_uri(self.env['ir.actions.report'].barcode('Code128', history.card_id.code, quiet=False)),
+                    'name': card.program_id.name,
+                    'code': card.code,
+                    'expiration_date': card.expiration_date,
+                    'barcode_base64': image_data_uri(self.env['ir.actions.report'].barcode('Code128', card.code, quiet=False)),
                 })
 
         data['extra_data']['loyalties'] = loyalties

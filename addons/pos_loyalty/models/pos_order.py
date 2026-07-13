@@ -56,23 +56,28 @@ class PosOrder(models.Model):
 
     def add_loyalty_history_lines(self, coupon_data, coupon_updates):
         id_mapping = {item['old_id']: int(item['id']) for item in coupon_updates}
-        history_lines_create_vals = []
+        loyalty_history = self.env['loyalty.history']
         for coupon in coupon_data:
             card_id = id_mapping.get(int(coupon['card_id']), False) or int(coupon['card_id'])
-            if not self.env['loyalty.card'].browse(card_id).exists():
+            card = self.env['loyalty.card'].browse(card_id)
+            if not card.exists():
                 continue
-            issued = coupon['won']
-            cost = coupon['spent']
-            if (issued or cost) and card_id > 0:
-                history_lines_create_vals.append({
-                    'card_id': card_id,
-                    'order_model': self._name,
-                    'order_id': self.id,
-                    'description': _('Onsite %s', self.display_name),
-                    'used': cost,
-                    'issued': issued,
-                })
-        self.env['loyalty.history'].create(history_lines_create_vals)
+            issued = max(coupon['won'], 0)
+            cost = coupon['spent'] + max(-coupon['won'], 0)
+            if not (issued or cost) or card_id <= 0:
+                continue
+            values = {
+                'order_model': self._name,
+                'order_id': self.id,
+                'description': _('Onsite %s', self.display_name),
+            }
+            # Award before consuming: an order that both earns and redeems points in
+            # the same transaction must run debt compensation on the award before the
+            # redemption draws from the refreshed balance.
+            if issued:
+                loyalty_history._create_issuing_history(card, issued, values)
+            if cost:
+                loyalty_history._create_consuming_history(card, cost, values)
 
     def confirm_coupon_programs(self, coupon_data):
         """
@@ -99,7 +104,6 @@ class PosOrder(models.Model):
             'program_id': p['program_id'],
             'partner_id': get_partner_id(p.get('partner_id', self.partner_id.id)),
             'code': p.get('code') or p.get('barcode') or self.env['loyalty.card']._generate_code(),
-            'points': 0,
             'expiration_date': p.get('date_to', False),
             'source_pos_order_id': self.id,
             'expiration_date': p.get('expiration_date')
@@ -123,9 +127,6 @@ class PosOrder(models.Model):
                 continue
             lines_per_reward_code[line.reward_identifier_code] |= line
         for coupon in all_coupons:
-            if coupon.id in coupon_new_id_map:
-                # Coupon existed previously, update amount of points.
-                coupon.points += coupon_data[coupon_new_id_map[coupon.id]]['points']
             for reward_code in coupon_data[coupon_new_id_map[coupon.id]].get('line_codes', []):
                 lines_per_reward_code[reward_code].coupon_id = coupon
         # Send creation email
@@ -141,16 +142,19 @@ class PosOrder(models.Model):
             for report in report_per_program[coupon.program_id]:
                 coupon_per_report[report.id].append(coupon.id)
 
-        # Adding loyalty history lines
-        loyalty_points = [
-            {
-                'order_id': self.id,
-                'card_id': coupon_id,
-                'spent': coupon_vals.get('spent', 0),
-                'won': coupon_vals.get('won', 0),
-            }
-            for coupon_id, coupon_vals in coupon_data.items()
-        ]
+        def _won_spent(coupon_vals):
+            won, spent = coupon_vals.get('won'), coupon_vals.get('spent')
+            points = coupon_vals.get('points', 0)
+            if won is None:
+                won = max(points, 0)
+            if spent is None:
+                spent = max(-points, 0)
+            return won, spent
+
+        loyalty_points = []
+        for coupon_id, coupon_vals in coupon_data.items():
+            won, spent = _won_spent(coupon_vals)
+            loyalty_points.append({'order_id': self.id, 'card_id': coupon_id, 'won': won, 'spent': spent})
         coupon_updates = [
             {
                 'id': coupon.id,
@@ -204,7 +208,7 @@ class PosOrder(models.Model):
                         'card_id': gift_card.id,
                         'description': _('Assigning partner %s', self.partner_id.name),
                         'used': 0,
-                        'issued': gift_card.points,
+                        'issued': 0,
                     })
 
                 if len([id for id in gift_card.history_ids.mapped('order_id') if id != 0]) == 0:
@@ -216,22 +220,18 @@ class PosOrder(models.Model):
                         'order_id': self.id,
                         'description': _('Assigning order %s', self.display_name),
                         'used': 0,
-                        'issued': gift_card.points,
+                        'issued': 0,
                     })
 
                 if coupon_vals.get('points') != gift_card.points:
                     # Coupon vals contains negative points
                     updated = True
-                    new_value = gift_card.points + coupon_vals['points']
-                    gift_card.points = new_value
-                    gift_card.history_ids.create({
-                        'card_id': gift_card.id,
-                        'order_model': self._name,
-                        'order_id': self.id,
-                        'description': _('Onsite %s', self.display_name),
-                        'used': -coupon_vals['points'] if coupon_vals['points'] < 0 else 0,
-                        'issued': coupon_vals['points'] if coupon_vals['points'] > 0 else 0,
-                    })
+                    gift_card._adjust_points(
+                        coupon_vals['points'],
+                        description=_('Onsite %s', self.display_name),
+                        order_model=self._name,
+                        order_id=self.id,
+                    )
 
                 if updated:
                     updated_gift_cards |= gift_card

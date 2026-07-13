@@ -100,7 +100,7 @@ class SaleOrder(models.Model):
                 continue
             points_per_coupon[line.coupon_id]["cost"] += line.points_cost
 
-        create_values = []
+        loyalty_history = self.env["loyalty.history"]
         base_values = {
             "order_id": self.id,
             "order_model": self._name,
@@ -109,14 +109,10 @@ class SaleOrder(models.Model):
         for coupon, point_dict in points_per_coupon.items():
             cost = point_dict.get("cost", 0.0)
             issued = point_dict.get("issued", 0.0)
-            create_values.append({
-                **base_values,
-                "card_id": coupon.id,
-                "used": cost,
-                "issued": issued,
-            })
-
-        self.env["loyalty.history"].create(create_values)
+            if issued:
+                loyalty_history._create_issuing_history(coupon, issued, base_values)
+            if cost:
+                loyalty_history._create_consuming_history(coupon, cost, base_values)
 
     def _get_no_effect_on_threshold_lines(self):
         """Return the lines that have no effect on the minimum amount to reach."""
@@ -184,7 +180,6 @@ class SaleOrder(models.Model):
                     )
                 )
             order._update_programs_and_rewards()
-            order._add_loyalty_history_lines()
         has_claimable_rewards = len(self) == 1 and bool(self._get_claimable_rewards())
 
         # Remove any coupon from 'current' program that don't claim any reward.
@@ -198,7 +193,7 @@ class SaleOrder(models.Model):
                 and pe.coupon_id not in reward_coupons
             )
         ).coupon_id.sudo().unlink()
-        # Add/remove the points to our coupons
+        # Validate there are enough points for the changes about to be applied to our coupons
         for coupon, change in (
             self.filtered(lambda s: s.state != "sale")._get_point_changes().items()
         ):
@@ -209,7 +204,8 @@ class SaleOrder(models.Model):
                         " rewards and coupon balance. "
                     )
                 )
-            coupon.points += change
+        for order in self:
+            order._add_loyalty_history_lines()
         res = super().action_confirm()
         self._add_users_to_program()
         # Prioritize any action from super()
@@ -238,11 +234,6 @@ class SaleOrder(models.Model):
         if order_history_lines:
             order_history_lines.sudo().unlink()
 
-        # Add/remove the points to our coupons
-        for coupon, changes in (
-            previously_confirmed.filtered(lambda s: s.state != "sale")._get_point_changes().items()
-        ):
-            coupon.points -= changes
         # Remove any rewards
         self.order_line.filtered(lambda line: line.is_reward_line).unlink()
         self.coupon_point_ids.coupon_id.sudo().filtered(
@@ -920,7 +911,12 @@ class SaleOrder(models.Model):
         self.ensure_one()
         if self.state == "sale":
             for coupon, points in coupon_points.items():
-                coupon.sudo().points += points
+                coupon.sudo()._adjust_points(
+                    points,
+                    description=self.env._("Reward claimed on order %s", self.display_name),
+                    order_model=self._name,
+                    order_id=self.id,
+                )
         for pe in self.coupon_point_ids.sudo():
             if pe.coupon_id in coupon_points:
                 pe.points = coupon_points.pop(pe.coupon_id)
@@ -930,29 +926,6 @@ class SaleOrder(models.Model):
                     Command.create({"coupon_id": coupon.id, "points": points})
                     for coupon, points in coupon_points.items()
                 ]
-            })
-
-    def _update_loyalty_history(self, coupon_id, points):
-        self.ensure_one()
-        order_coupon_history = self.env["loyalty.history"].search(
-            [
-                ("card_id", "=", coupon_id.id),
-                ("order_model", "=", self._name),
-                ("order_id", "=", self.id),
-            ],
-            limit=1,
-        )
-        if order_coupon_history:
-            order_coupon_history.update({"used": order_coupon_history.used + points})
-        else:
-            issued = self.coupon_point_ids.filtered(lambda p: p.coupon_id == coupon_id).points
-            self.env["loyalty.history"].create({
-                "card_id": coupon_id.id,
-                "order_model": self._name,
-                "order_id": self.id,
-                "description": self.env._("Order %s", self.display_name),
-                "issued": issued,
-                "used": points,
             })
 
     def _remove_program_from_points(self, programs):
@@ -1296,7 +1269,6 @@ class SaleOrder(models.Model):
                             {
                                 "program_id": program.id,
                                 "partner_id": partner_id,
-                                "points": 0,
                                 "order_id": self.id,
                             }
                             for _ in new_coupon_points
@@ -1640,12 +1612,7 @@ class SaleOrder(models.Model):
                     .sudo()
                     .with_context(loyalty_no_mail=True)
                     .create([
-                        {
-                            "program_id": program.id,
-                            "partner_id": partner,
-                            "points": 0,
-                            "order_id": self.id,
-                        }
+                        {"program_id": program.id, "partner_id": partner, "order_id": self.id}
                         for _ in all_points
                     ])
                 )

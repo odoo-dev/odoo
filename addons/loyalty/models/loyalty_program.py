@@ -165,6 +165,10 @@ class LoyaltyProgram(models.Model):
         readonly=False,
         default="Points",
     )
+    expire_after = fields.Integer(
+        string="Loyalty Points Expire After",
+        help="Number of days after which awarded loyalty points expire.",
+    )
     is_nominative = fields.Boolean(compute="_compute_is_nominative")
     is_payment_program = fields.Boolean(compute="_compute_is_payment_program")
 

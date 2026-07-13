@@ -182,8 +182,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         promo_coupon3.write({"code": "567890"})
         promo_coupon4.write({"code": "098765"})
 
-        self.coupon2.points = 6
-        self.coupon3.points = 3
+        self.coupon2._adjust_points(6 - self.coupon2.points, description="test setup")
+        self.coupon3._adjust_points(3 - self.coupon3.points, description="test setup")
 
         # use here the generated coupon
         self.start_pos_tour("PosLoyaltyTour2")
@@ -319,9 +319,21 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         self.assertEqual(loyalty_program.pos_order_count, 1)
         self.assertAlmostEqual(aaa_loyalty_card.points, 4)
-        histories = aaa_loyalty_card.history_ids.sorted("order_id")
-        self.assertEqual(histories.mapped("issued"), [2.0, 2.0, 4.0])
-        self.assertEqual(histories.mapped("used"), [0.0, 4.0, 0.0])
+        # An order that both earns and redeems points may now split its redemption
+        # across multiple linked rows (one per funding source), so compare sums per
+        # order rather than assuming exactly one row per order.
+        histories = aaa_loyalty_card.history_ids
+        order_ids = sorted(set(histories.mapped("order_id")))
+        issued_per_order = [
+            sum(histories.filtered(lambda h, oid=oid: h.order_id == oid).mapped("issued"))
+            for oid in order_ids
+        ]
+        used_per_order = [
+            sum(histories.filtered(lambda h, oid=oid: h.order_id == oid).mapped("used"))
+            for oid in order_ids
+        ]
+        self.assertEqual(issued_per_order, [2.0, 2.0, 4.0])
+        self.assertEqual(used_per_order, [0.0, 4.0, 0.0])
 
         # Part 2
         self.start_pos_tour("PosLoyaltyLoyaltyProgram2")
@@ -340,11 +352,11 @@ class TestUi(TestPointOfSaleHttpCommon):
 
         # Part 3
         partner_ddd = self.env['res.partner'].create({'name': 'DDD Test Partner'})
-        self.env['loyalty.card'].create({
+        ddd_loyalty_card = self.env['loyalty.card'].create({
             'partner_id': partner_ddd.id,
             'program_id': loyalty_program.id,
-            'points': 100,
         })
+        ddd_loyalty_card._adjust_points(100, description="Initial balance")
 
         self.start_tour(
             "/pos/ui/%d" % self.main_pos_config.id,
@@ -799,7 +811,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.env['loyalty.card'].create({
             'program_id': loyalty_program2.id,
             'partner_id': partner.id,
-            'points': 0,
         })
 
         self.product = self.env["product.product"].create(
@@ -851,11 +862,11 @@ class TestUi(TestPointOfSaleHttpCommon):
         })
 
         partner_aaa = self.env['res.partner'].create({'name': 'AAA Partner'})
-        self.env['loyalty.card'].create({
+        aaa_loyalty_card = self.env['loyalty.card'].create({
             'partner_id': partner_aaa.id,
             'program_id': self.loyalty_program.id,
-            'points': 30,
         })
+        aaa_loyalty_card._adjust_points(30, description="Initial balance")
 
         self.main_pos_config.open_ui()
 
@@ -887,7 +898,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         card = self.env['loyalty.card'].create({
             'partner_id': partner.id,
             'program_id': loyalty_program.id,
-            'points': 0,
         })
 
         self.main_pos_config.open_ui()
@@ -1179,11 +1189,11 @@ class TestUi(TestPointOfSaleHttpCommon):
         })
 
         partner_aaa = self.env['res.partner'].create({'name': 'AAA Partner'})
-        self.env['loyalty.card'].create({
+        aaa_loyalty_card = self.env['loyalty.card'].create({
             'partner_id': partner_aaa.id,
             'program_id': self.loyalty_program.id,
-            'points': 100,
         })
+        aaa_loyalty_card._adjust_points(100, description="Initial balance")
 
         self.main_pos_config.open_ui()
         self.start_pos_tour("PosLoyaltyTour6")
@@ -1400,11 +1410,11 @@ class TestUi(TestPointOfSaleHttpCommon):
         )
 
         partner = self.env['res.partner'].create({'name': 'AAA Partner'})
-        self.env['loyalty.card'].create({
+        loyalty_card = self.env['loyalty.card'].create({
             'partner_id': partner.id,
             'program_id': self.loyalty_program.id,
-            'points': 500,
         })
+        loyalty_card._adjust_points(500, description="Initial balance")
 
         self.main_pos_config.open_ui()
 
@@ -1576,12 +1586,12 @@ class TestUi(TestPointOfSaleHttpCommon):
         partner_aaa = self.env['res.partner'].create({'name': 'AAAA'})
         #Create an eWallet for partner_aaa
         with freeze_time('2020-1-1'):
-            self.env['loyalty.card'].create({
+            ewallet_card = self.env['loyalty.card'].create({
                 'partner_id': partner_aaa.id,
                 'program_id': ewallet_program.id,
-                'points': 50,
                 'expiration_date': date.today(),
             })
+            ewallet_card._adjust_points(50, description="Initial balance")
         self.main_pos_config.open_ui()
         self.start_pos_tour("ExpiredEWalletProgramTour")
 
@@ -1945,7 +1955,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         loyalty_card = self.env['loyalty.card'].create({
             'program_id': loyalty_program.id,
             'partner_id': partner_aaa.id,
-            'points': 0,
         })
 
         self.main_pos_config.open_ui()
@@ -1978,7 +1987,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         loyalty_card = self.env['loyalty.card'].create({
             'program_id': loyalty_program.id,
             'partner_id': partner_aaa.id,
-            'points': 0,
         })
 
         self.code_promo_program.active = True
@@ -2030,7 +2038,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         loyalty_card = self.env['loyalty.card'].create({
             'program_id': loyalty_program.id,
             'partner_id': partner_aaa.id,
-            'points': 0,
         })
 
         self.code_promo_program.active = True
@@ -2082,7 +2089,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         loyalty_card = self.env['loyalty.card'].create({
             'program_id': loyalty_program.id,
             'partner_id': partner_aaa.id,
-            'points': 0,
         })
 
         self.code_promo_program.active = True
@@ -2124,7 +2130,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         loyalty_card = self.env['loyalty.card'].create({
             'program_id': loyalty_program.id,
             'partner_id': partner_aaa.id,
-            'points': 0,
         })
 
         ewallet_program = self.env['loyalty.program'].create({
@@ -2145,11 +2150,11 @@ class TestUi(TestPointOfSaleHttpCommon):
             'trigger_product_ids': self.env.ref('loyalty.ewallet_product_50'),
         })
 
-        self.env['loyalty.card'].create({
+        ewallet_card = self.env['loyalty.card'].create({
             'program_id': ewallet_program.id,
             'partner_id': partner_aaa.id,
-            'points': 10,
         })
+        ewallet_card._adjust_points(10, description="Initial balance")
 
         self.main_pos_config.open_ui()
         self.start_tour(
@@ -2180,7 +2185,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         loyalty_card = self.env['loyalty.card'].create({
             'program_id': loyalty_program.id,
             'partner_id': partner_aaa.id,
-            'points': 0,
         })
 
         self.main_pos_config.open_ui()
@@ -2375,7 +2379,6 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.env['loyalty.card'].create({
             'partner_id': john_doe.id,
             'program_id': loyalty_program.id,
-            'points': 0
         })
 
         self.product_a.write({
@@ -2704,8 +2707,10 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.env['loyalty.program'].search([('id', '!=', self.auto_promo_program_next.id)]).write({'active': False})
         self.auto_promo_program_next.coupon_ids = [Command.create({
             'code': '563412',
-            'points': 10
         })]
+        self.auto_promo_program_next.coupon_ids.filtered(
+            lambda c: c.code == '563412'
+        )._adjust_points(10, description="Initial balance")
 
         fixed_tax = self.env['account.tax'].create({
             'name': 'Fixed Tax',
@@ -3008,8 +3013,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         card = self.env['loyalty.card'].create({
             'partner_id': partner_refunding.id,
             'program_id': self.loyalty_program.id,
-            'points': 100,
         })
+        card._adjust_points(100, description="Initial balance")
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_refund_does_not_decrease_points', login="pos_user")
         self.assertEqual(card.points, 30)
@@ -3146,11 +3151,11 @@ class TestUi(TestPointOfSaleHttpCommon):
             'max_usage': 1,
         })
 
-        self.env['loyalty.card'].create({
+        loyalty_card = self.env['loyalty.card'].create({
             'program_id': loyalty_program.id,
             'partner_id': test_partner.id,
-            'points': 100,
         })
+        loyalty_card._adjust_points(100, description="Initial balance")
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(
@@ -3176,7 +3181,8 @@ class TestUi(TestPointOfSaleHttpCommon):
             'program_id': gift_card_program.id,
             'source_pos_order_id': example_order_1.id,
             'code': 'gift_card_valid',
-            'points': 60.0,
+            # No 'points' here: it's derived from history_ids below, setting both
+            # would double-count the 60 points.
             'history_ids': [(0, 0, {
                 'order_model': 'pos.order',
                 'order_id': example_order_1.id,
@@ -3189,7 +3195,8 @@ class TestUi(TestPointOfSaleHttpCommon):
             'program_id': gift_card_program.id,
             'source_pos_order_id': example_order_2.id,
             'code': 'gift_card_partner',
-            'points': 60.0,
+            # No 'points' here: it's derived from history_ids below, setting both
+            # would double-count the 60 points.
             'partner_id': self.env['res.partner'].create({'name': 'Test Partner'}).id,
             'history_ids': [(0, 0, {
                 'order_model': 'pos.order',
@@ -3203,14 +3210,15 @@ class TestUi(TestPointOfSaleHttpCommon):
             gift_card_expired = self.env['loyalty.card'].create({
                 'program_id': gift_card_program.id,
                 'code': 'gift_card_expired',
-                'points': 60.0,
                 'expiration_date': date.today(),
             })
+            gift_card_expired._adjust_points(60.0, description="Initial balance")
         gift_card_sold = self.env['loyalty.card'].create({
             'program_id': gift_card_program.id,
             'source_pos_order_id': example_order_3.id,
             'code': 'gift_card_sold',
-            'points': 60.0,
+            # No 'points' here: it's derived from history_ids below, setting both
+            # would double-count the 60 points.
             'history_ids': [(0, 0, {
                 'order_model': 'pos.order',
                 'order_id': example_order_3.id,
@@ -3222,8 +3230,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         gift_card_generated_but_not_sold = self.env['loyalty.card'].create({
             'program_id': gift_card_program.id,
             'code': 'gift_card_generated_but_not_sold',
-            'points': 60.0,
         })
+        gift_card_generated_but_not_sold._adjust_points(60.0, description="Initial balance")
 
         self.start_pos_tour("test_physical_gift_card")
         self.assertEqual(gift_card_valid.points, 56.80)
@@ -3387,12 +3395,12 @@ class TestUi(TestPointOfSaleHttpCommon):
                 'required_points': 5,
             })],
         })
-        self.env['loyalty.card'].create({
+        loyalty_card = self.env['loyalty.card'].create({
             'program_id': loyalty_program.id,
             'partner_id': self.test_partner.id,
-            'points': 500,
             'code': '0444-e050-4548',
         })
+        loyalty_card._adjust_points(500, description="Initial balance")
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(
@@ -3425,8 +3433,8 @@ class TestUi(TestPointOfSaleHttpCommon):
         loyalty_card = self.env['loyalty.card'].create({
             'program_id': program.id,
             'partner_id': aa_partner.id,
-            'points': 100,
         })
+        loyalty_card._adjust_points(100, description="Initial balance")
 
         self.main_pos_config.with_user(self.pos_user).open_ui()
         self.start_tour(
@@ -3593,11 +3601,11 @@ class TestUi(TestPointOfSaleHttpCommon):
         trusted_pos_config = self.main_pos_config.copy()
         loyalty_program = self.create_programs([('Loyalty P', 'loyalty')])['Loyalty P']
         partner = self.env['res.partner'].create({'name': 'AAAA'})
-        self.env['loyalty.card'].create({
+        loyalty_card = self.env['loyalty.card'].create({
             'program_id': loyalty_program.id,
             'partner_id': partner.id,
-            'points': 50,
         })
+        loyalty_card._adjust_points(50, description="Initial balance")
         self.main_pos_config.trusted_config_ids += trusted_pos_config
         self.start_pos_tour("test_loyalty_is_not_processed_for_draft_order", login="pos_user")
 

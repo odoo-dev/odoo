@@ -76,8 +76,7 @@ class PosConfig(models.Model):
         coupon = self.env['loyalty.card'].search(
             [('program_id', 'in', self._get_program_ids().ids),
              '|', ('partner_id', 'in', (False, partner_id)), ('program_type', '=', 'gift_card'),
-             ('code', '=', code)],
-            order='partner_id, points desc', limit=1)
+             ('code', '=', code)], limit=1)
         program = coupon.program_id
         if not coupon or not program.active:
             return {

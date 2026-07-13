@@ -83,7 +83,6 @@ class LoyaltyGenerateWizard(models.TransientModel):
         self.ensure_one()
         return {
             "program_id": self.program_id.id,
-            "points": self.points_granted,
             "expiration_date": self.valid_until,
             "partner_id": partner.id if self.mode == "selected" else False,
         }
@@ -98,12 +97,8 @@ class LoyaltyGenerateWizard(models.TransientModel):
             customers = wizard._get_partners() or range(wizard.coupon_qty)
             coupon_create_vals.extend(wizard._get_coupon_values(partner) for partner in customers)
         coupons = self.env["loyalty.card"].create(coupon_create_vals)
-        self.env["loyalty.history"].create([
-            {
-                "description": self.description or self.env._("Gift For Customer"),
-                "card_id": coupon.id,
-                "issued": self.points_granted,
-            }
-            for coupon in coupons
-        ])
+        loyalty_history = self.env["loyalty.history"]
+        values = {"description": self.description or self.env._("Gift For Customer")}
+        for coupon in coupons:
+            loyalty_history._create_issuing_history(coupon, self.points_granted, values)
         return coupons
