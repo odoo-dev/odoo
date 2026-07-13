@@ -99,6 +99,7 @@ $border-color: $o-border-color !default;
 $border-radius: $o-border-radius !default;
 $border-radius-sm: $o-border-radius-sm !default;
 $border-radius-lg: $o-border-radius-lg !default;
+$border-radius-xl: $o-border-radius-xl !default;
 
 $component-active-color: $o-component-active-color !default;
 $component-active-bg: $o-component-active-bg !default;
@@ -248,7 +249,7 @@ $tooltip-opacity: 1 !default;
 
 $popover-bg: $white !default;
 $popover-border-color: $border-color !default;
-$popover-border-radius: $border-radius !default;
+$popover-border-radius: $border-radius-lg !default;
 $popover-arrow-color: var(--popover-arrow-color, #{$popover-bg}) !default;
 $popover-arrow-outer-color: $popover-border-color !default;
 
