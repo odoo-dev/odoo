@@ -21,6 +21,14 @@ export class MessagingMenuUIState extends Record {
     /** @type {string} */
     id;
     /**
+     * Thread whose item should be brought into view (centered) in the list. Set when a
+     * thread becomes the active Discuss thread (startup restore or "open in Discuss").
+     * The matching item scrolls itself into view once the tab content has settled, then
+     * clears this so later user-driven scrolling isn't yanked back. See
+     * `messaging_menu_item_patch`.
+     */
+    scrollToItem = fields.One("mail.thread");
+    /**
      * Trigger for the initial tab content load. It recomputes whenever the tab/filter to
      * show changes, or when this state becomes ready to load (see `_isReadyForInitialLoad`).
      */

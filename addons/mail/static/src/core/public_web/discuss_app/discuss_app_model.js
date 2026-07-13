@@ -32,6 +32,8 @@ export class DiscussApp extends Record {
                     this.sidebarState.activeTab =
                         this.thread.channel?.primaryMessagingMenuTab ?? fallback;
                 }
+                // Request that the sidebar bring this thread's item into view.
+                this.sidebarState.scrollToItem = this.thread;
             }
         },
     });

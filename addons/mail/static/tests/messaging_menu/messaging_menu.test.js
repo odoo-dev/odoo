@@ -3,6 +3,7 @@ import {
     contains,
     defineMailModels,
     insertText,
+    isInViewportOf,
     listenStoreFetch,
     onRpcBefore,
     openDiscuss,
@@ -17,6 +18,7 @@ import {
     waitStoreFetch,
     MENU_ACTIVE_IDS,
 } from "@mail/../tests/mail_test_helpers";
+import { MessagingMenuTab } from "@mail/core/public_web/messaging_menu/messaging_menu_tab_model";
 import { Store } from "@mail/../tests/mock_server/store";
 import { makeRecordFieldLocalId } from "@mail/model/misc";
 import { Store as StoreModel } from "@mail/model/store";
@@ -37,6 +39,7 @@ import { browser } from "@web/core/browser/browser";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { rpc } from "@web/core/network/rpc";
 import { getOrigin } from "@web/core/utils/urls";
+import { range } from "@web/core/utils/numbers";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -1188,4 +1191,26 @@ test("preserve message link formatting in messaging menu", async () => {
     await start();
     await openMessagingMenu(MENU_ACTIVE_IDS.CHANNEL);
     await contains(`.o-mail-NotificationItem-text a[href="https://odoo.com/"]`);
+});
+
+test("opening a thread in Discuss scrolls the sidebar to corresponding item", async () => {
+    // Load every channel directly so the target is actually rendered off screen.
+    patchWithCleanup(MessagingMenuTab, { LOAD_MORE_LIMIT: 50 });
+    const pyEnv = await startServer();
+    pyEnv["discuss.channel"].create(
+        range(50).map((i) => ({
+            name: `channel ${i}`,
+        }))
+    );
+    await start();
+    await openMessagingMenu(MENU_ACTIVE_IDS.CHANNEL);
+    await contains(".o-mail-MessagingMenuItem", { count: 50 });
+    await click(".o-mail-NotificationItem:contains('channel 0')");
+    await contains(".o-mail-ChatWindow-displayName:text('channel 0')");
+    await click("[title='Open Actions Menu']");
+    await click(".o-dropdown-item:text('Open in Discuss')");
+    await isInViewportOf(
+        ".o-mail-MessagingMenu-tabContent .o-mail-MessagingMenuItem:contains('channel 0')",
+        ".o-mail-MessagingMenu-tabContent"
+    );
 });

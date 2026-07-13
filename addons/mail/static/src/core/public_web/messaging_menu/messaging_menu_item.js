@@ -27,7 +27,7 @@ export class MessagingMenuItem extends Component {
     static template = "mail.MessagingMenuItem";
 
     isMobileOS = isMobileOS;
-    root = signal();
+    root = signal(null, { type: types.instanceOf(HTMLElement) });
 
     setup() {
         super.setup();

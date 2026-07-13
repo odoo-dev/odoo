@@ -7,12 +7,13 @@ import { isMobileOS } from "@web/core/browser/feature_detection";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { _t } from "@web/core/l10n/translation";
 
-import { props, types } from "@odoo/owl";
+import { props, types, useEffect } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 
 Object.assign(MessagingMenuItem.components, { CountryFlag });
 
-patch(MessagingMenuItem.prototype, {
+/** @type {MessagingMenuItem} */
+const messagingMenuItemPatch = {
     setup() {
         super.setup(...arguments);
         this.channelDropdownState = useDropdownState();
@@ -22,6 +23,27 @@ patch(MessagingMenuItem.prototype, {
         );
         this.isDiscussSidebarChannelActions = true;
         this.threadActions = useThreadActions({ thread: () => this.channel?.thread });
+        // Bring this channel's item into view (centered) when it is the thread requested
+        // by `sidebarState.scrollToItem` (e.g. "open in Discuss" action, or the thread
+        // restored on Discuss startup). Wait until the tab has settled: scrolling mid-load
+        // lets freshly streamed-in channels shove the item back out of view. Clearing the
+        // request once done makes it one-shot, so later user-driven loads (e.g. scrolling
+        // to the bottom) don't yank the list back to this item.
+        useEffect(() => {
+            const menuState = this.store.discuss.sidebarState;
+            const el = this.root();
+            if (
+                el &&
+                this.channel?.thread &&
+                menuState.scrollToItem?.eq(this.channel.thread) &&
+                ["idle", "loaded"].includes(
+                    this.activeTab().getLoadStatus(menuState.selectedFilter)
+                )
+            ) {
+                el.scrollIntoView({ behavior: "instant", block: "center" });
+                menuState.scrollToItem = null;
+            }
+        });
         if (isMobileOS()) {
             useLongPress(this.root, {
                 action: () => {
@@ -34,8 +56,9 @@ patch(MessagingMenuItem.prototype, {
     },
     get _isActive() {
         return (
-            this.store.discuss.isActive &&
-            Boolean(this.channel?.thread?.eq(this.store.discuss.thread))
+            super._isActive ||
+            (this.store.discuss.isActive &&
+                Boolean(this.channel?.thread?.eq(this.store.discuss.thread)))
         );
     },
     get actionsButtonClass() {
@@ -116,4 +139,5 @@ patch(MessagingMenuItem.prototype, {
         }
         return super.swipeLeft;
     },
-});
+};
+patch(MessagingMenuItem.prototype, messagingMenuItemPatch);

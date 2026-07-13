@@ -16,10 +16,7 @@ patch(MessagingMenuTab.prototype, {
                         return result;
                     }
                 }
-                if (c1.localId === c2.localId) {
-                    return 0;
-                }
-                return c2.localId > c1.localId ? 1 : -1;
+                return c2.id - c1.id;
             },
         });
         this.channelsWithCounter = fields.Many("discuss.channel", {
