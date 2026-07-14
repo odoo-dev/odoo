@@ -44,273 +44,365 @@
             <!-- Intro group -->
             <t t-snippet="website.s_banner" string="Banner" group="intro">
                 <keywords>hero, jumbotron, headline, header, branding, intro, home, showcase, spotlight, lead, welcome, announcement, splash, top, main</keywords>
+                <ai-description>Grid hero: headline, text and CTAs beside a small photo collage; versatile homepage opener</ai-description>
             </t>
             <t t-snippet="website.s_splash_intro" string="Splash Intro" group="intro">
                 <keywords>hero, splash, fullscreen, image, background, headline, header, branding, intro, home, showcase, spotlight, main, landing, presentation, top, cover, immersive, visual, impactful</keywords>
+                <ai-description>Full-viewport background-image hero with oversized headline and CTAs; maximum-impact opener</ai-description>
             </t>
             <t t-snippet="website.s_cover" string="Cover" group="intro">
                 <keywords>hero, jumbotron, headline, header, branding, intro, home, showcase, spotlight, main, landing, presentation, top, splash, parallax</keywords>
+                <ai-description>Full-width parallax background-image cover, centered headline and CTAs</ai-description>
             </t>
             <t t-snippet="website.s_animated_cover" string="Animated Cover" group="intro">
                 <keywords>hero, headline, header, intro, home, landing page, animated, movement, marquee, scrolling text, avatars, social proof, background image, immersive, cover</keywords>
+                <ai-description>Full-screen image hero with animated scrolling marquee text and avatars; lively, social opener</ai-description>
             </t>
             <t t-snippet="website.s_text_cover" string="Text Cover" group="intro">
                 <keywords>hero, jumbotron, headline, header, intro, home, content, description, primary, highlight, lead</keywords>
+                <ai-description>Split hero: headline, text and CTAs on one side, visual on the other; no full-bleed image</ai-description>
             </t>
             <t t-snippet="website.s_carousel" string="Carousel" group="intro" label="Carousel">
                 <keywords>gallery, carousel, slider, slideshow, picture, photo, image-slider, rotating, swipe, transition, media-carousel, movement</keywords>
+                <ai-description>Full-width slider of 3 slides mixing background images, headlines and CTAs</ai-description>
             </t>
             <t t-snippet="website.s_carousel_intro" string="Carousel Intro" group="intro" label="Carousel">
                 <keywords>gallery, carousel, slider, slideshow, picture, photo, image-slider, rotating, swipe, transition, media-carousel, movement</keywords>
+                <ai-description>Tall intro carousel: oversized headline over image-grid slides; editorial and image-heavy</ai-description>
             </t>
             <t t-snippet="website.s_adventure" string="Adventure" group="intro">
                 <keywords>journey, exploration, travel, outdoor, excitement, quest, start, onboarding, discovery, thrill</keywords>
+                <ai-description>Full-width background-image intro with shape divider, big headline and 2 CTAs; outdoor mood</ai-description>
             </t>
             <t t-snippet="website.s_striped_center_top" string="Striped Center Top" group="intro">
                 <keywords>hero, jumbotron, headline, header, introduction, home, content, picture, photo, illustration, media, visual, article, combination, trendy, pattern, design, centered</keywords>
+                <ai-description>Centered hero on striped pattern: big headline above one wide image; trendy editorial opener</ai-description>
             </t>
             <t t-snippet="website.s_motto" string="Motto" group="intro">
                 <keywords>cite, slogan, tagline, mantra, catchphrase, statements, sayings, comments, mission, citations, maxim, quotes, principle, ethos, values</keywords>
+                <ai-description>Minimal statement section: one oversized slogan on a shaped background, no image</ai-description>
             </t>
             <t t-snippet="website.s_hero_about" string="Hero About" group="intro">
                 <keywords>hero, headline, header, introduction, home, picture, photo, about page, company, story, history, brand, mission, statement</keywords>
+                <ai-description>About-style hero: big headline and intro text with one large image and a background shape</ai-description>
             </t>
             <t t-snippet="website.s_banner_contained" string="Banner Contained" group="intro">
                 <keywords>hero, banner, picture, photo, cover, shape, background image, fullscreen, headline, intro, landing page, impactful</keywords>
+                <ai-description>Boxed full-height banner: rounded background image with headline inside a container</ai-description>
             </t>
             <t t-snippet="website.s_banner_connected" string="Banner connected" group="intro">
                 <keywords>content, picture, photo, connection, cover, shape, background, image, headings, hero, light, experience, parallax</keywords>
+                <ai-description>Hero with parallax background image, shape divider and two text columns</ai-description>
             </t>
             <t t-snippet="website.s_kickoff" string="Kickoff" group="intro">
                 <keywords>picture, photo, illustration, media, visual, start, launch, commencement, initiation, opening, kick-off, kickoff, beginning, events, parallax</keywords>
+                <ai-description>Full-width parallax image header with headline on a shaped background; event or launch opener</ai-description>
             </t>
             <t t-snippet="website.s_closer_look" string="Closer Look" group="intro">
                 <keywords>content, picture, photo, illustration, media, visual, focus, in-depth, analysis, more, contact, detailed, mockup, explore, insight</keywords>
+                <ai-description>Centered headline above one large product/mockup image with CTAs; product-focus intro</ai-description>
             </t>
             <t t-snippet="website.s_striped_top" string="Striped Top" group="intro">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design</keywords>
+                <ai-description>Image and text split on a striped pattern with background shape; trendy content intro</ai-description>
             </t>
             <t t-snippet="website.s_sidegrid" string="Side grid" group="intro">
                 <keywords>grid, gallery, pictures, photos, media, text, content, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid, split, alignment</keywords>
+                <ai-description>Editorial grid hero: oversized headline beside a 4-image collage (grid mode); image-heavy</ai-description>
             </t>
             <t t-snippet="website.s_discovery" string="Discovery" group="intro">
                 <keywords>hero, jumbotron, headline, header, introduction, home, content, introduction, overview, spotlight, presentation, welcome, context, description, primary, highlight, lead, discover, exploration, reveal</keywords>
+                <ai-description>Text-only intro: kicker, big headline, supporting line and CTAs; clean, no imagery</ai-description>
             </t>
             <t t-snippet="website.s_intro_pill" string="Intro Pill" group="intro">
                 <keywords>hero, jumbotron, headline, header, introduction, home, content, introduction, overview, spotlight, presentation, welcome, context, description, primary, highlight, lead, journey, skills, expertises, experts, accomplishments, knowledge</keywords>
+                <ai-description>Playful intro: pill-shaped images embedded inside a giant headline, with CTAs</ai-description>
             </t>
             <t t-snippet="website.s_framed_intro" string="Framed Intro" group="intro">
                 <keywords>hero, jumbotron, headline, header, introduction, home, content, introduction, overview, spotlight, presentation, welcome, context, description, primary, highlight, lead</keywords>
+                <ai-description>Hero inside a framed card: text and CTAs on one side, image on the other</ai-description>
             </t>
             <t t-snippet="website.s_empowerment" string="Empowerment" group="intro">
                 <keywords>hero, jumbotron, headline, header, introduction, home, content, introduction, overview, spotlight, presentation, welcome, context, description, primary, highlight, lead, CTA, promote, promotion</keywords>
+                <ai-description>Split hero (grid): headline and CTA column beside one large image</ai-description>
             </t>
             <t t-snippet="website.s_split_intro" string="Split Intro" group="intro">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, network, relationships, interactions, connectivity, collaborations</keywords>
+                <ai-description>50/50 split intro: a background-image half and a headline/CTA half</ai-description>
             </t>
             <t t-snippet="website.s_hero_maintenance" string="Hero Maintenance" group="intro">
                 <keywords>hero, headline, header, centered, maintenance, under maintenance, coming soon, fullscreen, social media, status page, offline, temporary</keywords>
+                <ai-description>Full-screen centered maintenance/coming-soon cover with logo and social icons</ai-description>
             </t>
             <t t-snippet="website.s_hero_minimalist" string="Hero Minimalist" group="intro">
                 <keywords>hero, minimalist, headline, header, introduction, home, picture, photo, split layout, two column, large image, tagline, landing page</keywords>
+                <ai-description>Minimalist split hero: short tagline column and one large image; lots of whitespace</ai-description>
             </t>
             <t t-snippet="website.s_launch_countdown" string="Launch Countdown" group="intro">
                 <keywords>coming soon, countdown, launch, waitlist, timer, days hours minutes seconds, social media, teaser, pre-launch, fullscreen, dark</keywords>
+                <ai-description>Full-screen dark launch cover with countdown timer, headline and one CTA</ai-description>
             </t>
 
             <!-- Columns group -->
             <t t-snippet="website.s_three_columns" string="Columns" group="columns">
                 <keywords>description, containers, layouts, structures, multi-columns, modules, boxes</keywords>
+                <ai-description>Classic 3 columns, each with image, title and text; even, medium density</ai-description>
             </t>
             <t t-snippet="website.s_services_grid" string="Services Grid" group="columns">
                 <keywords>services, features, grid, images, three columns, overview</keywords>
+                <ai-description>Grid of 6 service tiles with images and titles over 2 rows; image-heavy overview</ai-description>
             </t>
             <t t-snippet="website.s_features_wall" string="Features Wall" group="columns">
                 <keywords>reveal, showcase, launch, presentation, announcement, content, picture, photo, illustration, media, visual, combination</keywords>
+                <ai-description>Asymmetric wall of feature blocks with images on a shaped background; showcase feel</ai-description>
             </t>
             <t t-snippet="website.s_key_benefits" string="Key benefits" group="columns">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, features, exhibit, details, capabilities, attributes, promotion, headline, content, overview, spotlight</keywords>
+                <ai-description>3 light text-only benefit columns on a shaped background; airy, icon-free</ai-description>
             </t>
             <t t-snippet="website.s_freegrid" string="Free grid" group="columns">
                 <keywords>description, containers, layouts, structures, multi-columns, modules, boxes, content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal, trendy, design, shape, geometric, engage, call to action, cta, button</keywords>
+                <ai-description>Free-form magazine collage (grid mode): 6 images with headline and CTA; bold and creative</ai-description>
             </t>
             <t t-snippet="website.s_cards_grid" string="Cards Grid" group="columns">
                 <keywords>description, containers, layouts, structures, multi-columns, modules, boxes, content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal</keywords>
+                <ai-description>2-column grid of 4 image cards with text; balanced text/image density</ai-description>
             </t>
             <t t-snippet="website.s_key_images" string="Key Images" group="columns">
                 <keywords>columns, gallery, pictures, photos, media, text, content, album, showcase, visuals, portfolio, arrangement, collection, visual-grid, split, alignment, added value</keywords>
+                <ai-description>4 image columns with captions; visual highlights row</ai-description>
             </t>
             <t t-snippet="website.s_wavy_grid" string="Wavy Grid" group="columns">
                 <keywords>reveal, showcase, launch, presentation, announcement, content, picture, photo, illustration, media, visual, combination</keywords>
+                <ai-description>4-image mosaic on a wavy shaped background with text; playful showcase</ai-description>
             </t>
             <t t-snippet="website.s_card_offset" string="Card Offset" group="columns">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design</keywords>
+                <ai-description>One large image card offset over a text column (grid mode); trendy overlap</ai-description>
             </t>
             <t t-snippet="website.s_cards_soft" string="Cards Soft" group="columns">
                 <keywords>description, containers, layouts, structures, multi-columns, modules, boxes, content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal</keywords>
+                <ai-description>3 soft rounded cards with images and text; gentle, friendly look</ai-description>
             </t>
             <t t-snippet="website.s_achievements_list" string="Achievements List" group="columns">
                 <keywords>achievements, awards, recognitions, certifications, press, records, milestones, honors, two columns, list, stats, numbers, accomplishments, highlights</keywords>
+                <ai-description>2-column text list of achievements/awards with stats; dense, image-free</ai-description>
             </t>
             <t t-snippet="website.s_about_bold" string="About Bold" group="columns">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, showcase, announcement, reveal</keywords>
+                <ai-description>Bold about section: wide text column with one supporting image</ai-description>
             </t>
 
             <!-- Content group -->
             <t t-snippet="website.s_text_image" string="Text - Image" group="content">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination</keywords>
+                <ai-description>2 columns: text and button on the left, one image on the right; workhorse content block</ai-description>
             </t>
             <t t-snippet="website.s_image_text" string="Image - Text" group="content">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination</keywords>
+                <ai-description>2 columns: one image on the left, text and button on the right; workhorse content block</ai-description>
             </t>
             <t t-snippet="website.s_shape_image" string="Shape image" group="content">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design, shape, geometric, patterned</keywords>
+                <ai-description>Text column beside an image cropped in a decorative shape</ai-description>
             </t>
             <t t-snippet="website.s_mockup_image" string="Mockup Image" group="content">
                 <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger, mockup</keywords>
+                <ai-description>Device mockup image with caption and CTA on a shaped background</ai-description>
             </t>
             <t t-snippet="website.s_cta_mockups" string="Call to Action Mockups" group="content">
                 <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger, mockups</keywords>
+                <ai-description>CTA headline with two device mockups (grid mode); app or product promo</ai-description>
             </t>
             <t t-snippet="website.s_image_hexagonal" string="Image Hexagonal" group="content">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, more, hexagon, geometric</keywords>
+                <ai-description>Hexagon-cropped images beside text and CTAs (grid mode); geometric accent</ai-description>
             </t>
             <t t-snippet="website.s_image_text_box" string="Image Text Box" group="content">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, engage, call to action, cta, box, showcase</keywords>
+                <ai-description>Image and text inside one boxed card with CTA and shape; contained highlight</ai-description>
             </t>
             <t t-snippet="website.s_image_text_overlap" string="Image - Text Overlap" group="content">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design</keywords>
+                <ai-description>Image overlapping a text block (grid mode); trendy offset layout</ai-description>
             </t>
             <t t-snippet="website.s_call_to_action" string="Call to Action" group="content">
                 <keywords>CTA, button, btn, action, engagement, link, offer, appeal</keywords>
+                <ai-description>Slim conversion strip: text left, one button right; classic CTA band</ai-description>
             </t>
             <t t-snippet="website.s_cta_box" string="Box Call to Action" group="content">
                 <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger</keywords>
+                <ai-description>Boxed CTA with a small image and two buttons</ai-description>
             </t>
             <t t-snippet="website.s_cta_centered" string="Centered Call to Action" group="content">
                 <keywords>CTA, button, call to action, offer, centered, minimal, conversion, signup, subscribe, join, card</keywords>
+                <ai-description>Minimal centered CTA: title and buttons only, no image</ai-description>
             </t>
             <t t-snippet="website.s_striped" string="Striped section" group="content">
                 <keywords>hero, jumbotron, headline, header, introduction, home, content, picture, photo, illustration, media, visual, article, combination, trendy, pattern, design</keywords>
+                <ai-description>Striped-pattern content band with one image and shaped background</ai-description>
             </t>
             <t t-snippet="website.s_cta_card" string="Card Call to Action" group="content">
                 <keywords>CTA, button, btn, action, engagement, link, offer, appeal, call to action, prompt, interact, trigger, items, checklists, entries, sequences, bullets, points, list, group, benefits, features, advantages</keywords>
+                <ai-description>CTA card with a benefits checklist and shape background</ai-description>
             </t>
             <t t-snippet="website.s_cta_mobile" string="CTA Mobile" group="content">
                 <keywords>stores, button, engagement, appeal, mockup, text, content, picture, photo, illustration, media, visual, article, story</keywords>
+                <ai-description>Mobile-app CTA: phone mockups with app-store badges (grid mode)</ai-description>
             </t>
-            <t t-snippet="website.s_searchbar" string="Search" t-forbid-sanitize="form" group="content"/>
+            <t t-snippet="website.s_searchbar" string="Search" t-forbid-sanitize="form" group="content">
+                <ai-description>Full-width search input band</ai-description>
+            </t>
             <t t-snippet="website.s_color_blocks_2" string="Big Boxes" group="content">
                 <keywords>columns, containers, layouts, large, panels, modules</keywords>
+                <ai-description>Two large colored panels side by side, each with text and CTA; strong color blocking</ai-description>
             </t>
-            <t t-snippet="website.s_popup" string="Popup" group="content" label="Popup"/>
+            <t t-snippet="website.s_popup" string="Popup" group="content" label="Popup">
+                <ai-description>Promotional popup card with background image and CTA button (opens over the page)</ai-description>
+            </t>
             <t t-snippet="website.s_countdown" string="Countdown" group="content">
                 <keywords>celebration, launch</keywords>
+                <ai-description>Countdown timer section for launches or events</ai-description>
             </t>
             <t t-snippet="website.s_numbers_lite" string="Numbers Lite" group="content">
                 <keywords>statistics, stats, KPI, metrics, highlights, figures, achievements, milestones, data, results, trends, count, counter, compact, simple</keywords>
+                <ai-description>Compact row of 4 plain stat figures; minimal social proof</ai-description>
             </t>
             <t t-snippet="website.s_numbers_charts" string="Numbers Charts" group="content">
                 <keywords>graph, table, diagram, pie, plot, bar, metrics, figures, data-visualization, statistics, stats, analytics, infographic, skills, report</keywords>
+                <ai-description>Statistics with small charts split over two columns (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_numbers" string="Numbers" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, skills, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, summaries, summary</keywords>
+                <ai-description>Large stat figures with labels in columns; strong numeric proof</ai-description>
             </t>
             <t t-snippet="website.s_numbers_boxed" string="Numbers boxed" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, performance, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, summaries, summary</keywords>
+                <ai-description>3 stat boxes over a background image (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_numbers_framed" string="Numbers framed" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, performance, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results</keywords>
+                <ai-description>3 framed stat cards on a shaped background</ai-description>
             </t>
             <t t-snippet="website.s_numbers_list" string="Numbers list" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, skills, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, cta, call to action, button</keywords>
+                <ai-description>Stat list beside a text column</ai-description>
             </t>
             <t t-snippet="website.s_numbers_grid" string="Numbers Grid" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, skills, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results</keywords>
+                <ai-description>4 stat tiles arranged in a grid</ai-description>
             </t>
             <t t-snippet="website.s_numbers_inline" string="Numbers Inline" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, skills, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results</keywords>
+                <ai-description>Single inline row of stats; very compact</ai-description>
             </t>
             <t t-snippet="website.s_big_number" string="Big number" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, skills, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, summaries, summary, large-figures, prominent, standout</keywords>
+                <ai-description>One huge standout figure on a shaped background; bold single-stat statement</ai-description>
             </t>
             <t t-snippet="website.s_features" string="Features" group="content">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion</keywords>
+                <ai-description>3 feature columns with icons, titles and text; classic feature row</ai-description>
             </t>
             <t t-snippet="website.s_manifesto" string="Manifesto" group="content">
                 <keywords>manifesto, mission, vision, values, principles, core values, core principles, numbered list, commitment, beliefs, statement</keywords>
+                <ai-description>Numbered manifesto/values list in text columns; editorial, image-free</ai-description>
             </t>
             <t t-snippet="website.s_bento_features" string="Bento Features" group="content">
                 <keywords>features, benefits, highlights, bento, bento grid, commitments, promises, values, goals, cards</keywords>
+                <ai-description>Bento grid of mixed-size feature cards with one image; modern dashboard look</ai-description>
             </t>
             <t t-snippet="website.s_projects_list" string="Projects List" group="content">
                 <keywords>projects, list, portfolio, showcase, work, case studies, collection, typography, agency, creative, clients, work list</keywords>
+                <ai-description>Typographic 2-column list of projects/works; minimal portfolio index</ai-description>
             </t>
             <t t-snippet="website.s_features_wave" string="Features Wave" group="content">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion, headline, content, overview, spotlight</keywords>
+                <ai-description>3 icon features on a wavy shaped background</ai-description>
             </t>
             <t t-snippet="website.s_projects_grid" string="Projects Grid" group="content">
                 <keywords>projects, portfolio, showcase, gallery, images, images-grid, collection, visual-grid, work, case studies, mixed layout, creative</keywords>
+                <ai-description>Mixed-size project image grid; portfolio showcase</ai-description>
             </t>
             <t t-snippet="website.s_projects_grid_minimal" string="Projects Grid Minimal" group="content">
                 <keywords>projects, portfolio, showcase, gallery, images, images-grid, collection, visual-grid, work, case studies, minimal, two columns, creative</keywords>
+                <ai-description>Minimal 2-column gallery of 4 project images</ai-description>
             </t>
             <t t-snippet="website.s_image_features" string="Image Features" group="content">
                 <keywords>features, highlights, image, showcase, split layout, icon list, checklist, bullet points, product features, benefits, description, photo, key features</keywords>
+                <ai-description>One image beside an icon checklist of features</ai-description>
             </t>
             <t t-snippet="website.s_features_image" string="Features Image" group="content">
                 <keywords>features, highlights, image, showcase, split layout, icon list, checklist, bullet points, product features, benefits, description, photo, key features</keywords>
+                <ai-description>Icon feature list beside one image</ai-description>
             </t>
             <t t-snippet="website.s_showcase_square" string="Showcase Square" group="content">
                 <keywords>features, icons, benefits, product features, split layout, image, icon list, advantages, highlights, product showcase, 4 features</keywords>
+                <ai-description>Product image surrounded by 4 feature callouts; product anatomy layout</ai-description>
             </t>
             <t t-snippet="website.s_media_list" string="Media List" group="content">
                 <keywords>block, blog, post, catalog, feed, items, entries, entry, collection</keywords>
+                <ai-description>Stacked media rows, each with image and text; list/feed look</ai-description>
             </t>
             <t t-snippet="website.s_services_pack" string="Services Pack" group="content">
                 <keywords>services, offer, package, features, list, catalog, agency, deliverables, skills, expertise</keywords>
+                <ai-description>Services/deliverables package list with title column; text-dense</ai-description>
             </t>
             <t t-snippet="website.s_showcase" string="Showcase" group="content">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion, presentation, demo, feature</keywords>
+                <ai-description>Central image with feature callouts on both sides</ai-description>
             </t>
             <t t-snippet="website.s_comparisons" string="Comparisons" group="content">
                 <keywords>pricing, promotion, price, feature-comparison, side-by-side, evaluation, competitive, overview</keywords>
+                <ai-description>3 pricing/plan columns with checklists and buttons; pricing table</ai-description>
             </t>
             <t t-snippet="website.s_comparisons_horizontal" string="Comparisons Horizontal" group="content">
                 <keywords>comparison, price, pricing, engage, call to action, cta, box, shop, table, cart, product, cost, charges, fees, tariffs, prices, expenses</keywords>
+                <ai-description>2 horizontal pricing cards with checklists and CTAs</ai-description>
             </t>
             <t t-snippet="website.s_features_grid" string="Features Grid" group="content">
                 <keywords>promotion, characteristic, quality, highlights, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion</keywords>
+                <ai-description>Dense 2-column grid of 12 small icon features; high information density</ai-description>
             </t>
             <t t-snippet="website.s_features_cards" string="Features Cards" group="content">
                 <keywords>features, benefits, highlights, cards, photo cards, image cards, grid, two columns, product features, services, quality</keywords>
+                <ai-description>2x2 grid of photo feature cards</ai-description>
             </t>
             <t t-snippet="website.s_tabs" string="Tabs" group="content" label="Tab">
                 <keywords>navigation, sections, multi-tab, panel, toggle</keywords>
+                <ai-description>Tabbed content panels; compact way to organize several topics</ai-description>
             </t>
             <t t-snippet="website.s_tabs_images" string="Tabs Images" group="content" label="Tab">
                 <keywords>images, pictures, photos, illustrations, media, visual, slider, tabs, switch, tabbed, sections, navigation</keywords>
+                <ai-description>Tabbed panels with images per tab</ai-description>
             </t>
             <t t-snippet="website.s_timeline" string="Timeline" group="content">
                 <keywords>history, story, events, milestones, chronology, sequence, progression, achievements</keywords>
+                <ai-description>Vertical timeline of milestones; story or history</ai-description>
             </t>
             <t t-snippet="website.s_timeline_list" string="Timeline List" group="content">
                 <keywords>history, story, events, milestones, chronology, sequence, progression, achievements, changelog, updates, announcements, recent, latest</keywords>
+                <ai-description>Compact timeline/changelog list</ai-description>
             </t>
             <t t-snippet="website.s_timeline_images" string="Timeline Images" group="content">
                 <keywords>history, story, events, milestones, chronology, sequence, progression, achievements, changelog, updates, announcements, recent, latest, picture, photo, illustration, media, visual</keywords>
+                <ai-description>Timeline with an image per milestone</ai-description>
             </t>
             <t t-snippet="website.s_process_steps" string="Steps" t-forbid-sanitize="true" group="content">
                 <keywords>process, progression, guide, workflow, sequence, instructions, stages, procedure, roadmap</keywords>
+                <ai-description>Numbered process steps in 4 columns; how-it-works flow</ai-description>
             </t>
             <t t-snippet="website.s_numbers_showcase" string="Numbers Showcase" group="content">
                 <keywords>statistics, stats, KPI, metrics, dashboard, analytics, highlights, figures, skills, achievements, benchmarks, milestones, indicators, data, measurements, reports, trends, results, analytics, cta, call to action, button</keywords>
+                <ai-description>Stats block beside text with CTA (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_accordion_image" string="Accordion Image" group="content">
                 <keywords>common answers, common questions, faq, QA, collapse, expandable, toggle, collapsible, hide-show, movement, information, image, picture, photo, illustration, media, visual</keywords>
+                <ai-description>FAQ accordion beside one image</ai-description>
             </t>
             <t t-snippet="website.s_carousel_cards" string="Carousel Cards" group="content" label="Carousel">
                 <keywords>gallery, carousel, slider, slideshow, picture, photo, image-slider, rotating, swipe, transition, media-carousel, movement, cta, engagement, call to action</keywords>
+                <ai-description>Card slider: 3 image cards with CTAs; browsable highlights</ai-description>
             </t>
 
             <!-- Keep `s_embed_code` snippet at the very end of the "Content" group -->
@@ -321,219 +413,293 @@
             <!-- Images group -->
             <t t-snippet="website.s_picture" string="Title - Image" group="images">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, heading, headline</keywords>
+                <ai-description>Centered title above one large image with caption</ai-description>
             </t>
             <!-- TODO share the keywords somehow (t-out does not work) -->
             <t t-snippet="website.s_masonry_block_default_template" string="Masonry" group="images">
                 <keywords>masonry, grid, column, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <ai-description>Masonry band: colored text block beside one tall image</ai-description>
             </t>
             <t t-snippet="website.s_masonry_block_reversed_template" string="Masonry" group="images">
                 <keywords>masonry, grid, column, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <ai-description>Masonry band: one tall image beside a colored text block (reversed)</ai-description>
             </t>
             <t t-snippet="website.s_masonry_block_images_template" string="Masonry" group="images">
                 <keywords>masonry, grid, column, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <ai-description>Masonry band of images only, no text</ai-description>
             </t>
             <t t-snippet="website.s_masonry_block_mosaic_template" string="Masonry" group="images">
                 <keywords>masonry, grid, column, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <ai-description>Masonry mosaic mixing several images and colored tiles</ai-description>
             </t>
             <t t-snippet="website.s_masonry_block_alternation_text_image_template" string="Masonry" group="images">
                 <keywords>masonry, grid, column, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <ai-description>Masonry band alternating text tile then images</ai-description>
             </t>
             <t t-snippet="website.s_masonry_block_alternation_image_text_template" string="Masonry" group="images">
                 <keywords>masonry, grid, column, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <ai-description>Masonry band alternating images then text tile</ai-description>
             </t>
             <t t-snippet="website.s_masonry_block_quad_template" string="Masonry" group="images">
                 <keywords>masonry, grid, column, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <ai-description>Masonry band of four tiles mixing text and images</ai-description>
             </t>
             <t t-snippet="website.s_quadrant" string="Quadrant" group="images">
                 <keywords>four sections, column, grid, division, split, segments, pictures, illustration, media, photos, tiles, arrangement, gallery, images-grid, mixed, collection, stacking, visual-grid, showcase, visuals, portfolio, thumbnails, engage, call to action, cta, showcase</keywords>
+                <ai-description>4-quadrant image grid with a CTA (grid mode); bold visual split</ai-description>
             </t>
             <t t-snippet="website.s_image_gallery" string="Image Gallery" group="images" label="Carousel">
                 <keywords>gallery, carousel, pictures, photos, album, showcase, visuals, portfolio, thumbnails, slideshow</keywords>
+                <ai-description>Image carousel gallery (slideshow of large photos)</ai-description>
             </t>
             <t t-snippet="website.s_images_wall" string="Images Wall" group="images" label="Gallery">
                 <keywords>grid, gallery, pictures, photos, album, showcase, visuals, portfolio, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <ai-description>Masonry wall of images; dense gallery</ai-description>
             </t>
             <t t-snippet="website.s_image_punchy" string="Punchy Image" group="images">
                 <keywords>headline, header, content, picture, photo, illustration, media, visual, article, combination, trendy, pattern, design, bold, impactful, vibrant, standout</keywords>
+                <ai-description>One oversized image with a punchy overlaid headline (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_parallax" string="Parallax" group="images">
                 <keywords>scrolling, depth, effect, background, layer, visual, movement, parallax</keywords>
+                <ai-description>Full-width parallax image band; strong visual break between sections</ai-description>
             </t>
             <t t-snippet="website.s_unveil" string="Unveil" group="images">
                 <keywords>reveal, showcase, launch, presentation, announcement, content, picture, photo, illustration, media, visual, article, combination</keywords>
+                <ai-description>Large reveal image with supporting image collage (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_image_title" string="Image Title" group="images">
                 <keywords>headline, header, content, picture, photo, illustration, media, visual, combination</keywords>
+                <ai-description>Wide image with a big title (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_image_frame" string="Image Frame" group="images">
                 <keywords>header, introduction, home, content, introduction, overview, spotlight, presentation, welcome, context, description, primary, highlight, lead</keywords>
+                <ai-description>Framed image with caption text (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_images_mosaic" string="Images Mosaic" group="images">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design, shape, geometric, patterned, contrast</keywords>
+                <ai-description>3-column mosaic of 5 images with geometric contrast</ai-description>
             </t>
             <t t-snippet="website.s_images_constellation" string="Images Constellation" group="images">
                 <keywords>content, picture, photo, illustration, media, visual, article, story, combination, trendy, pattern, design, shape, geometric, patterned, contrast, collage, arrangement, gallery, creative, mosaic</keywords>
+                <ai-description>Scattered creative collage of 5 images (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_duo_images" string="Duo Images" group="images">
                 <keywords>picture, photo, illustration, media, visual, two images, side by side, duo, gallery, photography, two columns, before after, comparison</keywords>
+                <ai-description>Two images side by side with captions; comparison or pairing</ai-description>
             </t>
 
             <!-- People group -->
             <t t-snippet="website.s_company_team" string="Team" group="people">
                 <keywords>organization, company, people, column, members, staffs, profiles, bios, roles, personnel, crew</keywords>
+                <ai-description>Team members in columns with photo, name, role and bio; classic team block</ai-description>
             </t>
             <t t-snippet="website.s_company_team_basic" string="Team Basic" group="people">
                 <keywords>organization, company, people, members, staffs, profiles, bios, roles, personnel, crew, patterned, trendy</keywords>
+                <ai-description>Simple portrait columns with name and role; minimal team row</ai-description>
             </t>
             <t t-snippet="website.s_company_team_shapes" string="Team Shapes" group="people">
                 <keywords>organization, structure, people, team, name, role, position, image, portrait, photo, employees, shapes</keywords>
+                <ai-description>Team portraits cropped in decorative shapes, 3 per row</ai-description>
             </t>
             <t t-snippet="website.s_company_team_detail" string="Team Detail" group="people">
                 <keywords>organization, company, people, members, staffs, profiles, bios, roles, personnel, crew, patterned, trendy, social</keywords>
+                <ai-description>3-column team grid with photos, roles and social links</ai-description>
             </t>
             <t t-snippet="website.s_company_team_spotlight" string="Team Spotlight" group="people">
                 <keywords>organization, company, people, members, staffs, profiles, bios, roles, personnel, crew, patterned</keywords>
+                <ai-description>4 spotlight team cards with large portraits</ai-description>
             </t>
             <t t-snippet="website.s_company_team_grid" string="Company Team Grid" group="people">
                 <keywords>organization, structure, people, team, name, role, position, image, portrait, photo, employees, shapes</keywords>
+                <ai-description>Team photo grid (grid mode) with 6 portraits</ai-description>
             </t>
             <t t-snippet="website.s_company_team_card" string="Card Team" group="people">
                 <keywords>organization, structure, people, team, name, role, position, image, portrait, photo, employees, shapes</keywords>
+                <ai-description>Team member cards with photos, 4 per row</ai-description>
             </t>
             <t t-snippet="website.s_references" string="References" group="people">
                 <keywords>customers, clients, sponsors, partners, supporters, case-studies, collaborators, associations, associates, testimonials, endorsements</keywords>
+                <ai-description>Partner/client logo strip; quick social proof</ai-description>
             </t>
             <t t-snippet="website.s_references_lite" string="References Lite" group="people">
                 <keywords>logos, brands, clients, partners, sponsors, customers, trust, social proof, trusted by</keywords>
+                <ai-description>Minimal single row of brand logos; lightest social proof</ai-description>
             </t>
             <t t-snippet="website.s_references_social" string="References Social" group="people">
                 <keywords>customers, clients, sponsors, partners, supporters, case-studies, collaborators, associations, associates, testimonials, endorsements, social</keywords>
+                <ai-description>Logo grid with social links</ai-description>
             </t>
             <t t-snippet="website.s_references_grid" string="References Grid" group="people">
                 <keywords>customers, clients, sponsors, partners, supporters, case-studies, collaborators, associations, associates, testimonials, endorsements</keywords>
+                <ai-description>Logo/reference grid with a CTA (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_references_tiles" string="References Tiles" group="people">
                 <keywords>customers, clients, sponsors, partners, logos, brand, supporters, collaborators, associations, trusted, references, tiles</keywords>
+                <ai-description>Brand logo tiles in a grid (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_quotes_carousel" string="Quotes" group="people" label="Carousel">
                 <keywords>cite, testimonials, endorsements, reviews, feedback, statements, references, sayings, comments, appreciations, citations, carousel</keywords>
+                <ai-description>Testimonial slider: portrait, quote and background image per slide</ai-description>
             </t>
             <t t-snippet="website.s_quotes_carousel_minimal" string="Quotes Minimal" group="people" label="Carousel">
                 <keywords>cite, testimonials, endorsements, reviews, feedback, statements, references, sayings, comments, appreciations, citations, carousel</keywords>
+                <ai-description>Minimal testimonial slider, mostly typography</ai-description>
             </t>
             <t t-snippet="website.s_reviews_wall" string="Reviews Wall" group="people">
                 <keywords>cite, testimonials, endorsements, reviews, feedback, statements, references, sayings, comments, appreciations, citations</keywords>
+                <ai-description>3-column wall of review cards with star ratings; dense social proof</ai-description>
             </t>
             <t t-snippet="website.s_quotes_carousel_compact" string="Quotes Compact" group="people" label="Carousel">
                 <keywords>cite, testimonials, endorsements, reviews, feedback, statements, references, sayings, comments, appreciations, citations, carousel</keywords>
+                <ai-description>Compact quote slider with small portraits</ai-description>
             </t>
 
             <!-- Text group -->
             <t t-snippet="website.s_title" string="Title" group="text">
                 <keywords>heading, h1, headline, header, main, top, caption, introductory, principal, key</keywords>
+                <ai-description>Standalone section heading</ai-description>
             </t>
             <t t-snippet="website.s_text_block" string="Text" group="text">
                 <keywords>content, paragraph, article, body, description, information</keywords>
+                <ai-description>Plain paragraph text block</ai-description>
             </t>
             <t t-snippet="website.s_text_block_split" string="Text Split" group="text">
                 <keywords>paragraph, description, information, split, split text, split content, story, typography, two columns, minimal, narrative, editorial</keywords>
+                <ai-description>Paragraph split over two text columns; editorial rhythm</ai-description>
             </t>
             <t t-snippet="website.s_title_split" string="Title Split" group="text">
                 <keywords>heading, headline, header, split, split text, split content, two columns, description, intro, section header, typography, large text</keywords>
+                <ai-description>Big title beside an intro paragraph; section header</ai-description>
             </t>
             <t t-snippet="website.s_text_bold" string="Text Bold" group="text">
                 <keywords>bold, bold text, paragraph, statement, large text, tagline, typography, impactful, mission statement, quote, big text</keywords>
+                <ai-description>One bold oversized statement paragraph; manifesto-style accent</ai-description>
             </t>
             <t t-snippet="website.s_awards_list" string="Awards List" group="text">
                 <keywords>awards, achievements, prizes, honors, recognition, list, accomplishments</keywords>
+                <ai-description>Awards/recognitions list rows with a CTA</ai-description>
             </t>
             <t t-snippet="website.s_faq_collapse" string="FAQ Block" group="text">
                 <keywords>common answers, common questions</keywords>
+                <ai-description>Collapsible FAQ accordion with side title</ai-description>
             </t>
             <t t-snippet="website.s_faq_list" string="FAQ List" group="text">
                 <keywords>questions, answers, common answers, common questions, faq, help, support, information, knowledge, guide, troubleshooting, assistance, columns, QA</keywords>
+                <ai-description>FAQ as columns of question/answer text</ai-description>
             </t>
             <t t-snippet="website.s_table_of_content" string="Table of Content" group="text" label="Table of Contents">
                 <keywords>navigation, index, outline, chapters, sections, overview, menu, tab</keywords>
+                <ai-description>Side navigation menu with content sections; long-form documentation</ai-description>
             </t>
             <t t-snippet="website.s_faq_horizontal" string="Topics List" group="text">
                 <keywords>questions, answers, common answers, common questions, faq, help, support, information, knowledge, guide, troubleshooting, assistance, QA, terms of services</keywords>
+                <ai-description>Topics list in horizontal rows with anchors; terms or help index</ai-description>
             </t>
             <t t-snippet="website.s_product_catalog" string="Pricelist" group="text">
                 <keywords>menu, pricing, shop, table, cart, product, cost, charges, fees, rates, prices, expenses</keywords>
+                <ai-description>Restaurant-style price list in two columns on a background</ai-description>
             </t>
             <t t-snippet="website.s_pricelist_cafe" string="Pricelist Cafe" group="text">
                 <keywords>menu, pricing, shop, table, cart, product, cost, charges, fees, rates, prices, expenses, columns</keywords>
+                <ai-description>Cafe menu price columns with one image and shape</ai-description>
             </t>
             <t t-snippet="website.s_pricelist_boxed" string="Pricelist Boxed" group="text">
                 <keywords>menu, pricing, shop, table, cart, product, cost, charges, fees, rates, prices, expenses</keywords>
+                <ai-description>Boxed price list on a parallax background image</ai-description>
             </t>
 
             <!-- Contact & Forms group -->
             <t t-snippet="website.s_title_form" string="Title - Form" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
                 <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request</keywords>
+                <ai-description>Title above a contact form; simple conversion section</ai-description>
             </t>
-            <t t-snippet="website.s_opening_hours" string="Opening Hours" group="contact_and_forms"/>
-            <t t-snippet="website.s_opening_hours_alt" string="Opening Hours Alt" group="contact_and_forms"/>
+            <t t-snippet="website.s_opening_hours" string="Opening Hours" group="contact_and_forms">
+                <ai-description>Opening hours over a parallax image (grid mode)</ai-description>
+            </t>
+            <t t-snippet="website.s_opening_hours_alt" string="Opening Hours Alt" group="contact_and_forms">
+                <ai-description>Opening hours beside an image</ai-description>
+            </t>
             <t t-snippet="website.s_hours_and_place" string="Hours and Place" group="contact_and_forms" label="Map">
                 <keywords>store, locator, map, address, hours, opening hours, directions, location, visit us, find us, contact</keywords>
+                <ai-description>Address, opening hours and directions band</ai-description>
             </t>
-            <t t-snippet="website.s_contact_info" string="Contact Info" group="contact_and_forms"/>
+            <t t-snippet="website.s_contact_info" string="Contact Info" group="contact_and_forms">
+                <ai-description>Contact details grid with icons (address, phone, email)</ai-description>
+            </t>
             <t t-snippet="website.s_website_form_overlay" string="Form Overlay" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
                 <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request</keywords>
+                <ai-description>Contact form overlaid on a background image</ai-description>
             </t>
             <t t-snippet="website.s_website_form_bold" string="Form Bold" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
                 <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request</keywords>
+                <ai-description>Bold full-width contact form with an icon info row</ai-description>
             </t>
             <t t-snippet="website.s_website_form_info" string="Form Info" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
                 <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request, image, picture, photo, illustration, media, visual, company, organization, address, phone, email, location, get-in-touch</keywords>
+                <ai-description>Contact form beside company info and an image (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_website_form_cover" string="Form Cover" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
                 <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request, image, picture, photo, illustration, media, visual</keywords>
+                <ai-description>Contact form on a background-image cover</ai-description>
             </t>
             <t t-snippet="website.s_form_aside" string="Form Aside" t-forbid-sanitize="form" group="contact_and_forms" label="Form">
                 <keywords>contact, collect, submission, input, fields, questionnaire, survey, registration, request, image, picture, photo, illustration, media, visual, get-in-touch</keywords>
+                <ai-description>Contact form beside one image</ai-description>
             </t>
             <t t-snippet="website.s_age_verification_popup" string="Age Verification Popup" t-forbid-sanitize="form" group="contact_and_forms" label="Popup">
                 <keywords>consent, confirmation, restriction, adult, eligibility, validation</keywords>
+                <ai-description>Age-gate popup with confirm/deny buttons</ai-description>
             </t>
 
             <!-- Catalog group -->
             <t t-snippet="website.s_floating_blocks" string="Floating Cards" group="catalog">
                 <keywords>hero, animation, animated, cards, float, stacked, promo, categories, ecommerce, shop</keywords>
+                <ai-description>Animated hero of stacked floating cards (parallax); ecommerce categories showcase</ai-description>
             </t>
             <t t-snippet="website.s_attributes_horizontal" string="Horizontal Attributes" group="catalog">
                 <keywords>services, icons, features, characteristic, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion, overview, specifications</keywords>
+                <ai-description>Horizontal strip of attributes/specs with small images</ai-description>
             </t>
             <t t-snippet="website.s_product_list" string="Items" group="catalog">
                 <keywords>shop, group, list, card, cart, products, inventory, catalog, merchandise, goods</keywords>
+                <ai-description>6-item product grid with images; shop-style listing</ai-description>
             </t>
             <t t-snippet="website.s_bento_grid" string="Bento Grid" group="catalog">
                 <keywords>cards, shop, grid, column, cart, product, ecommerce, categories, highlights, pictures, photos, illustration, media, visuals, intro, home, coupon, code, description, rounded, card, call to action, cta, marketing, showcase, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <ai-description>Bento grid of mixed-size tiles with images and CTA; modern commerce showcase</ai-description>
             </t>
             <t t-snippet="website.s_bento_banner" string="Bento Banner" group="catalog">
                 <keywords>hero, jumbotron, headline, header, introduction, banner, call to action, cta, button, highlight, showcase, spotlight, sober, trendy, design, picture, photo, illustration, visual, description, containers, layouts, product, buy</keywords>
+                <ai-description>Bento hero banner mixing image tiles and CTAs (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_banner_product" string="Collection Banner" group="catalog">
                 <keywords>hero, jumbotron, headline, header, shop, cart, product, ecommerce, picture, photo, illustration, media, visual, intro, home, content, description, call to action, cta, minimalist, marketing</keywords>
+                <ai-description>Product collection banner: parallax image beside text (grid mode)</ai-description>
             </t>
             <t t-snippet="website.s_bento_block" string="Bento Block" group="catalog">
                 <keywords>hero, jumbotron, headline, header, shop, cart, product, ecommerce, picture, photo, illustration, media, visual, intro, home, content, description, rounded, card, call to action, cta, minimalist, marketing</keywords>
+                <ai-description>Rounded bento block: product image, text and CTA</ai-description>
             </t>
             <t t-snippet="website.s_ecomm_categories_showcase" string="Categories Showcase" group="catalog">
                 <keywords>shop, cart, product, categories, ecommerce, e-commerce, cards, trendy, column, layouts, picture, photo, illustration, media, visual</keywords>
+                <ai-description>Category showcase cards with buttons over background images</ai-description>
             </t>
             <t t-snippet="website.s_banner_categories" string="Banner Categories" group="catalog">
                 <keywords>hero, categories, ecommerce, shop, illustration, buy, photos, shop, product, grid, pictures</keywords>
+                <ai-description>Hero banner with a category image grid and background shape</ai-description>
             </t>
             <t t-snippet="website.s_attributes_vertical" string="Vertical Attributes" group="catalog">
                 <keywords>services, icons, features, characteristic, specs, advantages, functionalities, exhibit, details, capabilities, attributes, promotion, overview, specifications</keywords>
+                <ai-description>Vertical list of attributes/specs with images</ai-description>
             </t>
             <t t-snippet="website.s_announcement_scroll" string="Announcement Scroll" group="catalog" label="Scroll">
                 <keywords>banner, announcement, scrolling text, trust indicators, info bar, site-wide banner, minimal design, trendy, bold, presentation</keywords>
+                <ai-description>Full-width scrolling marquee text band; trust indicators or announcements</ai-description>
             </t>
             <t t-snippet="website.s_bento_grid_avatars" string="Bento Avatars" group="catalog">
                 <keywords>cards, shop, grid, avatars, column, cart, product, ecommerce, categories, highlights, pictures, photos, illustration, media, visuals, intro, home, coupon, code, description, rounded, card, call to action, cta, marketing, showcase, mosaic, collage, arrangement, collection, visual-grid</keywords>
+                <ai-description>Bento grid mixing avatars and image tiles with CTA</ai-description>
             </t>
             <t id="sale_products_hook"/>
 
@@ -561,20 +727,27 @@
             <t t-snippet="website.s_instagram_page" string="Instagram Page" group="social" label="Instagram"
                 t-image-preview="/website/static/src/img/snippets_previews/s_instagram_preview.webp">
                 <keywords>social media, ig, feed</keywords>
+                <ai-description>Embedded Instagram feed</ai-description>
             </t>
             <t t-snippet="website.s_facebook_page" string="Facebook Page" group="social" label="Facebook"
                 t-image-preview="/website/static/src/img/snippets_previews/s_facebook_preview.webp">
                 <keywords>social media, fb, feed</keywords>
+                <ai-description>Embedded Facebook page widget</ai-description>
             </t>
             <t t-snippet="website.s_whatsapp" string="Whatsapp" group="social" label="Whatsapp"
                     t-image-preview="/website/static/src/img/snippets_previews/s_whatsapp.webp">
                     <keywords>cta, whatsapp, social, e-commerce, selling-points, prompt, form, chatbot, call-to-action, assistant, assistance, customer, 24, 7, support, talk</keywords>
+                    <ai-description>WhatsApp contact button block</ai-description>
             </t>
             <t t-set="google_maps_api_key" t-value="env.website.google_maps_api_key"/>
             <t t-if="debug or not google_maps_api_key" t-snippet="website.s_map" string="Map" group="social" label="Map"
-                t-image-preview="/website/static/src/img/snippets_previews/s_map_preview.png"/>
+                t-image-preview="/website/static/src/img/snippets_previews/s_map_preview.png">
+                <ai-description>Embedded map with the company address</ai-description>
+            </t>
             <t t-if="debug or google_maps_api_key" t-snippet="website.s_google_map" string="Google Map" group="social" label="Google Map"
-                t-image-preview="/website/static/src/img/snippets_previews/s_map_preview.png"/>
+                t-image-preview="/website/static/src/img/snippets_previews/s_map_preview.png">
+                <ai-description>Embedded Google map with the company address</ai-description>
+            </t>
 
             <!-- Debug group -->
             <t t-if="debug" t-snippet="website.s_dynamic_snippet" string="Dynamic Snippet" group="debug"
@@ -587,33 +760,79 @@
 
         <!-- Inner snippets -->
         <snippets id="snippet_content" string="Inner content">
-            <t t-snippet="website.s_inline_text" string="Text" t-thumbnail="/website/static/src/img/snippets_thumbs/s_inline_text.svg" t-grid-column-span="4"/>
-            <t t-snippet="website.s_button" string="Button" t-thumbnail="/website/static/src/img/snippets_thumbs/s_button.svg" t-grid-column-span="3"/>
-            <t t-snippet="website.s_hr" string="Separator" t-thumbnail="/website/static/src/img/snippets_thumbs/s_hr.svg"/>
-            <t t-snippet="website.s_image" string="Image" t-thumbnail="/website/static/src/img/snippets_thumbs/s_image.svg"/>
-            <t t-snippet="website.s_video" string="Video" t-thumbnail="/website/static/src/img/snippets_thumbs/s_video.svg"/>
-            <t t-snippet="website.s_icon" string="Icon" t-thumbnail="/website/static/src/img/snippets_thumbs/s_icon.svg"/>
-            <t t-snippet="website.s_accordion" string="Accordion" t-thumbnail="/website/static/src/img/snippets_thumbs/s_accordion.svg"/>
-            <t t-snippet="website.s_alert" string="Alert" t-thumbnail="/website/static/src/img/snippets_thumbs/s_alert.svg"/>
-            <t t-snippet="website.s_icon_list" string="Icon List" t-thumbnail="/website/static/src/img/snippets_thumbs/s_icon_list.svg" t-grid-column-span="4"/>
-            <t t-snippet="website.s_rating" string="Rating" t-thumbnail="/website/static/src/img/snippets_thumbs/s_rating.svg" t-grid-column-span="3"/>
-            <t t-snippet="website.s_card" string="Card" t-thumbnail="/website/static/src/img/snippets_thumbs/s_card.svg"/>
-            <t t-snippet="website.s_share" string="Share" t-thumbnail="/website/static/src/img/snippets_thumbs/s_share.svg"/>
-            <t t-snippet="website.s_social_media" string="Social Media" t-thumbnail="/website/static/src/img/snippets_thumbs/s_social_media.svg"/>
+            <t t-snippet="website.s_inline_text" string="Text" t-thumbnail="/website/static/src/img/snippets_thumbs/s_inline_text.svg" t-grid-column-span="4">
+                <ai-description>Inline text block</ai-description>
+            </t>
+            <t t-snippet="website.s_button" string="Button" t-thumbnail="/website/static/src/img/snippets_thumbs/s_button.svg" t-grid-column-span="3">
+                <ai-description>Standalone button</ai-description>
+            </t>
+            <t t-snippet="website.s_hr" string="Separator" t-thumbnail="/website/static/src/img/snippets_thumbs/s_hr.svg">
+                <ai-description>Horizontal separator line</ai-description>
+            </t>
+            <t t-snippet="website.s_image" string="Image" t-thumbnail="/website/static/src/img/snippets_thumbs/s_image.svg">
+                <ai-description>Single image</ai-description>
+            </t>
+            <t t-snippet="website.s_video" string="Video" t-thumbnail="/website/static/src/img/snippets_thumbs/s_video.svg">
+                <ai-description>Embedded video player</ai-description>
+            </t>
+            <t t-snippet="website.s_icon" string="Icon" t-thumbnail="/website/static/src/img/snippets_thumbs/s_icon.svg">
+                <ai-description>Single icon</ai-description>
+            </t>
+            <t t-snippet="website.s_accordion" string="Accordion" t-thumbnail="/website/static/src/img/snippets_thumbs/s_accordion.svg">
+                <ai-description>Collapsible accordion items</ai-description>
+            </t>
+            <t t-snippet="website.s_alert" string="Alert" t-thumbnail="/website/static/src/img/snippets_thumbs/s_alert.svg">
+                <ai-description>Alert/notice box with icon</ai-description>
+            </t>
+            <t t-snippet="website.s_icon_list" string="Icon List" t-thumbnail="/website/static/src/img/snippets_thumbs/s_icon_list.svg" t-grid-column-span="4">
+                <ai-description>Bullet list with icons; checklist</ai-description>
+            </t>
+            <t t-snippet="website.s_rating" string="Rating" t-thumbnail="/website/static/src/img/snippets_thumbs/s_rating.svg" t-grid-column-span="3">
+                <ai-description>Star rating row</ai-description>
+            </t>
+            <t t-snippet="website.s_card" string="Card" t-thumbnail="/website/static/src/img/snippets_thumbs/s_card.svg">
+                <ai-description>Content card with image, title and text</ai-description>
+            </t>
+            <t t-snippet="website.s_share" string="Share" t-thumbnail="/website/static/src/img/snippets_thumbs/s_share.svg">
+                <ai-description>Social share buttons</ai-description>
+            </t>
+            <t t-snippet="website.s_social_media" string="Social Media" t-thumbnail="/website/static/src/img/snippets_thumbs/s_social_media.svg">
+                <ai-description>Social network icon links</ai-description>
+            </t>
             <t t-snippet="website.s_facebook_page" string="Facebook" t-thumbnail="/website/static/src/img/snippets_thumbs/s_facebook_page.svg"
-                t-drag-image-preview="/website/static/src/img/snippets_previews/s_facebook_preview.webp"/>
+                t-drag-image-preview="/website/static/src/img/snippets_previews/s_facebook_preview.webp">
+                <ai-description>Embedded Facebook page widget</ai-description>
+            </t>
             <t t-snippet="website.s_instagram_page" string="Instagram" t-thumbnail="/website/static/src/img/snippets_thumbs/s_instagram_page.svg"
-                t-drag-image-preview="/website/static/src/img/snippets_previews/s_instagram_preview.webp"/>
-            <t t-snippet="website.s_searchbar_input" string="Search" t-thumbnail="/website/static/src/img/snippets_thumbs/s_searchbar_inline.svg" t-forbid-sanitize="form" t-grid-column-span="5"/>
+                t-drag-image-preview="/website/static/src/img/snippets_previews/s_instagram_preview.webp">
+                <ai-description>Embedded Instagram feed</ai-description>
+            </t>
+            <t t-snippet="website.s_searchbar_input" string="Search" t-thumbnail="/website/static/src/img/snippets_thumbs/s_searchbar_inline.svg" t-forbid-sanitize="form" t-grid-column-span="5">
+                <ai-description>Inline search input</ai-description>
+            </t>
             <t id="mass_mailing_newsletter_hook"/>
             <t id="mail_group_hook"/>
-            <t t-snippet="website.s_text_highlight" string="Text Highlight" t-thumbnail="/website/static/src/img/snippets_thumbs/s_text_highlight.svg"/>
-            <t t-snippet="website.s_chart" string="Chart" t-thumbnail="/website/static/src/img/snippets_thumbs/s_chart.svg"/>
-            <t t-snippet="website.s_progress_bar" string="Progress Bar" t-thumbnail="/website/static/src/img/snippets_thumbs/s_progress_bar.svg" t-grid-column-span="4"/>
-            <t t-snippet="website.s_badge" string="Badge" t-thumbnail="/website/static/src/img/snippets_thumbs/s_badge.svg" t-grid-column-span="2"/>
-            <t t-snippet="website.s_cta_badge" string="CTA Badge" t-thumbnail="/website/static/src/img/snippets_thumbs/s_cta_badge.svg" t-grid-column-span="5"/>
-            <t t-snippet="website.s_avatars" string="Avatars" t-thumbnail="/website/static/src/img/snippets_thumbs/s_avatars.svg" t-grid-column-span="4"/>
-            <t t-snippet="website.s_blockquote" string="Blockquote" t-thumbnail="/website/static/src/img/snippets_thumbs/s_blockquote.svg" t-grid-column-span="5"/>
+            <t t-snippet="website.s_text_highlight" string="Text Highlight" t-thumbnail="/website/static/src/img/snippets_thumbs/s_text_highlight.svg">
+                <ai-description>Text line with a decorative highlight effect</ai-description>
+            </t>
+            <t t-snippet="website.s_chart" string="Chart" t-thumbnail="/website/static/src/img/snippets_thumbs/s_chart.svg">
+                <ai-description>Chart/graph (bar, pie, line) with editable data</ai-description>
+            </t>
+            <t t-snippet="website.s_progress_bar" string="Progress Bar" t-thumbnail="/website/static/src/img/snippets_thumbs/s_progress_bar.svg" t-grid-column-span="4">
+                <ai-description>Progress bar with label</ai-description>
+            </t>
+            <t t-snippet="website.s_badge" string="Badge" t-thumbnail="/website/static/src/img/snippets_thumbs/s_badge.svg" t-grid-column-span="2">
+                <ai-description>Small badge/label</ai-description>
+            </t>
+            <t t-snippet="website.s_cta_badge" string="CTA Badge" t-thumbnail="/website/static/src/img/snippets_thumbs/s_cta_badge.svg" t-grid-column-span="5">
+                <ai-description>Pill badge with a short CTA link</ai-description>
+            </t>
+            <t t-snippet="website.s_avatars" string="Avatars" t-thumbnail="/website/static/src/img/snippets_thumbs/s_avatars.svg" t-grid-column-span="4">
+                <ai-description>Overlapping avatar row; compact social proof</ai-description>
+            </t>
+            <t t-snippet="website.s_blockquote" string="Blockquote" t-thumbnail="/website/static/src/img/snippets_thumbs/s_blockquote.svg" t-grid-column-span="5">
+                <ai-description>Styled quotation with attribution</ai-description>
+            </t>
             <!--
             Note: this inner snippet is still allowed to be dropped as a
             main snippet. Indeed, this handles the fact that the snippet
@@ -622,11 +841,19 @@
             it in the snippets modal anymore, and just *used* as an inner
             snippet by other snippets in there.
             -->
-            <t t-snippet="website.s_website_form" string="Form" t-thumbnail="/website/static/src/img/snippets_thumbs/s_website_form.svg" t-forbid-sanitize="form"/>
-            <t t-snippet="website.s_countdown" string="Countdown" t-thumbnail="/website/static/src/img/snippets_thumbs/s_countdown.svg"/>
+            <t t-snippet="website.s_website_form" string="Form" t-thumbnail="/website/static/src/img/snippets_thumbs/s_website_form.svg" t-forbid-sanitize="form">
+                <ai-description>Generic form (contact or custom fields)</ai-description>
+            </t>
+            <t t-snippet="website.s_countdown" string="Countdown" t-thumbnail="/website/static/src/img/snippets_thumbs/s_countdown.svg">
+                <ai-description>Countdown timer section for launches or events</ai-description>
+            </t>
             <t t-snippet="website.s_embed_code" string="Embed Code" t-thumbnail="/website/static/src/img/snippets_thumbs/s_embed_code.svg" t-forbid-sanitize="true"/>
-            <t t-if="debug or not google_maps_api_key" t-snippet="website.s_map" string="Map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_map.svg"/>
-            <t t-if="debug or google_maps_api_key" t-snippet="website.s_google_map" string="Google Map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_google_map.svg"/>
+            <t t-if="debug or not google_maps_api_key" t-snippet="website.s_map" string="Map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_map.svg">
+                <ai-description>Embedded map with the company address</ai-description>
+            </t>
+            <t t-if="debug or google_maps_api_key" t-snippet="website.s_google_map" string="Google Map" t-thumbnail="/website/static/src/img/snippets_thumbs/s_google_map.svg">
+                <ai-description>Embedded Google map with the company address</ai-description>
+            </t>
             <t id="event_speaker_bio_hook"/>
             <t id="snippet_donation_inline_hook"/>
             <t id="snippet_add_to_cart_hook"/>
