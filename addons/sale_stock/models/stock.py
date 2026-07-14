@@ -3,7 +3,7 @@
 
 from collections import defaultdict
 
-from odoo import api, Command, fields, models
+from odoo import Command, api, fields, models
 from odoo.tools.sql import column_exists, create_column
 
 
@@ -214,6 +214,10 @@ class StockPicking(models.Model):
     def _can_return(self):
         self.ensure_one()
         return super()._can_return() or self.sale_id
+
+    def action_open_adjustment(self):
+        self.ensure_one()
+        return self.move_ids.mapped('product_id').action_open_quants()
 
 
 class StockLot(models.Model):
