@@ -12,6 +12,7 @@
                     <div class="subpads d-flex flex-column gap-2">
                         <Numpad t-if="!this.currentOrder?.isEmpty() and this.pos.getOrder()?.uiState.selected_orderline_uuid" class="'d-grid'" buttons="this.getNumpadButtons()" onClick.bind="this.onNumpadClick"/>
                         <ActionpadWidget
+                            t-if="this.currentOrder"
                             order="this.currentOrder"
                             onClickMore.bind="this.displayAllControlPopup"
                             actionName.translate="Payment"
@@ -66,7 +67,7 @@
                 </div>
                 <t t-if="this.ui.isSmall">
                     <div class="switchpane d-flex gap-2 p-2 border-top bg-view">
-                        <button t-if="!this.pos.scanning" class="btn-switchpane pay-button btn btn-lg flex-grow-1" t-attf-class="{{ this.currentOrder.isEmpty() ? 'btn-secondary' : 'btn-primary' }}" t-on-click="() => this.pos.pay()">
+                        <button t-if="!this.pos.scanning" class="btn-switchpane pay-button btn btn-lg flex-grow-1" t-attf-class="{{ this.currentOrder?.isEmpty() ? 'btn-secondary' : 'btn-primary' }}" t-on-click="() => this.pos.pay()">
                             <span class="d-block">Pay</span>
                             <span t-out="this.total" />
                         </button>

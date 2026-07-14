@@ -2736,7 +2736,7 @@ export class PosStore extends WithLazyGetterTrap {
             orderUuid: this.getOrder().uuid,
             fastPaymentMethod: paymentMethod,
         });
-        await validation.validateOrder(false);
+        return await validation.validateOrder(false);
     }
 
     clickSaveOrder() {

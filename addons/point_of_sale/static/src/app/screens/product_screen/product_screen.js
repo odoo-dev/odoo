@@ -1,4 +1,4 @@
-import { onWillRender, useRef } from "@web/owl2/utils";
+import { useRef } from "@web/owl2/utils";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
@@ -7,7 +7,17 @@ import { useBarcodeReader } from "@point_of_sale/app/hooks/barcode_reader_hook";
 import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { user } from "@web/core/user";
-import { Component, onMounted, onWillUnmount, computed, proxy, props, t } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillUnmount,
+    computed,
+    proxy,
+    props,
+    signal,
+    t,
+    useEffect,
+} from "@odoo/owl";
 import { CategorySelector } from "@point_of_sale/app/components/category_selector/category_selector";
 import { Input } from "@point_of_sale/app/components/inputs/input/input";
 import {
@@ -51,6 +61,7 @@ export class ProductScreen extends Component {
     props = props({
         orderUuid: t.string(),
     });
+    isValidatingOrder = signal(false);
 
     setup() {
         this.pos = usePos();
@@ -72,9 +83,13 @@ export class ProductScreen extends Component {
             this.numberBuffer.reset();
         });
 
-        onWillRender(() => {
+        useEffect(() => {
             // If its a shared order it can be paid from another POS
-            if (this.currentOrder?.state !== "draft" && !this.isValidatingOrder) {
+            if (
+                this.currentOrder &&
+                this.currentOrder.state !== "draft" &&
+                !this.isValidatingOrder()
+            ) {
                 this.pos.addNewOrder();
             }
         });
@@ -116,14 +131,15 @@ export class ProductScreen extends Component {
         this.onScroll = debounce(this.longPressHandlers.onScroll, 200, { leading: true });
 
         Object.defineProperty(this.state, "quantityByProductTmplId", {
-            get: computed(() =>
-                this.currentOrder?.lines?.reduce((acc, ol) => {
-                    if (!ol.combo_parent_id) {
-                        const productTmplId = ol.product_id.product_tmpl_id.id;
-                        acc[productTmplId] = (acc[productTmplId] || 0) + ol.qty;
-                    }
-                    return acc;
-                }, {})
+            get: computed(
+                () =>
+                    this.currentOrder?.lines?.reduce((acc, ol) => {
+                        if (!ol.combo_parent_id) {
+                            const productTmplId = ol.product_id.product_tmpl_id.id;
+                            acc[productTmplId] = (acc[productTmplId] || 0) + ol.qty;
+                        }
+                        return acc;
+                    }, {}) || {}
             ),
         });
 
@@ -477,11 +493,15 @@ export class ProductScreen extends Component {
     }
 
     async fastValidate(paymentMethod) {
+        this.isValidatingOrder.set(true);
         try {
-            this.isValidatingOrder = true;
-            await this.pos.validateOrderFast(paymentMethod);
-        } finally {
-            this.isValidatingOrder = false;
+            const validated = await this.pos.validateOrderFast(paymentMethod);
+            if (validated !== true) {
+                this.isValidatingOrder.set(false);
+            }
+        } catch (error) {
+            this.isValidatingOrder.set(false);
+            throw error;
         }
     }
 
