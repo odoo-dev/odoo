@@ -127,7 +127,6 @@ class TestMrpValuationStandard(TestBomPriceCommon):
     def test_fifo_avco_2(self):
         self.glass.categ_id = self.category_fifo
         self.dining_table.categ_id = self.category_avco
-        self.dining_table.categ_id = self.category_fifo
 
         self._make_in_move(self.glass, 1, 10)
         self._make_in_move(self.glass, 1, 20)
@@ -305,7 +304,7 @@ class TestMrpValuationStandard(TestBomPriceCommon):
         """Create move into/out of a production location, test we create account
         entries with the Production Cost account.
         """
-        self.dining_table.categ_id.property_cost_method = 'standard'
+        self.dining_table.categ_id = self.category_standard_auto
 
         # move into production location
         self._make_out_move(self.dining_table, 1, location_dest_id=self.prod_location.id)
