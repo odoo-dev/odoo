@@ -1,0 +1,349 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data>
+        <!-- QWeb template for the original invoice submission (InvoiceRequest) -->
+        <template id="template_invoice_fisicalization" name="Request for original invoice">
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+                <soapenv:Body>
+                    <tns:RacunZahtjev xmlns:tns="http://www.apis-it.hr/fin/2012/types/f73"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="RacunZahtjev"
+                        xsi:schemaLocation="http://www.apis-it.hr/fin/2012/types/f73 ../schema/FiskalizacijaSchema.xsd">
+                        <tns:Zaglavlje>
+                            <tns:IdPoruke t-out="id_poruke"/>
+                            <tns:DatumVrijeme t-out="datum_vrijeme"/>
+                        </tns:Zaglavlje>
+                        <tns:Racun>
+                            <tns:Oib t-out="oib"/>
+                            <tns:USustPdv t-out="u_sust_pdv"/>
+                            <tns:DatVrijeme t-out="dat_vrijeme"/>
+                            <tns:OznSlijed t-out="ozn_slijed"/>
+                            <tns:BrRac>
+                                <tns:BrOznRac t-out="br_ozn_rac"/>
+                                <tns:OznPosPr t-out="ozn_pos_pr"/>
+                                <tns:OznNapUr t-out="ozn_nap_ur"/>
+                            </tns:BrRac>
+                            <t t-if="pdv">
+                                <tns:Pdv>
+                                    <t t-foreach="pdv" t-as="pdv">
+                                        <tns:Porez>
+                                            <tns:Stopa t-out="pdv['stopa']"/>
+                                            <tns:Osnovica t-out="pdv['osnovica']"/>
+                                            <tns:Iznos t-out="pdv['iznos']"/>
+                                        </tns:Porez>
+                                    </t>
+                                </tns:Pdv>
+                            </t>
+                            <t t-if="pnp">
+                                <tns:Pnp>
+                                    <t t-foreach="pnp" t-as="pnp">
+                                        <tns:Porez>
+                                            <tns:Stopa t-out="pnp['stopa']"/>
+                                            <tns:Osnovica t-out="pnp['osnovica']"/>
+                                            <tns:Iznos t-out="pnp['iznos']"/>
+                                        </tns:Porez>
+                                    </t>
+                                </tns:Pnp>
+                            </t>
+                            <t t-if="ostali_por">
+                                <tns:OstaliPor>
+                                    <t t-foreach="ostali_por" t-as="porez">
+                                        <tns:Porez>
+                                            <tns:Naziv t-out="porez['naziv']"/>
+                                            <tns:Stopa t-out="porez['stopa']"/>
+                                            <tns:Osnovica t-out="porez['osnovica']"/>
+                                            <tns:Iznos t-out="porez['iznos']"/>
+                                        </tns:Porez>
+                                    </t>
+                                </tns:OstaliPor>
+                            </t>
+                            <t t-if="iznos_oslobodjen_pdv">
+                                <tns:IznosOslobPdv t-out="iznos_oslobodjen_pdv"/>
+                            </t>
+                            <t t-if="iznos_marza">
+                                <tns:IznosMarza t-out="iznos_marza"/>
+                            </t>
+                            <t t-if="iznos_ne_podl_opor">
+                                <tns:IznosNePodlOpor t-out="iznos_ne_podl_opor"/>
+                            </t>
+                            <t t-if="naknade_items">
+                                <tns:Naknade>
+                                    <t t-foreach="naknade_items" t-as="naknada">
+                                        <tns:Naknada>
+                                            <tns:NazivN t-out="naknada['naziv']"/>
+                                            <tns:IznosN t-out="naknada['iznos']"/>
+                                        </tns:Naknada>
+                                    </t>
+                                </tns:Naknade>
+                            </t>
+                            <tns:IznosUkupno t-out="iznos_ukupno"/>
+                            <tns:NacinPlac t-out="nacin_plac"/>
+                            <tns:OibOper t-out="oib_oper"/>
+                            <tns:ZastKod t-out="zast_kod"/>
+                            <tns:NakDost t-out="nak_dost"/>
+                            <t t-if="paragon_br_rac">
+                                <tns:ParagonBrRac t-out="paragon_br_rac"/>
+                            </t>
+                            <t t-if="spec_namj">
+                                <tns:SpecNamj t-out="spec_namj"/>
+                            </t>
+                            <t t-if="recipient_oib">
+                                <tns:OibPrimatelja t-out="recipient_oib"/>
+                            </t>
+                        </tns:Racun>
+                    </tns:RacunZahtjev>
+                </soapenv:Body>
+            </soapenv:Envelope>
+        </template>
+
+
+        <!-- Template for payment method change request (ChangePaymentMethodRequest) -->
+        <template id="template_invoice_payment_method_change_request" name="Request to change the original payment method">
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+                <soapenv:Body>
+                    <tns:PromijeniNacPlacZahtjev xmlns:tns="http://www.apis-it.hr/fin/2012/types/f73"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="PromijeniNacPlacZahtjev"
+                        xsi:schemaLocation="http://www.apis-it.hr/fin/2012/types/f73 ../schema/FiskalizacijaSchema.xsd">
+                        <tns:Zaglavlje>
+                            <tns:IdPoruke t-out="id_poruke"/>
+                            <tns:DatumVrijeme t-out="datum_vrijeme"/>
+                        </tns:Zaglavlje>
+                        <tns:Racun>
+                            <tns:Oib t-out="oib"/>
+                            <tns:USustPdv t-out="u_sust_pdv"/>
+                            <tns:DatVrijeme t-out="dat_vrijeme"/>
+                            <tns:OznSlijed t-out="ozn_slijed"/>
+                            <tns:BrRac>
+                                <tns:BrOznRac t-out="br_ozn_rac"/>
+                                <tns:OznPosPr t-out="ozn_pos_pr"/>
+                                <tns:OznNapUr t-out="ozn_nap_ur"/>
+                            </tns:BrRac>
+                            <t t-if="pdv">
+                                <tns:Pdv>
+                                    <t t-foreach="pdv" t-as="pdv">
+                                        <tns:Porez>
+                                            <tns:Stopa t-out="pdv['stopa']"/>
+                                            <tns:Osnovica t-out="pdv['osnovica']"/>
+                                            <tns:Iznos t-out="pdv['iznos']"/>
+                                        </tns:Porez>
+                                    </t>
+                                </tns:Pdv>
+                            </t>
+                            <t t-if="pnp">
+                                <tns:Pnp>
+                                    <t t-foreach="pnp" t-as="pnp">
+                                        <tns:Porez>
+                                            <tns:Stopa t-out="pnp['stopa']"/>
+                                            <tns:Osnovica t-out="pnp['osnovica']"/>
+                                            <tns:Iznos t-out="pnp['iznos']"/>
+                                        </tns:Porez>
+                                    </t>
+                                </tns:Pnp>
+                            </t>
+                            <t t-if="ostali_por">
+                                <tns:OstaliPor>
+                                    <t t-foreach="ostali_por" t-as="porez">
+                                        <tns:Porez>
+                                            <tns:Naziv t-out="porez['naziv']"/>
+                                            <tns:Stopa t-out="porez['stopa']"/>
+                                            <tns:Osnovica t-out="porez['osnovica']"/>
+                                            <tns:Iznos t-out="porez['iznos']"/>
+                                        </tns:Porez>
+                                    </t>
+                                </tns:OstaliPor>
+                            </t>
+                            <t t-if="iznos_oslobodjen_pdv">
+                                <tns:IznosOslobPdv t-out="iznos_oslobodjen_pdv"/>
+                            </t>
+                            <t t-if="iznos_marza">
+                                <tns:IznosMarza t-out="iznos_marza"/>
+                            </t>
+                            <t t-if="iznos_ne_podl_opor">
+                                <tns:IznosNePodlOpor t-out="iznos_ne_podl_opor"/>
+                            </t>
+                            <t t-if="naknade_items">
+                                <tns:Naknade>
+                                    <t t-foreach="naknade_items" t-as="naknada">
+                                        <tns:Naknada>
+                                            <tns:NazivN t-out="naknada['naziv']"/>
+                                            <tns:IznosN t-out="naknada['iznos']"/>
+                                        </tns:Naknada>
+                                    </t>
+                                </tns:Naknade>
+                            </t>
+                            <tns:IznosUkupno t-out="iznos_ukupno"/>
+                            <tns:NacinPlac t-out="nacin_plac"/>
+                            <tns:OibOper t-out="oib_oper"/>
+                            <tns:ZastKod t-out="zast_kod"/>
+                            <tns:NakDost t-out="nak_dost"/>
+                            <t t-if="paragon_br_rac">
+                                <tns:ParagonBrRac t-out="paragon_br_rac"/>
+                            </t>
+                            <t t-if="spec_namj">
+                                <tns:SpecNamj t-out="spec_namj"/>
+                            </t>
+                            <t t-if="recipient_oib">
+                                <tns:OibPrimatelja t-out="recipient_oib"/>
+                            </t>
+                            
+                            <tns:PromijenjeniNacinPlac t-out="changed_payment_method"/>
+                            <t t-if="change_oib">
+                                <t t-if="changed_recipient_oib">
+                                    <tns:PromijenjeniOibPrimatelja t-out="changed_recipient_oib"/>
+                                </t>
+                                <t t-else="">
+                                    <tns:PromijenjeniOibPrimatelja/>
+                                </t>
+                            </t>
+                        </tns:Racun>
+                    </tns:PromijeniNacPlacZahtjev>
+                </soapenv:Body>
+            </soapenv:Envelope>
+        </template>
+
+        <!-- Template for checking fiscalization status (RequestVertification) -->
+        <template id="template_invoice_check_fisicalization_status" name="Request to check fiscalization status">
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+                <soapenv:Body>
+                    <tns:ProvjeraZahtjev xmlns:tns="http://www.apis-it.hr/fin/2012/types/f73"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" Id="ProvjeraZahtjev"
+                        xsi:schemaLocation="http://www.apis-it.hr/fin/2012/types/f73 ../schema/FiskalizacijaSchema.xsd">
+                        <tns:Zaglavlje>
+                            <tns:IdPoruke t-out="id_poruke"/>
+                            <tns:DatumVrijeme t-out="datum_vrijeme"/>
+                        </tns:Zaglavlje>
+                        <tns:Racun>
+                            <tns:Oib t-out="oib"/>
+                            <tns:USustPdv t-out="u_sust_pdv"/>
+                            <tns:DatVrijeme t-out="dat_vrijeme"/>
+                            <tns:OznSlijed t-out="ozn_slijed"/>
+                            <tns:BrRac>
+                                <tns:BrOznRac t-out="br_ozn_rac"/>
+                                <tns:OznPosPr t-out="ozn_pos_pr"/>
+                                <tns:OznNapUr t-out="ozn_nap_ur"/>
+                            </tns:BrRac>
+                            <t t-if="pdv">
+                                <tns:Pdv>
+                                    <t t-foreach="pdv" t-as="pdv">
+                                        <tns:Porez>
+                                            <tns:Stopa t-out="pdv['stopa']"/>
+                                            <tns:Osnovica t-out="pdv['osnovica']"/>
+                                            <tns:Iznos t-out="pdv['iznos']"/>
+                                        </tns:Porez>
+                                    </t>
+                                </tns:Pdv>
+                            </t>
+                            <t t-if="pnp">
+                                <tns:Pnp>
+                                    <t t-foreach="pnp" t-as="pnp">
+                                        <tns:Porez>
+                                            <tns:Stopa t-out="pnp['stopa']"/>
+                                            <tns:Osnovica t-out="pnp['osnovica']"/>
+                                            <tns:Iznos t-out="pnp['iznos']"/>
+                                        </tns:Porez>
+                                    </t>
+                                </tns:Pnp>
+                            </t>
+                            <t t-if="ostali_por">
+                                <tns:OstaliPor>
+                                    <t t-foreach="ostali_por" t-as="porez">
+                                        <tns:Porez>
+                                            <tns:Naziv t-out="porez['naziv']"/>
+                                            <tns:Stopa t-out="porez['stopa']"/>
+                                            <tns:Osnovica t-out="porez['osnovica']"/>
+                                            <tns:Iznos t-out="porez['iznos']"/>
+                                        </tns:Porez>
+                                    </t>
+                                </tns:OstaliPor>
+                            </t>
+                            <t t-if="iznos_oslobodjen_pdv">
+                                <tns:IznosOslobPdv t-out="iznos_oslobodjen_pdv"/>
+                            </t>
+                            <t t-if="iznos_marza">
+                                <tns:IznosMarza t-out="iznos_marza"/>
+                            </t>
+                            <t t-if="iznos_ne_podl_opor">
+                                <tns:IznosNePodlOpor t-out="iznos_ne_podl_opor"/>
+                            </t>
+                            <t t-if="naknade_items">
+                                <tns:Naknade>
+                                    <t t-foreach="naknade_items" t-as="naknada">
+                                        <tns:Naknada>
+                                            <tns:NazivN t-out="naknada['naziv']"/>
+                                            <tns:IznosN t-out="naknada['iznos']"/>
+                                        </tns:Naknada>
+                                    </t>
+                                </tns:Naknade>
+                            </t>
+                            <tns:IznosUkupno t-out="iznos_ukupno"/>
+                            <tns:NacinPlac t-out="nacin_plac"/>
+                            <tns:OibOper t-out="oib_oper"/>
+                            <tns:ZastKod t-out="zast_kod"/>
+                            <tns:NakDost t-out="nak_dost"/>
+                            <t t-if="paragon_br_rac">
+                                <tns:ParagonBrRac t-out="paragon_br_rac"/>
+                            </t>
+                            <t t-if="spec_namj">
+                                <tns:SpecNamj t-out="spec_namj"/>
+                            </t>
+                        </tns:Racun>
+                    </tns:ProvjeraZahtjev>
+                </soapenv:Body>
+            </soapenv:Envelope>
+        </template>
+
+        <!-- Rendered alone first, then C14N'd and signed to produce SignatureValue -->
+        <template id="template_invoice_fiscalization_signed_info" name="XML-DSig SignedInfo">
+            <SignedInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+                <CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                <Reference t-attf-URI="##{element_id}">
+                    <Transforms>
+                        <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                        <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                    </Transforms>
+                    <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <DigestValue>
+                        <t t-out="digest_value"/>
+                    </DigestValue>
+                </Reference>
+            </SignedInfo>
+        </template>
+
+        <template id="template_invoice_fiscalization_digital_signature" name="Digital signature template">
+            <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+                <SignedInfo>
+                    <CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                    <SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+                    <Reference t-attf-URI="##{element_id}">
+                        <Transforms>
+                            <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+                            <Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+                        </Transforms>
+                        <DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                        <DigestValue>
+                            <t t-out="digest_value"/>
+                        </DigestValue>
+                    </Reference>
+                </SignedInfo>
+                <SignatureValue>
+                    <t t-out="signature_value"/>
+                </SignatureValue>
+                <KeyInfo>
+                    <X509Data>
+                        <X509Certificate>
+                            <t t-out="certificate"/>
+                        </X509Certificate>
+                        <X509IssuerSerial>
+                            <X509IssuerName>
+                                <t t-out="issuer_name"/>
+                            </X509IssuerName>
+                            <X509SerialNumber>
+                                <t t-out="serial_number"/>
+                            </X509SerialNumber>
+                        </X509IssuerSerial>
+                    </X509Data>
+                </KeyInfo>
+            </Signature>
+        </template>
+    </data>
+</odoo>

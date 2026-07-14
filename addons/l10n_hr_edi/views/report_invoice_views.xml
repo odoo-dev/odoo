@@ -30,6 +30,15 @@
                     <span class="fw-bold" t-field="o.l10n_hr_payment_method_type"/>
                 </div>
             </xpath>
+            <xpath expr="//div[@id='qrcode']" position="after">
+                <div name="fiscalization_qrcode" t-if="o.l10n_hr_fiscalization_jir or o.l10n_hr_fiscalization_zki" style="page-break-inside: avoid;">
+                    <div t-if="o.l10n_hr_fiscalization_jir">JIR: <span t-out="o.l10n_hr_fiscalization_jir"/></div>
+                    <div t-if="o.l10n_hr_fiscalization_zki">ZKI: <span t-out="o.l10n_hr_fiscalization_zki"/></div>
+                    <div style="background-color: white; display: inline-block; padding: 2mm;">
+                        <img t-att-src="'/report/barcode/?barcode_type=%s&amp;value=%s&amp;width=%s&amp;height=%s&amp;barLevel=%s'%('QR', quote_plus(o._l10n_hr_get_fiscalization_qr_code()), 100, 100, 'L')"/>
+                    </div>
+                </div>
+            </xpath>
         </template>
         <template id="document_tax_totals_company_currency_template_inherit" inherit_id="account.document_tax_totals_company_currency_template">
             <xpath expr="//div[1]" position="inside">

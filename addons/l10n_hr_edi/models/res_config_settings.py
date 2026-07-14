@@ -13,6 +13,15 @@ class ResConfigSettings(models.TransientModel):
     l10n_hr_mer_company_bu = fields.Char(related='company_id.partner_id.l10n_hr_business_unit_code', readonly=False)
     l10n_hr_mer_software_ident = fields.Char(related='company_id.l10n_hr_mer_software_ident', readonly=False)
     l10n_hr_mer_purchase_journal_id = fields.Many2one(related='company_id.l10n_hr_mer_purchase_journal_id', readonly=False)
+    l10n_hr_fiscalization_enabled = fields.Boolean(related='company_id.l10n_hr_fiscalization_enabled', readonly=False)
+
+    # B2C Fiscalization
+    l10n_hr_fiscalization_mode = fields.Selection(related='company_id.l10n_hr_fiscalization_mode', readonly=False)
+    l10n_hr_fiscalization_certificate = fields.Many2one(related='company_id.l10n_hr_fiscalization_certificate', readonly=False)
+    l10n_hr_fiscalization_vat_liable = fields.Boolean(related='company_id.l10n_hr_fiscalization_vat_liable', readonly=False)
+    l10n_hr_fiscalization_sequence_identifier = fields.Selection(related='company_id.l10n_hr_fiscalization_sequence_identifier', readonly=False)
+    l10n_hr_fiscalization_ca_intermediate_pem = fields.Binary(related='company_id.l10n_hr_fiscalization_ca_intermediate_pem', readonly=False)
+    l10n_hr_fiscalization_ca_root_pem = fields.Binary(related='company_id.l10n_hr_fiscalization_ca_root_pem', readonly=False)
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS

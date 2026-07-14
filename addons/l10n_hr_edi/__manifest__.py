@@ -6,12 +6,14 @@ e-invoicing for Croatia
     """,
     'depends': [
         'l10n_hr',
+        'certificate',
         'account_edi_ubl_cii',
     ],
     'data': [
         'data/cron.xml',
         'data/l10n_hr.kpd.category.csv',
         'data/l10n_hr_tax_category.xml',
+        'data/template_request.xml',
         'views/account_journal_views.xml',
         'views/account_move_views.xml',
         'views/account_tax_views.xml',

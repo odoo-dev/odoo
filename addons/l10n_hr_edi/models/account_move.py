@@ -2,7 +2,7 @@ import logging
 import zoneinfo
 import re
 
-from odoo import api, models, fields
+from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import SQL
 
@@ -65,8 +65,8 @@ class AccountMove(models.Model):
     l10n_hr_business_document_status = fields.Selection(related='l10n_hr_edi_addendum_id.business_document_status')
     l10n_hr_business_status_reason = fields.Char(related='l10n_hr_edi_addendum_id.business_status_reason')
     l10n_hr_fiscalization_number = fields.Char(related='l10n_hr_edi_addendum_id.fiscalization_number')
-    l10n_hr_fiscalization_status = fields.Selection(related='l10n_hr_edi_addendum_id.fiscalization_status')
-    l10n_hr_fiscalization_error = fields.Char(related='l10n_hr_edi_addendum_id.fiscalization_error')
+    l10n_hr_fiscalization_status = fields.Selection(related='l10n_hr_edi_addendum_id.fiscalization_status', readonly=False)
+    l10n_hr_fiscalization_error = fields.Char(related='l10n_hr_edi_addendum_id.fiscalization_error', readonly=False)
     l10n_hr_fiscalization_request = fields.Char(related='l10n_hr_edi_addendum_id.fiscalization_request')
     l10n_hr_fiscalization_channel_type = fields.Selection(related='l10n_hr_edi_addendum_id.fiscalization_channel_type')
     # Payment reporting
@@ -75,10 +75,19 @@ class AccountMove(models.Model):
         currency_field='currency_id',
     )
     l10n_hr_payment_unreported = fields.Boolean(compute='_compute_l10n_hr_payment_unreported', search='_search_l10n_hr_payment_unreported')
-    l10n_hr_payment_method_type = fields.Selection(related='l10n_hr_edi_addendum_id.payment_method_type', readonly=False)
+    l10n_hr_payment_method_type = fields.Selection(related='l10n_hr_edi_addendum_id.payment_method_type', readonly=False, store=True)
     # MojEracun integration fields
     l10n_hr_mer_document_eid = fields.Char(related='l10n_hr_edi_addendum_id.mer_document_eid')
     l10n_hr_mer_document_status = fields.Selection(related='l10n_hr_edi_addendum_id.mer_document_status')
+
+    # B2C Fiscalization Fields
+    l10n_hr_fiscalization_jir = fields.Char(related="l10n_hr_edi_addendum_id.fiscalization_jir", readonly=False, store=True)
+    l10n_hr_fiscalization_zki = fields.Char(related="l10n_hr_edi_addendum_id.fiscalization_zki", readonly=False, store=True)
+
+    # Change Invoice data fields
+    l10n_hr_fiscalization_old_recipient_oib = fields.Char(string="Old Personal OIB")
+    l10n_hr_old_payment_method_type = fields.Char(string="Old Payment Method")
+    l10n_hr_fiscalization_payment_method_change_date = fields.Datetime(related="l10n_hr_edi_addendum_id.fiscalization_payment_method_change_date")
 
     @api.depends('l10n_hr_edi_addendum_id.payment_reported_amount', 'amount_residual', 'amount_total')
     def _compute_l10n_hr_payment_unreported(self):
@@ -293,3 +302,237 @@ class AccountMove(models.Model):
                     state_to_set,
                 )
                 move.l10n_hr_edi_addendum_id.business_document_status = state_to_set
+
+    @api.ondelete(at_uninstall=False)
+    def _l10n_hr_fiscalization_unlink_except_fiscalized(self):
+        """Prevent deleting fiscalized moves unless explicitly forced.
+
+        Uses context key `force_delete` for exceptional administrative flows.
+        """
+        if not self.env.context.get('force_delete') and any(m.l10n_hr_fiscalization_status == '0' for m in self):
+            raise UserError(self.env._('You cannot delete a move that has been fiscalized.'))
+
+    def _l10n_hr_get_fiscalization_qr_code(self):
+        """Generate the Croatian fiscalization QR URL.
+
+        Spec per Croatian TA:
+        - Base URL: https://porezna.gov.hr/rn
+        - Identifiers: use JIR if present, otherwise ZKI
+        - Datetime format: YYYYMMDD_HHMM (issuance datetime)
+        - Amount: absolute total with two decimals, period removed
+
+        Uses `l10n_hr_invoice_sending_time` (issuance datetime) for QR; The datetime is
+        converted to the Croatian timezone (Europe/Zagreb) for consistent
+        representation with TA.
+        """
+        self.ensure_one()
+
+        identifier = self.l10n_hr_fiscalization_jir or self.l10n_hr_fiscalization_zki
+        dt_source = self.l10n_hr_invoice_sending_time
+        if not identifier or not dt_source:
+            return None
+
+        dt_local = self.env['account.move.send']._l10n_hr_to_hr_local_dt(dt_source)
+        formatted_date = dt_local.strftime('%Y%m%d_%H%M')
+
+        amount_str = f'{self.amount_total_signed:.2f}'.replace('.', '')
+
+        base_url = 'https://porezna.gov.hr/rn'
+        if self.l10n_hr_fiscalization_jir:
+            return f"{base_url}?jir={self.l10n_hr_fiscalization_jir}&datv={formatted_date}&izn={amount_str}"
+        return f"{base_url}?zki={self.l10n_hr_fiscalization_zki}&datv={formatted_date}&izn={amount_str}"
+
+    def _l10n_hr_is_direct_fiscalization(self):
+        """Determine if invoice should use direct fiscalization (1.0).
+
+        Direct fiscalization (1.0) is used when:
+        - Partner is NOT a company (B2C transaction / individual customer)
+
+        EDI fiscalization (2.0) is used when:
+        - Partner IS a company (B2B transaction)
+
+        Note: Payment method does not affect which fiscalization flow is used.
+        """
+        self.ensure_one()
+        return not self.partner_id.commercial_partner_id.is_company
+
+    def action_change_fiscalization_payment_method(self):
+        """Open wizard to change payment method and/or recipient OIB for fiscalized invoice.
+
+        Security/functional constraints:
+        - Only when already fiscalized
+        - Only on the same calendar day as fiscalization time
+        """
+        self.ensure_one()
+
+        if self.l10n_hr_fiscalization_status != '0':
+            raise UserError(self.env._("Only fiscalized invoices can have their data changed."))
+
+        fiscalization_date = fields.Date.context_today(self, self.l10n_hr_invoice_sending_time)
+        today = fields.Date.context_today(self)
+        if fiscalization_date != today:
+            raise UserError(self.env._("Invoice data can only be changed on the same day the invoice was fiscalized."))
+
+        return {
+            'name': self.env._('Change Invoice Data'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'l10n.hr.fiscalization.change.payment.method',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_move_id': self.id,
+                'default_current_payment_method': self.l10n_hr_payment_method_type,
+            }
+        }
+
+    def l10n_hr_change_payment_method(self, new_payment_method, new_recipient_oib=None, change_oib=False):
+        """Change payment method and/or recipient OIB for a fiscalized invoice via TA API.
+
+        Uses the EDI send wizard plumbing to build, sign, and send a
+        dedicated PromijeniNacPlac request. Updates the invoice on success.
+
+        Args:
+            new_payment_method: New payment method code (G, K, T, O)
+            new_recipient_oib: New recipient OIB (11 digits) or empty string to clear
+            change_oib: Boolean indicating if OIB should be changed
+        """
+        self.ensure_one()
+
+        if self.l10n_hr_fiscalization_status != '0' or not self.l10n_hr_fiscalization_jir:
+            return {
+                'success': False,
+                'error': self.env._("Only fiscalized invoices can have their data changed.")
+            }
+
+        fiscalization_date = fields.Date.context_today(self, self.l10n_hr_invoice_sending_time)
+        today = fields.Date.context_today(self)
+        if fiscalization_date != today:
+            return {
+                'success': False,
+                'error': self.env._("Invoice data can only be changed on the same day the invoice was fiscalized.")
+            }
+
+        if new_payment_method == 'T' and change_oib and new_recipient_oib:
+            return {
+                'success': False,
+                'error': self.env._("Recipient OIB cannot be sent with payment method 'Transakcijski račun' (T).")
+            }
+
+        try:
+            send_wizard = self.action_invoice_sent()
+            send_obj = self.env[send_wizard['res_model']].with_context(send_wizard['context']).create({})
+            request_data = send_obj._l10n_hr_prepare_fiscalization_request(self)
+            request_data['changed_payment_method'] = new_payment_method
+
+            if change_oib:
+                request_data['changed_recipient_oib'] = new_recipient_oib if new_recipient_oib else ''
+                request_data['change_oib'] = True
+
+            xml_doc = send_obj._l10n_hr_generate_xml_file(request_data, is_payment_change=True)
+            response = send_obj._l10n_hr_send_xml_file(xml_doc, is_payment_change=True)
+
+            if response.get('success'):
+                self.l10n_hr_payment_method_type = new_payment_method
+
+                if response.get('datetime_of_payment_method_change'):
+                    change_datetime = send_obj._convert_hr_datetime_to_odoo(response.get('datetime_of_payment_method_change'))
+                    self.l10n_hr_fiscalization_payment_method_change_date = change_datetime
+                return {
+                    'success': True
+                }
+            else:
+                return {
+                    'success': False,
+                    'error': response.get('error')
+                }
+        except Exception as e:  # noqa: BLE001
+            return {
+                'success': False,
+                'error': str(e)
+            }
+
+    def l10n_hr_fiscalization_check_status_of_invoice(self):
+        """Check fiscalization status with the TA.
+
+        Builds a `ProvjeraZahtjev`, sends it, and returns the parsed response
+        including normalized error codes/messages when present.
+        """
+        self.ensure_one()
+
+        if self.l10n_hr_fiscalization_status != '0' and not self.l10n_hr_fiscalization_jir:
+            return {
+                'success': False,
+                'message': self.env._("Only fiscalized invoices can be checked. Send invoice to Fiscalization first.")
+            }
+
+        try:
+            send_wizard = self.action_invoice_sent()
+            send_obj = self.env[send_wizard['res_model']].with_context(send_wizard['context']).create({})
+            if not self.l10n_hr_fiscalization_zki:
+                self.l10n_hr_fiscalization_zki = send_obj._l10n_hr_generate_zki(self)
+            request_data = send_obj._l10n_hr_prepare_fiscalization_request(self)
+            xml_doc = send_obj._l10n_hr_generate_xml_file(request_data, check_status=True)
+            response = send_obj._l10n_hr_send_xml_file(xml_doc, check_status=True)
+
+            if response['success']:
+                return {
+                    'success': True,
+                    'message': self.env._("Invoice is properly fiscalized."),
+                    'details': response.get('errors', []),
+                    'invoice_details': response.get('invoice_details', {})
+                }
+            else:
+                return {
+                    'success': False,
+                    'message': self.env._("Fiscalization check failed: %s", response['error']),
+                    'details': response.get('errors', []),
+                    'invoice_details': response.get('invoice_details', {})
+                }
+        except Exception as e:  # noqa: BLE001
+            return {
+                'success': False,
+                'message': self.env._("Fiscalization check failed: %s", e),
+                'details': [],
+                'invoice_details': {}
+            }
+
+    def action_check_fiscalization_status(self):
+        self.ensure_one()
+        result = self.l10n_hr_fiscalization_check_status_of_invoice()
+
+        if result['success']:
+            message = result['message']
+            message_type = 'success'
+        else:
+            message = result['message']
+            message_type = 'danger'
+
+        if result.get('details'):
+            detail_messages = []
+            for detail in result['details']:
+                if isinstance(detail, dict) and 'code' in detail and 'message' in detail:
+                    detail_messages.append(f"{detail['code']}: {detail['message']}")
+
+            if detail_messages:
+                message += "\n\nDetails:\n" + "\n".join(detail_messages)
+
+        if not result['success'] and result.get('invoice_details'):
+            invoice_details = result.get('invoice_details', {})
+            if invoice_details:
+                message += "\n\nInvoice Details from Tax Authority:\n"
+                for key, value in invoice_details.items():
+                    if isinstance(value, (dict, list)):
+                        message += f"{key}: {value!s}\n"
+                    else:
+                        message += f"{key}: {value}\n"
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': self.env._('Fiscalization Status Check'),
+                'message': message,
+                'type': message_type,
+                'sticky': True,
+            }
+        }

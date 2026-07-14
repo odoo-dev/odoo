@@ -63,6 +63,8 @@ class L10nHrEdiAddendum(models.Model):
             ('T', 'Transakcijski račun'),  # Bank account
             ('O', 'Obračunsko plaćanje'),  # Settlement payment
             ('Z', 'Ostalo'),               # Other
+            ('G', 'Gotovina'),             # Cash - direct fiscalization only
+            ('K', 'Kartice'),              # Card - direct fiscalization only
         ],
         string='Payment Method Type',
         default='T',
@@ -82,3 +84,8 @@ class L10nHrEdiAddendum(models.Model):
         help="MojEracun internal document status - to be validated and received by the customer.",
     )
     mer_signed_xml_archived = fields.Boolean(string='Signed XML archived')
+
+    # B2C Fiscalization Fields
+    fiscalization_jir = fields.Char(string="JIR", help="Unique identifier of the invoice (JIR)", readonly=True)
+    fiscalization_zki = fields.Char(string="ZKI", help="Protective code of the issuer (ZKI)", readonly=True)
+    fiscalization_payment_method_change_date = fields.Datetime(string="Payment Method Change Date", readonly=True)

@@ -30,6 +30,12 @@
                         groups="account.group_account_invoice"
                         invisible="not l10n_hr_mer_document_eid or (amount_total - amount_residual) == l10n_hr_payment_reported_amount or move_type not in ('out_invoice', 'out_refund')"
                     />
+                    <button name="action_check_fiscalization_status"
+                            string="Check Status"
+                            class="oe_highlight"
+                            type="object"
+                            invisible="l10n_hr_fiscalization_status != '0'"
+                    />
                 </xpath>
                 <xpath expr="//header" position="after">
                     <div class="alert alert-warning w-100 d-flex align-items-center gap-1" invisible="move_type not in ('in_invoice', 'in_refund') or not l10n_hr_mer_document_eid or l10n_hr_fiscalization_status == '0' or invoice_date &gt;= '2026-01-01 00:00:00'"  role="alert">
@@ -44,15 +50,11 @@
                 </xpath>
                 <xpath expr="//page[@id='other_tab_entry']" position="after">
                     <page id="l10n_hr_edi_tab"
-                          string="Croatia: Fiscalization 2.0"
+                          string="Croatia: Fiscalization"
                           name="page_hr_edi_tab"
                           invisible="country_code != 'HR'">
                         <group string="Accounting information"
-                                name="l10n_hr_accounting_info_group">
-                            <field name="l10n_hr_invoice_sending_time"
-                                invisible="move_type not in ('out_invoice', 'out_refund')"
-                                readonly="True"
-                            />
+                            name="l10n_hr_accounting_info_group">
                             <field name="l10n_hr_process_type"
                                 readonly="state in ['cancel', 'posted']"
                             />
@@ -73,7 +75,35 @@
                                 readonly="True"
                             />
                         </group>
-                        <group string="Fiscalization"
+                        <group string="Fiscalization 1.0 (Direct / B2C)"
+                               name="l10n_hr_fiscalization_direct_group">
+                            <field name="l10n_hr_fiscalization_status"
+                                   string="Fiscalization Status"
+                                   readonly="True"
+                            />
+                            <field name="l10n_hr_fiscalization_jir"
+                                   invisible="l10n_hr_fiscalization_status != '1'"
+                                   readonly="True"
+                            />
+                            <field name="l10n_hr_fiscalization_zki"
+                                   invisible="l10n_hr_fiscalization_status != '1'"
+                                   readonly="True"
+                            />
+                            <field name="l10n_hr_invoice_sending_time"
+                                   invisible="l10n_hr_fiscalization_status != '1'"
+                                   readonly="True"
+                            />
+                            <field name="l10n_hr_fiscalization_payment_method_change_date"
+                                   invisible="l10n_hr_fiscalization_status != '1' or not l10n_hr_fiscalization_payment_method_change_date"
+                                   readonly="True"
+                            />
+                            <field name="l10n_hr_fiscalization_error"
+                                   invisible="l10n_hr_fiscalization_status == '1' or not l10n_hr_fiscalization_error"
+                                   readonly="True"
+                            />
+                            <field name="l10n_hr_payment_method_type"/>
+                        </group>
+                        <group string="Fiscalization 2.0 (e-Invoice / B2B)"
                                 name="l10n_hr_fiscalization_info_group"
                                 invisible="not l10n_hr_edi_addendum_id">
                             <field name="l10n_hr_business_document_status"
@@ -107,7 +137,6 @@
                             <field name="l10n_hr_payment_reported_amount"
                                 readonly="True"
                             />
-                            <field name="l10n_hr_payment_method_type"/>
                         </group>
                         <group string="MojEracun"
                                 name="l10n_hr_mojeracun_info_group"
@@ -166,6 +195,15 @@
                         decoration-success="l10n_hr_business_document_status in ['0', '2', '4', '99']"
                         decoration-warning="l10n_hr_business_document_status == '3'"
                         decoration-danger="l10n_hr_business_document_status == '1'"
+                        optional="hide"
+                    />
+                    <field name="l10n_hr_fiscalization_status"
+                        string="Fiscalization 2.0 Status"
+                        readonly="True"
+                        widget="badge"
+                        decoration-success="l10n_hr_fiscalization_status == '0'"
+                        decoration-warning="l10n_hr_fiscalization_status == '2'"
+                        decoration-danger="l10n_hr_fiscalization_status == '1'"
                         optional="hide"
                     />
                     <field name="l10n_hr_fiscalization_status"
