@@ -99,6 +99,8 @@ class Manager(Thread):
                 'name': device.device_name,
                 'type': device.device_type,
                 'connection': device.device_connection,
+                'manufacturer': getattr(device, 'device_manufacturer', ''),
+                'subtype': device.device_subtype if device.device_type == 'printer' else '',
             }
         devices_list.update(self.previous_unsupported_devices)
 
