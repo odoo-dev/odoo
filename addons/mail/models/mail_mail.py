@@ -29,11 +29,9 @@ class MailMail(models.Model):
     _name = 'mail.mail'
     _description = 'Outgoing Mail'
     _inherits = {'mail.message': 'mail_message_id'}
+    _check_inherits_access = False
     _order = 'id desc'
     _rec_name = 'subject'
-
-    def _access_domain(self, operation):
-        return self.env['ir.access']._get_domain_for(self._name, operation, include_inherits=False)
 
     @api.model
     def default_get(self, fields):

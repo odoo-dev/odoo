@@ -303,8 +303,8 @@ class IrAccess(models.Model):
 
         return frozendict({model_name: tuple(infos) for model_name, infos in result.items()})
 
-    @api.ormcache('self.env.uid', 'model_name', 'operation', 'include_inherits', 'tuple(self._get_access_context())')
-    def _get_domain_for(self, model_name: str, operation: str, *, include_inherits=True) -> Domain:
+    @api.ormcache('self.env.uid', 'model_name', 'operation', 'tuple(self._get_access_context())')
+    def _get_domain_for(self, model_name: str, operation: str) -> Domain:
         """ Return the domain that determines on which records of ``model_name``
         the current user is allowed to perform ``operation``.  The domain comes
         from the permissions and restrictions that applies to the current user.
@@ -318,7 +318,7 @@ class IrAccess(models.Model):
         restrictions = []
 
         # add access for parent models as restrictions
-        if include_inherits:
+        if self.env[model_name]._check_inherits_access:
             for parent_model_name, parent_field_name in self.env[model_name]._inherits.items():
                 domain = self._get_domain_for(parent_model_name, operation)
                 if domain.is_false():

@@ -9,6 +9,7 @@ class QuotationDocument(models.Model):
     _name = "quotation.document"
     _description = "Quotation's Headers & Footers"
     _inherits = {"ir.attachment": "ir_attachment_id"}
+    _check_inherits_access = False
     _order = "document_type desc, sequence, name"
     _check_company_auto = True
 
@@ -52,12 +53,10 @@ class QuotationDocument(models.Model):
     )
 
     def _access_domain(self, operation):
-        # this override gets the record rules only from the current model and
-        # ignores record rules on ir.attachment (inherits)
-        domain = super()._access_domain(operation)
-        if domain.is_false():
-            return domain
-        return self.env['ir.access']._get_domain_for(self._name, operation, include_inherits=False)
+        domain_attachment = self.env['ir.attachment']._access_domain(operation)
+        if domain_attachment.is_false():
+            return domain_attachment
+        return super()._access_domain(operation)
 
     # === CONSTRAINT METHODS ===#
 
