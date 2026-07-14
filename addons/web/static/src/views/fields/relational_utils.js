@@ -858,7 +858,7 @@ export class X2ManyFieldDialog extends Component {
     }
 }
 
-async function getFormViewInfo({ list, context, activeField, viewService, isSmall }) {
+export async function getFormViewInfo({ list, context, activeField, viewService, isSmall }) {
     let formArchInfo = activeField.views.form;
     let fields = activeField.fields;
     const comodel = list.resModel;
