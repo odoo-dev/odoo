@@ -31,8 +31,11 @@
             <span t-if="this.props.comboExtraPrice" style="font-size: 0.65rem;" class="price-extra px-1 py-0 rounded-1 text-bg-info position-absolute top-0 end-0">
                 <t t-out="this.props.comboExtraPrice"/>
             </span>
+            <span t-if="this.props.product.is_storable &amp;&amp; this.props.product.qty_available &gt; 0 &amp;&amp; this.props.product.qty_available &lt;= 5"
+                  t-attf-class="border position-absolute top-0 end-0 badge rounded m-1 px-1 smaller {{this.props.color ? `o_colorlist_item_color_${this.props.color}` : ''}}">
+                <t t-out="this.props.product.qty_available"/> left
+            </span>
             <t t-call-slot="quantityButtons" />
         </article>
     </t>
 </templates>
-
