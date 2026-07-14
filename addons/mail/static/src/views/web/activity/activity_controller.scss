@@ -35,6 +35,9 @@
         }
     }
     .o_activity_summary_cell {
+        border-right: 0;
+        border-left: 0;
+
         .o-mail-ActivityCell-counter {
             color: map-get($theme-colors, 'dark');
         }
@@ -74,19 +77,6 @@
                 color: map-get($theme-colors, 'dark');
                 &:hover {
                     text-decoration: underline;
-                }
-            }
-        }
-        &.o_activity_empty_cell {
-            > i {
-                display: none;
-            }
-            &:hover {
-                background-color: $component-active-bg;
-
-                > i {
-                    color: gray;
-                    display: flex;
                 }
             }
         }
