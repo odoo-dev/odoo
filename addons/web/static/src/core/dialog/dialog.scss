@@ -1,8 +1,17 @@
+.o_modal_backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: $zindex-modal-backdrop;
+    backdrop-filter: grayscale(50%);
+    pointer-events: none;
+}
 .modal.o_technical_modal {
     --o-control-panel-breadcrumbs-display: none;
     --formView-sheetBg-padding-x: var(--modal-padding);
 
-    backdrop-filter: grayscale(50%);
 
     .modal-content {
         .modal-header .modal-title {

@@ -1,10 +1,12 @@
+import { UserMedia } from "@mail/discuss/call/common/user_media";
+
 import { Component, signal, t, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { PermissionPromptDialog } from "@web/core/permission_prompt_dialog/permission_prompt_dialog";
 import { useService } from "@web/core/utils/hooks";
 
 export class CallPermissionDialog extends Component {
-    static components = { PermissionPromptDialog };
+    static components = { PermissionPromptDialog, UserMedia };
     static template = "discuss.CallPermissionDialog";
 
     setup() {

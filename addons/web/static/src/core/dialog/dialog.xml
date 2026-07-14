@@ -3,6 +3,7 @@
 
     <t t-name="web.Dialog">
         <div class="o_dialog" t-att-id="this.id" t-att-class="{ o_inactive_modal: !this.data.isActive }">
+            <div class="o_modal_backdrop"></div>
             <div role="dialog" class="modal d-block"
                 tabindex="-1"
                 t-att-class="{ o_technical_modal: this.props.technical, o_modal_full: this.isFullscreen, o_inactive_modal: !this.data.isActive }"
