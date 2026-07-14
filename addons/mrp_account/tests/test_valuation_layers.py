@@ -305,7 +305,7 @@ class TestMrpValuationStandard(TestBomPriceCommon):
         """Create move into/out of a production location, test we create account
         entries with the Production Cost account.
         """
-        self.dining_table.categ_id.property_cost_method = 'standard'
+        self.dining_table.categ_id = self.category_standard
 
         # move into production location
         self._make_out_move(self.dining_table, 1, location_dest_id=self.prod_location.id)
