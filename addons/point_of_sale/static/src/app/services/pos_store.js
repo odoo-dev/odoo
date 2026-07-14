@@ -1637,6 +1637,7 @@ export class PosStore extends WithLazyGetterTrap {
                     context,
                 });
                 order.serializeForORM();
+                order.clearUndoStack();
                 const missingRecords = await this.data.missingRecursive(data);
                 const newData = this.models.loadConnectedData(missingRecords);
 
@@ -1819,6 +1820,7 @@ export class PosStore extends WithLazyGetterTrap {
     setOrder(order) {
         if (this.getOrder()) {
             this.getOrder().updateSavedQuantity();
+            this.getOrder().clearUndoStack();
         }
         this.selectedOrderUuid = order?.uuid;
     }

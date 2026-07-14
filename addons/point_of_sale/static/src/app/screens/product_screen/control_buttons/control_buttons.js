@@ -145,6 +145,12 @@ export class ControlButtons extends Component {
         const selectedOrderline = this.currentOrder?.getSelectedOrderline();
         return this.pos.isSelectedLineCombo && this.pos.breakCombo(selectedOrderline.parentLine);
     }
+    clickUndo() {
+        const order = this.pos.getOrder();
+        // if (order?.undo()) {
+        //     this.notification.add(_t("Undo successful"), { type: "success" });
+        // }
+    }
 }
 
 export class ControlButtonsPopup extends Component {

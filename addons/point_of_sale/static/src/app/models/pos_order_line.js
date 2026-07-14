@@ -1,4 +1,5 @@
 import { registry } from "@web/core/registry";
+import { patch } from "@web/core/utils/patch";
 import { constructFullProductName, constructAttributeString } from "@point_of_sale/utils";
 import { parseFloat } from "@web/views/fields/parsers";
 import { formatFloat } from "@web/core/utils/numbers";
@@ -468,3 +469,36 @@ export class PosOrderline extends PosOrderlineAccounting {
 }
 
 registry.category("pos_available_models").add(PosOrderline.pythonModel, PosOrderline);
+
+patch(PosOrderline.prototype, {
+    setQuantity(quantity, keep_price) {
+        if (!this.order_id?._isUndoing) {
+            this.order_id?.pushUndoEntry({
+                type: "restore_line",
+                lineUuid: this.uuid,
+                prevQty: this.qty,
+            });
+        }
+        return super.setQuantity(quantity, keep_price);
+    },
+    setUnitPrice(price) {
+        if (!this.order_id?._isUndoing) {
+            this.order_id?.pushUndoEntry({
+                type: "restore_line",
+                lineUuid: this.uuid,
+                prevPriceUnit: this.price_unit,
+            });
+        }
+        return super.setUnitPrice(price);
+    },
+    setDiscount(discount) {
+        if (!this.order_id?._isUndoing) {
+            this.order_id?.pushUndoEntry({
+                type: "restore_line",
+                lineUuid: this.uuid,
+                prevDiscount: this.discount,
+            });
+        }
+        return super.setDiscount(discount);
+    },
+});

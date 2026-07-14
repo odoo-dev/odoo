@@ -7,7 +7,7 @@ import { useBarcodeReader } from "@point_of_sale/app/hooks/barcode_reader_hook";
 import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { user } from "@web/core/user";
-import { Component, onMounted, onWillUnmount, computed, proxy, props, t } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, computed, proxy, props, t, useListener } from "@odoo/owl";
 import { CategorySelector } from "@point_of_sale/app/components/category_selector/category_selector";
 import { Input } from "@point_of_sale/app/components/inputs/input/input";
 import {
@@ -80,6 +80,7 @@ export class ProductScreen extends Component {
         });
 
         onWillUnmount(async () => {
+            this.currentOrder?.clearUndoStack();
             if (
                 this.pos.config.use_presets &&
                 this.currentOrder &&
@@ -92,6 +93,13 @@ export class ProductScreen extends Component {
                 }
             }
             this.pos.searchProductDBState = null;
+        });
+
+        useListener(document, "keydown", (event) => {
+            if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z") {
+                event.preventDefault();
+                this.pos.getOrder()?.undo();
+            }
         });
 
         this.barcodeReader = useService("barcode_reader");
@@ -453,6 +461,8 @@ export class ProductScreen extends Component {
         if (!(await this.pos.canAddProductToCurrentOrder(product))) {
             return;
         }
+        const order = this.pos.getOrder();
+        const beforeUuids = new Set((order?.lines || []).map((l) => l.uuid));
         const options = {};
         if (this.searchWord && product.isConfigurable()) {
             const barcode = this.searchWord;
@@ -464,6 +474,10 @@ export class ProductScreen extends Component {
             }
         }
         const line = await this.pos.addLineToCurrentOrder({ product_tmpl_id: product }, options);
+        const newLine = (order?.lines || []).find((l) => !beforeUuids.has(l.uuid));
+        if (newLine) {
+            order?.pushUndoEntry({ type: "remove_line", lineUuid: newLine.uuid });
+        }
         this.showOptionalProductPopupIfNeeded(product);
 
         return line;

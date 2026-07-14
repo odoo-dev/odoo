@@ -68,6 +68,7 @@ export class PosOrder extends PosOrderAccounting {
             tip: { value: false, type: false },
             last_general_customer_note: this.general_customer_note || "",
             last_internal_note: this.internal_note || "",
+            undoStack: [],
         };
     }
 
@@ -343,6 +344,74 @@ export class PosOrder extends PosOrderAccounting {
         return { childLineFree, childLineExtra };
     }
 
+    pushUndoEntry(entry, maxStack = 20) {
+        this.uiState.undoStack.push(entry);
+        if (this.uiState.undoStack.length > maxStack) {
+            this.uiState.undoStack.shift();
+        }
+    }
+
+    clearUndoStack() {
+        this.uiState.undoStack = [];
+    }
+
+    _captureLineData(line) {
+        return {
+            product_id: line.product_id?.id,
+            product_tmpl_id: line.product_tmpl_id?.id,
+            qty: line.qty,
+            price_unit: line.price_unit,
+            price_extra: line.price_extra,
+            price_type: line.price_type,
+            discount: line.discount,
+            tax_ids: (line.tax_ids || []).map((t) => t.id),
+            full_product_name: line.full_product_name,
+            note: line.note,
+            customer_note: line.customer_note,
+            attribute_value_ids: (line.attribute_value_ids || []).map((a) => a.id),
+            combo_item_id: line.combo_item_id?.id,
+            extra_tax_data: line.extra_tax_data,
+            is_edited: line.is_edited,
+        };
+    }
+
+    undo() {
+        const entry = this.uiState.undoStack.pop();
+        if (!entry) return false;
+
+        this._isUndoing = true;
+        try {
+            if (entry.type === "remove_line") {
+                const line = this.lines.find((l) => l.uuid === entry.lineUuid);
+                if (line) {
+                    this.removeOrderline(line, true);
+                }
+            } else if (entry.type === "restore_line") {
+                const line = this.lines.find((l) => l.uuid === entry.lineUuid);
+                if (line) {
+                    if (entry.prevQty !== undefined) line.setQuantity(entry.prevQty, true);
+                    if (entry.prevPriceUnit !== undefined) line.setUnitPrice(entry.prevPriceUnit);
+                    if (entry.prevDiscount !== undefined) line.setDiscount(entry.prevDiscount);
+                }
+            } else if (entry.type === "recreate_line") {
+                const newLine = this.models["pos.order.line"].create({
+                    ...entry.lineData,
+                    order_id: this,
+                });
+                for (const childData of entry.comboChildrenData || []) {
+                    this.models["pos.order.line"].create({
+                        ...childData,
+                        combo_parent_id: newLine,
+                        order_id: this,
+                    });
+                }
+            }
+        } finally {
+            this._isUndoing = false;
+        }
+        return true;
+    }
+
     /**
      * A wrapper around line.delete() that may potentially remove multiple orderlines.
      * In core pos, it removes the linked combo lines. In other modules, it may remove
@@ -351,6 +420,15 @@ export class PosOrder extends PosOrderAccounting {
      * @returns {boolean} true if the line was removed, false otherwise
      */
     removeOrderline(line, deep = true) {
+        if (!this._isUndoing) {
+            this.pushUndoEntry({
+                type: "recreate_line",
+                lineData: this._captureLineData(line),
+                comboChildrenData: deep
+                    ? line.getAllLinesInCombo().map((cl) => this._captureLineData(cl))
+                    : [],
+            });
+        }
         // Remove tip
         if (this.config.iface_tipproduct && this.config.tip_product_id.id === line.product_id.id) {
             this.setTip(false);
