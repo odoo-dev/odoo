@@ -32952,7 +32952,7 @@ var ScorecardChartConfigPanel = class extends Component {
 		return !!this.state.keyValueDispatchResult?.isCancelledBecause("InvalidScorecardKeyValue");
 	}
 	get isBaselineInvalid() {
-		return !!this.state.keyValueDispatchResult?.isCancelledBecause("InvalidScorecardBaseline");
+		return !!this.state.baselineDispatchResult?.isCancelledBecause("InvalidScorecardBaseline");
 	}
 	onKeyValueRangeChanged(ranges) {
 		this.keyValue = ranges[0];
