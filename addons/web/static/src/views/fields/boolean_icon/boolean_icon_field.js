@@ -8,6 +8,7 @@ export class BooleanIconField extends Component {
     props = props({
         ...standardFieldProps,
         icon: t.string().optional("check_box"),
+        icon_class: t.string().optional(),
         label: t.string().optional(),
     });
 

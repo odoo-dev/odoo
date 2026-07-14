@@ -19,7 +19,7 @@
                         }"
                     t-attf-style="{{(this.activity().user_id || this.activity().role_id) ? '' : 'height:80%; width:80%;'}}"
                 >
-                    <i class="oi small" role="img" t-attf-class="{{ this.activity().icon }} {{this.activity().user_id || this.activity().role_id ? 'small' : 'fs-2'}}"/>
+                    <i class="oi small" role="img" t-attf-class="{{this.activity().user_id || this.activity().role_id ? 'small' : 'fs-2'}}" t-att-data-icon="this.activity().icon"/>
                 </div>
             </div>
         </div>
@@ -51,7 +51,7 @@
                     <FileUploader t-if="this.activity().activity_category === 'upload_file'" onUploaded.bind="this.onFileUploaded">
                         <t t-set-slot="toggler">
                             <button class="btn btn-link text-action p-0 me-3">
-                                <i t-attf-class="oi {{ this.activity().icon }}"/> <t t-out="this.activity().display_name"/>
+                                <i t-attf-class="oi" t-att-data-icon="this.activity().icon"/> <t t-out="this.activity().display_name"/>
                             </button>
                         </t>
                     </FileUploader>

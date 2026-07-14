@@ -1386,11 +1386,13 @@ test("Check notification popover for incoming messages", async () => {
     await click(".o-mail-Message-notification:first");
     await contains(".o-mail-MessageNotificationPopover");
     await contains(".o-mail-MessageNotificationPopover i", { count: 2 });
-    expect(".o-mail-MessageNotificationPopover div:first i[data-icon='check']").toHaveClass(
-        "fa-check"
+    expect(".o-mail-MessageNotificationPopover div:first i[data-icon='check']").toHaveAttribute(
+        "data-icon",
+        "check"
     );
-    expect(".o-mail-MessageNotificationPopover div:last i[data-icon='send']").toHaveClass(
-        "fa-send-o"
+    expect(".o-mail-MessageNotificationPopover div:last i[data-icon='send']").toHaveAttribute(
+        "data-icon",
+        "send"
     );
     await contains(
         ".o-mail-MessageNotificationPopover:text('ToSomeone CcincomingCc(incomingCc@ex.com)')"
@@ -1398,11 +1400,13 @@ test("Check notification popover for incoming messages", async () => {
     await click(".o-mail-Message-notification:last");
     await contains(".o-mail-MessageNotificationPopover");
     await contains(".o-mail-MessageNotificationPopover i", { count: 2 });
-    expect(".o-mail-MessageNotificationPopover div:first i[data-icon='check']").toHaveClass(
-        "fa-check"
+    expect(".o-mail-MessageNotificationPopover div:first i[data-icon='check']").toHaveAttribute(
+        "data-icon",
+        "check"
     );
-    expect(".o-mail-MessageNotificationPopover div:last i[data-icon='send']").toHaveClass(
-        "fa-send-o"
+    expect(".o-mail-MessageNotificationPopover div:last i[data-icon='send']").toHaveAttribute(
+        "data-icon",
+        "send"
     );
     await contains(
         ".o-mail-MessageNotificationPopover:text('ToSomeone ToincomingTo(incomingTo@ex.com)')"

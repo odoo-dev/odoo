@@ -829,7 +829,7 @@ describe("popover for file uploads", () => {
                 },
             });
         });
-        await click("button i[class='fa fa-upload']");
+        await click("button i[data-icon='upload']");
         await waitForRequest;
         await expectElementCount(".o_notification_manager .o_notification", 1);
         await click(".o_we_discard_link");
