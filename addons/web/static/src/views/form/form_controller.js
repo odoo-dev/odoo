@@ -585,6 +585,7 @@ export class FormController extends Component {
                 description: this.propertiesState.editable
                     ? _t("Save Properties")
                     : _t("Edit Properties"),
+                icon: "settings_applications",
                 callback: () => {
                     this.propertiesState.editable = !this.propertiesState.editable;
                     this.model.bus.trigger("PROPERTY_FIELD:EDIT", {

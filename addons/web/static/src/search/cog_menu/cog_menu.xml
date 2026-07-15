@@ -51,7 +51,7 @@
                                 class="{ [item.class]: !!item.class, 'o_menu_item': true, 'pe-none text-muted opacity-50': this.offlinePlugin.isOffline() and !(item.availableOffline and !this.env.model.root.isNew) }"
                                 onSelected="() => this.onItemSelected(item)"
                             >
-                                <i t-if="hasGroupIcons" t-att-class="item.icon ?? 'fa'" class="oi-fw me-1"/>
+                                <i t-if="hasGroupIcons" class="oi oi-fw me-1" t-att-data-icon="item.icon"/>
                                 <t t-out="item.description"/>
                             </DropdownItem>
 
