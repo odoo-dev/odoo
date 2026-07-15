@@ -442,7 +442,7 @@ class CustomerPortal(Controller):
             'current_partner': current_partner,
             'commercial_partner': current_partner.commercial_partner_id,
             # TODO: Remove me in master (Kept here to avoid changing the portal templates)
-            'is_commercial_address': can_edit_vat,
+            'is_commercial_address': not partner_sudo.parent_id or can_edit_vat,
             'is_main_address': not current_partner or (partner_sudo and partner_sudo == current_partner),
             'commercial_address_update_url': (
                 # Only redirect to account update if the logged in user is their own commercial
