@@ -209,7 +209,7 @@
 </t>
 
 <t t-name="mail.Message.mentionedChannelIcon">
-    <i t-att-class="icon"/>
+    <i t-att-data-icon="icon"/>
 </t>
 
 <t t-name="mail.Message.sidebarBookmark">

@@ -531,7 +531,7 @@ export class Message extends Record {
                         count: attachments.length - 1,
                     });
             }
-            return markup`<i class="fa me-1 ${this.previewIcon}"></i>${messageBody}`;
+            return markup`<i class="oi me-1" data-icon="${this.previewIcon}"></i>${messageBody}`;
         },
     });
 
