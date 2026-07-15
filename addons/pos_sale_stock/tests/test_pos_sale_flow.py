@@ -1007,3 +1007,130 @@ class TestPoSSaleStock(TestPosStockHttpCommon, TestPoSSale):
             picking.button_validate()
         self.assertEqual(sale_order.order_line.qty_delivered, 0)
         self.assertEqual(sale_order.order_line.qty_invoiced, 0)
+
+    def test_settle_mto_sale_order_with_manufacture_bom(self):
+        """
+        When an MTO+Manufacture product is sold via SO, confirming the SO triggers
+        both a delivery picking AND manufacturing orders (mrp.production). The MRP
+        component/production moves (stock.move) have picking_id=False because they
+        are not linked to any picking — they belong to the MO.
+        """
+        if not self.env['ir.module.module'].search([('name', '=', 'mrp'), ('state', '=', 'installed')]):
+            self.skipTest('mrp module is required for this test')
+
+        self.env.user.group_ids |= self.env.ref('mrp.group_mrp_user')
+
+        # --- Products ---
+        component_1 = self.env['product.product'].create({
+            'name': 'MTO Comp 1',
+            'is_storable': True,
+        })
+        component_2 = self.env['product.product'].create({
+            'name': 'MTO Comp 2',
+            'is_storable': True,
+        })
+        finished = self.env['product.product'].create({
+            'name': 'MTO Finished Product',
+            'available_in_pos': True,
+            'is_storable': True,
+            'lst_price': 100.0,
+        })
+
+        # --- Routes: MTO + Manufacture ---
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        mto_route = self.env.ref('stock.route_warehouse0_mto')
+        manufacture_route = self.env.ref('mrp.route_warehouse0_manufacture')
+        mto_route.active = True
+        finished.route_ids = [Command.set([mto_route.id, manufacture_route.id])]
+
+        # --- Manufacturing BoM (type=normal produces real MRP moves with picking_id=False) ---
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': finished.product_tmpl_id.id,
+            'product_qty': 1.0,
+            'type': 'normal',
+            'bom_line_ids': [
+                Command.create({'product_id': component_1.id, 'product_qty': 1.0}),
+                Command.create({'product_id': component_2.id, 'product_qty': 1.0}),
+            ],
+        })
+        self.assertTrue(bom, 'BoM must be created')
+
+        # --- Sale Order ---
+        partner = self.env['res.partner'].create({'name': 'MTO Test Partner'})
+        sale_order = self.env['sale.order'].create({
+            'partner_id': partner.id,
+            'order_line': [Command.create({
+                'product_id': finished.id,
+                'name': finished.name,
+                'product_uom_qty': 2,
+                'price_unit': finished.lst_price,
+                'product_uom_id': finished.uom_id.id,
+            })],
+        })
+        sale_order.action_confirm()
+
+        # --- Pre-flight: verify the crash condition actually exists ---
+        # Confirming an MTO+Manufacture SO creates MRP moves with picking_id=False.
+        so_line = sale_order.order_line[0]
+        all_linked_moves = so_line.move_ids.reference_ids.move_ids
+        mrp_moves = all_linked_moves.filtered(lambda m: not m.picking_id)
+        self.assertTrue(
+            mrp_moves,
+            'Expected MRP moves with picking_id=False to exist (the condition that triggers the bug). '
+            'Check that mrp module is installed and the product has MTO+Manufacture routes.'
+        )
+
+        # --- Open POS session ---
+        self.main_pos_config.open_ui()
+        current_session = self.main_pos_config.current_session_id
+
+        price = finished.lst_price * 2  # 2 units
+
+        pos_order_payload = {
+            'amount_paid': price,
+            'amount_return': 0,
+            'amount_tax': 0,
+            'amount_total': price,
+            'company_id': self.env.company.id,
+            'date_order': fields.Datetime.to_string(fields.Datetime.now()),
+            'fiscal_position_id': False,
+            'to_invoice': False,
+            'partner_id': partner.id,
+            'pricelist_id': self.main_pos_config.available_pricelist_ids[0].id,
+            'lines': [[0, 0, {
+                'discount': 0,
+                'pack_lot_ids': [],
+                'price_unit': finished.lst_price,
+                'product_id': finished.id,
+                'price_subtotal': price,
+                'price_subtotal_incl': price,
+                'sale_order_line_id': so_line.id,
+                'sale_order_origin_id': sale_order.id,
+                'qty': 2,
+                'tax_ids': [],
+            }]],
+            'name': 'Order 00099-001-0001',
+            'session_id': current_session.id,
+            'sequence_number': self.main_pos_config.journal_id.id,
+            'payment_ids': [[0, 0, {
+                'amount': price,
+                'name': fields.Datetime.now(),
+                'payment_method_id': self.main_pos_config.payment_method_ids[0].id,
+            }]],
+            'user_id': self.env.uid,
+            'uuid': str(uuid.uuid4()),
+        }
+        data = self.env['pos.order'].sync_from_ui([pos_order_payload])
+        pos_order_id = data['pos.order'][0]['id']
+        pos_order_record = self.env['pos.order'].browse(pos_order_id)
+        self.assertEqual(
+            pos_order_record.state, 'paid',
+            'POS order must reach "paid" state — sync_from_ui must not crash on MRP moves'
+        )
+        # Delivery picking is intact (not accidentally cancelled by the bug path)
+        delivery = sale_order.picking_ids.filtered(lambda p: p.picking_type_code == 'outgoing')
+        self.assertTrue(delivery, 'Delivery picking must still exist after POS settlement')
+        self.assertIn(
+            delivery.state, ['waiting', 'confirmed', 'assigned'],
+            'Delivery picking must remain open (not cancelled) after POS settlement'
+        )
