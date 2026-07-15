@@ -10,7 +10,7 @@
                 multiSelect="false"
             />
         </div>
-        <div class="btn-group" role="toolbar" aria-label="Change graph">
+        <div class="btn-group o_switcher" role="toolbar" aria-label="Change graph">
             <button class="btn btn-secondary fa fa-bar-chart o_graph_button" data-tooltip="Bar Chart" aria-label="Bar Chart" data-mode="bar"
                 t-on-click="() => this.onModeSelected('bar')"
                 t-att-class="{ active: this.model.metaData.mode === 'bar' }"
@@ -24,13 +24,13 @@
                 t-att-class="{ active: this.model.metaData.mode === 'pie' }"
             />
         </div>
-        <div t-if="this.model.metaData.mode === 'bar'" class="btn-group" role="toolbar" aria-label="Change graph">
+        <div t-if="this.model.metaData.mode === 'bar'" class="btn-group o_switcher" role="toolbar" aria-label="Change graph">
             <button class="btn btn-secondary fa fa-database o_graph_button" data-tooltip="Stacked" aria-label="Stacked"
                 t-on-click="this.toggleStacked"
                 t-att-class="{ active: this.model.metaData.stacked }"
             />
         </div>
-        <div t-if="this.model.metaData.mode === 'line'" class="btn-group" role="toolbar" aria-label="Change graph">
+        <div t-if="this.model.metaData.mode === 'line'" class="btn-group o_switcher" role="toolbar" aria-label="Change graph">
             <button class="btn btn-secondary fa fa-database o_graph_button" data-tooltip="Stacked" aria-label="Stacked"
                 t-on-click="this.toggleStacked"
                 t-att-class="{ active: this.model.metaData.stacked }"
@@ -40,7 +40,7 @@
                 t-att-class="{ active: this.model.metaData.cumulated }"
             />
         </div>
-        <div t-if="this.model.metaData.mode !== 'pie'" class="btn-group" role="toolbar" aria-label="Sort graph" name="toggleOrderToolbar">
+        <div t-if="this.model.metaData.mode !== 'pie'" class="btn-group o_switcher" role="toolbar" aria-label="Sort graph" name="toggleOrderToolbar">
             <button class="btn btn-secondary fa fa-sort-amount-desc o_graph_button" data-tooltip="Descending" aria-label="Descending"
                 t-on-click="() => this.toggleOrder('DESC')"
                 t-att-class="{ active: this.model.metaData.order === 'DESC' }"
