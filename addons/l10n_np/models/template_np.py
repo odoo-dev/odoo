@@ -25,5 +25,6 @@ class AccountChartTemplate(models.AbstractModel):
                 'payable_account_id': 'l10n_np_2110',
                 'income_account_id': 'l10n_np_4000',
                 'expense_account_id': 'l10n_np_6000',
+                'account_default_pos_receivable_account_id': 'l10n_np_1210',
             },
         }
