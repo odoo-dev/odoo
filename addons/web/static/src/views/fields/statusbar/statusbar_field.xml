@@ -70,7 +70,7 @@
                     t-att-class="{'o_arrow_button': this.uiService.isSmall, 'o_last': selectedIndex === 0 , 'o_first': selectedIndex === allItems.length - 1}"
                     t-att-disabled="this.props.isDisabled"
                 >
-                    <t t-out="this.getCurrentLabel()" />
+                    <i class="oi oi-fw" data-icon="chevron_forward" role="presentation"/> <t t-out="this.getCurrentLabel()" />
                 </button>
                 <t t-set-slot="content">
                     <t t-call="web.StatusBarField.Dropdown" items="this.getAllItems()"/>
