@@ -52,6 +52,10 @@ class AccountTax(models.Model):
         if self.filtered(lambda t: t.l10n_es_exempt_reason == 'E2'):
             return '02'
 
+        rebu_tax = self.env.ref('account.2_account_tax_template_rebu', raise_if_not_found=False)
+        if rebu_tax == self:
+            return '03'
+
         return '01'
 
     @api.model
