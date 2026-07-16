@@ -5,7 +5,8 @@ import { PlanSection } from "./plan_section";
 import { DatabaseSection } from "./database_section";
 import { IapSection } from "./iap_section";
 import { DashboardPlugin } from "./dashboard_plugin";
-import { navState } from "./components/navbar";
+// import { navState } from "./components/navbar";
+import { mount } from "@odoo/owl";
 
 const { DateTime } = luxon;
 
@@ -23,10 +24,10 @@ export class MySubscriptionDashboard extends Component {
         providePlugins([DashboardPlugin]);
         this.dashboardState = plugin(DashboardPlugin).state;
 
-        navState.isOpen = true;
-        onWillUnmount(() => {
-            navState.isOpen = false;
-        });
+        // navState.isOpen = true;
+        // onWillUnmount(() => {
+        //     navState.isOpen = false;
+        // });
 
         onWillStart(async () => {
             const data = await this.loadSubscription();
@@ -61,3 +62,4 @@ export class MySubscriptionDashboard extends Component {
 }
 
 registry.category("actions").add("mysubscription.dashboard", MySubscriptionDashboard);
+// await mount(MySubscriptionDashboard, document.body);

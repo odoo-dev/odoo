@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="mysubscription.dashboard">
+        <t t-set="head">
+            <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no"/>
+            <t t-call-assets="mysubscription.assets" />
+        </t>
+        <t t-call="web.layout"
+            html_data="{'style': 'height: 100%;'}"
+            title.translate="My Subscription"
+            head="head"/>
+    </template>
+</odoo>
