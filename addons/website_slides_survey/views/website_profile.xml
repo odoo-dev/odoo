@@ -116,24 +116,40 @@
     <template id="badge_content" inherit_id="website_profile.badge_content">
         <xpath expr="//div[@id='website_profile_badges']" position="after">
             <t t-if="certification_badges">
-                <div class="row">
-                    <div class="col-12">
-                        <h1 class="mt-4 mt-lg-2">Certification Badges</h1>
-                        <p class="lead">
-                            You can gain badges by passing certifications. Here is a list of all available certification badges.
-                            <br />Follow the links to reach new heights and skill up!
-                        </p>
-                        <div class="row col-12 align-items-center p-0" t-foreach="certification_badges" t-as="badge">
-                            <div class="col-3">
-                                <t t-if="badge.id in certification_badge_urls" t-set="badge_url" t-value="certification_badge_urls[badge.id]"/>
-                                <t t-call="website_profile.badge_header" badge_url="badge_url"/>
-                            </div>
-                            <div class="col-6">
-                                <span t-field="badge.description"/>
-                            </div>
-                            <div class="col-3 text-end">
-                                <b t-out="badge.granted_users_count"/>
-                                <i class="text-muted"> awarded users</i>
+                <div id="website_profile_certification_badges" class="mt-5">
+                    <div class="row">
+                        <div class="col-12 col-lg-6">
+                            <h2 class="h5-fs">Certification Badges</h2>
+                            <p>You can gain badges by passing certifications. Here is a list of all available certification badges. Follow the links to reach new heights and skill up!</p>
+                        </div>
+                    </div>
+                    <div class="row row-cols-1 row-cols-md-3 g-3">
+                        <div t-foreach="certification_badges" t-as="badge">
+                            <t t-set="badge_unlocked" t-value="bool(badge.stat_my)"/>
+                            <t t-set="badge_url" t-value="certification_badge_urls[badge.id] if certification_badge_urls and badge.id in certification_badge_urls else None"/>
+                            <div t-attf-class="card h-100 #{'' if badge_unlocked or request.env.user._is_public() else ' opacity-50'}">
+                                <div class="card-body d-flex gap-3 p-3">
+                                    <div class="flex-shrink-0">
+                                        <img t-if="not badge.image_1920 and badge.level"
+                                            t-attf-src="/website_profile/static/src/img/badge_#{badge.level}.svg"
+                                            class="rounded-circle o_image_40_cover"
+                                            t-att-alt="badge.name"/>
+                                        <div t-else="" t-field="badge.image_1920"
+                                            t-options="{'widget': 'image', 'preview_image': 'image_128', 'class': 'rounded-circle o_image_40_cover'}"/>
+                                    </div>
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="d-flex align-items-center gap-1">
+                                            <a t-if="badge_url" t-att-href="badge_url" class="text-decoration-none text-reset">
+                                                <h6 t-field="badge.name" class="mb-0"/>
+                                            </a>
+                                            <h6 t-else="" t-field="badge.name" class="mb-0"/>
+                                        </div>
+                                        <div class="text-muted small" t-field="badge.description"/>
+                                        <div class="small">
+                                            <t t-out="badge.granted_users_count"/> <span class="text-muted">awarded users</span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
