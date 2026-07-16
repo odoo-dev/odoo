@@ -14,12 +14,12 @@ export class WebsiteEventTrackReminder extends Interaction {
             "t-on-click.prevent.stop": this.debounced(this.onReminderToggleClick, 500, true),
             "t-on-mouseover": (ev) => {
                 if (!this.reminderOn){
-                    ev.currentTarget.classList.replace("fa-bell-o", "fa-bell");
+                    ev.currentTarget.classList.add("oi-filled");
                 }
             },
             "t-on-mouseout": (ev) => {
                 if (!this.reminderOn){
-                    ev.currentTarget.classList.replace("fa-bell", "fa-bell-o");
+                    ev.currentTarget.classList.remove("oi-filled")
                 }
             },
         },
