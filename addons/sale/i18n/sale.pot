@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-10 17:38+0000\n"
-"PO-Revision-Date: 2026-07-10 17:38+0000\n"
+"POT-Creation-Date: 2026-07-16 09:43+0000\n"
+"PO-Revision-Date: 2026-07-16 09:43+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -467,64 +467,68 @@ msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
-msgid "<i class=\"fa fa-comment\"/> Contact us to get a new quotation."
+msgid "<i class=\"oi me-1\" data-icon=\"print\"/>View Details"
 msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
-msgid "<i class=\"fa fa-comment\"/> Feedback"
+msgid ""
+"<i class=\"oi oi-filled\" data-icon=\"chat_bubble\"/> Contact us to get a "
+"new quotation."
 msgstr ""
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
-msgid "<i class=\"fa fa-fw fa-check\"/> Authorized"
-msgstr ""
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
-msgid "<i class=\"fa fa-fw fa-check\"/> Paid"
-msgstr ""
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
-msgid "<i class=\"fa fa-fw fa-check\"/> Reversed"
-msgstr ""
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.portal_my_quotations
-msgid "<i class=\"fa fa-fw fa-clock-o\"/> Expired"
-msgstr ""
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
-msgid "<i class=\"fa fa-fw fa-clock-o\"/> Waiting Payment"
+#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
+msgid "<i class=\"oi oi-filled\" data-icon=\"chat_bubble\"/> Feedback"
 msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.utm_campaign_view_kanban
-msgid "<i class=\"fa fa-fw fa-money me-1\" aria-label=\"Quotations\" role=\"img\"/>"
+msgid ""
+"<i class=\"oi oi-fw me-1\" data-icon=\"payments\" aria-label=\"Quotations\" "
+"role=\"img\"/>"
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
+msgid "<i class=\"oi oi-fw\" data-icon=\"check\"/> Authorized"
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
+msgid "<i class=\"oi oi-fw\" data-icon=\"check\"/> Paid"
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
+msgid "<i class=\"oi oi-fw\" data-icon=\"check\"/> Reversed"
 msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.portal_my_quotations
-msgid "<i class=\"fa fa-fw fa-remove\"/> Cancelled"
+msgid "<i class=\"oi oi-fw\" data-icon=\"close\"/> Cancelled"
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.portal_my_quotations
+msgid "<i class=\"oi oi-fw\" data-icon=\"schedule\"/> Expired"
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_content
+msgid "<i class=\"oi oi-fw\" data-icon=\"schedule\"/> Waiting Payment"
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
+msgid "<i class=\"oi\" data-icon=\"close\"/> Reject"
 msgstr ""
 
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.view_order_form
 msgid ""
-"<i class=\"fa fa-lock\"/>\n"
+"<i class=\"oi\" data-icon=\"lock\"/>\n"
 "                    Locked"
-msgstr ""
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
-msgid "<i class=\"fa fa-print me-1\"/>View Details"
-msgstr ""
-
-#. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
-msgid "<i class=\"fa fa-times\"/> Reject"
 msgstr ""
 
 #. module: sale
@@ -545,14 +549,6 @@ msgid ""
 msgstr ""
 
 #. module: sale
-#: model_terms:ir.ui.view,arch_db:sale.view_order_form
-msgid ""
-"<span class=\"fa fa-exclamation-triangle text-warning me-1\" title=\"This "
-"product is archived\" invisible=\"state not in ['draft', 'sent'] or not "
-"is_product_archived\"/>"
-msgstr ""
-
-#. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.crm_team_salesteams_view_form
 msgid "<span class=\"flex-grow-1\">/ Month</span>"
 msgstr ""
@@ -570,6 +566,14 @@ msgid ""
 "<span class=\"o_stat_value text-muted\">\n"
 "                                Outgoing\n"
 "                            </span>"
+msgstr ""
+
+#. module: sale
+#: model_terms:ir.ui.view,arch_db:sale.view_order_form
+msgid ""
+"<span class=\"oi text-warning me-1\" data-icon=\"warning\" title=\"This "
+"product is archived\" invisible=\"state not in ['draft', 'sent'] or not "
+"is_product_archived\"/>"
 msgstr ""
 
 #. module: sale
@@ -899,9 +903,7 @@ msgid ""
 "From Quotation: the document will be sent to and accessible by customers at any time.\n"
 "e.g. this option can be useful to share Product description files.\n"
 "On Order Confirmation: the document will be sent to and accessible by customers.\n"
-"e.g. this option can be useful to share User Manual or digital content bought on ecommerce. \n"
-"On Product Page: the document will be accessible by customers on the product page.\n"
-"e.g. this option can be useful to share Product description files."
+"e.g. this option can be useful to share User Manual or digital content bought on ecommerce. "
 msgstr ""
 
 #. module: sale
@@ -1230,11 +1232,6 @@ msgid "Category"
 msgstr ""
 
 #. module: sale
-#: model:product.template,name:sale.product_product_1_product_template
-msgid "Chair floor protection"
-msgstr ""
-
-#. module: sale
 #. odoo-python
 #: code:addons/sale/models/sale_order.py:0
 msgid ""
@@ -1460,11 +1457,6 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_tree
 msgid "Create Invoices"
-msgstr ""
-
-#. module: sale
-#: model:ir.model,website_form_label:sale.model_res_partner
-msgid "Create a Customer"
 msgstr ""
 
 #. module: sale
@@ -1760,9 +1752,7 @@ msgstr ""
 #: model:ir.model.fields,help:sale.field_sale_order__expected_date
 msgid ""
 "Delivery date you can promise to the customer, computed from the minimum "
-"lead time of the order lines in case of Service products. In case of "
-"shipping, the shipping policy of the order will be taken into account to "
-"either use the minimum or maximum lead time of the order lines."
+"lead time of the order lines."
 msgstr ""
 
 #. module: sale
@@ -1771,11 +1761,6 @@ msgstr ""
 msgid ""
 "Delivery lead time, in days. It's the number of days, promised to the "
 "customer, between the confirmation of the sales order and the delivery."
-msgstr ""
-
-#. module: sale
-#: model:product.template,name:sale.advance_product_0_product_template
-msgid "Deposit"
 msgstr ""
 
 #. module: sale
@@ -2186,11 +2171,6 @@ msgstr ""
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_order__message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
-
-#. module: sale
-#: model:ir.model.fields,help:sale.field_sale_order__activity_type_icon
-msgid "Font awesome icon e.g. fa-tasks"
 msgstr ""
 
 #. module: sale
@@ -2923,6 +2903,11 @@ msgid "Marketplaces"
 msgstr ""
 
 #. module: sale
+#: model:ir.model.fields,help:sale.field_sale_order__activity_type_icon
+msgid "Material Symbols icon e.g. checklist"
+msgstr ""
+
+#. module: sale
 #: model:ir.model.fields,field_description:sale.field_account_bank_statement_line__medium_id
 #: model:ir.model.fields,field_description:sale.field_account_move__medium_id
 #: model:ir.model.fields,field_description:sale.field_sale_order__medium_id
@@ -3017,11 +3002,6 @@ msgstr ""
 #. module: sale
 #: model:ir.actions.act_window,name:sale.action_quotation_form
 msgid "New Quotation"
-msgstr ""
-
-#. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__activity_calendar_event_id
-msgid "Next Activity Calendar Event"
 msgstr ""
 
 #. module: sale
@@ -3134,11 +3114,6 @@ msgstr ""
 #. module: sale
 #: model_terms:ir.ui.view,arch_db:sale.sale_order_portal_template
 msgid "Odoo"
-msgstr ""
-
-#. module: sale
-#: model:product.template,description_sale:sale.product_product_1_product_template
-msgid "Office chairs can harm your floor: protect it"
 msgstr ""
 
 #. module: sale
@@ -3848,11 +3823,6 @@ msgid "Rate"
 msgstr ""
 
 #. module: sale
-#: model:ir.model.fields,field_description:sale.field_sale_order__rating_ids
-msgid "Ratings"
-msgstr ""
-
-#. module: sale
 #: model:ir.model.fields,field_description:sale.field_product_product__reinvoice_policy
 #: model:ir.model.fields,field_description:sale.field_product_template__reinvoice_policy
 msgid "Re-Invoice Costs"
@@ -4214,14 +4184,6 @@ msgstr ""
 #: model:ir.ui.menu,name:sale.report_sales_team
 #: model:ir.ui.menu,name:sale.sales_team_config
 msgid "Sales Teams"
-msgstr ""
-
-#. module: sale
-#: model:ir.model.fields,help:sale.field_account_analytic_line__so_line
-msgid ""
-"Sales order item to which the time spent will be added in order to be "
-"invoiced to your customer. Remove the sales order item for the timesheet "
-"entry to be non-billable."
 msgstr ""
 
 #. module: sale
