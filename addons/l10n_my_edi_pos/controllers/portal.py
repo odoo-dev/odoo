@@ -5,8 +5,14 @@ from odoo.addons.account.controllers.portal import PortalAccount
 
 class L10nMYPortalAccount(PortalAccount):
 
+    def _is_malaysian_company(self):
+        return self.env.company.country_code == "MY"
+
     def _prepare_address_form_values(self, *args, **kwargs):
         rendering_values = super()._prepare_address_form_values(*args, **kwargs)
+
+        if not self._is_malaysian_company():
+            return rendering_values
 
         l10n_my_identification_types = dict(request.env['res.partner']._fields['l10n_my_identification_type'].selection)
         # BRN applies only to companies. It must not be selectable for individuals, and it's enforced companies.
@@ -18,6 +24,7 @@ class L10nMYPortalAccount(PortalAccount):
             'l10n_my_identification_types': l10n_my_identification_types,
             'l10n_my_edi_industrial_classifications': request.env['l10n_my_edi.industry_classification'].sudo().search([]),
             'default_industrial_classification_id': default_classification.id if default_classification else False,
+            "vat_label": self.env._("Tax Identification Number"),
         })
         return rendering_values
 
