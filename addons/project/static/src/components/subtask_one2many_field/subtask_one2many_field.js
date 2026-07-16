@@ -1,6 +1,6 @@
 import { registry } from "@web/core/registry";
 import { pick } from "@web/core/utils/objects";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 
 import { SubtaskListRenderer } from "./subtask_list_renderer";
 
@@ -30,7 +30,7 @@ export class SubtaskOne2ManyField extends X2ManyField {
 }
 
 export const subtaskOne2ManyField = {
-    ...x2ManyField,
+    ...one2ManyField,
     component: SubtaskOne2ManyField,
     additionalClasses: ["o_field_one2many"],
 };

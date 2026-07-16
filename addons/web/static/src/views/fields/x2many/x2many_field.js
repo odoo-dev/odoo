@@ -33,7 +33,6 @@ export class X2ManyField extends Component {
         addLabel: { type: String, optional: true },
         editable: { type: String, optional: true },
         viewMode: { type: String, optional: true },
-        widget: { type: String, optional: true },
         crudOptions: { type: Object, optional: true },
         string: { type: String, optional: true },
         relatedFields: { type: Object, optional: true },
@@ -144,7 +143,7 @@ export class X2ManyField extends Component {
     }
 
     get isMany2Many() {
-        return this.field.type === "many2many" || this.props.widget === "many2many";
+        return this.field.type === "many2many";
     }
 
     get list() {
@@ -322,30 +321,36 @@ export class X2ManyField extends Component {
     }
 }
 
-export const x2ManyField = {
-    component: X2ManyField,
-    displayName: _t("Relational table"),
-    supportedTypes: ["one2many", "many2many"],
-    useSubView: true,
-    extractProps: ({ attrs, relatedFields, viewMode, views, widget, string }, dynamicInfo) => {
-        const props = {
-            addLabel: attrs["add-label"],
-            context: dynamicInfo.context,
-            domain: dynamicInfo.domain,
-            crudOptions: pick(attrs, "create", "delete", "link", "unlink", "write"),
-            string,
-        };
-        if (viewMode) {
-            props.views = views;
-            props.viewMode = viewMode;
-            props.relatedFields = relatedFields;
-        }
-        if (widget) {
-            props.widget = widget;
-        }
-        return props;
-    },
+const extractProps = ({ attrs, relatedFields, viewMode, views, string }, dynamicInfo) => {
+    const props = {
+        addLabel: attrs["add-label"],
+        context: dynamicInfo.context,
+        domain: dynamicInfo.domain,
+        crudOptions: pick(attrs, "create", "delete", "link", "unlink", "write"),
+        string,
+    };
+    if (viewMode) {
+        props.views = views;
+        props.viewMode = viewMode;
+        props.relatedFields = relatedFields;
+    }
+    return props;
 };
 
-registry.category("fields").add("one2many", x2ManyField);
-registry.category("fields").add("many2many", x2ManyField);
+export const one2ManyField = {
+    component: X2ManyField,
+    displayName: _t("Relational table"),
+    supportedTypes: ["one2many"],
+    useSubView: true,
+    extractProps,
+};
+registry.category("fields").add("one2many", one2ManyField);
+
+export const many2ManyField = {
+    component: X2ManyField,
+    displayName: _t("Relational table"),
+    supportedTypes: ["many2many"],
+    useSubView: true,
+    extractProps,
+};
+registry.category("fields").add("many2many", many2ManyField);

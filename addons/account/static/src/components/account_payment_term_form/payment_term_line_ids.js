@@ -1,6 +1,6 @@
 import { registry } from "@web/core/registry";
 
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { useAddInlineRecord } from "@web/views/fields/relational_utils";
 
 export class PaymentTermLineIdsOne2Many extends X2ManyField {
@@ -18,7 +18,7 @@ export class PaymentTermLineIdsOne2Many extends X2ManyField {
 }
 
 export const PaymentTermLineIds = {
-    ...x2ManyField,
+    ...one2ManyField,
     component: PaymentTermLineIdsOne2Many,
 }
 

@@ -3,7 +3,7 @@ import { ConfirmationDialog, deleteConfirmationMessage } from '@web/core/confirm
 import { ListRenderer } from '@web/views/list/list_renderer';
 import { registry } from '@web/core/registry';
 import { useService } from '@web/core/utils/hooks';
-import { X2ManyField, x2ManyField } from '@web/views/fields/x2many/x2many_field';
+import { X2ManyField, one2ManyField } from '@web/views/fields/x2many/x2many_field';
 
 
 export class PAVListRenderer extends ListRenderer {
@@ -57,7 +57,7 @@ export class PAVOne2ManyField extends X2ManyField {
 }
 
 export const pavOne2ManyField = {
-    ...x2ManyField,
+    ...one2ManyField,
     component: PAVOne2ManyField,
 }
 

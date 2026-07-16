@@ -79,7 +79,7 @@ import { IntegerField } from "@web/views/fields/integer/integer_field";
 import { buildM2OFieldDescription, Many2OneField } from "@web/views/fields/many2one/many2one_field";
 import { useSpecialData } from "@web/views/fields/relational_utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { FormController } from "@web/views/form/form_controller";
 import { AttachDocumentWidget } from "@web/views/widgets/attach_document/attach_document";
 import { WebClient } from "@web/webclient/webclient";
@@ -12466,7 +12466,7 @@ test(`multiple views for m2m field after list item edit in form`, async () => {
 
 test(`custom x2many with relatedFields and list view inline`, async () => {
     fieldsRegistry.add("my_widget", {
-        ...x2ManyField,
+        ...one2ManyField,
         component: class MyField extends X2ManyField {},
         relatedFields: [
             { name: "parent_id", type: "many2one", relation: "partner" },
@@ -12522,7 +12522,7 @@ test(`custom x2many with relatedFields and list view inline`, async () => {
 
 test(`custom x2many with a m2o in relatedFields and column_invisible`, async () => {
     fieldsRegistry.add("my_widget", {
-        ...x2ManyField,
+        ...one2ManyField,
         component: class MyField extends X2ManyField {},
         relatedFields: [{ name: "parent_id", type: "many2one", relation: "partner" }],
     });
@@ -12574,7 +12574,7 @@ test(`custom x2many with a m2o in relatedFields and column_invisible`, async () 
 test.tags("desktop");
 test(`custom x2many with relatedFields and list view not inline`, async () => {
     fieldsRegistry.add("my_widget", {
-        ...x2ManyField,
+        ...one2ManyField,
         component: class MyField extends X2ManyField {},
         relatedFields: [
             { name: "parent_id", type: "many2one", relation: "partner" },

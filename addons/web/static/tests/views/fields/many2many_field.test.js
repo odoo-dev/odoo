@@ -24,7 +24,7 @@ import {
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, many2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import { cookie } from "@web/core/browser/cookie";
 import { ListRenderer } from "@web/views/list/list_renderer";
@@ -1337,7 +1337,7 @@ test("many2many editable list: delete with confirmation (cancel, then delete aga
         };
     }
     const x2ManyFieldWithConfirmation = {
-        ...x2ManyField,
+        ...many2ManyField,
         component: X2ManyFieldWithConfirmation,
         additionalClasses: ["o_field_one2many"],
     };
@@ -1971,7 +1971,7 @@ test("`this` inside rendererProps should reference the component", async () => {
     }
 
     const customX2ManyField = {
-        ...x2ManyField,
+        ...many2ManyField,
         component: CustomX2manyField,
     };
     registry.category("fields").add("custom", customX2ManyField);

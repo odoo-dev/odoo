@@ -5,7 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { useSubEnv } from "@web/owl2/utils";
 import { useOpenX2ManyRecord, useX2ManyCrud } from "@web/views/fields/relational_utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { QuestionPageListRenderer } from "./question_page_list_renderer";
 
 /**
@@ -111,9 +111,9 @@ class QuestionPageOneToManyField extends X2ManyField {
 }
 
 export const questionPageOneToManyField = {
-    ...x2ManyField,
+    ...one2ManyField,
     component: QuestionPageOneToManyField,
-    additionalClasses: [...x2ManyField.additionalClasses || [], "o_field_one2many"],
+    additionalClasses: [...one2ManyField.additionalClasses || [], "o_field_one2many"],
     
 };
 

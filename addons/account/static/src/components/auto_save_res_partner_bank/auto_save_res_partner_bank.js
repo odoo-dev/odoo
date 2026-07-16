@@ -1,5 +1,5 @@
 import { registry } from "@web/core/registry";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 
 
 export class AutoSaveResPartnerField extends X2ManyField {
@@ -10,7 +10,7 @@ export class AutoSaveResPartnerField extends X2ManyField {
 }
 
 export const autoSaveResPartnerField = {
-    ...x2ManyField,
+    ...one2ManyField,
     component: AutoSaveResPartnerField,
 };
 

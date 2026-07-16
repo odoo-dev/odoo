@@ -4,7 +4,7 @@ import { x2ManyCommands } from "@web/core/orm_plugin";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { ListTextField, TextField } from "@web/views/fields/text/text_field";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { ListRenderer, listRendererProps } from "@web/views/list/list_renderer";
 
 const SHOW_ALL_ITEMS_TOOLTIP = _t("Some lines can be on the next page, display them to unlock actions on section.");
@@ -571,12 +571,12 @@ export class ListSectionAndNoteText extends SectionAndNoteText {
 }
 
 export const sectionAndNoteFieldOne2Many = {
-    ...x2ManyField,
+    ...one2ManyField,
     component: SectionAndNoteFieldOne2Many,
-    additionalClasses: [...(x2ManyField.additionalClasses || []), "o_field_one2many"],
+    additionalClasses: [...(one2ManyField.additionalClasses || []), "o_field_one2many"],
     extractProps: (staticInfo, dynamicInfo) => {
         return {
-            ...x2ManyField.extractProps(staticInfo, dynamicInfo),
+            ...one2ManyField.extractProps(staticInfo, dynamicInfo),
             aggregatedFields: staticInfo.attrs.aggregated_fields
                 ? staticInfo.attrs.aggregated_fields.split(/\s*,\s*/)
                 : [],

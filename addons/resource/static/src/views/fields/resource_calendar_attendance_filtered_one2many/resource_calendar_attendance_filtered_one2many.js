@@ -1,5 +1,5 @@
 import { registry } from "@web/core/registry";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { Domain } from "@web/core/domain";
 
 export class ResourceCalendarAttendanceFilteredOne2Many extends X2ManyField {
@@ -32,7 +32,7 @@ export class ResourceCalendarAttendanceFilteredOne2Many extends X2ManyField {
 }
 
 export const calendarOne2Many = {
-    ...x2ManyField,
+    ...one2ManyField,
     component: ResourceCalendarAttendanceFilteredOne2Many,
     supportedAttributes: [
         {
@@ -42,7 +42,7 @@ export const calendarOne2Many = {
         },
     ],
     extractProps: (staticInfo, dynamicInfo) => ({
-        ...x2ManyField.extractProps(staticInfo, dynamicInfo),
+        ...one2ManyField.extractProps(staticInfo, dynamicInfo),
         domainFilter: new Domain(staticInfo.attrs.domain_filter),
     }),
 };

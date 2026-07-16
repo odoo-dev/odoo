@@ -1,6 +1,6 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { ListRenderer } from "@web/views/list/list_renderer";
 
 
@@ -44,7 +44,7 @@ export class FieldMany2ManyAltPOs extends X2ManyField {
 }
 
 export const fieldMany2ManyAltPOs = {
-    ...x2ManyField,
+    ...one2ManyField,
     component: FieldMany2ManyAltPOs,
 };
 

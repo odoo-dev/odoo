@@ -1,5 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { useX2ManyCrud, useOpenX2ManyRecord } from "@web/views/fields/relational_utils";
 import { registry } from "@web/core/registry";
 import { BadgeTag } from "@web/core/tags_list/badge_tag";
@@ -54,7 +54,7 @@ export class One2ManyTagsSkillsField extends X2ManyField {
 }
 
 export const one2ManyTagsSkillsField = {
-    ...x2ManyField,
+    ...one2ManyField,
     component: One2ManyTagsSkillsField,
 };
 

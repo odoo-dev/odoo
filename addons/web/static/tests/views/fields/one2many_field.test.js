@@ -36,7 +36,7 @@ import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { pick } from "@web/core/utils/objects";
 import { Record } from "@web/model/relational_model/record";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { WebClient } from "@web/webclient/webclient";
 
 class Partner extends models.Model {
@@ -13313,7 +13313,7 @@ test("one2many custom which can be edited in dialog or on the line", async () =>
     }
 
     const customX2ManyField = {
-        ...x2ManyField,
+        ...one2ManyField,
         component: CustomX2manyField,
     };
     registry.category("fields").add("custom", customX2ManyField);

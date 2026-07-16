@@ -1,7 +1,7 @@
 import { useChildSubEnv } from "@web/owl2/utils";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { X2ManyField, one2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { CustomMediaDialog } from "./custom_media_dialog";
 import { getDataURLFromFile } from "@web/core/utils/urls";
 import { saveMultipleAttachments } from "@web/core/utils/image_library";
@@ -78,7 +78,7 @@ export class X2ManyMediaViewer extends X2ManyField {
 }
 
 export const x2ManyMediaViewer = {
-    ...x2ManyField,
+    ...one2ManyField,
     component: X2ManyMediaViewer,
     relatedFields: ({ options }) => {
         if (options.set_attachment_id) {
@@ -90,7 +90,7 @@ export const x2ManyMediaViewer = {
         { attrs, relatedFields, viewMode, views, widget, options, string },
         dynamicInfo
     ) => {
-        const x2ManyFieldProps = x2ManyField.extractProps(
+        const x2ManyFieldProps = one2ManyField.extractProps(
             { attrs, relatedFields, viewMode, views, widget, options, string },
             dynamicInfo
         );
