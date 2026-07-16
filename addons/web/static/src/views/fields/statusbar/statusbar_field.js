@@ -268,9 +268,13 @@ export class StatusBarField extends Component {
         if (!firstItem) {
             return false;
         }
+        const style = getComputedStyle(root);
+        const verticalOffset =
+            parseFloat(style.paddingTop) + parseFloat(style.paddingBottom) +
+            parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
         const { height: currentHeight } = root.getBoundingClientRect();
         const { height: targetHeight } = firstItem.getBoundingClientRect();
-        return currentHeight > targetHeight;
+        return currentHeight > targetHeight + verticalOffset;
     }
 
     /**
