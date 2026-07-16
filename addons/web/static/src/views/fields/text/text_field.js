@@ -45,8 +45,9 @@ export class TextField extends Component {
             preventLineBreaks: !this.props.lineBreaks,
         });
         useSpellCheck({ ref: this.textareaRef });
-
-        useAutoresize(this.textareaRef, { minimumHeight: this.minimumHeight });
+        // debugger;
+        // useAutoresize(this.textareaRef, { minimumHeight: this.rowCount * 25 });
+        useAutoresize(this.textareaRef);
 
         this.selectionStart = this.props.record.data[this.props.name]?.length || 0;
     }
@@ -75,9 +76,7 @@ export class TextField extends Component {
     get isTranslatable() {
         return this.props.record.fields[this.props.name].translate;
     }
-    get minimumHeight() {
-        return this.props.lineBreaks ? 50 : 0;
-    }
+
     get rowCount() {
         return this.props.lineBreaks ? this.props.rowCount : 1;
     }
@@ -138,9 +137,6 @@ export class ListTextField extends TextField {
         rowCount: t.number().optional(1),
     });
 
-    get minimumHeight() {
-        return 0;
-    }
     get rowCount() {
         return this.props.rowCount;
     }
