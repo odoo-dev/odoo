@@ -56,3 +56,18 @@ class TestDuplicatePartnerBank(SavepointCaseWithUserDemo):
     def test_duplicate_acc_number_inactive_bank_account(self):
         self.partner_bank_b.active = False
         self.assertFalse(self.partner_bank_a.duplicate_bank_partner_ids)
+
+    def test_create_partner_bank_with_unsaved_partner_via_form(self):
+        # This seems to work, the bank stays virtual and doesn't get
+        # written with a partner_id until the partner is saved.
+        partner_form = Form(self.env['res.partner'])
+
+        with partner_form.bank_ids.new() as bank_form:
+            bank_form.account_number = '123456789'
+
+        partner_form.name = 'Test Partner'
+        partner = partner_form.save()
+
+        self.assertEqual(len(partner.bank_ids), 1)
+        self.assertEqual(partner.bank_ids.account_number, '123456789')
+        self.assertEqual(partner.bank_ids.partner_id, partner)

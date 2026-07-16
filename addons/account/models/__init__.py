@@ -51,3 +51,4 @@ from . import account_report
 from . import onboarding_onboarding_step
 from . import template_generic_coa
 from . import uom_uom
+from . import test_many2many_tags_reproduce
