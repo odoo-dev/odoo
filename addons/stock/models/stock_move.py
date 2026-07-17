@@ -2309,6 +2309,20 @@ Please change the quantity done or the rounding precision in your settings.""",
                 picking.batch_id = None
         return True
 
+    def _action_reset_to_draft(self):
+        done_moves = self.filtered(lambda m: m.state == 'done')
+        done_moves.move_dest_ids._do_unreserve()
+        dest_moves = self.env['stock.move']
+        for move in done_moves:
+            for dest in move.move_dest_ids.filtered(lambda d: d.state not in ('done', 'cancel') and d.location_id._child_of(move.location_dest_id)):
+                dest.product_uom_qty = max(dest.product_uom_qty - move.quantity, 0)
+                dest_moves |= dest
+        self.write({'state': 'draft'})
+        done_moves.picked = False
+        done_moves.move_line_ids._action_reset_to_draft()
+        dest_moves._action_assign()
+        return True
+
     def _log_cancel_activity(self):
         return
 
@@ -2385,12 +2399,15 @@ Please change the quantity done or the rounding precision in your settings.""",
         moves_to_push = moves_todo.filtered(lambda m: not m._skip_push())
         if moves_to_push:
             moves_to_push._push_apply()
+        skipped_push = moves_todo - moves_to_push
 
         for move in moves_todo:
             for move_dest in move.sudo().move_dest_ids:
                 if not move_dest.location_id._child_of(move.location_dest_id) and not move.location_dest_id._child_of(move_dest.location_id):
                     move_dest._break_mto_link(move)
                     continue
+                if move in skipped_push:
+                    move_dest.sudo().product_uom_qty = sum(move_dest.move_orig_ids.mapped('quantity'))
                 move_dests_per_company[move_dest.company_id.id] |= move_dest
 
         for company_id, move_dests in move_dests_per_company.items():
