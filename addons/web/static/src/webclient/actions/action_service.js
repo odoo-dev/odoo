@@ -901,6 +901,7 @@ export function makeActionManager(env, router = _router) {
         let removeDialogFn;
         const { promise: currentActionProm, resolve, reject } = Promise.withResolvers();
         const action = controller.action;
+        const fullscreen = _getActionMode(action) === "fullscreen";
         if (action.target !== "new" && "newStack" in options) {
             controllerStack = options.newStack;
         }
@@ -1161,6 +1162,7 @@ export function makeActionManager(env, router = _router) {
                     onMounted: () => resolve(),
                     withControlPanel: action.type === "ir.actions.act_window",
                 },
+                fullscreen,
             });
             await promise;
         }
