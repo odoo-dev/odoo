@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
     <t t-name="purchase.PurchaseDashboard">
-        <div class="o_purchase_dashboard container-fluid pb-3">
+        <div class="o_purchase_dashboard container-fluid px-0 pb-3">
             <div class="row justify-content-between gap-2 gap-lg-0">
                 <div class="col-12 col-lg-8 flex-grow-1 flex-lg-grow-0 flex-shrink-0">
                     <div class="grid gap-1 gap-lg-4">
@@ -156,7 +156,7 @@
                                          {{ this.purchaseData()['days_to_purchase'] and
                                             this.purchaseData()['global']['days_to_order'] > this.purchaseData()['days_to_purchase']
                                             ? 'btn btn-warning'
-                                            : 'bg-200 text-center' }}">
+                                            : 'rounded-3 bg-view text-center' }}">
                                     <div class="fs-2" t-out="this.purchaseData()['global']['days_to_order']"/>Days to Order
                                 </div>
                             </div>
