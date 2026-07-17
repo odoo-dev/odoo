@@ -16,7 +16,7 @@
             }
 
             th {
-                --table-bg: linear-gradient(to bottom, #{$o-webclient-background-color}, #{rgba($o-webclient-background-color, .75)});
+                --table-bg: linear-gradient(to bottom, #{$o-view-background-color}, #{rgba($o-view-background-color, .75)});
 
                 // Temporary workaround: We replace the border with a box-shadow to simulate the border bottom so it keeps visible when scrolling.
                 border: 0;

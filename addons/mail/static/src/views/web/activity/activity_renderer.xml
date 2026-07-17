@@ -103,7 +103,7 @@
 <t t-name="mail.ActivityViewFooter">
     <tfoot class="o_activity_view_table_footer">
         <tr class="o_data_row">
-            <td class="p-3" colspan="100">
+            <td class="p-3 bg-view" colspan="100">
                 <span class="btn btn-link o_record_selector cursor-pointer"
                       t-on-click.prevent.stop="this.props.scheduleActivity">
                     <i class="fa fa-plus pe-2"/> Schedule activity
@@ -113,7 +113,7 @@
     </tfoot>
 </t>
 
-<div t-name="mail.ActivityRenderer" class="o_activity_view h-100">
+<div t-name="mail.ActivityRenderer" class="o_activity_view h-100 rounded-4 rounded-bottom-0 bg-view overflow-hidden">
     <t t-if="!this.props.activityTypes.length" t-call="web.NoContentHelper"/>
     <table t-else="" class="table table-bordered mb-5 bg-view o_activity_view_table"
         t-attf-style="max-width: {{this.activeColumns.length &gt; 4 ? 100 : 20 * (this.activeColumns.length + 1) }}%; min-width: 600px;">
