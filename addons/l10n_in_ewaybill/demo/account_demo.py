@@ -18,10 +18,10 @@ class AccountChartTemplate(models.AbstractModel):
             },
         }
 
-    @template(template='in', model='l10n.in.ewaybill', demo=True)
-    def _l10n_in_ewaybill_demo(self):
-        if not self.env.company.state_id:
-            return {}
+    def _post_load_demo_data(self, template_code):
+        super()._post_load_demo_data(template_code)
+        if template_code != 'in' or not self.env.company.state_id:
+            return
         invoices = [
             'demo_invoice_b2b_1',
             'demo_invoice_b2b_2',
@@ -36,12 +36,16 @@ class AccountChartTemplate(models.AbstractModel):
             'vehicle_no': "GJ11AA1234",
             'vehicle_type': "R",
         }
-        return {
-            f'ewaybill_{invoice}': {
-                **default_ewaybill_vals,
-                'account_move_id': invoice_id,
-                'company_id': self.env.company.id,
+        self.env['l10n.in.ewaybill']._load_records([
+            {
+                'xml_id': self.company_xmlid(f'ewaybill_{invoice_xmlid}'),
+                'values': {
+                    **default_ewaybill_vals,
+                    'account_move_id': invoice.id,
+                    'company_id': self.env.company.id,
+                },
+                'noupdate': True,
             }
-            for invoice in invoices
-            if (invoice_id := self.env['ir.model.data']._xmlid_to_res_id(self.company_xmlid(invoice), raise_if_not_found=False))
-        }
+            for invoice_xmlid in invoices
+            if (invoice := self.ref(invoice_xmlid, raise_if_not_found=False))
+        ])
