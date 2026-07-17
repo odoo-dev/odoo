@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import contextvars
 import functools
 import logging
 import threading
@@ -29,7 +30,7 @@ from odoo.tools import (
     remove_accents,
     sql,
 )
-from odoo.tools.func import locked, reset_cached_properties
+from odoo.tools.func import reset_cached_properties
 from odoo.tools.lru import LRU
 from odoo.tools.misc import Collector
 from odoo.tools.version_tag_reset import reset_classes_tp_versions_used
@@ -89,10 +90,12 @@ class Registry(Mapping[str, type["BaseModel"]]):
     There is one registry instance per database.
 
     """
-    _lock = threading.RLock()
-
     registries = LRU[str, "Registry"](42)  # random default value
-    """ A mapping from database names to registries. """
+    """ A mapping from database names to ready registries. """
+
+    _loading_registry_locks = defaultdict[str, threading.RLock](threading.RLock)
+    _loading_registry = contextvars.ContextVar('loading_registry', default=None)
+    _lock = registries._lock  # TODO remove backward compatibility
 
     def __new__(cls, db_name: str):
         """ Return the registry for the given database name."""
@@ -100,18 +103,26 @@ class Registry(Mapping[str, type["BaseModel"]]):
         # set the database name for logging
         current_thread = threading.current_thread()
         current_thread.dbname = db_name
-        with cls._lock:
-            try:
-                return cls.registries[db_name]
-            except KeyError:
-                return cls.new(db_name)
+        registry = cls._loading_registry.get()
+        if registry is not None and registry.db_name == db_name:
+            return registry
+        while True:
+            if (registry := cls.registries.get(db_name)) is not None:
+                return registry
+            lock = cls._loading_registry_locks[db_name]
+            if lock.acquire(blocking=False):
+                try:
+                    return cls.new(db_name)
+                finally:
+                    lock.release()
+            with lock:  # wait until loaded
+                pass
 
     ready: bool  # whether everything is set up
     loaded: bool  # whether all modules are loaded
     models: dict[str, type[BaseModel]]
 
     @classmethod
-    @locked
     def new(
         cls,
         db_name: str,
@@ -146,23 +157,26 @@ class Registry(Mapping[str, type["BaseModel"]]):
           determined by the ``config['with_demo']``. Defaults to ``None``
         :param lock_wait: How long to wait to acquire the lock on the database (in seconds).
         """
-        if (registry := cls.registries.get(db_name)) and not registry.ready:
-            raise Exception('Registry for database %s can not be loaded recursively' % db_name)
-
-        from odoo.modules import db  # noqa: PLC0415
-        from odoo.modules.loading import load_modules, reset_modules_state  # noqa: PLC0415
-
-        t0 = time.time()
-        registry: Registry = object.__new__(cls)
-        registry.init(db_name)
-        first_registry = not cls.registries
-
+        assert db_name, "Missing database name"
         # Initializing a registry will call general code which will in
         # turn call Registry() to obtain the registry being initialized.
-        # Make it available in the registries dictionary then remove it
-        # if an exception is raised.
-        cls.registries[db_name] = registry  # pylint: disable=unsupported-assignment-operation
+        if cls._loading_registry.get() is not None:
+            raise Exception(f'Registry for database {db_name} cannot be loaded recursively')
+        lock = cls._loading_registry_locks[db_name]
+        lock.acquire()
         try:
+            first_registry = not cls.registries
+            cls.registries.pop(db_name, None)  # remove existing registry
+
+            from odoo.modules import db  # noqa: PLC0415
+            from odoo.modules.loading import load_modules, reset_modules_state  # noqa: PLC0415
+
+            t0 = time.time()
+
+            registry: Registry = object.__new__(cls)
+            registry._init__(db_name)
+            cls._loading_registry.set(registry)
+
             registry.setup_signaling()
             if upgrade_modules or install_modules or reinit_modules:
                 update_module = True
@@ -225,32 +239,33 @@ class Registry(Mapping[str, type["BaseModel"]]):
                     models_to_check = registry._models_to_check
                     registry = object.__new__(cls)
                     registry.init(db_name, models_to_check=models_to_check)
-                    cls.registries[db_name] = registry  # pylint: disable=unsupported-assignment-operation
+                    cls._loading_registry.set(registry)
                     cr.transaction.reset()  # rebind the transaction to the new registry
                     upgrade_modules = install_modules = reinit_modules = ()
                 else:
                     raise Exception(f'Failed to load registry after {retries} attempts')  # noqa: TRY301
-        except Exception:
-            _logger.error('Failed to load registry')
-            del cls.registries[db_name]     # pylint: disable=unsupported-delete-operation
-            raise
 
-        del registry.loaded_xmlids
-        del registry._force_upgrade_scripts
-        del registry._reinit_modules
-        del registry._models_to_check
+            del registry.loaded_xmlids
+            del registry._force_upgrade_scripts
+            del registry._reinit_modules
+            del registry._models_to_check
 
-        # load_modules() above can replace the registry by calling
-        # indirectly new() again (when modules have to be uninstalled).
-        # Yeah, crazy.
-        registry = cls.registries[db_name]  # pylint: disable=unsubscriptable-object
+            reset_classes_tp_versions_used(registry.values(), reset_above_ratio=0.3)  # cpython optimisation
+            registry.ready = True
+            cls.registries[db_name] = registry
+        finally:
+            cls._loading_registry.set(None)
+            del cls._loading_registry_locks[db_name]
+            lock.release()
 
-        reset_classes_tp_versions_used(registry.values(), reset_above_ratio=0.3)  # cpython optimisation
-        registry.ready = True
         _logger.info("Registry loaded in %.3fs", time.time() - t0)
         return registry
 
-    def init(self, db_name: str, models_to_check: OrderedSet[str] | None = None) -> None:
+    def _init__(self, db_name: str, models_to_check: OrderedSet[str] | None = None) -> None:
+        """Initialize attributes.
+
+        Like __init__ but needed because we want to control it while calling __new__ manually.
+        """
         self.loaded = False
         self.ready = False
 
@@ -323,17 +338,14 @@ class Registry(Mapping[str, type["BaseModel"]]):
         self.unaccent = _unaccent if self.has_unaccent else lambda x: x  # type: ignore
         self.unaccent_python = remove_accents if self.has_unaccent else lambda x: x
 
-        self.new = self.init = self.registries = None  # type: ignore
+        self.new = self._init__ = self.registries = None  # type: ignore
 
     @classmethod
-    @locked
     def delete(cls, db_name: str) -> None:
         """ Delete the registry linked to a given database. """
-        if db_name in cls.registries:  # pylint: disable=unsupported-membership-test
-            del cls.registries[db_name]  # pylint: disable=unsupported-delete-operation
+        cls.registries.pop(db_name, None)
 
     @classmethod
-    @locked
     def delete_all(cls):
         """ Delete all the registries. """
         cls.registries.clear()
@@ -459,7 +471,6 @@ class Registry(Mapping[str, type["BaseModel"]]):
 
         return model_names
 
-    @locked
     def _setup_models__(self, cr: BaseCursor, model_names: Iterable[str] | None = None) -> None:  # noqa: PLW3201
         """ Perform the setup of models.
         This must be called after loading modules and before using the ORM.
@@ -468,6 +479,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         models impacted by the given ``model_names`` and all the already-marked
         models will be set up. Otherwise, all models are set up.
         """
+        self._lock_for_update()
         from .environments import Environment  # noqa: PLC0415
         env = Environment(cr, SUPERUSER_ID, {})
         env.invalidate_all()
