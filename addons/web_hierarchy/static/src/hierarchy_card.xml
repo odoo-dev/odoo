@@ -12,7 +12,7 @@
                     <i class="fa fa-chevron-up"/>
                 </button>
             </div>
-            <div class="o_hierarchy_node w-100 h-100 d-flex flex-column justify-content-between border rounded-3 bg-view"
+            <div class="o_hierarchy_node w-100 h-100 d-flex flex-column justify-content-between rounded-3 bg-view"
                 t-att-data-node-id="this.props.node.id"
                 t-custom-click.synthetic="this.onGlobalClick"
             >
