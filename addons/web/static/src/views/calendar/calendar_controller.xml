@@ -17,7 +17,7 @@
                     <t t-component="this.searchBarToggler.component" t-props="this.searchBarToggler.props"/>
                 </t>
                 <div class="o_calendar_container d-grid h-100">
-                    <div class="o_calendar_header d-flex align-items-center gap-1 px-3 mb-3 px-print-0 pt-print-0">
+                    <div class="o_calendar_header d-flex align-items-center gap-1 mb-3 px-print-0 pt-print-0">
                         <div t-if="!this.uiService.isSmall" class="o_calendar_navigation_buttons btn-group d-print-none">
                             <button
                                 class="o_calendar_button_prev btn btn-secondary d-none d-md-block"

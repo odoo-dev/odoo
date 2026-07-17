@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="web.CalendarSidePanel">
-        <div t-if="this.props.sidePanelExpanded" class="o_calendar_sidepanel_container d-print-none position-relative w-100 w-md-auto px-0 px-md-3 overflow-x-hidden overflow-y-auto">
+        <div t-if="this.props.sidePanelExpanded" class="o_calendar_sidepanel_container d-print-none position-relative w-100 w-md-auto px-0 px-md-3 pe-md-0 overflow-x-hidden overflow-y-auto">
             <div t-if="this.props.model.meta.canScheduleEvents and this.state.isDragging" class="d-flex o_calendar_unschedule_zone rounded-4 mb-3 align-items-center justify-content-center">
                 <b>Drop here to unschedule</b>
             </div>
@@ -23,7 +23,7 @@
             </div>
         </div>
         <div t-elif="!this.uiService.isSmall" class="o_calendar_sidebar flex-grow-0 flex-shrink-0 h-100 cursor-pointer d-print-none" t-on-click="() => this.props.toggleSidePanel()">
-            <div class="d-flex">
+            <div class="d-flex me-n3">
                 <button class="btn btn-light btn-sm d-flex mb-2 mx-3 p-2">
                     <i class="oi oi-panel-right"/>
                 </button>
