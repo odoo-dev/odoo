@@ -17,7 +17,7 @@
                                 <t t-elif="cell.isLeaf !== undefined">
                                     <t t-call="web.PivotHeader.title" isXAxis="true" isInHead="true"/>
                                 </t>
-                                <th t-else="" t-att-colspan="cell.width" t-att-rowspan="cell.height" class="border-0 bg-100 fw-normal" t-att-class="{ 'border-0': cell_index != 0 }"/>
+                                <th t-else="" t-att-colspan="cell.width" t-att-rowspan="cell.height" class="border-0 bg-200 fw-normal" t-att-class="{ 'border-0': cell_index != 0 }"/>
                             </t>
                         </tr>
                     </thead>
