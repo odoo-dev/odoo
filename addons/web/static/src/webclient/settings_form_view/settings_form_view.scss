@@ -56,7 +56,7 @@ body:not(.o_touch_device) .o_settings_container .o_field_selection {
 
 // BASE SETTINGS LAYOUT
 .o_base_settings_view .o_form_renderer {
-   --settings__tab-bg: #{map-get($grays, '100')};
+   --settings__tab-bg: none;
    --settings__tab-bg--active: #{$o-component-active-bg};
    --settings__tab-color: #{$body-color};
    --settings__title-bg: #{map-get($grays, '300')};
