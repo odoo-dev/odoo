@@ -356,13 +356,21 @@ class AccountEdiProxyClientUser(models.Model):
                     continue
 
                 move.peppol_move_state = 'error'
-                move._message_log(body=_("Peppol error: %s", content['error'].get('data', {}).get('message') or content['error']['message']))
+                move._message_log(body=self._peppol_get_message_status_error_body(move, content['error']))
                 continue
 
             move.peppol_move_state = content['state']
-            move._message_log(body=_('Peppol status update: %s', content['state']))
+            move._message_log(body=self._peppol_get_message_status_update_body(move, content))
             processed_message_uuids.append(uuid)
         return processed_message_uuids
+
+    def _peppol_get_message_status_error_body(self, move, error):
+        self.ensure_one()
+        return _("Peppol error: %s", error.get('data', {}).get('message') or error['message'])
+
+    def _peppol_get_message_status_update_body(self, move, content):
+        self.ensure_one()
+        return _('Peppol status update: %s', content['state'])
 
     def _peppol_get_documents_for_status(self, batch_size):
         self.ensure_one()
