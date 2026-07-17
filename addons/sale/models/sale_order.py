@@ -929,9 +929,10 @@ class SaleOrder(models.Model):
 
     @api.onchange('order_line')
     def _onchange_order_line(self):
+        linked_lines_by_line = self.order_line._get_linked_lines_by_line()
         for index, line in enumerate(self.order_line):
             if line.product_type == 'combo' and line.selected_combo_items:
-                linked_lines = line._get_linked_lines()
+                linked_lines = linked_lines_by_line[line]
                 selected_combo_items = json.loads(line.selected_combo_items)
                 if (
                     selected_combo_items
