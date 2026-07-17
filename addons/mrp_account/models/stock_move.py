@@ -64,3 +64,12 @@ class StockMove(models.Model):
             )
             price_unit += component_price * qty_per_kit_by_line.get(bom_line, 0)
         return price_unit
+
+    def _action_reset_to_draft(self):
+        done_moves = self.filtered(lambda m: m.state == 'done')
+        account_moves = done_moves.account_move_id
+        account_moves.sudo().button_draft()
+        account_moves.sudo().unlink()
+        done_moves.analytic_account_line_ids.sudo().unlink()
+
+        return super()._action_reset_to_draft()

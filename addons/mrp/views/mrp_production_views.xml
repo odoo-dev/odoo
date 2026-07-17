@@ -237,6 +237,7 @@
                             confirm-title="Cancel Manufacturing Order"
                             confirm-label="Cancel this Order"/>
                     <button name="button_unbuild" type="object" string="Unbuild" invisible="state != 'done'" data-hotkey="shift+v"/>
+                    <button name="action_reset_to_draft" type="object" string="Reset to Draft" invisible="state not in ['cancel', 'done']" groups="mrp.group_mrp_manager"/>
                 </header>
                 <sheet>
                     <field name="reservation_state" invisible="1"/>
@@ -299,7 +300,7 @@
                                 <span class="o_stat_text">Overview</span>
                             </div>
                         </button>
-                        <button class="oe_stat_button" name="action_view_serial_numbers" type="object" icon="build" invisible="serial_numbers_count == 0">
+                        <button class="oe_stat_button" name="action_view_serial_numbers" type="object" icon="build" invisible="serial_numbers_count == 0 or state == 'draft'">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value"><field name="serial_numbers_count"/></span>
                                 <span class="o_stat_text">Serial Numbers</span>

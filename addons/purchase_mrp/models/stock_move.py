@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
+from odoo import api, Command, models
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
 
@@ -15,6 +15,19 @@ class StockMove(models.Model):
         for move in self:
             if move.bom_line_id and move.bom_line_id.bom_id.type == 'phantom':
                 move.packaging_uom_id = move.uom_id
+
+    def _get_old_demand_qty(self):
+        qty = super()._get_old_demand_qty()
+        po_lines = self._get_active_created_purchase_lines()
+        qty += sum(line.uom_id._compute_quantity(line.product_qty, self.uom_id) for line in po_lines)
+        return qty
+
+    def _get_active_created_purchase_lines(self):
+        return self.created_purchase_line_ids.filtered(lambda l: l.state not in ('cancel', 'purchase'))
+
+    def _set_created_purchase_lines(self, po_lines):
+        self.created_purchase_line_ids = [Command.set(po_lines.ids)]
+        po_lines.move_dest_ids = [Command.link(self.id)]
 
     def _get_cost_ratio(self, quantity):
         self.ensure_one()
