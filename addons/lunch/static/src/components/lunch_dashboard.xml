@@ -115,7 +115,7 @@
 
     <t t-name="lunch.LunchDashboardOrder">
 
-        <div class="o_lunch_banner d-flex flex-column me-3 mb-3 border rounded-3 p-3 bg-view">
+        <div class="o_lunch_banner d-flex flex-column mb-3 rounded-3 p-3 bg-view">
             <div class="overflow-y-auto overflow-x-hidden w-100">
                 <div class="d-flex flex-column w-100 gap-2">
                     <LunchAlerts alerts="this.state.infos.alerts"/>
