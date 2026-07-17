@@ -40,3 +40,8 @@ class AccountMoveSend(models.TransientModel):
                 'force_peppol_only': not invoice.company_id.l10n_fr_pdp_send_to_ppf,
             })
         return edi_user, document
+
+    def _get_peppol_attachments_linked_message(self, edi_user):
+        if edi_user.proxy_type == 'pdp':
+            return _("The invoice has been sent to the Approved Platform. The following attachments were sent with the XML:")
+        return super()._get_peppol_attachments_linked_message(edi_user)
