@@ -59,7 +59,7 @@ body:not(.o_touch_device) .o_settings_container .o_field_selection {
    --settings__tab-bg: #{map-get($grays, '100')};
    --settings__tab-bg--active: #{$o-component-active-bg};
    --settings__tab-color: #{$body-color};
-   --settings__title-bg: #{map-get($grays, '200')};
+   --settings__title-bg: #{map-get($grays, '300')};
 
    height: 100%;
 
