@@ -209,7 +209,7 @@ class Test_Read_GroupRelated_Bar(models.Model):
     name = fields.Char(aggregator="count_distinct")
 
     foo_ids = fields.One2many('test_read_group.related_foo', 'bar_id')
-    foo_names_sudo = fields.Char('name_one2many_related', related='foo_ids.name')
+    foo_names_sudo = fields.Char('name_one2many_related', related='foo_ids.name', compute_sudo=True)
 
     base_ids = fields.Many2many('test_read_group.related_base')
     computed_base_ids = fields.Many2many('test_read_group.related_base', compute='_compute_computed_base_ids')
@@ -225,8 +225,8 @@ class Test_Read_GroupRelated_Foo(models.Model):
     name = fields.Char()
     bar_id = fields.Many2one('test_read_group.related_bar')
 
-    bar_name_sudo = fields.Char('bar_name_sudo', related='bar_id.name')
-    bar_name = fields.Char('bar_name', related='bar_id.name', related_sudo=False)
+    bar_name_sudo = fields.Char('bar_name_sudo', related='bar_id.name', compute_sudo=True)
+    bar_name = fields.Char('bar_name', related='bar_id.name')
 
     bar_base_ids = fields.Many2many(related='bar_id.base_ids')
 
@@ -241,8 +241,8 @@ class Test_Read_GroupRelated_Base(models.Model):
     value = fields.Integer()
     foo_id = fields.Many2one('test_read_group.related_foo')
 
-    foo_id_name = fields.Char("foo_id_name", related='foo_id.name', related_sudo=False)
-    foo_id_name_sudo = fields.Char("foo_id_name_sudo", related='foo_id.name')
+    foo_id_name = fields.Char("foo_id_name", related='foo_id.name')
+    foo_id_name_sudo = fields.Char("foo_id_name_sudo", related='foo_id.name', compute_sudo=True)
 
     foo_id_bar_id_name = fields.Char('foo_bar_name_sudo', related='foo_id.bar_id.name')
     foo_id_bar_name = fields.Char('foo_bar_name_sudo_1', related='foo_id.bar_name')
