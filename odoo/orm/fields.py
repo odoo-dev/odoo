@@ -473,10 +473,9 @@ class Field[T]:
         if attrs.get('related'):
             if attrs.pop('compute', None):
                 warnings.warn(f"Field {self} is both compute and related. Set one of them to None.")
-            # by default, related fields are not stored, computed in superuser
-            # mode, not copied and readonly
+            # by default, related fields are not stored, not copied and readonly
             attrs['store'] = store = attrs.get('store', False)
-            attrs['compute_sudo'] = attrs.get('compute_sudo', attrs.get('related_sudo', True))
+            attrs['compute_sudo'] = attrs.get('compute_sudo', attrs.get('related_sudo', False))
             attrs['copy'] = attrs.get('copy', False)
             attrs['readonly'] = attrs.get('readonly', True)
         elif attrs.get('compute'):
