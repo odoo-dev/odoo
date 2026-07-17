@@ -49,7 +49,7 @@
 </t>
 
 <t t-name="web.SearchPanelContent">
-    <div class="o_search_panel flex-grow-0 flex-shrink-0 ms-3 pb-5 ps-3 overflow-auto position-relative"
+    <div class="o_search_panel flex-grow-0 flex-shrink-0 pb-5 overflow-auto position-relative"
          t-att-class="this.env.searchModel.searchPanelInfo.className"
          t-ref="this.root">
         <div t-if="!this.uiService.isSmall" class="d-flex align-items-center">
