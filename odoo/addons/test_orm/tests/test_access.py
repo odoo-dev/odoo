@@ -366,3 +366,117 @@ class TestAccess(TransactionCase):
         # combining access, where access condition is negated
         rule.domain = str(['&', ('categ_id', 'access', 'read'), '!', ('categ_id', 'access', 'write')])
         self.assertEqual(get_groups(), self.group1 | (comodel_groups - comodel_groups_write))
+
+    def test_get_groups_with_access_inherits(self):
+        """``_get_groups_with_access`` intersects parent groups only when
+        ``_check_inherits_access`` is True.
+        """
+        Parent = self.env['test_access_right.some_obj']
+        ChildCheck = self.env['test_access_right.inherits']
+        ChildNoCheck = self.env['test_access_right.inherits_nocheck']
+        IrAccess = self.env['ir.access']
+        get_groups = IrAccess._get_groups_with_access
+
+        IrAccess.search([
+            ('model_id.model', 'in', [Parent._name, ChildCheck._name, ChildNoCheck._name]),
+        ]).unlink()
+
+        # child models: only group1; parent model: only group2
+        for model_name in (ChildCheck._name, ChildNoCheck._name):
+            IrAccess.create({
+                'name': f'{model_name} group1',
+                'model_id': self.env['ir.model']._get_id(model_name),
+                'group_id': self.group1.id,
+                'operation': 'r',
+            })
+        IrAccess.create({
+            'name': 'parent group2',
+            'model_id': self.env['ir.model']._get_id(Parent._name),
+            'group_id': self.group2.id,
+            'operation': 'r',
+        })
+
+        # default True: groups must also have parent access -> empty intersection
+        self.assertFalse(get_groups(ChildCheck._name, 'read'))
+        # False: parent access is ignored -> group1 remains
+        self.assertEqual(get_groups(ChildNoCheck._name, 'read'), self.group1)
+
+        # when the same group has access on both models, it is kept
+        IrAccess.create({
+            'name': 'parent group1',
+            'model_id': self.env['ir.model']._get_id(Parent._name),
+            'group_id': self.group1.id,
+            'operation': 'r',
+        })
+        self.assertEqual(get_groups(ChildCheck._name, 'read'), self.group1)
+        self.assertEqual(get_groups(ChildNoCheck._name, 'read'), self.group1)
+
+
+class TestInheritsAccess(TransactionCase):
+    """Tests for ``_check_inherits_access`` on ``_access_domain`` / ``ir.access``."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        Parent = cls.env['test_access_right.some_obj']
+        cls.allowed = Parent.create({'val': 1})
+        cls.forbidden = Parent.create({'val': -1})
+        cls.env['ir.access'].create({
+            'name': 'Forbid negatives',
+            'model_id': cls.env['ir.model']._get_id(Parent._name),
+            'operation': 'crud',
+            'domain': "[('val', '>', 0)]",
+        })
+
+    def test_check_inherits_access_false(self):
+        """``_check_inherits_access=False`` ignores parent ACL domains."""
+        ChildCheck = self.env['test_access_right.inherits']
+        ChildNoCheck = self.env['test_access_right.inherits_nocheck']
+        children_check = ChildCheck.create([
+            {'some_id': self.allowed.id},
+            {'some_id': self.forbidden.id},
+        ])
+        children_nocheck = ChildNoCheck.create([
+            {'some_id': self.allowed.id},
+            {'some_id': self.forbidden.id},
+        ])
+
+        user = self.env.ref('base.public_user')
+        check_env = children_check.with_user(user)
+        nocheck_env = children_nocheck.with_user(user)
+
+        # default True: parent restriction applies (forbidden parent is filtered out)
+        self.assertEqual(
+            check_env.search([('id', 'in', children_check.ids)], order='id'),
+            children_check[0],
+        )
+        self.assertEqual(check_env._filtered_access('read'), children_check[0])
+
+        # False: parent restriction is ignored, both child records remain visible
+        self.assertEqual(
+            nocheck_env.search([('id', 'in', children_nocheck.ids)], order='id'),
+            children_nocheck,
+        )
+        self.assertEqual(nocheck_env._filtered_access('read'), children_nocheck)
+
+    def test_check_inherits_access_no_parent_permission(self):
+        """Without parent model permission, only ``_check_inherits_access=False`` keeps access."""
+        ChildCheck = self.env['test_access_right.inherits']
+        ChildNoCheck = self.env['test_access_right.inherits_nocheck']
+        child_check = ChildCheck.create({'some_id': self.allowed.id})
+        child_nocheck = ChildNoCheck.create({'some_id': self.allowed.id})
+
+        self.env['ir.access'].search([
+            ('model_id.model', '=', 'test_access_right.some_obj'),
+        ]).unlink()
+
+        user = self.env.ref('base.public_user')
+        self.assertFalse(self.env['test_access_right.some_obj'].with_user(user).has_access('read'))
+        self.assertFalse(child_check.with_user(user).has_access('read'))
+        self.assertTrue(child_nocheck.with_user(user).has_access('read'))
+        self.assertEqual(
+            ChildNoCheck.with_user(user).search([('id', '=', child_nocheck.id)]),
+            child_nocheck,
+        )
+        with mute_logger('odoo.addons.base.models.ir_access'), self.assertRaises(AccessError):
+            ChildCheck.with_user(user).search([('id', '=', child_check.id)])

@@ -398,9 +398,9 @@ class IrAccess(models.Model):
 
         groups = groups.with_prefetch()
 
-        if model._inherits:
+        # FIXME: does not take into account overrides of method _access_domain()
+        if model._check_inherits_access and model._inherits:
             # groups must also have access to all parent models
-            # FIXME: does not take into account overrides of method has_access()
             for parent_model_name in model._inherits:
                 groups &= self._get_groups_with_access(parent_model_name, operation)
 

@@ -35,6 +35,17 @@ class Test_Access_RightInherits(models.Model):
     some_id = fields.Many2one('test_access_right.some_obj', required=True, ondelete='restrict')
 
 
+class Test_Access_RightInheritsNocheck(models.Model):
+    """Same as ``test_access_right.inherits``, but parent ACLs are ignored."""
+    _name = 'test_access_right.inherits_nocheck'
+    _description = 'Object for testing _check_inherits_access=False'
+
+    _inherits = {'test_access_right.some_obj': 'some_id'}
+    _check_inherits_access = False
+
+    some_id = fields.Many2one('test_access_right.some_obj', required=True, ondelete='restrict')
+
+
 class Test_Access_RightChild(models.Model):
     _name = 'test_access_right.child'
     _description = 'Object for testing company ir rule'
