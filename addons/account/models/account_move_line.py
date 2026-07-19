@@ -1,4 +1,3 @@
-import json
 import logging
 import re
 from collections import defaultdict
@@ -867,44 +866,55 @@ class AccountMoveLine(models.Model):
 
         date_from = self.env.context.get('date_from')
         date_to = self.env.context.get('date_to')
-        historical, average, current = self.env['res.currency']._get_parsed_rates(self.env.companies - self.env.company, date_from, date_to)
+        current_date = self.env.context.get('cta_date_to') or date_to
 
-        raw_rates_alias = table._make_alias(f'raw_{currency_translation}')
-        raw_rates_table = SQL(
-            """(
-                SELECT %(historical)s::jsonb AS historical,
-                       %(average)s::jsonb AS average,
-                       %(current)s::jsonb AS current
-            )""",
-            historical=json.dumps(historical),
-            average=json.dumps(average),
-            current=json.dumps(current),
+        historical_table, cta_intervals_table, current_table = self.env['res.currency']._get_consolidation_rate_tables(
+            self.env.companies - self.env.company, date_from, date_to, current_date=current_date,
         )
-        cta_alias = table._make_alias(currency_translation)
-        if currency_translation == 'cta':
-            conversion_table = SQL(
-                """(
-                    SELECT CASE WHEN %(base_line_account_type)s = 'equity' THEN (%(historical)s->>(%(base_line_company)s::text))::jsonb->>(%(base_line_date)s::text)
-                                WHEN %(base_line_account_type)s LIKE ANY (ARRAY['income%%', 'expense%%', 'equity_unaffected']) THEN %(average)s->>(%(base_line_company)s::text)
-                                ELSE %(current)s->>(%(base_line_company)s::text)
-                           END::numeric AS rate
-                )""",
-                base_line_date=table.date,
-                base_line_company=table.company_id,
-                base_line_account_type=table.account_id.account_type,
-                historical=raw_rates_alias.historical,
-                average=raw_rates_alias.average,
-                current=raw_rates_alias.current,
-            )
-        else:
-            conversion_table = SQL(
-                "(SELECT (%(current)s->>(%(base_line_company)s::text))::numeric AS rate)",
-                base_line_company=table.company_id,
-                current=raw_rates_alias.current,
-            )
-        table._query.add_join(kind='JOIN', alias=raw_rates_alias, table=raw_rates_table, condition=SQL("TRUE"))
-        table._query.add_join(kind='LEFT JOIN LATERAL', alias=cta_alias, table=conversion_table, condition=SQL("TRUE"))
-        return SQL("COALESCE(%s, 1)", cta_alias.rate)
+
+        current_alias = table._make_alias(f'current_{currency_translation}')
+        table._query.add_join(kind='JOIN', alias=current_alias, table=current_table, condition=SQL("TRUE"))
+        current_rate = SQL("(%s->>(%s::text))::numeric", current_alias.rates, table.company_id)
+
+        if currency_translation != 'cta':
+            return SQL("COALESCE(%s, 1)", current_rate)
+
+        historical_alias = table._make_alias('cta_historical')
+        table._query.add_join(
+            kind='LEFT JOIN',
+            alias=historical_alias,
+            table=historical_table,
+            condition=SQL(
+                "%s = %s AND %s = %s",
+                historical_alias.company_id, table.company_id,
+                historical_alias.date, table.date,
+            ),
+        )
+        cta_intervals_alias = table._make_alias('cta_intervals')
+        table._query.add_join(
+            kind='LEFT JOIN',
+            alias=cta_intervals_alias,
+            table=cta_intervals_table,
+            condition=SQL(
+                "%s = %s AND %s BETWEEN %s AND %s",
+                cta_intervals_alias.company_id, table.company_id,
+                table.date, cta_intervals_alias.date_from, cta_intervals_alias.date_to,
+            ),
+        )
+
+        return SQL(
+            """COALESCE(CASE
+                   WHEN %(account_type)s = 'equity' THEN %(historical)s
+                   WHEN %(account_type)s = 'equity_retained' THEN %(retained)s
+                   WHEN %(account_type)s LIKE ANY (ARRAY['income%%', 'expense%%', 'equity_unaffected']) THEN %(average)s
+                   ELSE %(current)s
+               END, 1)""",
+            account_type=table.account_id.account_type,
+            historical=historical_alias.rate,
+            retained=cta_intervals_alias.retained,
+            average=cta_intervals_alias.average,
+            current=current_rate,
+        )
 
     def _compute_sql_debit_converted(self, table):
         return SQL("(%s * %s)", table.consolidation_rate, table.debit)
@@ -915,7 +925,7 @@ class AccountMoveLine(models.Model):
     def _compute_sql_balance_converted(self, table):
         return SQL("(%s * %s)", table.consolidation_rate, table.balance)
 
-    @api.depends_context('allowed_company_ids', 'currency_translation')
+    @api.depends_context('allowed_company_ids', 'currency_translation', 'date_from', 'date_to', 'cta_date_to')
     def _compute_consolidation_rate(self):
         line2rate = {}
         if len(self.env.companies.currency_id) > 1:
