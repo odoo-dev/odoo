@@ -929,8 +929,8 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
             orig_line.l10n_ph_discount_privilege_id,
         )
         self.assertEqual(
-            line.l10n_ph_discount_privilege_previous_discount,
-            orig_line.l10n_ph_discount_privilege_previous_discount,
+            line.l10n_ph_original_discount,
+            orig_line.l10n_ph_original_discount,
         )
 
         # Verify removal on the copy properly restores original discount
@@ -943,7 +943,7 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         self.assertFalse(line.l10n_ph_discount_privilege_id)
         self.assertEqual(
             line.discount,
-            orig_line.l10n_ph_discount_privilege_previous_discount,
+            orig_line.l10n_ph_original_discount,
         )
 
     def test_cannot_apply_on_posted_invoice(self):
@@ -998,7 +998,7 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         wizard.action_confirm()
         line = invoice.invoice_line_ids
         self.assertEqual(line.discount, 20.0)
-        self.assertEqual(line.l10n_ph_discount_privilege_previous_discount, 10.0)
+        self.assertEqual(line.l10n_ph_original_discount, 10.0)
 
         # Re-apply different privilege without tax (still 20% but different privilege)
         wizard2 = self._create_wizard(
@@ -1010,7 +1010,7 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         self.assertEqual(line.l10n_ph_discount_privilege_id, self.privilege_without_tax)
         self.assertEqual(line.discount, 20.0)
         # Original state should still reference the pre-first-privilege state
-        self.assertEqual(line.l10n_ph_discount_privilege_previous_discount, 10.0)
+        self.assertEqual(line.l10n_ph_original_discount, 10.0)
 
         wizard2.action_remove_all()
         self.assertFalse(line.l10n_ph_discount_privilege_id)
@@ -1043,7 +1043,7 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         line = invoice.invoice_line_ids
         self.assertEqual(line.l10n_ph_discount_privilege_id, self.privilege)
         self.assertEqual(line.discount, 20.0)
-        self.assertEqual(line.l10n_ph_discount_privilege_previous_discount, 10.0)
+        self.assertEqual(line.l10n_ph_original_discount, 10.0)
 
     def test_privilege_model_constraint_positive_amount(self):
         """Discount privilege requires a discount amount between 0 and 100."""

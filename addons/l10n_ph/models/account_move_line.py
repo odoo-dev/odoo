@@ -19,8 +19,13 @@ class AccountMoveLine(models.Model):
         string="Original Taxes (pre-privilege)",
         store=True,
     )
-    l10n_ph_discount_privilege_previous_discount = fields.Float(
-        string="Previous Discount (pre-privilege)",
+    l10n_ph_original_price_unit = fields.Float(
+        string="Original Price Unit (pre-privilege)",
+        digits="Product Price",
+        store=True,
+    )
+    l10n_ph_original_discount = fields.Float(
+        string="Original Discount (pre-privilege)",
         readonly=True,
     )
     l10n_ph_regular_discount_amount = fields.Monetary(
@@ -35,25 +40,19 @@ class AccountMoveLine(models.Model):
         compute="_compute_l10n_ph_discount_amounts",
         readonly=True,
     )
-    l10n_ph_original_price_unit = fields.Float(
-        string="Original Price Unit (pre-privilege)",
-        digits="Product Price",
-        store=True,
-    )
 
     # --- price_unit adjustment with privilege FP ---
 
     def _update_price_unit_from_privilege(self):
         """Called by the wizard after writing the privilege.
-        First pass saves the original price_unit so it can be restored on removal.
-        Second pass adapts price_unit through the privilege's fiscal position (FP),
-        or restores the original when the privilege is cleared."""
+        Saves the original price_unit so it can be restored on removal, then
+        adapts price_unit through the privilege's fiscal position (FP), or
+        restores the original price_unit when the privilege is cleared."""
         for line in self:
-            if not line.l10n_ph_original_price_unit and line.price_unit:
-                line.l10n_ph_original_price_unit = line.price_unit
-
-        for line in self:
-            if fiscal_position := line.l10n_ph_discount_privilege_id.fiscal_position_id:
+            fiscal_position = line.l10n_ph_discount_privilege_id.fiscal_position_id
+            if fiscal_position:
+                if not line.l10n_ph_original_price_unit and line.price_unit:
+                    line.l10n_ph_original_price_unit = line.price_unit
                 tax_ids = line.l10n_ph_original_tax_ids or line.tax_ids
                 taxes_after_fp = fiscal_position.map_tax(tax_ids)
                 line.price_unit = line.tax_ids._adapt_price_unit_to_another_taxes(
@@ -65,55 +64,57 @@ class AccountMoveLine(models.Model):
                 )
             elif line.l10n_ph_original_price_unit:
                 line.price_unit = line.l10n_ph_original_price_unit
-                if not line.l10n_ph_discount_privilege_id:
-                    line.l10n_ph_original_price_unit = 0
+                line.l10n_ph_original_price_unit = 0
 
     # --- Computed taxes with privilege FP ---
 
     def _update_tax_from_privilege(self):
         """Called by the wizard after writing the privilege.
-        First pass saves the original taxes so they can be restored on removal.
-        Second pass applies the fiscal position's tax mapping, restores original
-        taxes for non-FP privileges, or clears them entirely on privilege removal."""
+        Saves the original taxes so they can be restored on removal, then
+        applies the fiscal position's tax mapping. Non-FP privileges keep their
+        original taxes, which are restored when the privilege is cleared."""
         for line in self:
-            if (
-                line.l10n_ph_discount_privilege_id.fiscal_position_id
-                and not line.l10n_ph_original_tax_ids
-                and line.tax_ids
-            ):
-                line.l10n_ph_original_tax_ids = line.tax_ids
+            fiscal_position = line.l10n_ph_discount_privilege_id.fiscal_position_id
+            if fiscal_position:
+                if not line.l10n_ph_original_tax_ids and line.tax_ids:
+                    line.l10n_ph_original_tax_ids = line.tax_ids
+                line.tax_ids = fiscal_position.map_tax(line.l10n_ph_original_tax_ids)
+            elif line.l10n_ph_original_tax_ids:
+                line.tax_ids = line.l10n_ph_original_tax_ids
+                line.l10n_ph_original_tax_ids = None
 
+    # --- Discount with privilege ---
+
+    def _update_discount_from_privilege(self):
+        """Called by the wizard after writing the privilege.
+        Applies the privilege's discount percentage, or restores the original
+        discount when the privilege is cleared."""
         for line in self:
-            if line.l10n_ph_original_tax_ids:
-                if not line.l10n_ph_discount_privilege_id:
-                    line.tax_ids = line.l10n_ph_original_tax_ids
-                    line.l10n_ph_original_tax_ids = None
-                elif (
-                    fiscal_position
-                    := line.l10n_ph_discount_privilege_id.fiscal_position_id
-                ):
-                    line.tax_ids = fiscal_position.map_tax(
-                        line.l10n_ph_original_tax_ids,
-                    )
-                else:
-                    line.tax_ids = line.l10n_ph_original_tax_ids
+            if line.l10n_ph_discount_privilege_id:
+                line.discount = line.l10n_ph_discount_privilege_id.discount_amount
+            else:
+                line.discount = line.l10n_ph_original_discount or 0.0
+                line.l10n_ph_original_discount = 0.0
 
     # --- Discount allocation ---
 
-    @api.depends(
-        "l10n_ph_discount_privilege_id",
-        "l10n_ph_special_discount_amount",
-    )
+    @api.depends("l10n_ph_discount_privilege_id", "l10n_ph_special_discount_amount")
     def _compute_discount_allocation_needed(self):
-        """Override: for privilege lines, always replace super()'s output with
-        entries using the privilege's account and the correct amount formula."""
-        super()._compute_discount_allocation_needed()
-        for line in self:
+        """Override allocation for privileged lines.
+        Default = qty * price_unit * discount/100 (VAT-exclusive). SC/PWD
+        discounts are statutory and computed on the VAT-inclusive amount
+        (e.g., 5% of 840 = 42, not 750 * 5% = 37.5), so for non-FP privileges we
+        allocate l10n_ph_special_discount_amount (VAT-inclusive) to the
+        privilege's account instead. super() handles non-privileged lines only."""
+        lines_without_privilege = self.filtered(
+            lambda l: not l.l10n_ph_discount_privilege_id
+        )
+        super(AccountMoveLine, lines_without_privilege)._compute_discount_allocation_needed()
+        for line in self.filtered("l10n_ph_discount_privilege_id"):
             priv = line.l10n_ph_discount_privilege_id
-            if not priv:
-                continue
             if not priv.account_id:
                 line.discount_allocation_needed = False
+                line.discount_allocation_dirty = True
                 continue
             amount_currency = line.currency_id.round(
                 line.move_id.direction_sign
@@ -152,6 +153,7 @@ class AccountMoveLine(models.Model):
                     ),
                 ),
             ]
+            line.discount_allocation_dirty = True
 
     # --- Discount amounts ---
 
@@ -167,12 +169,17 @@ class AccountMoveLine(models.Model):
         "l10n_ph_discount_privilege_id",
     )
     def _compute_l10n_ph_discount_amounts(self):
-        """Compute regular and special discount amounts for sale lines.
-        Special discount: for privileged lines, back-calculates from price_total
-        (or price_unit * qty when discount == 100%) so that:
-          price_subtotal = price_unit * qty - special_discount_amount
-        Regular discount: for non-privileged lines with a regular discount % or
-        a discount from a sale-order pricelist / catalog list price."""
+        """Compute l10n_ph_special_discount_amount and
+        l10n_ph_regular_discount_amount for sale lines (SLSP/BOA reporting).
+
+        Special (privileged lines): VAT-inclusive discount = price_total *
+        discount/(100-discount); at 100% price_total is 0, so it is recomputed
+        from price_unit*qty with taxes via the tax engine. This keeps the
+        reported discount consistent with the FP tax treatment.
+
+        Regular (non-privileged): explicit discount % back-computed from
+        price_subtotal, or inferred from pricelist/catalog list price vs. the
+        invoiced unit price. Never reported as a privilege discount."""
         for line in self:
             if line.display_type != "product" or not line.move_id.is_sale_document():
                 line.l10n_ph_regular_discount_amount = 0.0
@@ -180,24 +187,21 @@ class AccountMoveLine(models.Model):
                 continue
 
             if line.l10n_ph_discount_privilege_id:
+                line.l10n_ph_regular_discount_amount = 0.0
                 if line.discount < 100.0:
                     line.l10n_ph_special_discount_amount = (
                         line.price_total * line.discount / (100.0 - line.discount)
                     )
                 else:
-                    # 100% discount — price_total is zero, use price_unit * qty instead,
-                    # adding non-included taxes for non-FP lines.
-                    base = line.price_unit * line.quantity
-                    if not line.l10n_ph_discount_privilege_id.fiscal_position_id:
-                        for tax in line.tax_ids.flatten_taxes_hierarchy():
-                            if (
-                                tax.amount_type == "percent"
-                                and tax.amount > 0
-                                and not tax._is_price_included(line.document_tax_mode)
-                            ):
-                                base *= 1.0 + tax.amount / 100.0
-                    line.l10n_ph_special_discount_amount = base * line.discount / 100.0
-                line.l10n_ph_regular_discount_amount = 0.0
+                    # 100% discount — price_total is zero, so recompute the
+                    # tax-inclusive amount (with no discount) and use it as the
+                    # discounted amount, avoiding manual tax roundings.
+                    company = line.company_id or self.env.company
+                    base_line = line.move_id._prepare_product_base_line_for_taxes_computation(line)
+                    base_line['discount'] = 0.0
+                    self.env['account.tax']._add_tax_details_in_base_line(base_line, company)
+                    self.env['account.tax']._round_base_lines_tax_details([base_line], company)
+                    line.l10n_ph_special_discount_amount = base_line['tax_details']['total_included_currency']
             else:
                 line.l10n_ph_special_discount_amount = 0.0
 

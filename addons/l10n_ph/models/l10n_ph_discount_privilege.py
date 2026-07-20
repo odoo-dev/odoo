@@ -11,6 +11,16 @@ class L10nPhDiscountPrivilege(models.Model):
     _check_company_auto = True
 
     name = fields.Char(string="Discount Name", required=True)
+    discount_type = fields.Selection(
+        selection=[
+            ("pwd", "PWD Discount"),
+            ("sc", "Senior Citizen Discount"),
+            ("special", "Special Discount"),
+        ],
+        string="Type",
+        required=True,
+        default="pwd",
+    )
     discount_amount = fields.Float(
         string="Discount Amount",
         required=True,

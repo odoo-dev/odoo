@@ -10,9 +10,9 @@
                         <div class="col-sm-5 col-md-5 col-5">
                             <group>
                                 <field name="privilege_id" placeholder="Select a privilege..." domain="[('company_id', '=', company_id)]"/>
-                                <field name="category_ids" widget="many2many_tags" invisible="apply_on != 'product_category'"
+                                <field name="category_ids" widget="many2many_tags" required="apply_on == 'product_category'" invisible="apply_on != 'product_category'"
                                        domain="[('id', 'in', available_category_ids)]"/>
-                                <field name="product_ids" widget="many2many_tags" invisible="apply_on != 'product'"
+                                <field name="product_ids" widget="many2many_tags" required="apply_on == 'product'" invisible="apply_on != 'product'"
                                        domain="[('id', 'in', available_product_ids)]"/>
                             </group>
                         </div>
