@@ -80,18 +80,21 @@ class ResCurrency(models.Model):
             date_to=date_to,
         ))
 
+
     def _get_parsed_rates(self, companies, date_from, date_to):
         currency_translation = self.env.context.get('currency_translation', 'current')
         date_from, date_to = bool(date_from) and str(date_from), bool(date_to) and str(date_to)
+        if not date_from:
+            # When there is no start date, we want to compute the average rate on the current year only
+            date_from = str(date_utils.start_of(fields.Date.from_string(date_to), 'year'))
 
         if currency_translation == 'current':
             fetch_from = date_to
         else:
-            fetch_from = (
-                min((str(self.env['account.move']._first_date()), date_from)) if date_from
-                else str(self.env['account.move']._first_date())
-            )
+            fetch_from = min((str(self.env['account.move']._first_date()), date_from))
 
+        # raw_cache: {companies: (min_date, max_date, {company_id: {date: rate}})}
+        # Stores all fetched rates; extended on either end as needed to avoid redundant DB queries.
         raw_cache = self.env.cr.cache.setdefault('res_currency_to_company_rates', {})
         cached_min, cached_max, historical = raw_cache.get(companies, (None, None, {}))
         new_min, new_max = cached_min, cached_max
@@ -114,77 +117,16 @@ class ResCurrency(models.Model):
             raw_cache[companies] = (new_min, new_max, historical)
 
         current = {company_id: date2rate[date_to] for company_id, date2rate in historical.items()}
-        average = self._get_fiscalyear_average_rates(companies, historical, date_from, date_to) if currency_translation == 'cta' else {}
+        period = list(date_utils.date_range(
+            fields.Date.to_date(date_to if currency_translation == 'current' else date_from),
+            fields.Date.to_date(date_to),
+            timedelta(days=1),
+        ))
+        average = {
+            company_id: sum(date2rate[str(d)] for d in period) / len(period)
+            for company_id, date2rate in historical.items()
+        }
         return historical, average, current
-
-    def _get_fiscalyear_average_rates(self, companies, historical, date_from, date_to):
-        boundaries_cache = self.env.cr.cache.setdefault('res_currency_fiscalyear_boundaries', {})
-        average = {}
-        for company in companies:
-            date2rate = historical.get(company.id)
-            if not date2rate:
-                continue
-            window_start = date_from or min(date2rate)
-            boundaries = self._get_fiscalyear_boundaries(company, window_start, date_to, boundaries_cache)
-            average[company.id] = self._average_rate_per_day(date2rate, boundaries, window_start, date_to)
-        return average
-
-    def _get_fiscalyear_boundaries(self, company, window_start, window_end, boundaries_cache):
-        """ Sorted (date_from, date_to) fiscal year boundaries for `company` covering
-        [window_start, window_end], cached and extended a whole fiscal year at a time so that
-        compute_fiscalyear_dates / get_fiscal_year is called at most once per fiscal-year
-        transition per company for the life of the cursor - not once per _get_parsed_rates call.
-        """
-        entry = boundaries_cache.setdefault(company.id, {'min': None, 'max': None, 'list': [], 'custom': None})
-        if entry['custom'] is None:
-            entry['custom'] = bool(self.env['account.fiscal.year'].search_count([
-                ('company_id', '=', company.id),
-            ]))
-
-        def walk(start_str, end_str):
-            cur, end = fields.Date.from_string(start_str), fields.Date.from_string(end_str)
-            while cur <= end:
-                if entry['custom']:
-                    res = company.compute_fiscalyear_dates(cur)
-                    fy_from, fy_to = str(res['date_from']), str(res['date_to'])
-                else:
-                    fy_from, fy_to = date_utils.get_fiscal_year(cur, day=company.fiscalyear_last_day, month=int(company.fiscalyear_last_month))
-
-                if not entry['list'] or entry['list'][-1][0] != fy_from:
-                    entry['list'].append((fy_from, fy_to))
-                cur = fields.Date.from_string(fy_to) + timedelta(days=1)
-
-        if entry['min'] is None:
-            walk(window_start, window_end)
-            entry['min'], entry['max'] = window_start, window_end
-        else:
-            if window_start < entry['min']:
-                # Rare: a later call needs further back than any call so far. Recompute rather
-                # than walking backwards day by day.
-                entry['list'] = []
-                walk(window_start, entry['max'])
-                entry['min'] = window_start
-            if window_end > entry['max']:
-                walk(entry['max'], window_end)
-                entry['max'] = window_end
-
-        return entry['list']
-
-    def _average_rate_per_day(self, date2rate, boundaries, window_start, window_end):
-        sorted_dates = sorted(d for d in date2rate if window_start <= d <= window_end)
-        result = {}
-        i, n, bi = 0, len(sorted_dates), 0
-        while i < n:
-            while fields.Date.to_string(boundaries[bi][1]) < sorted_dates[i]:
-                bi += 1
-            fy_to = boundaries[bi][1]
-            j, total = i, 0.0
-            while j < n and sorted_dates[j] <= fields.Date.to_string(fy_to):
-                total += date2rate[sorted_dates[j]]
-                j += 1
-            result.update(dict.fromkeys(sorted_dates[i:j], total / (j - i)))
-            i = j
-        return result
 
 
 class ResCurrencyRate(models.Model):
