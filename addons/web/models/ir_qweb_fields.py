@@ -43,13 +43,17 @@ class IrQwebFieldImage(models.AbstractModel):
             filename = options['filename']
         else:
             filename = record.display_name
-        filename = (filename or 'name').replace('/', '-').replace('\\', '-').replace('..', '--')
 
-        src = '/web/image/%s/%s/%s%s/%s?unique=%s' % (record._name, record.id, options.get('preview_image', field_name), max_size, url_quote(filename), sha)
+        slug = self.env['ir.http']._slugify(filename or 'image') or 'image'
+        if not slug.endswith('.jpg') and not slug.endswith('.png') and not slug.endswith('.webp'):
+            slug = f"{slug}.jpg"
+
+        unique_param = '%s-%s' % (record.id, sha)
+        src = '/web/image/%s/%s/%s%s?unique=%s' % (record._name, url_quote(slug), options.get('preview_image', field_name), max_size, unique_param)
 
         src_zoom = None
         if options.get('zoom') and getattr(record, options['zoom'], None):
-            src_zoom = '/web/image/%s/%s/%s%s/%s?unique=%s' % (record._name, record.id, options['zoom'], max_size, url_quote(filename), sha)
+            src_zoom = '/web/image/%s/%s/%s%s?unique=%s' % (record._name, url_quote(slug), options['zoom'], max_size, unique_param)
         elif options.get('zoom'):
             src_zoom = options['zoom']
 

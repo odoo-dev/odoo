@@ -1890,8 +1890,15 @@ class Website(models.CachedModel):
         """ Returns a local url that points to the image field of a given browse record. """
         sudo_record = record.sudo()
         sha = hashlib.sha512(str(sudo_record.write_date).encode('utf-8')).hexdigest()[:7]
-        size = '' if size is None else '/%s' % size
-        return '/web/image/%s/%s/%s%s?unique=%s' % (record._name, record.id, field, size, sha)
+        try:
+            raw_name = sudo_record.display_name or field
+        except Exception:  # noqa: BLE001 never break image rendering
+            raw_name = field
+        slug = self.env['ir.http']._slugify(raw_name, max_length=60) or field.replace('_', '-')
+        filename = '%s.jpg' % slug
+        unique = '%s-%s' % (record.id, sha)
+
+        return '/web/image/%s/%s/%s?unique=%s' % (record._name, filename, field, unique)
 
     def get_cdn_url(self, uri):
         self.ensure_one()
