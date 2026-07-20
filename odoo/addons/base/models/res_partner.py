@@ -928,11 +928,7 @@ class ResPartner(models.Model):
             if vals.get('website'):
                 vals['website'] = self._clean_website(vals['website'])
         partners = super().create(vals_list)
-        # due to ir.default, compute is not called as there is a default value
-        # hence calling the compute manually
         for partner, values in zip(partners, vals_list):
-            if 'lang' not in values:
-                partner._compute_lang()
             if values.get('parent_name') and not partner.parent_id:
                 # Create parent company if we got 'parent_name'
                 partner._create_parent_from_name(
