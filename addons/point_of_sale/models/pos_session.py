@@ -443,7 +443,7 @@ class PosSession(models.Model):
             'state': 'closed',
             'stop_at': self.stop_at or fields.Datetime.now(),
         })
-        self.order_ids.write({'state': 'done'})
+        self._get_closed_orders().write({'state': 'done'})
         self.env.flush_all()  # ensure sale.report is up to date
         return {'status': True}
 
@@ -1046,6 +1046,31 @@ class PosSession(models.Model):
         return non_invoiced_orders, invoiced_orders
 
     def _check_invoiced_orders_are_posted(self, invoiced_orders):
+        for order in invoiced_orders.filtered(lambda o: o.account_move.state != "posted"):
+            _logger.error(
+                """
+    Order id=%s
+    Order=%s
+    Invoice=%s
+    Invoice state=%s
+    Invoice name=%s
+    Session=%s
+    Company=%s
+    XMLID=%s
+    To invoice=%s
+    State=%s
+    """,
+                order.id,
+                order.name,
+                order.account_move.id,
+                order.account_move.state,
+                order.account_move.name,
+                order.session_id.name,
+                order.company_id.name,
+                order.get_external_id().get(order.id),
+                order.to_invoice,
+                order.state,
+            )
         account_move = invoiced_orders.account_move
         unposted = account_move.filtered(lambda move: move.state != 'posted')
         if unposted:
