@@ -763,24 +763,25 @@ class AccountChartTemplate(models.AbstractModel):
         if not company.parent_id and self.env['account.tax'].search_count([('tax_exigibility', '=', 'on_payment')], limit=1):
             company.tax_exigibility = True
 
-        for field, model in self._get_property_accounts(additional_properties).items():
-            value = template_data.get(field)
-            if value and field in self.env[model]._fields:
-                self.env['ir.default'].set(model, field, self.ref(value).id, company_id=company.id)
+        if not company.parent_id:
+            for field, model in self._get_property_accounts(additional_properties).items():
+                value = template_data.get(field)
+                if value and field in self.env[model]._fields:
+                    self.env['ir.default'].set(model, field, self.ref(value).id, company_id=company.id)
 
-        # Set default Income/Expense Accounts on Product Category Property from Company
-        self.env['ir.default'].set(
-            'product.category',
-            'property_account_income_categ_id',
-            company.income_account_id.id,
-            company_id=company.id,
-        )
-        self.env['ir.default'].set(
-            'product.category',
-            'property_account_expense_categ_id',
-            company.expense_account_id.id,
-            company_id=company.id,
-        )
+            # Set default Income/Expense Accounts on Product Category Property from Company
+            self.env['ir.default'].set(
+                'product.category',
+                'property_account_income_categ_id',
+                company.income_account_id.id,
+                company_id=company.id,
+            )
+            self.env['ir.default'].set(
+                'product.category',
+                'property_account_expense_categ_id',
+                company.expense_account_id.id,
+                company_id=company.id,
+            )
 
         # Set default transfer account on the internal transfer reconciliation model
         reco = self.ref('internal_transfer_reco', raise_if_not_found=False)
