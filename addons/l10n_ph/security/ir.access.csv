@@ -8,4 +8,4 @@ access_l10n_ph_discount_privilege_wizard_account_basic,Discount Privilege Wizard
 access_l10n_ph_discount_privilege_wizard_line,Discount Privilege Wizard Line: full access,l10n_ph.discount.privilege.wizard.line,l10n_ph.group_l10n_ph_discount_privilege,crud,
 access_l10n_ph_discount_privilege_wizard_line_account_invoice,Discount Privilege Wizard Line: invoice,l10n_ph.discount.privilege.wizard.line,account.group_account_invoice,crud,
 access_l10n_ph_discount_privilege_wizard_line_account_basic,Discount Privilege Wizard Line: basic,l10n_ph.discount.privilege.wizard.line,account.group_account_basic,crud,
-l10n_ph_discount_privilege_company_rule,Discount Privilege: Philippine company only,l10n_ph.discount.privilege,,crud,"[('company_id', 'in', company_ids)]"
+l10n_ph_discount_privilege_company_rule,Discount Privilege: only within its company,l10n_ph.discount.privilege,,crud,"[('company_id', 'in', company_ids)]"
