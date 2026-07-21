@@ -478,3 +478,22 @@ test("should toggle bold across nested spans", async () => {
     bold(editor);
     expect(getContent(el)).toBe(`<p><span><span>[A</span> </span></p><p>B]</p>`);
 });
+
+test("should make a link in a bold heading not bold", async () => {
+    await testEditor({
+        styleContent: styleH1Bold,
+        contentBefore: '<h1><a href="#">[link]</a></h1>',
+        stepFunction: bold,
+        contentAfter: '<h1><a href="#" style="font-weight: normal;">[link]</a></h1>',
+    });
+});
+
+test("should make a part of a not bold link bold", async () => {
+    await testEditor({
+        styleContent: styleH1Bold,
+        contentBefore: '<h1><a href="#" style="font-weight: normal;">li[n]k</a></h1>',
+        stepFunction: bold,
+        contentAfter:
+            '<h1><a href="#" style="font-weight: normal;">li<strong>[n]</strong>k</a></h1>',
+    });
+});

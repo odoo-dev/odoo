@@ -11,7 +11,7 @@ import {
     simulateArrowKeyPress,
     undo,
 } from "../_helpers/user_actions";
-import { unformat } from "../_helpers/format";
+import { cleanLinkArtifacts, unformat } from "../_helpers/format";
 
 test("should make a few characters strikeThrough", async () => {
     await testEditor({
@@ -281,4 +281,64 @@ test("should not add history step for strikethrough on collapsed selection", asy
 
     undo(editor);
     expect(getContent(el)).toBe(`<p>abcd[]</p>`);
+});
+
+test("should make a link strikeThrough", async () => {
+    await testEditor({
+        contentBefore: '<p>ab<a href="#">[link]</a>cd</p>',
+        stepFunction: strikeThrough,
+        contentAfter:
+            '<p>ab<a href="#" style="text-decoration-line: line-through;">[link]</a>cd</p>',
+    });
+});
+
+test("should make a link and the text around it strikeThrough", async () => {
+    await testEditor({
+        contentBefore: '<p>[ab<a href="#">link</a>cd]</p>',
+        stepFunction: strikeThrough,
+        contentAfter:
+            '<p><s>[ab</s><a href="#" style="text-decoration-line: line-through;">link</a><s>cd]</s></p>',
+    });
+});
+
+test("should make a button strikeThrough", async () => {
+    await testEditor({
+        contentBefore: '<p><a href="#" class="btn btn-primary">[link]</a></p>',
+        stepFunction: strikeThrough,
+        contentAfter:
+            '<p><a href="#" class="btn btn-primary" style="text-decoration-line: line-through;">[link]</a></p>',
+    });
+});
+
+test("should make a partly strikeThrough link strikeThrough", async () => {
+    await testEditor({
+        contentBefore: '<p><a href="#"><s>[li</s>n<s>k]</s></a></p>',
+        stepFunction: strikeThrough,
+        contentAfter: '<p><a href="#" style="text-decoration-line: line-through;">[link]</a></p>',
+    });
+});
+
+test("should make a link not strikeThrough", async () => {
+    await testEditor({
+        contentBefore:
+            '<p>ab<a href="#" style="text-decoration-line: line-through;">[link]</a>cd</p>',
+        stepFunction: strikeThrough,
+        contentAfter: '<p>ab<a href="#">[link]</a>cd</p>',
+    });
+});
+
+test("should make an element inside a link not strikeThrough", async () => {
+    const { editor, el } = await setupEditor(
+        '<p><a href="#" style="text-decoration-line: line-through;">li[<em>nk</em>]</a></p>'
+    );
+    strikeThrough(editor);
+    expect(cleanLinkArtifacts(el.innerHTML)).toBe('<p><a href="#"><s>li</s><em>nk</em></a></p>');
+});
+
+test("should make a part of a link not strikeThrough", async () => {
+    await testEditor({
+        contentBefore: '<p><a href="#" style="text-decoration-line: line-through;">li[n]k</a></p>',
+        stepFunction: strikeThrough,
+        contentAfter: '<p><a href="#"><s>li</s>[n]<s>k</s></a></p>',
+    });
 });

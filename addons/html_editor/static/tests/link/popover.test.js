@@ -412,6 +412,110 @@ describe("Link creation", () => {
             await insertText(editor, "D");
             expect(cleanLinkArtifacts(getContent(el))).toBe('<p>a<a href="#">link</a><br>D[]b</p>');
         });
+
+        describe("Creation inside formatted text", () => {
+            test("should move the strikeThrough onto the link (collapsed)", async () => {
+                const { editor, el } = await setupEditor("<p><s>ab[]cd</s></p>");
+                await insertText(editor, "/link");
+                await animationFrame();
+                await click(".o-we-command-name:first");
+                expect(cleanLinkArtifacts(getContent(el))).toBe(
+                    '<p><s>ab</s><a style="text-decoration-line: line-through;">[]</a><s>cd</s></p>'
+                );
+                await expectElementCount(".o-we-linkpopover", 1);
+                expect(".o-we-linkpopover input.o_we_label_link").toBeFocused();
+            });
+
+            test("should keep the strikeThrough on the link after adding a label", async () => {
+                const { editor, el } = await setupEditor("<p><s>ab[]cd</s></p>");
+                await insertText(editor, "/link");
+                await animationFrame();
+                await click(".o-we-command-name:first");
+                await contains(".o-we-linkpopover input.o_we_label_link").fill("mylink");
+                await contains(".o-we-linkpopover input.o_we_href_input_link").fill("#");
+                expect(cleanLinkArtifacts(getContent(el))).toBe(
+                    '<p><s>ab</s><a style="text-decoration-line: line-through;" href="#">mylink[]</a><s>cd</s></p>'
+                );
+            });
+
+            test("should move the strikeThrough onto the link (not collapsed)", async () => {
+                const { el } = await setupEditor("<p><s>[hello]</s></p>");
+                await waitFor(".o-we-toolbar");
+                await click(".o-we-toolbar .fa-link");
+                await contains(".o-we-linkpopover input.o_we_href_input_link", {
+                    timeout: 1500,
+                }).edit("#");
+                expect(cleanLinkArtifacts(getContent(el))).toBe(
+                    '<p><a style="text-decoration-line: line-through;" href="#">hello[]</a></p>'
+                );
+            });
+
+            test("should move the strikeThrough and underline onto the link", async () => {
+                const { editor, el } = await setupEditor("<p><s><u>ab[]cd</u></s></p>");
+                await insertText(editor, "/link");
+                await animationFrame();
+                await click(".o-we-command-name:first");
+                expect(cleanLinkArtifacts(getContent(el))).toBe(
+                    '<p><s><u>ab</u></s><a style="text-decoration-line: underline line-through;">[]</a><s><u>cd</u></s></p>'
+                );
+                await expectElementCount(".o-we-linkpopover", 1);
+            });
+
+            test("should move the format, color and font size onto the link", async () => {
+                const { editor, el } = await setupEditor(
+                    '<p><s><font style="color: red;"><span style="font-size: 32px;">ab[]cd</span></font></s></p>'
+                );
+                await insertText(editor, "/link");
+                await animationFrame();
+                await click(".o-we-command-name:first");
+                expect(cleanLinkArtifacts(getContent(el))).toBe(
+                    '<p><s><font style="color: red;"><span style="font-size: 32px;">ab</span></font></s>' +
+                        '<a style="text-decoration-line: line-through; color: red; font-size: 32px;">[]</a>' +
+                        '<s><font style="color: red;"><span style="font-size: 32px;">cd</span></font></s></p>'
+                );
+            });
+
+            test("should move a normal weight onto the link", async () => {
+                const { editor, el } = await setupEditor(
+                    '<h1>ab<span style="font-weight: normal;">c[]d</span></h1>'
+                );
+                await insertText(editor, "/link");
+                await animationFrame();
+                await click(".o-we-command-name:first");
+                expect(cleanLinkArtifacts(getContent(el))).toBe(
+                    '<h1>ab<span style="font-weight: normal;">c</span><a style="font-weight: normal;">[]</a><span style="font-weight: normal;">d</span></h1>'
+                );
+            });
+
+            test("should create the link inside a badge", async () => {
+                const { editor, el } = await setupEditor(
+                    '<p><span class="badge text-bg-secondary">ab[]cd</span></p>'
+                );
+                await insertText(editor, "/link");
+                await animationFrame();
+                await click(".o-we-command-name:first");
+                expect(cleanLinkArtifacts(getContent(el))).toBe(
+                    '<p><span class="badge text-bg-secondary">ab<a>[]</a>cd</span></p>'
+                );
+            });
+
+            test("should remove the link in a strikeThrough text when clicking away without URL", async () => {
+                const { editor, el } = await setupEditor("<p><s>ab[]cd</s></p>");
+                await insertText(editor, "/link");
+                await animationFrame();
+                await click(".o-we-command-name:first");
+                await expectElementCount(".o-we-linkpopover", 1);
+                const pNode = queryOne("p");
+                setSelection({
+                    anchorNode: pNode,
+                    anchorOffset: 0,
+                    focusNode: pNode,
+                    focusOffset: 0,
+                });
+                await animationFrame();
+                expect(cleanLinkArtifacts(getContent(el))).toBe("<p>[]<s>ab</s><s>cd</s></p>");
+            });
+        });
     });
     describe("Creation by toolbar", () => {
         test("should convert all selected text to link", async () => {

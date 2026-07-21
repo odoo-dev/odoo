@@ -56,9 +56,26 @@ describe("button style", () => {
         expect(el).toHaveInnerHTML(
             unformat(`
                 <div class="o-paragraph">
-                    <span class="display-1-fs">a\ufeff<a class="btn btn-fill-primary" href="#">\ufeffb\ufeff</a>\ufeffc</span>
+                    <span class="display-1-fs">a</span>\ufeff<a class="btn btn-fill-primary display-1-fs" href="#">\ufeffb\ufeff</a>\ufeff<span class="display-1-fs">c</span>
                 </div>
             `)
+        );
+    });
+
+    test("should keep the size and colors of a link turned into a button", async () => {
+        const { el } = await setupEditor(
+            '<p><a href="http://test.com/" class="h1-fs text-o-color-1 bg-o-color-2">li[]nk</a></p>'
+        );
+        await waitFor(".o-we-linkpopover");
+        await click(".o_we_edit_link");
+        await waitFor(".o_we_apply_link");
+        await click('select[name="link_type"]');
+        await animationFrame();
+        await select("primary");
+        await animationFrame();
+        await click(".o_we_apply_link");
+        expect(cleanLinkArtifacts(getContent(el))).toBe(
+            '<p><a href="http://test.com/" class="btn btn-fill-primary h1-fs text-o-color-1 bg-o-color-2">li[]nk</a></p>'
         );
     });
 
@@ -77,13 +94,9 @@ describe("button style", () => {
             },
             contentAfter: unformat(`
                 <div>
-                    <span class="display-1-fs">
-                        a
-                        <a class="btn btn-fill-primary" href="#">
-                            <span class="h1-fs">[b]</span>
-                        </a>
-                        c
-                    </span>
+                    <span class="display-1-fs">a</span>
+                    <a class="btn btn-fill-primary h1-fs" href="#">[b]</a>
+                    <span class="display-1-fs">c</span>
                 </div>
             `),
         });

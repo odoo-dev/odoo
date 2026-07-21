@@ -318,7 +318,34 @@ export class FormatPlugin extends Plugin {
                 )
         );
         const formatSpec = formatsSpecs[formatName];
+        // An element given by a provider, like a link, takes the format itself
+        // when all its text is selected. When only part of it is selected, its
+        // own format moves into its content, so that only that part changes.
+        const providers = this.getResource("formattable_node_providers");
+        const nodesToFormat = new Set();
         for (const node of textNodesToFormat) {
+            const formattableElement = providers.map((provider) => provider(node)).find(Boolean);
+            const isFullySelected =
+                formattableElement &&
+                descendants(formattableElement).every(
+                    (child) => !isVisibleTextNode(child) || textNodesToFormat.includes(child)
+                );
+            if (
+                formattableElement &&
+                !isFullySelected &&
+                formatSpec.isFormatted(formattableElement)
+            ) {
+                moveFormatToContent(formattableElement, formatSpec, cursor);
+            }
+            nodesToFormat.add(isFullySelected ? formattableElement : node);
+        }
+        for (const node of nodesToFormat) {
+            const isFormattableElement = !textNodesToFormat.includes(node);
+            if (isFormattableElement) {
+                for (const element of [node, ...node.querySelectorAll("*")]) {
+                    removeFormat(element, formatSpec, cursor);
+                }
+            }
             const inlineAncestors = [];
             /** @type { Node } */
             let currentNode = node;
@@ -372,9 +399,14 @@ export class FormatPlugin extends Plugin {
             const firstBlockOrClassHasFormat = formatSpec.isFormatted(parentNode, formatProps);
             if (firstBlockOrClassHasFormat && !applyStyle) {
                 formatSpec.addNeutralStyle &&
-                    formatSpec.addNeutralStyle(getOrCreateSpan(node, inlineAncestors, cursor));
+                    formatSpec.addNeutralStyle(
+                        isFormattableElement ? node : getOrCreateSpan(node, inlineAncestors, cursor)
+                    );
             } else if (!firstBlockOrClassHasFormat && applyStyle) {
-                const tag = formatSpec.tagName && this.document.createElement(formatSpec.tagName);
+                const tag =
+                    !isFormattableElement &&
+                    formatSpec.tagName &&
+                    this.document.createElement(formatSpec.tagName);
                 if (tag) {
                     cursor.update(callbacksForCursorUpdate.after(node, tag));
                     node.after(tag);
@@ -393,7 +425,9 @@ export class FormatPlugin extends Plugin {
                     }
                 } else if (formatName !== "fontSize" || formatProps.size) {
                     formatSpec.addStyle(
-                        getOrCreateSpan(node, inlineAncestors, cursor),
+                        isFormattableElement
+                            ? node
+                            : getOrCreateSpan(node, inlineAncestors, cursor),
                         formatProps
                     );
                 }
@@ -641,7 +675,7 @@ function getOrCreateSpan(node, ancestors, cursor) {
         return span;
     }
 }
-function removeFormat(node, formatSpec, cursor) {
+export function removeFormat(node, formatSpec, cursor) {
     const document = node.ownerDocument;
     node = closestElement(node);
     if (formatSpec.hasStyle(node)) {
@@ -673,4 +707,16 @@ function removeFormat(node, formatSpec, cursor) {
             unwrapContents(node);
         }
     }
+}
+
+// Moves the element's format onto a wrapper of its content.
+function moveFormatToContent(element, formatSpec, cursor) {
+    const wrapper = element.ownerDocument.createElement(formatSpec.tagName || "span");
+    if (!formatSpec.tagName) {
+        formatSpec.addStyle(wrapper, formatSpec.getFormatProps(element));
+    }
+    formatSpec.removeStyle(element);
+    wrapper.append(...element.childNodes);
+    cursor.remapNode(element, wrapper);
+    element.append(wrapper);
 }

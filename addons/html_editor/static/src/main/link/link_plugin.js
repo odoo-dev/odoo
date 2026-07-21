@@ -1,6 +1,16 @@
 import { Plugin } from "@html_editor/plugin";
-import { cleanTrailingBR, mergeAdjacentTextNodes, unwrapContents } from "@html_editor/utils/dom";
-import { childNodes, closestElement, selectElements } from "@html_editor/utils/dom_traversal";
+import {
+    cleanTrailingBR,
+    mergeAdjacentTextNodes,
+    removeEmptyTextNodes,
+    unwrapContents,
+} from "@html_editor/utils/dom";
+import {
+    childNodes,
+    closestElement,
+    findFurthest,
+    selectElements,
+} from "@html_editor/utils/dom_traversal";
 import { findInSelection, callbacksForCursorUpdate } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
@@ -15,6 +25,9 @@ import { memoize } from "@web/core/utils/functions";
 import { withSequence } from "@html_editor/utils/resource";
 import { isBlock, closestBlock } from "@html_editor/utils/blocks";
 import { isContentEditable } from "../../utils/dom_info";
+import { FONT_SIZE_CLASSES, formatsSpecs } from "@html_editor/utils/formatting";
+import { removeFormat } from "@html_editor/core/format_plugin";
+import { BG_CLASSES_REGEX, getColorOrClass, TEXT_CLASSES_REGEX } from "@html_editor/utils/color";
 
 /**
  * @typedef {import("@html_editor/core/selection_plugin").EditorSelection} EditorSelection
@@ -154,7 +167,7 @@ export class LinkPlugin extends Plugin {
         "linkSelection",
     ];
     // @phoenix @todo: do we want to have createLink and insertLink methods in link plugin?
-    static shared = ["createLink", "insertLink", "getPathAsUrlCommand"];
+    static shared = ["createLink", "insertLink", "getPathAsUrlCommand", "moveStylesToLink"];
     resources = {
         user_commands: [
             {
@@ -243,6 +256,10 @@ export class LinkPlugin extends Plugin {
         selectionchange_handlers: this.handleSelectionChange.bind(this),
         clean_for_save_handlers: ({ root }) => this.removeEmptyLinks(root),
         normalize_handlers: this.normalizeLink.bind(this),
+
+        /** Providers */
+        formattable_node_providers: (node) => closestElement(node, "a"),
+        color_target_providers: (node) => closestElement(node, "a"),
 
         /** Overrides */
         split_element_block_overrides: this.handleSplitBlock.bind(this),
@@ -367,6 +384,7 @@ export class LinkPlugin extends Plugin {
             link = this.createLink(url, label);
             this.dependencies.dom.insert(link);
         }
+        this.moveStylesToLink(link);
         this.dependencies.history.addStep();
         const linkParent = link.parentElement;
         const linkOffset = Array.from(linkParent.childNodes).indexOf(link);
@@ -385,7 +403,9 @@ export class LinkPlugin extends Plugin {
             description: _t("Create an URL."),
             icon: "fa-link",
             run: () => {
-                this.dependencies.dom.insert(this.createLink(url, text));
+                const link = this.createLink(url, text);
+                this.dependencies.dom.insert(link);
+                this.moveStylesToLink(link);
                 this.dependencies.history.addStep();
             },
         };
@@ -407,25 +427,6 @@ export class LinkPlugin extends Plugin {
 
     normalizeLink(root) {
         for (const anchorEl of selectElements(root, "a")) {
-            const { color } = anchorEl.style;
-            const childNodes = [...anchorEl.childNodes];
-            // For each anchor element, if it has an inline color style,
-            // (converted from an external style), remove it from the anchor,
-            // create a font tag inside it, and move the color to the font tag.
-            // This ensures the color is applied to the font element instead of
-            // the anchor element itself.
-            if (color && childNodes.every((n) => !isBlock(n))) {
-                anchorEl.style.removeProperty("color");
-                const font = selectElements(anchorEl, "font").next().value;
-                if (font && cleanZWChars(anchorEl.textContent) === font.textContent) {
-                    continue;
-                }
-                const newFont = this.document.createElement("font");
-                newFont.append(...childNodes);
-                anchorEl.appendChild(newFont);
-                this.dependencies.color.colorElement(newFont, color, "color");
-            }
-
             // When a link contains unsupported element (like an iframe or a link),
             // we remove the link. Cases can happen when a image link is replaced
             // by a document or a video
@@ -556,8 +557,17 @@ export class LinkPlugin extends Plugin {
                             this.overlay.close();
                             this.dependencies.selection.setCursorEnd(this.linkElement);
                         }
-                        if (classes) {
+                        const formatClasses = [...this.linkElement.classList].filter(
+                            (cls) =>
+                                FONT_SIZE_CLASSES.includes(cls) ||
+                                TEXT_CLASSES_REGEX.test(cls) ||
+                                BG_CLASSES_REGEX.test(cls)
+                        );
+                        if (classes || formatClasses.length) {
                             this.linkElement.className = classes;
+                            // The popover only sets its own classes, so keep
+                            // the format classes of the link.
+                            this.linkElement.classList.add(...formatClasses);
                         } else {
                             this.linkElement.removeAttribute("class");
                         }
@@ -628,6 +638,7 @@ export class LinkPlugin extends Plugin {
                 link.normalize();
             }
             this.dependencies.dom.insert(link);
+            this.moveStylesToLink(link);
             if (!imageNode) {
                 this.dependencies.selection.setCursorEnd(link);
             } else {
@@ -639,6 +650,79 @@ export class LinkPlugin extends Plugin {
                 });
             }
             return link;
+        }
+    }
+
+    /**
+     * Moves the formats and colors of the inline ancestors of the link onto
+     * the link itself, splitting those ancestors around it.
+     *
+     * @param {HTMLAnchorElement} link
+     */
+    moveStylesToLink(link) {
+        // Only split ancestors that are just styles, like the format plugin.
+        let boundary = link.parentElement;
+        while (
+            !isBlock(boundary) &&
+            !this.dependencies.split.isUnsplittable(boundary) &&
+            [...boundary.classList].every(
+                (cls) =>
+                    FONT_SIZE_CLASSES.includes(cls) ||
+                    TEXT_CLASSES_REGEX.test(cls) ||
+                    BG_CLASSES_REGEX.test(cls)
+            )
+        ) {
+            boundary = boundary.parentElement;
+        }
+        // The outermost ancestor with a format or a color.
+        const outermostStyledAncestor = findFurthest(
+            link.parentElement,
+            boundary,
+            (element) =>
+                Object.values(formatsSpecs).some(
+                    (formatSpec) => formatSpec.isTag?.(element) || formatSpec.hasStyle(element)
+                ) || ["color", "backgroundColor"].some((mode) => getColorOrClass(element, mode))
+        );
+        if (!outermostStyledAncestor) {
+            return;
+        }
+        const limitAncestor = outermostStyledAncestor.parentElement;
+        const ancestors = [];
+        let currentNode = link;
+        while (currentNode.parentElement !== limitAncestor) {
+            // Remove empty text nodes before splitting, to prevent creating
+            // empty elements in the DOM.
+            removeEmptyTextNodes(currentNode.parentElement);
+            currentNode = this.dependencies.split.splitAroundUntil(
+                currentNode,
+                currentNode.parentElement
+            );
+            // The outermost ancestor comes first, so that the closest one wins.
+            ancestors.unshift(currentNode);
+        }
+        for (const ancestor of ancestors) {
+            for (const mode of ["color", "backgroundColor"]) {
+                const color = getColorOrClass(ancestor, mode);
+                if (color) {
+                    this.dependencies.color.colorElement(link, color.value, mode);
+                    this.dependencies.color.colorElement(ancestor, "", mode);
+                }
+            }
+            if (["FONT", "SPAN"].includes(ancestor.tagName) && !ancestor.attributes.length) {
+                unwrapContents(ancestor);
+            }
+            for (const formatSpec of Object.values(formatsSpecs)) {
+                if (formatSpec.isTag?.(ancestor) || formatSpec.hasStyle(ancestor)) {
+                    // A neutral style, like a normal weight in bold text, stays
+                    // neutral on the link.
+                    if (formatSpec.isFormatted(ancestor)) {
+                        formatSpec.addStyle(link, formatSpec.getFormatProps?.(ancestor));
+                    } else {
+                        formatSpec.addNeutralStyle?.(link);
+                    }
+                    removeFormat(ancestor, formatSpec);
+                }
+            }
         }
     }
 
@@ -990,6 +1074,7 @@ export class LinkPlugin extends Plugin {
                 return () => {
                     textNodeToReplace.splitText(match[0].length); // this will keep the space (that will have been added in the meantime)
                     textNodeToReplace.parentNode.replaceChild(link, textNodeToReplace);
+                    this.moveStylesToLink(link);
                     // TODO Remove in master: kept for stable
                     return nodeForSelectionRestore;
                 };

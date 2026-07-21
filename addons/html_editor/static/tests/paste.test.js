@@ -2960,6 +2960,17 @@ describe("link", () => {
             });
         });
 
+        test("should paste and transform an URL in a strikeThrough text (collapsed)", async () => {
+            await testEditor({
+                contentBefore: "<p><s>ab[]cd</s></p>",
+                stepFunction: async (editor) => {
+                    pasteText(editor, "http://www.xyz.com");
+                },
+                contentAfter:
+                    '<p><s>ab</s><a href="http://www.xyz.com" style="text-decoration-line: line-through;">http://www.xyz.com</a>[]<s>cd</s></p>',
+            });
+        });
+
         test("should paste and not transform an URL in a existing link (collapsed) (1)", async () => {
             await testEditor({
                 contentBefore: '<p>a<a href="http://existing.com">b[]c</a>d</p>',
@@ -3149,6 +3160,15 @@ describe("link", () => {
             await expectElementCount(".o-we-powerbox", 0);
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p><a href="${url}">${url}</a> <a href="${videoUrl}">${videoUrl}</a> <a href="${imgUrl}">${imgUrl}</a>[]</p>`
+            );
+        });
+
+        test("should paste and transform multiple URLs in a strikeThrough text (collapsed)", async () => {
+            const { el, editor } = await setupEditor("<p><s>ab[]cd</s></p>");
+            pasteText(editor, "http://a.com http://b.com");
+            await animationFrame();
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                '<p><s>ab</s><a href="http://a.com" style="text-decoration-line: line-through;">http://a.com</a><s> </s><a href="http://b.com" style="text-decoration-line: line-through;">http://b.com</a><s>[]cd</s></p>'
             );
         });
 
@@ -3591,6 +3611,19 @@ describe("images", () => {
             await press("Enter");
             expect(cleanLinkArtifacts(getContent(el))).toBe(
                 `<p><a href="${imgUrl}">${imgUrl}</a>[]</p>`
+            );
+        });
+
+        test("should paste an image URL as a link in a strikeThrough text", async () => {
+            const { el, editor } = await setupEditor("<p><s>ab[]cd</s></p>");
+            pasteText(editor, imgUrl);
+            await animationFrame();
+            await expectElementCount(".o-we-powerbox", 1);
+            // Pick the second command (Paste as URL)
+            await press("ArrowDown");
+            await press("Enter");
+            expect(cleanLinkArtifacts(getContent(el))).toBe(
+                `<p><s>ab</s><a href="${imgUrl}" style="text-decoration-line: line-through;">${imgUrl}</a><s>[]cd</s></p>`
             );
         });
 

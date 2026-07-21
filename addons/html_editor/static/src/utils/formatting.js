@@ -92,6 +92,7 @@ export const formatsSpecs = {
             removeClass(node, ...FONT_SIZE_CLASSES);
         },
         removeStyle: (node) => removeStyle(node, "font-size"),
+        getFormatProps: (node) => ({ size: node.style["font-size"] }),
     },
     setFontSizeClassName: {
         isFormatted: (node, props) =>
@@ -112,6 +113,9 @@ export const formatsSpecs = {
             removeStyle(node, "font-size");
             removeClass(node, ...FONT_SIZE_CLASSES, ...TEXT_STYLE_CLASSES);
         },
+        getFormatProps: (node) => ({
+            className: FONT_SIZE_CLASSES.find((cls) => node.classList.contains(cls)),
+        }),
     },
 };
 

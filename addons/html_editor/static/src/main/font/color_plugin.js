@@ -7,25 +7,34 @@ import {
     BG_CLASSES_REGEX,
     hasTextColorClass,
     computeBackgroundColorForElement,
+    getColorOrClass,
 } from "@html_editor/utils/color";
 import { fillEmpty, removeClass, removeStyle, unwrapContents } from "@html_editor/utils/dom";
 import {
     isEmptyBlock,
     isEmptyTextNode,
     isTextNode,
+    isVisibleTextNode,
     isWhitespace,
     isZwnbsp,
     PROTECTED_QWEB_SELECTOR,
 } from "@html_editor/utils/dom_info";
-import { closestElement, descendants, selectElements } from "@html_editor/utils/dom_traversal";
+import {
+    closestElement,
+    descendants,
+    findFurthest,
+    selectElements,
+} from "@html_editor/utils/dom_traversal";
 import { isRedundantElement } from "@html_editor/utils/formatting";
 import { isCSSColor } from "@web/core/utils/colors";
 import { ColorSelector } from "./color_selector";
 import { reactive } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { withSequence } from "@html_editor/utils/resource";
-import { isBlock } from "@html_editor/utils/blocks";
+import { closestBlock, isBlock } from "@html_editor/utils/blocks";
 import { callbacksForCursorUpdate } from "@html_editor/utils/selection";
+
+/** @typedef {import("@html_editor/core/selection_plugin").Cursors} Cursors */
 
 const HEX_OPACITY = "99";
 
@@ -304,6 +313,69 @@ export class ColorPlugin extends Plugin {
 
         const nodesToColor = [...selectedNodes, ...targetedFieldNodes];
 
+        // An element given by a provider, like a link, takes the color itself
+        // when all its text is selected. When only part of it is selected, its
+        // own color moves into a <font> around its content, so that only that
+        // part changes.
+        const providers = this.getResource("color_target_providers");
+        const colorTargets = new Set();
+        const nodesToColorWithFonts = [];
+        for (const node of nodesToColor) {
+            const colorTarget = providers.map((provider) => provider(node)).find(Boolean);
+            const isFullySelected =
+                colorTarget &&
+                descendants(colorTarget).every(
+                    (child) => !isVisibleTextNode(child) || nodesToColor.includes(child)
+                );
+            if (isFullySelected) {
+                colorTargets.add(colorTarget);
+            } else {
+                if (colorTarget && getColorOrClass(colorTarget, mode)) {
+                    this.moveColorToContent(colorTarget, mode, cursors);
+                }
+                nodesToColorWithFonts.push(node);
+            }
+        }
+        for (const colorTarget of colorTargets) {
+            // Split the colored ancestors around the element.
+            const coloredAncestor = findFurthest(
+                colorTarget.parentElement,
+                closestBlock(colorTarget),
+                (el) => getColorOrClass(el, mode)
+            );
+            const ancestors = [];
+            if (coloredAncestor) {
+                // The zero-width spaces padding the element stay with it.
+                const first = isZwnbsp(colorTarget.previousSibling)
+                    ? colorTarget.previousSibling
+                    : colorTarget;
+                const last = isZwnbsp(colorTarget.nextSibling)
+                    ? colorTarget.nextSibling
+                    : colorTarget;
+                const splitAncestor = this.dependencies.split.splitAroundUntil(
+                    [first, last],
+                    coloredAncestor
+                );
+                // Collect the split ancestors.
+                let ancestor = colorTarget;
+                while (ancestor !== splitAncestor) {
+                    ancestor = ancestor.parentElement;
+                    ancestors.push(ancestor);
+                }
+            }
+            // Remove the color around and inside the element before coloring it.
+            for (const colored of [...ancestors, ...colorTarget.querySelectorAll("*")]) {
+                if (getColorOrClass(colored, mode)) {
+                    this.colorElement(colored, "", mode);
+                    if (["FONT", "SPAN"].includes(colored.tagName) && !colored.attributes.length) {
+                        cursors.update(callbacksForCursorUpdate.unwrap(colored));
+                        unwrapContents(colored);
+                    }
+                }
+            }
+            this.colorElement(colorTarget, color, mode);
+        }
+
         const getFonts = (selectedNodes) =>
             selectedNodes.flatMap((node) => {
                 let font =
@@ -468,12 +540,12 @@ export class ColorPlugin extends Plugin {
                 return font;
             });
 
-        let fonts = getFonts(nodesToColor);
+        let fonts = getFonts(nodesToColorWithFonts);
         // Dirty fix as the previous call could have unconnected elements
         // because of the `splitAroundUntil`. Another call should provide he
         // correct list of fonts.
         if (!fonts.every((font) => font.isConnected)) {
-            fonts = getFonts(nodesToColor);
+            fonts = getFonts(nodesToColorWithFonts);
         }
 
         // Color the selected <font>s and remove uncolored fonts.
@@ -493,6 +565,22 @@ export class ColorPlugin extends Plugin {
             }
         }
         cursors.restore();
+    }
+
+    /**
+     * Moves the color of the element onto a new <font> wrapping its content.
+     *
+     * @param {HTMLElement} element
+     * @param {string} mode 'color' or 'backgroundColor'
+     * @param {Cursors} cursors
+     */
+    moveColorToContent(element, mode, cursors) {
+        const font = this.document.createElement("font");
+        this.colorElement(font, getColorOrClass(element, mode).value, mode);
+        this.colorElement(element, "", mode);
+        font.append(...element.childNodes);
+        cursors.remapNode(element, font);
+        element.append(font);
     }
 
     getUsedCustomColors(mode) {

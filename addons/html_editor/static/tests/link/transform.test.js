@@ -119,6 +119,15 @@ test("should transform an email to url after space", async () => {
     });
 });
 
+test("should transform url after space in a strikeThrough text", async () => {
+    await testEditor({
+        contentBefore: "<p><s>ab http://test.com[]</s></p>",
+        stepFunction: (editor) => insertSpace(editor),
+        contentAfter:
+            '<p><s>ab </s><a href="http://test.com" style="text-decoration-line: line-through;">http://test.com</a><s>&nbsp;[]</s></p>',
+    });
+});
+
 test("should not transform url after two space", async () => {
     await testEditor({
         contentBefore: "<p>a http://test.com b http://test.com&nbsp;[] c http://test.com d</p>",

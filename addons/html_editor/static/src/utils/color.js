@@ -252,6 +252,37 @@ export function hasTextColorClass(element, mode) {
 }
 
 /**
+ * Returns the color the node itself applies for the given mode: a gradient,
+ * a color class or an inline color.
+ *
+ * @param {Element} node
+ * @param {string} [mode] 'color' or 'backgroundColor'
+ * @returns {{ type: string, value: string } | null}
+ */
+export function getColorOrClass(node, mode = "color") {
+    // The gradient comes first, as a text gradient also has the color class
+    // `text-gradient`.
+    if (isColorGradient(node.style["background-image"])) {
+        const isTextGradient = node.classList.contains("text-gradient");
+        if (
+            (mode === "color" && isTextGradient) ||
+            (mode === "backgroundColor" && !isTextGradient)
+        ) {
+            return { type: "gradient", value: node.style["background-image"] };
+        }
+    }
+    const classRegex = mode === "color" ? TEXT_CLASSES_REGEX : BG_CLASSES_REGEX;
+    const colorClass = [...node.classList].find((cls) => classRegex.test(cls));
+    if (colorClass) {
+        return { type: "class", value: colorClass };
+    }
+    if (node.style[mode] && node.style[mode] !== "inherit") {
+        return { type: "style", value: node.style[mode] };
+    }
+    return null;
+}
+
+/**
  * Returns true if the given element has a visible color (fore- or
  * -background depending on the given mode).
  *

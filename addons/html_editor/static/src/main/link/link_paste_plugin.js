@@ -84,9 +84,9 @@ export class LinkPastePlugin extends Plugin {
             // A url cannot be transformed inside an existing link.
             if (i % 2 && !selectionIsInsideALink) {
                 const url = deduceURLfromText(splitAroundUrl[i]);
-                this.dependencies.dom.insert(
-                    this.dependencies.link.createLink(url, splitAroundUrl[i])
-                );
+                const link = this.dependencies.link.createLink(url, splitAroundUrl[i]);
+                this.dependencies.dom.insert(link);
+                this.dependencies.link.moveStylesToLink(link);
             } else if (splitAroundUrl[i] !== "") {
                 this.dependencies.clipboard.pasteText(selection, splitAroundUrl[i]);
             }

@@ -1,6 +1,6 @@
 import { click, expect, test } from "@odoo/hoot";
 import { setupEditor, testEditor } from "./_helpers/editor";
-import { unformat } from "./_helpers/format";
+import { cleanLinkArtifacts, unformat } from "./_helpers/format";
 import { setColor } from "./_helpers/user_actions";
 import { animationFrame } from "@odoo/hoot-mock";
 
@@ -355,24 +355,18 @@ test("should apply background color to a list of 3 links", async () => {
         contentAfter:
             "<ul>" +
             "<li>" +
-            '<a href="#">' +
-            '<font style="background-color: rgb(255, 0, 0);">' +
+            '<a href="#" style="background-color: rgb(255, 0, 0);">' +
             "[abc" +
-            "</font>" +
             "</a>" +
             "</li>" +
             "<li>" +
-            '<a href="#">' +
-            '<font style="background-color: rgb(255, 0, 0);">' +
+            '<a href="#" style="background-color: rgb(255, 0, 0);">' +
             "bcd" +
-            "</font>" +
             "</a>" +
             "</li>" +
             "<li>" +
-            '<a href="#">' +
-            '<font style="background-color: rgb(255, 0, 0);">' +
+            '<a href="#" style="background-color: rgb(255, 0, 0);">' +
             "cde]" +
-            "</font>" +
             "</a>" +
             "</li>" +
             "</ul>",
@@ -385,7 +379,7 @@ test("should distribute color to texts and to button separately", async () => {
         stepFunction: setColor("rgb(255, 0, 0)", "color"),
         contentAfter:
             '<p>a<font style="color: rgb(255, 0, 0);">[b</font>' +
-            '<a class="btn"><font style="color: rgb(255, 0, 0);">c</font></a>' +
+            '<a class="btn" style="color: rgb(255, 0, 0);">c</a>' +
             '<font style="color: rgb(255, 0, 0);">d]</font>e</p>',
     });
 });
@@ -685,11 +679,9 @@ test("Should properly apply color when selection on feff", async () => {
     expect(el).toHaveInnerHTML(
         unformat(`
             <div class="o-paragraph">
-                <font style="color: rgb(255, 0, 0);">
-                    <a href="#">
-                        a
-                    </a>
-                </font>
+                <a href="#" style="color: rgb(255, 0, 0);">
+                    a
+                </a>
                 <font style="color: #6e4a8b;">
                     <font style="color: #008f8c;">
                         b
@@ -698,7 +690,6 @@ test("Should properly apply color when selection on feff", async () => {
             </div>
         `)
     );
-    // Ensure the link inherited the font color.
     const a = el.querySelector("a");
     expect(getComputedStyle(a).color).toBe("rgb(255, 0, 0)");
 });
@@ -726,4 +717,61 @@ test("should only target fully selected nodes when applying color", async () => 
         contentAfter:
             '<p><b>a<font style="color: red;">[b</font></b><font style="color: red;">c]</font>d</p>',
     });
+});
+
+test("should apply a color to a link", async () => {
+    await testEditor({
+        contentBefore: '<p><a href="#">[link]</a></p>',
+        stepFunction: setColor("red", "color"),
+        contentAfter: '<p><a href="#" style="color: red;">[link]</a></p>',
+    });
+});
+
+test("should apply a color to a link with colors inside", async () => {
+    const { el, editor } = await setupEditor(
+        '<p><a href="#"><font style="color: red;">[<em>li</em></font>nk]</a></p>'
+    );
+    setColor("blue", "color")(editor);
+    expect(cleanLinkArtifacts(el.innerHTML)).toBe(
+        '<p><a href="#" style="color: blue;"><em>li</em>nk</a></p>'
+    );
+});
+
+test("should remove the color of an element inside a link", async () => {
+    const { el, editor } = await setupEditor(
+        '<p><a href="#" style="color: red;">li[<em>nk</em>]</a></p>'
+    );
+    setColor("", "color")(editor);
+    expect(cleanLinkArtifacts(el.innerHTML)).toBe(
+        '<p><a href="#"><font style="color: red;">li</font><em>nk</em></a></p>'
+    );
+});
+
+test("should remove the color of a part of a link", async () => {
+    await testEditor({
+        contentBefore: '<p><a href="#" style="color: red;">li[n]k</a></p>',
+        stepFunction: setColor("", "color"),
+        contentAfter:
+            '<p><a href="#"><font style="color: red;">li</font>[n]<font style="color: red;">k</font></a></p>',
+    });
+});
+
+test("should remove the text gradient of a part of a link", async () => {
+    const gradient = "linear-gradient(135deg, rgb(255, 0, 0) 0%, rgb(0, 0, 255) 100%)";
+    await testEditor({
+        contentBefore: `<p><a href="#" class="text-gradient" style="background-image: ${gradient};">li[n]k</a></p>`,
+        stepFunction: setColor("", "color"),
+        contentAfter:
+            `<p><a href="#"><font class="text-gradient" style="background-image: ${gradient};">li</font>[n]` +
+            `<font class="text-gradient" style="background-image: ${gradient};">k</font></a></p>`,
+    });
+});
+
+test("should keep the color of a selected link", async () => {
+    const { el } = await setupEditor(
+        '<p><a href="#" style="color: rgb(255, 0, 0);">li[]nk</a></p>'
+    );
+    const link = el.querySelector("a");
+    expect(link).toHaveClass("o_link_in_selection");
+    expect(getComputedStyle(link).color).toBe("rgb(255, 0, 0)");
 });

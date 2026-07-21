@@ -14,6 +14,22 @@ test("should do nothing if no format is set", async () => {
         contentAfter: "<div>ab[cd]ef</div>",
     });
 });
+test("should remove the formats of a link", async () => {
+    await testEditor({
+        contentBefore:
+            '<p><a href="#" style="font-style: italic; font-weight: bolder; text-decoration-line: underline line-through;">[link]</a></p>',
+        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        contentAfter: '<p><a href="#">[link]</a></p>',
+    });
+});
+test("should remove the font size of a part of a link", async () => {
+    await testEditor({
+        contentBefore: '<p><a href="#" style="font-size: 32px;">li[n]k</a></p>',
+        stepFunction: (editor) => execCommand(editor, "removeFormat"),
+        contentAfter:
+            '<p><a href="#"><span style="font-size: 32px;">li</span>[n]<span style="font-size: 32px;">k</span></a></p>',
+    });
+});
 test('should not remove "non formating" html class (1)', async () => {
     await testEditor({
         contentBefore: '<div>ab<span class="xyz">[cd]</span>ef</div>',
