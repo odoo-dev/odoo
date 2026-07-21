@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ===================== Servings ===================== -->
+    <record id="serve_range_max" model="product.nutritional.info.key">
+        <field name="group_name">servings</field>
+        <field name="key_name">serve_range_max</field>
+        <field name="name">Serve Range Max</field>
+    </record>
+
+    <record id="serve_range_min" model="product.nutritional.info.key">
+        <field name="group_name">servings</field>
+        <field name="key_name">serve_range_min</field>
+        <field name="name">Serve Range Min</field>
+    </record>
+
+    <!-- ===================== Nutrition (kcal range) ===================== -->
+    <record id="kcal_range_min" model="product.nutritional.info.key">
+        <field name="group_name">nutrition</field>
+        <field name="key_name">kcal_range_min</field>
+        <field name="name">Kcal Range Min</field>
+    </record>
+
+    <record id="kcal_range_max" model="product.nutritional.info.key">
+        <field name="group_name">nutrition</field>
+        <field name="key_name">kcal_range_max</field>
+        <field name="name">Kcal Range Max</field>
+    </record>
+
+    <!-- ===================== NutritionalInfo: Additive group (mg) ===================== -->
+    <record id="caffeine_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">caffeine_mg</field>
+        <field name="name">Caffeine (mg)</field>
+    </record>
+
+    <record id="msg_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">msg_mg</field>
+        <field name="name">MSG (mg)</field>
+    </record>
+
+    <record id="polyols_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">polyols_mg</field>
+        <field name="name">Polyols (mg)</field>
+    </record>
+
+    <record id="polydextrose_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">polydextrose_mg</field>
+        <field name="name">Polydextrose (mg)</field>
+    </record>
+
+    <record id="artificialsweetener_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">artificialsweetener_mg</field>
+        <field name="name">Artificial Sweetener (mg)</field>
+    </record>
+
+    <!-- ===================== NutritionalInfo: Carbohydrate group ===================== -->
+    <record id="carbohydrate_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">carbohydrate_mg</field>
+        <field name="name">Carbohydrate (mg)</field>
+    </record>
+
+    <!-- ===================== NutritionalInfo: Protein group ===================== -->
+    <record id="protein_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">protein_mg</field>
+        <field name="name">Protein (mg)</field>
+    </record>
+
+    <!-- ===================== NutritionalInfo: Fat group ===================== -->
+    <record id="cholesterol_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">cholesterol_mg</field>
+        <field name="name">Cholesterol (mg)</field>
+    </record>
+
+    <record id="saturatedfat_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">saturatedfat_mg</field>
+        <field name="name">Saturated Fat (mg)</field>
+    </record>
+
+    <record id="fat_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">fat_mg</field>
+        <field name="name">Fat (mg)</field>
+    </record>
+
+    <record id="transfat_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">transfat_mg</field>
+        <field name="name">Trans Fat (mg)</field>
+    </record>
+
+    <!-- ===================== NutritionalInfo: Sodium group ===================== -->
+    <record id="sodium_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">sodium_mg</field>
+        <field name="name">Sodium (mg)</field>
+    </record>
+
+    <!-- ===================== NutritionalInfo: Energy group ===================== -->
+    <record id="calorie_kcal" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">calorie_kcal</field>
+        <field name="name">Calories (kcal)</field>
+    </record>
+
+    <!-- ===================== NutritionalInfo: Fiber group (Zomato) ===================== -->
+    <record id="fiber_mg" model="product.nutritional.info.key">
+        <field name="group_name">nutritional_info</field>
+        <field name="key_name">fiber_mg</field>
+        <field name="name">Fiber (mg)</field>
+    </record>
+
+    <!-- ===================== Deposit (Ireland) ===================== -->
+    <record id="deposit_charge" model="product.nutritional.info.key">
+        <field name="group_name">deposit</field>
+        <field name="key_name">deposit_charge</field>
+        <field name="name">Deposit Charge</field>
+    </record>
+
+    <!-- ===================== Additional Info (Swiggy) ===================== -->
+    <record id="accompaniments" model="product.nutritional.info.key">
+        <field name="group_name">additional_info</field>
+        <field name="key_name">accompaniments</field>
+        <field name="name">Accompaniments</field>
+    </record>
+
+    <record id="quantity" model="product.nutritional.info.key">
+        <field name="group_name">additional_info</field>
+        <field name="key_name">quantity</field>
+        <field name="name">Quantity</field>
+    </record>
+
+    <record id="quantity_unit" model="product.nutritional.info.key">
+        <field name="group_name">additional_info</field>
+        <field name="key_name">quantity_unit</field>
+        <field name="name">Quantity Unit</field>
+    </record>
+
+</odoo>

@@ -87,6 +87,17 @@
                         </group>
                     </group>
                 </page>
+                <page string="Nutritional Info" name="nutritional_info" invisible="not available_in_pos">
+                    <field name="nutritional_info_ids">
+                        <list editable="bottom">
+                            <field name="group"/>
+                            <field name="key"
+                                context="{'default_group_name': group}"
+                                options="{'no_create_edit': True}"/>
+                            <field name="value"/>
+                        </list>
+                    </field>
+                </page>
             </page>
             <div name="options" position="inside">
                 <span class="d-inline-flex">

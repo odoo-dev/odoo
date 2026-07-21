@@ -48,6 +48,7 @@ class ProductTemplate(models.Model):
         default=_default_pos_sequence,
         copy=False,
     )
+    nutritional_info_ids = fields.One2many('product.nutritional.info', 'product_id', string='Nutritional Info')
 
     @api.model
     def set_pos_sequence(self, sequence_by_id):

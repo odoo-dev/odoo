@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from . import account_bank_statement
+from . import product_nutritional_info
 from . import account_bank_statement_line
 from . import pos_load_mixin
 from . import account_account
