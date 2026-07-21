@@ -9,7 +9,7 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command
 from odoo.osv import expression
-from odoo.tools import float_compare, float_is_zero, format_date, groupby
+from odoo.tools import float_compare, float_is_zero, format_date, groupby, SQL
 from odoo.tools.translate import _
 
 
@@ -309,6 +309,18 @@ class SaleOrderLine(models.Model):
         related='company_id.tax_calculation_rounding_method',
         string='Tax calculation rounding method', readonly=True)
     company_price_include = fields.Selection(related="company_id.account_price_include")
+
+    def _order_field_to_sql(self, alias, field_name, direction, nulls, query):
+        """ Bypass the default many2one ordering for `order_id`.
+
+        By default, ordering on a many2one field follows to the comodel's `_order`.
+        For `order_id`, sort directly by the id instead of the default order defined on `sale.order`.
+        """
+        if field_name == "order_id":
+            sql_field = self._field_to_sql(alias, field_name, query)
+            return SQL("%s %s %s", sql_field, direction, nulls)
+
+        return super()._order_field_to_sql(alias, field_name, direction, nulls, query)
 
     #=== COMPUTE METHODS ===#
 
