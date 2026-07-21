@@ -28,15 +28,29 @@ class TestStockNotificationProduct(WebsiteSaleStockCommon, HttpCase):
         emails = self.env['mail.mail'].search([('email_to', '=', partner.email_formatted)])
         self.assertEqual(len(emails), 0)
 
+        self.macbook.list_price = 100.0
+        tax = self.company.account_sale_tax_id
+        self.assertTrue(tax)
+        self.assertFalse(tax.price_include)
+        self.macbook.taxes_id = tax
+        website = self.env['website'].get_current_website()
+        website = self.env["website"].get_current_website()
+        website.show_line_subtotals_tax_selection = "tax_included"
         self._add_product_qty_to_wh(self.macbook.id, 10.0, self.warehouse.lot_stock_id.id)
 
-        website = self.env['website'].get_current_website()
         website.company_id.partner_id.email = "test@test.com"
         with self.setup_cron_env() as env:
-            env['product.product']._send_availability_email()
+            env["product.product"]._send_availability_email()
 
-        emails = self.env['mail.mail'].search([('email_to', '=', partner.email_formatted)])
+        emails = self.env["mail.mail"].search([("email_to", "=", partner.email_formatted)])
         self.assertEqual(emails[0].subject, "Macbook Pro is back in stock")
+        expected_price = self.env["ir.qweb.field.monetary"].value_to_html(
+            tax.compute_all(self.macbook.list_price, self.macbook.currency_id, 1.0, self.macbook)[
+                "total_included"
+            ],
+            {"display_currency": self.macbook.currency_id},
+        )
+        self.assertIn(expected_price, emails[0].body_html)
         self.assertFalse(self.macbook._has_stock_notification(partner))
 
     @contextmanager
