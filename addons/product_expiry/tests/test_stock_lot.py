@@ -3,6 +3,7 @@
 
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
+from freezegun import freeze_time
 
 from odoo import fields, Command
 from odoo.addons.mail.tests.common import mail_new_test_user
@@ -853,3 +854,21 @@ class TestStockLot(TestStockCommon):
 
         wizard = self.env['expiry.picking.confirmation'].with_context(res['context']).create({})
         self.assertIn('new-expired-lot', wizard.description)
+
+    @freeze_time('2025-9-13')
+    def test_expiry_date_on_move_line(self):
+        """Test that the expiration date on a move line is correctly set when change the scheduled date of the picking."""
+        receipt = self.PickingObj.create({
+            'picking_type_id': self.picking_type_in.id,
+            'location_id': self.supplier_location.id,
+            'location_dest_id': self.stock_location.id,
+            'state': 'draft',
+            'move_ids': [Command.create({
+                'product_id': self.apple_product.id,
+                'product_uom_qty': 1,
+            })],
+        })
+        receipt.action_confirm()
+        self.assertEqual(receipt.move_line_ids.expiration_date, datetime.today() + timedelta(days=10))
+        receipt.scheduled_date = datetime.today() + timedelta(days=5)
+        self.assertRecordValues(receipt.move_line_ids, [{'expiration_date': datetime.today() + timedelta(days=15)}])
