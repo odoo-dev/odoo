@@ -115,12 +115,14 @@ class ProductTemplate(models.Model):
 
         products = product_tmpls.product_variant_ids
 
+        pricelists = {}
         # product.pricelist_item & product.pricelist loading
-        pricelists = config.current_session_id.get_pos_ui_product_pricelist_item_by_product(
-            product_tmpls.ids,
-            products.ids,
-            config.id
-        )
+        if current_sessin := config.current_session_id:
+            pricelists = current_sessin.get_pos_ui_product_pricelist_item_by_product(
+                product_tmpls.ids,
+                products.ids,
+                config.id,
+            )
 
         # product.template.attribute.value & product.template.attribute.line loading
         product_tmpl_attr_line = product_tmpls.attribute_line_ids
