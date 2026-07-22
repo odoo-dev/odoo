@@ -4,8 +4,8 @@ from lxml import etree
 from markupsafe import Markup
 
 from odoo import _, api, models
+from odoo.tools.misc import format_list
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
-from odoo.addons.account_peppol.tools import format_list
 from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)

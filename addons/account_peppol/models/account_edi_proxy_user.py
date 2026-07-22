@@ -5,8 +5,8 @@ import logging
 from lxml import etree
 
 from odoo import _, api, fields, models, tools
+from odoo.tools.misc import format_list
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
-from odoo.addons.account_peppol.tools import format_list
 from odoo.addons.account_peppol.tools.demo_utils import handle_demo
 from odoo.exceptions import UserError
 

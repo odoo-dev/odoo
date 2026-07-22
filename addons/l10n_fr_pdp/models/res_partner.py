@@ -105,18 +105,6 @@ class ResPartner(models.Model):
             return self.env['account.edi.xml.ubl_21_fr']
         return super()._get_edi_builder()
 
-    def _get_ubl_cii_formats_info(self):
-        # EXTENDS 'account_edi_ubl_cii'
-        formats_info = super()._get_ubl_cii_formats_info()
-        formats_info['ubl_21_fr'] = {'countries': ['FR'], 'on_peppol': False}
-        return formats_info
-
-    def _get_suggested_ubl_cii_format(self):
-        # EXTENDS 'account'
-        if self.country_code == 'FR' and not self._l10n_fr_pdp_is_b2c():
-            return 'ubl_21_fr'
-        return super()._get_suggested_ubl_cii_format()
-
     def _get_pdp_display_verification_state(self, state=None):
         self.ensure_one()
         state = state if state is not None else self.account_peppol_verification_label
@@ -126,13 +114,6 @@ class ResPartner(models.Model):
             return f'pdp_{state}'
         else:
             return f'peppol_{state}'
-
-    def _get_suggested_peppol_edi_format(self):
-        # EXTENDS 'account_edi_ubl_cidd`
-        self.ensure_one()
-        if self.env.company._get_peppol_proxy_type() == 'pdp' and self.commercial_partner_id._get_pdp_receiver_identification_info()[0] == 'pdp':
-            return 'ubl_21_fr'
-        return super()._get_suggested_peppol_edi_format()
 
     def _compute_account_peppol_verification_label(self):
         pdp_partners = self.filtered(
