@@ -246,7 +246,7 @@
                             </div>
                             <field name="tax_country_id" invisible="1"/>
                             <field name="order_line"
-                                widget="product_label_section_and_note_field_o2m"
+                                widget="purchase_qty_received_one2many"
                                 mode="list,kanban"
                                 aggregated_fields="price_subtotal"
                                 context="{'default_state': 'draft'}"
