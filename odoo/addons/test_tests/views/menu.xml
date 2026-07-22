@@ -153,7 +153,7 @@
                 <sheet>
                     <notebook>
                         <page>
-                            <field name="line_ids" widget="one2many" context="{'line_ids': line_ids}">
+                            <field name="line_ids" context="{'line_ids': line_ids}">
                                 <list editable="bottom">
                                     <field name="dummy"/>
                                     <field name="flag" readonly="1" column_invisible="True"/>

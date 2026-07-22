@@ -383,7 +383,7 @@ test("field string is used in the SelectCreateDialog", async () => {
                         <field name="name"/>
                     </list>
                 </field>
-                <field name="turtles" widget="many2many" string="Abcde">
+                <field name="turtles"  string="Abcde">
                     <list>
                         <field name="name"/>
                     </list>
@@ -868,7 +868,7 @@ test("fieldmany2many list comodel not writable", async () => {
         resModel: "partner",
         arch: `
             <form>
-                <field name="timmy" widget="many2many" can_create="False" can_write="False"/>
+                <field name="timmy"  can_create="False" can_write="False"/>
             </form>`,
     });
 
@@ -1497,7 +1497,7 @@ test("many2many widget: creates a new record with a context containing the paren
         resModel: "partner",
         arch: `
             <form>
-                <field name="turtles" widget="many2many" context="{'default_turtle_trululu': id}" >
+                <field name="turtles"  context="{'default_turtle_trululu': id}" >
                     <list>
                         <field name="turtle_foo"/>
                     </list>
@@ -1704,7 +1704,7 @@ test("many2many list add *many* records, remove, re-add", async () => {
         resModel: "partner",
         arch: `
             <form>
-                <field name="timmy" widget="many2many">
+                <field name="timmy" >
                     <list>
                         <field name="name"/>
                         <field name="product_ids" widget="many2many_tags"/>

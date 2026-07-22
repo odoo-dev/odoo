@@ -28,7 +28,7 @@
                         </group>
                         <notebook>
                             <page id="invoice_tab" name="invoice_tab" string="Invoices">
-                                <field name="invoice_ids" force_save="1" widget="many2many">
+                                <field name="invoice_ids" force_save="1" >
                                     <list create="False" edit="False">
                                         <field name="name"/>
                                         <field name="invoice_date" optional="show" string="Accounting Date"/>

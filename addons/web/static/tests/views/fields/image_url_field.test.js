@@ -85,7 +85,7 @@ test("ImageUrlField in subviews are loaded correctly", async () => {
         arch: /* xml */ `
             <form>
                 <field name="foo" widget="image_url" options="{'size': [90, 90]}"/>
-                <field name="timmy" widget="many2many" mode="kanban">
+                <field name="timmy"  mode="kanban">
                     <kanban>
                         <templates>
                             <t t-name="card">
@@ -128,7 +128,7 @@ test("image fields in x2many list are loaded correctly", async () => {
         resModel: "partner",
         arch: /* xml */ `
             <form>
-                <field name="timmy" widget="many2many">
+                <field name="timmy" >
                     <list>
                         <field name="image" widget="image_url"/>
                     </list>
@@ -235,8 +235,10 @@ test("ImageUrlField with width attribute is auto when Studio is set", async () =
             </form>
         `,
         resId: 1,
-
     });
 
-    expect(`.o_field_widget[name=foo] img`).toHaveAttribute("style", "width: auto; max-height: 270px;");
+    expect(`.o_field_widget[name=foo] img`).toHaveAttribute(
+        "style",
+        "width: auto; max-height: 270px;"
+    );
 });

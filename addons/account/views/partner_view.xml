@@ -68,7 +68,7 @@
                     </group>
                     <notebook>
                         <page name="account_mapping" string="Account Mapping" groups="account.group_account_readonly">
-                            <field name="account_ids" widget="one2many" nolabel="1">
+                            <field name="account_ids"  nolabel="1">
                                 <list string="Account Mapping" editable="bottom">
                                     <field name="account_src_id" domain="['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]"/>
                                     <field name="account_dest_id" domain="['|', ('company_ids', '=', parent.company_id), ('account_type', '!=', 'off_balance')]"/>

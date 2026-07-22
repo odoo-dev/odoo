@@ -114,7 +114,7 @@
                 <group name="main_field">
                     <label for="attribute_id" string="Attribute Name"/>
                     <field name="attribute_id" nolabel="1"/>
-                    <field name="value_ids" widget="one2many">
+                    <field name="value_ids" >
                         <list string="Values">
                             <field name="name"/>
                             <field name="html_color"/>

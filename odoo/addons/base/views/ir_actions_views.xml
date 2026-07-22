@@ -468,7 +468,7 @@
                                 </group>
                             </group>
                             <t invisible="state != 'multi'">
-                                <field name="child_ids" widget="many2many" mode="kanban" context="{
+                                <field name="child_ids"  mode="kanban" context="{
                                     'is_modal': 1,
                                     'default_model_id': model_id,
                                 }"/>

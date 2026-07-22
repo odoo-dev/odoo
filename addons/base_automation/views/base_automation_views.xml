@@ -141,7 +141,6 @@
                             <page string="Actions To Do" name="actions">
                                 <field
                                     name="action_server_ids"
-                                    widget="one2many"
                                     mode="kanban"
                                     context="{'default_model_id': model_id, 'is_modal': 1}"
                                 />

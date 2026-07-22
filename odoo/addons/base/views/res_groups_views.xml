@@ -39,7 +39,7 @@
                         </group>
                         <notebook>
                             <page string="Groups" name="groups">
-                                <field name="group_ids" widget="many2many" domain="[('privilege_id', '=', False)]" context="{'default_privilege_id': id}">
+                                <field name="group_ids"  domain="[('privilege_id', '=', False)]" context="{'default_privilege_id': id}">
                                     <list string="Groups">
                                         <field name="sequence" widget="handle"/>
                                         <field name="name"/>

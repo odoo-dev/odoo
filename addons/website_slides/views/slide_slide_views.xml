@@ -138,7 +138,7 @@
                             </page>
                             <page string="Additional Resources" name="external_links" >
                                 <group>
-                                    <field name="slide_resource_ids" widget="one2many" nolabel="1">
+                                    <field name="slide_resource_ids"  nolabel="1">
                                         <list editable="top">
                                             <field name="sequence" widget="handle"/>
                                             <field name="resource_type"/>

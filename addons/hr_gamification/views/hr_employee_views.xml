@@ -41,7 +41,7 @@
                         </div>
                     </div>
                     <div class="mt-2">
-                        <field name="badge_ids" mode="kanban" widget="many2many"/>
+                        <field name="badge_ids" mode="kanban" />
                         <div class="d-flex justify-content-center" invisible="user_id == uid">
                             <button class=" mt-2 grant_badge_btn o_kanban_renderer o_kanban_record o-kanban-button-new btn btn-link py-3" string="Grant a Badge" type="action" name="%(action_reward_wizard)d"/>
                         </div>

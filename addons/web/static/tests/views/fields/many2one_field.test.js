@@ -2397,7 +2397,7 @@ test("X2Many sequence list in modal", async () => {
         arch: `
             <form>
                 <field name="name" />
-                <field name="turtle_ids" widget="one2many">
+                <field name="turtle_ids" >
                     <list editable="bottom">
                         <field name="type_id"/>
                     </list>

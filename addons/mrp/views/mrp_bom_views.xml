@@ -85,7 +85,7 @@
                     </group>
                     <notebook>
                         <page string="Components" name="components">
-                            <field name="bom_line_ids" widget="one2many" context="{'default_parent_product_tmpl_id': product_tmpl_id, 'default_product_id': False, 'default_bom_id': id}">
+                            <field name="bom_line_ids"  context="{'default_parent_product_tmpl_id': product_tmpl_id, 'default_product_id': False, 'default_bom_id': id}">
                                 <list string="Components" editable="bottom">
                                     <control>
                                         <create string="Add a line"/>

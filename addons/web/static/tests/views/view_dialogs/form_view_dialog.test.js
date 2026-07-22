@@ -158,11 +158,11 @@ test("Form dialog and subview with _view_ref contexts", async () => {
     // This is an old test, written before "get_views" (formerly "load_views") automatically
     // inlines x2many subviews. As the purpose of this test is to assert that the js fetches
     // the correct sub view when it is not inline (which can still happen in nested form views),
-    // we bypass the inline mecanism of "get_views" by setting widget="many2many" on the field.
+    // we bypass the inline mecanism of "get_views" by setting  on the field.
     Instrument._views.form = /* xml */ `
         <form>
             <field name="name"/>
-            <field name="badassery" widget="many2many" context="{'list_view_ref': 'some_other_tree_view'}"/>
+            <field name="badassery"  context="{'list_view_ref': 'some_other_tree_view'}"/>
         </form>
     `;
     Badassery._views.list = /* xml */ `<list><field name="level"/></list>`;

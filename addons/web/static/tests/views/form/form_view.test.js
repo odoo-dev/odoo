@@ -740,7 +740,7 @@ test(`form with o2m having a many2many fields using the many2many_tags widget al
         form: `
             <form>
                 <field name="display_name"/>
-                <field name="type_ids" widget="one2many">
+                <field name="type_ids" >
                     <list string="Values">
                         <field name="display_name"/>
                         <!--
@@ -1126,7 +1126,7 @@ test(`Form and subview with _view_ref contexts`, async () => {
     // This is an old test, written before "get_views" (formerly "load_views") automatically
     // inlines x2many subviews. As the purpose of this test is to assert that the js fetches
     // the correct sub view when it is not inline (which can still happen in nested form views),
-    // we bypass the inline mecanism of "get_views" by setting widget="one2many" on the field.
+    // we bypass the inline mecanism of "get_views" by setting  on the field.
     Partner._views = {
         form: `
             <form>
@@ -1151,7 +1151,7 @@ test(`Form and subview with _view_ref contexts`, async () => {
         form: `
             <form>
                 <field name="name"/>
-                <field name="type_ids" widget="one2many" context="{'list_view_ref': 'some_other_tree_view'}"/>
+                <field name="type_ids"  context="{'list_view_ref': 'some_other_tree_view'}"/>
             </form>
         `,
     };
@@ -1270,7 +1270,7 @@ test(`Form and subsubview with only _view_ref contexts`, async () => {
         type: "form",
         arch: `
             <form>
-                <field string="Partner Types" name="type_ids" widget="one2many" context="{
+                <field string="Partner Types" name="type_ids"  context="{
                     'default_partner_id': id,
                     'form_view_ref': 'foo.partner_type_form_view'
                 }"/>
@@ -2438,7 +2438,7 @@ test(`input ids for multiple occurrences of fields in sub form view (not inline)
     await mountView({
         resModel: "partner",
         type: "form",
-        arch: `<form><field name="child_ids" widget="one2many"/></form>`,
+        arch: `<form><field name="child_ids" /></form>`,
     });
     await contains(`.o_field_x2many_list_row_add button`).click();
     const fieldIdAttrs = queryAllAttributes(`.modal .o_form_view .o_field_widget input`, "id");
@@ -3742,7 +3742,7 @@ test(`onchange send only the present fields to the server`, async () => {
         arch: `
             <form>
                 <field name="foo"/>
-                <field name="child_ids" widget="one2many">
+                <field name="child_ids" >
                     <list>
                         <field name="bar"/>
                         <field name="product_id"/>
@@ -3954,7 +3954,7 @@ test(`default record with a one2many and an onchange on sub field`, async () => 
         type: "form",
         arch: `
             <form>
-                <field name="child_ids" widget="one2many">
+                <field name="child_ids" >
                     <list><field name="foo"/></list>
                 </field>
             </form>
@@ -5156,7 +5156,7 @@ test("discard changes on relational data on existing record", async () => {
         arch: `
             <form>
                 <field name="bar"/>
-                <field name="product_ids" widget="one2many">
+                <field name="product_ids" >
                     <list>
                         <field name="display_name"/>
                     </list>
@@ -5195,7 +5195,7 @@ test("discard changes on relational data on new record (1)", async () => {
         arch: `
             <form>
                 <field name="bar"/>
-                <field name="product_ids" widget="one2many">
+                <field name="product_ids" >
                     <list>
                         <field name="display_name"/>
                     </list>
@@ -5238,7 +5238,7 @@ test("discard changes on relational data on new record (2)", async () => {
         arch: `
             <form>
                 <field name="bar"/>
-                <field name="product_ids" widget="one2many">
+                <field name="product_ids" >
                     <list>
                         <field name="display_name"/>
                     </list>
@@ -7776,7 +7776,7 @@ test(`*_view_ref in context are passed correctly`, async () => {
         type: "form",
         arch: `
             <form>
-                <field name="type_ids" widget="one2many" context="{'list_view_ref':'module.list_view_ref'}"/>
+                <field name="type_ids"  context="{'list_view_ref':'module.list_view_ref'}"/>
             </form>
         `,
         resId: 1,
@@ -7811,7 +7811,7 @@ test(`non inline subview and create=0 in action context`, async () => {
     await mountView({
         resModel: "partner",
         type: "form",
-        arch: `<form><field name="product_ids" mode="kanban" widget="one2many"/></form>`,
+        arch: `<form><field name="product_ids" mode="kanban" /></form>`,
         resId: 1,
         context: { create: false },
     });
@@ -8095,7 +8095,7 @@ test(`open one2many form containing one2many`, async () => {
         type: "form",
         arch: `
             <form>
-                <field name="product_ids" widget="one2many">
+                <field name="product_ids" >
                     <list create="0">
                         <field name="display_name"/>
                         <field name="type_ids"/>
@@ -8738,8 +8738,8 @@ test(`do not perform extra RPC to read invisible x2many fields`, async () => {
         type: "form",
         arch: `
             <form>
-                <field name="child_ids" widget="one2many" invisible="1"/>
-                <field name="product_ids" widget="one2many" invisible="1">
+                <field name="child_ids"  invisible="1"/>
+                <field name="product_ids"  invisible="1">
                     <list><field name="display_name"/></list>
                 </field>
                 <field name="type_ids" invisible="1" widget="many2many_tags"/>
@@ -9076,7 +9076,7 @@ test(`custom open record dialog title`, async () => {
         type: "form",
         arch: `
             <form>
-                <field name="child_ids" widget="many2many" string="custom label">
+                <field name="child_ids"  string="custom label">
                     <list><field name="display_name"/></list>
                     <form><field name="display_name"/></form>
                 </field>
@@ -9837,7 +9837,7 @@ test(`process the context for subview not inline`, async () => {
     await mountView({
         resModel: "partner",
         type: "form",
-        arch: `<form><field name="child_ids" widget="one2many"/></form>`,
+        arch: `<form><field name="child_ids" /></form>`,
         resId: 1,
         context: { hide_bar: true },
     });
@@ -10770,7 +10770,7 @@ test(`form view with list_view_ref with optional fields and local storage mock`,
         arch: `
             <form>
                 <field name="float_field"/>
-                <field name="child_ids" widget="one2many" context="{'list_view_ref': '34'}"/>
+                <field name="child_ids"  context="{'list_view_ref': '34'}"/>
             </form>
         `,
         viewId: 1,

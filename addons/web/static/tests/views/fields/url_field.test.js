@@ -210,7 +210,7 @@ test("in form x2many field, click/middleclick on the link should not open the re
         type: "form",
         resModel: "product",
         resId: 1,
-        arch: `<form><field name="p" widget="one2many"/></form>`,
+        arch: `<form><field name="p" /></form>`,
     });
     await click(".o_field_widget[name=url] a");
     await animationFrame();

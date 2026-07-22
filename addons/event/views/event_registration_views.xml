@@ -94,7 +94,7 @@
                     <field name="registration_properties" columns="2"/>
                     <notebook>
                         <page string="Questions" name="questions">
-                            <field name="registration_answer_ids" widget="one2many">
+                            <field name="registration_answer_ids">
                                 <list editable="bottom">
                                     <field name="event_id" column_invisible="True" />
                                     <field name="question_id" domain="[('event_ids', 'in', event_id)]" options="{'no_create': True}"/>

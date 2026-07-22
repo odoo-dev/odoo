@@ -333,7 +333,7 @@ test("SelectCreateDialog cascade x2many in create mode on desktop", async () => 
     Partner._views["form"] = /* xml */ `
         <form>
             <field name="name"/>
-            <field name="instrument" widget="one2many" mode="list"/>
+            <field name="instrument"  mode="list"/>
         </form>
     `;
     Instrument._views["form"] = /* xml */ `
@@ -367,7 +367,7 @@ test("SelectCreateDialog cascade x2many in create mode on desktop", async () => 
         arch: /* xml */ `
             <form>
                 <field name="name"/>
-                <field name="partner" widget="one2many" >
+                <field name="partner"  >
                     <list editable="top">
                         <field name="name"/>
                         <field name="instrument"/>
@@ -407,7 +407,7 @@ test("SelectCreateDialog cascade x2many in create mode on mobile", async () => {
     Partner._views["form"] = /* xml */ `
         <form>
             <field name="name"/>
-            <field name="instrument" widget="one2many" mode="list"/>
+            <field name="instrument"  mode="list"/>
         </form>
     `;
     Instrument._views["form"] = /* xml */ `
@@ -444,7 +444,7 @@ test("SelectCreateDialog cascade x2many in create mode on mobile", async () => {
         arch: /* xml */ `
             <form>
                 <field name="name"/>
-                <field name="partner" widget="one2many" >
+                <field name="partner"  >
                     <list editable="top">
                         <field name="name"/>
                         <field name="instrument"/>

@@ -1043,7 +1043,7 @@ test("use the limit attribute in arch (in field o2m non inline list view)", asyn
     await mountView({
         type: "form",
         resModel: "partner",
-        arch: `<form><field name="turtles" widget="one2many"/></form>`,
+        arch: `<form><field name="turtles" /></form>`,
         resId: 1,
     });
     expect(".o_data_row").toHaveCount(2);
@@ -1068,7 +1068,7 @@ test("one2many with default_order on view not inline", async () => {
                 <sheet>
                     <notebook>
                         <page string="Turtles">
-                            <field name="turtles" widget="one2many"/>
+                            <field name="turtles" />
                         </page>
                     </notebook>
                 </sheet>
@@ -3114,7 +3114,7 @@ test("edition of one2many field, with onchange and not inline sub view", async (
         resModel: "partner",
         arch: `
                 <form>
-                    <field name="turtles" widget="one2many"/>
+                    <field name="turtles" />
                 </form>`,
         resId: 1,
     });
@@ -3469,7 +3469,7 @@ test("many2many list: unlink two records", async () => {
         resModel: "partner",
         arch: `
             <form>
-                <field name="p" widget="many2many">
+                <field name="p" >
                     <list>
                         <field name="name"/>
                     </list>
@@ -5575,7 +5575,7 @@ test("one2many with many2many widget: create", async () => {
         resModel: "partner",
         arch: `
             <form>
-                <field name="turtles" widget="many2many">
+                <field name="turtles" >
                     <list>
                         <field name="turtle_foo"/>
                         <field name="turtle_qux"/>
@@ -5672,7 +5672,7 @@ test("one2many with many2many widget: edition", async () => {
         resModel: "partner",
         arch: `
             <form>
-                <field name="turtles" widget="many2many">
+                <field name="turtles" >
                     <list>
                         <field name="turtle_foo"/>
                         <field name="turtle_qux"/>
@@ -8878,7 +8878,7 @@ test("onchange in a one2many with non inline view on an existing record", async 
         resModel: "partner.type",
         arch: `
                 <form>
-                    <field name="partner_ids" widget="one2many"/>
+                    <field name="partner_ids" />
                 </form>`,
         resId: 12,
     });
@@ -8912,7 +8912,7 @@ test("onchange in a one2many with non inline view on a new record", async () => 
         resModel: "partner",
         arch: `
             <form>
-                <field name="turtles" widget="one2many"/>
+                <field name="turtles" />
             </form>`,
     });
 
@@ -11231,7 +11231,7 @@ test("one2many column_invisible on view not inline", async () => {
                     <notebook>
                         <page string="Partner page">
                             <field name="bar"/>
-                            <field name="p" widget="one2many"/>
+                            <field name="p" />
                         </page>
                     </notebook>
                 </sheet>

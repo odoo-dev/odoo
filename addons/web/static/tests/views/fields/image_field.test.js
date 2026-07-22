@@ -612,7 +612,7 @@ test("ImageField in subviews is loaded correctly", async () => {
         arch: /* xml */ `
             <form>
                 <field name="document" widget="image" options="{'size': [90, 90]}" />
-                <field name="timmy" widget="many2many" mode="kanban">
+                <field name="timmy"  mode="kanban">
                     <kanban>
                         <templates>
                             <t t-name="card">
@@ -650,7 +650,7 @@ test("ImageField in x2many list is loaded correctly", async () => {
         resId: 1,
         arch: /* xml */ `
             <form>
-                <field name="timmy" widget="many2many">
+                <field name="timmy" >
                     <list>
                         <field name="image" widget="image" />
                     </list>
