@@ -1740,22 +1740,22 @@ class TestCompute(common.TransactionCase):
 class TestHttp(common.HttpCase):
     def test_webhook_trigger(self):
         model = self.env["ir.model"]._get("base.automation.linked.test")
-        record_getter = "model.search([('name', '=', payload['name'])]) if payload.get('name') else None"
-        automation = create_automation(self, trigger="on_webhook", model_id=model.id, record_getter=record_getter, _actions={
+        webhook_record_getter = "model.search([('name', '=', payload['name'])]) if payload.get('name') else None"
+        automation = create_automation(self, trigger="on_webhook", model_id=model.id, webhook_record_getter=webhook_record_getter, _actions={
             "state": "object_write",
             "update_path": "another_field",
             "value": "written"
         })
 
         obj = self.env[model.model].create({"name": "some name"})
-        response = self.url_open(automation.url, data=json.dumps({"name": "some name"}))
+        response = self.url_open(automation.webhook_url, data=json.dumps({"name": "some name"}))
         self.assertEqual(response.json(), {"status": "ok"})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(obj.another_field, "written")
 
         obj.another_field = False
         with mute_logger("odoo.addons.base_automation.models.base_automation"):
-            response = self.url_open(automation.url, data=json.dumps({}))
+            response = self.url_open(automation.webhook_url, data=json.dumps({}))
         self.assertEqual(response.json(), {"status": "error"})
         self.assertEqual(response.status_code, 500)
         self.assertEqual(obj.another_field, False)
@@ -1764,23 +1764,59 @@ class TestHttp(common.HttpCase):
         self.assertEqual(response.json(), {"status": "error"})
         self.assertEqual(response.status_code, 404)
 
+    def test_double_webhook_trigger(self):
+        # Webhooks with matching UUIDs should all be executed on the same request
+        webhook_uuid = '669933'
+        model = self.env['ir.model']._get('base.automation.linked.test')
+        [record1, record2] = self.env['base.automation.linked.test'].create([
+            {'name': 'object1'}, {'name': 'object2'},
+        ])
+
+        automation1 = create_automation(self,
+            trigger='on_webhook',
+            model_id=model.id,
+            webhook_record_getter=f"model.search([('name', '=', '{record1.name}')])",
+            webhook_uuid=webhook_uuid, _actions={
+                'state': 'object_write',
+                'update_path': 'another_field',
+                'value': 'written',
+            },
+        )
+
+        automation2 = create_automation(self,
+            trigger='on_webhook',
+            model_id=model.id,
+            webhook_record_getter=f"model.search([('name', '=', '{record2.name}')])",
+            webhook_uuid=webhook_uuid, _actions={
+                'state': 'object_write',
+                'update_path': 'another_field',
+                'value': 'written',
+            },
+        )
+        self.assertEqual(automation1.webhook_url, automation2.webhook_url, 'Sanity check: automation URLs should be equal')
+        with mute_logger("odoo.addons.base_automation.models.base_automation"):
+            response = self.url_open(automation1.webhook_url, data=json.dumps({"name": "some name"}))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(record1.another_field, 'written')
+        self.assertEqual(record2.another_field, 'written')
+
     def test_payload_in_action_server(self):
         model = self.env["ir.model"]._get("base.automation.linked.test")
-        record_getter = "model.search([('name', '=', payload['name'])]) if payload.get('name') else None"
-        automation = create_automation(self, trigger="on_webhook", model_id=model.id, record_getter=record_getter, _actions={
+        webhook_record_getter = "model.search([('name', '=', payload['name'])]) if payload.get('name') else None"
+        automation = create_automation(self, trigger="on_webhook", model_id=model.id, webhook_record_getter=webhook_record_getter, _actions={
             "state": "code",
             "code": "record.write({'another_field': json.dumps(payload)})"
         })
 
         obj = self.env[model.model].create({"name": "some name"})
-        self.url_open(automation.url, data=json.dumps({"name": "some name", "test_key": "test_value"}), headers={"Content-Type": "application/json"})
+        self.url_open(automation.webhook_url, data=json.dumps({"name": "some name", "test_key": "test_value"}), headers={"Content-Type": "application/json"})
         self.assertEqual(json.loads(obj.another_field), {
             "name": "some name",
             "test_key": "test_value",
         })
 
         obj.another_field = ""
-        self.url_open(automation.url + "?test_param=test_value&name=some%20name")
+        self.url_open(automation.webhook_url + "?test_param=test_value&name=some%20name")
         self.assertEqual(json.loads(obj.another_field), {
             "name": "some name",
             "test_param": "test_value",
@@ -1798,7 +1834,7 @@ class TestHttp(common.HttpCase):
         automation_sender = create_automation(self, trigger="on_write", model_id=model.id, trigger_field_ids=[(6, 0, [name_field_id.id])], _actions={
             "name": "Send Webhook Notification",
             "state": "webhook",
-            "webhook_url": automation_receiver.url,
+            "webhook_url": automation_receiver.webhook_url,
         })
 
         # Changing the name will make an http request, post-commitedly

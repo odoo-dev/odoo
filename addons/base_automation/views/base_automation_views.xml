@@ -58,9 +58,9 @@
                                     </div>
                                     <div class="text-muted" invisible="trigger != 'on_change'"><i class="fa fa-warning"/> Automation rules triggered by UI changes will be executed <em>every time</em> the watched fields change, <em>whether you save or not</em>.</div>
                                 </div>
-                                <label for="url" string="Secret URL" invisible="trigger != 'on_webhook'"/>
+                                <label for="webhook_url" string="Secret URL" invisible="trigger != 'on_webhook'"/>
                                 <div class="d-flex flex-row" invisible="trigger != 'on_webhook'">
-                                    <field name="url" class="oe_inline mb-0" widget="CopyClipboardURL"/>
+                                    <field name="webhook_url" class="oe_inline mb-0" widget="CopyClipboardURL"/>
                                     <button groups="base.group_no_one"
                                         type="object"
                                         name="action_rotate_webhook_uuid"
@@ -121,9 +121,9 @@
                                     invisible="trigger != 'on_change'" widget="many2many_tags" />
                             </group>
                             <group>
-                                <label for="record_getter" string="Target Record" invisible="trigger != 'on_webhook'" />
+                                <label for="webhook_record_getter" string="Target Record" invisible="trigger != 'on_webhook'" />
                                 <div invisible="trigger != 'on_webhook'">
-                                    <field name="record_getter" string="Target Record"/>
+                                    <field name="webhook_record_getter" string="Target Record"/>
                                     <div>
                                         <div  class="text-muted"><i class="fa fa-info-circle"/> The default target record getter will work out-of-the-box for any webhook coming from another Odoo instance.</div>
                                         <span class="text-muted"> Available variables: </span>
