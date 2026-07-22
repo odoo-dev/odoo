@@ -44,6 +44,8 @@ const StepSchema = {
     },
     trigger: { type: String },
     expectUnloadPage: { type: Boolean, optional: true },
+    highlight: { type: String, optional: true },
+    highlightColor: { type: String, optional: true },
     //ONLY IN DEBUG MODE
     pause: { type: Boolean, optional: true },
     break: { type: Boolean, optional: true },
@@ -141,7 +143,7 @@ export const tourService = {
 
             let tourConfig = {
                 delayToCheckUndeterminisms: 0,
-                stepDelay: 3000,
+                stepDelay: 2000,
                 keepWatchBrowser: false,
                 mode: "auto",
                 showPointerDuration: 0,
@@ -183,10 +185,24 @@ export const tourService = {
                 if (!odoo.loader.modules.get("@web_tour/js/tour_automatic/tour_automatic")) {
                     await loadBundle("web_tour.automatic", { css: false });
                 }
+                await loadBundle("web_tour.interactive");
+                const { TourPointer } = odoo.loader.modules.get(
+                    "@web_tour/js/tour_pointer/tour_pointer"
+                );
+                pointer.stop = overlay.add(
+                    TourPointer,
+                    {
+                        pointerState: pointer.state,
+                        bounce: false,
+                    },
+                    {
+                        sequence: 1100, // sequence based on bootstrap z-index values.
+                    }
+                );
                 const { TourAutomatic } = odoo.loader.modules.get(
                     "@web_tour/js/tour_automatic/tour_automatic"
                 );
-                new TourAutomatic(tour).start();
+                new TourAutomatic(tour).start(pointer);
             } else {
                 await loadBundle("web_tour.interactive");
                 const { TourPointer } = odoo.loader.modules.get(
@@ -283,48 +299,68 @@ export const tourService = {
             }
         }
 
+        const RECORD_APPROACH = 2; // 1 = Controller + base64, 2 = Model + Attachment URL
+
         async function recordTourVideo(tourName) {
             const closeNotification = notification.add(
                 "Tour recording has started on the server. Please wait...",
                 { title: "Video Recorder", type: "info", sticky: true }
             );
             try {
-                const result = await rpc("/web_tour/record_tour", { tour_name: tourName });
-                closeNotification();
-                if (result && result.success && result.video_data) {
-                    // Convert base64 back to binary data
-                    const binaryString = atob(result.video_data);
-                    const len = binaryString.length;
-                    const bytes = new Uint8Array(len);
-                    for (let i = 0; i < len; i++) {
-                        bytes[i] = binaryString.charCodeAt(i);
+                if (RECORD_APPROACH === 1) {
+                    const result = await rpc("/web_tour/record_tour", { tour_name: tourName });
+                    closeNotification();
+                    if (result && result.success && result.video_data) {
+                        // Convert base64 back to binary data
+                        const binaryString = atob(result.video_data);
+                        const len = binaryString.length;
+                        const bytes = new Uint8Array(len);
+                        for (let i = 0; i < len; i++) {
+                            bytes[i] = binaryString.charCodeAt(i);
+                        }
+                        const blob = new Blob([bytes], { type: "video/mp4" });
+                        const url = URL.createObjectURL(blob);
+                        
+                        const a = document.createElement("a");
+                        a.style.display = "none";
+                        a.href = url;
+                        a.download = `tour_recording_${tourName}_${Date.now()}.mp4`;
+                        document.body.appendChild(a);
+                        a.click();
+                        
+                        setTimeout(() => {
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+                        }, 100);
+                        
+                        notification.add("Video recording successfully compiled and downloaded!", {
+                            title: "Video Recorder",
+                            type: "success",
+                        });
+                    } else {
+                        const msg = (result && result.message) || "Unknown error";
+                        notification.add(`Recording failed: ${msg}`, {
+                            title: "Video Recorder",
+                            type: "danger",
+                            sticky: true
+                        });
                     }
-                    const blob = new Blob([bytes], { type: "video/mp4" });
-                    const url = URL.createObjectURL(blob);
-                    
-                    const a = document.createElement("a");
-                    a.style.display = "none";
-                    a.href = url;
-                    a.download = `tour_recording_${tourName}_${Date.now()}.mp4`;
-                    document.body.appendChild(a);
-                    a.click();
-                    
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        window.URL.revokeObjectURL(url);
-                    }, 100);
-                    
-                    notification.add("Video recording successfully compiled and downloaded!", {
-                        title: "Video Recorder",
-                        type: "success",
-                    });
                 } else {
-                    const msg = (result && result.message) || "Unknown error";
-                    notification.add(`Recording failed: ${msg}`, {
-                        title: "Video Recorder",
-                        type: "danger",
-                        sticky: true
-                    });
+                    const result = await orm.call("web_tour.recorder", "record_tour", [tourName]);
+                    closeNotification();
+                    if (result && result.success && result.attachment_id) {
+                        notification.add("Video recording successfully saved to Attachments!", {
+                            title: "Video Recorder",
+                            type: "success",
+                        });
+                    } else {
+                        const msg = (result && result.message) || "Unknown error";
+                        notification.add(`Recording failed: ${msg}`, {
+                            title: "Video Recorder",
+                            type: "danger",
+                            sticky: true
+                        });
+                    }
                 }
             } catch (err) {
                 closeNotification();
