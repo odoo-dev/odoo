@@ -202,6 +202,14 @@ class PurchaseOrder(models.Model):
         "Purchase Warning",
         help="Internal warning for the partner or the products as set by the user.",
         compute='_compute_purchase_warning_text')
+    manual_order_line_ids = fields.One2many(
+        "purchase.order.line",
+        "order_id",
+        domain=[
+            ("qty_received_method", "=", "manual"),
+            ("display_type", "=", False),
+        ],
+    )
 
     @api.constrains('company_id', 'order_line')
     def _check_order_line_company_id(self):
@@ -353,11 +361,7 @@ class PurchaseOrder(models.Model):
     @api.depends('order_line.qty_received', 'order_line.product_uom_qty', 'state')
     def _compute_show_receive_button(self):
         for order in self:
-            order.show_receive_button = (
-                order.state == 'purchase'
-                and any(line.qty_received < line.product_qty for line in order.order_line)
-                and all(line.qty_received_method == "manual" for line in order.order_line)
-            )
+            order.show_receive_button = order.state == 'purchase' and order.manual_order_line_ids
 
     @api.depends('partner_id.name', 'partner_id.purchase_warn_msg', 'order_line.purchase_line_warn_msg')
     def _compute_purchase_warning_text(self):
@@ -680,17 +684,9 @@ class PurchaseOrder(models.Model):
         return action
 
     def action_receive(self):
-        invalid_targets = self.filtered(
-            lambda o: o.state != "purchase" or
-            any(line.qty_received_method != "manual" for line in o.order_line)
-        )
-        if invalid_targets:
-            raise UserError(
-                _("The following purchase orders %(invalid_orders)s can't be received. Cancelled all receptions.",
-                invalid_orders=invalid_targets))
-        for order in self:
-            for line in order.order_line:
-                line.qty_received = line.product_qty
+        action = self.env["ir.actions.actions"]._for_xml_id("purchase.action_purchase_receive")
+        action["res_id"] = self.id
+        return action
 
     def _mark_rfqs_as_sent(self):
         self.filtered(lambda po: po.state == 'draft').state = 'sent'

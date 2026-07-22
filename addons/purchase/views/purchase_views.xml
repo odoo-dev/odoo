@@ -104,6 +104,34 @@
             </field>
         </record>
 
+        <record id="purchase_order_receive_view" model="ir.ui.view">
+            <field name="name">purchase.order.receive.form</field>
+            <field name="model">purchase.order</field>
+            <field name="arch" type="xml">
+                <form string="Receive Products">
+                    <field name="manual_order_line_ids">
+                        <list editable="bottom" create="0" delete="0">
+                            <field name="product_id" readonly="1"/>
+                            <field name="product_qty" readonly="1"/>
+                            <field name="qty_received"/>
+                        </list>
+                    </field>
+                    <footer>
+                        <button string="Save &amp; Close" special="save" class="btn-primary"/>
+                        <button string="Cancel" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_purchase_receive" model="ir.actions.act_window">
+            <field name="name">Receive Products</field>
+            <field name="res_model">purchase.order</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="purchase.purchase_order_receive_view"/>
+            <field name="target">new</field>
+        </record>
+
         <record id="purchase_order_form" model="ir.ui.view">
             <field name="name">purchase.order.form</field>
             <field name="model">purchase.order</field>
