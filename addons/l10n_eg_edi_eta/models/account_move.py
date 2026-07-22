@@ -42,7 +42,6 @@ class AccountMove(models.Model):
         compute='_compute_l10n_eg_edi_uuid',
         store=True,
         copy=False,
-        init_storage=lambda model: None
     )
     l10n_eg_eta_json_doc_file = fields.Binary(
         string='ETA JSON Document',
