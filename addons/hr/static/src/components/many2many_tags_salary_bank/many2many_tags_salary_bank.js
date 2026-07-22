@@ -1,11 +1,11 @@
 import {
     many2ManyTagsField,
-    Many2ManyTagsField,
+    X2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
-export class FieldMany2ManyTagsSalaryBank extends Many2ManyTagsField {
+export class FieldMany2ManyTagsSalaryBank extends X2ManyTagsField {
     setup() {
         super.setup();
         this.actionService = useService("action");

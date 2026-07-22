@@ -38,7 +38,7 @@ class Many2ManyTagsFieldColorListPopover extends Component {
     };
 }
 
-export const many2ManyTagsFieldProps = {
+export const x2ManyTagsFieldProps = {
     ...standardFieldProps,
     canCreate: t.boolean().optional(true),
     canQuickCreate: t.boolean().optional(true),
@@ -55,7 +55,7 @@ export const many2ManyTagsFieldProps = {
     string: t.string().optional(),
 };
 
-export class Many2ManyTagsField extends Component {
+export class X2ManyTagsField extends Component {
     static template = "web.Many2ManyTagsField";
     static components = {
         Tag: BadgeTag,
@@ -63,7 +63,7 @@ export class Many2ManyTagsField extends Component {
         Many2XAutocomplete,
         Popover: Many2ManyTagsFieldColorListPopover,
     };
-    props = props(many2ManyTagsFieldProps);
+    props = props(x2ManyTagsFieldProps);
 
     many2ManyTagsFieldRef = signal(null);
     autoCompleteRef = signal(null);
@@ -83,13 +83,16 @@ export class Many2ManyTagsField extends Component {
         });
         this.mutex = new Mutex();
 
+        // Tags always add/remove existing records via LINK/UNLINK commands: the ORM applies
+        // those the same way for one2many (re-parents/detaches the record) as for many2many,
+        // so this stays `true` regardless of `this.fieldType`.
         const { saveRecord, removeRecord } = useX2ManyCrud(
             () => this.props.record.data[this.props.name],
             true
         );
 
         this.activeActions = useActiveActions({
-            fieldType: "many2many",
+            fieldType: this.fieldType,
             crudOptions: {
                 create: this.props.canCreate && this.props.createExpression,
                 createEdit: this.props.canCreateEdit,
@@ -140,6 +143,9 @@ export class Many2ManyTagsField extends Component {
 
     get relation() {
         return this.props.record.fields[this.props.name].relation;
+    }
+    get fieldType() {
+        return this.props.record.fields[this.props.name].type;
     }
     get evalContext() {
         return this.props.record.evalContext;
@@ -263,10 +269,9 @@ export class Many2ManyTagsField extends Component {
     }
 }
 
-export const many2ManyTagsField = {
-    component: Many2ManyTagsField,
+const x2ManyTagsFieldConfig = {
+    component: X2ManyTagsField,
     displayName: _t("Tags"),
-    supportedTypes: ["many2many", "one2many"],
     supportedOptions: [
         {
             label: _t("Disable creation"),
@@ -388,6 +393,10 @@ export const many2ManyTagsField = {
     },
 };
 
+export const one2ManyTagsField = { ...x2ManyTagsFieldConfig, supportedTypes: ["one2many"] };
+export const many2ManyTagsField = { ...x2ManyTagsFieldConfig, supportedTypes: ["many2many"] };
+
 registry.category("fields").add("many2many_tags", many2ManyTagsField);
-registry.category("fields").add("card.one2many", many2ManyTagsField);
+registry.category("fields").add("one2many_tags", one2ManyTagsField);
+registry.category("fields").add("card.one2many", one2ManyTagsField);
 registry.category("fields").add("card.many2many", many2ManyTagsField);

@@ -3,9 +3,9 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Many2XAutocomplete, many2XAutocompleteProps } from "@web/views/fields/relational_utils";
 import {
-    Many2ManyTagsField,
+    X2ManyTagsField,
     many2ManyTagsField,
-    many2ManyTagsFieldProps,
+    x2ManyTagsFieldProps,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { roundDecimals } from "@web/core/utils/numbers";
 
@@ -87,14 +87,14 @@ export class Many2XUomTagsAutocomplete extends Many2XAutocomplete {
     }
 }
 
-export class Many2ManyUomTagsField extends Many2ManyTagsField {
+export class Many2ManyUomTagsField extends X2ManyTagsField {
     static template = "uom.Many2ManyUomTagsField";
     static components = {
-        ...Many2ManyTagsField.components,
+        ...X2ManyTagsField.components,
         Many2XAutocomplete: Many2XUomTagsAutocomplete,
     };
     props = props({
-        ...many2ManyTagsFieldProps,
+        ...x2ManyTagsFieldProps,
         productField: t.string().optional("product_id"),
         quantityField: t.string().optional("product_uom_qty"),
     });

@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import {
-    Many2ManyTagsField,
+    X2ManyTagsField,
     many2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { TaxTagPopup } from "./tax_tag_popover"
@@ -44,9 +44,9 @@ export class Many2XTaxTagsAutocomplete extends Many2XAutocomplete {
 
 }
 
-export class Many2ManyTaxTagsField extends Many2ManyTagsField {
+export class Many2ManyTaxTagsField extends X2ManyTagsField {
     static components = {
-        ...Many2ManyTagsField.components,
+        ...X2ManyTagsField.components,
         Many2XAutocomplete: Many2XTaxTagsAutocomplete,
     };
 

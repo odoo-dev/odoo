@@ -1,11 +1,11 @@
 import { registry } from "@web/core/registry";
 import {
     many2ManyTagsField,
-    Many2ManyTagsField,
+    X2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { useOpenMany2XRecord } from "@web/views/fields/relational_utils";
 
-export class MassMailingMany2ManyTagsField extends Many2ManyTagsField { 
+export class MassMailingX2ManyTagsField extends X2ManyTagsField { 
     setup() {
         super.setup();
         // Override the onRecordSaved to reload the parent
@@ -35,9 +35,9 @@ export class MassMailingMany2ManyTagsField extends Many2ManyTagsField {
     }
 }
 
-export const massMailingMany2ManyTagsField = {
+export const massMailingX2ManyTagsField = {
     ...many2ManyTagsField,
-    component: MassMailingMany2ManyTagsField,
+    component: MassMailingX2ManyTagsField,
 };
 
-registry.category("fields").add("mailing_many2many_tags", massMailingMany2ManyTagsField);
+registry.category("fields").add("mailing_many2many_tags", massMailingX2ManyTagsField);

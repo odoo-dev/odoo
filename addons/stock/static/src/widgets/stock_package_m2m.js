@@ -1,12 +1,12 @@
 import {
-    Many2ManyTagsField,
-    many2ManyTagsField,
+    X2ManyTagsField,
+    one2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 
 
-export class Many2ManyPackageTagsField extends Many2ManyTagsField {
+export class Many2ManyPackageTagsField extends X2ManyTagsField {
     setup() {
         super.setup();
         this.hasNoneTag = this.props.record.data?.has_lines_without_result_package || false;
@@ -35,7 +35,7 @@ export class Many2ManyPackageTagsField extends Many2ManyTagsField {
 }
 
 export const many2ManyPackageTagsField = {
-    ...many2ManyTagsField,
+    ...one2ManyTagsField,
     component: Many2ManyPackageTagsField,
     additionalClasses: ['o_field_many2many_tags'],
     relatedFields: () => [

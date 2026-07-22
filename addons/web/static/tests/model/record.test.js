@@ -20,7 +20,7 @@ import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import { CharField } from "@web/views/fields/char/char_field";
 import { Field } from "@web/views/fields/field";
-import { Many2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_tags_field";
+import { X2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { Many2OneField } from "@web/views/fields/many2one/many2one_field";
 
 class Foo extends models.Model {
@@ -517,10 +517,10 @@ test(`handles x2many fields`, async () => {
 
     class Parent extends Component {
         static props = ["*"];
-        static components = { Record, Many2ManyTagsField };
+        static components = { Record, X2ManyTagsField };
         static template = xml`
             <Record resModel="'foo'" fieldNames="['tags']" activeFields="this.activeFields" fields="this.fields" values="this.values" t-slot-scope="data">
-                <Many2ManyTagsField name="'tags'" record="data.record"/>
+                <X2ManyTagsField name="'tags'" record="data.record"/>
             </Record>
         `;
 

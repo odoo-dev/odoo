@@ -1,7 +1,7 @@
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 import {
-    Many2ManyTagsField,
-    many2ManyTagsField,
+    X2ManyTagsField,
+    one2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { registry } from "@web/core/registry";
 
@@ -14,15 +14,15 @@ export class Many2XBarcodeTagsAutocomplete extends Many2XAutocomplete {
     }
 }
 
-export class Many2ManyBarcodeTagsField extends Many2ManyTagsField {
+export class Many2ManyBarcodeTagsField extends X2ManyTagsField {
     static components = {
-        ...Many2ManyTagsField.components,
+        ...X2ManyTagsField.components,
         Many2XAutocomplete: Many2XBarcodeTagsAutocomplete,
     };
 }
 
 export const many2ManyBarcodeTagsField = {
-    ...many2ManyTagsField,
+    ...one2ManyTagsField,
     component: Many2ManyBarcodeTagsField,
     additionalClasses: ['o_field_many2many_tags'],
 }

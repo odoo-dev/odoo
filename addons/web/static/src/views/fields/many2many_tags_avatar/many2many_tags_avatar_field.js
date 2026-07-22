@@ -7,16 +7,16 @@ import { AvatarTag } from "@web/core/tags_list/avatar_tag";
 import { imageUrl } from "@web/core/utils/urls";
 import {
     many2ManyTagsField,
-    Many2ManyTagsField,
-    many2ManyTagsFieldProps,
+    X2ManyTagsField,
+    x2ManyTagsFieldProps,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 
 export const many2ManyTagsAvatarFieldProps = {
-    ...many2ManyTagsFieldProps,
+    ...x2ManyTagsFieldProps,
     withCommand: t.boolean().optional(),
 };
 
-export class Many2ManyTagsAvatarField extends Many2ManyTagsField {
+export class Many2ManyTagsAvatarField extends X2ManyTagsField {
     static template = "web.Many2ManyTagsAvatarField";
     static optionTemplate = "web.Many2ManyTagsAvatarField.option";
     static components = {

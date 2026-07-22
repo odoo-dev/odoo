@@ -1,7 +1,7 @@
 import { registry } from "@web/core/registry";
 import {
-    Many2ManyTagsField,
-    many2ManyTagsField,
+    X2ManyTagsField,
+    one2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { Component } from "@odoo/owl";
 import { BadgeTag } from "@web/core/tags_list/badge_tag";
@@ -12,18 +12,18 @@ class SkillsTag extends Component {
     static props = ["color?", "defaultLevel", "onDelete?", "text", "tooltip", "onClick"];
 }
 
-class SkillsMany2ManyTags extends Many2ManyTagsField {
-    static components = { ...Many2ManyTagsField.components, Tag: SkillsTag };
+class SkillsMany2ManyTags extends X2ManyTagsField {
+    static components = { ...X2ManyTagsField.components, Tag: SkillsTag };
     getTagProps(record) {
         return { ...super.getTagProps(record), defaultLevel: record.data.default_level };
     }
 }
 
 export const skillsMany2ManyTags = {
-    ...many2ManyTagsField,
+    ...one2ManyTagsField,
     component: SkillsMany2ManyTags,
     relatedFields: (fieldInfo) => [
-        ...many2ManyTagsField.relatedFields(fieldInfo),
+        ...one2ManyTagsField.relatedFields(fieldInfo),
         { name: "default_level", type: "boolean" },
     ],
 };

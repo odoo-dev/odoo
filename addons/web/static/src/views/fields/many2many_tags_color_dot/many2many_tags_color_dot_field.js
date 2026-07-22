@@ -1,6 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { Many2ManyTagsField, many2ManyTagsField } from "../many2many_tags/many2many_tags_field";
+import { X2ManyTagsField, many2ManyTagsField } from "../many2many_tags/many2many_tags_field";
 import { BadgeTagDot } from "@web/core/tags_list/badge_tag_dot";
 
 /**
@@ -12,9 +12,9 @@ import { BadgeTagDot } from "@web/core/tags_list/badge_tag_dot";
  * tag to keep its regular appearance while visually indicating its color
  * through the small dot.
  */
-class Many2ManyTagsColorDotField extends Many2ManyTagsField {
+class Many2ManyTagsColorDotField extends X2ManyTagsField {
     static components = {
-        ...Many2ManyTagsField.components,
+        ...X2ManyTagsField.components,
         Tag: BadgeTagDot,
     };
 }

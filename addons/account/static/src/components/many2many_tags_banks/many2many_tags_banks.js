@@ -1,6 +1,6 @@
 import {
-    many2ManyTagsField,
-    Many2ManyTagsField,
+    one2ManyTagsField,
+    X2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
@@ -23,7 +23,7 @@ class BankTag extends Component {
     ];
 }
 
-export class FieldMany2ManyTagsBanks extends Many2ManyTagsField {
+export class FieldMany2ManyTagsBanks extends X2ManyTagsField {
     static template = "account.FieldMany2ManyTagsBanks";
     static components = {
         ...super.components,
@@ -75,10 +75,10 @@ export class FieldMany2ManyTagsBanks extends Many2ManyTagsField {
 }
 
 export const fieldMany2ManyTagsBanks = {
-    ...many2ManyTagsField,
+    ...one2ManyTagsField,
     component: FieldMany2ManyTagsBanks,
     supportedOptions: [
-        ...many2ManyTagsField.supportedOptions.filter((option) => option.name !== "color_field"),
+        ...one2ManyTagsField.supportedOptions.filter((option) => option.name !== "color_field"),
         {
             label: _t("Allows out payments"),
             name: "allow_out_payment_field",
@@ -86,13 +86,13 @@ export const fieldMany2ManyTagsBanks = {
         },
     ],
     additionalClasses: [
-        ...(many2ManyTagsField.additionalClasses || []),
+        ...(one2ManyTagsField.additionalClasses || []),
         "o_field_many2many_tags",
         "o_text_input"
     ],
     relatedFields: ({ options }) => {
         return [
-            ...many2ManyTagsField.relatedFields({ options }),
+            ...one2ManyTagsField.relatedFields({ options }),
             { name: options.allow_out_payment_field, type: "boolean", readonly: false },
             { name: "active", type: "boolean", readonly: false },
         ];

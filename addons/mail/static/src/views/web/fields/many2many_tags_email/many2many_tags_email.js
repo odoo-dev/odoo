@@ -4,9 +4,9 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { props, t } from "@odoo/owl";
 import {
-    Many2ManyTagsField,
+    X2ManyTagsField,
     many2ManyTagsField,
-    many2ManyTagsFieldProps,
+    x2ManyTagsFieldProps,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
 
@@ -26,7 +26,7 @@ export class FieldMany2ManyTagsEmailMany2xAutocomplete extends Many2XAutocomplet
     }
 }
 
-export class FieldMany2ManyTagsEmail extends Many2ManyTagsField {
+export class FieldMany2ManyTagsEmail extends X2ManyTagsField {
     static template = "FieldMany2ManyTagsEmailTags";
     static components = {
         ...super.components,
@@ -34,7 +34,7 @@ export class FieldMany2ManyTagsEmail extends Many2ManyTagsField {
         Many2XAutocomplete: FieldMany2ManyTagsEmailMany2xAutocomplete,
     };
     props = props({
-        ...many2ManyTagsFieldProps,
+        ...x2ManyTagsFieldProps,
         context: t.object().optional(),
         canEditTags: t.boolean().optional(),
     });

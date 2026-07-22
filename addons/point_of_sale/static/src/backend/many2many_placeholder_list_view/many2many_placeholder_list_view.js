@@ -1,10 +1,10 @@
 import { registry } from "@web/core/registry";
 import {
-    Many2ManyTagsField,
+    X2ManyTagsField,
     many2ManyTagsField,
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
 
-export class Many2ManyPlaceholderListView extends Many2ManyTagsField {
+export class Many2ManyPlaceholderListView extends X2ManyTagsField {
     static template = "point_of_sale.Many2ManyPlaceholderListView";
 }
 
