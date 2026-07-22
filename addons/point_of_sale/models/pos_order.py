@@ -1394,6 +1394,15 @@ class PosOrder(models.Model):
         aggregated_per_line = self._aggregate_base_line_and_prepare_account_move_line_data(base_lines)
         return aggregated_per_line + zero_price_lines
 
+    def _get_payment_amounts_by_method(self):
+        """Aggregate pos.payment amounts by payment method for the account move line data."""
+        payment_amounts_by_method = {}   # pm -> total signed amount
+        for payment in self.payment_ids:
+            pm = payment.payment_method_id
+            payment_amounts_by_method.setdefault(pm, 0.0)
+            payment_amounts_by_method[pm] += payment.amount
+        return payment_amounts_by_method
+
     def _prepare_account_move_line_data_for_payments(self, partner=None):
         """
         Aggregate pos.payment amounts by payment method for the session receipt.
@@ -1405,15 +1414,10 @@ class PosOrder(models.Model):
         Skipped:
           - payments whose order is already invoiced (handled by a separate flow)
         """
-        combined = {}   # pm -> total signed amount
         session = self.session_id  # Always single record in this context
         today = fields.Date.context_today(self)
 
-        for payment in self.payment_ids:
-            pm = payment.payment_method_id
-            combined.setdefault(pm, 0.0)
-            combined[pm] += payment.amount
-
+        combined = self._get_payment_amounts_by_method()
         # Combined payments: aggregate all orders for a given PM into one slot
         result = []
         for pm, amount in combined.items():

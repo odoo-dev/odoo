@@ -52,6 +52,10 @@ class PosOrder(models.Model):
             sale_orders = self.lines.mapped('sale_order_origin_id')
             for so in sale_orders.filtered(lambda s: s.state in ('draft', 'sent')):
                 so.action_confirm()
+        # Link POS payment method on pre-paid account payments for sale order settlement payments.
+        for payment in self.payment_ids:
+            if payment.payment_method_id.use_sale_order_payment and not payment.online_account_payment_id.pos_payment_method_id:
+                payment.online_account_payment_id.pos_payment_method_id = payment.payment_method_id
         return res
 
     @api.model
@@ -141,3 +145,13 @@ class PosOrder(models.Model):
         if 'crm_team_id' in vals:
             vals['crm_team_id'] = vals['crm_team_id'] if vals.get('crm_team_id') else self.session_id.crm_team_id.id
         return super().write(vals)
+
+    def _get_payment_amounts_by_method(self):
+        """Excludes payment methods linked to a sale order, since those are already accounted"""
+        combined = super()._get_payment_amounts_by_method()
+        filtered_combined = {
+            pm: amount
+            for pm, amount in combined.items()
+            if not pm.use_sale_order_payment
+        }
+        return filtered_combined
