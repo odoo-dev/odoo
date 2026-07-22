@@ -50,6 +50,13 @@ export class VersionsTimeline extends StatusBarField {
 
     async createVersion(date) {
         await this.props.record.save();
+        await this.orm.call("hr.version", "check_contract_finished", [
+            [this.props.record.data.version_id.id],
+        ]);
+        await this.orm.call("hr.employee", "check_no_existing_contract", [
+            [this.props.record.resId],
+            date,
+        ]);
         const version_id = await this.orm.call("hr.employee", "create_version", [
             this.props.record.evalContext.id,
             { date_version: date },
