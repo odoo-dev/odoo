@@ -3,11 +3,6 @@ import { CustomerAddress } from '@portal/interactions/address';
 
 patch(CustomerAddress.prototype, {
 
-    async willStart() {
-        await super.willStart();
-        this.setBrFieldsVisibility();
-    },
-
     _selectState(id) {
         this.addressForm.querySelector(
             `select[name="state_id"] > option[value="${id}"]`
@@ -83,12 +78,8 @@ patch(CustomerAddress.prototype, {
         return await super.onChangeState();
     },
 
-    async onChangeCountry() {
-        await this.waitFor(super.onChangeCountry());
-        this.setBrFieldsVisibility();
-    },
-
-    setBrFieldsVisibility() {
+    _updateCountryLayout() {
+        super._updateCountryLayout(...arguments);
         if (this._getSelectedCountryCode() === 'BR') {
             this._setVisibility('.o_standard_address', false); // hide
             this._setVisibility('.o_extended_address', true); // show

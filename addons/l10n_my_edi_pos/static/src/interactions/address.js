@@ -87,9 +87,6 @@ patch(CustomerAddress.prototype, {
         if (!radio || !this.el.querySelector('input[name="l10n_my_edi_malaysian_tin"]')) {
             return addressFields;
         }
-        if (this._getSelectedCountryCode() !== "MY") {
-            addressFields.add("l10n_my_edi_malaysian_tin");
-        }
-        return addressFields;
+        return addressFields.add("l10n_my_edi_malaysian_tin");
     },
 });

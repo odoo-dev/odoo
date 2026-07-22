@@ -93,22 +93,6 @@ class ResPartner(models.Model):
 
     # Bussiness Methods (Get address fields)
 
-    def _get_address_fields(self, country):
-        address_format_fields = (country and country.get_address_fields()) or [
-            "street",
-            "zip",
-            "city",
-        ]
-
-        if country.zip_applicability == "not_applicable":
-            address_format_fields.remove("zip")
-
-        # Maps `res.country` 'address_format' fields to `res.partner` fields that have to be set on
-        # the address page.
-        mapping = country._get_address_format_fields_mapping()
-
-        return [mapping.get(fname, fname) for fname in address_format_fields]
-
     def _get_required_address_fields(
             self, address_type, country, use_delivery_as_billing=False, **kwargs
         ):

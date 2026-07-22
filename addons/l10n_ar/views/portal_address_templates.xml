@@ -10,9 +10,19 @@
                 <label class="col-form-label" for="l10n_ar_afip_responsibility_type_id">
                     ARCA Responsibility
                 </label>
+                <i
+                    t-if="commercial_fields_warning"
+                    class="oi text-warning"
+                    data-icon="info"
+                    data-bs-toggle="tooltip"
+                    t-att-title="commercial_fields_warning"
+                />
                 <select
                     name="l10n_ar_afip_responsibility_type_id"
-                    t-att-class="'pe-none opacity-50 form-select' if not can_edit_commercial_fields else 'form-select'"
+                    t-att-class="(
+                        'pe-none opacity-50 form-select'
+                        if not can_edit_commercial_fields else 'form-select'
+                    )"
                 >
                     <option value="">ARCA Responsibility...</option>
                     <option

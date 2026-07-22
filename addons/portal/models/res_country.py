@@ -6,6 +6,44 @@ from odoo import api, models
 class ResCountry(models.Model):
     _inherit = "res.country"
 
+    def _is_zip_before_city(self, default_address_fields=[]):
+        if not self or self.zip_applicability == "not_applicable":
+            return False
+
+        address_fields = default_address_fields or self._get_address_fields()
+        if not address_fields or "zip" not in address_fields:
+            return False
+
+        return address_fields.index("zip") < address_fields.index(
+            self._get_partner_city_field()
+        )
+
+    def _get_address_fields(self):
+        address_format_fields = (self and self.get_address_fields()) or [
+            "street",
+            "zip",
+            "city",
+        ]
+
+        # Add state_name in address fields even though it's not in `address_format` if country has
+        # states.
+        if (
+            "state_name" not in address_format_fields
+            and "state_code" not in address_format_fields
+            and self.state_ids
+        ):
+            address_format_fields.append("state_id")
+
+        if self.zip_applicability == "not_applicable":
+            address_format_fields.remove("zip")
+
+        # Maps `res.country` 'address_format' fields to `res.partner` fields that have to be set on
+        # the address page.
+        mapping = self._get_address_format_fields_mapping()
+
+        return [mapping.get(fname, fname) for fname in address_format_fields]
+
+    @api.model
     def _get_address_format_fields_mapping(self):
         """Return mapping of `res.country` 'address_format' fields to `res.partner` fields that
         have to be set on the address page.
@@ -21,9 +59,6 @@ class ResCountry(models.Model):
         return fields_mapping
 
     def _get_cities_data(self, state_id=False):
-        if not self:
-            return []
-
         self.ensure_one()
         domain = [("country_id", "=", self.id)]
         if state_id:
@@ -38,18 +73,6 @@ class ResCountry(models.Model):
     @api.model
     def _get_cities_fields_to_fetch(self):
         return ["id", "name", "zipcode", "state_id"]
-
-    def _is_zip_before_city(self, default_address_fields=[]):
-        if not self or self.zip_applicability == "not_applicable":
-            return False
-
-        address_fields = default_address_fields or self.get_address_fields()
-        if not address_fields or "zip" not in address_fields:
-            return False
-
-        return address_fields.index("zip") < address_fields.index(
-            self._get_partner_city_field()
-        )
 
     def _get_partner_city_field(self):
         """Return city field based on `_enforce_city_choice`."""

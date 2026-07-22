@@ -62,8 +62,10 @@ class ResPartner(models.Model):
 
         return frontend_writable_fields
 
-    def _get_mandatory_billing_address_fields(self, country_sudo, **kwargs):
-        mandatory_fields = super()._get_mandatory_billing_address_fields(country_sudo, **kwargs)
-        if self.env.company._is_latam():
+    def _get_mandatory_billing_address_fields(self, country_sudo, display_b2b_fields=True, **kwargs):
+        mandatory_fields = super()._get_mandatory_billing_address_fields(
+            country_sudo, display_b2b_fields=display_b2b_fields, **kwargs
+        )
+        if self.env.company._is_latam() and display_b2b_fields:
             mandatory_fields.update({'l10n_latam_identification_type_id', 'vat'})
         return mandatory_fields

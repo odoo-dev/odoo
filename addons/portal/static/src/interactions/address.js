@@ -23,12 +23,15 @@ export class CustomerAddress extends Interaction {
         this.countryCode = this.addressForm.dataset.companyCountryCode;
 
         // Required fields (defined server-side)
-        const requiredFields = this.addressForm.default_required_fields.value.split(",");
-        requiredFields.forEach((fieldName) => this._markRequired(fieldName, true));
+        this.requiredFields = this.addressForm.default_required_fields.value.split(",");
+        this.requiredFields.forEach((fieldName) => this._markRequired(fieldName, true));
 
         // Support for customizations and additional required fields
         this.alwaysRequiredFields = this.addressForm.required_fields.value.split(",");
         this.alwaysRequiredFields.forEach((fieldName) => this._markRequired(fieldName, true));
+
+        // Update address fields layout based on fields requirement and visibility
+        this._updateAddressLayout();
     }
 
     async onChangeCountry() {
@@ -42,11 +45,12 @@ export class CustomerAddress extends Interaction {
                 use_delivery_as_billing: this.useDeliveryAsBilling,
             },
         ));
+        this.requiredFields = data.required_fields;
 
         this.addressForm.phone.placeholder = data.phone_code;
         // manage fields order / visibility
         if (data.address_fields) {
-            const cityField = data.required_fields.includes("city_id") ? "city_id" : "city";
+            const cityField = this._getCityField();
             if (data.zip_before_city) {
                 this._getInputDiv("zip").after(this._getInputDiv(cityField));
             } else {
@@ -58,7 +62,7 @@ export class CustomerAddress extends Interaction {
                 if (data.address_fields.includes(fname)) {
                     if (data.selection && fname in data.selection) {
                         // Configure the options for relational fields
-                        this._setFieldChoices(fname, data.selection[fname].data);
+                        this._setFieldChoices(fname, data.selection[fname]);
                     }
                     if (!data.selection?.[fname]) {
                         this._showInput(fname);
@@ -83,12 +87,55 @@ export class CustomerAddress extends Interaction {
                 this._markRequired(element.name, false);
             }
         });
-
+        this._updateCountryLayout(data);
         return data;
     }
 
     _getAddressFields() {
         return new Set(["street", "zip", "state_id", "city", "city_id"]);
+    }
+
+    /*
+     * Update address layout depending on updated country.
+     */
+    _updateCountryLayout(countryDetails = {}) {
+        this._updateAddressLayout();
+        const vatLabel = this._getInputLabel("vat");
+        if (vatLabel) {
+            vatLabel.textContent = countryDetails.vat_label;
+        }
+    }
+
+    /*
+     * Update address layout depending on fields requirements and visibility.
+     */
+    _updateAddressLayout() {
+        const hasStates = this.addressForm.state_id.options.length > 1;
+        const zipVisible = this._getInputDiv("zip").getClientRects().length > 0;
+
+        const countryDiv = this._getInputDiv("country_id");
+        const cityDiv = this._getInputDiv(this._getCityField());
+
+        if (!hasStates && !zipVisible) {
+            countryDiv.classList.replace("col-lg-12", "col-lg-6");
+            cityDiv.classList.remove("col-md-8");
+            cityDiv.classList.remove("col-md-12");
+            cityDiv.classList.add("col-lg-6");
+            // Move country and city in single line if state and zip both are not visible
+            countryDiv.after(cityDiv);
+        } else {
+            countryDiv.classList.toggle("col-lg-6", hasStates);
+            countryDiv.classList.toggle("col-lg-12", !hasStates);
+
+            cityDiv.classList.remove("col-lg-6");
+            cityDiv.classList.toggle("col-md-8", zipVisible);
+            cityDiv.classList.toggle("col-md-12", !zipVisible);
+        }
+
+    }
+
+    _getCityField() {
+        return this.requiredFields.includes("city_id") ? "city_id" : "city"
     }
 
     async onChangeState() {
@@ -133,12 +180,17 @@ export class CustomerAddress extends Interaction {
     _showInput(name) {
         // show parent div, containing label and input
         this.addressForm[name].parentElement.style.display = '';
+        this.addressForm[name].disabled = false;
     }
 
     _hideInput(name, clearValue=true) {
         // hide parent div, containing label and input
         this.addressForm[name].parentElement.style.display = 'none';
-        if (!clearValue) return;
+        if (!clearValue) {
+            // Make input field disabled to avoid sending its value to the server
+            this.addressForm[name].disabled = true;
+            return;
+        }
         this.addressForm[name].value = ''
     }
 

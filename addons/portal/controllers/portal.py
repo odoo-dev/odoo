@@ -430,7 +430,14 @@ class CustomerPortal(Controller):
             country_sudo._enforce_city_choice()
             and country_sudo._get_cities_data(state_sudo.id)
         )
-        can_edit_countries = not partner_sudo.country_id or partner_sudo._can_edit_country()
+        can_edit_country = not partner_sudo.country_id or partner_sudo._can_edit_country()
+        country_warning = ""
+        if not can_edit_country:
+            country_warning = self.env._(
+                "Changing country is not allowed once document(s) have been issued for your"
+                " account. Please contact us directly for this operation."
+            )
+
         return {
             'partner_sudo': partner_sudo,  # If set, customer is editing an existing address
             'partner_id': partner_sudo.id,
@@ -442,13 +449,15 @@ class CustomerPortal(Controller):
             'can_edit_commercial_fields': not has_confirmed_documents and is_main_contact,
             'commercial_address_update_url': commercial_address_update_url,
             'commercial_fields_warning': commercial_fields_warning,
-            'can_edit_country': can_edit_countries,
+            "country_warning": country_warning,
             'callback': callback,
             'is_used_as_billing': address_type == 'billing' or use_delivery_as_billing,
             "required_fields": self.env["res.partner"]._get_required_address_fields(
-                address_type, country_sudo, use_delivery_as_billing=use_delivery_as_billing, **kwargs
+                address_type, country_sudo,
+                use_delivery_as_billing=use_delivery_as_billing, **kwargs
             ),
             'use_delivery_as_billing': use_delivery_as_billing,
+            "zip_applicability": country_sudo.zip_applicability,
             "zip_before_city": country_sudo._is_zip_before_city(),
             'vat_warning': vat_warning,
             "vat_label": (
@@ -463,7 +472,8 @@ class CustomerPortal(Controller):
             "phone_code": f"+{country_sudo.phone_code}" if country_sudo.phone_code != 0 else "",
             "country": country_sudo,
             "countries": (
-                request.env["res.country"].sudo().search([]) if can_edit_countries else country_sudo
+                request.env["res.country"].sudo().search([])
+                if can_edit_country else country_sudo
             ),
             "state": state_sudo,
             "states": country_sudo.state_ids,
@@ -907,36 +917,31 @@ class CustomerPortal(Controller):
         website=True,
         readonly=True,
     )
-    def portal_address_country_info(
-        self, country, address_type,
-        use_delivery_as_billing=False,
-        **kwargs
-    ):
+    def portal_address_country_info(self, country, address_type, **kwargs):
+        address_fields = country._get_address_fields()
         required_fields = self.env["res.partner"]._get_required_address_fields(
-            address_type, country, use_delivery_as_billing=use_delivery_as_billing, **kwargs
+            address_type, country, **kwargs
         )
-        cities_data = []
-        if "city_id" in required_fields and not country.state_required:
-            # If country enforces states, cities will be fetched through the state_info route
-            # depending on the chosen state.
-            cities_data = country._get_cities_data()
-        address_fields = self.env["res.partner"]._get_address_fields(country)
-        states_data = request.env["res.country.state"].sudo().search_read(
+        state_data = self.env["res.country.state"].sudo().search_read(
             [("country_id", "=", country.id)],
             ["id", "name", "code"],
         )
+        city_data = []
+        if "city_id" in required_fields and not country.state_required:
+            # If country enforces states, cities will be fetched through the state_info route
+            # depending on the chosen state.
+            city_data = country._get_cities_data()
 
         return {
             "address_fields": address_fields,
             "required_fields": list(required_fields),
-            "zip_applicability": country.zip_applicability,
             "zip_before_city": country._is_zip_before_city(default_address_fields=address_fields),
             "selection": {
-                "city_id": {"data": cities_data},
-                "state_id": {"data": states_data},
+                "state_id": state_data,
+                "city_id": city_data,
             },
             "phone_code": f"+{country.phone_code}" if country.phone_code != 0 else "",
-            "vat_label": country.vat_label or request.env._("VAT"),
+            "vat_label": country.vat_label or self.env._("VAT"),
         }
 
     @route(

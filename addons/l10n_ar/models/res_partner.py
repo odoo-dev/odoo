@@ -108,9 +108,13 @@ class ResPartner(models.Model):
 
         return frontend_writable_fields
 
-    def _get_mandatory_billing_address_fields(self, country_sudo, **kwargs):
-        mandatory_fields = super()._get_mandatory_billing_address_fields(country_sudo, **kwargs)
-        if self.env.company.country_code == 'AR':
+    def _get_mandatory_billing_address_fields(
+            self, country_sudo, display_b2b_fields=True, **kwargs
+        ):
+        mandatory_fields = super()._get_mandatory_billing_address_fields(
+            country_sudo, display_b2b_fields=display_b2b_fields, **kwargs
+        )
+        if self.env.company.country_code == 'AR' and display_b2b_fields:
             mandatory_fields.add('l10n_ar_afip_responsibility_type_id')
         return mandatory_fields
 
