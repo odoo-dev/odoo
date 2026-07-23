@@ -328,7 +328,7 @@ class Task(models.Model):
             self.project_id = self.parent_id.project_id.id
             self.display_in_project = False
 
-        if not self._origin and self.project_id.partner_id:
+        if not self._origin and not self.parent_id and self.project_id.partner_id:
             self.partner_id = self.project_id.partner_id
 
     def is_blocked_by_dependences(self):
