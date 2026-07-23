@@ -218,6 +218,7 @@ export async function makeTestApp(options) {
         test: true,
         translatableAttributes: ["data-tooltip"],
         translateFn: appTranslateFn,
+        config: options.config,
     });
     await app.pluginManager.ready;
 
