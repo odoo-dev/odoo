@@ -396,6 +396,13 @@ class PurchaseOrderLine(models.Model):
         values = []
         for line in self.filtered(lambda l: not l.display_type):
             for val in line._prepare_stock_moves(picking):
+                if line.order_id.picking_type_id.company_id != line.order_id.company_id:
+                    if line.order_id.partner_id.company_id and line.order_id.partner_id.company_id != line.order_id.picking_type_id.company_id:
+                        raise UserError(self.env._(
+                            "There is a mismatch between the company the Vendor is restricted to and the company receiving the purchased products. "
+                            "Please ensure the company is the same or that the Contact has no company restriction set."
+                            ))
+                    val['company_id'] = line.order_id.picking_type_id.company_id.id
                 values.append(val)
 
         return self.env['stock.move'].create(values)
