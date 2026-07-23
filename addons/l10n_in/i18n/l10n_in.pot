@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.5a1+e\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 18:01+0000\n"
-"PO-Revision-Date: 2026-07-17 18:01+0000\n"
+"POT-Creation-Date: 2026-07-23 16:19+0000\n"
+"PO-Revision-Date: 2026-07-23 16:19+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -523,6 +523,11 @@ msgid "Create TDS Entry"
 msgstr ""
 
 #. module: l10n_in
+#: model:ir.model,website_form_label:l10n_in.model_res_partner
+msgid "Create a Customer"
+msgstr ""
+
+#. module: l10n_in
 #: model:ir.model.fields,field_description:l10n_in.field_l10n_in_pan_entity__create_uid
 #: model:ir.model.fields,field_description:l10n_in.field_l10n_in_port_code__create_uid
 #: model:ir.model.fields,field_description:l10n_in.field_l10n_in_section_alert__create_uid
@@ -757,11 +762,6 @@ msgid "Followers (Partners)"
 msgstr ""
 
 #. module: l10n_in
-#: model:ir.model.fields,help:l10n_in.field_l10n_in_pan_entity__activity_type_icon
-msgid "Font awesome icon e.g. fa-tasks"
-msgstr ""
-
-#. module: l10n_in
 #: model:ir.model.fields,field_description:l10n_in.field_res_config_settings__l10n_in_gsp
 #: model_terms:ir.ui.view,arch_db:l10n_in.res_config_settings_view_form_inherit_l10n_in
 msgid "GSP"
@@ -922,8 +922,14 @@ msgid "HSN/SAC Validation"
 msgstr ""
 
 #. module: l10n_in
-#: model:account.cash.rounding,name:l10n_in.cash_rounding_in_half_up
+#. odoo-python
+#: code:addons/l10n_in/models/template_in.py:0
 msgid "Half Up"
+msgstr ""
+
+#. module: l10n_in
+#: model:account.cash.rounding,name:l10n_in.cash_rounding_in_half_up
+msgid "Half Up (deprecated)"
 msgstr ""
 
 #. module: l10n_in
@@ -1334,6 +1340,11 @@ msgstr ""
 #: model:res.groups,name:l10n_in.group_l10n_in_reseller
 #: model_terms:ir.ui.view,arch_db:l10n_in.res_config_settings_view_form_inherit_l10n_in
 msgid "Manage Reseller(E-Commerce)"
+msgstr ""
+
+#. module: l10n_in
+#: model:ir.model.fields,help:l10n_in.field_l10n_in_pan_entity__activity_type_icon
+msgid "Material Symbols icon e.g. checklist"
 msgstr ""
 
 #. module: l10n_in

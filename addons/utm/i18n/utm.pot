@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.3a1\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 18:37+0000\n"
-"PO-Revision-Date: 2026-03-12 18:37+0000\n"
+"POT-Creation-Date: 2026-07-23 15:04+0000\n"
+"PO-Revision-Date: 2026-07-23 15:04+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -73,11 +73,6 @@ msgid "Automatically Generated Campaign"
 msgstr ""
 
 #. module: utm
-#: model:utm.campaign,title:utm.utm_campaign_black_friday
-msgid "Black Friday Sales"
-msgstr ""
-
-#. module: utm
 #: model:ir.model.fields,field_description:utm.field_utm_mixin__campaign_id
 msgid "Campaign"
 msgstr ""
@@ -122,11 +117,6 @@ msgstr ""
 #. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.view_utm_campaign_view_search
 msgid "Campaigns that are assigned to me"
-msgstr ""
-
-#. module: utm
-#: model:utm.campaign,title:utm.utm_campaign_christmas_special
-msgid "Christmas Special"
 msgstr ""
 
 #. module: utm
@@ -211,7 +201,6 @@ msgstr ""
 #. module: utm
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
-#: model:utm.stage,name:utm.campaign_stage_2
 msgid "Design"
 msgstr ""
 
@@ -425,11 +414,6 @@ msgid "Running"
 msgstr ""
 
 #. module: utm
-#: model:utm.stage,name:utm.campaign_stage_1
-msgid "Schedule"
-msgstr ""
-
-#. module: utm
 #: model_terms:ir.ui.view,arch_db:utm.utm_medium_view_search
 msgid "Search UTM Medium"
 msgstr ""
@@ -443,7 +427,6 @@ msgstr ""
 #. module: utm
 #. odoo-javascript
 #: code:addons/utm/static/src/js/utm_campaign_kanban_examples.js:0
-#: model:utm.stage,name:utm.campaign_stage_3
 msgid "Sent"
 msgstr ""
 

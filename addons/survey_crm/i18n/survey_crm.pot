@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.4a1\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-07 17:37+0000\n"
-"PO-Revision-Date: 2026-05-07 17:37+0000\n"
+"POT-Creation-Date: 2026-07-23 15:03+0000\n"
+"PO-Revision-Date: 2026-07-23 15:03+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -52,45 +52,15 @@ msgid "<span class=\"o_stat_text\">Lead</span>"
 msgstr ""
 
 #. module: survey_crm
-#: model:survey.question.answer,value:survey_crm.lead_qualification_question_answer_row_3
-msgid "A client-relationship company?"
-msgstr ""
-
-#. module: survey_crm
 #. odoo-python
 #: code:addons/survey_crm/models/templates/survey_survey.py:0
 msgid "A team/committee"
 msgstr ""
 
 #. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_0
-msgid "About you"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_5
-msgid "About your company"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question.answer,value:survey_crm.lead_qualification_question_7_question_answer_1
-msgid "Agriculture"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question.answer,value:survey_crm.lead_qualification_question_answer_row_2
-msgid "An IT-oriented company?"
-msgstr ""
-
-#. module: survey_crm
 #. odoo-python
 #: code:addons/survey_crm/models/survey_user_input.py:0
 msgid "Answers"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_11
-msgid "Anything to add?"
 msgstr ""
 
 #. module: survey_crm
@@ -101,11 +71,6 @@ msgstr ""
 #. module: survey_crm
 #: model:ir.model.fields,help:survey_crm.field_survey_question__generate_lead
 msgid "At least one of the question answers can generate leads."
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_1
-msgid "Before this survey, were you aware of our company?"
 msgstr ""
 
 #. module: survey_crm
@@ -151,16 +116,6 @@ msgid "Getting to know you"
 msgstr ""
 
 #. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_10
-msgid "Have you ever worked with any of the following?"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_6
-msgid "How is your company named?"
-msgstr ""
-
-#. module: survey_crm
 #: model:ir.model.fields,field_description:survey_crm.field_survey_question__id
 #: model:ir.model.fields,field_description:survey_crm.field_survey_question_answer__id
 #: model:ir.model.fields,field_description:survey_crm.field_survey_survey__id
@@ -203,19 +158,9 @@ msgid "Leads"
 msgstr ""
 
 #. module: survey_crm
-#: model:survey.survey,title:survey_crm.lead_qualification_survey
-msgid "Let's connect!"
-msgstr ""
-
-#. module: survey_crm
 #. odoo-python
 #: code:addons/survey_crm/models/templates/survey_survey.py:0
 msgid "Let's start with a basic question. What's your email address?"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question.answer,value:survey_crm.lead_qualification_question_7_question_answer_2
-msgid "Manufacturing/Industry"
 msgstr ""
 
 #. module: survey_crm
@@ -237,23 +182,8 @@ msgid "New"
 msgstr ""
 
 #. module: survey_crm
-#: model:survey.question.answer,value:survey_crm.lead_qualification_question_1_question_answer_2
-msgid "No"
-msgstr ""
-
-#. module: survey_crm
 #: model:ir.model.fields,help:survey_crm.field_survey_survey__lead_count
 msgid "Number of leads created by this survey"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,comments_message:survey_crm.lead_qualification_question_7
-msgid "Other"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question.answer,value:survey_crm.lead_qualification_question_answer_row_1
-msgid "Our company in the past?"
 msgstr ""
 
 #. module: survey_crm
@@ -265,11 +195,6 @@ msgstr ""
 #. module: survey_crm
 #: model_terms:ir.ui.view,arch_db:survey_crm.survey_survey_view_form
 msgid "Select a Sales team"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question.answer,value:survey_crm.lead_qualification_question_7_question_answer_3
-msgid "Services"
 msgstr ""
 
 #. module: survey_crm
@@ -304,11 +229,6 @@ msgid "Survey User Input"
 msgstr ""
 
 #. module: survey_crm
-#: model_terms:survey.survey,description_done:survey_crm.lead_qualification_survey
-msgid "Thanks a lot for your participation!"
-msgstr ""
-
-#. module: survey_crm
 #. odoo-python
 #: code:addons/survey_crm/models/templates/survey_survey.py:0
 msgid "Thanks for answering!"
@@ -320,37 +240,9 @@ msgid "This question generates leads"
 msgstr ""
 
 #. module: survey_crm
-#: model_terms:survey.survey,description:survey_crm.lead_qualification_survey
-msgid ""
-"Welcome, <br><br>\n"
-"                You're receiving this survey because you're likely to become one of our partners.<br>\n"
-"                Once submitted, one of our managers will follow up on the integration process based on your answers."
-msgstr ""
-
-#. module: survey_crm
 #. odoo-python
 #: code:addons/survey_crm/models/templates/survey_survey.py:0
 msgid "What is the size of your company?"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_7
-msgid "What sector do you primarily operate within?"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_4
-msgid "What's your job position?"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_2
-msgid "What's your name?"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_8
-msgid "What's your total headcount?"
 msgstr ""
 
 #. module: survey_crm
@@ -363,22 +255,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/survey_crm/models/templates/survey_survey.py:0
 msgid "Who will make the final decision on this purchase?"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_9
-msgid "Working together"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question.answer,value:survey_crm.lead_qualification_question_1_question_answer_1
-#: model:survey.question.answer,value:survey_crm.lead_qualification_question_answer_col_1
-msgid "Yes"
-msgstr ""
-
-#. module: survey_crm
-#: model:survey.question,title:survey_crm.lead_qualification_question_3
-msgid "Your email:"
 msgstr ""
 
 #. module: survey_crm

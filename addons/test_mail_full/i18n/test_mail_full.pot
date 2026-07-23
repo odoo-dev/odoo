@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server saas~12.5\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-09-09 10:49+0000\n"
-"PO-Revision-Date: 2019-09-09 10:49+0000\n"
+"POT-Creation-Date: 2026-07-23 16:19+0000\n"
+"PO-Revision-Date: 2026-07-23 16:19+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,276 +16,471 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_needaction
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_needaction
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_needaction
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__access_warning
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__access_warning
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__access_warning
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__access_warning
+msgid "Access warning"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__message_needaction
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__message_needaction
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__message_needaction
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__message_needaction
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__message_needaction
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__message_needaction
 msgid "Action Needed"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_attachment_count
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_attachment_count
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_attachment_count
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_ids
+msgid "Activities"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_plans_ids
+msgid "Activity Plans"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_state
+msgid "Activity State"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_type_icon
+msgid "Activity Type Icon"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__message_attachment_count
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__message_attachment_count
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__message_attachment_count
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__message_attachment_count
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__message_attachment_count
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__message_attachment_count
 msgid "Attachment Count"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model,name:test_mail_full.model_mail_test_sms
-#: model:ir.model,name:test_mail_full.model_mail_test_sms_bl
-msgid "Chatter Model for SMS Gateway"
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__rating_avg
+msgid "Average Rating"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model,name:test_mail_full.model_mail_test_sms_partner
-msgid "Chatter Model for SMS Gateway (Partner only)"
+#: model:ir.model,name:test_mail_full.model_mail_test_portal
+msgid "Chatter Model for Portal"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__create_uid
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__create_uid
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__create_uid
+#: model:ir.model,name:test_mail_full.model_mail_test_portal_no_partner
+msgid "Chatter Model for Portal (no partner field)"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__company_id
+msgid "Company"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__create_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__create_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__create_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__create_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__create_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__create_uid
 msgid "Created by"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__create_date
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__create_date
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__create_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__create_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__create_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__create_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__create_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__create_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__create_date
 msgid "Created on"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__customer_id
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__customer_id
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__partner_id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__partner_id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__partner_id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__customer_id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__customer_id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__customer_id
 msgid "Customer"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__display_name
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__display_name
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__display_name
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal__access_url
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_no_partner__access_url
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_public_access_action__access_url
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating__access_url
+msgid "Customer Portal URL"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__display_name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__display_name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__display_name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__display_name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__display_name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__display_name
 msgid "Display Name"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__email_from
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__email_from
-msgid "Email From"
-msgstr ""
-
-#. module: test_mail_full
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_bl__phone_sanitized
-msgid ""
-"Field used to store sanitized phone number. Helps speeding up searches and "
-"comparisons."
-msgstr ""
-
-#. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_follower_ids
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_follower_ids
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_follower_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__message_follower_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__message_follower_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__message_follower_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__message_follower_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__message_follower_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__message_follower_ids
 msgid "Followers"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_channel_ids
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_channel_ids
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_channel_ids
-msgid "Followers (Channels)"
-msgstr ""
-
-#. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_partner_ids
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_partner_ids
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_partner_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__message_partner_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__message_partner_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__message_partner_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__message_partner_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__message_partner_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__message_partner_ids
 msgid "Followers (Partners)"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__id
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__id
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__email_from
+msgid "From"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__has_message
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__has_message
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__has_message
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__has_message
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__has_message
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__has_message
+msgid "Has Message"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__id
 msgid "ID"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms__message_needaction
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms__message_unread
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_bl__message_needaction
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_bl__message_unread
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_partner__message_needaction
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_partner__message_unread
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_exception_icon
+msgid "Icon"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal__message_needaction
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_no_partner__message_needaction
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_public_access_action__message_needaction
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating__message_needaction
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating_thread__message_needaction
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating_thread_read__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms__message_has_error
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms__message_has_sms_error
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_bl__message_has_error
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_bl__message_has_sms_error
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_partner__message_has_error
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_partner__message_has_sms_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal__message_has_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal__message_has_sms_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_no_partner__message_has_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_no_partner__message_has_sms_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_public_access_action__message_has_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_public_access_action__message_has_sms_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating__message_has_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating__message_has_sms_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating_thread__message_has_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating_thread__message_has_sms_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating_thread_read__message_has_error
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating_thread_read__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_bl__phone_blacklisted
-msgid ""
-"If the email address is on the blacklist, the contact won't receive mass "
-"mailing anymore, from any list"
-msgstr ""
-
-#. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_is_follower
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_is_follower
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_is_follower
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__message_is_follower
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__message_is_follower
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__message_is_follower
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__message_is_follower
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__message_is_follower
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__message_is_follower
 msgid "Is Follower"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms____last_update
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl____last_update
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner____last_update
-msgid "Last Modified on"
-msgstr ""
-
-#. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__write_uid
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__write_uid
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__write_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__write_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__write_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__write_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__write_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__write_uid
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__write_uid
 msgid "Last Updated by"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__write_date
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__write_date
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__write_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__write_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__write_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__write_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__write_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__write_date
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__write_date
 msgid "Last Updated on"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_main_attachment_id
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_main_attachment_id
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_main_attachment_id
-msgid "Main Attachment"
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating__activity_type_icon
+msgid "Material Symbols icon e.g. checklist"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_has_error
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_has_error
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_has_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__message_has_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__message_has_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__message_has_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__message_has_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__message_has_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__message_has_error
 msgid "Message Delivery error"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_ids
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_ids
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__message_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__message_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__message_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__message_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__message_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__message_ids
 msgid "Messages"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__mobile_nbr
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__mobile_nbr
-msgid "Mobile Nbr"
+#: model:ir.model,name:test_mail_full.model_mail_test_rating_thread
+msgid "Model for testing rating without the rating mixin"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__name
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__name
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__name
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__name
 msgid "Name"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_needaction_counter
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_needaction_counter
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_needaction_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_summary
+msgid "Next Activity Summary"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_type_id
+msgid "Next Activity Type"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__message_needaction_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__message_needaction_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__message_needaction_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__message_needaction_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__message_needaction_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__message_needaction_counter
 msgid "Number of Actions"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_has_error_counter
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_has_error_counter
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_has_error_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__message_has_error_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__message_has_error_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__message_has_error_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__message_has_error_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__message_has_error_counter
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__message_has_error_counter
 msgid "Number of errors"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms__message_needaction_counter
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_bl__message_needaction_counter
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_partner__message_needaction_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal__message_needaction_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_no_partner__message_needaction_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_public_access_action__message_needaction_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating__message_needaction_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating_thread__message_needaction_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating_thread_read__message_needaction_counter
 msgid "Number of messages requiring action"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms__message_has_error_counter
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_bl__message_has_error_counter
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_partner__message_has_error_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal__message_has_error_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_no_partner__message_has_error_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_portal_public_access_action__message_has_error_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating__message_has_error_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating_thread__message_has_error_counter
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating_thread_read__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms__message_unread_counter
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_bl__message_unread_counter
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_partner__message_unread_counter
-msgid "Number of unread messages"
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__phone_nbr
+msgid "Phone Number"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__phone_blacklisted
-msgid "Phone Blacklisted"
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__access_url
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__access_url
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__access_url
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__access_url
+msgid "Portal Access URL"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__phone_nbr
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__phone_nbr
-msgid "Phone Nbr"
+#: model:ir.model,name:test_mail_full.model_mail_test_portal_public_access_action
+msgid "Portal Public Access Action"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_has_sms_error
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_has_sms_error
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_has_sms_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__rating_avg_text
+msgid "Rating Avg Text"
+msgstr ""
+
+#. module: test_mail_full
+#: model:mail.message.subtype,description:test_mail_full.mt_mail_test_rating_rating_done
+#: model:mail.message.subtype,name:test_mail_full.mt_mail_test_rating_rating_done
+msgid "Rating Done"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__rating_last_feedback
+msgid "Rating Last Feedback"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__rating_last_image
+msgid "Rating Last Image"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__rating_last_value
+msgid "Rating Last Value"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model,name:test_mail_full.model_mail_test_rating
+msgid "Rating Model (ticket-like)"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__rating_percentage_satisfaction
+msgid "Rating Satisfaction"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__rating_last_text
+msgid "Rating Text"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__rating_count
+msgid "Rating count"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__rating_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__rating_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__rating_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__rating_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__rating_ids
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__rating_ids
+msgid "Ratings"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model,name:test_mail_full.model_mail_test_rating_thread_read
+msgid "Read-post rating model"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__user_id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__user_id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__user_id
+msgid "Responsible"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__activity_user_id
+msgid "Responsible User"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__message_has_sms_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__message_has_sms_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__message_has_sms_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__message_has_sms_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread__message_has_sms_error
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating_thread_read__message_has_sms_error
 msgid "SMS Delivery error"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__phone_sanitized
-msgid "Sanitized Number"
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__user_id
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__user_id
+msgid "Salesperson"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__subject
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__subject
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal__access_token
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_no_partner__access_token
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_portal_public_access_action__access_token
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__access_token
+msgid "Security Token"
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+
+#. module: test_mail_full
+#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_rating__subject
 msgid "Subject"
 msgstr ""
 
 #. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_unread
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_unread
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_unread
-msgid "Unread Messages"
-msgstr ""
-
-#. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__message_unread_counter
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__message_unread_counter
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__message_unread_counter
-msgid "Unread Messages Counter"
-msgstr ""
-
-#. module: test_mail_full
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms__website_message_ids
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_bl__website_message_ids
-#: model:ir.model.fields,field_description:test_mail_full.field_mail_test_sms_partner__website_message_ids
-msgid "Website Messages"
-msgstr ""
-
-#. module: test_mail_full
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms__website_message_ids
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_bl__website_message_ids
-#: model:ir.model.fields,help:test_mail_full.field_mail_test_sms_partner__website_message_ids
-msgid "Website communication history"
+#: model:ir.model.fields,help:test_mail_full.field_mail_test_rating__activity_exception_decoration
+msgid "Type of the exception activity on record."
 msgstr ""

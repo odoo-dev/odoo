@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.5a1+e\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 18:00+0000\n"
-"PO-Revision-Date: 2026-07-17 18:00+0000\n"
+"POT-Creation-Date: 2026-07-23 16:09+0000\n"
+"PO-Revision-Date: 2026-07-23 16:09+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -53,8 +53,8 @@ msgstr ""
 #. module: l10n_fr_pdp
 #: model_terms:ir.ui.view,arch_db:l10n_fr_pdp.res_config_settings_view_form
 msgid ""
-"<i class=\"fa fa-exclamation-triangle\"/>You can only send and receive <span"
-" class=\"o_form_label\">unregulated</span> messages currently."
+"<i class=\"oi\" data-icon=\"warning\"/>You can only send and receive <span "
+"class=\"o_form_label\">unregulated</span> messages currently."
 msgstr ""
 
 #. module: l10n_fr_pdp
@@ -298,6 +298,11 @@ msgid "Available Statuses"
 msgstr ""
 
 #. module: l10n_fr_pdp
+#: model:ir.model,name:l10n_fr_pdp.model_account_edi_ubl
+msgid "Base helpers for UBL"
+msgstr ""
+
+#. module: l10n_fr_pdp
 #: model:ir.model.fields.selection,name:l10n_fr_pdp.selection__pdp_response_wizard__reason_code__calcul_err
 msgid "Billing calculation error"
 msgstr ""
@@ -432,6 +437,11 @@ msgid "Contract reference required to process the missing invoice"
 msgstr ""
 
 #. module: l10n_fr_pdp
+#: model:ir.model,website_form_label:l10n_fr_pdp.model_res_partner
+msgid "Create a Customer"
+msgstr ""
+
+#. module: l10n_fr_pdp
 #. odoo-javascript
 #: code:addons/l10n_fr_pdp/static/src/js/pdp_info.xml:0
 msgid "Create, send and receive e-invoices for free."
@@ -504,6 +514,7 @@ msgstr ""
 
 #. module: l10n_fr_pdp
 #: model:ir.model.fields,field_description:l10n_fr_pdp.field_account_edi_proxy_client_user__display_name
+#: model:ir.model.fields,field_description:l10n_fr_pdp.field_account_edi_ubl__display_name
 #: model:ir.model.fields,field_description:l10n_fr_pdp.field_account_edi_xml_cii__display_name
 #: model:ir.model.fields,field_description:l10n_fr_pdp.field_account_edi_xml_ubl_21_fr__display_name
 #: model:ir.model.fields,field_description:l10n_fr_pdp.field_account_journal__display_name
@@ -780,11 +791,6 @@ msgid "Followers (Partners)"
 msgstr ""
 
 #. module: l10n_fr_pdp
-#: model:ir.model.fields,help:l10n_fr_pdp.field_l10n_fr_pdp_reports_flow__activity_type_icon
-msgid "Font awesome icon e.g. fa-tasks"
-msgstr ""
-
-#. module: l10n_fr_pdp
 #. odoo-python
 #: code:addons/l10n_fr_pdp/models/res_partner.py:0
 msgid "For French regulated invoices, only %(format_name)s is supported."
@@ -886,6 +892,7 @@ msgstr ""
 
 #. module: l10n_fr_pdp
 #: model:ir.model.fields,field_description:l10n_fr_pdp.field_account_edi_proxy_client_user__id
+#: model:ir.model.fields,field_description:l10n_fr_pdp.field_account_edi_ubl__id
 #: model:ir.model.fields,field_description:l10n_fr_pdp.field_account_edi_xml_cii__id
 #: model:ir.model.fields,field_description:l10n_fr_pdp.field_account_edi_xml_ubl_21_fr__id
 #: model:ir.model.fields,field_description:l10n_fr_pdp.field_account_journal__id
@@ -1171,6 +1178,11 @@ msgstr ""
 #. module: l10n_fr_pdp
 #: model:ir.model.fields.selection,name:l10n_fr_pdp.selection__account_peppol_response__pdp_flow_number__6
 msgid "Mandatory Status"
+msgstr ""
+
+#. module: l10n_fr_pdp
+#: model:ir.model.fields,help:l10n_fr_pdp.field_l10n_fr_pdp_reports_flow__activity_type_icon
+msgid "Material Symbols icon e.g. checklist"
 msgstr ""
 
 #. module: l10n_fr_pdp

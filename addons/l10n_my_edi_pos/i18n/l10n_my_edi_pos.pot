@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.3a1+e\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-12 19:15+0000\n"
-"PO-Revision-Date: 2026-03-12 19:15+0000\n"
+"POT-Creation-Date: 2026-07-23 15:10+0000\n"
+"PO-Revision-Date: 2026-07-23 15:10+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -18,8 +18,8 @@ msgstr ""
 #. module: l10n_my_edi_pos
 #: model_terms:ir.ui.view,arch_db:l10n_my_edi_pos.view_partner_form_pos_ui_inherit_l10n_my_edi_pos
 msgid ""
-"<span class=\"text-success fa fa-check\" title=\"Validation Successful\" invisible=\"not l10n_my_edi_display_tin_warning or l10n_my_tin_validation_state != 'valid'\"/>\n"
-"                        <span class=\"text-danger fa fa-close\" title=\"Validation Failed\" invisible=\"not l10n_my_edi_display_tin_warning or l10n_my_tin_validation_state != 'invalid'\"/>"
+"<span class=\"text-success oi\" data-icon=\"check\" title=\"Validation Successful\" invisible=\"not l10n_my_edi_display_tin_warning or l10n_my_tin_validation_state != 'valid'\"/>\n"
+"                        <span class=\"text-danger oi\" data-icon=\"close\" title=\"Validation Failed\" invisible=\"not l10n_my_edi_display_tin_warning or l10n_my_tin_validation_state != 'invalid'\"/>"
 msgstr ""
 
 #. module: l10n_my_edi_pos
@@ -209,6 +209,8 @@ msgid "Some fields are missing or have wrong values"
 msgstr ""
 
 #. module: l10n_my_edi_pos
+#. odoo-python
+#: code:addons/l10n_my_edi_pos/controllers/portal.py:0
 #: model_terms:ir.ui.view,arch_db:l10n_my_edi_pos.portal_address_form_fields_my
 msgid "Tax Identification Number"
 msgstr ""

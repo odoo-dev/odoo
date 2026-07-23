@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.0\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-11 13:57+0000\n"
-"PO-Revision-Date: 2025-09-11 13:57+0000\n"
+"POT-Creation-Date: 2026-07-23 15:11+0000\n"
+"PO-Revision-Date: 2026-07-23 15:11+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -19,11 +19,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/hr_skills_survey/models/hr_resume_line.py:0
 msgid "%s (copy)"
-msgstr ""
-
-#. module: hr_skills_survey
-#: model:hr.resume.line,name:hr_skills_survey.resume_line_valid
-msgid "AWS Cloud"
 msgstr ""
 
 #. module: hr_skills_survey
@@ -68,16 +63,6 @@ msgstr ""
 #. module: hr_skills_survey
 #: model:hr.resume.line.type,name:hr_skills_survey.resume_type_certification
 msgid "Internal Certification"
-msgstr ""
-
-#. module: hr_skills_survey
-#: model:hr.resume.line,name:hr_skills_survey.resume_line_expiring
-msgid "MongoDB Developer"
-msgstr ""
-
-#. module: hr_skills_survey
-#: model:hr.resume.line,name:hr_skills_survey.resume_line_aws
-msgid "Oracle DB"
 msgstr ""
 
 #. module: hr_skills_survey

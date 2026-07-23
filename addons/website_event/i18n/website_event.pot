@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
-"PO-Revision-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-07-23 15:08+0000\n"
+"PO-Revision-Date: 2026-07-23 15:08+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -78,45 +78,33 @@ msgid ""
 msgstr ""
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
-msgid "<i class=\"fa fa-ban me-2\"/>Sold Out"
+#: model_terms:ir.ui.view,arch_db:website_event.event_pages_kanban_view
+msgid "<i class=\"oi me-1\" data-icon=\"public\" title=\"Website\"/>"
+msgstr ""
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.event_card
+msgid "<i class=\"oi me-2 text-muted\" data-icon=\"location_on\" title=\"Location\"/>"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.modal_slot_registration
-msgid "<i class=\"fa fa-caret-left me-2\"/><small>Previous</small>"
+msgid "<i class=\"oi me-2\" data-icon=\"arrow_left\"/><small>Previous</small>"
+msgstr ""
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
+msgid "<i class=\"oi me-2\" data-icon=\"block\"/>Sold Out"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-check me-2\" role=\"img\"/>Registered"
+msgid "<i class=\"oi me-2\" data-icon=\"check\" role=\"img\"/>Registered"
 msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "<i class=\"fa fa-check me-2\"/>Registered"
-msgstr ""
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.registration_configure_tickets_button
-msgid ""
-"<i class=\"fa fa-gear me-1\" role=\"img\" aria-label=\"Configure\" "
-"title=\"Configure event tickets\"/><em>Configure Tickets</em>"
-msgstr ""
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_pages_kanban_view
-msgid "<i class=\"fa fa-globe me-1\" title=\"Website\"/>"
-msgstr ""
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "<i class=\"fa fa-map-marker me-2 text-muted\" title=\"Location\"/>"
-msgstr ""
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
-msgid "<i class=\"fa fa-map-marker\" title=\"Location\"/> Online event"
+msgid "<i class=\"oi me-2\" data-icon=\"check\"/>Registered"
 msgstr ""
 
 #. module: website_event
@@ -139,10 +127,11 @@ msgid "<i class=\"oi me-2\" data-icon=\"schedule\" role=\"presentation\"/>8:15 P
 msgstr ""
 
 #. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.navbar
+#: model_terms:ir.ui.view,arch_db:website_event.registration_configure_tickets_button
 msgid ""
-"<i class=\"oi oi-chevron-left\"/>\n"
-"                <span>All Events</span>"
+"<i class=\"oi oi-filled me-1\" data-icon=\"settings\" role=\"img\" aria-"
+"label=\"Configure\" title=\"Configure event tickets\"/><em>Configure "
+"Tickets</em>"
 msgstr ""
 
 #. module: website_event
@@ -150,6 +139,18 @@ msgstr ""
 msgid ""
 "<i class=\"oi oi-filled me-2\" data-icon=\"calendar_today\" "
 "role=\"presentation\"/>August 23, 2025"
+msgstr ""
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.navbar
+msgid ""
+"<i class=\"oi\" data-icon=\"chevron_backward\"/>\n"
+"                <span>All Events</span>"
+msgstr ""
+
+#. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.event_description_full
+msgid "<i class=\"oi\" data-icon=\"location_on\" title=\"Location\"/> Online event"
 msgstr ""
 
 #. module: website_event
@@ -169,12 +170,7 @@ msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.modal_slot_registration
-msgid "<small>Next</small><i class=\"fa fa-caret-right ms-2\"/>"
-msgstr ""
-
-#. module: website_event
-#: model_terms:ir.ui.view,arch_db:website_event.events_list
-msgid "<span class=\"fa fa-plus me-1\"/> Create an Event"
+msgid "<small>Next</small><i class=\"oi ms-2\" data-icon=\"arrow_right\"/>"
 msgstr ""
 
 #. module: website_event
@@ -231,10 +227,15 @@ msgid ""
 msgstr ""
 
 #. module: website_event
+#: model_terms:ir.ui.view,arch_db:website_event.events_list
+msgid "<span class=\"oi me-1\" data-icon=\"add\"/> Create an Event"
+msgstr ""
+
+#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.modal_ticket_registration
 msgid ""
 "<span class=\"text-danger\">\n"
-"                                        <i class=\"fa fa-ban me-2\"/>Sold Out\n"
+"                                        <i class=\"oi me-2\" data-icon=\"block\"/>Sold Out\n"
 "                                    </span>"
 msgstr ""
 
@@ -346,11 +347,6 @@ msgid ""
 msgstr ""
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_question_about_1_answer_2
-msgid "A friend"
-msgstr ""
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_photos
 msgid "A past event"
 msgstr ""
@@ -415,11 +411,6 @@ msgid "All Events"
 msgstr ""
 
 #. module: website_event
-#: model:event.question,title:website_event.event_question_allergies
-msgid "Allergies"
-msgstr ""
-
-#. module: website_event
 #: model:ir.model.fields,help:website_event.field_event_event__website_menu
 msgid "Allows to display and manage event-specific menus on website."
 msgstr ""
@@ -466,12 +457,6 @@ msgstr ""
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.navbar
 msgid "Back to {{0}}"
-msgstr ""
-
-#. module: website_event
-#: model:event.question.answer,name:website_event.event_question_about_0_answer_1
-#: model:event.question.answer,name:website_event.event_question_about_2_answer_1
-msgid "Blog Post"
 msgstr ""
 
 #. module: website_event
@@ -531,11 +516,6 @@ msgid "Close"
 msgstr ""
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_question_about_1_answer_1
-msgid "Commercials"
-msgstr ""
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_event_view_form
 #: model_terms:ir.ui.view,arch_db:website_event.event_type_view_form
 msgid "Community"
@@ -567,11 +547,6 @@ msgstr ""
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_attendee_details
 msgid "Confirm Registration"
-msgstr ""
-
-#. module: website_event
-#: model:event.question.answer,name:website_event.event_question_working_field_answer_0
-msgid "Consumers"
 msgstr ""
 
 #. module: website_event
@@ -726,7 +701,7 @@ msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "Event Info <i class=\"fa fa-chevron-right\"/>"
+msgid "Event Info <i class=\"oi\" data-icon=\"chevron_right\"/>"
 msgstr ""
 
 #. module: website_event
@@ -906,7 +881,7 @@ msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_card
-msgid "Get Tickets <i class=\"fa fa-chevron-right\"/>"
+msgid "Get Tickets <i class=\"oi\" data-icon=\"chevron_right\"/>"
 msgstr ""
 
 #. module: website_event
@@ -969,18 +944,6 @@ msgstr ""
 msgid ""
 "Honoring outstanding accomplishments, dedication, and impact across all "
 "fields."
-msgstr ""
-
-#. module: website_event
-#: model:event.question,title:website_event.event_question_about_us
-msgid "How did you hear about us?"
-msgstr ""
-
-#. module: website_event
-#: model:event.question,title:website_event.event_question_about_0
-#: model:event.question,title:website_event.event_question_about_1
-#: model:event.question,title:website_event.event_question_about_2
-msgid "How did you learn about this event?"
 msgstr ""
 
 #. module: website_event
@@ -1069,7 +1032,7 @@ msgstr ""
 
 #. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.registration_ticket_access
-msgid "Join online <i class=\"ms-1 fa fa-globe\"/>"
+msgid "Join online <i class=\"oi ms-1\" data-icon=\"public\"/>"
 msgstr ""
 
 #. module: website_event
@@ -1125,11 +1088,6 @@ msgid ""
 msgstr ""
 
 #. module: website_event
-#: model:event.question,title:website_event.event_question_meal_type
-msgid "Meal Type"
-msgstr ""
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.s_dynamic_snippet_events_single_entry_preview_data
 #: model_terms:ir.ui.view,arch_db:website_event.s_event_upcoming_snippet_card_preview_data
 msgid ""
@@ -1150,11 +1108,6 @@ msgstr ""
 #. module: website_event
 #: model:ir.actions.act_window,name:website_event.website_event_menu_action
 msgid "Menus"
-msgstr ""
-
-#. module: website_event
-#: model:event.question.answer,name:website_event.event_question_meal_type_answer_0
-msgid "Mixed"
 msgstr ""
 
 #. module: website_event
@@ -1252,11 +1205,6 @@ msgid "Our Trainings"
 msgstr ""
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_question_about_1_answer_0
-msgid "Our website"
-msgstr ""
-
-#. module: website_event
 #: model_terms:ir.ui.view,arch_db:website_event.event_calendar_links
 #: model_terms:ir.ui.view,arch_db:website_event.event_description_dates
 msgid "Outlook"
@@ -1266,11 +1214,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_event/models/event_event.py:0
 msgid "Past Events"
-msgstr ""
-
-#. module: website_event
-#: model:event.question.answer,name:website_event.event_question_meal_type_answer_2
-msgid "Pastafarian"
 msgstr ""
 
 #. module: website_event
@@ -1320,12 +1263,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_event/static/src/website_builder/events_list_page_option.xml:0
 msgid "Quotes"
-msgstr ""
-
-#. module: website_event
-#: model:event.question.answer,name:website_event.event_question_about_0_answer_2
-#: model:event.question.answer,name:website_event.event_question_about_2_answer_2
-msgid "Radio Ad"
 msgstr ""
 
 #. module: website_event
@@ -1442,11 +1379,6 @@ msgid "Remaining time before event starts (minutes)"
 msgstr ""
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_question_working_field_answer_2
-msgid "Research"
-msgstr ""
-
-#. module: website_event
 #: model:ir.model.fields,help:website_event.field_event_event__website_id
 #: model:ir.model.fields,help:website_event.field_event_tag__website_id
 #: model:ir.model.fields,help:website_event.field_event_tag_category__website_id
@@ -1463,11 +1395,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_event.field_event_event__is_seo_optimized
 #: model:ir.model.fields,field_description:website_event.field_website_event_menu__is_seo_optimized
 msgid "SEO optimized"
-msgstr ""
-
-#. module: website_event
-#: model:event.question.answer,name:website_event.event_question_working_field_answer_1
-msgid "Sales"
 msgstr ""
 
 #. module: website_event
@@ -1594,8 +1521,6 @@ msgid "Slots"
 msgstr ""
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_question_about_0_answer_0
-#: model:event.question.answer,name:website_event.event_question_about_2_answer_0
 #: model_terms:ir.ui.view,arch_db:website_event.index_sidebar_follow_us
 msgid "Social Media"
 msgstr ""
@@ -1744,11 +1669,6 @@ msgid "Used when not being an url based menu"
 msgstr ""
 
 #. module: website_event
-#: model:event.question.answer,name:website_event.event_question_meal_type_answer_1
-msgid "Vegetarian"
-msgstr ""
-
-#. module: website_event
 #: model:ir.model.fields.selection,name:website_event.selection__event_event__website_visibility__link
 msgid "Via a Link"
 msgstr ""
@@ -1892,11 +1812,6 @@ msgid "Website opengraph image"
 msgstr ""
 
 #. module: website_event
-#: model:event.question,title:website_event.event_question_hockey_level
-msgid "What's your Hockey level?"
-msgstr ""
-
-#. module: website_event
 #: model:ir.model.fields,help:website_event.field_event_event__is_ongoing
 msgid "Whether event has begun"
 msgstr ""
@@ -1904,11 +1819,6 @@ msgstr ""
 #. module: website_event
 #: model:ir.model.fields,help:website_event.field_event_event__start_today
 msgid "Whether event is going to start today if still not ongoing"
-msgstr ""
-
-#. module: website_event
-#: model:event.question,title:website_event.event_question_working_field
-msgid "Which field are you working in?"
 msgstr ""
 
 #. module: website_event

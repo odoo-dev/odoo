@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.5a1+e\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 18:12+0000\n"
-"PO-Revision-Date: 2026-07-03 18:12+0000\n"
+"POT-Creation-Date: 2026-07-23 16:13+0000\n"
+"PO-Revision-Date: 2026-07-23 16:13+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -116,11 +116,6 @@ msgid "Account Chart Template"
 msgstr ""
 
 #. module: l10n_rw
-#: model:res.company,pay_later_label:l10n_rw.demo_company_rw
-msgid "Confirm"
-msgstr ""
-
-#. module: l10n_rw
 #: model:ir.model.fields,field_description:l10n_rw.field_account_chart_template__display_name
 msgid "Display Name"
 msgstr ""
@@ -131,11 +126,6 @@ msgid "ID"
 msgstr ""
 
 #. module: l10n_rw
-#: model:res.company,pay_now_label:l10n_rw.demo_company_rw
-msgid "Pay now"
-msgstr ""
-
-#. module: l10n_rw
 #: model:ir.ui.menu,name:l10n_rw.account_reports_rw_statements_menu
 msgid "Rwanda"
 msgstr ""
@@ -143,18 +133,6 @@ msgstr ""
 #. module: l10n_rw
 #: model:account.report,name:l10n_rw.tax_report
 msgid "Tax Report"
-msgstr ""
-
-#. module: l10n_rw
-#: model_terms:res.company,sign_terms:l10n_rw.demo_company_rw
-#: model_terms:res.company,sign_terms_html:l10n_rw.demo_company_rw
-msgid "Terms &amp; Conditions"
-msgstr ""
-
-#. module: l10n_rw
-#: model_terms:res.company,sign_terms:l10n_rw.demo_company_rw
-#: model_terms:res.company,sign_terms_html:l10n_rw.demo_company_rw
-msgid "Your conditions..."
 msgstr ""
 
 #. module: l10n_rw

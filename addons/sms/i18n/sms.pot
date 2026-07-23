@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:39+0000\n"
-"PO-Revision-Date: 2026-07-17 17:39+0000\n"
+"POT-Creation-Date: 2026-07-23 15:13+0000\n"
+"PO-Revision-Date: 2026-07-23 15:13+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -48,29 +48,29 @@ msgstr ""
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 msgid ""
-"<i class=\"fa fa-warning\"/> An error occurred with your account. Please "
-"contact the support for more information..."
-msgstr ""
-
-#. module: sms
-#: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
-msgid ""
-"<i class=\"fa fa-warning\"/> You cannot send SMS while your account is not "
-"registered."
-msgstr ""
-
-#. module: sms
-#: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
-msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                            Register"
 msgstr ""
 
 #. module: sms
 #: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
 msgid ""
-"<i class=\"oi oi-arrow-right\"/>\n"
+"<i class=\"oi\" data-icon=\"east\"/>\n"
 "                            Set Sender Name"
+msgstr ""
+
+#. module: sms
+#: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
+msgid ""
+"<i class=\"oi\" data-icon=\"warning\"/> An error occurred with your account."
+" Please contact the support for more information..."
+msgstr ""
+
+#. module: sms
+#: model_terms:ir.ui.view,arch_db:sms.iap_account_view_form
+msgid ""
+"<i class=\"oi\" data-icon=\"warning\"/> You cannot send SMS while your "
+"account is not registered."
 msgstr ""
 
 #. module: sms
@@ -327,21 +327,11 @@ msgid "Customer"
 msgstr ""
 
 #. module: sms
-#: model:sms.template,name:sms.sms_template_demo_0
-msgid "Customer: automated SMS"
-msgstr ""
-
-#. module: sms
 #. odoo-javascript
 #: code:addons/sms/static/src/core/notification_model_patch.js:0
 #: model:ir.model.fields.selection,name:sms.selection__mail_notification__failure_type__sms_database_non_active
 #: model:ir.model.fields.selection,name:sms.selection__sms_sms__failure_type__sms_database_non_active
 msgid "Database non active"
-msgstr ""
-
-#. module: sms
-#: model:sms.template,body:sms.sms_template_demo_0
-msgid "Dear {{ object.display_name }} this is an automated SMS."
 msgstr ""
 
 #. module: sms
@@ -501,6 +491,47 @@ msgstr ""
 #: model:ir.model.fields,help:sms.field_ir_cron__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_lunch_supplier__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_mail_blacklist__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_performance_thread__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_performance_thread_recipients__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_performance_tracking__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_access__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_access_custo__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_access_public__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_activity__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_composer_source__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_container__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_container_mc__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_field_type__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_gateway__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_gateway_company__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_gateway_groups__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_gateway_main_attachment__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_lang__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_lead__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_multi_company__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_multi_company_read__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_multi_company_with_activity__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_properties__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_recipients__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_rotting_resource__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_simple__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_simple_main_attachment__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_simple_unfollow__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_simple_unnamed__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_thread_customer__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_ticket__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_ticket_el__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_ticket_mc__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_ticket_partner__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_track__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_track_all__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_track_all_m2m__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_track_all_o2m__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_track_compute__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_track_duration_mixin__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_track_groups__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_track_monetary__message_has_sms_error
+#: model:ir.model.fields,help:sms.field_mail_test_track_selection__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_mail_thread__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_mail_thread_blacklist__message_has_sms_error
 #: model:ir.model.fields,help:sms.field_mail_thread_main_attachment__message_has_sms_error
@@ -948,6 +979,47 @@ msgstr ""
 #: model:ir.model.fields,field_description:sms.field_ir_cron__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_lunch_supplier__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_mail_blacklist__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_performance_thread__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_performance_thread_recipients__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_performance_tracking__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_access__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_access_custo__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_access_public__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_activity__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_composer_source__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_container__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_container_mc__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_field_type__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_gateway__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_gateway_company__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_gateway_groups__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_gateway_main_attachment__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_lang__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_lead__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_multi_company__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_multi_company_read__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_multi_company_with_activity__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_properties__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_recipients__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_rotting_resource__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_simple__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_simple_main_attachment__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_simple_unfollow__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_simple_unnamed__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_thread_customer__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_ticket__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_ticket_el__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_ticket_mc__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_ticket_partner__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_track__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_track_all__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_track_all_m2m__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_track_all_o2m__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_track_compute__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_track_duration_mixin__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_track_groups__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_track_monetary__message_has_sms_error
+#: model:ir.model.fields,field_description:sms.field_mail_test_track_selection__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_mail_thread__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_mail_thread_blacklist__message_has_sms_error
 #: model:ir.model.fields,field_description:sms.field_mail_thread_main_attachment__message_has_sms_error

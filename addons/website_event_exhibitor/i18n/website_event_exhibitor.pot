@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.4a1\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:39+0000\n"
-"PO-Revision-Date: 2026-06-19 17:39+0000\n"
+"POT-Creation-Date: 2026-07-23 15:16+0000\n"
+"PO-Revision-Date: 2026-07-23 15:16+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -24,37 +24,18 @@ msgid ""
 msgstr ""
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "<a href=\"#\" class=\"btn btn-primary o_translate_inline\">Discover more</a>"
-msgstr ""
-
-#. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
-msgid ""
-"<i class=\"fa fa-long-arrow-right mx-2\" aria-label=\"Arrow icon\" "
-"title=\"Arrow\"/>"
-msgstr ""
-
-#. module: website_event_exhibitor
-#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
-msgid "<span class=\"fa fa-plus me-1\"/> Add Exhibitors"
+msgid "<i class=\"oi mx-2\" data-icon=\"east\" aria-label=\"Arrow icon\" title=\"Arrow\"/>"
 msgstr ""
 
 #. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_aside
 msgid "<span class=\"h5 m-3\">Other exhibitors</span>"
+msgstr ""
+
+#. module: website_event_exhibitor
+#: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitors_main
+msgid "<span class=\"oi me-1\" data-icon=\"add\"/> Add Exhibitors"
 msgstr ""
 
 #. module: website_event_exhibitor
@@ -124,24 +105,6 @@ msgid "Archived"
 msgstr ""
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "As a team, we are happy to contribute to this event."
-msgstr ""
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__message_attachment_count
 msgid "Attachment Count"
 msgstr ""
@@ -204,24 +167,6 @@ msgid "Come back between"
 msgstr ""
 
 #. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Come see us live, we hope to meet you!"
-msgstr ""
-
-#. module: website_event_exhibitor
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.exhibitor_card
 msgid "Connect"
 msgstr ""
@@ -269,11 +214,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__website_description
 #: model_terms:ir.ui.view,arch_db:website_event_exhibitor.event_sponsor_view_form
 msgid "Description"
-msgstr ""
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
-msgid "Discover more"
 msgstr ""
 
 #. module: website_event_exhibitor
@@ -398,11 +338,6 @@ msgid "Followers (Partners)"
 msgstr ""
 
 #. module: website_event_exhibitor
-#: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__activity_type_icon
-msgid "Font awesome icon e.g. fa-tasks"
-msgstr ""
-
-#. module: website_event_exhibitor
 #: model:ir.model.fields.selection,name:website_event_exhibitor.selection__event_sponsor__exhibitor_type__sponsor
 msgid "Footer Logo Only"
 msgstr ""
@@ -411,24 +346,6 @@ msgstr ""
 #: model:event.sponsor.type,name:website_event_exhibitor.event_sponsor_type3
 #: model:ir.model.fields.selection,name:website_event_exhibitor.selection__event_sponsor_type__display_ribbon_style__gold
 msgid "Gold"
-msgstr ""
-
-#. module: website_event_exhibitor
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_3
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_4
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_5
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_6
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_7
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_8
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_7_sponsor_9
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_0
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_1
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_2
-#: model_terms:event.sponsor,website_description:website_event_exhibitor.event_sponsor_3
-msgid "Happy to be Sponsor"
 msgstr ""
 
 #. module: website_event_exhibitor
@@ -541,6 +458,11 @@ msgstr ""
 #. module: website_event_exhibitor
 #: model:ir.model.fields,field_description:website_event_exhibitor.field_event_sponsor__image_512
 msgid "Logo"
+msgstr ""
+
+#. module: website_event_exhibitor
+#: model:ir.model.fields,help:website_event_exhibitor.field_event_sponsor__activity_type_icon
+msgid "Material Symbols icon e.g. checklist"
 msgstr ""
 
 #. module: website_event_exhibitor

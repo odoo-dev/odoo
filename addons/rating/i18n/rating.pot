@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.4a1\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:38+0000\n"
-"PO-Revision-Date: 2026-06-19 17:38+0000\n"
+"POT-Creation-Date: 2026-07-23 15:09+0000\n"
+"PO-Revision-Date: 2026-07-23 15:09+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -27,17 +27,17 @@ msgstr ""
 
 #. module: rating
 #: model_terms:ir.ui.view,arch_db:rating.rating_external_page_view
-msgid "<i class=\"fa fa-arrow-left me-1\"/> Back to the Homepage"
+msgid "<i class=\"oi me-1\" data-icon=\"arrow_back\"/> Back to the Homepage"
 msgstr ""
 
 #. module: rating
 #: model_terms:ir.ui.view,arch_db:rating.rating_rating_view_kanban_stars
-msgid "<i class=\"fa fa-clock-o me-2\" aria-label=\"Create date\"/>"
+msgid "<i class=\"oi me-2\" data-icon=\"schedule\" aria-label=\"Create date\"/>"
 msgstr ""
 
 #. module: rating
 #: model_terms:ir.ui.view,arch_db:rating.rating_rating_view_kanban_stars
-msgid "<i class=\"fa fa-folder me-2\" aria-label=\"Open folder\"/>"
+msgid "<i class=\"oi oi-filled me-2\" data-icon=\"folder\" aria-label=\"Open folder\"/>"
 msgstr ""
 
 #. module: rating
@@ -135,6 +135,7 @@ msgstr ""
 #. module: rating
 #. odoo-python
 #: code:addons/rating/controllers/main.py:0
+#: model:ir.model.fields.selection,name:rating.selection__mail_test_rating__rating_avg_text__top
 #: model:ir.model.fields.selection,name:rating.selection__product_template__rating_avg_text__top
 #: model:ir.model.fields.selection,name:rating.selection__project_task__rating_avg_text__top
 #: model:ir.model.fields.selection,name:rating.selection__rating_mixin__rating_avg_text__top
@@ -262,6 +263,7 @@ msgstr ""
 #. module: rating
 #. odoo-python
 #: code:addons/rating/controllers/main.py:0
+#: model:ir.model.fields.selection,name:rating.selection__mail_test_rating__rating_avg_text__ok
 #: model:ir.model.fields.selection,name:rating.selection__product_template__rating_avg_text__ok
 #: model:ir.model.fields.selection,name:rating.selection__project_task__rating_avg_text__ok
 #: model:ir.model.fields.selection,name:rating.selection__rating_mixin__rating_avg_text__ok
@@ -277,6 +279,7 @@ msgid "No rating yet"
 msgstr ""
 
 #. module: rating
+#: model:ir.model.fields.selection,name:rating.selection__mail_test_rating__rating_avg_text__none
 #: model:ir.model.fields.selection,name:rating.selection__product_template__rating_avg_text__none
 #: model:ir.model.fields.selection,name:rating.selection__project_task__rating_avg_text__none
 #: model:ir.model.fields.selection,name:rating.selection__rating_mixin__rating_avg_text__none
@@ -455,6 +458,47 @@ msgstr ""
 #: model:ir.model.fields,field_description:rating.field_ir_cron__rating_ids
 #: model:ir.model.fields,field_description:rating.field_lunch_supplier__rating_ids
 #: model:ir.model.fields,field_description:rating.field_mail_blacklist__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_performance_thread__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_performance_thread_recipients__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_performance_tracking__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_access__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_access_custo__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_access_public__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_activity__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_composer_source__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_container__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_container_mc__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_field_type__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_gateway__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_gateway_company__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_gateway_groups__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_gateway_main_attachment__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_lang__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_lead__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_multi_company__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_multi_company_read__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_multi_company_with_activity__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_properties__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_recipients__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_rotting_resource__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_simple__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_simple_main_attachment__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_simple_unfollow__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_simple_unnamed__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_thread_customer__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_ticket__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_ticket_el__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_ticket_mc__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_ticket_partner__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_track__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_track_all__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_track_all_m2m__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_track_all_o2m__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_track_compute__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_track_duration_mixin__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_track_groups__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_track_monetary__rating_ids
+#: model:ir.model.fields,field_description:rating.field_mail_test_track_selection__rating_ids
 #: model:ir.model.fields,field_description:rating.field_mail_thread__rating_ids
 #: model:ir.model.fields,field_description:rating.field_mail_thread_blacklist__rating_ids
 #: model:ir.model.fields,field_description:rating.field_mail_thread_main_attachment__rating_ids
@@ -543,6 +587,7 @@ msgstr ""
 #. module: rating
 #. odoo-python
 #: code:addons/rating/controllers/main.py:0
+#: model:ir.model.fields.selection,name:rating.selection__mail_test_rating__rating_avg_text__ko
 #: model:ir.model.fields.selection,name:rating.selection__product_template__rating_avg_text__ko
 #: model:ir.model.fields.selection,name:rating.selection__project_task__rating_avg_text__ko
 #: model:ir.model.fields.selection,name:rating.selection__rating_mixin__rating_avg_text__ko

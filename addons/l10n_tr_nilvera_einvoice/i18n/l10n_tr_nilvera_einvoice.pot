@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.5a1+e\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-03 18:12+0000\n"
-"PO-Revision-Date: 2026-07-03 18:12+0000\n"
+"POT-Creation-Date: 2026-07-23 15:07+0000\n"
+"PO-Revision-Date: 2026-07-23 15:07+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,51 +16,16 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_316
-msgid "11/1-a Contract Services for Customers in Free Zones"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_301
-msgid "11/1-a Export of Goods"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_302
-msgid "11/1-a Service Export"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_308
-msgid "13/d Delivery of Incentive Investment Goods"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_328
-msgid "13/i Residential or Workplace Deliveries"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_212
-msgid "17/4-i Services Provided in Free Zones"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_351
-msgid "351 - Other Not Exempt from VAT"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #: model_terms:ir.ui.view,arch_db:l10n_tr_nilvera_einvoice.account_nilvera_view_move_form
 msgid ""
-"<i class=\"fa fa-check text-success\" aria-hidden=\"true\"/>\n"
+"<i class=\"oi text-success\" data-icon=\"check\" aria-hidden=\"true\"/>\n"
 "                                <span class=\"text-success\">Accept</span>"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
 #: model_terms:ir.ui.view,arch_db:l10n_tr_nilvera_einvoice.account_nilvera_view_move_form
 msgid ""
-"<i class=\"fa fa-times text-warning\" aria-hidden=\"true\"/>\n"
+"<i class=\"oi text-warning\" data-icon=\"close\" aria-hidden=\"true\"/>\n"
 "                                <span class=\"text-warning\">Reject</span>"
 msgstr ""
 
@@ -162,11 +127,6 @@ msgid "Air Transportation"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_615
-msgid "All Kinds of Printing and Printing Services"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #. odoo-python
 #: code:addons/l10n_tr_nilvera_einvoice/models/account_move.py:0
 msgid "An error occurred. Try again later."
@@ -200,11 +160,6 @@ msgstr ""
 #. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields.selection,name:l10n_tr_nilvera_einvoice.selection__account_move__l10n_tr_invoice_scenario_group__basic
 msgid "Basic Scenario"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_608
-msgid "Building Inspection Services"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -338,11 +293,6 @@ msgid ""
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_612
-msgid "Cleaning Service"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_l10n_tr_nilvera_einvoice_account_tax_code__code_type
 msgid "Code Type"
 msgstr ""
@@ -355,11 +305,6 @@ msgstr ""
 #. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields.selection,name:l10n_tr_nilvera_einvoice.selection__account_move__l10n_tr_gib_invoice_scenario__ticarifatura
 msgid "Commercial"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_625
-msgid "Commercial Advertising Services"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -384,20 +329,13 @@ msgid "Config Settings"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_601
-msgid ""
-"Construction Works and Engineering-Architecture and Survey-Project Services "
-"Performed Along with These Works"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #: model:ir.model,name:l10n_tr_nilvera_einvoice.model_res_partner
 msgid "Contact"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_622
-msgid "Cotton, Mohair, Wool and Fleece, Raw Hide and Skin Deliveries"
+#: model:ir.model,website_form_label:l10n_tr_nilvera_einvoice.model_res_partner
+msgid "Create a Customer"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -415,11 +353,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_l10n_tr_nilvera_einvoice_account_tax_code__create_date
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_l10n_tr_ticarifatura_response_wizard__create_date
 msgid "Created on"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_610
-msgid "Customer Finding / Taking Services to Tourist Shops"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -478,42 +411,6 @@ msgid ""
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_228
-msgid ""
-"Deliveries Made Free of Charge to the Institutions and Organizations Listed "
-"in Article (17/1) of Law 17/2-b"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_619
-msgid "Delivery of Copper, Zinc and Aluminum Products"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_618
-msgid ""
-"Delivery of Copper, Zinc, Iron-Steel, Aluminum and Lead Ingots Other Than "
-"Those Obtained from Scrap Metal"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_627
-msgid "Delivery of Iron and Steel Products"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_621
-msgid ""
-"Delivery of Raw Materials Obtained from Metal, Plastic, Rubber, Paper and "
-"Glass Scrap and Waste"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_623
-msgid "Delivery of Wood and Forest Products"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_account_chart_template__display_name
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_account_edi_xml_ubl_tr__display_name
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_account_journal__display_name
@@ -560,11 +457,6 @@ msgid ""
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_613
-msgid "Environmental and Garden Maintenance Services"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields.selection,name:l10n_tr_nilvera_einvoice.selection__account_move__l10n_tr_nilvera_send_status__error
 msgid "Error"
 msgstr ""
@@ -604,20 +496,8 @@ msgid "Export Invoice"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_701
-msgid ""
-"Export Registered Sales within the scope of Article 11/1-c of the VAT Law "
-"No. 3065"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields.selection,name:l10n_tr_nilvera_einvoice.selection__l10n_tr_nilvera_einvoice_account_tax_code__code_type__export_registration
 msgid "Export Registration"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_338
-msgid "Exports of Goods by Manufacturers"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -639,11 +519,6 @@ msgstr ""
 #. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields.selection,name:l10n_tr_nilvera_einvoice.selection__account_move__l10n_tr_shipping_type__7
 msgid "Fixed Transportation"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_604
-msgid "Food Service"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -680,11 +555,6 @@ msgstr ""
 msgid ""
 "For withholding return invoices, the tax amount is expected to be the same percentage as the returned quantity.\n"
 "The following mismatch was found:\n"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_624
-msgid "Freight Transport Service"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -743,11 +613,6 @@ msgstr ""
 #. module: l10n_tr_nilvera_einvoice
 #: model:res.partner.category,name:l10n_tr_nilvera_einvoice.res_partner_category_imalatcino
 msgid "IMALATCINO"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_617
-msgid "Ingot Deliveries Obtained from Scrap Metal"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -828,11 +693,6 @@ msgstr ""
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_account_bank_statement_line__l10n_tr_zero_vat_warning
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_account_move__l10n_tr_zero_vat_warning
 msgid "L10N Tr Zero Vat Warning"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_606
-msgid "Labor Supply Services"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -980,11 +840,6 @@ msgid ""
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_605
-msgid "Organization Service"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_account_bank_statement_line__l10n_tr_original_invoice_date
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_account_move__l10n_tr_original_invoice_date
 #: model_terms:ir.ui.view,arch_db:l10n_tr_nilvera_einvoice.account_nilvera_view_move_form
@@ -1002,28 +857,8 @@ msgid "Original Tax After Withholding"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_350
-msgid "Other"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_616
-msgid "Other Services"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_626
-msgid "Other Submissions"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #: model:res.partner.category,name:l10n_tr_nilvera_einvoice.res_partner_category_pasaportno
 msgid "PASAPORTNO"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_250
-msgid "Partial Others"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -1065,11 +900,6 @@ msgstr ""
 #. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields.selection,name:l10n_tr_nilvera_einvoice.selection__account_move__l10n_tr_shipping_type__5
 msgid "Post"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_607
-msgid "Private Security Service"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -1140,13 +970,6 @@ msgid "Rejected"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_603
-msgid ""
-"Renovation, Maintenance and Repair Services for Machinery, Equipment, Fixed "
-"Assets and Vehicles"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields,field_description:l10n_tr_nilvera_einvoice.field_l10n_tr_ticarifatura_response_wizard__response_code
 msgid "Response Code"
 msgstr ""
@@ -1187,16 +1010,6 @@ msgstr ""
 #. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields.selection,name:l10n_tr_nilvera_einvoice.selection__account_move__l10n_tr_gib_invoice_type__satis
 msgid "Sales"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_702
-msgid "Sales under the IPAC and Temporary Acceptance Regime"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_620
-msgid "Scrap and Waste Delivery of Those Who Waive the Exception"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -1255,11 +1068,6 @@ msgid "Shows the Nilvera status of the customer. "
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_614
-msgid "Shuttle Transportation Service"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
 #. odoo-python
 #: code:addons/l10n_tr_nilvera_einvoice/models/account_move.py:0
 msgid "Some PDFs are not yet available from Nilvera. Please try again later."
@@ -1304,11 +1112,6 @@ msgstr ""
 #. module: l10n_tr_nilvera_einvoice
 #: model:ir.model.fields.selection,name:l10n_tr_nilvera_einvoice.selection__account_move__l10n_tr_nilvera_send_status__succeed
 msgid "Successful"
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_602
-msgid "Survey, Plan-Project, Consultancy, Audit and Similar Services"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -1371,13 +1174,6 @@ msgid ""
 "Technical field (not for users). Used to dynamically filter the list of "
 "available exemption codes based on the selected GIB Invoice Type or other "
 "criteria."
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_609
-msgid ""
-"Textile and Garment Works, Bag and Shoe Sewing Works and Intermediary "
-"Services for These Works"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice
@@ -1583,13 +1379,6 @@ msgid ""
 "- Approved: Commercial Invoice is approved by recipient.\n"
 "- Approved Automatically: Commercial Invoice is automatically approved after 8 days without a response.\n"
 "- Rejected: Commercial Invoice is rejected by recipient."
-msgstr ""
-
-#. module: l10n_tr_nilvera_einvoice
-#: model:l10n_tr_nilvera_einvoice.account.tax.code,name:l10n_tr_nilvera_einvoice.account_tax_code_611
-msgid ""
-"Transactions Subject to Broadcasting, Advertising and Naming Rights Revenues"
-" of Sports Clubs"
 msgstr ""
 
 #. module: l10n_tr_nilvera_einvoice

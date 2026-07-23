@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-17 17:37+0000\n"
-"PO-Revision-Date: 2026-07-17 17:37+0000\n"
+"POT-Creation-Date: 2026-07-23 15:11+0000\n"
+"PO-Revision-Date: 2026-07-23 15:11+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -615,86 +615,88 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:mail.view_users_form_mail
 #: model_terms:ir.ui.view,arch_db:mail.view_users_form_simple_modif_mail
 msgid ""
-"<i class=\"fa fa-arrow-right mx-2\" invisible=\"not out_of_office_from\" "
-"title=\"to\"/>"
+"<i class=\"oi mx-2\" data-icon=\"arrow_forward\" invisible=\"not "
+"out_of_office_from\" title=\"to\"/>"
 msgstr ""
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
-msgid "<i class=\"fa fa-calendar\" title=\"Due date\"/>"
+msgid ""
+"<i class=\"oi oi-filled mb-2\" data-icon=\"group\" role=\"img\" "
+"title=\"Role\" aria-label=\"Role\"/>"
 msgstr ""
 
 #. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_kanban_open_target
-msgid "<i class=\"fa fa-check\"/> Done"
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
+msgid "<i class=\"oi oi-filled mb-2\" data-icon=\"person\" title=\"Assigned to\"/>"
+msgstr ""
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
+msgid "<i class=\"oi oi-filled pt-1\" data-icon=\"sticky_note_2\" title=\"Note\"/>"
+msgstr ""
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
+msgid "<i class=\"oi oi-filled\" data-icon=\"calendar_today\" title=\"Due date\"/>"
+msgstr ""
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
+msgid ""
+"<i class=\"oi oi-filled\" data-icon=\"group\" role=\"img\" title=\"Role\" "
+"aria-label=\"Role\" style=\"font-size: 12px;\"/>"
 msgstr ""
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.mail_activity_plan_view_kanban
 msgid ""
-"<i class=\"fa fa-cogs fa-fw me-2\" role=\"img\" aria-label=\"Steps count\" "
-"title=\"Steps count\"/>"
+"<i class=\"oi oi-fw me-2\" data-icon=\"settings_applications\" role=\"img\" "
+"aria-label=\"Steps count\" title=\"Steps count\"/>"
+msgstr ""
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_kanban_open_target
+msgid "<i class=\"oi\" data-icon=\"check\"/> Done"
+msgstr ""
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
+msgid ""
+"<i class=\"oi\" data-icon=\"hourglass_disabled\" role=\"img\" title=\"To "
+"Assign\" aria-label=\"To Assign\" style=\"font-size: 12px;\"/>"
+msgstr ""
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
+msgid "<i class=\"oi\" data-icon=\"label\" title=\"Summary\"/>"
+msgstr ""
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_form
+#: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_kanban
+msgid "<i class=\"oi\" data-icon=\"login\" role=\"img\"/> Join"
+msgstr ""
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_form
+#: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_kanban
+msgid "<i class=\"oi\" data-icon=\"logout\" role=\"img\"/> Leave"
+msgstr ""
+
+#. module: mail
+#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
+msgid "<i class=\"oi\" data-icon=\"oi_odoo\" title=\"Link to\"/>"
 msgstr ""
 
 #. module: mail
 #: model_terms:ir.ui.view,arch_db:mail.view_document_file_kanban
-msgid "<i class=\"fa fa-globe\" aria-label=\"Document url\"/>"
-msgstr ""
-
-#. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
-msgid ""
-"<i class=\"fa fa-hourglass-end\" role=\"img\" title=\"To Assign\" aria-"
-"label=\"To Assign\" style=\"font-size: 12px;\"/>"
-msgstr ""
-
-#. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_form
-#: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_kanban
-msgid "<i class=\"fa fa-sign-in\" role=\"img\"/> Join"
-msgstr ""
-
-#. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_form
-#: model_terms:ir.ui.view,arch_db:mail.discuss_channel_view_kanban
-msgid "<i class=\"fa fa-sign-out\" role=\"img\"/> Leave"
-msgstr ""
-
-#. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
-msgid "<i class=\"fa fa-sticky-note pt-1\" title=\"Note\"/>"
-msgstr ""
-
-#. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
-msgid "<i class=\"fa fa-tag\" title=\"Summary\"/>"
-msgstr ""
-
-#. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
-msgid "<i class=\"fa fa-user mb-2\" title=\"Assigned to\"/>"
-msgstr ""
-
-#. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_view_form_popup
-msgid "<i class=\"fa fa-users mb-2\" role=\"img\" title=\"Role\" aria-label=\"Role\"/>"
-msgstr ""
-
-#. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
-msgid ""
-"<i class=\"fa fa-users\" role=\"img\" title=\"Role\" aria-label=\"Role\" "
-"style=\"font-size: 12px;\"/>"
-msgstr ""
-
-#. module: mail
-#: model_terms:ir.ui.view,arch_db:mail.mail_activity_schedule_view_form
-msgid "<i class=\"oi oi-odoo\" title=\"Link to\"/>"
+msgid "<i class=\"oi\" data-icon=\"public\" aria-label=\"Document url\"/>"
 msgstr ""
 
 #. module: mail
@@ -1558,9 +1560,22 @@ msgstr ""
 #: model:ir.model.fields.selection,name:mail.selection__hr_work_entry_type__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__ir_actions_server__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__ir_cron__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__l10n_fr_pdp_reports_flow__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__l10n_id_efaktur_coretax_document__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__l10n_in_ewaybill__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__l10n_in_pan_entity__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__l10n_it_edi_doi_declaration_of_intent__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__l10n_latam_check__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__lunch_supplier__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_mixin__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_type__decoration_type__warning
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_access_custo__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_activity__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_lead__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_multi_company_read__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_multi_company_with_activity__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_rating__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_sms_bl_activity__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__mailing_mailing__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__maintenance_equipment__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__maintenance_request__activity_exception_decoration__warning
@@ -1568,6 +1583,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:mail.selection__mrp_routing_workcenter__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__mrp_unbuild__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__mrp_workorder__activity_exception_decoration__warning
+#: model:ir.model.fields.selection,name:mail.selection__myinvois_document__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__pos_session__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__product_pricelist__activity_exception_decoration__warning
 #: model:ir.model.fields.selection,name:mail.selection__product_product__activity_exception_decoration__warning
@@ -5037,9 +5053,22 @@ msgstr ""
 #: model:ir.model.fields.selection,name:mail.selection__hr_work_entry_type__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__ir_actions_server__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__ir_cron__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__l10n_fr_pdp_reports_flow__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__l10n_id_efaktur_coretax_document__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__l10n_in_ewaybill__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__l10n_in_pan_entity__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__l10n_it_edi_doi_declaration_of_intent__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__l10n_latam_check__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__lunch_supplier__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_mixin__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_type__decoration_type__danger
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_access_custo__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_activity__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_lead__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_multi_company_read__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_multi_company_with_activity__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_rating__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_sms_bl_activity__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__mailing_mailing__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__maintenance_equipment__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__maintenance_request__activity_exception_decoration__danger
@@ -5047,6 +5076,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:mail.selection__mrp_routing_workcenter__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__mrp_unbuild__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__mrp_workorder__activity_exception_decoration__danger
+#: model:ir.model.fields.selection,name:mail.selection__myinvois_document__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__pos_session__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__product_pricelist__activity_exception_decoration__danger
 #: model:ir.model.fields.selection,name:mail.selection__product_product__activity_exception_decoration__danger
@@ -5460,18 +5490,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail/static/src/chatter/web/chatter_patch.js:0
 msgid "Following"
-msgstr ""
-
-#. module: mail
-#: model:ir.model.fields,help:mail.field_ir_actions_server__activity_type_icon
-#: model:ir.model.fields,help:mail.field_ir_cron__activity_type_icon
-#: model:ir.model.fields,help:mail.field_mail_activity__icon
-#: model:ir.model.fields,help:mail.field_mail_activity_mixin__activity_type_icon
-#: model:ir.model.fields,help:mail.field_mail_activity_plan_template__icon
-#: model:ir.model.fields,help:mail.field_mail_activity_type__icon
-#: model:ir.model.fields,help:mail.field_res_partner__activity_type_icon
-#: model:ir.model.fields,help:mail.field_res_users__activity_type_icon
-msgid "Font awesome icon e.g. fa-tasks"
 msgstr ""
 
 #. module: mail
@@ -6181,6 +6199,18 @@ msgstr ""
 #. module: mail
 #: model:ir.model.fields,help:mail.field_mail_followers__res_id
 msgid "Id of the followed resource"
+msgstr ""
+
+#. module: mail
+#: model:ir.model.fields,field_description:mail.field_res_partner__vat
+#: model:ir.model.fields,field_description:mail.field_res_users__vat
+msgid "Identification Number"
+msgstr ""
+
+#. module: mail
+#: model:ir.model.fields,help:mail.field_res_partner__vat
+#: model:ir.model.fields,help:mail.field_res_users__vat
+msgid "Identification Number for selected type"
 msgstr ""
 
 #. module: mail
@@ -7741,6 +7771,18 @@ msgstr ""
 #. odoo-python
 #: code:addons/mail/models/mail_render_mixin.py:0
 msgid "Mass Mailing Template: '%(name)s' (ID: %(record_id)s)"
+msgstr ""
+
+#. module: mail
+#: model:ir.model.fields,help:mail.field_ir_actions_server__activity_type_icon
+#: model:ir.model.fields,help:mail.field_ir_cron__activity_type_icon
+#: model:ir.model.fields,help:mail.field_mail_activity__icon
+#: model:ir.model.fields,help:mail.field_mail_activity_mixin__activity_type_icon
+#: model:ir.model.fields,help:mail.field_mail_activity_plan_template__icon
+#: model:ir.model.fields,help:mail.field_mail_activity_type__icon
+#: model:ir.model.fields,help:mail.field_res_partner__activity_type_icon
+#: model:ir.model.fields,help:mail.field_res_users__activity_type_icon
+msgid "Material Symbols icon e.g. checklist"
 msgstr ""
 
 #. module: mail
@@ -9475,9 +9517,22 @@ msgstr ""
 #: model:ir.model.fields.selection,name:mail.selection__hr_work_entry_type__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__ir_actions_server__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__ir_cron__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__l10n_fr_pdp_reports_flow__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__l10n_id_efaktur_coretax_document__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__l10n_in_ewaybill__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__l10n_in_pan_entity__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__l10n_it_edi_doi_declaration_of_intent__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__l10n_latam_check__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__lunch_supplier__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity__state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_mixin__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_access_custo__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_activity__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_lead__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_multi_company_read__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_multi_company_with_activity__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_rating__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_sms_bl_activity__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__mailing_mailing__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__maintenance_equipment__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__maintenance_request__activity_state__overdue
@@ -9485,6 +9540,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:mail.selection__mrp_routing_workcenter__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__mrp_unbuild__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__mrp_workorder__activity_state__overdue
+#: model:ir.model.fields.selection,name:mail.selection__myinvois_document__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__pos_session__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__product_pricelist__activity_state__overdue
 #: model:ir.model.fields.selection,name:mail.selection__product_product__activity_state__overdue
@@ -9838,9 +9894,22 @@ msgstr ""
 #: model:ir.model.fields.selection,name:mail.selection__hr_work_entry_type__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__ir_actions_server__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__ir_cron__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__l10n_fr_pdp_reports_flow__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__l10n_id_efaktur_coretax_document__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__l10n_in_ewaybill__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__l10n_in_pan_entity__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__l10n_it_edi_doi_declaration_of_intent__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__l10n_latam_check__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__lunch_supplier__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity__state__planned
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_mixin__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_access_custo__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_activity__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_lead__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_multi_company_read__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_multi_company_with_activity__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_rating__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_sms_bl_activity__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__mailing_mailing__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__maintenance_equipment__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__maintenance_request__activity_state__planned
@@ -9848,6 +9917,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:mail.selection__mrp_routing_workcenter__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__mrp_unbuild__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__mrp_workorder__activity_state__planned
+#: model:ir.model.fields.selection,name:mail.selection__myinvois_document__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__pos_session__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__product_pricelist__activity_state__planned
 #: model:ir.model.fields.selection,name:mail.selection__product_product__activity_state__planned
@@ -12199,12 +12269,6 @@ msgid "Targeted model"
 msgstr ""
 
 #. module: mail
-#: model:ir.model.fields,field_description:mail.field_res_partner__vat
-#: model:ir.model.fields,field_description:mail.field_res_users__vat
-msgid "Tax ID"
-msgstr ""
-
-#. module: mail
 #. odoo-javascript
 #: code:addons/mail/static/src/discuss/call/common/call_settings.xml:0
 #: model:ir.ui.menu,name:mail.discuss_technical
@@ -13037,9 +13101,22 @@ msgstr ""
 #: model:ir.model.fields.selection,name:mail.selection__hr_work_entry_type__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__ir_actions_server__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__ir_cron__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__l10n_fr_pdp_reports_flow__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__l10n_id_efaktur_coretax_document__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__l10n_in_ewaybill__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__l10n_in_pan_entity__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__l10n_it_edi_doi_declaration_of_intent__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__l10n_latam_check__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__lunch_supplier__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity__state__today
 #: model:ir.model.fields.selection,name:mail.selection__mail_activity_mixin__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_access_custo__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_activity__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_lead__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_multi_company_read__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_multi_company_with_activity__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_rating__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__mail_test_sms_bl_activity__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__mailing_mailing__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__maintenance_equipment__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__maintenance_request__activity_state__today
@@ -13047,6 +13124,7 @@ msgstr ""
 #: model:ir.model.fields.selection,name:mail.selection__mrp_routing_workcenter__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__mrp_unbuild__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__mrp_workorder__activity_state__today
+#: model:ir.model.fields.selection,name:mail.selection__myinvois_document__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__pos_session__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__product_pricelist__activity_state__today
 #: model:ir.model.fields.selection,name:mail.selection__product_product__activity_state__today
@@ -14516,12 +14594,6 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/mail/static/src/discuss/call/common/call_permission_dialog.js:0
 msgid "You can still turn off your %s anytime."
-msgstr ""
-
-#. module: mail
-#: model:ir.model.fields,help:mail.field_res_partner__vat
-#: model:ir.model.fields,help:mail.field_res_users__vat
-msgid "You can use '/' to indicate that the customer has no Tax ID."
 msgstr ""
 
 #. module: mail

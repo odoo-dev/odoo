@@ -4,10 +4,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 19.4a1\n"
+"Project-Id-Version: Odoo Server 19.5a1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-19 17:36+0000\n"
-"PO-Revision-Date: 2026-06-19 17:36+0000\n"
+"POT-Creation-Date: 2026-07-23 16:09+0000\n"
+"PO-Revision-Date: 2026-07-23 16:09+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -22,22 +22,24 @@ msgid "%(card_campaign_name)s Mailings"
 msgstr ""
 
 #. module: marketing_card
+#: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_kanban
+msgid ""
+"<i class=\"oi oi-fw\" data-icon=\"mouse\" aria-label=\"Clicks\" role=\"img\""
+" title=\"Clicks\"/>"
+msgstr ""
+
+#. module: marketing_card
+#: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_kanban
+msgid ""
+"<i class=\"oi oi-fw\" data-icon=\"share\" aria-label=\"Shares\" role=\"img\""
+" title=\"Shares\"/>"
+msgstr ""
+
+#. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_linkedin_share_composer
 msgid ""
-"<i class=\"fa fa-exclamation-triangle\"/>\n"
+"<i class=\"oi\" data-icon=\"warning\"/>\n"
 "                    <span>We were not able to get an authorization to post in your stead.</span>"
-msgstr ""
-
-#. module: marketing_card
-#: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_kanban
-msgid ""
-"<i class=\"fa fa-fw fa-mouse-pointer\" aria-label=\"Clicks\" role=\"img\" "
-"title=\"Clicks\"/>"
-msgstr ""
-
-#. module: marketing_card
-#: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_view_kanban
-msgid "<i class=\"fa fa-fw fa-share\" aria-label=\"Shares\" role=\"img\" title=\"Shares\"/>"
 msgstr ""
 
 #. module: marketing_card
@@ -246,7 +248,6 @@ msgstr ""
 #. module: marketing_card
 #. odoo-python
 #: code:addons/marketing_card/models/card_campaign.py:0
-#: model:card.campaign,content_header:marketing_card.card_campaign_campaign_1
 msgid "Card Title"
 msgstr ""
 
@@ -258,11 +259,6 @@ msgstr ""
 #. module: marketing_card
 #: model:card.template,name:marketing_card.card_template_user_image
 msgid "Center"
-msgstr ""
-
-#. module: marketing_card
-#: model_terms:card.campaign,reward_message:marketing_card.card_campaign_campaign_1
-msgid "Check out odoo.com for more!"
 msgstr ""
 
 #. module: marketing_card
@@ -423,11 +419,6 @@ msgstr ""
 #. module: marketing_card
 #: model:ir.model.fields,field_description:marketing_card.field_card_campaign__message_partner_ids
 msgid "Followers (Partners)"
-msgstr ""
-
-#. module: marketing_card
-#: model:ir.model.fields,help:marketing_card.field_card_campaign__activity_type_icon
-msgid "Font awesome icon e.g. fa-tasks"
 msgstr ""
 
 #. module: marketing_card
@@ -645,6 +636,11 @@ msgstr ""
 #. module: marketing_card
 #: model:ir.model,name:marketing_card.model_mailing_mailing
 msgid "Mass Mailing"
+msgstr ""
+
+#. module: marketing_card
+#: model:ir.model.fields,help:marketing_card.field_card_campaign__activity_type_icon
+msgid "Material Symbols icon e.g. checklist"
 msgstr ""
 
 #. module: marketing_card
@@ -985,11 +981,6 @@ msgid "Share Template"
 msgstr ""
 
 #. module: marketing_card
-#: model:card.campaign,request_title:marketing_card.card_campaign_campaign_1
-msgid "Share the news with your community"
-msgstr ""
-
-#. module: marketing_card
 #: model_terms:ir.ui.view,arch_db:marketing_card.card_campaign_preview
 msgid "Share with your community!"
 msgstr ""
@@ -1083,11 +1074,6 @@ msgid "Thanks for your support."
 msgstr ""
 
 #. module: marketing_card
-#: model:card.campaign,request_description:marketing_card.card_campaign_campaign_1
-msgid "That will help us"
-msgstr ""
-
-#. module: marketing_card
 #. odoo-python
 #: code:addons/marketing_card/models/utm_source.py:0
 msgid ""
@@ -1099,11 +1085,6 @@ msgstr ""
 #. odoo-python
 #: code:addons/marketing_card/utils/linkedin_api.py:0
 msgid "The image is too large: %(image_size_human_readable)s"
-msgstr ""
-
-#. module: marketing_card
-#: model:card.campaign,content_section:marketing_card.card_campaign_campaign_1
-msgid "This section is static"
 msgstr ""
 
 #. module: marketing_card
@@ -1154,11 +1135,6 @@ msgid ""
 msgstr ""
 
 #. module: marketing_card
-#: model:card.campaign,content_sub_header:marketing_card.card_campaign_campaign_1
-msgid "Welcome to Odoo"
-msgstr ""
-
-#. module: marketing_card
 #: model:ir.model.fields,help:marketing_card.field_card_card__requires_sync
 msgid "Whether the image needs to be updated to match the campaign template."
 msgstr ""
@@ -1166,11 +1142,6 @@ msgstr ""
 #. module: marketing_card
 #: model:card.template,name:marketing_card.card_template_world_map
 msgid "World Map"
-msgstr ""
-
-#. module: marketing_card
-#: model_terms:card.campaign,reward_message:marketing_card.card_campaign_campaign_1
-msgid "You just leveled up your exposure!"
 msgstr ""
 
 #. module: marketing_card
