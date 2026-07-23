@@ -24,7 +24,8 @@ class SaleOrder(models.Model):
         'stock.warehouse', string='Warehouse',
         compute='_compute_warehouse_id', store=True, readonly=False, precompute=True,
         init_storage='_init_column_warehouse_id',
-        check_company=True)
+        domain=lambda self: [('company_id', 'in', self.env.companies.ids)]
+    )
     picking_ids = fields.One2many('stock.picking', 'sale_id', string='Transfers')
     delivery_count = fields.Integer(string='Delivery Orders', compute='_compute_picking_ids')
     late_availability = fields.Boolean(

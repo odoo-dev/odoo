@@ -58,8 +58,9 @@ class SaleOrderLine(models.Model):
             else:
                 line.display_qty_widget = False
 
-    def _read_qties(self, date, wh):
-        return self.mapped('product_id').with_context(to_date=date, warehouse_id=wh).read([
+    def _read_qties(self, date, wh_id):
+        # sudo needed in case cross company warehouse
+        return self.mapped('product_id').with_context(to_date=date, warehouse_id=wh_id).sudo().read([
             'qty_available',
             'free_qty',
             'virtual_available',
@@ -117,10 +118,10 @@ class SaleOrderLine(models.Model):
         for line in self.filtered(lambda l: l.state in ('draft', 'sent')):
             if not (line.product_id and line.display_qty_widget):
                 continue
-            grouped_lines[(line.warehouse_id.id, line.order_id.commitment_date or line._expected_date())] |= line
+            grouped_lines[line.warehouse_id, line.order_id.commitment_date or line._expected_date()] |= line
 
         for (warehouse, scheduled_date), lines in grouped_lines.items():
-            product_qties = lines._read_qties(scheduled_date, warehouse)
+            product_qties = lines._read_qties(scheduled_date, warehouse.id)
             qties_per_product = {
                 product['id']: (product['qty_available'], product['free_qty'], product['virtual_available'])
                 for product in product_qties
@@ -160,8 +161,8 @@ class SaleOrderLine(models.Model):
             product = line.product_id
             product_routes = line.route_ids or (product.route_ids + product.categ_id.total_route_ids)
 
-            # Check MTO
-            mto_route = line.warehouse_id.mto_pull_id.route_id
+            # Check MTO. sudo needed in case cross-company warehouse
+            mto_route = line.warehouse_id.sudo().mto_pull_id.route_id
             if not mto_route:
                 try:
                     mto_route = self.env['stock.warehouse']._find_or_create_global_route('stock.route_warehouse0_mto', _('Replenish on Order (MTO)'), create=False)
@@ -281,7 +282,7 @@ class SaleOrderLine(models.Model):
             'date_planned': date_planned,
             'date_deadline': date_deadline,
             'route_ids': self.route_ids,
-            'warehouse_id': self.warehouse_id,
+            'warehouse_id': self.sudo().warehouse_id,  # sudo() in case cross-company warehouse
             'partner_id': self.order_id.partner_shipping_id.id,
             'forecasted_location_id': self._get_location_final(),
             'product_description_variants': self.with_context(lang=self.order_id.partner_id.lang)._get_sale_order_line_multiline_description_variants().strip(),
