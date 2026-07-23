@@ -369,10 +369,6 @@ test("field string is used in the SelectCreateDialog", async () => {
         list: '<list><field name="name"/></list>',
         search: '<search><field name="name"/></search>',
     };
-    Turtle._views = {
-        list: '<list><field name="name"/></list>',
-        search: '<search><field name="name"/></search>',
-    };
     await mountView({
         type: "form",
         resModel: "partner",
@@ -383,7 +379,7 @@ test("field string is used in the SelectCreateDialog", async () => {
                         <field name="name"/>
                     </list>
                 </field>
-                <field name="turtles"  string="Abcde">
+                <field name="timmy" string="Abcde">
                     <list>
                         <field name="name"/>
                     </list>
@@ -1467,26 +1463,22 @@ test("many2many concurrency edition", async () => {
 });
 
 test("many2many widget: creates a new record with a context containing the parentID", async () => {
-    Turtle._views = {
+    PartnerType._views = {
         list: '<list><field name="name"/></list>',
         search: '<search><field name="name"/></search>',
-        form: '<form string="Turtle Power"><field name="turtle_trululu"/></form>',
+        form: '<form string="Partner Type Power"><field name="color"/></form>',
     };
     onRpc(({ args, method, kwargs }) => {
         expect.step(method);
         if (method === "onchange") {
-            expect(kwargs.context.default_turtle_trululu).toBe(1);
+            expect(kwargs.context.default_color).toBe(1);
             expect(args).toEqual([
                 [],
                 {},
                 [],
                 {
-                    turtle_foo: {},
-                    turtle_trululu: {
-                        fields: {
-                            display_name: {},
-                        },
-                    },
+                    name: {},
+                    color: {},
                 },
             ]);
         }
@@ -1497,9 +1489,9 @@ test("many2many widget: creates a new record with a context containing the paren
         resModel: "partner",
         arch: `
             <form>
-                <field name="turtles"  context="{'default_turtle_trululu': id}" >
+                <field name="timmy" context="{'default_color': id}">
                     <list>
-                        <field name="turtle_foo"/>
+                        <field name="name"/>
                     </list>
                 </field>
             </form>`,
@@ -1511,7 +1503,7 @@ test("many2many widget: creates a new record with a context containing the paren
     expect.verifySteps(["get_views", "web_search_read", "has_group"]);
 
     await contains(".o_create_button").click();
-    expect("[name='turtle_trululu'] input").toHaveValue("first record");
+    expect("[name='color'] input").toHaveValue("1");
     expect.verifySteps(["get_views", "onchange"]);
 });
 

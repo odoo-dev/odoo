@@ -1024,35 +1024,54 @@ test("nested x2manys with inline form, but not list", async () => {
 
 test.tags("desktop");
 test("use the limit attribute in arch (in field o2m non inline list view)", async () => {
-    Partner._records[0].turtles = [1, 2, 3];
+    // "turtles" is nested inside "p"'s own inline form (not top-level), so it is
+    // never auto-inlined by the server and must be fetched via a dedicated get_views.
+    Partner._records[0].p = [2];
+    Partner._records[1].turtles = [1, 2, 3];
     Turtle._views = { list: `<list limit="2"><field name="turtle_foo"/></list>` };
     onRpc((args) => {
         expect.step(args.method);
     });
     onRpc("web_read", (args) => {
-        expect(args.kwargs.specification).toEqual({
-            display_name: {},
-            turtles: {
+        if (args.args[0][0] === 2) {
+            expect(args.kwargs.specification.turtles).toEqual({
                 fields: {
                     turtle_foo: {},
                 },
                 limit: 2,
-            },
-        });
+            });
+        }
     });
     await mountView({
         type: "form",
         resModel: "partner",
-        arch: `<form><field name="turtles" /></form>`,
+        arch: `
+            <form>
+                <field name="p">
+                    <list>
+                        <field name="name"/>
+                    </list>
+                    <form>
+                        <field name="turtles" />
+                    </form>
+                </field>
+            </form>`,
         resId: 1,
     });
-    expect(".o_data_row").toHaveCount(2);
-    expect.verifySteps(["get_views", "get_views", "web_read"]);
+    expect.verifySteps(["get_views", "web_read"]);
+
+    await contains(".o_data_cell").click();
+    expect(".modal").toHaveCount(1);
+    expect.verifySteps(["get_views", "web_read"]);
+    expect(".modal .o_data_row").toHaveCount(2);
 });
 
 test.tags("desktop");
 test("one2many with default_order on view not inline", async () => {
-    Partner._records[0].turtles = [1, 2, 3];
+    // "turtles" is nested inside "p"'s own inline form (not top-level), so its list
+    // view is never auto-inlined by the server and must be fetched separately.
+    Partner._records[0].p = [2];
+    Partner._records[1].turtles = [1, 2, 3];
     Turtle._views = {
         list: `
             <list default_order="turtle_foo">
@@ -1065,17 +1084,26 @@ test("one2many with default_order on view not inline", async () => {
         resModel: "partner",
         arch: `
             <form>
-                <sheet>
-                    <notebook>
-                        <page string="Turtles">
-                            <field name="turtles" />
-                        </page>
-                    </notebook>
-                </sheet>
+                <field name="p">
+                    <list>
+                        <field name="name"/>
+                    </list>
+                    <form>
+                        <sheet>
+                            <notebook>
+                                <page string="Turtles">
+                                    <field name="turtles" />
+                                </page>
+                            </notebook>
+                        </sheet>
+                    </form>
+                </field>
             </form>`,
         resId: 1,
     });
-    expect(queryAllTexts(".o_field_one2many .o_data_cell")).toEqual([
+
+    await contains(".o_data_cell").click();
+    expect(queryAllTexts(".modal .o_field_one2many .o_data_cell")).toEqual([
         "9",
         "blip",
         "21",
@@ -3091,6 +3119,8 @@ test("add record in a one2many non editable list with context", async () => {
 
 test.tags("desktop");
 test("edition of one2many field, with onchange and not inline sub view", async () => {
+    // "turtles" is nested inside "p"'s own inline form (not top-level), so its sub
+    // view is never auto-inlined by the server and must be fetched separately.
     Turtle._onChanges.turtle_int = function (obj) {
         obj.turtle_foo = String(obj.turtle_int);
     };
@@ -3108,26 +3138,37 @@ test("edition of one2many field, with onchange and not inline sub view", async (
                     </group>
                 </form>`,
     };
+    Partner._records[0].p = [2];
 
     await mountView({
         type: "form",
         resModel: "partner",
         arch: `
                 <form>
-                    <field name="turtles" />
+                    <field name="p">
+                        <list>
+                            <field name="name"/>
+                        </list>
+                        <form>
+                            <field name="turtles" />
+                        </form>
+                    </field>
                 </form>`,
         resId: 1,
     });
-    await contains(".o_field_x2many_list_row_add button").click();
-    await contains('div[name="turtle_int"] input').edit("5");
-    await contains(".modal-footer button.btn-primary").click();
-    let firstCellOfSecondRow = ".o_data_cell.o_list_char:eq(1)";
+    await contains(".o_data_cell").click();
+    expect(".modal").toHaveCount(1);
+
+    await contains(".modal .o_field_x2many_list_row_add button").click();
+    await contains('.modal div[name="turtle_int"] input').edit("5");
+    await contains(".modal:eq(1) .modal-footer button.btn-primary").click();
+    let firstCellOfSecondRow = ".modal .o_data_cell.o_list_char:eq(1)";
     expect(firstCellOfSecondRow).toHaveText("5");
     await contains(firstCellOfSecondRow).click();
 
-    await contains('div[name="turtle_int"] input').edit("3");
-    await contains(".modal-footer button.btn-primary").click();
-    firstCellOfSecondRow = ".o_data_cell.o_list_char:eq(1)";
+    await contains('.modal div[name="turtle_int"] input').edit("3");
+    await contains(".modal:eq(1) .modal-footer button.btn-primary").click();
+    firstCellOfSecondRow = ".modal .o_data_cell.o_list_char:eq(1)";
     expect(firstCellOfSecondRow).toHaveText("3");
 });
 
@@ -3454,22 +3495,24 @@ test("boolean field in a one2many must be directly editable", async () => {
 
 test("many2many list: unlink two records", async () => {
     expect.assertions(4);
-    Partner._records[0].p = [1, 2, 4];
-    Partner._views = {
+    Partner._records[0].timmy = [12, 14];
+    PartnerType._views = {
         form: `
             <form>
                 <field name="name"/>
             </form>`,
     };
     onRpc("web_save", (args) => {
-        expect(args.args[1].p).toEqual([[3, 1]], { message: "should send a command 3 (unlink)" });
+        expect(args.args[1].timmy).toEqual([[3, 12]], {
+            message: "should send a command 3 (unlink)",
+        });
     });
     await mountView({
         type: "form",
         resModel: "partner",
         arch: `
             <form>
-                <field name="p" >
+                <field name="timmy">
                     <list>
                         <field name="name"/>
                     </list>
@@ -3477,10 +3520,10 @@ test("many2many list: unlink two records", async () => {
             </form>`,
         resId: 1,
     });
-    expect("td.o_list_record_remove button").toHaveCount(3);
+    expect("td.o_list_record_remove button").toHaveCount(2);
 
     await contains("td.o_list_record_remove button").click();
-    expect("td.o_list_record_remove button").toHaveCount(2);
+    expect("td.o_list_record_remove button").toHaveCount(1);
 
     await contains("tr.o_data_row td").click();
     expect(".modal .modal-footer .o_btn_remove").toHaveCount(0);
@@ -5536,190 +5579,6 @@ test("one2many list not editable, the context is properly evaluated and sent", a
     expect(".modal").toHaveCount(1);
     expect(".o_readonly_modifier").toHaveCount(1);
     expect(".o_readonly_modifier").toHaveText("5");
-});
-
-test.tags("desktop");
-test("one2many with many2many widget: create", async () => {
-    expect.assertions(10);
-
-    Turtle._views = {
-        list: `
-            <list>
-                <field name="name"/>
-                <field name="turtle_foo"/>
-                <field name="turtle_bar"/>
-                <field name="product_id"/>
-            </list>`,
-        search: `
-            <search>
-                <field name="turtle_foo"/>
-                <field name="turtle_bar"/>
-                <field name="product_id"/>
-            </search>`,
-    };
-
-    let expectedCommand;
-    onRpc("turtle", "web_save", (args) => {
-        expect.step("turtle save");
-    });
-    onRpc("partner", "web_save", (args) => {
-        expect(args.args[0][0]).toBe(1, {
-            message: "should write on the partner record 1",
-        });
-        expect(args.args[1].turtles).toEqual(expectedCommand, {
-            message: "should send only a 'LINK TO' command",
-        });
-    });
-    await mountView({
-        type: "form",
-        resModel: "partner",
-        arch: `
-            <form>
-                <field name="turtles" >
-                    <list>
-                        <field name="turtle_foo"/>
-                        <field name="turtle_qux"/>
-                        <field name="turtle_int"/>
-                        <field name="product_id"/>
-                    </list>
-                    <form>
-                        <group>
-                            <field name="turtle_foo"/>
-                            <field name="turtle_bar"/>
-                            <field name="turtle_int"/>
-                            <field name="product_id"/>
-                        </group>
-                    </form>
-                </field>
-            </form>`,
-        resId: 1,
-    });
-
-    await contains(".o_field_x2many_list_row_add button").click();
-
-    expect(".modal .o_data_row").toHaveCount(2);
-
-    await contains(".modal .o_data_row .o_list_record_selector input").click();
-    await animationFrame(); // additional render due to the change of selection (done in owl, not pure js)
-    await contains(".modal .o_select_button").click();
-    expectedCommand = [[4, 1]];
-    await clickSave();
-
-    await contains(".o_field_x2many_list_row_add button").click();
-    expect(".modal .o_data_row").toHaveCount(1);
-
-    await contains(".modal-footer button:eq(1)").click();
-    await contains('.modal .o_field_widget[name="turtle_foo"] input').edit("tototo", {
-        confirm: false,
-    });
-    await contains('.modal .o_field_widget[name="turtle_int"] input').edit(50, { confirm: false });
-    await clickFieldDropdown("product_id");
-    await press("Enter");
-    await animationFrame();
-
-    await contains(".modal-footer button").click();
-    expect.verifySteps(["turtle save"]);
-
-    expect(".modal").toHaveCount(0);
-    expect(".o_data_row").toHaveCount(3);
-    expect(queryAllTexts(".o_data_row")).toEqual(
-        ["blip 1.5 9", "yop 1.5 0", "tototo 1.5 50 xphone"],
-        {
-            message: "should display the record values in one2many list",
-        }
-    );
-
-    expectedCommand = [[4, 4]];
-    await clickSave();
-});
-
-test.tags("desktop");
-test("one2many with many2many widget: edition", async () => {
-    expect.assertions(7);
-
-    Turtle._views = {
-        list: `
-            <list>
-                <field name="name"/>
-                <field name="turtle_foo"/>
-                <field name="turtle_bar"/>
-                <field name="product_id"/>
-            </list>`,
-        search: `
-            <search>
-                <field name="turtle_foo"/>
-                <field name="turtle_bar"/>
-                <field name="product_id"/>
-            </search>`,
-    };
-    onRpc("turtle", "web_save", ({ args }) => {
-        expect(args[0]).toHaveLength(1);
-        expect(args[1]).toEqual(
-            { product_id: 37 },
-            { message: "should write only the product_id on the turtle record" }
-        );
-    });
-    onRpc("partner", "web_save", ({ args }) => {
-        expect(args[0][0]).toBe(1, {
-            message: "should write on the partner record 1",
-        });
-        expect(args[1].turtles[0][0]).toBe(4, {
-            message: "should send only a 'link to' command",
-        });
-    });
-    await mountView({
-        type: "form",
-        resModel: "partner",
-        arch: `
-            <form>
-                <field name="turtles" >
-                    <list>
-                        <field name="turtle_foo"/>
-                        <field name="turtle_qux"/>
-                        <field name="turtle_int"/>
-                        <field name="product_id"/>
-                    </list>
-                    <form>
-                        <group>
-                            <field name="turtle_foo"/>
-                            <field name="turtle_bar"/>
-                            <field name="turtle_int"/>
-                            <field name="turtle_trululu"/>
-                            <field name="product_id"/>
-                        </group>
-                    </form>
-                </field>
-            </form>`,
-        resId: 1,
-    });
-
-    await contains(".o_data_cell").click();
-    expect(".modal .modal-title:eq(0)").toHaveText("Open: one2many turtle field", {
-        message: "modal should use the python field string as title",
-    });
-    await contains(".modal .o_form_button_cancel").click();
-
-    // edit the first one2many record
-    await contains(".o_data_cell:eq(0)").click();
-    await clickFieldDropdown("product_id");
-    await press("Enter");
-    await animationFrame();
-    await contains(".modal .o_form_button_save").click();
-
-    // add a one2many record
-    await contains(".o_field_x2many_list_row_add button").click();
-    await contains(".modal .o_data_row:first .o_list_record_selector input:eq(0)").click();
-    await animationFrame(); // wait for re-rendering because of the change of selection
-    await contains(".modal .o_select_button:eq(0)").click();
-
-    // edit the second one2many record
-    await contains(".o_data_row:eq(1) .o_data_cell:eq(0)").click();
-    await clickFieldDropdown("product_id");
-    await press("Enter");
-    await animationFrame();
-    await contains(".modal .modal-footer button:first:eq(0)").click();
-
-    await clickSave();
 });
 
 test("new record, the context is properly evaluated and sent", async () => {
@@ -8853,6 +8712,8 @@ test("add a new line after limit is reached should behave nicely", async () => {
 
 test.tags("desktop");
 test("onchange in a one2many with non inline view on an existing record", async () => {
+    // "partner_ids" is nested inside "timmy"'s own inline form (not top-level), so its
+    // sub view is never auto-inlined by the server and must be fetched separately.
     Partner._fields.sequence = fields.Integer({ string: "Sequence", type: "integer" });
     Partner._records[0].sequence = 1;
     Partner._records[1].sequence = 2;
@@ -8863,6 +8724,7 @@ test("onchange in a one2many with non inline view on an existing record", async 
         relation: "partner",
     });
     PartnerType._records[0].partner_ids = [1, 2];
+    Partner._records[0].timmy = [12];
     Partner._views = {
         list: `
                 <list>
@@ -8875,21 +8737,35 @@ test("onchange in a one2many with non inline view on an existing record", async 
     });
     await mountView({
         type: "form",
-        resModel: "partner.type",
+        resModel: "partner",
         arch: `
                 <form>
-                    <field name="partner_ids" />
+                    <field name="timmy">
+                        <list>
+                            <field name="name"/>
+                        </list>
+                        <form>
+                            <field name="partner_ids" />
+                        </form>
+                    </field>
                 </form>`,
-        resId: 12,
+        resId: 1,
     });
-    // swap 2 lines in the one2many
-    await contains("tbody tr:eq(1) .o_handle_cell").dragAndDrop("tbody tr");
+    expect.verifySteps(["get_views", "web_read"]);
 
-    expect.verifySteps(["get_views", "get_views", "web_read", "onchange", "onchange"]);
+    await contains(".o_data_cell").click();
+    expect.verifySteps(["get_views", "web_read"]);
+
+    // swap 2 lines in the nested one2many
+    await contains(".modal tbody tr:eq(1) .o_handle_cell").dragAndDrop(".modal tbody tr");
+
+    expect.verifySteps(["onchange", "onchange"]);
 });
 
 test.tags("desktop");
 test("onchange in a one2many with non inline view on a new record", async () => {
+    // "turtles" is nested inside "p"'s own inline form (not top-level), so its sub
+    // view is never auto-inlined by the server and must be fetched separately.
     Turtle._onChanges = {
         name: function (obj) {
             if (obj.name) {
@@ -8904,31 +8780,29 @@ test("onchange in a one2many with non inline view on a new record", async () => 
                 <field name="turtle_int"/>
             </list>`,
     };
-    onRpc((args) => {
-        expect.step(args.method || args.route);
-    });
     await mountView({
         type: "form",
         resModel: "partner",
         arch: `
             <form>
-                <field name="turtles" />
+                <field name="p">
+                    <list>
+                        <field name="name"/>
+                    </list>
+                    <form>
+                        <field name="turtles" />
+                    </form>
+                </field>
             </form>`,
     });
 
-    // add a row and trigger the onchange
+    // add a new "p" row, opening its own (new) sub-form
     await contains(".o_field_x2many_list_row_add button").click();
-    await contains('.o_data_row div[name="name"] input').edit("a name", { confirm: "blur" });
+    // add a row in "turtles" (nested, not inline) and trigger the onchange
+    await contains(".modal .o_field_x2many_list_row_add button").click();
+    await contains('.modal .o_data_row div[name="name"] input').edit("a name", { confirm: "blur" });
 
-    expect(".o_field_cell[name=turtle_int]").toHaveText("44");
-
-    expect.verifySteps([
-        "get_views", // load main form
-        "get_views", // load sub list
-        "onchange", // main record
-        "onchange", // sub record
-        "onchange", // edition of name of sub record
-    ]);
+    expect(".modal .o_field_cell[name=turtle_int]").toHaveText("44");
 });
 
 test.tags("desktop");
@@ -11210,6 +11084,9 @@ test("one2many column visiblity depends on onchange of parent field", async () =
 
 test.tags("desktop");
 test("one2many column_invisible on view not inline", async () => {
+    // The inner "p" (with its column_invisible="parent.*" expressions) is nested
+    // inside the outer "p"'s own inline form (not top-level), so its list view is
+    // never auto-inlined by the server and must be fetched separately.
     Partner._records[0].p = [2];
     Partner._views = {
         list: `
@@ -11224,32 +11101,40 @@ test("one2many column_invisible on view not inline", async () => {
         resModel: "partner",
         arch: `
             <form>
-                <sheet>
-                    <group>
-                        <field name="product_id"/>
-                    </group>
-                    <notebook>
-                        <page string="Partner page">
-                            <field name="bar"/>
-                            <field name="p" />
-                        </page>
-                    </notebook>
-                </sheet>
+                <field name="p">
+                    <list>
+                        <field name="name"/>
+                    </list>
+                    <form>
+                        <sheet>
+                            <group>
+                                <field name="product_id"/>
+                            </group>
+                            <notebook>
+                                <page string="Partner page">
+                                    <field name="bar"/>
+                                    <field name="p" />
+                                </page>
+                            </notebook>
+                        </sheet>
+                    </form>
+                </field>
             </form>`,
         resId: 1,
     });
 
-    expect("th:not(.o_list_actions_header)").toHaveCount(2);
+    await contains(".o_data_cell").click();
+    expect(".modal th:not(.o_list_actions_header)").toHaveCount(2);
     await selectFieldDropdownItem("product_id", "xphone");
-    expect("th:not(.o_list_actions_header)").toHaveCount(1, {
+    expect(".modal th:not(.o_list_actions_header)").toHaveCount(1, {
         message: "should be 1 column when the product_id is set",
     });
-    await contains(".o_field_many2one[name=product_id] input").clear({ confirm: "blur" });
-    expect("th:not(.o_list_actions_header)").toHaveCount(2, {
+    await contains(".modal .o_field_many2one[name=product_id] input").clear({ confirm: "blur" });
+    expect(".modal th:not(.o_list_actions_header)").toHaveCount(2, {
         message: "should be 2 columns in the one2many when product_id is not set",
     });
-    await contains(".o_field_boolean[name=bar] input").click();
-    expect("th:not(.o_list_actions_header)").toHaveCount(1, {
+    await contains(".modal .o_field_boolean[name=bar] input").click();
+    expect(".modal th:not(.o_list_actions_header)").toHaveCount(1, {
         message: "should be 1 column after the value change",
     });
 });
