@@ -298,11 +298,11 @@ class StockMove(models.Model):
             return False
         return super()._should_be_assigned()
 
-    def _split(self, qty, restrict_partner_id=False):
+    def _split(self, qty, restrict_partner_id=False, source_location_id=None):
         # When setting the Repair Order as done with partially done moves, do not split these moves
         if self.repair_id:
             return []
-        return super(StockMove, self)._split(qty, restrict_partner_id)
+        return super()._split(qty, restrict_partner_id, source_location_id)
 
     def action_show_details(self):
         action = super().action_show_details()

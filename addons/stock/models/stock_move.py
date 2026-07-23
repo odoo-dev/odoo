@@ -2438,11 +2438,12 @@ Please change the quantity done or the rounding precision in your settings.""",
             vals['uom_id'] = self.env.context['force_split_uom_id']
         return vals
 
-    def _split(self, qty, restrict_partner_id=False):
+    def _split(self, qty, restrict_partner_id=False, source_location_id=None):
         """ Splits `self` quantity and return values for a new moves to be created afterwards
 
         :param qty: float. quantity to split (given in product UoM)
         :param restrict_partner_id: optional partner that can be given in order to force the new move to restrict its choice of quants to the ones belonging to this partner.
+        :param source_location_id: optional location id that can be given in order to force the new move to this specific location.
         :returns: list of dict. stock move values """
         self.ensure_one()
         if self.state in ('done', 'cancel'):
@@ -2470,9 +2471,8 @@ Please change the quantity done or the rounding precision in your settings.""",
         if restrict_partner_id:
             defaults['restrict_partner_id'] = restrict_partner_id
 
-        # TDE CLEANME: remove context key + add as parameter
-        if self.env.context.get('source_location_id'):
-            defaults['location_id'] = self.env.context['source_location_id']
+        if source_location_id:
+            defaults['location_id'] = source_location_id
         new_move_vals = self.copy_data(defaults)
 
         # Update the original `product_qty` of the move. Use the general product's decimal
