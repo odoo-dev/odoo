@@ -29,7 +29,9 @@ class ResGroups(models.Model):
         compute="_compute_access_count"
     )
     menu_access = fields.Many2many('ir.ui.menu', 'ir_ui_menu_group_rel', 'gid', 'menu_id', string='Access Menu')
+    menu_access_count = fields.Integer(compute="_compute_menu_access_count")
     view_access = fields.Many2many('ir.ui.view', 'ir_ui_view_group_rel', 'group_id', 'view_id', string='Views')
+    view_access_count = fields.Integer(compute="_compute_view_access_count")
     comment = fields.Text(string='Notes', translate=True)
     full_name = fields.Char(compute='_compute_full_name', string='Group Name', search='_search_full_name')
     share = fields.Boolean(string='Share Group',
@@ -447,6 +449,16 @@ class ResGroups(models.Model):
         for group in self:
             group.access_count = len(group.access_ids)
 
+    @api.depends('menu_access')
+    def _compute_menu_access_count(self):
+        for group in self:
+            group.menu_access_count = len(group.menu_access)
+
+    @api.depends('view_access')
+    def _compute_view_access_count(self):
+        for group in self:
+            group.view_access_count = len(group.view_access)
+
     def action_show_all_users(self):
         self.ensure_one()
         return {
@@ -487,4 +499,24 @@ class ResGroups(models.Model):
             'res_model': 'ir.access',
             'views': [[False, 'list'], [False, 'kanban'], [False, 'form']],
             'domain': [('group_id', 'in', self.ids)],
+        }
+
+    def action_view_implied_menus(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Access Menu"),
+            'res_model': 'ir.ui.menu',
+            'views': [[False, 'list'], [False, 'kanban'], [False, 'form']],
+            'domain': [('group_ids', 'in', self.ids)],
+        }
+
+    def action_view_implied_views(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _("Implying Views"),
+            'res_model': 'ir.ui.view',
+            'views': [[False, 'list'], [False, 'kanban'], [False, 'form']],
+            'domain': [('group_ids', 'in', self.ids)],
         }

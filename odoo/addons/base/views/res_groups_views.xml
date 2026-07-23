@@ -116,16 +116,24 @@
                   <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button type="object" name="action_view_implied_ids"
-                            class="oe_stat_button" icon="south">
+                            class="oe_stat_button" icon="account_tree">
                             <field name="implied_count" widget="statinfo" string="Implied Groups"/>
                         </button>
-                        <button type="object" name="action_view_implied_by_ids"
-                            class="oe_stat_button" icon="north">
-                            <field name="implied_by_count" widget="statinfo" string="Implying Groups"/>
+                        <button type="object" name="action_show_all_users"
+                            class="oe_stat_button" icon="groups">
+                            <field name="all_users_count" widget="statinfo" string="Implied Users"/>
                         </button>
                         <button type="object" name="action_view_access_ids"
                             class="oe_stat_button" icon="lock">
-                            <field name="access_count" widget="statinfo" string="Access Rights"/>
+                            <field name="access_count" widget="statinfo" string="Implied Rights"/>
+                        </button>
+                        <button type="object" name="action_view_implied_menus"
+                                class="oe_stat_button" icon="menu">
+                            <field name="menu_access_count" widget="statinfo" string="Implying Menus"/>
+                        </button>
+                        <button type="object" name="action_view_implied_views"
+                                class="oe_stat_button" icon="tv">
+                            <field name="view_access_count" widget="statinfo" string="Implying Views"/>
                         </button>
                     </div>
 
@@ -138,15 +146,15 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Users" name="user_ids">
-                            <field name="user_ids" context="{'search_default_filter_no_share':1}"/>
-                        </page>
                         <page string="Dependencies" name="inherit_groups">
                             <group>
-                                <field name="implied_ids" widget="many2many_tags" options="{'on_tag_click': 'open_form'}"/>
                                 <field name="implied_by_ids" widget="many2many_tags" options="{'on_tag_click': 'open_form'}"/>
+                                <field name="implied_ids" widget="many2many_tags" options="{'on_tag_click': 'open_form'}"/>
                                 <field name="disjoint_ids" widget="many2many_tags" options="{'on_tag_click': 'open_form'}"/>
                             </group>
+                        </page>
+                        <page string="Users" name="user_ids">
+                            <field name="user_ids" context="{'search_default_filter_no_share':1}"/>
                         </page>
                         <page string="Access Rights" name="access_rights">
                             <field name="access_ids">
