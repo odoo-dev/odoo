@@ -236,11 +236,8 @@ class Form:
                 contexts[field_name] = ctx
                 field_spec['context'] = get_static_context(ctx)
 
-            # FIXME: better widgets support
             # NOTE: selection breaks because of m2o widget=selection
-            if node.get('widget') in ['many2many']:
-                field_info['type'] = node.get('widget')
-            elif node.get('widget') == 'daterange':
+            if node.get('widget') == 'daterange':
                 options = ast.literal_eval(node.get('options', '{}'))
                 related_field = options.get('start_date_field') or options.get('end_date_field')
                 daterange_field_names[related_field] = field_name
@@ -907,6 +904,20 @@ class O2MProxy(X2MProxy):
         """
         self._assert_editable()
         return O2MForm(self, index)
+
+    def add(self, record):
+        """ Adds ``record`` to the field, the record must already exist.
+
+        The addition will only be finalized when the parent record is saved.
+        """
+        self._assert_editable()
+        comodel_name = self._field_info['relation']
+        assert isinstance(record, BaseModel) and record._name == comodel_name, \
+            f"trying to assign a {record._name!r} object to a {comodel_name!r} field"
+
+        if record.id not in self._field_value:
+            self._field_value.add(record.id, {'id': record.id})
+            self._form._perform_onchange(self._field)
 
     def remove(self, index):
         """ Removes the record at ``index`` from the parent form.
