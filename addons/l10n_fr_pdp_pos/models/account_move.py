@@ -5,6 +5,7 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     def _l10n_fr_pdp_reports_pos_is_transaction_entry(self):
+        self.ensure_one()
         return self.move_type == 'entry' and bool(self.env['pos.session'].sudo().search_count([
             ('move_id', '=', self.id),
         ]))
