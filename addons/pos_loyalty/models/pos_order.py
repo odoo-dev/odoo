@@ -58,17 +58,23 @@ class PosOrder(models.Model):
             'payload': {},
         }
 
-    def _add_loyalty_history_lines(self, history_vals, updated_loyalty_cards, loyalty_cards_before, coupon_wise_correction):
+    @api.model
+    def _add_loyalty_history_lines(self, history_vals, updated_loyalty_cards, loyalty_cards_before, coupon_wise_correction, order_skip_history_map):
         orders = self.browse({c['order_id'] for c in updated_loyalty_cards}).exists()
-        order_display_name_map = {o.id: o.display_name for o in orders}
+        order_display_name_map = {o.id: {'display_name': o.display_name, 'access_token': o.access_token} for o in orders}
+        card_history_vap_map = {hv['card_id'] : hv for hv in history_vals}
         for card in updated_loyalty_cards:
-            card_id = card['id']
-            order_display_name = order_display_name_map.get(card['order_id'])
-            before = loyalty_cards_before.get(card_id, 0)
-            points = card['points'] - before - coupon_wise_correction.get(card_id, 0)
-            if not order_display_name or (not points and card['program_type'] != 'gift_card'):
+            if order_skip_history_map[order_display_name_map.get(card['order_id'], {}).get('access_token')]:
                 continue
-            history_val = next((hv for hv in history_vals if hv['card_id'] == card_id), None)
+            card_id = card['id']
+            order_display_name = order_display_name_map.get(card['order_id'], {}).get('display_name')
+            points = card['points'] - loyalty_cards_before.get(card_id, 0) - coupon_wise_correction.get(card_id, 0)
+            if not order_display_name:
+                continue
+            if not points and card["program_type"] != "gift_card":
+                continue
+
+            history_val = card_history_vap_map.get(card_id)
             if history_val:
                 history_val['issued'] = points
             else:
@@ -92,7 +98,7 @@ class PosOrder(models.Model):
         """
         loyalty_cards_before = {}
         updated_loyalty_cards = []
-        skip_history = False
+        order_skip_history_map = {}
         LoyaltyCard = self.env['loyalty.card']
         order_card_map = defaultdict(lambda: LoyaltyCard)
         orders_being_created = [order.get('access_token') for order in orders]
@@ -100,14 +106,16 @@ class PosOrder(models.Model):
 
             loyalty_card_vals = []
             existing_order = self._get_open_order(order)
+            order_token = order.get('access_token')
             if existing_order and existing_order.state == 'paid':
-                skip_history = True
+                order_skip_history_map[order_token] = True
                 continue
+            else:
+                order_skip_history_map[order_token] = False
             for command, card_id, card_vals in order.get('loyalty_card_ids', []):
                 if not command and not card_vals.get('points', 0):
                     continue
                 if card_id:
-                    order_token = order.get('access_token')
                     if card := LoyaltyCard.browse(card_id).exists():
                         order_card_map[order_token] |= card
                         loyalty_cards_before[card.id] = card.points
@@ -122,9 +130,11 @@ class PosOrder(models.Model):
             order.loyalty_card_ids |= order_card_map.get(order.access_token, LoyaltyCard)
             for loyalty_card in order.loyalty_card_ids:
                 updated_loyalty_cards.append({'order_id': order.id, 'id': loyalty_card.id, 'points': loyalty_card.points, 'program_type': loyalty_card.program_type})
-            if not skip_history:
-                order._add_log_for_gift_cards(order.loyalty_card_ids.filtered(lambda c: c.program_type == 'gift_card'))
-        history_vals = []
+            loyalty_cards = order.loyalty_card_ids
+            loyalty_cards.filtered(lambda card: not loyalty_cards_before.get('card.id')).with_context(action_no_send_mail=False)._send_creation_communication()
+            if not order_skip_history_map[order.access_token]:
+                order._add_log_for_gift_cards(loyalty_cards.filtered(lambda c: c.program_type == 'gift_card'))
+        history_vals = defaultdict(dict)
         coupon_wise_correction = defaultdict(float)
         for line in created_orders.lines.filtered('coupon_id'):
             coupon = line.coupon_id
@@ -136,27 +146,36 @@ class PosOrder(models.Model):
                 else 0
             )
             coupon_wise_correction[coupon.id] += correction
-            history_vals.append({
-                'card_id': coupon.id,
-                'order_model': line.order_id._name,
-                'order_id': line.order_id.id,
-                'description': _('Onsite %s', line.order_id.display_name),
-                'used': line.points_cost,
-                'issued': 0,
-            })
+            if history_vals.get('coupon.id'):
+                history_vals[coupon.id]['used'] =  history_vals[coupon.id]['used'] - line.points_cost
+            else:
+                history_vals[coupon.id] = {
+                    'card_id': coupon.id,
+                    'order_model': line.order_id._name,
+                    'order_id': line.order_id.id,
+                    'description': _('Onsite %s', line.order_id.display_name),
+                    'used': line.points_cost,
+                    'issued': 0,
+                }
+
             coupon.points -= (line.points_cost + correction)
-        if not skip_history:
-            self._add_loyalty_history_lines(history_vals, updated_loyalty_cards, loyalty_cards_before, coupon_wise_correction)
-        created_orders.loyalty_card_ids.with_context(action_no_send_mail=False)._send_creation_communication()
-        if not len(created_orders):
+        self._add_loyalty_history_lines(list(history_vals.values()), updated_loyalty_cards, loyalty_cards_before, coupon_wise_correction, order_skip_history_map)
+        if not created_orders:
             return data
         all_cards = created_orders.loyalty_card_ids | created_orders.lines.coupon_id
-        loyalty_cards = [{**loyalty_card, '_barcode_base64': image_data_uri(self.env['ir.actions.report'].barcode('Code128', loyalty_card.get('code')))} for loyalty_card in LoyaltyCard._load_pos_data_read(all_cards, created_orders[0].config_id)]
+        loyalty_cards = [{**loyalty_card, '_barcode_base64': image_data_uri(self.env['ir.actions.report'].barcode('Code128', loyalty_card.get('code') or ''))} for loyalty_card in LoyaltyCard._load_pos_data_read(all_cards, created_orders[0].config_id)]
         data.update({
             'pos.order': [
-                {**order, 'loyalty_card_ids': [*order.get('loyalty_card_ids', []), *((order_card_map.get(order.get('access_token')) or LoyaltyCard).ids)]}
-                for order in data.get('pos.order', [])
+                {
+                    **order,
+                    'loyalty_card_ids': [
+                        *order.get('loyalty_card_ids', []),
+                        *((order_card_map.get(order.get('access_token')) or LoyaltyCard).ids),
+                    ],
+                }
                 if order.get('id') in created_orders.ids
+                else order
+                for order in data.get('pos.order', [])
             ],
             'loyalty.card': loyalty_cards,
             'loyalty.program': self.env['loyalty.program']._load_pos_data_read(

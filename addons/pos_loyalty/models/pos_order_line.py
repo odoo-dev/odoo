@@ -39,8 +39,8 @@ class PosOrderLine(models.Model):
     def _points_for_correction(self):
         """
         Calculate point cost adjustments for product rewards based on program rules.
-        Returns 0 if order doesn't meet minimum amount/quantity requirements.
-        Otherwise calculates points based on reward point mode (money or unit).
+        Return 0 if the order does not meet the minimum amount or quantity requirements.
+        Otherwise, calculate the point adjustment according to the reward point mode.
         """
         self.ensure_one()
         points = 0
@@ -59,4 +59,4 @@ class PosOrderLine(models.Model):
                     points -= self.price_subtotal_incl * rule.reward_point_amount
                 elif rule.reward_point_mode == 'unit':
                     points += self.qty * rule.reward_point_amount
-        return points if not self.order_id.is_refund else -1 * points
+        return -points if self.order_id.is_refund else points

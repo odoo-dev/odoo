@@ -6,8 +6,8 @@ const { DateTime } = luxon;
 export class LoyaltyCard extends Base {
     setup(vals) {
         super.setup();
-        // In case of loyalty loaded from the backend then we want to set active as backend and if
-        // loyalty card generated in frontend the create with active true.
+        // Loyalty cards loaded from the backend keep their `active` value.
+        // Loyalty cards created in the frontend are active by default.
         this.active = "active" in vals ? vals.active : true;
     }
     static pythonModel = "loyalty.card";

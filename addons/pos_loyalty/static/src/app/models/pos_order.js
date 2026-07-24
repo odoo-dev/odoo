@@ -90,6 +90,31 @@ patch(PosOrder.prototype, {
         return state;
     },
 
+    _removeLoyaltyCards(programIds) {
+        const removedCards = [];
+
+        for (const loyaltyCard of this.loyalty_card_ids) {
+            if (!programIds.has(loyaltyCard.program_id.id)) {
+                continue;
+            }
+
+            if (loyaltyCard.points === loyaltyCard._temp_points) {
+                loyaltyCard.delete();
+            } else if (loyaltyCard.points > loyaltyCard._temp_points) {
+                loyaltyCard.update({
+                    points: loyaltyCard.points - loyaltyCard._temp_points,
+                    _temp_points: 0,
+                });
+            }
+
+            removedCards.push(loyaltyCard);
+        }
+
+        if (removedCards.length) {
+            this.loyalty_card_ids = [["unlink", ...removedCards]];
+        }
+    },
+
     /**
      * We need to update the rewards upon changing the partner as it may impact the points available
      *  for rewards.
@@ -99,32 +124,18 @@ patch(PosOrder.prototype, {
     setPartner(partner) {
         const oldPartner = this.getPartner();
         super.setPartner(partner);
-        if (this.loyalty_card_ids.length && oldPartner !== this.getPartner()) {
-            // Remove couponPointChanges for cards in is_nominative programs.
-            // This makes sure that counting of points on loyalty and ewallet programs is updated after partner changes.
-            const loyaltyProgramIds = new Set(
-                this.models["loyalty.program"]
-                    .filter((program) => program.is_nominative)
-                    .map((program) => program.id)
-            );
-            const removedCards = [];
-            for (const loyaltyCard of this.loyalty_card_ids) {
-                if (loyaltyProgramIds.has(loyaltyCard.program_id.id)) {
-                    if (loyaltyCard.points === loyaltyCard._temp_points) {
-                        loyaltyCard.delete();
-                    } else if (loyaltyCard.points > loyaltyCard._temp_points) {
-                        loyaltyCard.update({
-                            points: loyaltyCard.points - loyaltyCard._temp_points,
-                            _temp_points: 0,
-                        });
-                    }
-                    removedCards.push(loyaltyCard);
-                }
-            }
-            if (removedCards.length) {
-                this.loyalty_card_ids = [["unlink", ...removedCards]];
-            }
+
+        if (!this.loyalty_card_ids.length || oldPartner === this.getPartner()) {
+            return;
         }
+
+        const loyaltyProgramIds = new Set(
+            this.models["loyalty.program"]
+                .filter((program) => program.is_nominative)
+                .map((program) => program.id)
+        );
+
+        this._removeLoyaltyCards(loyaltyProgramIds);
     },
     waitForPushOrder() {
         return (
@@ -184,32 +195,22 @@ patch(PosOrder.prototype, {
     setPricelist(pricelist) {
         const oldPricelist = this.pricelist_id;
         super.setPricelist(...arguments);
-        if (this.loyalty_card_ids.length && oldPricelist !== pricelist) {
-            // Remove couponPointChanges for cards in no longer available programs.
-            // This makes sure that counting of points on loyalty and ewallet programs is updated after pricelist changes.
-            const loyaltyProgramIds = new Set(
-                this.models["loyalty.program"]
-                    .filter(
-                        (program) =>
-                            program.pricelist_ids.length > 0 &&
-                            (!pricelist ||
-                                !program.pricelist_ids.some((pl) => pl.id === pricelist.id))
-                    )
-                    .map((program) => program.id)
-            );
-            for (const loyaltyCard of this.loyalty_card_ids) {
-                if (loyaltyProgramIds.has(loyaltyCard.program_id.id)) {
-                    if (loyaltyCard.points === loyaltyCard._temp_points) {
-                        loyaltyCard.delete();
-                    } else if (loyaltyCard.points > loyaltyCard._temp_points) {
-                        loyaltyCard.update({
-                            points: loyaltyCard.points - loyaltyCard._temp_points,
-                            _temp_points: 0,
-                        });
-                    }
-                }
-            }
+
+        if (!this.loyalty_card_ids.length || oldPricelist === pricelist) {
+            return;
         }
+
+        const loyaltyProgramIds = new Set(
+            this.models["loyalty.program"]
+                .filter(
+                    (program) =>
+                        program.pricelist_ids.length > 0 &&
+                        (!pricelist || !program.pricelist_ids.some((pl) => pl.id === pricelist.id))
+                )
+                .map((program) => program.id)
+        );
+
+        this._removeLoyaltyCards(loyaltyProgramIds);
     },
     _resetPrograms() {
         this.uiState.disabledRewards = new Set();
@@ -975,34 +976,34 @@ patch(PosOrder.prototype, {
             selectedLine._e_wallet_program_id ||
             this.models["loyalty.program"].find((p) => p.program_type === "gift_card");
 
-        let newLoyalyCard = this.loyalty_card_ids.find(
+        let newLoyaltyCard = this.loyalty_card_ids.find(
             (lc) =>
                 lc.points === selectedLine.price_unit && lc.program_id.id == program.id && !lc.code
         );
-        if (!newLoyalyCard) {
-            newLoyalyCard = this.models["loyalty.card"].create({
+        if (!newLoyaltyCard) {
+            newLoyaltyCard = this.models["loyalty.card"].create({
                 points: points,
                 code: null,
                 source_pos_order_id: this.id,
                 program_id: program.id,
             });
-            this.loyalty_card_ids = [["link", newLoyalyCard]];
+            this.loyalty_card_ids = [["link", newLoyaltyCard]];
         }
         const loyaltyCard = this.models["loyalty.card"].getBy("code", newGiftCardCode);
         if (loyaltyCard) {
-            newLoyalyCard.delete();
+            newLoyaltyCard.delete();
             loyaltyCard.update({
                 _temp_points: points,
                 source_pos_order_id: this.id,
             });
             this.loyalty_card_ids = [["link", loyaltyCard]];
         } else {
-            newLoyalyCard?.update({
+            newLoyaltyCard?.update({
                 code: newGiftCardCode,
-                points: points,
                 _temp_points: points,
                 expiration_date: expirationDate,
                 partner_id: partner_id,
+                points,
             });
         }
     },
