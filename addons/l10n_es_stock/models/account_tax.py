@@ -10,9 +10,9 @@ class AccountTax(models.Model):
         if rebu_tax in base_line['tax_ids']:
             def load(field, fallback):
                 return self._get_base_line_field_value_from_record(record, field, kwargs, fallback)
-            base_line.update({
-                'purchase_price': load('purchase_price', 0.0)
-            })
+            purchase_price = load('purchase_price', 0.0) if 'purchase_price' in record._fields else 0.0
+            total_cost = load('total_cost', 0.0) if 'total_cost' in record._fields else 0.0
+            base_line['purchase_price'] = max(purchase_price, total_cost)
         return base_line
 
     def _add_tax_details_in_base_line(self, base_line, company, rounding_method=None):
