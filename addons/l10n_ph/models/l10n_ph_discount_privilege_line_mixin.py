@@ -107,8 +107,11 @@ class L10nPhDiscountPrivilegeLineMixin(models.AbstractModel):
         restores the original price_unit when the privilege is cleared."""
         for line in self:
             price_unit = line.price_unit
-            new_price_unit, original_price_unit = line._adjust_price_unit_from_privilege(
-                price_unit, line.tax_ids,
+            new_price_unit, original_price_unit = (
+                line._adjust_price_unit_from_privilege(
+                    price_unit,
+                    line.tax_ids,
+                )
             )
             line.price_unit = new_price_unit
             line.l10n_ph_original_price_unit = original_price_unit
@@ -169,11 +172,21 @@ class L10nPhDiscountPrivilegeLineMixin(models.AbstractModel):
                     # tax-inclusive amount (with no discount) and use it as the
                     # discounted amount, avoiding manual tax roundings.
                     company = line.company_id or self.env.company
-                    base_line = line.move_id._prepare_product_base_line_for_taxes_computation(line)
-                    base_line['discount'] = 0.0
-                    self.env['account.tax']._add_tax_details_in_base_line(base_line, company)
-                    self.env['account.tax']._round_base_lines_tax_details([base_line], company)
-                    line.l10n_ph_special_discount_amount = base_line['tax_details']['total_included_currency']
+                    base_line = (
+                        line.move_id._prepare_product_base_line_for_taxes_computation(
+                            line,
+                        )
+                    )
+                    base_line["discount"] = 0.0
+                    self.env["account.tax"]._add_tax_details_in_base_line(
+                        base_line, company,
+                    )
+                    self.env["account.tax"]._round_base_lines_tax_details(
+                        [base_line], company,
+                    )
+                    line.l10n_ph_special_discount_amount = base_line["tax_details"][
+                        "total_included_currency"
+                    ]
             else:
                 line.l10n_ph_special_discount_amount = 0.0
                 if line.discount:

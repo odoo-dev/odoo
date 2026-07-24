@@ -48,7 +48,9 @@ class AccountMoveLine(models.Model):
         lines_without_privilege = self.filtered(
             lambda line: not line.l10n_ph_discount_privilege_id,
         )
-        super(AccountMoveLine, lines_without_privilege)._compute_discount_allocation_needed()
+        super(
+            AccountMoveLine, lines_without_privilege,
+        )._compute_discount_allocation_needed()
         for line in self.filtered("l10n_ph_discount_privilege_id"):
             priv = line.l10n_ph_discount_privilege_id
             if not priv.account_id:

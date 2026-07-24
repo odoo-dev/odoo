@@ -10,7 +10,6 @@ from odoo.addons.l10n_ph.tests.common import TestPhCommon
 
 @tagged("post_install_l10n", "post_install", "-at_install")
 class TestDiscountPrivilegeWizard(TestPhCommon):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -195,12 +194,18 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
     # ============================================================
 
     def test_privilege_crud(self):
-        priv = self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "Test Privilege",
-            "discount_type": "sc",
-            "discount_amount": 20.0,
-            "account_id": self.special_discount_account.id,
-        })
+        priv = (
+            self.env["l10n_ph.discount.privilege"]
+            .sudo()
+            .create(
+                {
+                    "name": "Test Privilege",
+                    "discount_type": "sc",
+                    "discount_amount": 20.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
+        )
         self.assertEqual(priv.name, "Test Privilege")
         self.assertEqual(priv.discount_type, "sc")
         self.assertEqual(priv.discount_amount, 20.0)
@@ -212,57 +217,77 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
 
         priv_id = priv.id
         priv.unlink()
-        self.assertFalse(self.env["l10n_ph.discount.privilege"].browse(priv_id).exists())
+        self.assertFalse(
+            self.env["l10n_ph.discount.privilege"].browse(priv_id).exists(),
+        )
 
     def test_privilege_discount_type_values(self):
         for dtype in ("pwd", "sc", "special"):
-            priv = self.env["l10n_ph.discount.privilege"].sudo().create({
-                "name": f"Test {dtype}",
-                "discount_type": dtype,
-                "discount_amount": 10.0,
-                "account_id": self.special_discount_account.id,
-            })
+            priv = (
+                self.env["l10n_ph.discount.privilege"]
+                .sudo()
+                .create(
+                    {
+                        "name": f"Test {dtype}",
+                        "discount_type": dtype,
+                        "discount_amount": 10.0,
+                        "account_id": self.special_discount_account.id,
+                    },
+                )
+            )
             self.assertEqual(priv.discount_type, dtype)
             priv.unlink()
 
     def test_privilege_model_constraint_positive_amount(self):
         with self.assertRaises(ValidationError):
-            self.env["l10n_ph.discount.privilege"].sudo().create({
-                "name": "Invalid Zero",
-                "discount_amount": 0.0,
-                "account_id": self.special_discount_account.id,
-            })
+            self.env["l10n_ph.discount.privilege"].sudo().create(
+                {
+                    "name": "Invalid Zero",
+                    "discount_amount": 0.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         with self.assertRaises(ValidationError):
-            self.env["l10n_ph.discount.privilege"].sudo().create({
-                "name": "Invalid Negative",
-                "discount_amount": -5.0,
-                "account_id": self.special_discount_account.id,
-            })
+            self.env["l10n_ph.discount.privilege"].sudo().create(
+                {
+                    "name": "Invalid Negative",
+                    "discount_amount": -5.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         with self.assertRaises(ValidationError):
-            self.env["l10n_ph.discount.privilege"].sudo().create({
-                "name": "Invalid Over 100",
-                "discount_amount": 101.0,
-                "account_id": self.special_discount_account.id,
-            })
+            self.env["l10n_ph.discount.privilege"].sudo().create(
+                {
+                    "name": "Invalid Over 100",
+                    "discount_amount": 101.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
 
     def test_privilege_unique_name_per_company(self):
-        self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "Duplicate Name",
-            "discount_amount": 20.0,
-            "account_id": self.special_discount_account.id,
-        })
-        with self.assertRaises(Exception), mute_logger('odoo.sql_db'):
-            self.env["l10n_ph.discount.privilege"].sudo().create({
+        self.env["l10n_ph.discount.privilege"].sudo().create(
+            {
                 "name": "Duplicate Name",
-                "discount_amount": 30.0,
+                "discount_amount": 20.0,
                 "account_id": self.special_discount_account.id,
-            })
+            },
+        )
+        with self.assertRaises(Exception), mute_logger("odoo.sql_db"):
+            self.env["l10n_ph.discount.privilege"].sudo().create(
+                {
+                    "name": "Duplicate Name",
+                    "discount_amount": 30.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
 
     def test_privilege_archive_in_use(self):
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=100.0),
         )
-        wizard = self._create_wizard(invoice, privilege_id=self.privilege.id, apply_on="all")
+        wizard = self._create_wizard(
+            invoice, privilege_id=self.privilege.id, apply_on="all",
+        )
         wizard.action_confirm()
         with self.assertRaises(ValidationError):
             self.privilege.unlink()
@@ -272,14 +297,24 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
     def test_privilege_applied_to_categories(self):
         cat_a = self.env["product.category"].create({"name": "Cat A"})
         cat_b = self.env["product.category"].create({"name": "Cat B"})
-        prod_a = self.env["product.product"].create({"name": "Prod A", "categ_id": cat_a.id})
-        prod_b = self.env["product.product"].create({"name": "Prod B", "categ_id": cat_b.id})
-        priv = self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "Cat Scoped",
-            "discount_amount": 15.0,
-            "account_id": self.special_discount_account.id,
-            "applied_to_category_ids": [Command.set(cat_a.ids)],
-        })
+        prod_a = self.env["product.product"].create(
+            {"name": "Prod A", "categ_id": cat_a.id},
+        )
+        prod_b = self.env["product.product"].create(
+            {"name": "Prod B", "categ_id": cat_b.id},
+        )
+        priv = (
+            self.env["l10n_ph.discount.privilege"]
+            .sudo()
+            .create(
+                {
+                    "name": "Cat Scoped",
+                    "discount_amount": 15.0,
+                    "account_id": self.special_discount_account.id,
+                    "applied_to_category_ids": [Command.set(cat_a.ids)],
+                },
+            )
+        )
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=prod_a, price_unit=100.0),
             self._line_vals(name="Line B", product=prod_b, price_unit=200.0),
@@ -470,23 +505,36 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         tax_12 = self.base_tax
         tax_local = self._create_tax("Local Tax", 2.0)
 
-        fpos = self.env["account.fiscal.position"].create({
-            "name": "Multi-tax FP",
-        })
+        fpos = self.env["account.fiscal.position"].create(
+            {
+                "name": "Multi-tax FP",
+            },
+        )
         sc_pwd_tax = self.tax_sale_0_exempt_sc_pwd
         sc_pwd_tax.write({"original_tax_ids": [Command.set([tax_12.id, tax_local.id])]})
         fpos.write({"tax_ids": [Command.set([sc_pwd_tax.id])]})
         self.fpos_sc_pwd.write({"tax_ids": [Command.set([sc_pwd_tax.id])]})
 
-        priv = self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "Multi-tax FP",
-            "discount_amount": 20.0,
-            "fiscal_position_id": fpos.id,
-            "account_id": self.special_discount_account.id,
-        })
+        priv = (
+            self.env["l10n_ph.discount.privilege"]
+            .sudo()
+            .create(
+                {
+                    "name": "Multi-tax FP",
+                    "discount_amount": 20.0,
+                    "fiscal_position_id": fpos.id,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
+        )
 
         invoice = self._create_invoice(
-            self._line_vals(name="Line A", product=self.product_a, price_unit=100.0, tax=tax_12 + tax_local),
+            self._line_vals(
+                name="Line A",
+                product=self.product_a,
+                price_unit=100.0,
+                tax=tax_12 + tax_local,
+            ),
         )
         wizard = self._create_wizard(invoice, privilege_id=priv.id, apply_on="all")
         wizard.action_confirm()
@@ -499,19 +547,27 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         tax_dest1 = self._create_tax("Dest 1", 0.0)
         tax_dest2 = self._create_tax("Dest 2", 0.0)
 
-        fpos = self.env["account.fiscal.position"].create({
-            "name": "Non-1:1 FP",
-        })
+        fpos = self.env["account.fiscal.position"].create(
+            {
+                "name": "Non-1:1 FP",
+            },
+        )
         tax_dest1.write({"original_tax_ids": [Command.set([self.base_tax.id])]})
         tax_dest2.write({"original_tax_ids": [Command.set([self.base_tax.id])]})
         fpos.write({"tax_ids": [Command.set([tax_dest1.id, tax_dest2.id])]})
 
-        priv = self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "Non-1:1 FP",
-            "discount_amount": 20.0,
-            "fiscal_position_id": fpos.id,
-            "account_id": self.special_discount_account.id,
-        })
+        priv = (
+            self.env["l10n_ph.discount.privilege"]
+            .sudo()
+            .create(
+                {
+                    "name": "Non-1:1 FP",
+                    "discount_amount": 20.0,
+                    "fiscal_position_id": fpos.id,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
+        )
 
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=100.0),
@@ -550,11 +606,13 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         privilege = (
             self.env["l10n_ph.discount.privilege"]
             .sudo()
-            .create({
-                "name": "SC 20% No FP (tax-incl)",
-                "discount_amount": 20.0,
-                "account_id": self.special_discount_account.id,
-            })
+            .create(
+                {
+                    "name": "SC 20% No FP (tax-incl)",
+                    "discount_amount": 20.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         )
         invoice = self._create_invoice(
             self._line_vals(
@@ -598,21 +656,23 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         self._assert_discount_allocation(invoice, line, 125.0)
 
     def test_fp_privilege_on_standard_vat_with_document_tax_included(self):
-        invoice = self.env["account.move"].create({
-            "move_type": "out_invoice",
-            "partner_id": self.partner_a.id,
-            "document_tax_mode": "tax_included",
-            "invoice_line_ids": [
-                Command.create(
-                    self._line_vals(
-                        name="Line A",
-                        product=self.product_a,
-                        price_unit=750.0,
-                        tax=self.tax_sale_12,
+        invoice = self.env["account.move"].create(
+            {
+                "move_type": "out_invoice",
+                "partner_id": self.partner_a.id,
+                "document_tax_mode": "tax_included",
+                "invoice_line_ids": [
+                    Command.create(
+                        self._line_vals(
+                            name="Line A",
+                            product=self.product_a,
+                            price_unit=750.0,
+                            tax=self.tax_sale_12,
+                        ),
                     ),
-                ),
-            ],
-        })
+                ],
+            },
+        )
         wizard = self._create_wizard(
             invoice,
             privilege_id=self.privilege.id,
@@ -631,21 +691,23 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         self._assert_discount_allocation(invoice, line, 133.93)
 
     def test_fp_privilege_on_standard_vat_with_document_tax_excluded(self):
-        invoice = self.env["account.move"].create({
-            "move_type": "out_invoice",
-            "partner_id": self.partner_a.id,
-            "document_tax_mode": "tax_excluded",
-            "invoice_line_ids": [
-                Command.create(
-                    self._line_vals(
-                        name="Line A",
-                        product=self.product_a,
-                        price_unit=1000.0,
-                        tax=self.tax_sale_12,
+        invoice = self.env["account.move"].create(
+            {
+                "move_type": "out_invoice",
+                "partner_id": self.partner_a.id,
+                "document_tax_mode": "tax_excluded",
+                "invoice_line_ids": [
+                    Command.create(
+                        self._line_vals(
+                            name="Line A",
+                            product=self.product_a,
+                            price_unit=1000.0,
+                            tax=self.tax_sale_12,
+                        ),
                     ),
-                ),
-            ],
-        })
+                ],
+            },
+        )
         wizard = self._create_wizard(
             invoice,
             privilege_id=self.privilege.id,
@@ -664,11 +726,13 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         privilege = (
             self.env["l10n_ph.discount.privilege"]
             .sudo()
-            .create({
-                "name": "SC 20% No FP",
-                "discount_amount": 20.0,
-                "account_id": self.special_discount_account.id,
-            })
+            .create(
+                {
+                    "name": "SC 20% No FP",
+                    "discount_amount": 20.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         )
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=1000.0),
@@ -693,11 +757,13 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         privilege = (
             self.env["l10n_ph.discount.privilege"]
             .sudo()
-            .create({
-                "name": "SC 5% VAT-able",
-                "discount_amount": 5.0,
-                "account_id": self.special_discount_account.id,
-            })
+            .create(
+                {
+                    "name": "SC 5% VAT-able",
+                    "discount_amount": 5.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         )
         invoice = self._create_invoice(
             self._line_vals(
@@ -720,11 +786,13 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         privilege = (
             self.env["l10n_ph.discount.privilege"]
             .sudo()
-            .create({
-                "name": "SC 5% VAT-able",
-                "discount_amount": 5.0,
-                "account_id": self.special_discount_account.id,
-            })
+            .create(
+                {
+                    "name": "SC 5% VAT-able",
+                    "discount_amount": 5.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         )
         invoice = self._create_invoice(
             self._line_vals(
@@ -802,7 +870,9 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
             apply_on="all",
         )
         wizard.action_confirm()
-        self.assertEqual(invoice.invoice_line_ids.tax_ids, self.tax_sale_0_exempt_sc_pwd)
+        self.assertEqual(
+            invoice.invoice_line_ids.tax_ids, self.tax_sale_0_exempt_sc_pwd,
+        )
         self.assertTrue(
             invoice.line_ids.filtered(
                 lambda line_item: line_item.display_type == "discount",
@@ -844,11 +914,13 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         privilege = (
             self.env["l10n_ph.discount.privilege"]
             .sudo()
-            .create({
-                "name": "SC 20% No FP (remove test)",
-                "discount_amount": 20.0,
-                "account_id": self.special_discount_account.id,
-            })
+            .create(
+                {
+                    "name": "SC 20% No FP (remove test)",
+                    "discount_amount": 20.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         )
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=1000.0),
@@ -966,11 +1038,17 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=100.0),
         )
-        full = self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "Full 100%",
-            "discount_amount": 100.0,
-            "account_id": self.special_discount_account.id,
-        })
+        full = (
+            self.env["l10n_ph.discount.privilege"]
+            .sudo()
+            .create(
+                {
+                    "name": "Full 100%",
+                    "discount_amount": 100.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
+        )
         wizard = self._create_wizard(invoice, privilege_id=full.id, apply_on="all")
         line_wiz = wizard.line_ids
         self.assertTrue(line_wiz.has_discount_privilege)
@@ -981,7 +1059,9 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=100.0),
         )
-        wizard = self._create_wizard(invoice, privilege_id=self.privilege.id, apply_on="all")
+        wizard = self._create_wizard(
+            invoice, privilege_id=self.privilege.id, apply_on="all",
+        )
         wizard.action_confirm()
 
         wizard2 = self._create_wizard(invoice)
@@ -994,14 +1074,22 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=100.0),
         )
-        wizard = self._create_wizard(invoice, privilege_id=self.privilege.id, apply_on="all")
+        wizard = self._create_wizard(
+            invoice, privilege_id=self.privilege.id, apply_on="all",
+        )
         wizard.action_confirm()
 
-        priv30 = self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "30% Priv",
-            "discount_amount": 30.0,
-            "account_id": self.special_discount_account.id,
-        })
+        priv30 = (
+            self.env["l10n_ph.discount.privilege"]
+            .sudo()
+            .create(
+                {
+                    "name": "30% Priv",
+                    "discount_amount": 30.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
+        )
         wizard2 = self._create_wizard(invoice, privilege_id=priv30.id, apply_on="all")
         line_wiz = wizard2.line_ids
         self.assertTrue(line_wiz.has_applied_discount_privilege)
@@ -1013,27 +1101,43 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
     # ============================================================
 
     def test_skip_discount_amounts_on_section_lines(self):
-        invoice = self.env["account.move"].create({
-            "move_type": "out_invoice",
-            "partner_id": self.partner_a.id,
-            "invoice_line_ids": [
-                Command.create({"name": "Section Title", "display_type": "line_section"}),
-                Command.create(self._line_vals(name="Line A", product=self.product_a, price_unit=100.0)),
-                Command.create({"name": "Note", "display_type": "line_note"}),
-            ],
-        })
-        wizard = self._create_wizard(invoice, privilege_id=self.privilege.id, apply_on="all")
+        invoice = self.env["account.move"].create(
+            {
+                "move_type": "out_invoice",
+                "partner_id": self.partner_a.id,
+                "invoice_line_ids": [
+                    Command.create(
+                        {"name": "Section Title", "display_type": "line_section"},
+                    ),
+                    Command.create(
+                        self._line_vals(
+                            name="Line A", product=self.product_a, price_unit=100.0,
+                        ),
+                    ),
+                    Command.create({"name": "Note", "display_type": "line_note"}),
+                ],
+            },
+        )
+        wizard = self._create_wizard(
+            invoice, privilege_id=self.privilege.id, apply_on="all",
+        )
         wizard.action_confirm()
 
-        section = invoice.line_ids.filtered(lambda line: line.display_type == "line_section")
+        section = invoice.line_ids.filtered(
+            lambda line: line.display_type == "line_section",
+        )
         note = invoice.line_ids.filtered(lambda line: line.display_type == "line_note")
-        product_line = invoice.invoice_line_ids.filtered(lambda line: line.display_type == "product")
+        product_line = invoice.invoice_line_ids.filtered(
+            lambda line: line.display_type == "product",
+        )
 
         self.assertEqual(section.l10n_ph_special_discount_amount, 0.0)
         self.assertEqual(section.l10n_ph_regular_discount_amount, 0.0)
         self.assertEqual(note.l10n_ph_special_discount_amount, 0.0)
         self.assertEqual(note.l10n_ph_regular_discount_amount, 0.0)
-        self.assertAlmostEqual(product_line.l10n_ph_special_discount_amount, 20.0, places=2)
+        self.assertAlmostEqual(
+            product_line.l10n_ph_special_discount_amount, 20.0, places=2,
+        )
 
     # ============================================================
     #  Quantity / Credit Notes / Copy
@@ -1060,13 +1164,17 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         self.assertAlmostEqual(line.price_subtotal, 240.0)
 
     def test_apply_on_credit_note(self):
-        credit_note = self.env["account.move"].create({
-            "move_type": "out_refund",
-            "partner_id": self.partner_a.id,
-            "invoice_line_ids": [
-                Command.create(self._line_vals(name="Refund Line", price_unit=100.0)),
-            ],
-        })
+        credit_note = self.env["account.move"].create(
+            {
+                "move_type": "out_refund",
+                "partner_id": self.partner_a.id,
+                "invoice_line_ids": [
+                    Command.create(
+                        self._line_vals(name="Refund Line", price_unit=100.0),
+                    ),
+                ],
+            },
+        )
         wizard = self._create_wizard(
             credit_note,
             privilege_id=self.privilege.id,
@@ -1095,12 +1203,18 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
 
         copied = invoice.copy()
         line = copied.invoice_line_ids
-        self.assertEqual(line.l10n_ph_discount_privilege_id, orig_line.l10n_ph_discount_privilege_id)
-        self.assertEqual(line.l10n_ph_original_discount, orig_line.l10n_ph_original_discount)
+        self.assertEqual(
+            line.l10n_ph_discount_privilege_id, orig_line.l10n_ph_discount_privilege_id,
+        )
+        self.assertEqual(
+            line.l10n_ph_original_discount, orig_line.l10n_ph_original_discount,
+        )
 
-        remove_wizard = self.env["l10n_ph.discount.privilege.wizard"].create({
-            "move_id": copied.id,
-        })
+        remove_wizard = self.env["l10n_ph.discount.privilege.wizard"].create(
+            {
+                "move_id": copied.id,
+            },
+        )
         remove_wizard.action_remove_all()
         self.assertFalse(line.l10n_ph_discount_privilege_id)
         self.assertEqual(line.discount, orig_line.l10n_ph_original_discount)
@@ -1116,11 +1230,13 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         full = (
             self.env["l10n_ph.discount.privilege"]
             .sudo()
-            .create({
-                "name": "Full Discount",
-                "discount_amount": 100.0,
-                "account_id": self.special_discount_account.id,
-            })
+            .create(
+                {
+                    "name": "Full Discount",
+                    "discount_amount": 100.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         )
         wizard = self._create_wizard(invoice, privilege_id=full.id, apply_on="all")
         wizard.action_confirm()
@@ -1139,11 +1255,17 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
                 tax=self.tax_incl,
             ),
         )
-        full = self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "Full 100%",
-            "discount_amount": 100.0,
-            "account_id": self.special_discount_account.id,
-        })
+        full = (
+            self.env["l10n_ph.discount.privilege"]
+            .sudo()
+            .create(
+                {
+                    "name": "Full 100%",
+                    "discount_amount": 100.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
+        )
         wizard = self._create_wizard(invoice, privilege_id=full.id, apply_on="all")
         wizard.action_confirm()
 
@@ -1162,11 +1284,17 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
                 tax=self.base_tax,
             ),
         )
-        full = self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "Full 100%",
-            "discount_amount": 100.0,
-            "account_id": self.special_discount_account.id,
-        })
+        full = (
+            self.env["l10n_ph.discount.privilege"]
+            .sudo()
+            .create(
+                {
+                    "name": "Full 100%",
+                    "discount_amount": 100.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
+        )
         wizard = self._create_wizard(invoice, privilege_id=full.id, apply_on="all")
         wizard.action_confirm()
 
@@ -1192,10 +1320,14 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         self._assert_discount_allocation(invoice, invoice.invoice_line_ids, 20.0)
 
     def test_apply_privilege_clears_regular_discount(self):
-        regular_discount_account = self.company_data["default_account_revenue"].copy({
-            "name": "Regular Discount Allocation Account",
-        })
-        self.company_data["company"].account_discount_expense_allocation_id = regular_discount_account
+        regular_discount_account = self.company_data["default_account_revenue"].copy(
+            {
+                "name": "Regular Discount Allocation Account",
+            },
+        )
+        self.company_data[
+            "company"
+        ].account_discount_expense_allocation_id = regular_discount_account
         self.addCleanup(
             lambda: self.company_data["company"].write(
                 {"account_discount_expense_allocation_id": False},
@@ -1230,18 +1362,22 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
     # ============================================================
 
     def test_discount_privilege_records_are_hidden_outside_ph_company(self):
-        other_company = self.env["res.company"].create({
-            "name": "Non-PH Company",
-            "country_id": self.env.ref("base.us").id,
-        })
+        other_company = self.env["res.company"].create(
+            {
+                "name": "Non-PH Company",
+                "country_id": self.env.ref("base.us").id,
+            },
+        )
         privilege = (
             self.env["l10n_ph.discount.privilege"]
             .sudo()
-            .create({
-                "name": "PH Only",
-                "discount_amount": 10.0,
-                "account_id": self.special_discount_account.id,
-            })
+            .create(
+                {
+                    "name": "PH Only",
+                    "discount_amount": 10.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         )
         self.assertTrue(
             self.env["l10n_ph.discount.privilege"].search([("id", "=", privilege.id)]),
@@ -1253,26 +1389,30 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         )
 
     def test_invoicing_user_can_apply_but_not_configure_privileges(self):
-        invoice_user = self.env["res.users"].create({
-            "name": "Invoice User",
-            "login": "invoice.user@example.com",
-            "email": "invoice.user@example.com",
-            "company_id": self.company_data["company"].id,
-            "company_ids": [Command.set(self.company_data["company"].ids)],
-            "group_ids": [
-                Command.link(self.env.ref("account.group_account_invoice").id),
-            ],
-        })
-        readonly_user = self.env["res.users"].create({
-            "name": "Readonly User",
-            "login": "readonly.user@example.com",
-            "email": "readonly.user@example.com",
-            "company_id": self.company_data["company"].id,
-            "company_ids": [Command.set(self.company_data["company"].ids)],
-            "group_ids": [
-                Command.link(self.env.ref("account.group_account_readonly").id),
-            ],
-        })
+        invoice_user = self.env["res.users"].create(
+            {
+                "name": "Invoice User",
+                "login": "invoice.user@example.com",
+                "email": "invoice.user@example.com",
+                "company_id": self.company_data["company"].id,
+                "company_ids": [Command.set(self.company_data["company"].ids)],
+                "group_ids": [
+                    Command.link(self.env.ref("account.group_account_invoice").id),
+                ],
+            },
+        )
+        readonly_user = self.env["res.users"].create(
+            {
+                "name": "Readonly User",
+                "login": "readonly.user@example.com",
+                "email": "readonly.user@example.com",
+                "company_id": self.company_data["company"].id,
+                "company_ids": [Command.set(self.company_data["company"].ids)],
+                "group_ids": [
+                    Command.link(self.env.ref("account.group_account_readonly").id),
+                ],
+            },
+        )
 
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=100.0),
@@ -1289,39 +1429,53 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         )
         self.assertEqual(wizard.move_id, invoice)
 
-        self.env["l10n_ph.discount.privilege"].with_user(invoice_user).create({
-            "name": "Invoice User Creates",
-            "discount_amount": 10.0,
-            "account_id": self.special_discount_account.id,
-            "company_id": self.company_data["company"].id,
-        })
-
-        with self.assertRaises(Exception):
-            self.env["l10n_ph.discount.privilege"].with_user(readonly_user).create({
-                "name": "Should Not Create",
+        self.env["l10n_ph.discount.privilege"].with_user(invoice_user).create(
+            {
+                "name": "Invoice User Creates",
                 "discount_amount": 10.0,
                 "account_id": self.special_discount_account.id,
                 "company_id": self.company_data["company"].id,
-            })
+            },
+        )
+
+        with self.assertRaises(Exception):
+            self.env["l10n_ph.discount.privilege"].with_user(readonly_user).create(
+                {
+                    "name": "Should Not Create",
+                    "discount_amount": 10.0,
+                    "account_id": self.special_discount_account.id,
+                    "company_id": self.company_data["company"].id,
+                },
+            )
 
     def test_wizard_rejects_privilege_from_other_company(self):
-        company_b = self.env["res.company"].create({
-            "name": "Company B",
-            "country_id": self.env.ref("base.ph").id,
-        })
+        company_b = self.env["res.company"].create(
+            {
+                "name": "Company B",
+                "country_id": self.env.ref("base.ph").id,
+            },
+        )
         company_b.partner_id.l10n_ph_entity_type = "corporation"
-        account_b = self.env["account.account"].create({
-            "code": "DISC-B",
-            "name": "Discount B",
-            "account_type": "income",
-            "company_ids": [Command.set(company_b.ids)],
-        })
-        priv_b = self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "Priv B",
-            "discount_amount": 20.0,
-            "account_id": account_b.id,
-            "company_id": company_b.id,
-        })
+        account_b = self.env["account.account"].create(
+            {
+                "code": "DISC-B",
+                "name": "Discount B",
+                "account_type": "income",
+                "company_ids": [Command.set(company_b.ids)],
+            },
+        )
+        priv_b = (
+            self.env["l10n_ph.discount.privilege"]
+            .sudo()
+            .create(
+                {
+                    "name": "Priv B",
+                    "discount_amount": 20.0,
+                    "account_id": account_b.id,
+                    "company_id": company_b.id,
+                },
+            )
+        )
 
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=100.0),
@@ -1349,14 +1503,22 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         cat_x = self.env["product.category"].create({"name": "Cat X"})
         self.env["product.product"].create({"name": "Prod X", "categ_id": cat_x.id})
         cat_y = self.env["product.category"].create({"name": "Cat Y"})
-        prod_y = self.env["product.product"].create({"name": "Prod Y", "categ_id": cat_y.id})
+        prod_y = self.env["product.product"].create(
+            {"name": "Prod Y", "categ_id": cat_y.id},
+        )
 
-        priv = self.env["l10n_ph.discount.privilege"].sudo().create({
-            "name": "Cat X Only",
-            "discount_amount": 15.0,
-            "account_id": self.special_discount_account.id,
-            "applied_to_category_ids": [Command.set(cat_x.ids)],
-        })
+        priv = (
+            self.env["l10n_ph.discount.privilege"]
+            .sudo()
+            .create(
+                {
+                    "name": "Cat X Only",
+                    "discount_amount": 15.0,
+                    "account_id": self.special_discount_account.id,
+                    "applied_to_category_ids": [Command.set(cat_x.ids)],
+                },
+            )
+        )
 
         invoice = self._create_invoice(
             self._line_vals(name="Line Y", product=prod_y, price_unit=100.0),
@@ -1401,49 +1563,69 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
             wizard.action_remove_all()
 
     def test_privilege_not_applied_on_vendor_bill(self):
-        bill = self.env["account.move"].create({
-            "move_type": "in_invoice",
-            "partner_id": self.partner_a.id,
-            "invoice_line_ids": [
-                Command.create({
-                    "name": "Vendor Line",
-                    "product_id": self.product_a.id,
-                    "account_id": self.company_data["default_account_expense"].id,
-                    "quantity": 1.0,
-                    "price_unit": 100.0,
-                }),
-            ],
-        })
+        bill = self.env["account.move"].create(
+            {
+                "move_type": "in_invoice",
+                "partner_id": self.partner_a.id,
+                "invoice_line_ids": [
+                    Command.create(
+                        {
+                            "name": "Vendor Line",
+                            "product_id": self.product_a.id,
+                            "account_id": self.company_data[
+                                "default_account_expense"
+                            ].id,
+                            "quantity": 1.0,
+                            "price_unit": 100.0,
+                        },
+                    ),
+                ],
+            },
+        )
         self.assertFalse(bill.l10n_ph_has_discount_privilege)
 
     def test_mixed_basket_multiple_privileges(self):
         pwd_privilege = (
             self.env["l10n_ph.discount.privilege"]
             .sudo()
-            .create({
-                "name": "PWD 20%",
-                "discount_amount": 20.0,
-                "fiscal_position_id": self.fpos_sc_pwd.id,
-                "account_id": self.special_discount_account.id,
-            })
+            .create(
+                {
+                    "name": "PWD 20%",
+                    "discount_amount": 20.0,
+                    "fiscal_position_id": self.fpos_sc_pwd.id,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         )
         sc5_privilege = (
             self.env["l10n_ph.discount.privilege"]
             .sudo()
-            .create({
-                "name": "SC 5% VAT-able",
-                "discount_amount": 5.0,
-                "account_id": self.special_discount_account.id,
-            })
+            .create(
+                {
+                    "name": "SC 5% VAT-able",
+                    "discount_amount": 5.0,
+                    "account_id": self.special_discount_account.id,
+                },
+            )
         )
 
-        product_c = self.env["product.product"].create({"name": "Product C", "list_price": 300.0})
-        product_d = self.env["product.product"].create({"name": "Product D", "list_price": 150.0})
+        product_c = self.env["product.product"].create(
+            {"name": "Product C", "list_price": 300.0},
+        )
+        product_d = self.env["product.product"].create(
+            {"name": "Product D", "list_price": 150.0},
+        )
 
         invoice = self._create_invoice(
-            self._line_vals(name="Line A (SC 20%)", product=self.product_a, price_unit=1000.0),
-            self._line_vals(name="Line B (PWD 20%)", product=self.product_b, price_unit=2000.0),
-            self._line_vals(name="Line C (SC 5%)", product=product_c, price_unit=3000.0),
+            self._line_vals(
+                name="Line A (SC 20%)", product=self.product_a, price_unit=1000.0,
+            ),
+            self._line_vals(
+                name="Line B (PWD 20%)", product=self.product_b, price_unit=2000.0,
+            ),
+            self._line_vals(
+                name="Line C (SC 5%)", product=product_c, price_unit=3000.0,
+            ),
             self._line_vals(name="Line D (none)", product=product_d, price_unit=4000.0),
         )
 

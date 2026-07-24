@@ -8,7 +8,7 @@ class ResConfigSettings(models.TransientModel):
 
     group_l10n_ph_discount_privilege = fields.Boolean(
         string="Discount Privileges",
-        implied_group='l10n_ph.group_l10n_ph_discount_privilege',
+        implied_group="l10n_ph.group_l10n_ph_discount_privilege",
     )
 
     @api.onchange("group_l10n_ph_discount_privilege")

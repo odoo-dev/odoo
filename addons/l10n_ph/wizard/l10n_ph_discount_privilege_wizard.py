@@ -65,13 +65,14 @@ class L10nPhDiscountPrivilegeWizard(models.TransientModel):
         for vals in vals_list:
             if not vals.get("move_id"):
                 raise UserError(
-                    self.env._("A customer invoice or credit note is required to apply discount privileges."),
+                    self.env._(
+                        "A customer invoice or credit note is required to apply discount privileges.",
+                    ),
                 )
             if "line_ids" not in vals:
                 move = self.env["account.move"].browse(vals["move_id"])
                 invoice_lines = (
-                    move.invoice_line_ids
-                    - move.invoice_line_ids._get_discount_lines()
+                    move.invoice_line_ids - move.invoice_line_ids._get_discount_lines()
                 )
                 vals["line_ids"] = [
                     Command.create(
@@ -95,8 +96,7 @@ class L10nPhDiscountPrivilegeWizard(models.TransientModel):
             return source.product_id.categ_id.id in self.category_ids.ids
         if self.apply_on == "product":
             return (
-                bool(self.product_ids)
-                and source.product_id.id in self.product_ids.ids
+                bool(self.product_ids) and source.product_id.id in self.product_ids.ids
             )
         return False
 
