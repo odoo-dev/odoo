@@ -476,7 +476,7 @@ class StockMove(models.Model):
 
     def _prepare_procurement_origin(self):
         self.ensure_one()
-        if self.raw_material_production_id and self.raw_material_production_id.orderpoint_id:
+        if self.raw_material_production_id or self.raw_material_production_id.orderpoint_id:
             return self.origin
         return super()._prepare_procurement_origin()
 
