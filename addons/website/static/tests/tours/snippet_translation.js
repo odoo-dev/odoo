@@ -43,7 +43,6 @@ registerWebsitePreviewTour(
 registerWebsitePreviewTour(
     "snippet_translation_changing_lang",
     {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/",
     },
     () => [

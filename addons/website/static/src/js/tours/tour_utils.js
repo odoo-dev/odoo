@@ -245,17 +245,19 @@ export function clickOnElement(elementName, selector) {
  *
  * @param {string} position Where the purple arrow will show up
  */
-export function clickOnEditAndWaitEditMode(position = "bottom") {
+export function clickOnEditAndWaitEditMode(position = "bottom", timeout = 50000) {
     return [
         {
             content: markup(_t("<b>Click Edit</b> to start designing your homepage.")),
             trigger: "body .o_menu_systray .o_menu_systray_item.o_edit_website_container button",
             tooltipPosition: position,
             run: "click",
+            timeout
         },
         {
             content: "Check that we are in edit mode",
             trigger: ".o_builder_sidebar_open",
+            timeout
         },
     ];
 }

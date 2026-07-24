@@ -12,7 +12,6 @@ import { stepUtils } from "@web_tour/tour_utils";
 registerWebsitePreviewTour(
     "blog_tags",
     {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/blog",
     },
     () => [

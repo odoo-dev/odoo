@@ -138,7 +138,6 @@ function openBackgroundColorPicker(type, selector) {
 registerWebsitePreviewTour(
     "website_page_breadcrumb",
     {
-        undeterministicTour_doNotCopy: true, // Remove this key to make the tour failed. ( It removes delay between steps )
         url: "/contactus",
         edition: false,
     },

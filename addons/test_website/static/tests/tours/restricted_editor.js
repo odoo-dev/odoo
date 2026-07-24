@@ -69,7 +69,6 @@ const goToMenuItem = [
 registerWebsitePreviewTour(
     "test_restricted_editor_only",
     {
-        undeterministicTour_doNotCopy: true,
         url: "/",
     },
     () => [
@@ -120,9 +119,6 @@ registerWebsitePreviewTour(
 registerWebsitePreviewTour(
     "test_restricted_editor_test_admin",
     {
-        // Remove this key to make the tour fail with error:
-        // "Element has not been found." at step "Open Edit menu"
-        undeterministicTour_doNotCopy: true,
         url: "/",
     },
     () => [

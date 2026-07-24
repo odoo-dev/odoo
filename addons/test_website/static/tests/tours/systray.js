@@ -229,7 +229,7 @@ register(
         ...canEditInBackEnd(),
         ...canEdit(),
     ],
-    true
+    false
 );
 
 register(
@@ -242,7 +242,7 @@ register(
         ...canEditInBackEnd(),
         ...canEdit(),
     ],
-    true
+    false
 );
 
 register(
@@ -255,7 +255,7 @@ register(
         ...canViewInBackEnd(),
         ...canEditButCannotChange(),
     ],
-    true
+    false
 );
 
 register("test_systray_not_reditor_tester", () => [
