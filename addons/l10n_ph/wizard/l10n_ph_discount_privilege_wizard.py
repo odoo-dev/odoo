@@ -9,9 +9,9 @@ class L10nPhDiscountPrivilegeWizard(models.TransientModel):
     _name = "l10n_ph.discount.privilege.wizard"
     _description = "Discount Privilege Wizard"
 
-    move_id = fields.Many2one("account.move", required=True)
-    company_id = fields.Many2one(related="move_id.company_id")
-    currency_id = fields.Many2one(related="move_id.currency_id")
+    move_id = fields.Many2one("account.move")
+    company_id = fields.Many2one(related="move_id.company_id", readonly=True)
+    currency_id = fields.Many2one(related="move_id.currency_id", readonly=True)
     privilege_id = fields.Many2one(
         "l10n_ph.discount.privilege",
         string="Privilege Applied",
@@ -63,7 +63,11 @@ class L10nPhDiscountPrivilegeWizard(models.TransientModel):
         """Autopopulate line_ids from the invoice, excluding discount-allocation
         lines (which are handled by other modules and should not receive privileges)."""
         for vals in vals_list:
-            if "line_ids" not in vals and vals.get("move_id"):
+            if not vals.get("move_id"):
+                raise UserError(
+                    self.env._("A customer invoice or credit note is required to apply discount privileges."),
+                )
+            if "line_ids" not in vals:
                 move = self.env["account.move"].browse(vals["move_id"])
                 invoice_lines = (
                     move.invoice_line_ids

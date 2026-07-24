@@ -281,6 +281,18 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
                 ],
             },
         )
+        readonly_user = self.env["res.users"].create(
+            {
+                "name": "Readonly User",
+                "login": "readonly.user@example.com",
+                "email": "readonly.user@example.com",
+                "company_id": self.company_data["company"].id,
+                "company_ids": [Command.set(self.company_data["company"].ids)],
+                "group_ids": [
+                    Command.link(self.env.ref("account.group_account_readonly").id),
+                ],
+            },
+        )
 
         invoice = self._create_invoice(
             self._line_vals(name="Line A", product=self.product_a, price_unit=100.0),
@@ -297,8 +309,19 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         )
         self.assertEqual(wizard.move_id, invoice)
 
+        # Invoice-group users have crud on the privilege model per the invoice
+        # access pattern; only basic/readonly users cannot create privileges.
+        self.env["l10n_ph.discount.privilege"].with_user(invoice_user).create(
+            {
+                "name": "Invoice User Creates",
+                "discount_amount": 10.0,
+                "account_id": self.special_discount_account.id,
+                "company_id": self.company_data["company"].id,
+            },
+        )
+
         with self.assertRaises(Exception):
-            self.env["l10n_ph.discount.privilege"].with_user(invoice_user).create(
+            self.env["l10n_ph.discount.privilege"].with_user(readonly_user).create(
                 {
                     "name": "Should Not Create",
                     "discount_amount": 10.0,
@@ -350,23 +373,6 @@ class TestDiscountPrivilegeWizard(TestPhCommon):
         inv_line_a, inv_line_b = invoice.invoice_line_ids.sorted("sequence")
         self.assertEqual(inv_line_a.l10n_ph_discount_privilege_id, self.privilege)
         self.assertFalse(inv_line_b.l10n_ph_discount_privilege_id)
-
-    def test_regular_discount_amount_from_tax_inclusive_price_difference(self):
-        """Regular discount amount is correctly back-calculated for tax-inclusive
-        (price-include division) lines when no SC/PWD privilege is active."""
-        invoice = self._create_invoice(
-            self._line_vals(
-                name="Line A",
-                product=self.product_a,
-                quantity=2.0,
-                price_unit=100.0,
-                tax=self.tax_incl,
-            ),
-        )
-
-        line = invoice.invoice_line_ids
-        self.assertAlmostEqual(line.l10n_ph_regular_discount_amount, 35.71, places=2)
-        self.assertEqual(line.l10n_ph_special_discount_amount, 0.0)
 
     def test_remove_line_discount_does_not_require_privilege(self):
         """Per-line SC/PWD privilege removal works even when no privilege is

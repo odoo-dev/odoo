@@ -18,14 +18,17 @@ class AccountMoveLine(models.Model):
         self.ensure_one()
         return self.display_type != "product" or not self.move_id.is_sale_document()
 
+    def _l10n_ph_line_qty(self):
+        self.ensure_one()
+        return self.quantity
+
+    def _l10n_ph_regular_discount_reference_price(self):
+        self.ensure_one()
+        return self.price_unit
+
     @api.depends(
-        "quantity",
-        "discount",
-        "price_unit",
         "price_total",
-        "product_id.lst_price",
         "tax_ids",
-        "move_id.move_type",
         "document_tax_mode",
         "l10n_ph_discount_privilege_id",
     )
@@ -43,7 +46,7 @@ class AccountMoveLine(models.Model):
         allocate l10n_ph_special_discount_amount (VAT-inclusive) to the
         privilege's account instead. super() handles non-privileged lines only."""
         lines_without_privilege = self.filtered(
-            lambda line: not line.l10n_ph_discount_privilege_id
+            lambda line: not line.l10n_ph_discount_privilege_id,
         )
         super(AccountMoveLine, lines_without_privilege)._compute_discount_allocation_needed()
         for line in self.filtered("l10n_ph_discount_privilege_id"):

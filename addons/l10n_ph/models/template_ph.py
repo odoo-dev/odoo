@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import models
+
 from odoo.addons.account.models.chart_template import template
 
 
@@ -76,7 +77,7 @@ class AccountChartTemplate(models.AbstractModel):
             },
             "l10n_ph_discount_privilege_sc_5": {
                 "name": "5% Senior Citizen Discount",
-                "discount_type": "sc",
+                "discount_type": "special",
                 "discount_amount": 5,
                 "account_id": "l10n_ph_account_401021",
             },

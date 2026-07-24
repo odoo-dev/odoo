@@ -7,9 +7,8 @@ class L10nPhDiscountPrivilegeLineMixin(models.AbstractModel):
     """Shared logic for applying Philippine SC/PWD discount privileges on any
     document line (invoice lines, sale order lines, ...).
 
-    Concrete models inherit this mixin and only provide the small model-specific
-    hooks plus the correct `@api.depends` for `_compute_l10n_ph_discount_amounts`,
-    which must list the quantity / document-tax-mode fields specific to that model.
+    Concrete models inherit this mixin and provide the model-specific
+    hooks plus the correct dependencies for `_compute_l10n_ph_discount_amounts`.
     """
 
     _name = "l10n_ph.discount.privilege.line.mixin"
@@ -50,45 +49,69 @@ class L10nPhDiscountPrivilegeLineMixin(models.AbstractModel):
         readonly=True,
     )
 
-    # --- Model-specific hooks ---
+    # --- Model-specific hooks (overridden by each concrete model) ---
 
     def _l10n_ph_skip_discount_amounts(self):
-        self.ensure_one()
-        return bool(self.display_type)
+        """Return True when the line should not receive privilege discount
+        amounts (e.g. a section/note line, or a non-sale document).
+
+        Must be overridden in each concrete model.
+        """
+        raise NotImplementedError
 
     def _l10n_ph_line_qty(self):
-        self.ensure_one()
-        return self.quantity
+        """Return the line quantity used in the 100% discount back-calculation.
+
+        Must be overridden in each concrete model.
+        """
+        raise NotImplementedError
 
     def _l10n_ph_regular_discount_reference_price(self):
-        self.ensure_one()
-        if self.product_id:
-            return self.product_id.lst_price
-        return self.price_unit
+        """Return the reference (pre-discount) unit price used to infer the
+        regular discount amount when no explicit discount % is set.
+
+        Must be overridden in each concrete model.
+        """
+        raise NotImplementedError
 
     # --- price_unit adjustment with privilege FP ---
+
+    def _adjust_price_unit_from_privilege(self, price_unit, tax_ids):
+        """Compute the new price_unit and original_price_unit to set on the line
+        after applying (or removing) the privilege's fiscal position, without
+        writing to any model-specific field directly."""
+        self.ensure_one()
+        fiscal_position = self.l10n_ph_discount_privilege_id.fiscal_position_id
+        if fiscal_position:
+            tax_ids = self.l10n_ph_original_tax_ids or tax_ids
+            taxes_after_fp = fiscal_position.map_tax(tax_ids)
+            new_price_unit = tax_ids._adapt_price_unit_to_another_taxes(
+                price_unit=self.l10n_ph_original_price_unit or price_unit,
+                product=None,
+                original_taxes=tax_ids,
+                new_taxes=taxes_after_fp,
+                document_tax_mode=self.document_tax_mode,
+            )
+            original_price_unit = self.l10n_ph_original_price_unit or price_unit
+        elif self.l10n_ph_original_price_unit:
+            new_price_unit = self.l10n_ph_original_price_unit
+            original_price_unit = 0.0
+        else:
+            new_price_unit = price_unit
+            original_price_unit = 0.0
+        return new_price_unit, original_price_unit
 
     def _update_price_unit_from_privilege(self):
         """Save the original price_unit so it can be restored on removal, then
         adapts price_unit through the privilege's fiscal position (FP), or
         restores the original price_unit when the privilege is cleared."""
         for line in self:
-            fiscal_position = line.l10n_ph_discount_privilege_id.fiscal_position_id
-            if fiscal_position:
-                if not line.l10n_ph_original_price_unit and line.price_unit:
-                    line.l10n_ph_original_price_unit = line.price_unit
-                tax_ids = line.l10n_ph_original_tax_ids or line.tax_ids
-                taxes_after_fp = fiscal_position.map_tax(tax_ids)
-                line.price_unit = line.tax_ids._adapt_price_unit_to_another_taxes(
-                    price_unit=line.l10n_ph_original_price_unit,
-                    product=None,
-                    original_taxes=tax_ids,
-                    new_taxes=taxes_after_fp,
-                    document_tax_mode=line.document_tax_mode,
-                )
-            elif line.l10n_ph_original_price_unit:
-                line.price_unit = line.l10n_ph_original_price_unit
-                line.l10n_ph_original_price_unit = 0
+            price_unit = line.price_unit
+            new_price_unit, original_price_unit = line._adjust_price_unit_from_privilege(
+                price_unit, line.tax_ids,
+            )
+            line.price_unit = new_price_unit
+            line.l10n_ph_original_price_unit = original_price_unit
 
     # --- Computed taxes with privilege FP ---
 
@@ -128,8 +151,7 @@ class L10nPhDiscountPrivilegeLineMixin(models.AbstractModel):
         reported discount consistent with the FP tax treatment.
 
         Regular (non-privileged): explicit discount % back-computed from
-        price_subtotal, or inferred from pricelist/catalog list price vs. the
-        invoiced unit price. Never reported as a privilege discount."""
+        price_subtotal. Never reported as a privilege discount."""
         for line in self:
             if line._l10n_ph_skip_discount_amounts():
                 line.l10n_ph_regular_discount_amount = 0.0
@@ -155,20 +177,11 @@ class L10nPhDiscountPrivilegeLineMixin(models.AbstractModel):
             else:
                 line.l10n_ph_special_discount_amount = 0.0
                 if line.discount:
-                    # Back-calculate regular discount amount from price_subtotal.
                     line.l10n_ph_regular_discount_amount = (
                         line.price_subtotal * line.discount / (100.0 - line.discount)
                     )
                 else:
-                    reference_price = line._l10n_ph_regular_discount_reference_price()
-                    if line.price_unit and reference_price > line.price_unit:
-                        line.l10n_ph_regular_discount_amount = (
-                            line.price_subtotal
-                            * (reference_price - line.price_unit)
-                            / line.price_unit
-                        )
-                    else:
-                        line.l10n_ph_regular_discount_amount = 0.0
+                    line.l10n_ph_regular_discount_amount = 0.0
 
     # --- Preview helper for wizard ---
 
