@@ -28,7 +28,21 @@ registry.category("web_tour.tours").add("sale_tour", {
             trigger: "button.o_list_button_add",
             content: _t("Build your first quotation right here!"),
             tooltipPosition: "bottom",
-            run: "click",
+            run: async function ({ anchor, waitFor }) {
+                // sale_management turns this button into a dropdown when
+                // quotation templates exist. Keep this in one step: split
+                // across two steps, the popover closes itself before the
+                // second step's click can land.
+                if (anchor.classList.contains("dropdown")) {
+                    anchor.click();
+                    const newQuotationButton = await waitFor(
+                        "div.o_popover:has(.o_sale_management_template) > button.o-dropdown-item:not(.o_sale_management_template)"
+                    );
+                    newQuotationButton.click();
+                } else {
+                    anchor.click();
+                }
+            },
         },
         {
             trigger: ".o_sale_order",
@@ -41,7 +55,23 @@ registry.category("web_tour.tours").add("sale_tour", {
         },
         {
             isActive: ["auto"],
-            trigger: ".ui-menu-item > a:contains('Agrolait')",
+            trigger: ".o_m2o_dropdown_option_create_edit",
+            content: _t("Create and edit the customer."),
+            tooltipPosition: "bottom",
+            run: "click",
+        },
+        {
+            isActive: ["auto"],
+            trigger: ".o_dialog .o_field_widget[name='email'] input",
+            content: _t("Enter an email address for your customer."),
+            tooltipPosition: "bottom",
+            run: "edit agrolait@example.com",
+        },
+        {
+            isActive: ["auto"],
+            trigger: ".o_dialog .o_form_button_save",
+            content: _t("Save the customer."),
+            tooltipPosition: "bottom",
             run: "click",
         },
         // as we are creating product on the fly in next step, which is not supported in sol_label_text
@@ -95,6 +125,22 @@ registry.category("web_tour.tours").add("sale_tour", {
             isActive: ["body:not(:has(.modal-footer button.o_mail_send))"],
             trigger: ".modal-footer button[name='document_layout_save']",
             content: _t("let's continue"),
+            tooltipPosition: "bottom",
+            run: "click",
+        },
+        {
+            // The customer was created on the fly without an email address,
+            // so the composer asks for one before it can send.
+            isActive: ["body:has(.o-mail-RecipientsInputTagsListPopover)"],
+            trigger: ".o-mail-RecipientsInputTagsListPopover input",
+            content: _t("Enter an email address for your customer."),
+            tooltipPosition: "bottom",
+            run: "edit agrolait@example.com",
+        },
+        {
+            isActive: ["body:has(.o-mail-RecipientsInputTagsListPopover)"],
+            trigger: ".o-mail-RecipientsInputTagsListPopover button.btn-primary",
+            content: _t("Confirm the email address."),
             tooltipPosition: "bottom",
             run: "click",
         },
