@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="l10n_kz_edi.TestConnection">
+        <div class="o_l10n_kz_edi_test_connection p-4">
+            <!-- Listed up front and filled in as each check runs. -->
+            <div t-foreach="state.checks" t-as="check" t-key="check_index" class="d-flex align-items-start gap-2 mb-3">
+                <span t-att-class="iconClass(check)" class="mt-1"/>
+                <div class="flex-grow-1">
+                    <div class="fw-bold" t-esc="check.label"/>
+                    <div t-if="check.message"
+                         t-att-class="check.status === 'failure' ? 'text-danger' : 'text-muted'"
+                         t-esc="check.message"/>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
