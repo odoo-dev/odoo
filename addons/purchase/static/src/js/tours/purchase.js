@@ -49,6 +49,8 @@ registry.category("web_tour.tours").add("purchase_tour", {
         {
             isActive: ["auto"],
             trigger: ".ui-menu-item > a:contains('Azure Interior')",
+            content: _t("Select this vendor."),
+            tooltipPosition: "bottom",
             run: "click",
         },
         {
@@ -75,10 +77,12 @@ registry.category("web_tour.tours").add("purchase_tour", {
         {
             isActive: ["auto"],
             trigger: "a:contains('DESK0001')",
+            content: _t("Select this product."),
+            tooltipPosition: "bottom",
             run: "click",
         },
         {
-            trigger: ".o_field_text[name='name'] textarea:value(DESK0001)",
+            trigger: ".oi-arrow-right", // Wait for product creation
         },
         {
             trigger: ".o_purchase_order",
@@ -94,7 +98,7 @@ registry.category("web_tour.tours").add("purchase_tour", {
             trigger: ".o_statusbar_buttons .o_arrow_button_current[name='action_rfq_send']",
         },
         ...stepUtils.statusbarButtonsSteps(
-            "Send by Email",
+            "Send RFQ",
             _t("Send the request for quotation to your vendor.")
         ),
         {
@@ -110,11 +114,13 @@ registry.category("web_tour.tours").add("purchase_tour", {
             trigger: ".o_purchase_order",
         },
         {
-            content: "Select price",
+            content: _t("Select price"),
+            tooltipPosition: "bottom",
             trigger: 'tbody tr.o_data_row .o_list_number[name="price_unit"]',
+            run: "click",
         },
         {
-            trigger: "tbody tr.o_data_row .o_list_number[name='price_unit']",
+            trigger: "tbody tr.o_data_row .o_list_number[name='price_unit'] input",
             content: _t(
                 "Once you get the price from the vendor, you can complete the purchase order with the right price."
             ),
@@ -124,9 +130,16 @@ registry.category("web_tour.tours").add("purchase_tour", {
         {
             isActive: ["auto"],
             trigger: ".o_purchase_order",
+            content: _t("Confirm the price."),
+            tooltipPosition: "bottom",
             run: "click",
         },
         ...stepUtils.statusbarButtonsSteps("Confirm Order", _t("Confirm your purchase.")),
+        {
+            // Wait for the confirmation to be saved before the tour ends,
+            // otherwise it can finish on a still-dirty form view.
+            trigger: ".o_statusbar_status .o_arrow_button_current:contains('Purchase Order')",
+        },
         ...new PurchaseAdditionalTourSteps()._get_purchase_stock_steps(),
     ],
 });
