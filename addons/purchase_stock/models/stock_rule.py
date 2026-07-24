@@ -164,7 +164,7 @@ class StockRule(models.Model):
 
     def _filter_warehouse_routes(self, product, warehouses, route):
         if any(rule.action == 'buy' for rule in route.rule_ids):
-            if product.seller_ids:
+            if product.seller_ids or product._has_confirmed_purchase():
                 return super()._filter_warehouse_routes(product, warehouses, route)
             return False
         return super()._filter_warehouse_routes(product, warehouses, route)
@@ -185,6 +185,8 @@ class StockRule(models.Model):
         seller = 'supplierinfo' in values and values['supplierinfo'] or product.with_company(buy_rule.company_id)._select_seller(quantity=None)
         if not buy_rule:
             return delays, delay_description
+        if not seller and not product._has_vendor_pricelist(company_id=buy_rule.company_id):
+            seller = product._get_last_po_supplierinfo(company_id=buy_rule.company_id)
         if not seller:
             delays['total_delay'] += 365
             delays['no_vendor_found_delay'] += 365
@@ -407,6 +409,8 @@ class StockRule(models.Model):
 
         if not supplier and not partner:  # Last fallback, also matching expired pricelists
             supplier = p._select_seller(quantity=None) or p._prepare_sellers()[:1]
+        if not supplier and not p._has_vendor_pricelist(partner, company):
+            supplier = p._get_last_po_supplierinfo(partner_id=partner, company_id=company)
         return supplier
 
 
@@ -415,7 +419,7 @@ class StockRoute(models.Model):
 
     def _is_valid_resupply_route_for_product(self, product):
         if any(rule.action == 'buy' for rule in self.rule_ids):
-            return bool(product.seller_ids)
+            return bool(product.seller_ids) or product._has_confirmed_purchase()
         return super()._is_valid_resupply_route_for_product(product)
 
     def _get_non_push_pull_rule_actions(self):

@@ -32,7 +32,7 @@ class PurchaseOrderLine(models.Model):
     discount = fields.Float(
         string="Discount (%)",
         compute='_compute_price_unit_and_date_planned_and_name',
-        digits='Discount',
+        digits='Discount', aggregator='avg',
         store=True, readonly=False)
     tax_ids = fields.Many2many(
         comodel_name='account.tax',
@@ -510,11 +510,20 @@ class PurchaseOrderLine(models.Model):
                             line.name = display_names[vendors.ids.index(line.selected_seller_id.id)] + line.name[len(display_name):]
                         break
 
+            seller = line.selected_seller_id
+            has_pricelist = line.product_id._has_vendor_pricelist(line.order_id.partner_id, line.company_id)
+            if not seller and not has_pricelist:
+                # No pricelist defined for this vendor: the last confirmed po line acts as one
+                seller = line.product_id._get_last_po_supplierinfo(
+                    partner_id=line.order_id.partner_id,
+                    company_id=line.company_id,
+                )
+                if seller:
+                    line.date_planned = line._get_date_planned(seller).strftime(DEFAULT_SERVER_DATETIME_FORMAT)
+
             # If not seller, use the standard price. It needs a proper currency conversion.
-            if not line.selected_seller_id:
-                unavailable_seller = line.product_id.seller_ids.filtered(
-                    lambda s: s.partner_id == line.order_id.partner_id)
-                if not unavailable_seller and line.price_unit and line.uom_id == line._origin.uom_id:
+            if not seller:
+                if not has_pricelist and line.price_unit and line.uom_id == line._origin.uom_id:
                     # Avoid to modify the price unit if there is no price list for this partner and
                     # the line has already one to avoid to override unit price set manually.
                     continue
@@ -542,16 +551,16 @@ class PurchaseOrderLine(models.Model):
                     ),
                 )
 
-            elif line.selected_seller_id:
-                price_unit = line.env['account.tax']._fix_tax_included_price_company(line.selected_seller_id.price, line.product_id.supplier_taxes_id, line.tax_ids, line.company_id, document_tax_mode=line.document_tax_mode) if line.selected_seller_id else 0.0
-                price_unit = line.selected_seller_id.currency_id._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
+            else:
+                price_unit = line.env['account.tax']._fix_tax_included_price_company(seller.price, line.product_id.supplier_taxes_id, line.tax_ids, line.company_id, document_tax_mode=line.document_tax_mode)
+                price_unit = seller.currency_id._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
                 line.price_unit = line.technical_price_unit = line.product_id._adapt_price_unit_to_document_tax_mode(
-                    line.selected_seller_id.uom_id._compute_price(price_unit, line.uom_id),
+                    seller.uom_id._compute_price(price_unit, line.uom_id),
                     line.product_id.supplier_taxes_id,
                     line.uom_id,
                     line.document_tax_mode,
                 )
-                line.discount = line.selected_seller_id.discount or 0.0
+                line.discount = seller.discount or 0.0
 
     def _reset_price_unit(self, price_unit):
         self.ensure_one()
@@ -742,6 +751,8 @@ class PurchaseOrderLine(models.Model):
             uom_id=product_uom if values.get('force_uom') else product_id.uom_id,
             params={'force_uom': values.get('force_uom')}
         )
+        if not seller and not product_id._has_vendor_pricelist(partner_id, company_id):
+            seller = product_id._get_last_po_supplierinfo(partner_id, company_id)
         if seller and (seller.uom_id or seller.product_tmpl_id.uom_id) != product_uom:
             uom_po_qty = product_id.uom_id._compute_quantity(uom_po_qty, seller.uom_id, rounding_method='HALF-UP')
 
