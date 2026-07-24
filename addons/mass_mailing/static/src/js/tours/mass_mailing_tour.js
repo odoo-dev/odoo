@@ -26,27 +26,31 @@
         tooltipPosition: 'bottom',
         run: "click",
     }, {
-        trigger: 'div[name="subject"]',
+        trigger: 'div[name="subject"] input',
         content: markup(_t('Pick the <b>email subject</b>.')),
         tooltipPosition: 'bottom',
-        run: "edit",
+        run: "edit Newsletter",
     }, {
         isActive: ["auto"],
-        trigger: 'div[name="contact_list_ids"] > .o_input_dropdown > input[type="text"]',
-        run: 'click',
+        trigger: 'div[name="contact_list_ids"] input',
+        content: _t("Pick a mailing list."),
+        tooltipPosition: 'bottom',
+        run: 'edit Newsletter',
     }, {
         isActive: ["auto"],
-        trigger: 'li.ui-menu-item',
+        trigger: '.o-autocomplete--dropdown-item:contains("Newsletter")',
+        content: _t("Select this mailing list."),
+        tooltipPosition: 'bottom',
         run: 'click',
     }, {
         isActive: ["enterprise"],
-        trigger: 'div[name="body_arch"] :iframe .o_mail_templates_grid',
+        trigger: 'div[name="body_arch"] :iframe .o_mail_templates_grid .dropdown-item:contains("Welcome Message")',
         content: markup(_t('Choose a <b>template</b>.')),
         tooltipPosition: 'top',
         run: 'click',
     }, {
         isActive: ["community"],
-        trigger: 'div[name="body_arch"] :iframe .o_mail_templates_grid',
+        trigger: 'div[name="body_arch"] :iframe .o_mail_templates_grid .dropdown-item:contains("Welcome Message")',
         content: markup(_t('Choose a <b>template</b>.')),
         tooltipPosition: 'top',
         run: 'click',
@@ -63,12 +67,19 @@
         tooltipPosition: 'top',
         run: 'click',
     }, {
-        trigger: 'div.o_favorite',
+        // Clicking a block opens the full-screen editor - leave it to get
+        // back to the mailing form.
+        trigger: 'button[title="Save & Quit"]',
+        content: _t("Save your changes."),
+        tooltipPosition: 'bottom',
+        run: 'click',
+    }, {
+        trigger: '.o_favorite',
         content: _t('Click on the star to add this mailing to your templates.'),
         tooltipPosition: 'bottom',
         run: 'click',
     }, {
-        trigger: 'button[name="action_preview"]',
+        trigger: 'button[name="action_test"]',
         content: _t("Test this mailing by sending a copy to yourself."),
         tooltipPosition: 'bottom',
         run: "click",

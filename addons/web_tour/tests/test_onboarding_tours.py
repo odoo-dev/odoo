@@ -6,7 +6,7 @@ from odoo.tests import HttpCase, tagged
 @tagged('post_install', '-at_install')
 class TestOnboardingTours(HttpCase):
 
-    tour_names = ['hr_expense_tour', 'event_tour', 'sale_tour', 'purchase_tour']
+    tour_names = ['hr_expense_tour', 'event_tour', 'sale_tour', 'purchase_tour', 'mass_mailing_tour']
     only_tour = None  # TEMP: set to a tour name (e.g. 'sale_tour') to run only that one
 
     def setUp(self):
