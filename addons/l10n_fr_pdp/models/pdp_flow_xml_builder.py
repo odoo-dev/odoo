@@ -447,7 +447,6 @@ class PdpFlow10XMLBuilder(models.AbstractModel):
         If agregation_function is given, summary is returned grouped by the value returned
         by the agregation function.
         '''
-        move = move_lines.move_id.ensure_one() if buyer and seller else None
         summaries = defaultdict(lambda: {
             'taxable_amount_total': 0,
             'tax_total': 0,
@@ -492,6 +491,7 @@ class PdpFlow10XMLBuilder(models.AbstractModel):
                 summary['taxable_amount_total'] += base_amount
                 summary['tax_total'] += tax_amount
             if buyer and seller:
+                move = move_lines.move_id.ensure_one()
                 for tax, values in summary['subtotals'].items():
                     tax_code, exemption_code, exemption_reason = self._get_tax_codes_and_exemption(
                         buyer, seller, tax, move,
